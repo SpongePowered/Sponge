@@ -49,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
@@ -58,7 +59,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.util.List;
@@ -69,7 +69,7 @@ import java.util.Optional;
 public abstract class MixinBlockLeaves extends MixinBlock {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
-    private void onLeavesConstruction(CallbackInfo ci) {
+    private void impl$UpdateTickRandomlyFromWorldConfig(CallbackInfo ci) {
         this.setTickRandomly(SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getLeafDecay());
     }
 
@@ -110,7 +110,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     private void destroy(net.minecraft.world.World worldIn, BlockPos pos) {
         final IBlockState state = worldIn.getBlockState(pos);
         // Sponge Start - Cause tracking
-        if (!((IMixinWorld) worldIn).isFake()) {
+        if (!((WorldBridge) worldIn).isFake()) {
             final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
             final IPhaseState<?> currentState = peek.state;
             final boolean isWorldGen = currentState.isWorldGeneration();

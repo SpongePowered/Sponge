@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(TileEntityBrewingStand.class)
@@ -48,7 +48,7 @@ public abstract class MixinTileEntityBrewingStand_RealTime extends TileEntity {
         )
     )
     private void adjustForRealTimeBrewTime(TileEntityBrewingStand self, int modifier) {
-        if (((IMixinWorld) this.world).isFake()) {
+        if (((WorldBridge) this.world).isFake()) {
             this.brewTime = modifier;
             return;
         }

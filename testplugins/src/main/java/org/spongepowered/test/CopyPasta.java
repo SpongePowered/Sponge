@@ -54,7 +54,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.extent.ArchetypeVolume;
-import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 
 import java.io.File;
@@ -66,6 +65,7 @@ import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+@SuppressWarnings("deprecation")
 @Plugin(id = "copypasta", name = "CopyPasta", description = CopyPasta.DESCRIPTION, version = "0.0.0")
 public class CopyPasta implements LoadableModule {
 
@@ -164,7 +164,7 @@ public class CopyPasta implements LoadableModule {
                     .volume(data.getClipboard())
                     .metaValue(Schematic.METADATA_AUTHOR, player.getName())
                     .metaValue(Schematic.METADATA_NAME, name)
-                    .paletteType(BlockPaletteTypes.LOCAL)
+                    .paletteType(org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL)
                     .build();
                 DataContainer schematicData = null;
                 if ("legacy".equalsIgnoreCase(format)) {

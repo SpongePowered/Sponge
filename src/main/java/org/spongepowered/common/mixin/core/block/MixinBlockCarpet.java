@@ -29,13 +29,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
+import org.spongepowered.common.bridge.block.DyeableBLockBridge;
 
 @Mixin(BlockCarpet.class)
-public abstract class MixinBlockCarpet extends MixinBlock implements IMixinDyeableBlock {
+public abstract class MixinBlockCarpet extends MixinBlock implements DyeableBLockBridge {
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(CallbackInfo ci) {
-        this.setProperty(BlockCarpet.COLOR);
+    private void impl$setPropertyForDyeableBlock(CallbackInfo ci) {
+        this.bridge$SetColorPropertyEnum(BlockCarpet.COLOR);
     }
 }

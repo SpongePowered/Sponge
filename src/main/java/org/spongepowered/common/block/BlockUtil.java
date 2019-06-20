@@ -26,14 +26,9 @@ package org.spongepowered.common.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.bridge.block.BlockBridge;
 
 import java.util.UUID;
 
@@ -71,12 +66,12 @@ public final class BlockUtil {
         return toNative(spongeSnapshot.getState()).getBlock();
     }
 
-    public static IMixinBlock toMixin(BlockState blockState) {
-        return (IMixinBlock) toNative(blockState).getBlock();
+    public static BlockBridge toMixin(BlockState blockState) {
+        return (BlockBridge) toNative(blockState).getBlock();
     }
 
-    public static IMixinBlock toMixin(IBlockState blockState) {
-        return (IMixinBlock) blockState.getBlock();
+    public static BlockBridge toMixin(IBlockState blockState) {
+        return (BlockBridge) blockState.getBlock();
     }
 
     private BlockUtil() {

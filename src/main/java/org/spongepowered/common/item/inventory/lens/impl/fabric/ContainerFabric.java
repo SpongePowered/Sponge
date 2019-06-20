@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+@SuppressWarnings("unchecked")
 public class ContainerFabric extends MinecraftFabric {
 
     private Translation displayName;

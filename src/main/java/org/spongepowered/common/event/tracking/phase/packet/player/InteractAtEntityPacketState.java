@@ -40,7 +40,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -97,8 +96,8 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
             // Something happened?
             return;
         }
-        final World spongeWorld = EntityUtil.getSpongeWorld(player);
-        EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
+        final World spongeWorld = (World) player.world;
+        ((Entity) entity).setNotifier(player.getUniqueID());
 
 
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -108,7 +107,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
                 SpongeCommonEventFactory.callSpawnEntity(entities, context);
             });
             context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
-                final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                final List<Entity> items = entities.stream().map(entity1 -> (Entity) entity1).collect(Collectors.toList());
                 SpongeCommonEventFactory.callSpawnEntity(items, context);
             });
             context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
@@ -131,7 +130,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
                     if (entityFromUuid != null) {
                         final List<Entity> entities = entry.getValue()
                             .stream()
-                            .map(EntityUtil::fromNative)
+                            .map(entity1 -> (Entity) entity1)
                             .collect(Collectors.toList());
                         if (!entities.isEmpty()) {
                             // TODO - Remove the frame modifications to uncomment this line so we can simplify our code.
@@ -152,7 +151,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
                     drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
                 final List<Entity> entities = items
                     .stream()
-                    .map(EntityUtil::fromNative)
+                    .map(entity1 -> (Entity) entity1)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
                     DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),

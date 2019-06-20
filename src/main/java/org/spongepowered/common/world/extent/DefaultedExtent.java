@@ -51,7 +51,6 @@ import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.common.block.SpongeTileEntityArchetype;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.util.gen.ArrayImmutableBlockBuffer;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
@@ -199,7 +198,7 @@ public interface DefaultedExtent extends Extent {
         }
         ArrayList<EntityArchetype> entities = new ArrayList<>();
         for (Entity hit : intersectingEntities) {
-            net.minecraft.entity.Entity nms = EntityUtil.toNative(hit);
+            net.minecraft.entity.Entity nms = (net.minecraft.entity.Entity) hit;
             SpongeEntityArchetype archetype = (SpongeEntityArchetype) hit.createArchetype();
             NBTTagList tagList = archetype.getData().getTagList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
             if (tagList.isEmpty()) {

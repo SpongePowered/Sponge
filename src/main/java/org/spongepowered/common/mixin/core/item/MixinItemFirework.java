@@ -24,46 +24,189 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import net.minecraft.entity.Entity;
+import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFirework;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 @Mixin(ItemFirework.class)
 public class MixinItemFirework extends Item {
 
-    private static final String TARGET_CREATIVE_MODE = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z";
-
-    private boolean primeCancelled;
-
-    @Redirect(method = "onItemUse", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
-    private boolean onspawnEntity(World world, Entity firework, EntityPlayer player, World worldIn, BlockPos pos, EnumHand side, EnumFacing hitX, float hitY, float hitZ, float p_180614_9_) {
-        ((Firework) firework).setShooter((ProjectileSource) player);
-        Sponge.getCauseStackManager().pushCause(player);
-        this.primeCancelled = !((IMixinEntityFireworkRocket) firework).shouldPrime();
-        Sponge.getCauseStackManager().popCause();
-        return !this.primeCancelled && world.spawnEntity(firework);
+    /**
+     * @author gabizou - June 10th, 2019 - 1.12.2
+     * @reason We can throw a construct pre event here before the
+     * entity is actually constructed, and if the event is cancelled,
+     * we can still return the correct itemstack. If the event is
+     * cancelled, we end up not shrinking the itemstack, but we will
+     * make sure to notify the player at the end of the packet being
+     * processed.
+     *
+     * @param worldIn The world
+     * @param playerIn The player using the item
+     * @param handIn The hand
+     * @param cir The callback
+     * @param stack The ItemStack used from the hand
+     */
+    @Inject(
+        method = "onItemRightClick",
+        at = @At(
+            value = "NEW",
+            target = "net/minecraft/entity/item/EntityFireworkRocket"
+        ),
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        cancellable = true
+    )
+    private void spongeImpl$ThrowPreBeforeSpawning(World worldIn, EntityPlayer playerIn, EnumHand handIn,
+        CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack stack) {
+        if (spongeImpl$ThrowConstructPreEvent(worldIn, playerIn, stack)) {
+            cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, stack));
+        }
     }
 
-    @Redirect(method = "onItemUse", at = @At(value = "FIELD", target = TARGET_CREATIVE_MODE, opcode = Opcodes.GETFIELD))
-    private boolean shouldNotDecreaseStack(PlayerCapabilities capabilities) {
-        boolean notCondition = capabilities.isCreativeMode || this.primeCancelled;
-        this.primeCancelled = false;
-        return notCondition;
+
+    /**
+     * @author gabizou - June 10th, 2019 - 1.12.2
+     * @reason We can throw a construct pre event here before the
+     * entity is actually constructed, and if the event is cancelled,
+     * we can still return the correct itemstack. If the event is
+     * cancelled, we end up not shrinking the itemstack, but we will
+     * make sure to notify the player at the end of the packet being
+     * processed.
+     *
+     * @param player The player using the item
+     * @param worldIn The world
+     * @param pos The block position
+     * @param hand The hand
+     * @param facing The block face being clicked on
+     * @param hitX The hit position
+     * @param hitY The hit position
+     * @param hitZ The hit position
+     * @param cir The callback
+     * @param stack The ItemStack used from the hand
+     */
+    @Inject(method = "onItemUse",
+        at = @At(value = "NEW", target = "net/minecraft/entity/item/EntityFireworkRocket"),
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        cancellable = true
+    )
+    private void spongeImpl$ThrowPrimeEventsIfCancelled(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing,
+        float hitX, float hitY, float hitZ, CallbackInfoReturnable<EnumActionResult> cir, ItemStack stack) {
+        if (spongeImpl$ThrowConstructPreEvent(worldIn, player, stack)) {
+            cir.setReturnValue(EnumActionResult.SUCCESS);
+        }
+
+    }
+
+    /**
+     * Private method for bridging the duplicate between
+     * {@link #onItemRightClick(World, EntityPlayer, EnumHand)} and
+     * {@link #onItemUse(EntityPlayer, World, BlockPos, EnumHand, EnumFacing, float, float, float)}
+     * since both follow the same logic, but differ in how they are called.
+     *
+     * @param world The world
+     * @param player The player
+     * @param usedItem The used item
+     * @return True if the event is cancelled and the callback needs to be cancelled
+     */
+    private boolean spongeImpl$ThrowConstructPreEvent(World world, EntityPlayer player, ItemStack usedItem) {
+        if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((WorldBridge) world).isFake()) {
+            final Vector3d targetPosition = new Vector3d(player.posX, player.posY , player.posZ);
+            final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) world,
+                targetPosition);
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
+                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
+                frame.pushCause(player);
+                ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                    EntityTypes.FIREWORK, targetTransform);
+                return SpongeImpl.postEvent(event);
+            }
+        }
+        return false;
+    }
+
+    @Inject(method = "onItemUse",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        cancellable = true
+    )
+    private void spongeImpl$InjectPrimeEventAndCancel(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX,
+        float hitY, float hitZ, CallbackInfoReturnable<EnumActionResult> cir, ItemStack usedItem, EntityFireworkRocket rocket) {
+        if (spongeImpl$ThrowPrimeEventAndGetCancel(worldIn, player, rocket, usedItem)) {
+            cir.setReturnValue(EnumActionResult.SUCCESS);
+        }
+    }
+
+    @Inject(method = "onItemRightClick",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        cancellable = true
+    )
+    private void spongeImpl$InjectPrimeEventAndCancel(World worldIn, EntityPlayer player, EnumHand handIn,
+        CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack usedItem, EntityFireworkRocket rocket) {
+        if (spongeImpl$ThrowPrimeEventAndGetCancel(worldIn, player, rocket, usedItem)) {
+            // We have to still return success because the server/client can get out of sync otherwise.
+            cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, usedItem));
+        }
+    }
+
+    /**
+     * Private method for throwing the prime events on the firework. If
+     * the prime is cancelled, then the firework will not be spawned.
+     * This is to bridge the same logic between
+     * {@link #onItemUse(EntityPlayer, World, BlockPos, EnumHand, EnumFacing, float, float, float)}
+     * {@link #onItemRightClick(World, EntityPlayer, EnumHand)}.
+     *
+     * @param world The world
+     * @param player The player using the item
+     * @param rocket The rocket
+     * @param usedItem The used item
+     * @return True if the event is cancelled and the rocket should not be spawned
+     */
+    private boolean spongeImpl$ThrowPrimeEventAndGetCancel(World world, EntityPlayer player, EntityFireworkRocket rocket, ItemStack usedItem) {
+        if (((WorldBridge) world).isFake() ) {
+            return false;
+        }
+        ((Firework) rocket).setShooter((Player) player);
+        if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
+                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
+                frame.pushCause(player);
+                if (!((FusedExplosiveBridge) rocket).bridge$shouldPrime()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

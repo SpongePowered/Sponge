@@ -54,7 +54,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
@@ -100,7 +100,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) itemStack).getCustomManipulators()) {
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) itemStack).getCustomManipulators()) {
             builder.add(manipulator.asImmutable());
             keyBuilder.addAll(manipulator.getKeys());
             valueBuilder.addAll(manipulator.getValues());
@@ -204,14 +204,14 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.ITEM_TYPE, this.isNone() ? ItemTypes.NONE.getId() : this.itemType.getId())
-            .set(DataQueries.ITEM_COUNT, this.quantity)
-            .set(DataQueries.ITEM_DAMAGE_VALUE, this.damageValue);
+            .set(DataQueries.ItemStack.TYPE, this.isNone() ? ItemTypes.NONE.getId() : this.itemType.getId())
+            .set(DataQueries.ItemStack.COUNT, this.quantity)
+            .set(DataQueries.ItemStack.DAMAGE_VALUE, this.damageValue);
         if (!this.manipulators.isEmpty()) {
-            container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedImmutableManipulatorList(this.manipulators));
+            container.set(DataQueries.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedImmutableManipulatorList(this.manipulators));
         }
         if (this.compound != null) {
-            container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
+            container.set(DataQueries.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
         }
         return container;
     }
@@ -315,7 +315,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public ItemStackSnapshot merge(ItemStackSnapshot that, MergeFunction function) {
         final ItemStack thisCopy = this.privateStack.copy();
         final ItemStack thatCopy = that.createStack();
-        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) thatCopy).getCustomManipulators()) {
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) thatCopy).getCustomManipulators()) {
             thisCopy.offer(manipulator, function);
         }
         return thisCopy.createSnapshot();

@@ -65,20 +65,20 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
     @Override
     protected Optional<PotionEffect> buildContent(DataView container) throws InvalidDataException {
         checkNotNull(container);
-        if (!container.contains(DataQueries.POTION_TYPE) || !container.contains(DataQueries.POTION_DURATION)
-            || !container.contains(DataQueries.POTION_AMPLIFIER) || !container.contains(DataQueries.POTION_AMBIANCE)
-            || !container.contains(DataQueries.POTION_SHOWS_PARTICLES)) {
+        if (!container.contains(DataQueries.Potions.POTION_TYPE) || !container.contains(DataQueries.Potions.POTION_DURATION)
+            || !container.contains(DataQueries.Potions.POTION_AMPLIFIER) || !container.contains(DataQueries.Potions.POTION_AMBIANCE)
+            || !container.contains(DataQueries.Potions.POTION_SHOWS_PARTICLES)) {
             return Optional.empty();
         }
-        String effectName = container.getString(DataQueries.POTION_TYPE).get();
+        String effectName = container.getString(DataQueries.Potions.POTION_TYPE).get();
         Optional<PotionEffectType> optional = Sponge.getRegistry().getType(PotionEffectType.class, effectName);
         if (!optional.isPresent()) {
             throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
         }
-        int duration = container.getInt(DataQueries.POTION_DURATION).get();
-        int amplifier = container.getInt(DataQueries.POTION_AMPLIFIER).get();
-        boolean ambience = container.getBoolean(DataQueries.POTION_AMBIANCE).get();
-        boolean particles = container.getBoolean(DataQueries.POTION_SHOWS_PARTICLES).get();
+        int duration = container.getInt(DataQueries.Potions.POTION_DURATION).get();
+        int amplifier = container.getInt(DataQueries.Potions.POTION_AMPLIFIER).get();
+        boolean ambience = container.getBoolean(DataQueries.Potions.POTION_AMBIANCE).get();
+        boolean particles = container.getBoolean(DataQueries.Potions.POTION_SHOWS_PARTICLES).get();
         PotionEffect.Builder builder = new SpongePotionBuilder();
 
         return Optional.of(builder.potionType(optional.get())

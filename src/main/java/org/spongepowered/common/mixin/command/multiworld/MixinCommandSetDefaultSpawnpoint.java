@@ -32,7 +32,7 @@ import net.minecraft.server.management.PlayerList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 @Mixin(CommandSetDefaultSpawnpoint.class)
 public abstract class MixinCommandSetDefaultSpawnpoint {
@@ -41,7 +41,7 @@ public abstract class MixinCommandSetDefaultSpawnpoint {
     @Redirect(method = "execute", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     private void onSendSpawnPointPacket(PlayerList playerList, Packet<?> packet, MinecraftServer server, ICommandSender sender, String[] args) {
-        playerList.sendPacketToAllPlayersInDimension(packet, ((IMixinWorldServer) sender.getEntityWorld()).getDimensionId());
+        playerList.sendPacketToAllPlayersInDimension(packet, ((ServerWorldBridge) sender.getEntityWorld()).bridge$getDimensionId());
     }
 
 }

@@ -41,8 +41,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
 
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class MixinChunk_Collisions {
             return;
         }
         // Run hook in EntityLivingBase to support maxEntityCramming
-        if (entityIn != null && entityIn instanceof EntityLivingBase && ((IModData_Collisions) entityIn).isRunningCollideWithNearby()) {
+        if (entityIn != null && entityIn instanceof EntityLivingBase && ((CollisionsCapability) entityIn).collision$isRunningCollideWithNearby()) {
             return;
         }
 
@@ -85,7 +85,7 @@ public class MixinChunk_Collisions {
     }
 
     private <T extends Entity> boolean allowEntityCollision(List<T> listToFill) {
-        if (this.world instanceof IMixinWorldServer) {
+        if (this.world instanceof ServerWorldBridge) {
             if (PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
                 // allow explosions
                 return true;
@@ -100,21 +100,21 @@ public class MixinChunk_Collisions {
             if (source instanceof LocatableBlock) {
                 final LocatableBlock locatable = (LocatableBlock) source;
                 final BlockType blockType =locatable.getLocation().getBlockType();
-                final IModData_Collisions spongeBlock = (IModData_Collisions) blockType;
-                if (spongeBlock.requiresCollisionsCacheRefresh()) {
-                    spongeBlock.initializeCollisionState(this.world);
-                    spongeBlock.requiresCollisionsCacheRefresh(false);
+                final CollisionsCapability spongeBlock = (CollisionsCapability) blockType;
+                if (spongeBlock.collision$requiresCollisionsCacheRefresh()) {
+                    spongeBlock.collision$initializeCollisionState(this.world);
+                    spongeBlock.collision$requiresCollisionsCacheRefresh(false);
                 }
 
-                return !((spongeBlock.getMaxCollisions() >= 0) && (listToFill.size() >= spongeBlock.getMaxCollisions()));
-            } else if (source instanceof IModData_Collisions) {
-                final IModData_Collisions spongeEntity = (IModData_Collisions) source;
-                if (spongeEntity.requiresCollisionsCacheRefresh()) {
-                    spongeEntity.initializeCollisionState(this.world);
-                    spongeEntity.requiresCollisionsCacheRefresh(false);
+                return !((spongeBlock.collision$getMaxCollisions() >= 0) && (listToFill.size() >= spongeBlock.collision$getMaxCollisions()));
+            } else if (source instanceof CollisionsCapability) {
+                final CollisionsCapability spongeEntity = (CollisionsCapability) source;
+                if (spongeEntity.collision$requiresCollisionsCacheRefresh()) {
+                    spongeEntity.collision$initializeCollisionState(this.world);
+                    spongeEntity.collision$requiresCollisionsCacheRefresh(false);
                 }
 
-                return !((spongeEntity.getMaxCollisions() >= 0) && (listToFill.size() >= spongeEntity.getMaxCollisions()));
+                return !((spongeEntity.collision$getMaxCollisions() >= 0) && (listToFill.size() >= spongeEntity.collision$getMaxCollisions()));
             }
 
             return true;

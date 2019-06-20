@@ -25,74 +25,27 @@
 package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.monster.EntityPigZombie;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.entity.living.monster.ZombiePigman;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableData;
-import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.interfaces.entity.IMixinAggressive;
-import org.spongepowered.common.interfaces.entity.IMixinAnger;
-
-import java.util.List;
+import org.spongepowered.common.bridge.entity.AggressiveBridge;
 
 @Mixin(EntityPigZombie.class)
-@Implements(@Interface(iface = IMixinAggressive.class, prefix = "aggressive$"))
-public abstract class MixinEntityPigZombie extends MixinEntityZombie implements ZombiePigman, IMixinAnger {
+public abstract class MixinEntityPigZombie extends MixinEntityMob implements AggressiveBridge {
 
-    @Shadow private int angerLevel;
-
+    @Shadow public int angerLevel;
     @Shadow public abstract boolean isAngry();
-    
-    @Intrinsic
-    public boolean aggressive$isAngry() {
+
+    @Override
+    public boolean bridge$isAngry() {
         return this.isAngry();
     }
 
-    public void aggressive$setAngry(boolean angry) {
+    @Override
+    public void bridge$setAngry(boolean angry) {
         if (angry) {
             this.angerLevel = 400 + this.rand.nextInt(400);
         } else {
             this.angerLevel = 0;
         }
-    }
-
-    @Override
-    public int getAngerLevel() {
-        return this.angerLevel;
-    }
-
-    @Override
-    public void setAngerLevel(int angerLevel) {
-        this.angerLevel = angerLevel < 0 ? 0 : angerLevel;
-    }
-
-    @Override
-    public AngerableData getAngerData() {
-        return new SpongeAngerableData(this.angerLevel);
-    }
-
-    @Override
-    public MutableBoundedValue<Integer> angerLevel() {
-        return SpongeValueFactory.boundedBuilder(Keys.ANGER)
-                .actualValue(this.angerLevel)
-                .defaultValue(0)
-                .minimum(Integer.MIN_VALUE)
-                .maximum(Integer.MAX_VALUE)
-                .build();
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getAngerData());
-        manipulators.add(new SpongeAggressiveData(isAngry()));
     }
 }

@@ -37,12 +37,13 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 /**
  * A generalized generation phase state. Used for entering populator world generation,
@@ -135,7 +136,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, G context, BlockTickContext phaseContext) {
+    public void appendNotifierPreBlockTick(ServerWorldBridge mixinWorld, BlockPos pos, G context, BlockTickContext phaseContext) {
 
     }
 
@@ -170,6 +171,11 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
 
     @Override
     public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    @Override
+    public boolean shouldProvideModifiers(G phaseContext) {
         return false;
     }
 

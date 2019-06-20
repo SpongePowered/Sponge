@@ -24,16 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
-import org.spongepowered.api.block.tileentity.carrier.Beacon;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -49,26 +42,24 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
-import java.util.List;
+import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(TileEntityBeacon.class)
-public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable implements Beacon, IMixinCustomNameable, IMixinTileEntityBeacon {
+public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable implements IMixinCustomNameable, IMixinTileEntityBeacon {
 
     @Shadow private Potion primaryEffect;
     @Shadow private Potion secondaryEffect;
-    @Shadow private int levels;
     @Shadow private String customName;
-    @Override @Shadow public abstract boolean isItemValidForSlot(int index, ItemStack stack);
+    @Shadow public abstract boolean isItemValidForSlot(int index, ItemStack stack);
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     @Override
     public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
-        return ReusableLens.getLens(InputSlotLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
+        return ReusableLens.getLens(InputSlotLens.class, this, this::impl$generateBeaconSlotProvider, this::impl$generateBeaconRootLens);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private SlotProvider generateSlotProvider() {
+    private SlotProvider impl$generateBeaconSlotProvider() {
         InputSlotLensImpl lens = new InputSlotLensImpl(0, ((Class) TileEntityBeacon.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
                 itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)));
         return new SlotCollection.Builder()
@@ -76,53 +67,31 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
                 .build();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private InputSlotLens generateRootLens(SlotProvider slots) {
+    @SuppressWarnings({"rawtypes"})
+    private InputSlotLens impl$generateBeaconRootLens(SlotProvider slots) {
         return ((InputSlotLens) slots.getSlot(0));
     }
 
-    @Override
-    public int getCompletedLevels() {
-        return this.levels < 0 ? 0 : this.levels;
-    }
-
-    // We want to preserve the normal behavior of isBeaconEffect, except when reading saved effects from NBT
-    // and when setting from a Sponge DataProcessor. This ensures that vanilla in-game interactions with the beacon
-    // work as normal, while still allowing plugins to set a custom potion through the API
-    @Redirect(method = "readFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;", ordinal = 0))
-    private Potion onFirstIsBeaconEffect(int id) {
+    /**
+     * @author gabizou - June 11th, 2019 - 1.12.2
+     * @reason We want to avoid validating the potion type and just set the
+     * potion anyways. This allows for plugins to set custom potions on beacons
+     * that will persist.
+     *
+     * @param id The id
+     * @return The potion by id, no validation
+     */
+    @Redirect(method = "readFromNBT",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;")
+    )
+    @Nullable
+    private Potion impl$UsePotionUtilInsteadOfCheckingValidPotions(int id) {
         return Potion.getPotionById(id);
-    }
-
-    @Redirect(method = "readFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;", ordinal = 1))
-    private Potion oSecondIsBeaconEffect(int id) {
-        return Potion.getPotionById(id);
-    }
-
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(of("effect1"), getField(1));
-        container.set(of("effect2"), getField(2));
-        return container;
-    }
-
-    @Override
-    public void sendDataToContainer(DataView dataView) {
-        dataView.set(of("effect1"), getField(1));
-        dataView.set(of("effect2"), getField(2));
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getBeaconData());
     }
 
     @Override
     public void setCustomDisplayName(String customName) {
-        ((TileEntityBeacon) (Object) this).setName(customName);
+        this.customName = customName;
     }
 
     @Override

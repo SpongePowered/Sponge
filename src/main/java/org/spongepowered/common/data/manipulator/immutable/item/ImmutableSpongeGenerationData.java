@@ -30,13 +30,13 @@ import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGenerationData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 public class ImmutableSpongeGenerationData extends AbstractImmutableIntData<ImmutableGenerationData, GenerationData>
     implements ImmutableGenerationData {
 
     public ImmutableSpongeGenerationData(int value) {
-        super(ImmutableGenerationData.class, value, Keys.GENERATION, SpongeGenerationData.class, 0, DataConstants.MAXIMUM_GENERATION, 0);
+        super(ImmutableGenerationData.class, value, Keys.GENERATION, SpongeGenerationData.class, 0, Constants.Item.Book.MAXIMUM_GENERATION, 0);
     }
 
     @Override

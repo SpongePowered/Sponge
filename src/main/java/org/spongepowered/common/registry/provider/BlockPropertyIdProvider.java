@@ -49,6 +49,10 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         return Holder.INSTANCE;
     }
 
+    public static String getIdFor(IProperty<?> iProperty) {
+        return getInstance().propertyIdMap.get(iProperty);
+    }
+
     @Override
     public Optional<String> get(IProperty<?> key) {
         return Optional.ofNullable(this.propertyIdMap.get(checkNotNull(key, "Property cannot be null!")));

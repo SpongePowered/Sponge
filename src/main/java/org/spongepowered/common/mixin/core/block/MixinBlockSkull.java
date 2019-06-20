@@ -34,20 +34,19 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDropData;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDropData;
 import org.spongepowered.common.data.util.DirectionResolver;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
 @Mixin(BlockSkull.class)
 public abstract class MixinBlockSkull extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getShouldDropFor(blockState), getDirectionalData(blockState));
@@ -93,8 +92,4 @@ public abstract class MixinBlockSkull extends MixinBlock {
                 DirectionResolver.getFor(blockState.getValue(BlockSkull.FACING)));
     }
 
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation("item.skull.skeleton.name");
-    }
 }

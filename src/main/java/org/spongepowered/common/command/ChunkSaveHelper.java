@@ -36,7 +36,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -64,7 +64,7 @@ public class ChunkSaveHelper {
                     WorldServer world = (WorldServer) spongeWorld;
                     writer.beginObject();
                     writer.name("name").value(((SaveHandler) ((WorldServer) spongeWorld).getSaveHandler()).saveDirectoryName);
-                    writer.name("dimensionId").value(((IMixinWorldServer) spongeWorld).getDimensionId());
+                    writer.name("dimensionId").value(((ServerWorldBridge) spongeWorld).bridge$getDimensionId());
                     writer.name("players").value(world.playerEntities.size());
                     writer.name("loadedChunks").value(world.getChunkProvider().getLoadedChunks().size());
                     writer.name("activeChunks").value(world.getChunkProvider().getLoadedChunkCount());

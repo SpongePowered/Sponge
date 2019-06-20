@@ -29,14 +29,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntitySilverfish;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 @Mixin(EntitySilverfish.AISummonSilverfish.class)
 public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
@@ -49,7 +48,9 @@ public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
      * would fail in forge environments. This changes the injection to a predictable
      * place where we still can forcibly call things but still cancel as needed.
      *
-     * @param cir
+     * @param world The World
+     * @param pos The target position
+     * @param dropBlock Whether to drop the block or not
      */
     @Redirect(
         method = "updateTask",
@@ -58,9 +59,9 @@ public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
             target = "Lnet/minecraft/world/World;destroyBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"
         )
     )
-    private boolean onCanGrief(World world, BlockPos pos, boolean dropBlock) {
+    private boolean onCanGrief(final World world, final BlockPos pos, final boolean dropBlock) {
         final IBlockState blockState = world.getBlockState(pos);
-        return ((IMixinGriefer) this.silverfish).canGrief()
+        return ((GrieferBridge) this.silverfish).bridge$CanGrief()
                ? world.destroyBlock(pos, dropBlock)
                : world.setBlockState(pos, blockState.getValue(BlockSilverfish.VARIANT).getModelBlock(), 3);
     }

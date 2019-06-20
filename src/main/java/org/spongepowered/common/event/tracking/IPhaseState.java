@@ -73,15 +73,14 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase.Listener
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.core.world.MixinChunk;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -215,7 +214,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * </p>
      *
      * <p>Note that the {@link PhaseTracker} is only provided for easy access
-     * to the {@link WorldServer}, {@link IMixinWorldServer}, and
+     * to the {@link WorldServer}, {@link ServerWorldBridge}, and
      * {@link World} instances.</p>
      *
      * @param phaseContext The context of the current state being unwound
@@ -724,9 +723,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param context The context
      * @param phaseContext the block tick context being entered
      */
-    default void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
-        final Chunk chunk = WorldUtil.asNative(mixinWorld).getChunk(pos);
-        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+    default void appendNotifierPreBlockTick(ServerWorldBridge mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
+        final Chunk chunk = ((WorldServer) mixinWorld).getChunk(pos);
+        final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
             mixinChunk.getBlockOwner(pos).ifPresent(phaseContext::owner);
             mixinChunk.getBlockNotifier(pos).ifPresent(phaseContext::notifier);
@@ -742,7 +741,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param blockEvent
      */
     default void appendNotifierToBlockEvent(C context, PhaseContext<?> currentContext,
-        IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+        ServerWorldBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
 
     }
 
@@ -813,7 +812,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default void capturesNeighborNotifications(C context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
+    default void capturesNeighborNotifications(C context, ServerWorldBridge mixinWorld, BlockPos notifyPos, Block sourceBlock,
         IBlockState iblockstate, BlockPos sourcePos) {
     }
     /**
@@ -844,7 +843,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return null;
 
     }
-    default void captureTileEntityReplacement(C currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos, @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
+    default void captureTileEntityReplacement(C currentContext, ServerWorldBridge mixinWorldServer, BlockPos pos, @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
         // Default, do nothing.
 
     }

@@ -41,50 +41,24 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import javax.annotation.Nullable;
 
 @Mixin(EntityThrowable.class)
-public abstract class MixinEntityThrowable extends MixinEntity implements Projectile {
+public abstract class MixinEntityThrowable extends MixinEntity {
 
     @Shadow public EntityLivingBase thrower;
-    @Shadow private String throwerName;
-    @Shadow public abstract EntityLivingBase getThrower();
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
     @Nullable
     public ProjectileSource projectileSource;
 
     @Override
-    public ProjectileSource getShooter() {
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        } else if (this.getThrower() != null && this.getThrower() instanceof ProjectileSource) {
-            return (ProjectileSource) this.getThrower();
-        }
-
-        return ProjectileSource.UNKNOWN;
+    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$readFromSpongeCompound(compound);
+        ProjectileSourceSerializer.readSourceFromNbt(compound, ((Projectile) this));
     }
 
     @Override
-    public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof EntityLivingBase) {
-            // This allows things like Vanilla kill attribution to take place
-            this.thrower = (EntityLivingBase) shooter;
-        } else {
-            this.thrower = null;
-        }
-
-        this.throwerName = null;
-        this.projectileSource = shooter;
-    }
-
-    @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, this);
-    }
-
-    @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.getShooter(), this.thrower);
+    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$writeToSpongeCompound(compound);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Projectile) this).getShooter(), this.thrower);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityThrowable;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
@@ -94,7 +68,7 @@ public abstract class MixinEntityThrowable extends MixinEntity implements Projec
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.getShooter(), movingObjectPosition)) {
+        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((Projectile) this).getShooter(), movingObjectPosition)) {
             this.onImpact(movingObjectPosition);
         }
     }

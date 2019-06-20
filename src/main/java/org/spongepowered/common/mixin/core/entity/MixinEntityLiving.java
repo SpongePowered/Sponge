@@ -32,21 +32,18 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.GoalType;
 import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.living.Agent;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
-import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
+import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -59,30 +56,25 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.bridge.data.VanishingBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityLiving.class)
-public abstract class MixinEntityLiving extends MixinEntityLivingBase implements Agent {
+public abstract class MixinEntityLiving extends MixinEntityLivingBase {
 
-    private static final String GET_CLOSEST_PLAYER =
-            "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;";
-    @Shadow @Final private EntityAITasks tasks;
-    @Shadow @Final private EntityAITasks targetTasks;
+    @Shadow @Final protected EntityAITasks tasks;
+    @Shadow @Final protected EntityAITasks targetTasks;
     @Shadow @Nullable private EntityLivingBase attackTarget;
 
     @Shadow public abstract boolean isAIDisabled();
@@ -90,7 +82,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow protected abstract void initEntityAI();
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
-    public void onInitAi(EntityLiving this$0) {
+    private void spongeImpl$initializeAI(final EntityLiving this$0) {
         this.initSpongeAI();
         this.initEntityAI();
     }
@@ -118,15 +110,15 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     }
 
     @SuppressWarnings("unchecked")
-    private void handleDelayedTaskEventFiring(IMixinEntityAITasks tasks) {
-        Iterator<EntityAITasks.EntityAITaskEntry> taskItr = tasks.getTasksUnsafe().iterator();
+    private void handleDelayedTaskEventFiring(final IMixinEntityAITasks tasks) {
+        final Iterator<EntityAITasks.EntityAITaskEntry> taskItr = tasks.getTasksUnsafe().iterator();
         while (taskItr.hasNext()) {
-            EntityAITasks.EntityAITaskEntry task = taskItr.next();
+            final EntityAITasks.EntityAITaskEntry task = taskItr.next();
             final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(),
-                    task.priority, task.priority, (Goal<? extends Agent>) tasks, this, (AITask<?>) task.action);
+                    task.priority, task.priority, (Goal<? extends Agent>) tasks, (Agent) this, (AITask<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
-                ((IMixinEntityAIBase) task.action).setGoal(null);
+                ((EntityGoalBridge) task.action).setGoal(null);
                 taskItr.remove();
             }
         }
@@ -134,10 +126,10 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     @Inject(method = "processInitialInteract", cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashHolder(Lnet/minecraft/entity/Entity;Z)V"))
-    public void callLeashEvent(EntityPlayer playerIn, EnumHand hand, CallbackInfoReturnable<Boolean> ci) {
+    private void callLeashEvent(final EntityPlayer playerIn, final EnumHand hand, final CallbackInfoReturnable<Boolean> ci) {
         if (!playerIn.world.isRemote) {
             Sponge.getCauseStackManager().pushCause(playerIn);
-            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this);
+            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), (Living) this);
             SpongeImpl.postEvent(event);
             Sponge.getCauseStackManager().popCause();
             if(event.isCancelled()) {
@@ -146,78 +138,60 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
-    @Inject(method = "clearLeashed", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD), cancellable = true)
-    public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
-        net.minecraft.entity.Entity entity = getLeashHolder();
+    @Inject(method = "clearLeashed",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD),
+        cancellable = true)
+    private void impl$ThrowUnleashEvent(final boolean sendPacket, final boolean dropLead, final CallbackInfo ci) {
+        final net.minecraft.entity.Entity entity = getLeashHolder();
         if (!this.world.isRemote) {
+            final CauseStackManager csm = Sponge.getCauseStackManager();
             if(entity == null) {
-                Sponge.getCauseStackManager().pushCause(this);
+                csm.pushCause(this);
             } else {
-                Sponge.getCauseStackManager().pushCause(entity);
+                csm.pushCause(entity);
             }
-            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this);
+            final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(csm.getCurrentCause(), (Living) this);
             SpongeImpl.postEvent(event);
-            Sponge.getCauseStackManager().popCause();
+            csm.popCause();
             if(event.isCancelled()) {
                 ci.cancel();
             }
         }
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Agent> Optional<Goal<T>> getGoal(GoalType type) {
-        if (GoalTypes.NORMAL.equals(type)) {
-            return Optional.of((Goal<T>) this.tasks);
-        } else if (GoalTypes.TARGET.equals(type)) {
-            return Optional.of((Goal<T>) this.targetTasks);
-        }
-        return Optional.empty();
-    }
-
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 16384.0D))
-    private double getHardDespawnRange(double value) {
+    private double getHardDespawnRange(final double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
         }
         return value;
     }
 
     // Note that this should inject twice.
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 1024.0D), expect = 2)
-    private double getSoftDespawnRange(double value) {
+    private double getSoftDespawnRange(final double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
         }
         return value;
     }
 
     @ModifyConstant(method = "despawnEntity", constant = @Constant(intValue = 600))
-    private int getMinimumLifetime(int value) {
+    private int getMinimumLifetime(final int value) {
         if (!this.world.isRemote) {
-            return ((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
+            return ((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
         }
         return value;
     }
 
     @Nullable
-    @Redirect(method = "despawnEntity", at = @At(value = "INVOKE", target = GET_CLOSEST_PLAYER))
-    public EntityPlayer onDespawnEntity(World world, net.minecraft.entity.Entity entity, double distance) {
-        return ((IMixinWorld) world).getClosestPlayerToEntityWhoAffectsSpawning(entity, distance);
-    }
-
-    @Override
-    public Optional<Entity> getTarget() {
-        return Optional.ofNullable((Entity) this.attackTarget);
-    }
-
-    @Override
-    public void setTarget(@Nullable Entity target) {
-        if (target instanceof EntityLivingBase) {
-            this.attackTarget = (EntityLivingBase) target;
-        } else {
-            this.attackTarget = null;
-        }
+    @Redirect(
+        method = "despawnEntity",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;"))
+    private EntityPlayer spongeImpl$despa(final World world, final net.minecraft.entity.Entity entity, final double distance) {
+        return ((WorldBridge) world).getClosestPlayerToEntityWhoAffectsSpawning(entity, distance);
     }
 
     /**
@@ -229,14 +203,14 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      * @param entitylivingbaseIn The entity living base coming in
      */
     @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
-    private void onSetAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn, CallbackInfo ci) {
+    private void onSetAttackTarget(@Nullable final EntityLivingBase entitylivingbaseIn, final CallbackInfo ci) {
         if (!this.world.isRemote && ShouldFire.SET_A_I_TARGET_EVENT) {
             if (entitylivingbaseIn != null) {
-                if (((IMixinEntity) entitylivingbaseIn).isVanished() && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
+                if (((VanishingBridge) entitylivingbaseIn).vanish$isVanished() && ((VanishingBridge) entitylivingbaseIn).vanish$isUntargetable()) {
                     this.attackTarget = null;
                     ci.cancel();
                 } else {
-                    SetAITargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) entitylivingbaseIn, this);
+                    final SetAITargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) entitylivingbaseIn, (Agent) this);
                     if (event.isCancelled()) {
                         ci.cancel();
                     } else {
@@ -258,7 +232,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Overwrite
     public EntityLivingBase getAttackTarget() {
         if (this.attackTarget != null) {
-            if (((IMixinEntity) this.attackTarget).isVanished() && ((IMixinEntity) this.attackTarget).isUntargetable()) {
+            if (((VanishingBridge) this.attackTarget).vanish$isVanished() && ((VanishingBridge) this.attackTarget).vanish$isUntargetable()) {
                 this.attackTarget = null;
             }
         }
@@ -275,28 +249,10 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      * @return
      */
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;canPickUpLoot()Z"))
-    private boolean onCanGrief(EntityLiving thisEntity) {
-        return thisEntity.canPickUpLoot() && ((IMixinGriefer) this).canGrief();
+    private boolean onCanGrief(final EntityLiving thisEntity) {
+        return thisEntity.canPickUpLoot() && ((GrieferBridge) this).bridge$CanGrief();
     }
 
-    // Data delegated methods
-
-
-    @Override
-    public AgentData getAgentData() {
-        return new SpongeAgentData(!this.isAIDisabled());
-    }
-
-    @Override
-    public Value<Boolean> aiEnabled() {
-        return new SpongeValue<>(Keys.AI_ENABLED, true, !this.isAIDisabled());
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getAgentData());
-    }
 
     @Override
     public void onJoinWorld() {

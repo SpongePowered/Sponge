@@ -59,6 +59,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         return this.volume;
     }
 
+    @SuppressWarnings("try")
     @Override
     public void map(BlockVolumeMapper mapper, MutableBlockVolume destination) {
         final Vector3i offset = align(destination);
@@ -133,8 +134,8 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
             BasicPluginContext context = PluginPhase.State.BLOCK_WORKER.createPhaseContext()
                 .source(this)) {
             context.buildAndSwitch();
-            for (int z = zMin; z <= zMax; z++) {
-                for (int y = yMin; y <= yMax; y++) {
+            for (int y = yMin; y <= yMax; y++) {
+                for (int z = zMin; z <= zMax; z++) {
                     for (int x = xMin; x <= xMax; x++) {
                         visitor.visit(this.volume, x, y, z);
                     }

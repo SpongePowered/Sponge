@@ -28,7 +28,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
-import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 
 public class InventoryPacketContext extends PacketContext<InventoryPacketContext> {
 
@@ -49,10 +49,10 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
 
     @Override
     public boolean hasCaptures() {
-        if (!((IMixinContainer) this.packetPlayer.openContainer).getPreviewTransactions().isEmpty()) {
+        if (!((ContainerBridge) this.packetPlayer.openContainer).getPreviewTransactions().isEmpty()) {
             return true;
         }
-        if (!((IMixinContainer) this.packetPlayer.openContainer).getCapturedTransactions().isEmpty()) {
+        if (!((ContainerBridge) this.packetPlayer.openContainer).bridge$getCapturedSlotTransactions().isEmpty()) {
             return true;
         }
         if (this.state == PacketPhase.Inventory.DROP_ITEMS) {
@@ -85,7 +85,7 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
         ) {
             return true;
         }
-        ((IMixinContainer) this.packetPlayer.openContainer).setCaptureInventory(false);
+        ((ContainerBridge) this.packetPlayer.openContainer).setCaptureInventory(false);
 
         return super.hasCaptures();
     }

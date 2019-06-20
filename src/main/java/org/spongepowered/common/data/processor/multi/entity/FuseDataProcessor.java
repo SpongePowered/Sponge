@@ -38,7 +38,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
 import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFuseData;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 
 import java.util.Map;
 import java.util.Optional;
@@ -62,20 +62,20 @@ public class FuseDataProcessor extends AbstractMultiDataSingleTargetProcessor<Fu
         checkArgument(fuseDuration >= 0, "fuse cannot be less than zero");
         checkArgument(ticksRemaining >= 0, "remaining ticks cannot be less than zero");
 
-        IMixinFusedExplosive mixin = (IMixinFusedExplosive) explosive;
-        mixin.setFuseDuration(fuseDuration);
+        FusedExplosiveBridge mixin = (FusedExplosiveBridge) explosive;
+        mixin.bridge$setFuseDuration(fuseDuration);
         if (explosive.isPrimed()) {
-            mixin.setFuseTicksRemaining(ticksRemaining);
+            mixin.bridge$setFuseTicksRemaining(ticksRemaining);
         }
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(FusedExplosive explosive) {
-        IMixinFusedExplosive mixin = (IMixinFusedExplosive) explosive;
+        FusedExplosiveBridge mixin = (FusedExplosiveBridge) explosive;
         return ImmutableMap.of(
-                Keys.FUSE_DURATION, mixin.getFuseDuration(),
-                Keys.TICKS_REMAINING, mixin.getFuseTicksRemaining()
+                Keys.FUSE_DURATION, mixin.bridge$getFuseDuration(),
+                Keys.TICKS_REMAINING, mixin.bridge$getFuseTicksRemaining()
         );
     }
 

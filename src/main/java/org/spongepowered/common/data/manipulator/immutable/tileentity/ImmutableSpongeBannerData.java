@@ -37,7 +37,7 @@ import org.spongepowered.api.data.value.immutable.ImmutablePatternListValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongePatternListValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
@@ -55,7 +55,7 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
         super(ImmutableBannerData.class);
         this.base = checkNotNull(base, "Null base!");
         this.layers = ImmutableList.copyOf(checkNotNull(layers, "Null pattern list!"));
-        this.baseValue = ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, DataConstants.Catalog.DEFAULT_BANNER_BASE, this.base);
+        this.baseValue = ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, Constants.Catalog.DEFAULT_BANNER_BASE, this.base);
         this.layersValue = new ImmutableSpongePatternListValue(Keys.BANNER_PATTERNS, this.layers);
         registerGetters();
     }

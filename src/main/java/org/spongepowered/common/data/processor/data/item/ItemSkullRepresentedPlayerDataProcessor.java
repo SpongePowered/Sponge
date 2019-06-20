@@ -25,6 +25,8 @@
 package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
@@ -37,6 +39,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.SkullUtils;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -50,7 +53,7 @@ public class ItemSkullRepresentedPlayerDataProcessor
     }
 
     private static boolean isSupportedItem(ItemStack stack) {
-        return SkullUtils.isValidItemStack(stack) && SkullUtils.getSkullType(stack).equals(SkullTypes.PLAYER);
+        return SkullUtils.isValidItemStack(stack) && SkullUtils.getSkullType(stack.getMetadata()).equals(SkullTypes.PLAYER);
     }
 
     @Override
@@ -76,7 +79,12 @@ public class ItemSkullRepresentedPlayerDataProcessor
 
     @Override
     protected Optional<GameProfile> getVal(ItemStack itemStack) {
-        return SkullUtils.getProfile(itemStack);
+        if (SkullUtils.isValidItemStack(itemStack) && SkullUtils.getSkullType(itemStack.getMetadata()).equals(SkullTypes.PLAYER)) {
+            final NBTTagCompound nbt = itemStack.getSubCompound(NbtDataUtil.ITEM_SKULL_OWNER);
+            final com.mojang.authlib.GameProfile mcProfile = nbt == null ? null : NBTUtil.readGameProfileFromNBT(nbt);
+            return Optional.ofNullable((GameProfile) mcProfile);
+        }
+        return Optional.empty();
     }
 
     @Override

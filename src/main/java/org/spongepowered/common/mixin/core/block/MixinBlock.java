@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
-import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
@@ -37,26 +35,20 @@ import net.minecraft.block.BlockEndGateway;
 import net.minecraft.block.BlockEnderChest;
 import net.minecraft.block.BlockMobSpawner;
 import net.minecraft.block.BlockShulkerBox;
-import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -66,16 +58,10 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -85,6 +71,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.BlockTrackerCategory;
 import org.spongepowered.common.config.category.BlockTrackerModCategory;
@@ -92,15 +80,13 @@ import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -108,8 +94,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(value = Block.class, priority = 999)
-@Implements(@Interface(iface = BlockType.class, prefix = "block$"))
-public abstract class MixinBlock implements BlockType, IMixinBlock {
+public abstract class MixinBlock implements BlockBridge {
 
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
     private boolean hasCollideLogic;
@@ -125,80 +110,18 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private boolean allowsEntityEventCreation = true;
     private boolean hasNeighborOverride = false;
 
-    @Shadow private boolean needsRandomTick;
-    @Shadow protected SoundType blockSoundType;
     @Shadow @Final protected BlockStateContainer blockState;
 
     @Shadow public abstract String getTranslationKey();
     @Shadow public abstract Material getMaterial(IBlockState state);
     @Shadow public abstract IBlockState shadow$getDefaultState();
-    @Shadow public abstract boolean shadow$getTickRandomly();
     @Shadow public abstract void dropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune);
-
     @Shadow public abstract BlockStateContainer getBlockState();
-
-    @Shadow protected boolean enableStats;
-
-    @Shadow protected boolean hasTileEntity;
+    @Shadow protected abstract Block setTickRandomly(boolean shouldTick);
 
     @Inject(method = "registerBlock(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
         BlockTypeRegistryModule.getInstance().registerFromGameData(location.toString(), (BlockType) block);
-    }
-
-    @Override
-    public String getId() {
-        return this.getNameFromRegistry();
-    }
-
-    @Override
-    public String getName() {
-        return this.getNameFromRegistry();
-    }
-
-    private String getNameFromRegistry() {
-        // This should always succeed when things are working properly,
-        // so we just catch the exception instead of doing a null check.
-        try {
-            return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
-        } catch (NullPointerException e) {
-            throw new RuntimeException(String.format("Block '%s' (class '%s') is not registered with the block registry! This is likely a bug in the corresponding mod.", this, this.getClass().getName()), e);
-        }
-    }
-
-    @Override
-    public BlockState getDefaultState() {
-        return (BlockState) shadow$getDefaultState();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<BlockState> getAllBlockStates() {
-        return (Collection<BlockState>) (Collection<?>) this.blockState.getValidStates();
-    }
-
-    @Override
-    public Optional<ItemType> getItem() {
-        if (this == BlockTypes.AIR) {
-            return Optional.of(ItemTypes.AIR);
-        }
-        ItemType itemType = (ItemType) Item.getItemFromBlock((Block) (Object) this);
-        return Items.AIR.equals(itemType) ? Optional.empty() : Optional.of(itemType);
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() + ".name");
-    }
-
-    @Intrinsic
-    public boolean block$getTickRandomly() {
-        return shadow$getTickRandomly();
-    }
-
-    @Override
-    public void setTickRandomly(boolean tickRandomly) {
-        this.needsRandomTick = tickRandomly;
     }
 
     @Override
@@ -235,27 +158,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return builder;
     }
 
-    @Override
-    public BlockState getDefaultBlockState() {
-        return getDefaultState();
-    }
-
-    @Override
-    public Collection<BlockTrait<?>> getTraits() {
-        return getDefaultBlockState().getTraits();
-    }
-
-    @Override
-    public Optional<BlockTrait<?>> getTrait(String blockTrait) {
-        return getDefaultBlockState().getTrait(blockTrait);
-    }
-
     @Inject(method = "dropBlockAsItem", at = @At("HEAD"), cancellable = true)
     private void checkBlockDropForTransactions(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune, CallbackInfo ci) {
-        if (((IMixinWorld) worldIn).isFake()) {
+        if (((WorldBridge) worldIn).isFake()) {
             return;
         }
-        final SpongeProxyBlockAccess proxyAccess = ((IMixinWorldServer) worldIn).getProxyAccess();
+        final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldIn).bridge$getProxyAccess();
         if (proxyAccess.hasProxy() && proxyAccess.isProcessingTransactionWithNextHavingBreak(pos, state)) {
             ci.cancel();
         }
@@ -341,13 +249,13 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
     private void onDropBlockAsItemWithChanceHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune,
         CallbackInfo ci) {
-        if (!((IMixinWorld) worldIn).isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
+        if (!((WorldBridge) worldIn).isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
             if (PhaseTracker.getInstance().getCurrentState().isRestoring()) {
                 ci.cancel();
                 return;
             }
 
-            final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
+            final ServerWorldBridge mixinWorld = (ServerWorldBridge) worldIn;
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final IPhaseState<?> currentState = phaseTracker.getCurrentState();
             final PhaseContext<?> currentContext = phaseTracker.getCurrentContext();
@@ -355,7 +263,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
                 PhaseContext<?> context = BlockPhase.State.BLOCK_DROP_ITEMS.createPhaseContext()
-                        .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.PHYSICS_OBSERVER));
+                        .source(mixinWorld.bridge$createSnapshot(state, state, pos, BlockChangeFlags.PHYSICS_OBSERVER));
                 // use current notifier and owner if available
                 currentContext.applyNotifierIfAvailable(context::notifier);
                 currentContext.applyOwnerIfAvailable(context::owner);
@@ -370,7 +278,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
     private void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune,
         CallbackInfo ci) {
-        if (!((IMixinWorld) worldIn).isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
+        if (!((WorldBridge) worldIn).isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
             if (this.data == null) {
                 // means that we didn't need to capture before
                 return;
@@ -406,11 +314,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             this.timing = SpongeTimings.getBlockTiming((net.minecraft.block.Block) (Object) this);
         }
         return this.timing;
-    }
-
-    @Override
-    public BlockSoundGroup getSoundGroup() {
-        return (BlockSoundGroup) this.blockSoundType;
     }
 
     @Override
@@ -451,7 +354,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     public void initializeTrackerState() {
         final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeImpl.getTrackerConfigAdapter();
         final BlockTrackerCategory blockTrackerCat = trackerConfigAdapter.getConfig().getBlockTracker();
-        String[] ids = this.getId().split(":");
+        String[] ids = ((BlockType) this).getId().split(":");
         if (ids.length != 2) {
             final PrettyPrinter printer = new PrettyPrinter(60).add("Malformatted Block ID discovered!").centre().hr()
                 .addWrapped(60, "Sponge has found a malformatted block id when trying to"
@@ -460,7 +363,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                                 + "mod developer as the registration for this block is not likely"
                                 + "to work with other systems and assumptions of having a properly"
                                 + "formatted block id.")
-                .add("%s : %s", "Malformed ID", this.getId())
+                .add("%s : %s", "Malformed ID", ((BlockType) this).getId())
                 .add("%s : %s", "Discovered id array", ids)
                 .add();
             final String id = ids[0];
@@ -482,10 +385,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         }
 
         // Determine if this block needs to be handled during WorldServer#addBlockEvent
-        final Block thisBlock = (Block)(Object) this;
-        if (thisBlock instanceof BlockMobSpawner || thisBlock instanceof BlockEnderChest
-                || thisBlock instanceof BlockChest || thisBlock instanceof BlockShulkerBox
-                || thisBlock instanceof BlockEndGateway || thisBlock instanceof BlockBeacon) {
+        if (((Block) (Object) this) instanceof BlockMobSpawner || ((Block) (Object) this) instanceof BlockEnderChest
+            || ((Block) (Object) this) instanceof BlockChest || ((Block) (Object) this) instanceof BlockShulkerBox
+            || ((Block) (Object) this)instanceof BlockEndGateway || ((Block) (Object) this) instanceof BlockBeacon) {
             this.shouldFireBlockEvents = false;
         }
         // Determine which blocks can avoid executing un-needed event logic

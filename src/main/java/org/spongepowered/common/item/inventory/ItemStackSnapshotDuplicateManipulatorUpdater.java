@@ -47,8 +47,8 @@ public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataC
 
     @Override
     public DataView update(DataView content) {
-        if (content.contains(DataQueries.UNSAFE_NBT)) {
-            NBTTagCompound compound = NbtTranslator.getInstance().translateData(content.getView(DataQueries.UNSAFE_NBT).get());
+        if (content.contains(DataQueries.Sponge.UNSAFE_NBT)) {
+            NBTTagCompound compound = NbtTranslator.getInstance().translateData(content.getView(DataQueries.Sponge.UNSAFE_NBT).get());
             if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
                 final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
                 if (spongeCompound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {
@@ -56,9 +56,9 @@ public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataC
                 }
             }
             NbtDataUtil.filterSpongeCustomData(compound);
-            content.remove(DataQueries.UNSAFE_NBT);
+            content.remove(DataQueries.Sponge.UNSAFE_NBT);
             if (!compound.isEmpty()) {
-                content.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translate(compound));
+                content.set(DataQueries.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translate(compound));
             }
         }
         content.set(Queries.CONTENT_VERSION, this.getOutputVersion());

@@ -41,10 +41,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Mixin(value = Chunk.class, priority = 1002)
-public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
+public abstract class MixinChunk_Async_Lighting implements ChunkBridge {
 
     // Keeps track of block positions in this chunk currently queued for sky light update
     private CopyOnWriteArrayList<Short> queuedSkyLightingUpdates = new CopyOnWriteArrayList<>();
@@ -97,9 +97,9 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(World worldIn, int x, int z, CallbackInfo ci) {
-        this.isServerChunk = !((IMixinWorld) worldIn).isFake();
+        this.isServerChunk = !((WorldBridge) worldIn).isFake();
         if (this.isServerChunk) {
-            this.lightExecutorService = ((IMixinWorldServer) worldIn).getLightingExecutor();
+            this.lightExecutorService = ((ServerWorldBridge) worldIn).bridge$getLightingExecutor();
         }
     }
 
@@ -227,9 +227,9 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     @Redirect(method = "enqueueRelightChecks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"))
     private IBlockState onRelightChecksGetBlockState(World world, BlockPos pos) {
-        Chunk chunk = ((IMixinChunkProviderServer) world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        Chunk chunk = ((ServerChunkProviderBridge) world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
 
-        final IMixinChunk spongeChunk = (IMixinChunk) chunk;
+        final ChunkBridge spongeChunk = (ChunkBridge) chunk;
         if (chunk == null || chunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {
             return Blocks.AIR.getDefaultState();
         }
@@ -433,22 +433,22 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
         }
 
         // add diagonal chunks
-        final Chunk southEastChunk = ((IMixinChunk) this.getNeighborChunk(0)).getNeighborChunk(2);
+        final Chunk southEastChunk = ((ChunkBridge) this.getNeighborChunk(0)).getNeighborChunk(2);
         if (southEastChunk == null) {
             return false;
         }
 
-        final Chunk southWestChunk = ((IMixinChunk) this.getNeighborChunk(0)).getNeighborChunk(3);
+        final Chunk southWestChunk = ((ChunkBridge) this.getNeighborChunk(0)).getNeighborChunk(3);
         if (southWestChunk == null) {
             return false;
         }
 
-        final Chunk northEastChunk = ((IMixinChunk) this.getNeighborChunk(1)).getNeighborChunk(2);
+        final Chunk northEastChunk = ((ChunkBridge) this.getNeighborChunk(1)).getNeighborChunk(2);
         if (northEastChunk == null) {
             return false;
         }
 
-        final Chunk northWestChunk = ((IMixinChunk) this.getNeighborChunk(1)).getNeighborChunk(3);
+        final Chunk northWestChunk = ((ChunkBridge) this.getNeighborChunk(1)).getNeighborChunk(3);
         if (northWestChunk == null) {
             return false;
         }
@@ -467,22 +467,22 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
         }
 
         // add diagonal chunks
-        final Chunk southEastChunk = ((IMixinChunk) this.getNeighborChunk(0)).getNeighborChunk(2);
+        final Chunk southEastChunk = ((ChunkBridge) this.getNeighborChunk(0)).getNeighborChunk(2);
         if (southEastChunk == null) {
             return EMPTY_LIST;
         }
 
-        final Chunk southWestChunk = ((IMixinChunk) this.getNeighborChunk(0)).getNeighborChunk(3);
+        final Chunk southWestChunk = ((ChunkBridge) this.getNeighborChunk(0)).getNeighborChunk(3);
         if (southWestChunk == null) {
             return EMPTY_LIST;
         }
 
-        final Chunk northEastChunk = ((IMixinChunk) this.getNeighborChunk(1)).getNeighborChunk(2);
+        final Chunk northEastChunk = ((ChunkBridge) this.getNeighborChunk(1)).getNeighborChunk(2);
         if (northEastChunk == null) {
             return EMPTY_LIST;
         }
 
-        final Chunk northWestChunk = ((IMixinChunk) this.getNeighborChunk(1)).getNeighborChunk(3);
+        final Chunk northWestChunk = ((ChunkBridge) this.getNeighborChunk(1)).getNeighborChunk(3);
         if (northWestChunk == null) {
             return EMPTY_LIST;
         }
@@ -648,7 +648,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
                 if (chunk == null) {
                     continue;
                 }
-                ((IMixinWorldServer) this.world).updateLightAsync(EnumSkyBlock.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
+                ((ServerWorldBridge) this.world).bridge$updateLightAsync(EnumSkyBlock.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
             }
         }
 
@@ -668,7 +668,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
             return false;
         }
 
-        return ((IMixinWorldServer) this.world).updateLightAsync(lightType, pos, (Chunk)(Object) chunk);
+        return ((ServerWorldBridge) this.world).bridge$updateLightAsync(lightType, pos, (Chunk)(Object) chunk);
     }
 
     private boolean checkWorldLight(BlockPos pos) {
@@ -691,10 +691,10 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
         if (this.world.provider.hasSkyLight())
         {
-            flag |= ((IMixinWorldServer) this.world).updateLightAsync(EnumSkyBlock.SKY, pos, (Chunk)(Object) chunk);
+            flag |= ((ServerWorldBridge) this.world).bridge$updateLightAsync(EnumSkyBlock.SKY, pos, (Chunk)(Object) chunk);
         }
 
-        flag = flag | ((IMixinWorldServer) this.world).updateLightAsync(EnumSkyBlock.BLOCK, pos, (Chunk)(Object) chunk);
+        flag = flag | ((ServerWorldBridge) this.world).bridge$updateLightAsync(EnumSkyBlock.BLOCK, pos, (Chunk)(Object) chunk);
         return flag;
     }
 

@@ -52,6 +52,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -59,8 +60,8 @@ import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.interfaces.item.IMixinItemStack;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -146,7 +147,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             if (itemCompound != null) {
                 this.compound = itemCompound.copy();
             }
-            this.itemDataSet.addAll(((IMixinCustomDataHolder) itemStack).getCustomManipulators());
+            this.itemDataSet.addAll(((CustomDataHolderBridge) itemStack).getCustomManipulators());
 
         } else {
             this.itemDataSet.addAll(itemStack.getContainers());
@@ -157,29 +158,29 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     @Override
     public ItemStack.Builder fromContainer(DataView container) {
         checkNotNull(container);
-        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT)
-            || !container.contains(DataQueries.ITEM_DAMAGE_VALUE)) {
+        if (!container.contains(DataQueries.ItemStack.TYPE) || !container.contains(DataQueries.ItemStack.COUNT)
+            || !container.contains(DataQueries.ItemStack.DAMAGE_VALUE)) {
             return this;
         }
         reset();
 
-        final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
+        final int count = getData(container, DataQueries.ItemStack.COUNT, Integer.class);
         quantity(count);
 
-        final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
+        final String itemTypeId = getData(container, DataQueries.ItemStack.TYPE, String.class);
         final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).get();
         itemType(itemType);
 
-        this.damageValue = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
-        if (container.contains(DataQueries.UNSAFE_NBT)) {
-            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
+        this.damageValue = getData(container, DataQueries.ItemStack.DAMAGE_VALUE, Integer.class);
+        if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
+            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.Sponge.UNSAFE_NBT).get());
             if (compound.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
                 compound.removeTag(NbtDataUtil.SPONGE_DATA);
             }
             this.compound = compound;
         }
-        if (container.contains(DataQueries.DATA_MANIPULATORS)) {
-            final List<DataView> views = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
+        if (container.contains(DataQueries.Sponge.DATA_MANIPULATORS)) {
+            final List<DataView> views = container.getViewList(DataQueries.Sponge.DATA_MANIPULATORS).get();
             final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
             final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
             this.itemDataSet = new HashSet<>();
@@ -272,28 +273,28 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     @Override
     protected Optional<ItemStack> buildContent(DataView container) throws InvalidDataException {
         checkNotNull(container);
-        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT) || !container.contains(
-            DataQueries.ITEM_DAMAGE_VALUE)) {
+        if (!container.contains(DataQueries.ItemStack.TYPE) || !container.contains(DataQueries.ItemStack.COUNT) || !container.contains(
+            DataQueries.ItemStack.DAMAGE_VALUE)) {
             return Optional.empty();
         }
-        final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
-        final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
+        final String itemTypeId = getData(container, DataQueries.ItemStack.TYPE, String.class);
+        final int count = getData(container, DataQueries.ItemStack.COUNT, Integer.class);
         final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).orElseThrow(() -> new IllegalStateException("Unable to find item with id: " + itemTypeId));
-        final int damage = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
+        final int damage = getData(container, DataQueries.ItemStack.DAMAGE_VALUE, Integer.class);
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count, damage);
-        if (container.contains(DataQueries.UNSAFE_NBT)) {
-            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
+        if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
+            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.Sponge.UNSAFE_NBT).get());
             itemStack.setTagCompound(compound);
         }
-        if (container.contains(DataQueries.DATA_MANIPULATORS)) {
-            final List<DataView> views = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
+        if (container.contains(DataQueries.Sponge.DATA_MANIPULATORS)) {
+            final List<DataView> views = container.getViewList(DataQueries.Sponge.DATA_MANIPULATORS).get();
             final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
             final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
             for (DataManipulator<?, ?> manipulator : manipulators) {
-                ((IMixinCustomDataHolder) itemStack).offerCustom(manipulator, MergeFunction.IGNORE_ALL);
+                ((CustomDataHolderBridge) itemStack).offerCustom(manipulator, MergeFunction.IGNORE_ALL);
             }
             if (!transaction.failedData.isEmpty()) {
-                ((IMixinCustomDataHolder) itemStack).addFailedData(transaction.failedData);
+                ((CustomDataHolderBridge) itemStack).addFailedData(transaction.failedData);
             }
         }
         return Optional.of((ItemStack) itemStack);
@@ -330,10 +331,10 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (this.keyValues != null) {
             this.keyValues.forEach((key, value) -> stack.offer((Key) key, value));
         }
-        if (this.compound != null) {
-            final NBTTagCompound compoundTag = this.compound.getCompoundTag(NbtDataUtil.FORGE_CAPS);
+        if (this.compound != null && this.compound.hasKey(Constants.Forge.FORGE_CAPS, NbtDataUtil.TAG_COMPOUND)) {
+            final NBTTagCompound compoundTag = this.compound.getCompoundTag(Constants.Forge.FORGE_CAPS);
             if (compoundTag != null) {
-                ((IMixinItemStack) stack).setCapabilitiesFromSpongeBuilder(compoundTag);
+                SpongeImplHooks.setCapabilitiesFromSpongeBuilder(stack, compoundTag);
             }
         }
 

@@ -48,8 +48,8 @@ import javax.annotation.Nullable;
 @Mixin(EntityAIWatchClosest.class)
 public abstract class MixinEntityAIWatchClosest extends EntityAIBase implements WatchClosestAITask {
 
-    @Shadow private Class watchedClass;
-    @Shadow private float maxDistance;
+    @Shadow protected Class watchedClass;
+    @Shadow protected float maxDistance;
     @Shadow @Final @Mutable private float chance;
     @Nullable
     private EntityType watchedType;

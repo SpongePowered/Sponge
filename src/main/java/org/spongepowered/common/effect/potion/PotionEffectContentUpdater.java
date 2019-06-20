@@ -51,11 +51,11 @@ public class PotionEffectContentUpdater implements DataContentUpdater {
 
     @Override
     public DataView update(DataView content) {
-        final String oldId = content.getString(DataQueries.POTION_TYPE).get();
+        final String oldId = content.getString(DataQueries.Potions.POTION_TYPE).get();
         final String newId = map.get(oldId);
 
-        content.remove(DataQueries.POTION_TYPE);
-        content.set(DataQueries.POTION_TYPE, newId);
+        content.remove(DataQueries.Potions.POTION_TYPE);
+        content.set(DataQueries.Potions.POTION_TYPE, newId);
 
         return content;
     }

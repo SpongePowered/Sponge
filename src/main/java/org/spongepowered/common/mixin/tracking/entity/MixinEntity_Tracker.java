@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
@@ -47,11 +47,12 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1111)
-public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
+public abstract class MixinEntity_Tracker implements Entity, EntityBridge {
+
+    @Shadow public net.minecraft.world.World world;
 
     private SpongeProfileManager spongeProfileManager;
     private UserStorageService userStorageService;
-    @Shadow public net.minecraft.world.World world;
 
     @Override
     public void trackEntityUniqueId(String nbtKey, @Nullable UUID uuid) {
@@ -60,21 +61,23 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         } else if (NbtDataUtil.SPONGE_ENTITY_NOTIFIER.equals(nbtKey)) {
             this.notifier = uuid;
         }
-        final NBTTagCompound spongeData = getSpongeData();
-        if (!spongeData.hasKey(nbtKey)) {
-            if (uuid == null) {
-                return;
-            }
+        if (data$hasRootCompound()) {
+            final NBTTagCompound spongeData = data$getSpongeCompound();
+            if (!spongeData.hasKey(nbtKey)) {
+                if (uuid == null) {
+                    return;
+                }
 
-            NBTTagCompound sourceNbt = new NBTTagCompound();
-            sourceNbt.setUniqueId(NbtDataUtil.UUID, uuid);
-            spongeData.setTag(nbtKey, sourceNbt);
-        } else {
-            final NBTTagCompound compoundTag = spongeData.getCompoundTag(nbtKey);
-            if (uuid == null) {
-                spongeData.removeTag(nbtKey);
+                NBTTagCompound sourceNbt = new NBTTagCompound();
+                sourceNbt.setUniqueId(NbtDataUtil.UUID, uuid);
+                spongeData.setTag(nbtKey, sourceNbt);
             } else {
-                compoundTag.setUniqueId(NbtDataUtil.UUID, uuid);
+                final NBTTagCompound compoundTag = spongeData.getCompoundTag(nbtKey);
+                if (uuid == null) {
+                    spongeData.removeTag(nbtKey);
+                } else {
+                    compoundTag.setUniqueId(NbtDataUtil.UUID, uuid);
+                }
             }
         }
     }
@@ -127,7 +130,7 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         } else if (this.notifier != null && NbtDataUtil.SPONGE_ENTITY_NOTIFIER.equals(nbtKey)) {
             return this.notifier;
         }
-        NBTTagCompound nbt = getSpongeData();
+        NBTTagCompound nbt = data$getSpongeCompound();
         if (!nbt.hasKey(nbtKey)) {
             return null;
         }

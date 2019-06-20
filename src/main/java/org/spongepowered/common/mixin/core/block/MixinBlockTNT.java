@@ -26,12 +26,10 @@ package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.block.BlockTNT;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.Living;
@@ -43,18 +41,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.entity.IMixinEntityTNTPrimed;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.bridge.entity.item.TNTPrimedEntityBridge;
+
+import javax.annotation.Nullable;
 
 @Mixin(BlockTNT.class)
 public abstract class MixinBlockTNT extends MixinBlock {
 
-    private static final String TARGET_PRIME = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z";
-    private static final String TARGET_PRIME_SOUND = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
-    private static final String TARGET_REMOVE = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z";
-    private static final String TARGET_REMOVE_BLOCK = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z";
-
-    private EntityLivingBase igniter;
     private boolean primeCancelled;
 
     private boolean onRemove(World world, BlockPos pos) {
@@ -63,54 +59,57 @@ public abstract class MixinBlockTNT extends MixinBlock {
         return removed;
     }
 
-    @Inject(method = "explode", at = @At("INVOKE"))
-    public void prePrime(World world, BlockPos pos, IBlockState state, EntityLivingBase igniter, CallbackInfo ci) {
-        this.igniter = igniter;
-    }
-
-    @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_PRIME))
-    public boolean onPrime(World world, Entity tnt) {
-        IMixinEntityTNTPrimed mixin = (IMixinEntityTNTPrimed) tnt;
-        mixin.setDetonator(this.igniter);
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            if (this.igniter != null) {
-                frame.addContext(EventContextKeys.IGNITER, (Living) this.igniter);
-            } // TODO Maybe add the player or any active entity from the PhaseTracker?
-            this.primeCancelled = !mixin.shouldPrime();
-        }
-        return !this.primeCancelled && world.spawnEntity(tnt);
-    }
-
-    @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_PRIME_SOUND))
-    public void onPrimeSound(World world, EntityPlayer player, double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch) {
-        if (!this.primeCancelled) {
-            world.playSound(null, x, y, z, soundIn, category, volume, pitch);
+    @Inject(method = "explode",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        cancellable = true
+    )
+    private void impl$ThrowPrimeAndMaybeCancel(World worldIn, BlockPos pos, IBlockState state, @Nullable EntityLivingBase igniter,
+        CallbackInfo ci, EntityTNTPrimed tnt) {
+        ((TNTPrimedEntityBridge) tnt).bridge$setDetonator(igniter);
+        if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                if (igniter != null) {
+                    frame.addContext(EventContextKeys.IGNITER, (Living) igniter);
+                }
+                if (!((TNTPrimedEntityBridge) tnt).bridge$shouldPrime()) {
+                    ci.cancel();
+                }
+            }
         }
     }
 
-    @Redirect(method = "onExplosionDestroy", at = @At(value = "INVOKE", target = TARGET_PRIME))
-    public boolean onPrimePostExplosion(World world, Entity tnt) {
-        // Called when prime triggered by explosion
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
-            boolean result =  ((IMixinFusedExplosive) tnt).shouldPrime() && world.spawnEntity(tnt);
-            return result;
+    @Inject(
+        method = "onExplosionDestroy",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        cancellable = true
+    )
+    private void impl$CheckIfCanPrimeFromExplosion(World worldIn, BlockPos pos, Explosion explosionIn, CallbackInfo ci, EntityTNTPrimed tnt) {
+        if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
+                if (!((FusedExplosiveBridge) tnt).bridge$shouldPrime()) {
+                    ci.cancel();
+                }
+            }
         }
+
     }
 
-    @Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = TARGET_REMOVE))
+    @Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"))
     public boolean onRemovePostAddded(World world, BlockPos pos) {
         // Called when TNT is placed next to a charge
         return onRemove(world, pos);
     }
 
-    @Redirect(method = "neighborChanged", at = @At(value = "INVOKE", target = TARGET_REMOVE))
+    @Redirect(method = "neighborChanged", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"))
     public boolean onRemovePostCharge(World world, BlockPos pos) {
         // Called when TNT receives charge
         return onRemove(world, pos);
     }
 
-    @Redirect(method = "onBlockActivated", at = @At(value = "INVOKE", target = TARGET_REMOVE_BLOCK))
+    @Redirect(method = "onBlockActivated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
     public boolean onRemovePostInteract(World world, BlockPos pos, IBlockState state, int flag) {
         // Called when player manually ignites TNT
         boolean removed = !this.primeCancelled && world.setBlockState(pos, state, flag);
@@ -118,7 +117,7 @@ public abstract class MixinBlockTNT extends MixinBlock {
         return removed;
     }
 
-    @Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = TARGET_REMOVE))
+    @Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"))
     public boolean onRemovePostCollision(World world, BlockPos pos) {
         // Called when the TNT is hit with a flaming arrow
         return onRemove(world, pos);

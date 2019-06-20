@@ -25,53 +25,15 @@
 package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.projectile.EntitySmallFireball;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
-import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 @Mixin(EntitySmallFireball.class)
-public abstract class MixinEntitySmallFireball extends MixinEntityFireball implements SmallFireball {
-
-    private float damage = 5.0f;
-
-    @ModifyArg(method = "onImpact",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    private float onSpongeAttackEntityFrom(float amount) {
-        return this.damage;
-    }
-
-    public double getDamage() {
-        return this.damage;
-    }
-
-    public void setDamage(double damage) {
-        this.damage = (float) damage;
-    }
-
-    @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
-        }
-    }
-
-    @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
-        compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
-    }
-
+public abstract class MixinEntitySmallFireball extends MixinEntityFireball {
 
     /**
      * @author gabizou - April 13th, 2018
@@ -80,7 +42,7 @@ public abstract class MixinEntitySmallFireball extends MixinEntityFireball imple
      * complicated injectors that may not end up working. For a more precise point
      * of where this is redirectiong, refer to the mixin issue.
      *
-     * @see <a href="https://github.com/SpongePowered/Mixin/issues/250"/>
+     * @see <a href="https://github.com/SpongePowered/Mixin/issues/250">Issue</a>
      * @param world
      * @param pos
      * @return
@@ -93,6 +55,6 @@ public abstract class MixinEntitySmallFireball extends MixinEntityFireball imple
         )
     )
     private boolean onCanGrief(World world, BlockPos pos) {
-        return ((IMixinGriefer) this).canGrief() && world.isAirBlock(pos);
+        return ((GrieferBridge) this).bridge$CanGrief() && world.isAirBlock(pos);
     }
 }

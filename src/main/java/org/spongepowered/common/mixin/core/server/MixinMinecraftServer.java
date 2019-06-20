@@ -88,6 +88,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -105,10 +106,9 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
@@ -363,11 +363,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public void prepareSpawnArea(WorldServer worldServer) {
         WorldProperties worldProperties = (WorldProperties) worldServer.getWorldInfo();
-        if (!((IMixinWorldInfo) worldProperties).isValid() || !worldProperties.doesGenerateSpawnOnLoad()) {
+        if (!((WorldInfoBridge) worldProperties).isValid() || !worldProperties.doesGenerateSpawnOnLoad()) {
             return;
         }
 
-        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) worldServer.getChunkProvider();
+        ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) worldServer.getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
 
         try (GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
@@ -377,7 +377,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             int i = 0;
             this.setUserMessage("menu.generatingTerrain");
             LOGGER.info("Preparing start region for world {} ({}/{})", worldServer.getWorldInfo().getWorldName(),
-                ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(), ((IMixinWorldServer) worldServer).getDimensionId());
+                ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(), ((ServerWorldBridge) worldServer).bridge$getDimensionId());
             BlockPos blockpos = worldServer.getSpawnPoint();
             long j = MinecraftServer.getCurrentTimeMillis();
             for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
@@ -424,7 +424,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public boolean unloadWorld(World world) {
         // API is not allowed to unload overworld
-        return ((IMixinWorldServer) world).getDimensionId() != 0 && WorldManager.unloadWorld((WorldServer) world, false, false);
+        return ((ServerWorldBridge) world).bridge$getDimensionId() != 0 && WorldManager.unloadWorld((WorldServer) world, false, false);
 
     }
 
@@ -615,11 +615,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Redirect(method = "addServerStatsToSnooper", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;", opcode = Opcodes.GETFIELD))
     private WorldProvider onGetWorldProviderForSnooper(WorldServer world) {
-        if (((IMixinWorld) world).isFake() || world.getWorldInfo() == null) {
+        if (((WorldBridge) world).isFake() || world.getWorldInfo() == null) {
             // Return overworld provider
             return ((net.minecraft.world.World) Sponge.getServer().getWorlds().iterator().next()).provider;
         }
-        this.dimensionId = ((IMixinWorldServer) world).getDimensionId();
+        this.dimensionId = ((ServerWorldBridge) world).bridge$getDimensionId();
         return world.provider;
     }
 
@@ -666,7 +666,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             if (save) {
                 // Sponge start - check auto save interval in world config
                 if (this.isDedicatedServer() && this.isServerRunning()) {
-                    final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+                    final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
                     final int autoSaveInterval = configAdapter.getConfig().getWorld().getAutoSaveInterval();
                     if (log) {
                         log = configAdapter.getConfig().getLogging().logWorldAutomaticSaving();

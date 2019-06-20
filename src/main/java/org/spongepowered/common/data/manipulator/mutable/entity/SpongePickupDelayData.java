@@ -32,14 +32,14 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePickupDelayData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public final class SpongePickupDelayData extends AbstractIntData<PickupDelayData, ImmutablePickupDelayData> implements PickupDelayData {
 
     public SpongePickupDelayData() {
-        this(DataConstants.Entity.Item.DEFAULT_PICKUP_DELAY);
+        this(Constants.Entity.Item.DEFAULT_PICKUP_DELAY);
     }
 
     public SpongePickupDelayData(int value, int minimum, int maximum, int defaultValue) {
@@ -54,9 +54,9 @@ public final class SpongePickupDelayData extends AbstractIntData<PickupDelayData
     public MutableBoundedValue<Integer> delay() {
         return SpongeValueFactory.boundedBuilder(Keys.PICKUP_DELAY) // this.usedKey does not work here
                 .actualValue(this.getValue())
-                .minimum(DataConstants.Entity.Item.MIN_PICKUP_DELAY)
-                .maximum(DataConstants.Entity.Item.MAX_PICKUP_DELAY)
-                .defaultValue(DataConstants.Entity.Item.DEFAULT_PICKUP_DELAY)
+                .minimum(Constants.Entity.Item.MIN_PICKUP_DELAY)
+                .maximum(Constants.Entity.Item.MAX_PICKUP_DELAY)
+                .defaultValue(Constants.Entity.Item.DEFAULT_PICKUP_DELAY)
                 .build();
     }
 
@@ -72,7 +72,7 @@ public final class SpongePickupDelayData extends AbstractIntData<PickupDelayData
     }
 
     private boolean isInifinitePickup() {
-        return this.getValue() == DataConstants.Entity.Item.MAGIC_NO_PICKUP;
+        return this.getValue() == Constants.Entity.Item.MAGIC_NO_PICKUP;
     }
 
     @Override

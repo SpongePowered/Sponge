@@ -65,10 +65,10 @@ import org.spongepowered.api.item.inventory.slot.InputSlot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
@@ -128,11 +128,11 @@ public final class ContainerUtil {
         return (net.minecraft.inventory.Container) container;
     }
 
-    public static IMixinContainer toMixin(net.minecraft.inventory.Container container) {
-        return (IMixinContainer) container;
+    public static ContainerBridge toMixin(net.minecraft.inventory.Container container) {
+        return (ContainerBridge) container;
     }
 
-    public static net.minecraft.inventory.Container fromMixin(IMixinContainer container) {
+    public static net.minecraft.inventory.Container fromMixin(ContainerBridge container) {
         return (net.minecraft.inventory.Container) container;
     }
 
@@ -501,7 +501,7 @@ public final class ContainerUtil {
                 }
             }
         }
-        Location<org.spongepowered.api.world.World> loc = ((IMixinContainer) container).getOpenLocation();
+        Location<org.spongepowered.api.world.World> loc = ((ContainerBridge) container).getOpenLocation();
         if (loc != null) {
             return new IMixinSingleBlockCarrier() {
                 @Override
@@ -532,6 +532,6 @@ public final class ContainerUtil {
     }
 
     public static org.spongepowered.api.item.inventory.Slot getSlot(net.minecraft.inventory.Container container, int slot) {
-        return ((IMixinContainer) container).getContainerSlot(slot);
+        return ((ContainerBridge) container).getContainerSlot(slot);
     }
 }

@@ -72,10 +72,10 @@ public class SpongeParticleEffect implements ParticleEffect {
     @Override
     public DataContainer toContainer() {
         DataContainer dataContainer = DataContainer.createNew();
-        dataContainer.set(DataQueries.PARTICLE_TYPE, this.type);
-        dataContainer.set(DataQueries.PARTICLE_OPTIONS, this.options.entrySet().stream().map(entry -> DataContainer.createNew()
-                .set(DataQueries.PARTICLE_OPTION_KEY, entry.getKey())
-                .set(DataQueries.PARTICLE_OPTION_VALUE, entry.getValue()))
+        dataContainer.set(DataQueries.Particles.PARTICLE_TYPE, this.type);
+        dataContainer.set(DataQueries.Particles.PARTICLE_OPTIONS, this.options.entrySet().stream().map(entry -> DataContainer.createNew()
+                .set(DataQueries.Particles.PARTICLE_OPTION_KEY, entry.getKey())
+                .set(DataQueries.Particles.PARTICLE_OPTION_VALUE, entry.getValue()))
                 .collect(Collectors.toList()));
         return dataContainer;
     }

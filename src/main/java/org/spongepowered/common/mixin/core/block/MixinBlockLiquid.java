@@ -53,7 +53,7 @@ public abstract class MixinBlockLiquid extends MixinBlock {
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"
         )
     )
-    private void onSetBlockState(World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<Boolean> cir, boolean flag, Integer integer) {
+    private void impl$CheckForLiquidMixing(World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<Boolean> cir, boolean flag, Integer integer) {
         IBlockState newState = integer == 0 ? Blocks.OBSIDIAN.getDefaultState() : Blocks.COBBLESTONE.getDefaultState();
         ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, pos, newState, null);
         Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);

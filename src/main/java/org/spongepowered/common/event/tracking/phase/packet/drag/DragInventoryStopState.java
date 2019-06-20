@@ -32,10 +32,10 @@ import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
 
 import java.util.List;
@@ -49,7 +49,7 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
-        ((IMixinContainer) playerMP.openContainer).setFirePreview(false);
+        ((ContainerBridge) playerMP.openContainer).setFirePreview(false);
     }
 
     @Override
@@ -60,11 +60,11 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
 
     public static void unwindCraftPreview(InventoryPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
-        ((IMixinContainer) player.openContainer).setFirePreview(true);
+        ((ContainerBridge) player.openContainer).setFirePreview(true);
 
         Inventory craftInv = ((Inventory) player.openContainer).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
         if (craftInv instanceof CraftingInventory) {
-            List<SlotTransaction> previewTransactions = ((IMixinContainer) player.openContainer).getPreviewTransactions();
+            List<SlotTransaction> previewTransactions = ((ContainerBridge) player.openContainer).getPreviewTransactions();
             if (!previewTransactions.isEmpty()) {
                 CraftingRecipe recipe = SpongeCraftingRecipeRegistry
                         .getInstance().findMatchingRecipe(((CraftingInventory) craftInv).getCraftingGrid(), ((World) player.world)).orElse(null);

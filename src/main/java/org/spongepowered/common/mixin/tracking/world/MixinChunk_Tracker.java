@@ -38,7 +38,6 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -48,16 +47,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.profile.SpongeProfileManager;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
@@ -69,40 +69,31 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(value = net.minecraft.world.chunk.Chunk.class, priority = 1111)
-public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
+public abstract class MixinChunk_Tracker implements ChunkBridge {
 
-    private static final int NUM_XZ_BITS = 4;
-    private static final int NUM_SHORT_Y_BITS = 8;
-    private static final int NUM_INT_Y_BITS = 24;
-    private static final int Y_SHIFT = NUM_XZ_BITS;
-    private static final short XZ_MASK = 0xF;
-    private static final short Y_SHORT_MASK = 0xFF;
-    private static final int Y_INT_MASK = 0xFFFFFF;
-    private SpongeProfileManager spongeProfileManager;
-    private UserStorageService userStorageService;
 
     @Shadow @Final private World world;
     @Shadow @Final public int x;
     @Shadow @Final public int z;
     @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
-
     @Shadow public abstract ChunkPos getPos();
 
+
+    @Nullable private UserStorageService userStorageService;
     private Map<Integer, PlayerTracker> trackedIntBlockPositions = new HashMap<>();
     private Map<Short, PlayerTracker> trackedShortBlockPositions = new HashMap<>();
 
-    @Final // need this constructor to never be overwritten by anything.
-    @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
-    private void onConstructedTracker(World world, int x, int z, CallbackInfo ci) {
-        if (!world.isRemote) {
-            this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
-            this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
-        }
+    @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
+    private void tracker$setUpUserService(@Nullable final World worldIn, final int x, final int z, final CallbackInfo ci) {
+        this.userStorageService = worldIn != null && !((WorldBridge) worldIn).isFake()
+                                  ? null
+                                  : SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+
     }
 
     @Override
-    public void addTrackedBlockPosition(Block block, BlockPos pos, User user, PlayerTracker.Type trackerType) {
-        if (this.world.isRemote) {
+    public void addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) {
+        if (((WorldBridge) this.world).isFake()) {
             return;
         }
         if (!PhaseTracker.getInstance().getCurrentState().tracksOwnersAndNotifiers()) {
@@ -117,13 +108,13 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         if (block instanceof ITileEntityProvider) {
             final TileEntity tileEntity = this.tileEntities.get(pos);
             if (tileEntity != null) {
-                IMixinTileEntity spongeTile = (IMixinTileEntity) tileEntity;
+                final TileEntityBridge spongeTile = (TileEntityBridge) tileEntity;
                 if (trackerType == PlayerTracker.Type.NOTIFIER) {
                     if (spongeTile.getSpongeNotifier() == user) {
                         return;
                     }
                     spongeTile.setSpongeNotifier(user);
-                } else { 
+                } else {
                     if (spongeTile.getSpongeOwner() == user) {
                         return;
                     }
@@ -132,7 +123,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             }
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter();
         if (configAdapter.getConfig().getLogging().blockTrackLogging()) {
             if (!configAdapter.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
                 SpongeHooks.logBlockTrack(this.world, block, pos, user, true);
@@ -141,10 +132,10 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             }
         }
 
-        final IMixinWorldInfo worldInfo = (IMixinWorldInfo) this.world.getWorldInfo();
+        final WorldInfoBridge worldInfo = (WorldInfoBridge) this.world.getWorldInfo();
         final int indexForUniqueId = worldInfo.getIndexForUniqueId(user.getUniqueId());
         if (pos.getY() <= 255) {
-            short blockPos = this.blockPosToShort(pos);
+            final short blockPos = MixinChunk_Tracker.blockPosToShort(pos);
             final PlayerTracker playerTracker = this.trackedShortBlockPositions.get(blockPos);
             if (playerTracker != null) {
                 if (trackerType == PlayerTracker.Type.OWNER) {
@@ -157,7 +148,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
                 this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(indexForUniqueId, trackerType));
             }
         } else {
-            int blockPos = this.blockPosToInt(pos);
+            final int blockPos = MixinChunk_Tracker.blockPosToInt(pos);
             final PlayerTracker playerTracker = this.trackedIntBlockPositions.get(blockPos);
             if (playerTracker != null) {
                 if (trackerType == PlayerTracker.Type.OWNER) {
@@ -183,18 +174,21 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     @Override
-    public Optional<User> getBlockOwner(BlockPos pos) {
-        final int intKey = this.blockPosToInt(pos);
+    public Optional<User> getBlockOwner(final BlockPos pos) {
+        if (((WorldBridge) this.world).isFake()) {
+            return Optional.empty();
+        }
+        final int intKey = MixinChunk_Tracker.blockPosToInt(pos);
         final PlayerTracker intTracker = this.trackedIntBlockPositions.get(intKey);
         if (intTracker != null) {
             final int notifierIndex = intTracker.ownerIndex;
-            return this.getValidatedUser(intKey, notifierIndex);
+            return this.tracker$getValidatedUser(intKey, notifierIndex);
         } else {
-            final short shortKey = this.blockPosToShort(pos);
+            final short shortKey = MixinChunk_Tracker.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
                 final int notifierIndex = shortTracker.ownerIndex;
-                return this.getValidatedUser(shortKey, notifierIndex);
+                return this.tracker$getValidatedUser(shortKey, notifierIndex);
             }
         }
 
@@ -202,18 +196,21 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     @Override
-    public Optional<UUID> getBlockOwnerUUID(BlockPos pos) {
-        final int key = this.blockPosToInt(pos);
+    public Optional<UUID> getBlockOwnerUUID(final BlockPos pos) {
+        if (((WorldBridge) this.world).isFake()) {
+            return Optional.empty();
+        }
+        final int key = MixinChunk_Tracker.blockPosToInt(pos);
         final PlayerTracker intTracker = this.trackedIntBlockPositions.get(key);
         if (intTracker != null) {
             final int ownerIndex = intTracker.ownerIndex;
-            return this.getValidatedUUID(key, ownerIndex);
+            return this.tracker$getValidatedUUID(key, ownerIndex);
         } else {
-            final short shortKey = this.blockPosToShort(pos);
+            final short shortKey = MixinChunk_Tracker.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
                 final int ownerIndex = shortTracker.ownerIndex;
-                return this.getValidatedUUID(shortKey, ownerIndex);
+                return this.tracker$getValidatedUUID(shortKey, ownerIndex);
             }
         }
 
@@ -221,16 +218,19 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     @Override
-    public Optional<User> getBlockNotifier(BlockPos pos) {
-        final int intKey = this.blockPosToInt(pos);
+    public Optional<User> getBlockNotifier(final BlockPos pos) {
+        if (((WorldBridge) this.world).isFake()) {
+            return Optional.empty();
+        }
+        final int intKey = MixinChunk_Tracker.blockPosToInt(pos);
         final PlayerTracker intTracker = this.trackedIntBlockPositions.get(intKey);
         if (intTracker != null) {
-            return this.getValidatedUser(intKey, intTracker.notifierIndex);
+            return this.tracker$getValidatedUser(intKey, intTracker.notifierIndex);
         } else {
-            final short shortKey = this.blockPosToShort(pos);
+            final short shortKey = MixinChunk_Tracker.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
-                return this.getValidatedUser(shortKey, shortTracker.notifierIndex);
+                return this.tracker$getValidatedUser(shortKey, shortTracker.notifierIndex);
             }
         }
 
@@ -238,39 +238,42 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     @Override
-    public Optional<UUID> getBlockNotifierUUID(BlockPos pos) {
-        final int key = this.blockPosToInt(pos);
+    public Optional<UUID> getBlockNotifierUUID(final BlockPos pos) {
+        if (((WorldBridge) this.world).isFake()) {
+            return Optional.empty();
+        }
+        final int key = MixinChunk_Tracker.blockPosToInt(pos);
         final PlayerTracker intTracker = this.trackedIntBlockPositions.get(key);
         if (intTracker != null) {
-            return this.getValidatedUUID(key, intTracker.notifierIndex);
+            return this.tracker$getValidatedUUID(key, intTracker.notifierIndex);
         } else {
-            final short shortKey = this.blockPosToShort(pos);
+            final short shortKey = MixinChunk_Tracker.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
-                return this.getValidatedUUID(shortKey, shortTracker.notifierIndex);
+                return this.tracker$getValidatedUUID(shortKey, shortTracker.notifierIndex);
             }
         }
 
         return Optional.empty();
     }
 
-    private Optional<User> getValidatedUser(int key, int ownerIndex) {
-        Optional<UUID> uuid = this.getValidatedUUID(key, ownerIndex);
+    private Optional<User> tracker$getValidatedUser(final int key, final int ownerIndex) {
+        final Optional<UUID> uuid = this.tracker$getValidatedUUID(key, ownerIndex);
         if (uuid.isPresent()) {
-            UUID userUniqueId = uuid.get();
+            final UUID userUniqueId = uuid.get();
             // get player if online
-            EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
+            final EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
             if (player != null) {
                 return Optional.of((User) player);
             }
             // player is not online, get or create user from storage
-            return this.getUserFromId(userUniqueId);
+            return this.tracker$getUserFromId(userUniqueId);
         }
         return Optional.empty();
     }
 
-    private Optional<UUID> getValidatedUUID(int key, int ownerIndex) {
-        UUID uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(ownerIndex)).orElse(null);
+    private Optional<UUID> tracker$getValidatedUUID(final int key, final int ownerIndex) {
+        final UUID uuid = (((WorldInfoBridge) this.world.getWorldInfo()).getUniqueIdForIndex(ownerIndex)).orElse(null);
         if (uuid != null) {
             // Verify id is valid and not invalid
             if (SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
@@ -283,45 +286,48 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         return Optional.empty();
     }
 
-    private Optional<User> getUserFromId(UUID uuid) {
+    private Optional<User> tracker$getUserFromId(final UUID uuid) {
         // check username cache
-        String username = SpongeUsernameCache.getLastKnownUsername(uuid);
-        if (username != null) {
+        final String username = SpongeUsernameCache.getLastKnownUsername(uuid);
+        if (username != null && this.userStorageService != null) {
             return this.userStorageService.get(GameProfile.of(uuid, username));
         }
 
         // check mojang cache
-        GameProfile profile = this.spongeProfileManager.getCache().getById(uuid).orElse(null);
-        if (profile != null) {
+        final GameProfile profile = Sponge.getServer().getGameProfileManager().getCache().getById(uuid).orElse(null);
+        if (profile != null && this.userStorageService != null) {
             return this.userStorageService.get(profile);
         }
 
         // If we reach this point, queue UUID for async lookup and return empty
-        this.spongeProfileManager.lookupUserAsync(uuid);
+        ((SpongeProfileManager) Sponge.getServer().getGameProfileManager()).lookupUserAsync(uuid);
         return Optional.empty();
     }
 
     // Special setter used by API
     @Override
-    public void setBlockNotifier(BlockPos pos, @Nullable UUID uuid) {
+    public void setBlockNotifier(final BlockPos pos, @Nullable final UUID uuid) {
+        if (((WorldBridge) this.world).isFake()) {
+            return;
+        }
         if (pos.getY() <= 255) {
-            short blockPos = this.blockPosToShort(pos);
+            final short blockPos = MixinChunk_Tracker.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(blockPos);
             if (shortTracker != null) {
-                shortTracker.notifierIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
+                shortTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
                 this.trackedShortBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid),
+                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid),
                                 PlayerTracker.Type.NOTIFIER));
             }
         } else {
-            int blockPos = this.blockPosToInt(pos);
+            final int blockPos = MixinChunk_Tracker.blockPosToInt(pos);
             final PlayerTracker intTracker = this.trackedIntBlockPositions.get(blockPos);
             if (intTracker != null) {
-                intTracker.notifierIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
+                intTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
                 this.trackedIntBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid),
+                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid),
                                 PlayerTracker.Type.NOTIFIER));
             }
         }
@@ -329,35 +335,38 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     // Special setter used by API
     @Override
-    public void setBlockCreator(BlockPos pos, @Nullable UUID uuid) {
+    public void setBlockCreator(final BlockPos pos, @Nullable final UUID uuid) {
+        if (((WorldBridge) this.world).isFake()) {
+            return;
+        }
         if (pos.getY() <= 255) {
-            short blockPos = this.blockPosToShort(pos);
+            final short blockPos = MixinChunk_Tracker.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(blockPos);
             if (shortTracker != null) {
-                shortTracker.ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
+                shortTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
-                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo())
+                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo())
                         .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
             }
         } else {
-            int blockPos = this.blockPosToInt(pos);
+            final int blockPos = MixinChunk_Tracker.blockPosToInt(pos);
             final PlayerTracker intTracker = this.trackedIntBlockPositions.get(blockPos);
             if (intTracker != null) {
-                intTracker.ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
+                intTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
-                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo())
+                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo())
                         .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
             }
         }
     }
 
     @Override
-    public void setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPositions) {
+    public void setTrackedIntPlayerPositions(final Map<Integer, PlayerTracker> trackedPositions) {
         this.trackedIntBlockPositions = trackedPositions;
     }
 
     @Override
-    public void setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPositions) {
+    public void setTrackedShortPlayerPositions(final Map<Short, PlayerTracker> trackedPositions) {
         this.trackedShortBlockPositions = trackedPositions;
     }
 
@@ -370,13 +379,13 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
      * @param bitsToReplace The number of bits to replace starting from nibble index
      * @return The modified integer
      */
-    private int setNibble(int num, int data, int which, int bitsToReplace) {
+    private static int setNibble(final int num, final int data, final int which, final int bitsToReplace) {
         return (num & ~(bitsToReplace << (which * 4)) | (data << (which * 4)));
     }
 
     @Inject(method = "onLoad", at = @At("HEAD"))
-    private void startLoad(CallbackInfo callbackInfo) {
-        final boolean isFake = ((IMixinWorld) this.world).isFake();
+    private void startLoad(final CallbackInfo callbackInfo) {
+        final boolean isFake = ((WorldBridge) this.world).isFake();
         if (!isFake) {
             if (!SpongeImplHooks.isMainThread()) {
                 final PrettyPrinter printer = new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
@@ -404,8 +413,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     @Inject(method = "onLoad", at = @At("RETURN"))
-    private void endLoad(CallbackInfo callbackInfo) {
-        if (!((IMixinWorld) this.world).isFake() && SpongeImplHooks.isMainThread()) {
+    private void endLoad(final CallbackInfo callbackInfo) {
+        if (!((WorldBridge) this.world).isFake() && SpongeImplHooks.isMainThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;
             }
@@ -417,20 +426,20 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     /**
      * Serialize this BlockPos into a short value
      */
-    private short blockPosToShort(BlockPos pos) {
-        short serialized = (short) this.setNibble(0, pos.getX() & XZ_MASK, 0, NUM_XZ_BITS);
-        serialized = (short) this.setNibble(serialized, pos.getY() & Y_SHORT_MASK, 1, NUM_SHORT_Y_BITS);
-        serialized = (short) this.setNibble(serialized, pos.getZ() & XZ_MASK, 3, NUM_XZ_BITS);
+    private static short blockPosToShort(final BlockPos pos) {
+        short serialized = (short) MixinChunk_Tracker.setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+        serialized = (short) MixinChunk_Tracker.setNibble(serialized, pos.getY() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
+        serialized = (short) MixinChunk_Tracker.setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
         return serialized;
     }
 
     /**
      * Serialize this BlockPos into an int value
      */
-    private int blockPosToInt(BlockPos pos) {
-        int serialized = this.setNibble(0, pos.getX() & XZ_MASK, 0, NUM_XZ_BITS);
-        serialized = this.setNibble(serialized, pos.getY() & Y_INT_MASK, 1, NUM_INT_Y_BITS);
-        serialized = this.setNibble(serialized, pos.getZ() & XZ_MASK, 7, NUM_XZ_BITS);
+    private static int blockPosToInt(final BlockPos pos) {
+        int serialized = MixinChunk_Tracker.setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+        serialized = MixinChunk_Tracker.setNibble(serialized, pos.getY() & Constants.Chunk.Y_INT_MASK, 1, Constants.Chunk.NUM_INT_Y_BITS);
+        serialized = MixinChunk_Tracker.setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 7, Constants.Chunk.NUM_XZ_BITS);
         return serialized;
     }
 }

@@ -26,14 +26,13 @@ package org.spongepowered.common.mixin.core.block.properties;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.properties.PropertyBool;
-import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(value = PropertyBool.class)
-public abstract class MixinPropertyBoolean extends MixinPropertyHelper<Boolean> implements BooleanTrait {
+public abstract class MixinPropertyBoolean extends MixinPropertyHelper<Boolean> {
 
     private Integer hashCode;
     @Shadow @Final private ImmutableSet<Boolean> allowedValues;

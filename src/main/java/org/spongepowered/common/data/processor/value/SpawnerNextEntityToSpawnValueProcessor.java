@@ -33,34 +33,34 @@ import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.IMixinMobSpawner;
+import org.spongepowered.common.mixin.core.tileentity.AccessorTileEntityMobSpawner;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class SpawnerNextEntityToSpawnValueProcessor extends AbstractSpongeValueProcessor<IMixinMobSpawner,
+public class SpawnerNextEntityToSpawnValueProcessor extends AbstractSpongeValueProcessor<AccessorTileEntityMobSpawner,
         WeightedSerializableObject<EntityArchetype>, Value<WeightedSerializableObject<EntityArchetype>>> {
 
     public SpawnerNextEntityToSpawnValueProcessor() {
-        super(IMixinMobSpawner.class, Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN);
+        super(AccessorTileEntityMobSpawner.class, Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN);
     }
 
     @Override
     protected Value<WeightedSerializableObject<EntityArchetype>> constructValue(WeightedSerializableObject<EntityArchetype> actualValue) {
         return new SpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN,
-                DataConstants.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN, actualValue);
+                Constants.TileEntity.Spawner.DEFAULT_NEXT_ENTITY_TO_SPAWN, actualValue);
     }
 
     @Override
-    protected boolean set(IMixinMobSpawner container, WeightedSerializableObject<EntityArchetype> value) {
-        SpawnerUtils.setNextEntity(container.getLogic(), value);
+    protected boolean set(AccessorTileEntityMobSpawner container, WeightedSerializableObject<EntityArchetype> value) {
+        SpawnerUtils.setNextEntity(container.accessor$getSpawnerLogic(), value);
         return true;
     }
 
     @Override
-    protected Optional<WeightedSerializableObject<EntityArchetype>> getVal(IMixinMobSpawner container) {
-        return Optional.of(SpawnerUtils.getNextEntity(container.getLogic()));
+    protected Optional<WeightedSerializableObject<EntityArchetype>> getVal(AccessorTileEntityMobSpawner container) {
+        return Optional.of(SpawnerUtils.getNextEntity(container.accessor$getSpawnerLogic()));
     }
 
     @Override

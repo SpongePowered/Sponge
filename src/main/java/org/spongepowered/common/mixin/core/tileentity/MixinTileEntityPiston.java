@@ -28,12 +28,11 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntityPiston;
 import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.block.tileentity.Piston;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(TileEntityPiston.class)
-public abstract class MixinTileEntityPiston extends MixinTileEntity implements Piston {
+public abstract class MixinTileEntityPiston extends MixinTileEntity {
 
     @Shadow private IBlockState pistonState;
     @Shadow private EnumFacing pistonFacing;

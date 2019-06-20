@@ -36,9 +36,8 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -51,7 +50,7 @@ public final class DropInventoryState extends BasicInventoryPacketState {
         final EntityPlayerMP player = context.getPacketPlayer();
         final ItemStack usedStack = context.getItemUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
-        final Entity spongePlayer = EntityUtil.fromNative(player);
+        final Entity spongePlayer = (Entity) player;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -63,7 +62,7 @@ public final class DropInventoryState extends BasicInventoryPacketState {
 
                     final ArrayList<Entity> entities = new ArrayList<>();
                     for (EntityItem item : items) {
-                        entities.add(EntityUtil.fromNative(item));
+                        entities.add((Entity) item);
                     }
                     final DropItemEvent.Dispense dropItemEvent =
                         SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
@@ -73,9 +72,9 @@ public final class DropInventoryState extends BasicInventoryPacketState {
                     }
                 });
 
-            final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+            final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
             mixinContainer.setCaptureInventory(false);
-            mixinContainer.getCapturedTransactions().clear();
+            mixinContainer.bridge$getCapturedSlotTransactions().clear();
         }
 
     }

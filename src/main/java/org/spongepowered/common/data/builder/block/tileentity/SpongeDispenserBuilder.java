@@ -41,8 +41,8 @@ public class SpongeDispenserBuilder extends SpongeLockableBuilder<Dispenser> {
     @Override
     protected Optional<Dispenser> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(dispenser -> {
-            if (container.contains(DataQueries.CUSTOM_NAME)) {
-                ((TileEntityDispenser) dispenser).setCustomName(container.getString(DataQueries.CUSTOM_NAME).get());
+            if (container.contains(DataQueries.BlockEntity.CUSTOM_NAME)) {
+                ((TileEntityDispenser) dispenser).setCustomName(container.getString(DataQueries.BlockEntity.CUSTOM_NAME).get());
             }
             ((TileEntityDispenser) dispenser).validate();
             return dispenser;

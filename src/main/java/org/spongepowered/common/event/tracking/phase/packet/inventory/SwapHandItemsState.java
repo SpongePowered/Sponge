@@ -34,7 +34,6 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 
@@ -54,7 +53,7 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
     @Override
     public void unwind(InventoryPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
-        final Entity spongePlayer = EntityUtil.fromNative(player);
+        final Entity spongePlayer = (Entity) player;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
             final IMixinInventoryPlayer mixinInventory = ((IMixinInventoryPlayer) player.inventory);

@@ -58,7 +58,6 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
     private final Class<T> catalogType;
     private final int length;
 
-    @SuppressWarnings("unchecked")
     private GlobalPalette(PaletteType<T> paletteType, Function<T, Integer> map, IntFunction<T> identity, Class<T> catalogType) {
         int highest = 0;
         for (T type : Sponge.getRegistry().getAllOf(catalogType)) {
@@ -74,6 +73,7 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
         this.catalogType = catalogType;
     }
 
+    @SuppressWarnings("deprecation")
     public static Palette<BlockState> getBlockPalette() {
         if (blockPalette == null) {
             blockPalette = new BlockPaletteWrapper(new GlobalPalette<>(PaletteTypes.GLOBAL_BLOCKS,

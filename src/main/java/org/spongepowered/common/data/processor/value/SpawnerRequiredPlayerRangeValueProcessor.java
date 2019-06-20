@@ -30,16 +30,16 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.interfaces.IMixinMobSpawner;
+import org.spongepowered.common.mixin.core.tileentity.AccessorTileEntityMobSpawner;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class SpawnerRequiredPlayerRangeValueProcessor extends AbstractSpongeValueProcessor<IMixinMobSpawner, Short, MutableBoundedValue<Short>> {
+public class SpawnerRequiredPlayerRangeValueProcessor extends AbstractSpongeValueProcessor<AccessorTileEntityMobSpawner, Short, MutableBoundedValue<Short>> {
 
     public SpawnerRequiredPlayerRangeValueProcessor() {
-        super(IMixinMobSpawner.class, Keys.SPAWNER_REQUIRED_PLAYER_RANGE);
+        super(AccessorTileEntityMobSpawner.class, Keys.SPAWNER_REQUIRED_PLAYER_RANGE);
     }
 
     @Override
@@ -47,20 +47,20 @@ public class SpawnerRequiredPlayerRangeValueProcessor extends AbstractSpongeValu
         return SpongeValueFactory.boundedBuilder(this.key)
                 .minimum((short) 0)
                 .maximum(Short.MAX_VALUE)
-                .defaultValue(DataConstants.DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE)
+                .defaultValue(Constants.TileEntity.Spawner.DEFAULT_REQUIRED_PLAYER_RANGE)
                 .actualValue(actualValue)
                 .build();
     }
 
     @Override
-    protected boolean set(IMixinMobSpawner container, Short value) {
-        container.getLogic().activatingRangeFromPlayer = value;
+    protected boolean set(AccessorTileEntityMobSpawner container, Short value) {
+        container.accessor$getSpawnerLogic().activatingRangeFromPlayer = value;
         return true;
     }
 
     @Override
-    protected Optional<Short> getVal(IMixinMobSpawner container) {
-        return Optional.of((short) container.getLogic().activatingRangeFromPlayer);
+    protected Optional<Short> getVal(AccessorTileEntityMobSpawner container) {
+        return Optional.of((short) container.accessor$getSpawnerLogic().activatingRangeFromPlayer);
     }
 
     @Override

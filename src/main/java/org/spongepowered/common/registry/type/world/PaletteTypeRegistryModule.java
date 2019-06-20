@@ -66,6 +66,7 @@ public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistr
         return ImmutableList.copyOf(this.paletteMappings.values());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void registerDefaults() {
         registerAdditionalCatalog(org.spongepowered.api.world.schematic.BlockPaletteTypes.GLOBAL);

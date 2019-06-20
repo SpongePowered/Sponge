@@ -24,27 +24,124 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import net.minecraft.entity.Entity;
+import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.item.EntityEnderEye;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemEnderEye;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.bridge.world.WorldBridge;
+
+import javax.annotation.Nullable;
 
 @Mixin(ItemEnderEye.class)
 public class MixinItemEnderEye extends Item {
 
-    @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
-    private boolean onspawnEntity(World world, Entity enderEye, World worldIn, EntityPlayer player, EnumHand hand) {
-        ((EyeOfEnder) enderEye).setShooter((ProjectileSource) player);
-        // TODO direct this appropriately
-        return world.spawnEntity(enderEye);
+    /**
+     * @author gabizou - June 10th, 2019 - 1.12.2
+     * @reason We can throw a construct pre event here before the
+     * entity is actually constructed, and if the event is cancelled,
+     * we can still return the correct itemstack. If the event is
+     * cancelled, we end up not shrinking the itemstack, but we will
+     * make sure to notify the player at the end of the packet being
+     * processed.
+     *
+     * @param worldIn The world
+     * @param playerIn The player using the item
+     * @param handIn The hand
+     * @param cir The callback
+     * @param used The ItemStack used from the hand
+     * @param rayTraceResult The raytrace validated using the item
+     * @param targetPos The target position of the dungeon
+     */
+    @Inject(
+        method = "onItemRightClick",
+        at = @At(
+            value = "NEW",
+            target = "net/minecraft/entity/item/EntityEnderEye"
+        ),
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        cancellable = true
+    )
+    private void spongeImpl$ThrowPreBeforeSpawning(World worldIn, EntityPlayer playerIn, EnumHand handIn,
+        CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack used, RayTraceResult rayTraceResult, @Nullable BlockPos targetPos) {
+        if (targetPos != null && !((WorldBridge) worldIn).isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+            final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.height / 2.0F), playerIn.posZ);
+            final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
+                targetPosition);
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                EntityTypes.EYE_OF_ENDER, targetTransform);
+            if (SpongeImpl.postEvent(event)) {
+                cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, used));
+            }
+        }
+    }
+
+    /**
+     * @author gabizou - June 10th, 2019 - 1.12.2
+     * @reason Instead of redirecting the world.spawnEntity,
+     * we'll inject with a local capture to have the ability to
+     * add context to the entity being spawned. Normally, by this point,
+     * the cause stack will have the information available, but,
+     * there are cases where we need to add the context of the item
+     * and stack if the interact is being called by another source.
+     *
+     * @param worldIn The world
+     * @param playerIn The player using the item
+     * @param handIn The hand
+     * @param cir The callback
+     * @param playerStack The ItemStack used from the hand
+     * @param result The raytrace validated using the item
+     * @param targetPos The target position of the dungeon
+     * @param enderEye The ender eye being spawned
+     */
+    @Inject(method = "onItemRightClick",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/entity/item/EntityEnderEye;moveTowards(Lnet/minecraft/util/math/BlockPos;)V"
+            ),
+            to = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/advancements/CriteriaTriggers;USED_ENDER_EYE:Lnet/minecraft/advancements/critereon/UsedEnderEyeTrigger;",
+                opcode = Opcodes.GETSTATIC
+            )
+        ),
+        locals = LocalCapture.CAPTURE_FAILSOFT
+    )
+    private void spongeImpl$setShooterBeforeSpawning(World worldIn, EntityPlayer playerIn, EnumHand handIn,
+        CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack playerStack, RayTraceResult result,
+        BlockPos targetPos, EntityEnderEye enderEye) {
+        if (((WorldBridge) worldIn).isFake()) {
+            return;
+        }
+        ((EyeOfEnder) enderEye).setShooter((ProjectileSource) playerIn);
     }
 
 }

@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
+import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
 
 import java.util.List;
 
@@ -56,7 +56,7 @@ public abstract class MixinEntityLivingBase_Collisions extends MixinEntity_Colli
     }
 
     @Override
-    public boolean isRunningCollideWithNearby() {
+    public boolean collision$isRunningCollideWithNearby() {
         return this.runningCollideWithNearby;
     }
 
@@ -69,13 +69,13 @@ public abstract class MixinEntityLivingBase_Collisions extends MixinEntity_Colli
                 continue;
             }
 
-            final IModData_Collisions spongeEntity = (IModData_Collisions) this;
-            if (spongeEntity.requiresCollisionsCacheRefresh()) {
-                spongeEntity.initializeCollisionState(this.world);
-                spongeEntity.requiresCollisionsCacheRefresh(false);
+            final CollisionsCapability spongeEntity = (CollisionsCapability) this;
+            if (spongeEntity.collision$requiresCollisionsCacheRefresh()) {
+                spongeEntity.collision$initializeCollisionState(this.world);
+                spongeEntity.collision$requiresCollisionsCacheRefresh(false);
             }
 
-            if (spongeEntity.getMaxCollisions() >= 0 && list.size() >= spongeEntity.getMaxCollisions()) {
+            if (spongeEntity.collision$getMaxCollisions() >= 0 && list.size() >= spongeEntity.collision$getMaxCollisions()) {
                 // Don't process any more collisions
                 break;
             }

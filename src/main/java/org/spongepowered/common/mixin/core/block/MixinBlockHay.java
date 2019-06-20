@@ -73,7 +73,7 @@ public abstract class MixinBlockHay extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
-    public ImmutableAxisData getAxisData(IBlockState blockState) {
+    private ImmutableAxisData getAxisData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
                 DirectionChecker.convertAxisToSponge(blockState.getValue(BlockRotatedPillar.AXIS)));
     }

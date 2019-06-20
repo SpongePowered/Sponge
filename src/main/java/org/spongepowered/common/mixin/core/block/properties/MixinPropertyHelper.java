@@ -26,15 +26,13 @@ package org.spongepowered.common.mixin.core.block.properties;
 
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyHelper;
-import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 
-import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * This is retained solely for simplification not having to perform any
@@ -43,28 +41,12 @@ import java.util.Optional;
  * @param <T> The type of comparable
  */
 @Mixin(value = PropertyHelper.class)
-public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>, IMixinPropertyHolder {
+public abstract class MixinPropertyHelper<T extends Comparable<T>> {
 
-    private Integer hashCode;
-    private String idString;
     @Shadow @Final private Class<T> valueClass;
     @Shadow @Final private String name;
 
-    @Override
-    public String getId() {
-        return this.idString;
-    }
-
-    @Override
-    public void setId(String id) {
-        this.idString = id;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public Optional<T> parseValue(String value) {
-        return Optional.ofNullable((T) ((IProperty) this).parseValue(value).orNull());
-    }
+    @Nullable private Integer hashCode;
 
     /**
      * @author blood - February 28th, 2019

@@ -25,18 +25,19 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockRail;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.BlockRailDetector;
 import net.minecraft.block.BlockRailPowered;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRailDirectionData;
+import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
@@ -44,6 +45,8 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 
 import java.util.Map;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(BlockRailBase.class)
 public abstract class MixinBlockRailBase extends MixinBlock {
@@ -62,30 +65,24 @@ public abstract class MixinBlockRailBase extends MixinBlock {
         return ImmutableRailDirectionData.class.isAssignableFrom(immutable);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableRailDirectionData) {
-            final BlockRailBase.EnumRailDirection railDirection = (BlockRailBase.EnumRailDirection) (Object) ((ImmutableRailDirectionData) manipulator).type().get();
-            if (blockState.getBlock() instanceof BlockRail) {
-                return Optional.of((BlockState) blockState.withProperty(BlockRail.SHAPE, railDirection));
-            } else if (blockState.getBlock() instanceof BlockRailPowered) {
-                if (!BlockRailPowered.SHAPE.getAllowedValues().contains(railDirection)) {
-                    return Optional.empty();
-                }
-                return Optional.of((BlockState) blockState.withProperty(BlockRailPowered.SHAPE, railDirection));
-            } else if (blockState.getBlock() instanceof BlockRailDetector) {
-                if (!BlockRailDetector.SHAPE.getAllowedValues().contains(railDirection)) {
-                    return Optional.empty();
-                }
-                return Optional.of((BlockState) blockState.withProperty(BlockRailDetector.SHAPE, railDirection));
-            } else { // For mods that extend BlockRailBase
-                for (Map.Entry<IProperty, Comparable> entry : (ImmutableSet<Map.Entry<IProperty, Comparable>>) (Object) blockState.getProperties().entrySet
-                        ()) {
-                    if (entry.getValue() instanceof BlockRailBase.EnumRailDirection) {
-                        if (entry.getKey().getAllowedValues().contains(railDirection)) {
-                            return Optional.of((BlockState) blockState.withProperty(entry.getKey(), railDirection));
-                        }
+            final RailDirection apiDirection = ((ImmutableRailDirectionData) manipulator).type().get();
+            final BlockRailBase.EnumRailDirection railDirection = (BlockRailBase.EnumRailDirection) (Object) apiDirection;
+            Optional<BlockState> state = getStateForDirection(blockState, railDirection);
+            if (state.isPresent()) {
+                return state;
+            }
+            // For mods that extend BlockRailBase
+            for (Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.getProperties().entrySet
+                    ()) {
+                if (entry.getValue() instanceof BlockRailBase.EnumRailDirection) {
+                    if (entry.getKey().getAllowedValues().contains(railDirection)) {
+                        final PropertyEnum<BlockRailBase.EnumRailDirection> property = (PropertyEnum<BlockRailBase.EnumRailDirection>) entry.getKey();
+                        final IBlockState newState = blockState.withProperty(property, railDirection);
+                        return Optional.of((BlockState) newState);
                     }
                 }
             }
@@ -97,42 +94,48 @@ public abstract class MixinBlockRailBase extends MixinBlock {
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.RAIL_DIRECTION)) {
             final BlockRailBase.EnumRailDirection railDirection = (BlockRailBase.EnumRailDirection) value;
-            if (blockState.getBlock() instanceof BlockRail) {
-                return Optional.of((BlockState) blockState.withProperty(BlockRail.SHAPE, railDirection));
-            } else if (blockState.getBlock() instanceof BlockRailPowered) {
-                if (!BlockRailPowered.SHAPE.getAllowedValues().contains(railDirection)) {
-                    return Optional.empty();
-                }
-                return Optional.of((BlockState) blockState.withProperty(BlockRailPowered.SHAPE, railDirection));
-            } else if (blockState.getBlock() instanceof BlockRailDetector) {
-                if (!BlockRailDetector.SHAPE.getAllowedValues().contains(railDirection)) {
-                    return Optional.empty();
-                }
-                return Optional.of((BlockState) blockState.withProperty(BlockRailDetector.SHAPE, railDirection));
+            Optional<BlockState> x = getStateForDirection(blockState, railDirection);
+            if (x.isPresent()) {
+                return x;
             }
 
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    private Optional<BlockState> getStateForDirection(IBlockState blockState, BlockRailBase.EnumRailDirection railDirection) {
+        if (blockState.getBlock() instanceof BlockRail) {
+            return Optional.of((BlockState) blockState.withProperty(BlockRail.SHAPE, railDirection));
+        }
+        if (blockState.getBlock() instanceof BlockRailPowered) {
+            if (!BlockRailPowered.SHAPE.getAllowedValues().contains(railDirection)) {
+                return Optional.empty();
+            }
+            return Optional.of((BlockState) blockState.withProperty(BlockRailPowered.SHAPE, railDirection));
+        }
+        if (blockState.getBlock() instanceof BlockRailDetector) {
+            if (!BlockRailDetector.SHAPE.getAllowedValues().contains(railDirection)) {
+                return Optional.empty();
+            }
+            return Optional.of((BlockState) blockState.withProperty(BlockRailDetector.SHAPE, railDirection));
+        }
+        return Optional.empty();
+    }
+
+    @Nullable
     private ImmutableRailDirectionData getRailDirectionFor(IBlockState blockState) {
         if (blockState.getBlock() instanceof BlockRail) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,
-                    blockState.getValue(BlockRail.SHAPE));
-        } else if (blockState.getBlock() instanceof BlockRailPowered) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,
-                    blockState.getValue(BlockRailPowered.SHAPE));
-        } else if (blockState.getBlock() instanceof BlockRailDetector) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,
-                    blockState.getValue(BlockRailDetector.SHAPE));
-        } else { // For mods extending BlockRailBase
-            for (Map.Entry<IProperty, Comparable> entry : (ImmutableSet<Map.Entry<IProperty, Comparable>>) (Object) blockState.getProperties().entrySet
-                    ()) {
-                if (entry.getValue() instanceof BlockRailBase.EnumRailDirection) {
-                    return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,
-                        entry.getValue());
-                }
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.getValue(BlockRail.SHAPE));
+        }
+        if (blockState.getBlock() instanceof BlockRailPowered) {
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.getValue(BlockRailPowered.SHAPE));
+        }
+        if (blockState.getBlock() instanceof BlockRailDetector) {
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.getValue(BlockRailDetector.SHAPE));
+        } // For mods extending BlockRailBase
+        for (Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.getProperties().entrySet()) {
+            if (entry.getValue() instanceof BlockRailBase.EnumRailDirection) {
+                return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, entry.getValue());
             }
         }
         return null;

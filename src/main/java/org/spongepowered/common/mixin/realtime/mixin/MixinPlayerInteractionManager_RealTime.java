@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(PlayerInteractionManager.class)
@@ -62,7 +62,7 @@ public abstract class MixinPlayerInteractionManager_RealTime {
         )
     )
     private void adjustForRealTimeDiggingTime(PlayerInteractionManager self, int modifier) {
-        if (SpongeImplHooks.isFakePlayer(this.player) || ((IMixinWorld) this.world).isFake()) {
+        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.world).isFake()) {
             this.curblockDamage = modifier;
             return;
         }

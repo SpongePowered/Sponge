@@ -69,6 +69,7 @@ public class WireAttachmentDataProcessor extends AbstractMultiDataProcessor<Wire
         return DataTransactionResult.failNoData();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<ImmutableWireAttachmentData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableWireAttachmentData immutable) {
         Map<Direction, WireAttachmentType> map = Maps.newHashMap(((ImmutableSpongeWireAttachmentData) immutable).getWireAttachmentMap());

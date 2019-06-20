@@ -25,87 +25,85 @@
 package org.spongepowered.common.mixin.entityactivation;
 
 import net.minecraft.world.World;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRange;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
+import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 
 @NonnullByDefault
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
-public abstract class MixinEntity_Activation implements Entity, IModData_Activation {
+public abstract class MixinEntity_Activation implements ActivationCapability {
 
-    public final byte activationType = EntityActivationRange.initializeEntityActivationType((net.minecraft.entity.Entity) (Object) this);
-    public boolean defaultActivationState = true;
-    public long activatedTick = Integer.MIN_VALUE;
-    private int activationRange;
-    private boolean refreshCache = false;
+    private final byte activation$activationType = EntityActivationRange.initializeEntityActivationType((net.minecraft.entity.Entity) (Object) this);
+    private boolean activation$defaultActivationState = true;
+    private long activation$activatedTick = Integer.MIN_VALUE;
+    private int activation$activationRange;
+    private boolean activation$refreshCache = false;
 
     @Shadow public World world;
     @Shadow public boolean onGround;
 
-    @Shadow
-    public abstract void setDead();
+    @Shadow public abstract void setDead();
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onEntityActivationConstruction(World world, CallbackInfo ci) {
-        if (world != null && !((IMixinWorld) world).isFake() && ((IMixinWorldInfo) world.getWorldInfo()).isValid()) {
+    private void activation$InitActivationRanges(World world, CallbackInfo ci) {
+        if (world != null && !((WorldBridge) world).isFake() && ((WorldInfoBridge) world.getWorldInfo()).isValid()) {
             EntityActivationRange.initializeEntityActivationState((net.minecraft.entity.Entity) (Object) this);
         }
     }
 
     @Override
-    public void inactiveTick() {
+    public void activation$inactiveTick() {
     }
 
     @Override
-    public byte getActivationType() {
-        return this.activationType;
+    public byte activation$getActivationType() {
+        return this.activation$activationType;
     }
 
     @Override
-    public long getActivatedTick() {
-        return this.activatedTick;
+    public long activation$getActivatedTick() {
+        return this.activation$activatedTick;
     }
 
     @Override
-    public boolean getDefaultActivationState() {
-        return this.defaultActivationState;
+    public boolean activation$getDefaultActivationState() {
+        return this.activation$defaultActivationState;
     }
 
     @Override
-    public void setDefaultActivationState(boolean defaultState) {
-        this.defaultActivationState = defaultState;
+    public void activation$setDefaultActivationState(boolean defaultState) {
+        this.activation$defaultActivationState = defaultState;
     }
 
     @Override
-    public void setActivatedTick(long tick) {
-        this.activatedTick = tick;
+    public void activation$setActivatedTick(long tick) {
+        this.activation$activatedTick = tick;
     }
 
     @Override
-    public int getActivationRange() {
-        return this.activationRange;
+    public int activation$getActivationRange() {
+        return this.activation$activationRange;
     }
 
     @Override
-    public void setActivationRange(int range) {
-        this.activationRange = range;
+    public void activation$setActivationRange(int range) {
+        this.activation$activationRange = range;
     }
 
     @Override
-    public void requiresActivationCacheRefresh(boolean flag) {
-        this.refreshCache = flag;
+    public void activation$requiresActivationCacheRefresh(boolean flag) {
+        this.activation$refreshCache = flag;
     }
 
     @Override
-    public boolean requiresActivationCacheRefresh() {
-        return this.refreshCache;
+    public boolean activation$requiresActivationCacheRefresh() {
+        return this.activation$refreshCache;
     }
 }

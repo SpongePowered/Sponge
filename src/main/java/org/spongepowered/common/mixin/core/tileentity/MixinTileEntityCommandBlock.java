@@ -24,53 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import net.minecraft.command.ICommandSender;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.tileentity.TileEntityCommandBlock;
-import org.spongepowered.api.block.tileentity.CommandBlock;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 
-import java.util.List;
-
 @NonnullByDefault
 @Mixin(TileEntityCommandBlock.class)
-public abstract class MixinTileEntityCommandBlock extends MixinTileEntity implements CommandBlock, IMixinCommandSource {
+public abstract class MixinTileEntityCommandBlock extends MixinTileEntity implements IMixinCommandSource {
 
     @Shadow public abstract CommandBlockBaseLogic getCommandBlockLogic();
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getCommandData());
-    }
 
     @Override
     public ICommandSender asICommandSender() {
         return getCommandBlockLogic();
     }
 
-    @Override
-    public void execute() {
-        getCommandBlockLogic().trigger(this.world);
-    }
-
-    @Override
-    @SuppressWarnings("deprecated")
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(of("StoredCommand"), this.getCommandBlockLogic().getCommand());
-        container.set(of("SuccessCount"), this.getCommandBlockLogic().getSuccessCount());
-        container.set(of("CustomName"), this.getCommandBlockLogic().getName());
-        container.set(of("DoesTrackOutput"), this.getCommandBlockLogic().shouldTrackOutput());
-        if (this.getCommandBlockLogic().shouldTrackOutput()) {
-        }
-        return container;
-    }
 }

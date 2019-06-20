@@ -30,9 +30,8 @@ import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -40,14 +39,14 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(value = net.minecraft.world.World.class, priority = 1111)
-public abstract class MixinWorld_Tracker implements World, IMixinWorld{
+public abstract class MixinWorld_Tracker implements World {
 
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
 
     @Override
     public Optional<UUID> getCreator(int x, int y, int z) {
-        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -55,12 +54,12 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld{
         BlockPos pos = new BlockPos(x, y, z);
         // The difference here saves the user lookup check for snapshot creation, very hot when considering
         // blocks changing with potentially n block notifiers and n block owners.
-        return ((IMixinChunk) chunk).getBlockOwnerUUID(pos);
+        return ((ChunkBridge) chunk).getBlockOwnerUUID(pos);
     }
 
     @Override
     public Optional<UUID> getNotifier(int x, int y, int z) {
-        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -68,29 +67,29 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld{
         BlockPos pos = new BlockPos(x, y, z);
         // The difference here saves the user lookup check for snapshot creation, very hot when considering
         // blocks changing with potentially n block notifiers and n block owners.
-        return ((IMixinChunk) chunk).getBlockNotifierUUID(pos);
+        return ((ChunkBridge) chunk).getBlockNotifierUUID(pos);
     }
 
     @Override
     public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
-        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }
 
         BlockPos pos = new BlockPos(x, y, z);
-        ((IMixinChunk) chunk).setBlockCreator(pos, uuid);
+        ((ChunkBridge) chunk).setBlockCreator(pos, uuid);
     }
 
     @Override
     public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
-        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }
 
         BlockPos pos = new BlockPos(x, y, z);
-        ((IMixinChunk) chunk).setBlockNotifier(pos, uuid);
+        ((ChunkBridge) chunk).setBlockNotifier(pos, uuid);
     }
 
 }

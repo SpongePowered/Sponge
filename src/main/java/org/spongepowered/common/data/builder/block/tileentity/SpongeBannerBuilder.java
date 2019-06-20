@@ -50,13 +50,13 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
     @Override
     protected Optional<Banner> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(banner1 -> {
-            if (!container.contains(DataQueries.BASE) || !container.contains(DataQueries.PATTERNS)) {
+            if (!container.contains(DataQueries.BlockEntity.Banner.BASE) || !container.contains(DataQueries.BlockEntity.Banner.PATTERNS)) {
                 ((TileEntity) banner1).invalidate();
                 return Optional.empty();
             }
             final BannerData bannerData = new SpongeBannerData(); // TODO when banner data is implemented.
 
-            String dyeColorId = container.getString(DataQueries.BASE).get();
+            String dyeColorId = container.getString(DataQueries.BlockEntity.Banner.BASE).get();
             Optional<DyeColor> colorOptional = Sponge.getRegistry().getType(DyeColor.class, dyeColorId);
             if (!colorOptional.isPresent()) {
                 throw new InvalidDataException("The provided container has an invalid dye color entry!");
@@ -64,7 +64,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
             bannerData.set(Keys.BANNER_BASE_COLOR, colorOptional.get());
 
             // Now we have to get the patterns list
-            final List<PatternLayer> patternsList = container.getSerializableList(DataQueries.PATTERNS, PatternLayer.class).get();
+            final List<PatternLayer> patternsList = container.getSerializableList(DataQueries.BlockEntity.Banner.PATTERNS, PatternLayer.class).get();
             final ListValue<PatternLayer> patternLayers = bannerData.patternsList();
             patternsList.forEach(patternLayers::add);
             bannerData.set(patternLayers);

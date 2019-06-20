@@ -31,6 +31,11 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(WorldProviderHell.class)
 public abstract class MixinWorldProviderHell extends MixinWorldProvider {
 
+    @Override
+    public float bridge$getMovementFactor() {
+        return 8.0f;
+    }
+
     /**
      * Since each World has a WorldBorder in Sponge, let the Nether
      * based worlds use local coordinates, not adjusted ones based on Overworld's.
@@ -38,7 +43,7 @@ public abstract class MixinWorldProviderHell extends MixinWorldProvider {
      * @return The server world border
      */
     @Override
-    public WorldBorder createServerWorldBorder() {
+    public WorldBorder bridge$createServerWorldBorder() {
         return new WorldBorder();
     }
 

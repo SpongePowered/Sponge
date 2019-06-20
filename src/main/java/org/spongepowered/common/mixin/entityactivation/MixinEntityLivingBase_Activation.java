@@ -34,8 +34,8 @@ public abstract class MixinEntityLivingBase_Activation extends MixinEntity_Activ
     @Shadow protected int idleTime;
 
     @Override
-    public void inactiveTick() {
-        super.inactiveTick();
+    public void activation$inactiveTick() {
+        super.activation$inactiveTick();
         ++this.idleTime;
     }
 }

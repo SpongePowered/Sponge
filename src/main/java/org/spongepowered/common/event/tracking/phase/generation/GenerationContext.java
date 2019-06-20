@@ -28,7 +28,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.world.WorldUtil;
 
 public class GenerationContext<G extends GenerationContext<G>> extends PhaseContext<G> {
 
@@ -40,7 +39,7 @@ public class GenerationContext<G extends GenerationContext<G>> extends PhaseCont
 
     @SuppressWarnings("unchecked")
     public G world(net.minecraft.world.World world) {
-        this.world = WorldUtil.fromNative(world);
+        this.world = (World) world;
         return (G) this;
     }
 

@@ -32,6 +32,7 @@ import net.minecraft.util.datafix.IFixableData;
 import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
 import java.util.UUID;
@@ -47,17 +48,17 @@ public class PlayerRespawnData implements IFixableData {
     public NBTTagCompound fixTagCompound(NBTTagCompound compound) {
         final Map<UUID, RespawnLocation> spawnLocations = Maps.newHashMap();
 
-        if (compound.hasKey(NbtDataUtil.USER_SPAWN_X, NbtDataUtil.TAG_ANY_NUMERIC)
-            && compound.hasKey(NbtDataUtil.USER_SPAWN_Y, NbtDataUtil.TAG_ANY_NUMERIC)
-            && compound.hasKey(NbtDataUtil.USER_SPAWN_Z, NbtDataUtil.TAG_ANY_NUMERIC)) {
-            Vector3d pos = new Vector3d(compound.getInteger(NbtDataUtil.USER_SPAWN_X),
-                    compound.getInteger(NbtDataUtil.USER_SPAWN_Y),
-                    compound.getInteger(NbtDataUtil.USER_SPAWN_Z));
+        if (compound.hasKey(Constants.Sponge.User.USER_SPAWN_X, NbtDataUtil.TAG_ANY_NUMERIC)
+            && compound.hasKey(Constants.Sponge.User.USER_SPAWN_Y, NbtDataUtil.TAG_ANY_NUMERIC)
+            && compound.hasKey(Constants.Sponge.User.USER_SPAWN_Z, NbtDataUtil.TAG_ANY_NUMERIC)) {
+            Vector3d pos = new Vector3d(compound.getInteger(Constants.Sponge.User.USER_SPAWN_X),
+                    compound.getInteger(Constants.Sponge.User.USER_SPAWN_Y),
+                    compound.getInteger(Constants.Sponge.User.USER_SPAWN_Z));
 //            final UUID key = WorldPropertyRegistryModule.dimIdToUuid(0);
 //            spawnLocations.put(key, RespawnLocation.builder().world(key).position(pos).build());
             // This is the point where we need to check the old data, if it is available.
         }
-        NBTTagList spawnlist = compound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
+        NBTTagList spawnlist = compound.getTagList(Constants.Sponge.User.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
         // This is legacy forge versions, not sure how forge is going to be saving it from now on, but
         // we can at least start moving all of this to our own compound and overwrite as necessary
         for (int i = 0; i < spawnlist.tagCount(); i++) {

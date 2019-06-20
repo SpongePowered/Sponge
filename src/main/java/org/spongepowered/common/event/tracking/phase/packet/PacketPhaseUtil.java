@@ -44,15 +44,14 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.util.List;
 
@@ -81,10 +80,10 @@ public final class PacketPhaseUtil {
             }
         }
         if (openContainer != null) {
-            boolean capture = ((IMixinContainer) openContainer).capturingInventory();
-            ((IMixinContainer) openContainer).setCaptureInventory(false);
+            boolean capture = ((ContainerBridge) openContainer).capturingInventory();
+            ((ContainerBridge) openContainer).setCaptureInventory(false);
             openContainer.detectAndSendChanges();
-            ((IMixinContainer) openContainer).setCaptureInventory(capture);
+            ((ContainerBridge) openContainer).setCaptureInventory(capture);
             // If event is cancelled, always resync with player
             // we must also validate the player still has the same container open after the event has been processed
             if (eventCancelled && player.openContainer == openContainer && player instanceof EntityPlayerMP) {
@@ -198,7 +197,7 @@ public final class PacketPhaseUtil {
                         // update the reference of player
                         packetPlayer = ((NetHandlerPlayServer) netHandler).player;
                     }
-                    ((IMixinEntityPlayerMP) packetPlayer).setPacketItem(ItemStack.EMPTY);
+                    ((ServerPlayerEntityBridge) packetPlayer).bridge$setPacketItem(ItemStack.EMPTY);
                 }
             }
         } else { // client

@@ -59,7 +59,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -175,29 +175,29 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
                 .set(Queries.WORLD_ID, this.worldUuid.toString())
-                .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
-                .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
+                .set(DataQueries.Entity.TYPE, this.entityType.getId())
+                .createView(DataQueries.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, this.position.getX())
                 .set(Queries.POSITION_Y, this.position.getY())
                 .set(Queries.POSITION_Z, this.position.getZ())
                 .getContainer()
-                .createView(DataQueries.ENTITY_ROTATION)
+                .createView(DataQueries.Entity.ROTATION)
                 .set(Queries.POSITION_X, this.rotation.getX())
                 .set(Queries.POSITION_Y, this.rotation.getY())
                 .set(Queries.POSITION_Z, this.rotation.getZ())
                 .getContainer()
-                .createView(DataQueries.ENTITY_SCALE)
+                .createView(DataQueries.Entity.SCALE)
                 .set(Queries.POSITION_X, this.scale.getX())
                 .set(Queries.POSITION_Y, this.scale.getY())
                 .set(Queries.POSITION_Z, this.scale.getZ())
                 .getContainer()
-                .set(DataQueries.DATA_MANIPULATORS, dataList);
+                .set(DataQueries.Sponge.DATA_MANIPULATORS, dataList);
 
         if (this.entityUuid != null) {
-            container.set(DataQueries.ENTITY_ID, this.entityUuid.toString());
+            container.set(DataQueries.Entity.UUID, this.entityUuid.toString());
         }
         if (this.compound != null) {
-            container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
+            container.set(DataQueries.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
         }
 
         return container;
@@ -271,6 +271,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return transform(key, input -> value);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<EntitySnapshot> with(BaseValue<?> value) {
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
@@ -383,7 +384,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         builder.position = location.getPosition();
         builder.worldId = location.getExtent().getUniqueId();
         NBTTagCompound newCompound = this.compound.copy();
-        newCompound.setInteger("Dimension", ((IMixinWorldInfo) location.getExtent().getProperties()).getDimensionId());
+        newCompound.setInteger("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).getDimensionId());
         builder.compound = newCompound;
         return builder.build();
     }

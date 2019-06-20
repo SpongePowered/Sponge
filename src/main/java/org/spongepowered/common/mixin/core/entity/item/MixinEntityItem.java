@@ -24,22 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.Item;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
@@ -47,29 +37,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
+import org.spongepowered.common.bridge.entity.ItemEntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 @Mixin(EntityItem.class)
-public abstract class MixinEntityItem extends MixinEntity implements Item, IMixinEntityItem {
+public abstract class MixinEntityItem extends MixinEntity implements ItemEntityBridge {
 
     private static final int MAGIC_PREVIOUS = -1;
     @Shadow private int pickupDelay;
-    @Shadow private int age;
+    @Shadow public int age;
     @Shadow public abstract ItemStack getItem();
     /**
      * A simple cached value of the merge radius for this item.
@@ -86,71 +68,71 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
     public float dropChance = 1.0f;
 
     @Override
-    public boolean infinitePickupDelay() {
+    public boolean bridge$infinitePickupDelay() {
         return this.infinitePickupDelay;
     }
 
     @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
-    private double getSearchRadius(double originalRadius) {
-        if (this.world.isRemote || ((IMixinWorld) this.world).isFake()) {
+    private double impl$changeSearchRadiusFromConfig(double originalRadius) {
+        if (this.world.isRemote || ((WorldBridge) this.world).isFake()) {
             return originalRadius;
         }
         if (this.cachedRadius == -1) {
-            final double configRadius = ((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getItemMergeRadius();
+            final double configRadius = ((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getItemMergeRadius();
             this.cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
         return this.cachedRadius;
     }
 
     @Override
-    public int getPickupDelay() {
+    public int bridge$getPickupDelay() {
         return this.infinitePickupDelay ? this.previousPickupDelay : this.pickupDelay;
     }
 
     @Override
-    public void setPickupDelay(int delay, boolean infinite) {
+    public void bridge$setPickupDelay(int delay, boolean infinite) {
         this.pickupDelay = delay;
         boolean previous = this.infinitePickupDelay;
         this.infinitePickupDelay = infinite;
         if (infinite && !previous) {
             this.previousPickupDelay = this.pickupDelay;
-            this.pickupDelay = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
+            this.pickupDelay = Constants.Entity.Item.MAGIC_NO_PICKUP;
         } else if (!infinite) {
             this.previousPickupDelay = MAGIC_PREVIOUS;
         }
     }
 
     @Override
-    public boolean infiniteDespawnDelay() {
+    public boolean bridge$infiniteDespawnDelay() {
         return this.infiniteDespawnDelay;
     }
 
     @Override
-    public int getDespawnDelay() {
+    public int bridge$getDespawnDelay() {
         return 6000 - (this.infiniteDespawnDelay ? this.previousDespawnDelay : this.age);
     }
 
     @Override
-    public void setDespawnDelay(int delay) {
+    public void bridge$setDespawnDelay(int delay) {
         this.age = 6000 - delay;
     }
 
     @Override
-    public void setDespawnDelay(int delay, boolean infinite) {
+    public void bridge$setDespawnDelay(int delay, boolean infinite) {
         this.age = 6000 - delay;
         boolean previous = this.infiniteDespawnDelay;
         this.infiniteDespawnDelay = infinite;
         if (infinite && !previous) {
             this.previousDespawnDelay = this.age;
-            this.age = DataConstants.Entity.Item.MAGIC_NO_DESPAWN;
+            this.age = Constants.Entity.Item.MAGIC_NO_DESPAWN;
         } else if (!infinite) {
             this.previousDespawnDelay = MAGIC_PREVIOUS;
         }
     }
 
     @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
+    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$readFromSpongeCompound(compound);
 
         this.infinitePickupDelay = compound.getBoolean(NbtDataUtil.INFINITE_PICKUP_DELAY);
         if (compound.hasKey(NbtDataUtil.PREVIOUS_PICKUP_DELAY, NbtDataUtil.TAG_ANY_NUMERIC)) {
@@ -170,8 +152,8 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
                 this.previousPickupDelay = this.pickupDelay;
             }
 
-            this.pickupDelay = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
-        } else if (this.pickupDelay == DataConstants.Entity.Item.MAGIC_NO_PICKUP && this.previousPickupDelay != MAGIC_PREVIOUS) {
+            this.pickupDelay = Constants.Entity.Item.MAGIC_NO_PICKUP;
+        } else if (this.pickupDelay == Constants.Entity.Item.MAGIC_NO_PICKUP && this.previousPickupDelay != MAGIC_PREVIOUS) {
             this.pickupDelay = this.previousPickupDelay;
             this.previousPickupDelay = MAGIC_PREVIOUS;
         }
@@ -181,16 +163,16 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
                 this.previousDespawnDelay = this.age;
             }
 
-            this.age = DataConstants.Entity.Item.MAGIC_NO_DESPAWN;
-        } else if (this.age == DataConstants.Entity.Item.MAGIC_NO_DESPAWN && this.previousDespawnDelay != MAGIC_PREVIOUS) {
+            this.age = Constants.Entity.Item.MAGIC_NO_DESPAWN;
+        } else if (this.age == Constants.Entity.Item.MAGIC_NO_DESPAWN && this.previousDespawnDelay != MAGIC_PREVIOUS) {
             this.age = this.previousDespawnDelay;
             this.previousDespawnDelay = MAGIC_PREVIOUS;
         }
     }
 
     @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
+    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$writeToSpongeCompound(compound);
 
         compound.setBoolean(NbtDataUtil.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
         compound.setShort(NbtDataUtil.PREVIOUS_PICKUP_DELAY, (short) this.previousPickupDelay);
@@ -198,25 +180,22 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
         compound.setShort(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
     }
 
-    @Override
-    public Translation getTranslation() {
-        return getItemData().item().get().getType().getTranslation();
-    }
-
-    @Override
-    public ItemType getItemType() {
-        return (ItemType) getItem().getItem();
-    }
-
-    @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
-    public void onPlayerItemPickup(EntityPlayer entityIn, CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay, this.getCreator().orElse(null))) {
+    @Inject(
+        method = "onCollideWithPlayer",
+        at = @At(
+            value = "INVOKE",
+            ordinal = 0,
+            target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"),
+        cancellable = true
+    )
+    private void spongeImpl$ThrowPickupEvent(EntityPlayer entityIn, CallbackInfo ci) {
+        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay)) {
             ci.cancel();
         }
     }
 
     @Redirect(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addItemStackToInventory(Lnet/minecraft/item/ItemStack;)Z"))
-    public boolean onAddItemStackToInventory(InventoryPlayer inventory, ItemStack itemStack, EntityPlayer player) {
+    private boolean spongeImpl$throwPikcupEventForAddItem(InventoryPlayer inventory, ItemStack itemStack, EntityPlayer player) {
         IMixinInventoryPlayer inv = (IMixinInventoryPlayer) inventory;
         inv.setCapture(true);
         boolean added = inventory.addItemStackToInventory(itemStack);
@@ -228,23 +207,4 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
         return added;
     }
 
-    // TODO non pre event
-
-    // Data delegated methods - Reduces potentially expensive lookups for accessing guaranteed data
-
-    @Override
-    public RepresentedItemData getItemData() {
-        return new SpongeRepresentedItemData(ItemStackUtil.snapshotOf(getItem()));
-    }
-
-    @Override
-    public Value<ItemStackSnapshot> item() {
-        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(getItem()));
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getItemData());
-    }
 }

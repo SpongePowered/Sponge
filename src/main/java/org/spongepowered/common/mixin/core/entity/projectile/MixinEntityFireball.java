@@ -28,6 +28,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.RayTraceResult;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,57 +42,31 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import javax.annotation.Nullable;
 
 @Mixin(EntityFireball.class)
-public abstract class MixinEntityFireball extends MixinEntity implements Fireball {
+public abstract class MixinEntityFireball extends MixinEntity {
 
     @Shadow public EntityLivingBase shootingEntity;
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
-    @Nullable
-    private ProjectileSource projectileSource = null;
-
     @Override
-    public ProjectileSource getShooter() {
-        if (this.shootingEntity instanceof ProjectileSource) {
-            return (ProjectileSource) this.shootingEntity;
-        }
-
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        }
-
-        return ProjectileSource.UNKNOWN;
+    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$readFromSpongeCompound(compound);
+        ProjectileSourceSerializer.readSourceFromNbt(compound, ((Fireball) this));
     }
 
     @Override
-    public void setShooter(ProjectileSource shooter) {
-        this.projectileSource = shooter;
-        if (shooter instanceof EntityLivingBase) {
-            this.shootingEntity = (EntityLivingBase) shooter;
-        } else {
-            this.shootingEntity = null;
-        }
-    }
-
-    @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, this);
-    }
-
-    @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.getShooter(), this.shootingEntity);
+    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$writeToSpongeCompound(compound);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Fireball) this).getShooter(), this.shootingEntity);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
-    public void onProjectileImpact(EntityFireball projectile, RayTraceResult movingObjectPosition) {
+    private void onProjectileImpact(EntityFireball projectile, RayTraceResult movingObjectPosition) {
         if (this.world.isRemote || movingObjectPosition.typeOfHit == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.getShooter(), movingObjectPosition)) {
+        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((Fireball) this).getShooter(), movingObjectPosition)) {
             this.onImpact(movingObjectPosition);
         }
     }

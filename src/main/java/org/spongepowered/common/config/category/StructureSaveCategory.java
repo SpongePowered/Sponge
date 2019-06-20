@@ -33,9 +33,18 @@ import java.util.Map;
 @ConfigSerializable
 public class StructureSaveCategory extends ConfigCategory {
 
-    @Setting(value = "enabled")
+    @Setting(value = "enabled", comment = "If 'false', disables the modification to prevent certain structures\n"
+                                          + "from saving to the world's data folder. If you wish to prevent certain\n"
+                                          + "structures from saving, leave this \"enabled=true\". When \'true\', the\n"
+                                          + "modification allows for specific \'named\' structures to NOT be saved to\n"
+                                          + "disk. Examples of some structures that are costly and somewhat irrelivent\n"
+                                          + "is 'mineshaft's, as they build several structures and save, even after\n"
+                                          + "finished generating.")
     private boolean isEnabled = false;
-    @Setting(value = "auto-populate", comment = "If 'true', newly discovered structures will be added to this config with a default value.")
+    @Setting(value = "auto-populate", comment = "If 'true', newly discovered structures will be added to this config\n"
+                                                + "with a default value of \'true\'. This is useful for finding out\n"
+                                                + "potentially what structures are being saved from various mods, and\n"
+                                                + "allowing those structures to be selectively disabled.")
     private boolean autoPopulate = false;
     @Setting(value = "mods", comment = "Per-mod overrides. Refer to the minecraft default mod for example.")
     private Map<String, StructureModCategory> modList = new HashMap<>();

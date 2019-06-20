@@ -42,11 +42,11 @@ public class SpongeNoteBuilder extends AbstractTileBuilder<Note> {
     @Override
     protected Optional<Note> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(note1 -> {
-            if (!container.contains(DataQueries.TILE_NOTE_ID)) {
+            if (!container.contains(DataQueries.BlockEntity.NOTE_ID)) {
                 ((TileEntity) note1).invalidate();
                 return Optional.empty();
             }
-            ((TileEntityNote) note1).note = container.getInt(DataQueries.TILE_NOTE_ID).get().byteValue();
+            ((TileEntityNote) note1).note = container.getInt(DataQueries.BlockEntity.NOTE_ID).get().byteValue();
             ((TileEntityNote) note1).validate();
             return Optional.of(note1);
         });

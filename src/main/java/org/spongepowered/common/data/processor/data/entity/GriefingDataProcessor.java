@@ -36,7 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGriefingDa
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 import java.util.Optional;
 
@@ -49,7 +49,7 @@ public class GriefingDataProcessor extends AbstractEntitySingleDataProcessor<Ent
 
     @Override
     protected boolean supports(Entity dataHolder) {
-        return dataHolder instanceof IMixinGriefer && ((IMixinGriefer) dataHolder).isGriefer();
+        return dataHolder instanceof GrieferBridge && ((GrieferBridge) dataHolder).bridge$isGriefer();
     }
 
     @Override
@@ -59,13 +59,13 @@ public class GriefingDataProcessor extends AbstractEntitySingleDataProcessor<Ent
 
     @Override
     protected boolean set(Entity dataHolder, Boolean value) {
-        ((IMixinGriefer) dataHolder).setCanGrief(value);
+        ((GrieferBridge) dataHolder).bridge$SetCanGrief(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(Entity dataHolder) {
-        return Optional.of(((IMixinGriefer) dataHolder).canGrief());
+        return Optional.of(((GrieferBridge) dataHolder).bridge$CanGrief());
     }
 
     @Override

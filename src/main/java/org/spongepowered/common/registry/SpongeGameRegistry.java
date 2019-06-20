@@ -331,6 +331,7 @@ public class SpongeGameRegistry implements GameRegistry {
         return Optional.ofNullable((CatalogRegistryModule<T>) REGISTRY_MAP.get(catalogClass));
     }
 
+    @SuppressWarnings("unchecked")
     public <TUnknown, T extends CatalogType> T getTranslated(Class<TUnknown> clazz, Class<T> catalogClazz) {
         CatalogRegistryModule<T> module = getRegistryModuleFor(catalogClazz).orElse(null);
         checkArgument(module instanceof ExtraClassCatalogRegistryModule);
@@ -381,6 +382,7 @@ public class SpongeGameRegistry implements GameRegistry {
         return (T) supplier.get();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public <T extends CatalogType> T register(Class<T> type, T obj) throws IllegalArgumentException, UnsupportedOperationException {
         CatalogRegistryModule<T> registryModule = getRegistryModuleFor(type).orElse(null);
@@ -536,11 +538,13 @@ public class SpongeGameRegistry implements GameRegistry {
         return SpongeVillagerRegistry.getInstance();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public TextSerializerFactory getTextSerializerFactory() {
         return SpongeTextSerializerFactory.INSTANCE;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public SpongeSelectorFactory getSelectorFactory() {
         return SpongeSelectorFactory.INSTANCE;

@@ -24,99 +24,24 @@
  */
 package org.spongepowered.common.mixin.core.potion;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
 import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.potion.IMixinPotion;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
-import org.spongepowered.common.text.translation.SpongeTranslation;
-
-import java.util.Locale;
-import java.util.Map;
 
 @Mixin(Potion.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
-
-    @Shadow public abstract String shadow$getName();
-    @Shadow public abstract boolean shadow$isInstant();
-
-    private static final Map<String, String> potionMapping = ImmutableMap.<String, String>builder()
-            .put("effect.damageBoost", "effect.strength")
-            .put("effect.fireResistance", "effect.fire_resistance")
-            .put("effect.harm", "effect.harming")
-            .put("effect.heal", "effect.healing")
-            .put("effect.invisibility", "effect.invisibility")
-            .put("effect.jump", "effect.leaping")
-            .put("effect.luck", "effect.luck")
-            .put("effect.moveSlowdown", "effect.slowness")
-            .put("effect.moveSpeed", "effect.swiftness")
-            .put("effect.nightVision", "effect.night_vision")
-            .put("effect.poison", "effect.poison")
-            .put("effect.regeneration", "effect.regeneration")
-            .put("effect.waterBreathing", "effect.water_breathing")
-            .put("effect.weakness", "effect.weakness")
-            .build();
-
-    private Translation translation;
-    private Translation potionTranslation;
-    private String spongeResourceID;
-
-    @Intrinsic
-    public String potion$getId() {
-        return this.spongeResourceID;
-    }
-
-    @Intrinsic
-    public boolean potion$isInstant() {
-        return shadow$isInstant();
-    }
-
-    @Intrinsic
-    public String potion$getName() {
-        return this.shadow$getName();
-    }
-
-    @Override
-    public Translation getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
-        if (this.translation == null) {
-            this.translation = new SpongeTranslation(shadow$getName());
-        }
-        return this.translation;
-    }
-
-    // TODO: Remove this from the API or change return type to Optional
-    @Override
-    public Translation getPotionTranslation() {
-        if (this.potionTranslation == null) {
-            String name = shadow$getName();
-            this.potionTranslation = new SpongeTranslation("potion." + potionMapping.getOrDefault(name, "effect.missing"));
-        }
-        return this.potionTranslation;
-    }
-
-    @Override
-    public void setId(String id) {
-        this.spongeResourceID = id;
-    }
+public abstract class MixinPotion {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "registerPotions", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/RegistryNamespaced;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
-    private static void onPotionRegister(RegistryNamespaced registry, int id, Object location, Object potion) {
+    @Redirect(method = "registerPotions",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/RegistryNamespaced;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
+    private static void impl$registerForSponge(RegistryNamespaced registry, int id, Object location, Object potion) {
         final ResourceLocation resource = (ResourceLocation) location;
         final Potion mcPotion = (Potion) potion;
-        ((IMixinPotion) mcPotion).setId(resource.toString().toLowerCase(Locale.ENGLISH));
         PotionEffectTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionEffectType) mcPotion);
         registry.register(id, location, potion);
     }

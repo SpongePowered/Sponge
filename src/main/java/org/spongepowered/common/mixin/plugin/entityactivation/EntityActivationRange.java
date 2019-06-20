@@ -61,19 +61,18 @@ import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
-import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 
 import java.util.Map;
 
@@ -127,8 +126,8 @@ public class EntityActivationRange {
      * @param entity Entity to check
      */
     public static void initializeEntityActivationState(Entity entity) {
-        final IModData_Activation spongeEntity = (IModData_Activation) entity;
-        if (((IMixinWorld) entity.world).isFake()) {
+        final ActivationCapability spongeEntity = (ActivationCapability) entity;
+        if (((WorldBridge) entity.world).isFake()) {
             return;
         }
 
@@ -149,14 +148,14 @@ public class EntityActivationRange {
         }
 
         final EntityActivationRangeCategory config =
-            ((IMixinWorldInfo) entity.world.getWorldInfo()).getConfigAdapter().getConfig().getEntityActivationRange();
+            ((WorldInfoBridge) entity.world.getWorldInfo()).getConfigAdapter().getConfig().getEntityActivationRange();
         EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
         if (type == EntityTypes.UNKNOWN || !(type instanceof SpongeEntityType)) {
-            spongeEntity.setDefaultActivationState(true);
+            spongeEntity.activation$setDefaultActivationState(true);
             return;
         }
         final SpongeEntityType spongeType = (SpongeEntityType) type;
-        final byte activationType = spongeEntity.getActivationType();
+        final byte activationType = spongeEntity.activation$getActivationType();
         if (!spongeType.isActivationRangeInitialized()) {
             addEntityToConfig(entity.world, spongeType, activationType);
             spongeType.setActivationRangeInitialized(true);
@@ -166,27 +165,27 @@ public class EntityActivationRange {
         int defaultActivationRange = config.getDefaultRanges().get(activationTypeMappings.get(activationType));
         if (entityMod == null) {
             // use default activation range
-            spongeEntity.setActivationRange(defaultActivationRange);
+            spongeEntity.activation$setActivationRange(defaultActivationRange);
             if (defaultActivationRange > 0) {
-                spongeEntity.setDefaultActivationState(false);
+                spongeEntity.activation$setDefaultActivationState(false);
             }
         } else {
             if (!entityMod.isEnabled()) {
-                spongeEntity.setDefaultActivationState(true);
+                spongeEntity.activation$setDefaultActivationState(true);
                 return;
             }
 
             Integer defaultModActivationRange = entityMod.getDefaultRanges().get(activationTypeMappings.get(activationType));
             Integer entityActivationRange = entityMod.getEntityList().get(type.getName().toLowerCase());
             if (defaultModActivationRange != null && entityActivationRange == null) {
-                spongeEntity.setActivationRange(defaultModActivationRange);
+                spongeEntity.activation$setActivationRange(defaultModActivationRange);
                 if (defaultModActivationRange > 0) {
-                    spongeEntity.setDefaultActivationState(false);
+                    spongeEntity.activation$setDefaultActivationState(false);
                 }
             } else if (entityActivationRange != null) {
-                spongeEntity.setActivationRange(entityActivationRange);
+                spongeEntity.activation$setActivationRange(entityActivationRange);
                 if (entityActivationRange > 0) {
-                    spongeEntity.setDefaultActivationState(false);
+                    spongeEntity.activation$setDefaultActivationState(false);
                 }
             }
         }
@@ -218,7 +217,7 @@ public class EntityActivationRange {
      * @param world The world to perform activation checks in
      */
     public static void activateEntities(World world) {
-        if (((IMixinWorld) world).isFake()) {
+        if (((WorldBridge) world).isFake()) {
             return;
         }
 
@@ -232,7 +231,7 @@ public class EntityActivationRange {
             }
 
             maxRange = Math.min((((org.spongepowered.api.world.World) world).getViewDistance() << 4) - 8, maxRange);
-            ((IModData_Activation) player).setActivatedTick(SpongeImpl.getServer().getTickCounter());
+            ((ActivationCapability) player).activation$setActivatedTick(SpongeImpl.getServer().getTickCounter());
             growBb(maxBB, player.getEntityBoundingBox(), maxRange, 256, maxRange);
 
             int i = MathHelper.floor(maxBB.minX / 16.0D);
@@ -243,7 +242,7 @@ public class EntityActivationRange {
             for (int i1 = i; i1 <= j; ++i1) {
                 for (int j1 = k; j1 <= l; ++j1) {
                     WorldServer worldserver = (WorldServer) world;
-                    Chunk chunk = ((IMixinChunkProviderServer) worldserver.getChunkProvider()).getLoadedChunkWithoutMarkingActive(i1, j1);
+                    Chunk chunk = ((ServerChunkProviderBridge) worldserver.getChunkProvider()).getLoadedChunkWithoutMarkingActive(i1, j1);
                     if (chunk != null) {
                         activateChunkEntities(player, chunk);
                     }
@@ -263,30 +262,30 @@ public class EntityActivationRange {
             for (Object o : chunk.getEntityLists()[i]) {
                 Entity entity = (Entity) o;
                 EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
-                final IModData_Activation spongeEntity = (IModData_Activation) entity;
+                final ActivationCapability spongeEntity = (ActivationCapability) entity;
                 long currentTick = SpongeImpl.getServer().getTickCounter();
-                if (!((IMixinEntity) entity).shouldTick()) {
+                if (!((EntityBridge) entity).shouldTick()) {
                     continue;
                 }
                 if (type == EntityTypes.UNKNOWN) {
-                    spongeEntity.setActivatedTick(currentTick);
+                    spongeEntity.activation$setActivatedTick(currentTick);
                     continue;
                 }
 
-                if (currentTick > spongeEntity.getActivatedTick()) {
-                    if (spongeEntity.getDefaultActivationState()) {
-                        spongeEntity.setActivatedTick(currentTick);
+                if (currentTick > spongeEntity.activation$getActivatedTick()) {
+                    if (spongeEntity.activation$getDefaultActivationState()) {
+                        spongeEntity.activation$setActivatedTick(currentTick);
                         continue;
                     }
 
                     // check if activation cache needs to be updated
-                    if (spongeEntity.requiresActivationCacheRefresh()) {
+                    if (spongeEntity.activation$requiresActivationCacheRefresh()) {
                         EntityActivationRange.initializeEntityActivationState(entity);
-                        spongeEntity.requiresActivationCacheRefresh(false);
+                        spongeEntity.activation$requiresActivationCacheRefresh(false);
                     }
                     // check for entity type overrides
-                    byte activationType = spongeEntity.getActivationType();
-                    int bbActivationRange = spongeEntity.getActivationRange();
+                    byte activationType = spongeEntity.activation$getActivationType();
+                    int bbActivationRange = spongeEntity.activation$getActivationRange();
 
                     if (activationType == 5) {
                         growBb(miscBB, player.getEntityBoundingBox(), bbActivationRange, 256, bbActivationRange);
@@ -300,31 +299,31 @@ public class EntityActivationRange {
                         growBb(monsterBB, player.getEntityBoundingBox(), bbActivationRange, 256, bbActivationRange);
                     }
 
-                    switch (spongeEntity.getActivationType()) {
+                    switch (spongeEntity.activation$getActivationType()) {
                         case 1:
                             if (monsterBB.intersects(entity.getEntityBoundingBox())) {
-                                spongeEntity.setActivatedTick(currentTick);
+                                spongeEntity.activation$setActivatedTick(currentTick);
                             }
                             break;
                         case 2:
                             if (creatureBB.intersects(entity.getEntityBoundingBox())) {
-                                spongeEntity.setActivatedTick(currentTick);
+                                spongeEntity.activation$setActivatedTick(currentTick);
                             }
                             break;
                         case 3:
                             if (aquaticBB.intersects(entity.getEntityBoundingBox())) {
-                                spongeEntity.setActivatedTick(currentTick);
+                                spongeEntity.activation$setActivatedTick(currentTick);
                             }
                             break;
                         case 4:
                             if (ambientBB.intersects(entity.getEntityBoundingBox())) {
-                                spongeEntity.setActivatedTick(currentTick);
+                                spongeEntity.activation$setActivatedTick(currentTick);
                             }
                             break;
                         case 5:
                         default:
                             if (miscBB.intersects(entity.getEntityBoundingBox())) {
-                                spongeEntity.setActivatedTick(currentTick);
+                                spongeEntity.activation$setActivatedTick(currentTick);
                             }
                     }
                 }
@@ -390,7 +389,7 @@ public class EntityActivationRange {
         if (entity.world.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
             return true;
         }
-        final IMixinChunk activeChunk = ((IMixinEntity) entity).getActiveChunk();
+        final ChunkBridge activeChunk = ((EntityBridge) entity).getActiveChunk();
         if (activeChunk == null) {
             // Should never happen but just in case for mods, always tick
             return true;
@@ -406,21 +405,21 @@ public class EntityActivationRange {
         }
 
         long currentTick = SpongeImpl.getServer().getTickCounter();
-        IModData_Activation spongeEntity = (IModData_Activation) entity;
-        boolean isActive = spongeEntity.getActivatedTick() >= currentTick || spongeEntity.getDefaultActivationState();
+        ActivationCapability spongeEntity = (ActivationCapability) entity;
+        boolean isActive = spongeEntity.activation$getActivatedTick() >= currentTick || spongeEntity.activation$getDefaultActivationState();
 
         // Should this entity tick?
         if (!isActive) {
-            if ((currentTick - spongeEntity.getActivatedTick() - 1) % 20 == 0) {
+            if ((currentTick - spongeEntity.activation$getActivatedTick() - 1) % 20 == 0) {
                 // Check immunities every 20 ticks.
                 if (checkEntityImmunities(entity)) {
                     // Triggered some sort of immunity, give 20 full ticks before we check again.
-                    spongeEntity.setActivatedTick(currentTick + 20);
+                    spongeEntity.activation$setActivatedTick(currentTick + 20);
                 }
                 isActive = true;
             }
             // Add a little performance juice to active entities. Skip 1/4 if not immune.
-        } else if (!spongeEntity.getDefaultActivationState() && entity.ticksExisted % 4 == 0 && !checkEntityImmunities(entity)) {
+        } else if (!spongeEntity.activation$getDefaultActivationState() && entity.ticksExisted % 4 == 0 && !checkEntityImmunities(entity)) {
             isActive = false;
         }
 
@@ -435,7 +434,7 @@ public class EntityActivationRange {
         checkNotNull(world, "world");
         checkNotNull(type, "type");
 
-        final SpongeConfig<WorldConfig> worldConfigAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
         final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
 
         final boolean autoPopulate = worldConfigAdapter.getConfig().getEntityActivationRange().autoPopulateData();

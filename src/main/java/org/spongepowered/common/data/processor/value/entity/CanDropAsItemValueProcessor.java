@@ -31,8 +31,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -44,7 +44,7 @@ public class CanDropAsItemValueProcessor extends AbstractSpongeValueProcessor<En
 
     @Override
     protected Value<Boolean> constructValue(Boolean value) {
-        return new SpongeValue<>(Keys.CAN_DROP_AS_ITEM, DataConstants.DEFAULT_FALLING_BLOCK_CAN_DROP_AS_ITEM, value);
+        return new SpongeValue<>(Keys.CAN_DROP_AS_ITEM, Constants.Entity.FallingBlock.DEFAULT_CAN_DROP_AS_ITEM, value);
     }
 
     @Override

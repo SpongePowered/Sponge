@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -32,6 +33,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 final class DispensePhaseState extends BlockPhaseState {
 
@@ -46,6 +48,7 @@ final class DispensePhaseState extends BlockPhaseState {
             .addEntityDropCaptures();
     }
 
+    @SuppressWarnings({"unchecked", "Duplicates", "RedundantCast"})
     @Override
     public void unwind(GeneralizedContext phaseContext) {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
@@ -65,7 +68,7 @@ final class DispensePhaseState extends BlockPhaseState {
             .acceptAndClearIfNotEmpty(drops -> {
                 drops.asMap().forEach((key, value) -> {
                     Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList(value), phaseContext);
+                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList<>((Collection<? extends Entity>) (Collection<?>) value), phaseContext);
                 });
             });
     }

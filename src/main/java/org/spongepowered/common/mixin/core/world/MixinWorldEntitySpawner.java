@@ -54,16 +54,16 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 
@@ -77,15 +77,9 @@ import javax.annotation.Nullable;
 @Mixin(WorldEntitySpawner.class)
 public abstract class MixinWorldEntitySpawner {
 
-    private static final String BIOME_CAN_SPAWN_ANIMAL =
-        "Lnet/minecraft/world/WorldEntitySpawner;canCreatureTypeSpawnAtLocation(Lnet/minecraft/entity/EntityLiving$SpawnPlacementType;"
-        + "Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Z";
-
-    private static final String WEIGHTED_RANDOM_GET = "Lnet/minecraft/util/WeightedRandom;getRandomItem(Ljava/util/Random;Ljava/util/List;)"
-        + "Lnet/minecraft/util/WeightedRandom$Item;";
     @Nullable
     private static EntityType spawnerEntityType;
-    private List<Chunk> eligibleSpawnChunks = new ArrayList<>();
+    private final List<Chunk> eligibleSpawnChunks = new ArrayList<>();
 
     /**
      * @author blood - February 18th, 2017
@@ -98,58 +92,58 @@ public abstract class MixinWorldEntitySpawner {
      * @return The amount of entities spawned
      */
     @Overwrite
-    public int findChunksForSpawning(WorldServer world, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnOnSetTickRate) {
+    public int findChunksForSpawning(final WorldServer world, final boolean spawnHostileMobs, final boolean spawnPeacefulMobs, final boolean spawnOnSetTickRate) {
         if (!spawnHostileMobs && !spawnPeacefulMobs) {
             return 0;
         }
 
-        try (PhaseContext<?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
+        try (final PhaseContext<?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
                 .world(world)) {
             context.buildAndSwitch();
             Iterator<Chunk> chunkIterator = this.eligibleSpawnChunks.iterator();
             while (chunkIterator.hasNext()) {
-                Chunk chunk = chunkIterator.next();
-                ((IMixinChunk) chunk).setIsSpawning(false);
+                final Chunk chunk = chunkIterator.next();
+                ((ChunkBridge) chunk).setIsSpawning(false);
                 chunkIterator.remove();
             }
 
-            IMixinWorldServer spongeWorld = ((IMixinWorldServer) world);
-            spongeWorld.getTimingsHandler().mobSpawn.startTiming();
+            final ServerWorldBridge spongeWorld = (ServerWorldBridge) world;
+            spongeWorld.bridge$getTimingsHandler().mobSpawn.startTiming();
 
             int chunkSpawnCandidates = 0;
-            final int mobSpawnRange = Math.min(((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getMobSpawnRange(),
+            final int mobSpawnRange = Math.min(((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getMobSpawnRange(),
                     ((org.spongepowered.api.world.World) world).getViewDistance());
             // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
             // Since we allow for custom ranges, we need to adjust the div count based on the
             // mob spawn range set by server.
             final int MOB_SPAWN_COUNT_DIV = (2 * mobSpawnRange + 1) * (2 * mobSpawnRange + 1);
 
-            for (EntityPlayer entityplayer : world.playerEntities) {
+            for (final EntityPlayer entityplayer : world.playerEntities) {
                 // We treat players who do not affect spawning as "spectators"
-                if (!((IMixinEntityPlayer) entityplayer).affectsSpawning() || entityplayer.isSpectator()) {
+                if (!((PlayerEntityBridge) entityplayer).affectsSpawning() || entityplayer.isSpectator()) {
                     continue;
                 }
 
-                int playerPosX = MathHelper.floor(entityplayer.posX / 16.0D);
-                int playerPosZ = MathHelper.floor(entityplayer.posZ / 16.0D);
+                final int playerPosX = MathHelper.floor(entityplayer.posX / 16.0D);
+                final int playerPosZ = MathHelper.floor(entityplayer.posZ / 16.0D);
 
                 for (int i = -mobSpawnRange; i <= mobSpawnRange; ++i) {
                     for (int j = -mobSpawnRange; j <= mobSpawnRange; ++j) {
-                        boolean flag = i == -mobSpawnRange || i == mobSpawnRange || j == -mobSpawnRange || j == mobSpawnRange;
+                        final boolean flag = i == -mobSpawnRange || i == mobSpawnRange || j == -mobSpawnRange || j == mobSpawnRange;
                         final Chunk
                             chunk =
-                            ((IMixinChunkProviderServer) world.getChunkProvider())
+                            ((ServerChunkProviderBridge) world.getChunkProvider())
                                 .getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
-                        if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
+                        if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).isPersistedChunk())) {
                             // Don't attempt to spawn in an unloaded chunk
                             continue;
                         }
 
-                        final IMixinChunk spongeChunk = (IMixinChunk) chunk;
+                        final ChunkBridge spongeChunk = (ChunkBridge) chunk;
                         ++chunkSpawnCandidates;
                         final ChunkPos chunkPos = chunk.getPos();
                         if (!flag && world.getWorldBorder().contains(chunkPos)) {
-                            PlayerChunkMapEntry playerchunkmapentry = world.getPlayerChunkMap().getEntry(chunkPos.x, chunkPos.z);
+                            final PlayerChunkMapEntry playerchunkmapentry = world.getPlayerChunkMap().getEntry(chunkPos.x, chunkPos.z);
 
                             if (playerchunkmapentry != null && playerchunkmapentry.isSentToPlayers() && !spongeChunk.isSpawning()) {
                                 this.eligibleSpawnChunks.add(chunk);
@@ -161,17 +155,17 @@ public abstract class MixinWorldEntitySpawner {
             }
 
             // If there are no eligible chunks, return early
-            if (this.eligibleSpawnChunks.size() == 0) {
-                spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
+            if (this.eligibleSpawnChunks.isEmpty()) {
+                spongeWorld.bridge$getTimingsHandler().mobSpawn.stopTiming();
                 return 0;
             }
 
             int totalSpawned = 0;
             final long worldTotalTime = world.getTotalWorldTime();
-            final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+            final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
 
             labelOuterLoop:
-            for (EnumCreatureType enumCreatureType : EnumCreatureType.values()) {
+            for (final EnumCreatureType enumCreatureType : EnumCreatureType.values()) {
                 int limit = 0;
                 int tickRate = 0;
                 if (enumCreatureType == EnumCreatureType.MONSTER) {
@@ -193,8 +187,8 @@ public abstract class MixinWorldEntitySpawner {
                 }
 
                 if ((!enumCreatureType.getPeacefulCreature() || spawnPeacefulMobs) && (enumCreatureType.getPeacefulCreature() || spawnHostileMobs)) {
-                    int entityCount = SpongeImplHooks.countEntities(world, enumCreatureType, true);
-                    int maxCount = limit * chunkSpawnCandidates / MOB_SPAWN_COUNT_DIV;
+                    final int entityCount = SpongeImplHooks.countEntities(world, enumCreatureType, true);
+                    final int maxCount = limit * chunkSpawnCandidates / MOB_SPAWN_COUNT_DIV;
                     if (entityCount > maxCount) {
                         continue labelOuterLoop;
                     }
@@ -206,10 +200,10 @@ public abstract class MixinWorldEntitySpawner {
                         final Chunk chunk = chunkIterator.next();
                         final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
                         final BlockPos blockpos = getRandomChunkPosition(world, chunk);
-                        int k1 = blockpos.getX();
-                        int l1 = blockpos.getY();
-                        int i2 = blockpos.getZ();
-                        IBlockState iblockstate = world.getBlockState(blockpos);
+                        final int k1 = blockpos.getX();
+                        final int l1 = blockpos.getY();
+                        final int i2 = blockpos.getZ();
+                        final IBlockState iblockstate = world.getBlockState(blockpos);
 
                         if (!iblockstate.isNormalCube()) {
                             int spawnCount = 0;
@@ -219,7 +213,7 @@ public abstract class MixinWorldEntitySpawner {
                                 int j3 = i2;
                                 Biome.SpawnListEntry spawnListEntry = null;
                                 IEntityLivingData ientitylivingdata = null;
-                                int l3 = MathHelper.ceil(Math.random() * 4.0D);
+                                final int l3 = MathHelper.ceil(Math.random() * 4.0D);
 
                                 for (int i4 = 0; i4 < l3; ++i4) {
                                     l2 += world.rand.nextInt(6) - world.rand.nextInt(6);
@@ -242,11 +236,11 @@ public abstract class MixinWorldEntitySpawner {
 
                                         final EntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(spawnListEntry.entityClass);
                                         if (entityType != null) {
-                                            Vector3d vector3d = new Vector3d(spawnX, spawnY, spawnZ);
-                                            Transform<org.spongepowered.api.world.World>
+                                            final Vector3d vector3d = new Vector3d(spawnX, spawnY, spawnZ);
+                                            final Transform<org.spongepowered.api.world.World>
                                                 transform =
                                                 new Transform<>((org.spongepowered.api.world.World) world, vector3d);
-                                            ConstructEntityEvent.Pre
+                                            final ConstructEntityEvent.Pre
                                                 event =
                                                 SpongeEventFactory
                                                     .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), entityType,
@@ -260,12 +254,12 @@ public abstract class MixinWorldEntitySpawner {
                                             && WorldEntitySpawner.canCreatureTypeSpawnAtLocation(
                                             EntitySpawnPlacementRegistry.getPlacementForEntity(spawnListEntry.entityClass), world,
                                             mutableBlockPos)) {
-                                            EntityLiving entityliving;
+                                            final EntityLiving entityliving;
 
                                             try {
                                                 entityliving =
                                                     spawnListEntry.entityClass.getConstructor(new Class<?>[]{World.class}).newInstance(world);
-                                            } catch (Exception exception) {
+                                            } catch (final Exception exception) {
                                                 exception.printStackTrace();
                                                 continue labelOuterLoop;
                                             }
@@ -302,18 +296,18 @@ public abstract class MixinWorldEntitySpawner {
                 }
             }
 
-            spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
+            spongeWorld.bridge$getTimingsHandler().mobSpawn.stopTiming();
 
             return totalSpawned;
         }
     }
 
-    private static BlockPos getRandomChunkPosition(World worldIn, Chunk chunk)
+    private static BlockPos getRandomChunkPosition(final World worldIn, final Chunk chunk)
     {
-        int i = chunk.x * 16 + worldIn.rand.nextInt(16);
-        int j = chunk.z * 16 + worldIn.rand.nextInt(16);
-        int k = MathHelper.roundUp(chunk.getHeight(new BlockPos(i, 0, j)) + 1, 16);
-        int l = worldIn.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
+        final int i = chunk.x * 16 + worldIn.rand.nextInt(16);
+        final int j = chunk.z * 16 + worldIn.rand.nextInt(16);
+        final int k = MathHelper.roundUp(chunk.getHeight(new BlockPos(i, 0, j)) + 1, 16);
+        final int l = worldIn.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
         return new BlockPos(i, l, j);
     }
 
@@ -324,35 +318,35 @@ public abstract class MixinWorldEntitySpawner {
      * @reason Avoids checking unloaded chunks and chunks with pending light updates.
      */
     @Overwrite
-    private static BlockPos getRandomChunkPosition(World worldIn, int x, int z)
+    private static BlockPos getRandomChunkPosition(final World worldIn, final int x, final int z)
     {
         // Sponge start
-        final Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x, z);
-        if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
+        final Chunk chunk = ((ServerChunkProviderBridge) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x, z);
+        if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).isPersistedChunk())) {
             // Don't attempt to spawn in an unloaded chunk
             return null;
         }
         // Sponge end
 
-        int i = x * 16 + worldIn.rand.nextInt(16);
-        int j = z * 16 + worldIn.rand.nextInt(16);
-        int k = MathHelper.roundUp(chunk.getHeight(new BlockPos(i, 0, j)) + 1, 16);
-        int l = worldIn.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
+        final int i = x * 16 + worldIn.rand.nextInt(16);
+        final int j = z * 16 + worldIn.rand.nextInt(16);
+        final int k = MathHelper.roundUp(chunk.getHeight(new BlockPos(i, 0, j)) + 1, 16);
+        final int l = worldIn.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
         return new BlockPos(i, l, j);
     }
 
-    @Inject(method = "performWorldGenSpawning", at = @At(value = "HEAD"))
-    private static void onPerformWorldGenSpawningHead(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
+    @Inject(method = "performWorldGenSpawning", at = @At("HEAD"))
+    private static void onPerformWorldGenSpawningHead(final World worldServer, final Biome biome, final int j, final int k, final int l, final int m, final Random rand, final CallbackInfo ci) {
         GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
                 .source(worldServer)
                 .world(worldServer)
                 .buildAndSwitch();
     }
 
-    @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"))
-    private static void onPerformWorldGenSpawningReturn(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
+    @Inject(method = "performWorldGenSpawning", at = @At("RETURN"))
+    private static void onPerformWorldGenSpawningReturn(final World worldServer, final Biome biome, final int j, final int k, final int l, final int m, final Random rand, final CallbackInfo ci) {
         PhaseTracker.getInstance().getCurrentContext().close();
-        spawnerEntityType = null;
+        MixinWorldEntitySpawner.spawnerEntityType = null;
     }
 
     /**
@@ -363,8 +357,10 @@ public abstract class MixinWorldEntitySpawner {
      * @param pos
      * @return
      */
-    @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = BIOME_CAN_SPAWN_ANIMAL))
-    private static boolean onCanGenerate(EntityLiving.SpawnPlacementType type, World worldIn, BlockPos pos) {
+    @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target =
+        "Lnet/minecraft/world/WorldEntitySpawner;canCreatureTypeSpawnAtLocation(Lnet/minecraft/entity/EntityLiving$SpawnPlacementType;"
+        + "Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Z"))
+    private static boolean onCanGenerate(final EntityLiving.SpawnPlacementType type, final World worldIn, final BlockPos pos) {
         return WorldEntitySpawner.canCreatureTypeSpawnAtLocation(type, worldIn, pos) && check(pos, worldIn);
     }
 
@@ -376,26 +372,28 @@ public abstract class MixinWorldEntitySpawner {
      * @param collection
      * @return
      */
-    @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = WEIGHTED_RANDOM_GET))
-    private static WeightedRandom.Item onGetRandom(Random random, List<Biome.SpawnListEntry> collection) {
-        Biome.SpawnListEntry entry = WeightedRandom.getRandomItem(random, collection);
+    @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target =
+        "Lnet/minecraft/util/WeightedRandom;getRandomItem(Ljava/util/Random;Ljava/util/List;)"
+            + "Lnet/minecraft/util/WeightedRandom$Item;"))
+    private static WeightedRandom.Item onGetRandom(final Random random, final List<Biome.SpawnListEntry> collection) {
+        final Biome.SpawnListEntry entry = WeightedRandom.getRandomItem(random, collection);
         setEntityType(entry.entityClass);
         return entry;
     }
 
-    private static void setEntityType(Class<? extends net.minecraft.entity.Entity> entityclass) {
-        spawnerEntityType = EntityTypeRegistryModule.getInstance().getForClass(entityclass);
+    private static void setEntityType(final Class<? extends net.minecraft.entity.Entity> entityclass) {
+        MixinWorldEntitySpawner.spawnerEntityType = EntityTypeRegistryModule.getInstance().getForClass(entityclass);
     }
 
-    private static boolean check(BlockPos pos, World world) {
-        EntityType entityType = spawnerEntityType;
+    private static boolean check(final BlockPos pos, final World world) {
+        final EntityType entityType = MixinWorldEntitySpawner.spawnerEntityType;
         if (entityType == null) {
             return true; // Basically, we can't throw our own event.
         }
-        Vector3d vector3d = new Vector3d(pos.getX(), pos.getY(), pos.getZ());
-        Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, vector3d);
+        final Vector3d vector3d = new Vector3d(pos.getX(), pos.getY(), pos.getZ());
+        final Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, vector3d);
         Sponge.getCauseStackManager().pushCause(world);
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), entityType, transform);
+        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), entityType, transform);
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         return !event.isCancelled();

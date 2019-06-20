@@ -35,10 +35,10 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.core.world.MixinWorld;
 
 import java.util.List;
@@ -48,7 +48,7 @@ import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
 
 @Mixin(value = WorldServer.class)
-public abstract class MixinWorldServer_Async_Lighting extends MixinWorld implements IMixinWorldServer {
+public abstract class MixinWorldServer_Async_Lighting extends MixinWorld implements ServerWorldBridge {
 
     private static final int NUM_XZ_BITS = 4;
     private static final int NUM_SHORT_Y_BITS = 8;
@@ -60,16 +60,16 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
 
     @Override
     public boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos) {
-        return this.updateLightAsync(lightType, pos, null);
+        return this.bridge$updateLightAsync(lightType, pos, null);
     }
 
     @Override
-    public boolean checkLightAsync(EnumSkyBlock lightType, BlockPos pos, net.minecraft.world.chunk.Chunk currentChunk, List<Chunk> neighbors) {
-        // Sponge - This check is not needed as neighbors are checked in updateLightAsync
+    public boolean bridge$checkLightAsync(EnumSkyBlock lightType, BlockPos pos, net.minecraft.world.chunk.Chunk currentChunk, List<Chunk> neighbors) {
+        // Sponge - This check is not needed as neighbors are checked in bridge$updateLightAsync
         if (false && !this.isAreaLoaded(pos, 17, false)) {
             return false;
         } else {
-            final IMixinChunk spongeChunk = (IMixinChunk) currentChunk;
+            final ChunkBridge spongeChunk = (ChunkBridge) currentChunk;
             int i = 0;
             int j = 0;
             //this.theProfiler.startSection("getBrightness"); // Sponge - don't use profiler off of main thread
@@ -188,7 +188,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
             spongeChunk.getQueuedLightingUpdates(lightType).remove((Short) this.blockPosToShort(pos));
             spongeChunk.getPendingLightUpdates().decrementAndGet();
             for (net.minecraft.world.chunk.Chunk neighborChunk : neighbors) {
-                final IMixinChunk neighbor = (IMixinChunk) neighborChunk;
+                final ChunkBridge neighbor = (ChunkBridge) neighborChunk;
                 neighbor.getPendingLightUpdates().decrementAndGet();
             }
 
@@ -199,16 +199,16 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
     }
 
     @Override
-    public boolean updateLightAsync(EnumSkyBlock lightType, BlockPos pos, @Nullable Chunk currentChunk) {
+    public boolean bridge$updateLightAsync(EnumSkyBlock lightType, BlockPos pos, @Nullable Chunk currentChunk) {
         if (this.getMinecraftServer().isServerStopped() || this.lightExecutorService.isShutdown()) {
             return false;
         }
 
         if (currentChunk == null) {
-            currentChunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            currentChunk = ((ServerChunkProviderBridge) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         }
 
-        final IMixinChunk spongeChunk = (IMixinChunk) currentChunk;
+        final ChunkBridge spongeChunk = (ChunkBridge) currentChunk;
         if (currentChunk == null || currentChunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {
             return false;
         }
@@ -226,7 +226,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         List<Chunk> neighbors = spongeChunk.getNeighbors();
 
         // add diagonal chunks
-        IMixinChunk southChunk = (IMixinChunk) spongeChunk.getNeighborChunk(0);
+        ChunkBridge southChunk = (ChunkBridge) spongeChunk.getNeighborChunk(0);
         if (southChunk != null) {
             Chunk southEastChunk = southChunk.getNeighborChunk(2);
             Chunk southWestChunk = southChunk.getNeighborChunk(3);
@@ -237,7 +237,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
                 neighbors.add(southWestChunk);
             }
         }
-        IMixinChunk northChunk = (IMixinChunk) spongeChunk.getNeighborChunk(1);
+        ChunkBridge northChunk = (ChunkBridge) spongeChunk.getNeighborChunk(1);
         if (northChunk != null) {
             Chunk northEastChunk = northChunk.getNeighborChunk(2);
             Chunk northWestChunk = northChunk.getNeighborChunk(3);
@@ -250,7 +250,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         }
 
         for (net.minecraft.world.chunk.Chunk neighborChunk : neighbors) {
-            final IMixinChunk neighbor = (IMixinChunk) neighborChunk;
+            final ChunkBridge neighbor = (ChunkBridge) neighborChunk;
             neighbor.getPendingLightUpdates().incrementAndGet();
             neighbor.setLightUpdateTime(chunk.getWorld().getTotalWorldTime());
         }
@@ -258,17 +258,17 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         //System.out.println("size = " + ((ThreadPoolExecutor) this.lightExecutorService).getQueue().size());
         if (SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             this.lightExecutorService.execute(() -> {
-                this.checkLightAsync(lightType, pos, chunk, neighbors);
+                this.bridge$checkLightAsync(lightType, pos, chunk, neighbors);
             });
         } else {
-            this.checkLightAsync(lightType, pos, chunk, neighbors);
+            this.bridge$checkLightAsync(lightType, pos, chunk, neighbors);
         }
 
         return true;
     }
 
     @Override
-    public ExecutorService getLightingExecutor() {
+    public ExecutorService bridge$getLightingExecutor() {
         return this.lightExecutorService;
     }
 

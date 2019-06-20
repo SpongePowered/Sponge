@@ -35,10 +35,10 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStopState;
-import org.spongepowered.common.interfaces.IMixinContainer;
 
 import java.util.List;
 import java.util.Optional;
@@ -66,7 +66,7 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
-        ((IMixinContainer) playerMP.openContainer).setFirePreview(false);
+        ((ContainerBridge) playerMP.openContainer).setFirePreview(false);
     }
 
     @Override

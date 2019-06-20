@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import net.minecraft.entity.EntityHanging;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
@@ -34,16 +35,16 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinEntityHanging;
 
 import java.util.Optional;
 
-public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcessor<IMixinEntityHanging, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
+public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityHanging, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
 
     public HangingDataProcessor() {
-        super(Keys.DIRECTION, IMixinEntityHanging.class);
+        super(Keys.DIRECTION, EntityHanging.class);
     }
 
     @Override
@@ -52,14 +53,14 @@ public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcesso
     }
 
     @Override
-    protected boolean set(IMixinEntityHanging dataHolder, Direction value) {
-        dataHolder.setDirection(value);
+    protected boolean set(EntityHanging dataHolder, Direction value) {
+        dataHolder.updateFacingWithBoundingBox(DirectionResolver.getFor(value));
         return true;
     }
 
     @Override
-    protected Optional<Direction> getVal(IMixinEntityHanging dataHolder) {
-        return Optional.of(dataHolder.getDirection());
+    protected Optional<Direction> getVal(EntityHanging dataHolder) {
+        return Optional.of(dataHolder.facingDirection == null ? Direction.NONE : DirectionResolver.getFor(dataHolder.facingDirection));
     }
 
     @Override

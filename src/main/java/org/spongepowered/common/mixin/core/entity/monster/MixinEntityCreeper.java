@@ -41,25 +41,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityCreeper.class)
-public abstract class MixinEntityCreeper extends MixinEntityMob implements Creeper, IMixinFusedExplosive {
-
-    private static final String TARGET_NEW_EXPLOSION = "Lnet/minecraft/world/World;createExplosion"
-            + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;";
-    private static final String TARGET_IGNITE = "Lnet/minecraft/entity/monster/EntityCreeper;ignite()V";
-    private static final String TARGET_DAMAGE_ITEM = "Lnet/minecraft/item/ItemStack;damageItem"
-            + "(ILnet/minecraft/entity/EntityLivingBase;)V";
-
-    private static final int DEFAULT_EXPLOSION_RADIUS = 3;
-    private static final int STATE_IDLE = -1;
-    private static final int STATE_PRIMED = 1;
+public abstract class MixinEntityCreeper extends MixinEntityMob implements FusedExplosiveBridge {
 
     @Shadow private int timeSinceIgnited;
     @Shadow private int fuseTime;
@@ -78,32 +70,32 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     // FusedExplosive Impl
 
     @Override
-    public Optional<Integer> getExplosionRadius() {
+    public Optional<Integer> bridge$getExplosionRadius() {
         return Optional.of(this.explosionRadius);
     }
 
     @Override
-    public void setExplosionRadius(Optional<Integer> radius) {
-        this.explosionRadius = radius.orElse(DEFAULT_EXPLOSION_RADIUS);
+    public void bridge$setExplosionRadius(Optional<Integer> radius) {
+        this.explosionRadius = radius.orElse(Constants.Entity.Creeper.DEFAULT_EXPLOSION_RADIUS);
     }
 
     @Override
-    public int getFuseDuration() {
+    public int bridge$getFuseDuration() {
         return this.fuseDuration;
     }
 
     @Override
-    public void setFuseDuration(int fuseTicks) {
+    public void bridge$setFuseDuration(int fuseTicks) {
         this.fuseDuration = fuseTicks;
     }
 
     @Override
-    public int getFuseTicksRemaining() {
+    public int bridge$getFuseTicksRemaining() {
         return this.fuseTime - this.timeSinceIgnited;
     }
 
     @Override
-    public void setFuseTicksRemaining(int fuseTicks) {
+    public void bridge$setFuseTicksRemaining(int fuseTicks) {
         // Note: The creeper will detonate when timeSinceIgnited >= fuseTime
         // assuming it is within range of a player. Every tick that the creeper
         // is not within a range of a player, timeSinceIgnited is decremented
@@ -112,38 +104,17 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
         this.fuseTime = fuseTicks;
     }
 
-    @Override
-    public void prime() {
-        checkState(!isPrimed(), "already primed");
-        setCreeperState(STATE_PRIMED);
-    }
-
-    @Override
-    public void defuse() {
-        checkState(isPrimed(), "not primed");
-        setCreeperState(STATE_IDLE);
-    }
-
-    @Override
-    public boolean isPrimed() {
-        return getCreeperState() == STATE_PRIMED;
-    }
-
-    @Override
-    public void detonate() {
-        this.explode();
-    }
 
     @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
     private void onStateChange(int state, CallbackInfo ci) {
-        setFuseDuration(this.fuseDuration);
+        bridge$setFuseDuration(this.fuseDuration);
         if (this.world.isRemote) {
             return;
         }
 
-        if (!isPrimed() && state == STATE_PRIMED && !shouldPrime()) {
+        if (!((Creeper) this).isPrimed() && state == Constants.Entity.Creeper.STATE_PRIMED && !bridge$shouldPrime()) {
             ci.cancel();
-        } else if (isPrimed() && state == STATE_IDLE && !shouldDefuse()) {
+        } else if (((Creeper) this).isPrimed() && state == Constants.Entity.Creeper.STATE_IDLE && !bridge$shouldDefuse()) {
             ci.cancel();
         } else if (getCreeperState() != state) {
             this.stateDirty = true;
@@ -157,25 +128,26 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
         }
 
         if (this.stateDirty) {
-            if (state == STATE_PRIMED) {
-                postPrime();
-            } else if (state == STATE_IDLE) {
-                postDefuse();
+            if (state == Constants.Entity.Creeper.STATE_PRIMED) {
+                bridge$postPrime();
+            } else if (state == Constants.Entity.Creeper.STATE_IDLE) {
+                bridge$postDefuse();
             }
             this.stateDirty = false;
         }
     }
 
-    @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
+    @Redirect(method = "explode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;createExplosion"
+                                                                      + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;"))
     @Nullable
     private net.minecraft.world.Explosion onExplode(net.minecraft.world.World world, Entity self, double x,
         double y, double z, float strength, boolean smoking) {
-        return detonate(Explosion.builder()
+        return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(new Location<>((World) world, new Vector3d(x, y, z)))
-                .sourceExplosive(this)
+                .sourceExplosive(((Creeper) this))
                 .radius(strength)
                 .shouldPlaySmoke(smoking)
-                .shouldBreakBlocks(smoking && ((IMixinGriefer) this).canGrief()))
+                .shouldBreakBlocks(smoking && ((GrieferBridge) this).bridge$CanGrief()))
                 .orElseGet(() -> {
                     this.detonationCancelled = true;
                     return null;
@@ -189,15 +161,16 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
         }
     }
 
-    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = TARGET_IGNITE))
+    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityCreeper;ignite()V"))
     private void onInteractIgnite(EntityCreeper self) {
-        this.interactPrimeCancelled = !shouldPrime();
+        this.interactPrimeCancelled = !bridge$shouldPrime();
         if (!this.interactPrimeCancelled) {
             ignite();
         }
     }
 
-    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = TARGET_DAMAGE_ITEM))
+    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;damageItem"
+                                                                              + "(ILnet/minecraft/entity/EntityLivingBase;)V"))
     private void onDamageFlintAndSteel(ItemStack fas, int amount, EntityLivingBase player) {
         if (!this.interactPrimeCancelled) {
             fas.damageItem(amount, player);

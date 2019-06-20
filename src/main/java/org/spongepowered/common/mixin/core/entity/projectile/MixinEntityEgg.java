@@ -26,14 +26,13 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.entity.projectile.Egg;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 @Mixin(EntityEgg.class)
-public abstract class MixinEntityEgg extends MixinEntityThrowable implements Egg {
+public abstract class MixinEntityEgg extends MixinEntityThrowable {
 
     public double damageAmount;
 
@@ -45,16 +44,16 @@ public abstract class MixinEntityEgg extends MixinEntityThrowable implements Egg
     }
 
     @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
+    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
             this.damageAmount = compound.getDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
         }
     }
 
     @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
+    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$writeToSpongeCompound(compound);
         compound.setDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
     }
 }

@@ -44,7 +44,7 @@ public class SpongeDisabledSlotsData extends AbstractData<DisabledSlotsData, Imm
     private Set<EquipmentType> placingDisabled;
 
     public SpongeDisabledSlotsData() {
-        this(new HashSet(), new HashSet());
+        this(new HashSet<>(), new HashSet<>());
     }
 
     public SpongeDisabledSlotsData(Set<EquipmentType> takingDisabled, Set<EquipmentType> placingDisabled) {
@@ -59,12 +59,12 @@ public class SpongeDisabledSlotsData extends AbstractData<DisabledSlotsData, Imm
 
     @Override
     public SetValue<EquipmentType> takingDisabled() {
-        return new SpongeSetValue<>(Keys.ARMOR_STAND_TAKING_DISABLED, new HashSet(), this.takingDisabled);
+        return new SpongeSetValue<>(Keys.ARMOR_STAND_TAKING_DISABLED, new HashSet<>(), this.takingDisabled);
     }
 
     @Override
     public SetValue<EquipmentType> placingDisabled() {
-        return new SpongeSetValue<>(Keys.ARMOR_STAND_PLACING_DISABLED, new HashSet(), this.placingDisabled);
+        return new SpongeSetValue<>(Keys.ARMOR_STAND_PLACING_DISABLED, new HashSet<>(), this.placingDisabled);
     }
 
     @Override

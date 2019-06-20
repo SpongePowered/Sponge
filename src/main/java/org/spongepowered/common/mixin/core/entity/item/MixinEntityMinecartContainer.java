@@ -28,16 +28,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecartContainer;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.storage.loot.ILootContainer;
-import org.spongepowered.api.entity.vehicle.minecart.ContainerMinecart;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -50,24 +44,22 @@ import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
 @Mixin(EntityMinecartContainer.class)
-@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
-             @Interface(iface = ContainerMinecart.class, prefix = "container$")})
+@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
 public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart implements ILockableContainer, ILootContainer {
 
-    @Shadow public boolean dropContentsWhenDead;
+    @Shadow private boolean dropContentsWhenDead;
+
     protected Fabric fabric = new IInventoryFabric(this);
     protected SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
-    protected Lens lens;
+    protected Lens lens = createLensOnConstruct();
 
-    @Inject(method = "<init>*", at = @At("RETURN"))
-    public void onInit(CallbackInfo ci) {
-        this.lens = this.getSizeInventory() == 0 ? new DefaultEmptyLens((InventoryAdapter) this) : new OrderedInventoryLensImpl(0,
-                this.getSizeInventory(), 1, this.slots);
+    protected Lens createLensOnConstruct() {
+        return this.getSizeInventory() == 0
+               ? new DefaultEmptyLens((InventoryAdapter) this)
+               : new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
     }
 
-    @SuppressWarnings("unchecked")
     public SlotProvider inventory$getSlotProvider() {
         return this.slots;
     }
@@ -80,13 +72,8 @@ public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart i
         return this.fabric;
     }
 
-    @SuppressWarnings("unchecked")
-    public CarriedInventory<ContainerMinecart> container$getInventory() {
-        return (CarriedInventory<ContainerMinecart>) this;
-    }
-
     /**
-     * @author Zidane
+     * @author Zidane - June 2019 - 1.12.2
      * @reason Only have this Minecart not drop contents if we actually changed dimension
      */
     @Override

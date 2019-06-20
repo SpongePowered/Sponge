@@ -35,8 +35,8 @@ import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 
 import java.util.Optional;
 
@@ -80,13 +80,13 @@ public final class SpongeMessageHandler {
         Optional<User> notifier = Optional.empty();
 
         if (message.type == 0) { // block
-            IMixinChunk spongeChunk = (IMixinChunk) sender.world.getChunk(pos);
+            ChunkBridge spongeChunk = (ChunkBridge) sender.world.getChunk(pos);
             owner = spongeChunk.getBlockOwner(pos);
             notifier = spongeChunk.getBlockNotifier(pos);
         } else if (message.type == 1) { // entity
             Entity entity = sender.world.getEntityByID(message.entityId);
             if (entity != null) {
-                IMixinEntity spongeEntity = (IMixinEntity) entity;
+                EntityBridge spongeEntity = (EntityBridge) entity;
                 owner = spongeEntity.getCreatorUser();
                 notifier = spongeEntity.getNotifierUser();
             }

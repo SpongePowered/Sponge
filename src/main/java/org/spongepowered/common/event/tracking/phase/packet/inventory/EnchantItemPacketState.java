@@ -37,22 +37,17 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
-import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public final class EnchantItemPacketState extends BasicInventoryPacketState {
 
@@ -74,9 +69,9 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
         // See MixinNetHandlerPlayServer processClickWindow redirect for rest of
         // fix.
         // --bloodmc
-        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+        final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
         if (!mixinContainer.capturingInventory()) {
-            mixinContainer.getCapturedTransactions().clear();
+            mixinContainer.bridge$getCapturedSlotTransactions().clear();
             return;
         }
 
@@ -87,12 +82,12 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(lastCursor, newCursor);
 
         final net.minecraft.inventory.Container openContainer = player.openContainer;
-        final List<SlotTransaction> slotTransactions = mixinContainer.getCapturedTransactions();
+        final List<SlotTransaction> slotTransactions = mixinContainer.bridge$getCapturedSlotTransactions();
 
         final int usedButton = packetIn.getButton();
         final List<Entity> capturedItems = new ArrayList<>();
         for (EntityItem entityItem : context.getCapturedItems()) {
-            capturedItems.add(EntityUtil.fromNative(entityItem));
+            capturedItems.add((Entity) entityItem);
         }
         context.getCapturedItems().clear();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -106,7 +101,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
 
             // Some mods may override container detectAndSendChanges method and prevent captures
             // If this happens and we captured no entities, avoid firing events
-            if (mixinContainer.getCapturedTransactions().isEmpty() && capturedItems.isEmpty()) {
+            if (mixinContainer.bridge$getCapturedSlotTransactions().isEmpty() && capturedItems.isEmpty()) {
                 mixinContainer.setCaptureInventory(false);
                 return;
             }if (inventoryEvent != null) {

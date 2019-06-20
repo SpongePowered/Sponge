@@ -31,7 +31,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -40,23 +39,20 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.entity.item.WitherSkullEntityBridge;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinExplosive;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityWitherSkull.class)
-public abstract class MixinEntityWitherSkull extends MixinEntityFireball implements WitherSkull, IMixinExplosive {
+public abstract class MixinEntityWitherSkull extends MixinEntityFireball implements WitherSkullEntityBridge {
 
-    private static final String EXPLOSION_TARGET = "Lnet/minecraft/world/World;newExplosion"
-            + "(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;";
-    private static final int DEFAULT_EXPLOSION_RADIUS = 1;
-
-    @Nullable private Cause detonationCause;
-    private int explosionRadius = DEFAULT_EXPLOSION_RADIUS;
+    private int explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
     private float damage = 0.0f;
     private boolean damageSet = false;
 
@@ -82,8 +78,8 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     }
 
     @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
+    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
             this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
             this.damageSet = true;
@@ -91,8 +87,8 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     }
 
     @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
+    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$writeToSpongeCompound(compound);
         if (this.damageSet) {
             compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
         } else {
@@ -102,36 +98,31 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
 
     // Explosive Impl
     @Override
-    public Optional<Integer> getExplosionRadius() {
+    public Optional<Integer> bridge$getExplosionRadius() {
         return Optional.of(this.explosionRadius);
     }
 
     @Override
-    public void setExplosionRadius(Optional<Integer> explosionRadius) {
-        this.explosionRadius = explosionRadius.orElse(DEFAULT_EXPLOSION_RADIUS);
-    }
-
-    @Override
-    public void detonate() {
-        onExplode(this.world, (Entity) (Object) this, this.posX, this.posY, this.posZ, 0, false, true);
-        setDead();
+    public void bridge$setExplosionRadius(Optional<Integer> explosionRadius) {
+        this.explosionRadius = explosionRadius.orElse(Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS);
     }
 
     @SuppressWarnings("deprecation")
-    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = EXPLOSION_TARGET))
+    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;newExplosion"
+                                                                       + "(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;"))
     @Nullable
-    private net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
+    public net.minecraft.world.Explosion bridge$CreateAndProcessExplosionEvent(net.minecraft.world.World worldObj, Entity self, double x,
         double y, double z, float strength, boolean flaming,
         boolean smoking) {
-        boolean griefer = ((IMixinGriefer) this).canGrief();
+        boolean griefer = ((GrieferBridge) this).bridge$CanGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in API 8/1.13
-            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
-            frame.pushCause(getShooter());
-            return detonate(Explosion.builder()
+            frame.addContext(EventContextKeys.THROWER, ((WitherSkull) this).getShooter()); // TODO - Remove in API 8/1.13
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((WitherSkull) this).getShooter());
+            frame.pushCause(((WitherSkull) this).getShooter());
+            return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
-                .sourceExplosive(this)
+                .sourceExplosive(((WitherSkull) this))
                 .radius(this.explosionRadius)
                 .canCauseFire(flaming)
                 .shouldPlaySmoke(smoking && griefer)

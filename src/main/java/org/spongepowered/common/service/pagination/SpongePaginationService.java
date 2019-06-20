@@ -195,6 +195,7 @@ public class SpongePaginationService implements PaginationService {
 
         @Nullable
         @Override
+        @SuppressWarnings("deprecation")
         protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
             UUID id;
 

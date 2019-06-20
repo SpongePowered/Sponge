@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.advancement.ICriterion;
+import org.spongepowered.common.advancement.CriterionBridge;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 
@@ -45,7 +45,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(Criterion.class)
-public class MixinCriterion implements ICriterion, IMixinCriterion {
+public class MixinCriterion implements CriterionBridge, IMixinCriterion {
 
     @Shadow @Final @Nullable private ICriterionInstance criterionInstance;
 

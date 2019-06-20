@@ -34,17 +34,16 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePrismarineData;
 import org.spongepowered.api.data.type.PrismarineType;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePrismarineData;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
 @Mixin(BlockPrismarine.class)
 public abstract class MixinBlockPrismarine extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getPrismarineTypeFor(blockState));
@@ -55,6 +54,7 @@ public abstract class MixinBlockPrismarine extends MixinBlock {
         return ImmutablePrismarineData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePrismarineData) {
@@ -73,13 +73,10 @@ public abstract class MixinBlockPrismarine extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutablePrismarineData getPrismarineTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePrismarineData.class,
                 (PrismarineType) (Object) blockState.getValue(BlockPrismarine.VARIANT));
     }
 
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + "." + BlockPrismarine.EnumType.ROUGH.getTranslationKey() + ".name");
-    }
 }

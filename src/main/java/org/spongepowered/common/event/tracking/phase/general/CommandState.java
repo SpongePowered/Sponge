@@ -45,13 +45,13 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldManager;
@@ -105,7 +105,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     public void associateNeighborStateNotifier(CommandPhaseContext context, BlockPos sourcePos, Block block, BlockPos notifyPos,
         WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         context.getSource(Player.class)
-            .ifPresent(player -> ((IMixinChunk) minecraftWorld.getChunk(notifyPos))
+            .ifPresent(player -> ((ChunkBridge) minecraftWorld.getChunk(notifyPos))
                 .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER));
     }
 
@@ -170,14 +170,14 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                     items.addAll(itemStacks);
                     itemStacks.clear();
 
-                    final WorldServer minecraftWorld = EntityUtil.getMinecraftWorld(affectedEntity.get());
+                    final WorldServer minecraftWorld = (WorldServer) affectedEntity.get().getWorld();
                     if (!items.isEmpty())
                     {
                         csm.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
                         final List<Entity> itemEntities = items.stream()
                             .map(data -> data.create(minecraftWorld))
-                            .map(EntityUtil::fromNative)
+                            .map(entity -> (Entity) entity)
                             .collect(Collectors.toList());
                         csm.pushCause(affectedEntity.get());
                         final DropItemEvent.Destruct destruct =

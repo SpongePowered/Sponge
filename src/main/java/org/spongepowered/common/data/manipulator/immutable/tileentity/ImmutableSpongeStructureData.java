@@ -33,7 +33,7 @@ import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeStructureData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public final class ImmutableSpongeStructureData extends AbstractImmutableData<ImmutableStructureData, StructureData> implements ImmutableStructureData {
@@ -63,25 +63,25 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
         super(ImmutableStructureData.class);
 
         this.author = author;
-        this.authorValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_AUTHOR, DataConstants.DEFAULT_STRUCTURE_AUTHOR, this.author);
+        this.authorValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_AUTHOR, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_AUTHOR, this.author);
         this.ignoreEntities = ignoreEntities;
-        this.ignoreEntitiesValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_IGNORE_ENTITIES, DataConstants.DEFAULT_STRUCTURE_IGNORE_ENTITIES, this.ignoreEntities);
+        this.ignoreEntitiesValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_IGNORE_ENTITIES, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_IGNORE_ENTITIES, this.ignoreEntities);
         this.integrity = integrity;
-        this.integrityValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_INTEGRITY, DataConstants.DEFAULT_STRUCTURE_INTEGRITY, this.integrity);
+        this.integrityValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_INTEGRITY, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_INTEGRITY, this.integrity);
         this.mode = mode;
-        this.modeValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_MODE, DataConstants.DEFAULT_STRUCTURE_MODE, this.mode);
+        this.modeValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_MODE, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_MODE, this.mode);
         this.position = position;
-        this.positionValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_POSITION, DataConstants.DEFAULT_STRUCTURE_POSITION, this.position);
+        this.positionValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_POSITION, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_POSITION, this.position);
         this.powered = powered;
-        this.poweredValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_POWERED, DataConstants.DEFAULT_STRUCTURE_POWERED, this.powered);
+        this.poweredValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_POWERED, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_POWERED, this.powered);
         this.seed = seed;
-        this.seedValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SEED, DataConstants.DEFAULT_STRUCTURE_SEED, this.seed);
+        this.seedValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SEED, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_SEED, this.seed);
         this.showAir = showAir;
-        this.showAirValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SHOW_AIR, DataConstants.DEFAULT_STRUCTURE_SHOW_AIR, this.showAir);
+        this.showAirValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SHOW_AIR, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_SHOW_AIR, this.showAir);
         this.showBoundingBox = showBoundingBox;
-        this.showBoundingBoxValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SHOW_BOUNDING_BOX, DataConstants.DEFAULT_STRUCTURE_SHOW_BOUNDING_BOX, this.showBoundingBox);
+        this.showBoundingBoxValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SHOW_BOUNDING_BOX, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_SHOW_BOUNDING_BOX, this.showBoundingBox);
         this.size = size;
-        this.sizeValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SIZE, DataConstants.DEFAULT_STRUCTURE_SIZE, this.size);
+        this.sizeValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SIZE, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_SIZE, this.size);
 
         this.registerGetters();
     }

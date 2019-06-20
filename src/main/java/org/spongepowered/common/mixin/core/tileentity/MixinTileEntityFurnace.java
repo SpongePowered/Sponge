@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import static net.minecraft.inventory.SlotFurnaceFuel.isBucket;
-import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
@@ -34,7 +33,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.SmeltEvent;
@@ -71,26 +69,21 @@ import java.util.Collections;
 
 @NonnullByDefault
 @Mixin(TileEntityFurnace.class)
-public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable implements Furnace, IMixinCustomNameable {
-
-    @Shadow private String furnaceCustomName;
+public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable implements IMixinCustomNameable {
 
     @Shadow private NonNullList<ItemStack> furnaceItemStacks;
-
     @Shadow private int cookTime;
-    @Shadow private int furnaceBurnTime;
     @Shadow private int currentItemBurnTime;
 
     @Shadow protected abstract boolean canSmelt();
 
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     @Override
     public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
-        return ReusableLens.getLens(FurnaceInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
+        return ReusableLens.getLens(FurnaceInventoryLens.class, this, this::generateSlotProvider, this::generateRootLens);
     }
 
-    @SuppressWarnings("unchecked")
     private SlotProvider generateSlotProvider() {
         return new SlotCollection.Builder().add(InputSlotAdapter.class, InputSlotLensImpl::new)
                 .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> TileEntityFurnace.isItemFuel((ItemStack) s) || isBucket(
@@ -103,22 +96,8 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
                 .build();
     }
 
-    @SuppressWarnings("unchecked")
     private FurnaceInventoryLens generateRootLens(SlotProvider slots) {
-        return new FurnaceInventoryLens((InventoryAdapter) this, slots);
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(of("BurnTime"), this.getField(0));
-        container.set(of("BurnTimeTotal"), this.getField(1));
-        container.set(of("CookTime"), this.getField(3) - this.getField(2));
-        container.set(of("CookTimeTotal"), this.getField(3));
-        if (this.furnaceCustomName != null) {
-            container.set(of("CustomName"), this.furnaceCustomName);
-        }
-        return container;
+        return new FurnaceInventoryLens(this, slots);
     }
 
     @Override
@@ -135,7 +114,7 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
         ItemStackSnapshot shrinkedFuel = ItemStackUtil.snapshotOf(ItemStackUtil.cloneDefensive(itemStack, itemStack.getCount() - 1));
 
         Transaction<ItemStackSnapshot> transaction = new Transaction<>(fuel, shrinkedFuel);
-        SmeltEvent.ConsumeFuel event = SpongeEventFactory.createSmeltEventConsumeFuel(cause, fuel, this, Collections.singletonList(transaction));
+        SmeltEvent.ConsumeFuel event = SpongeEventFactory.createSmeltEventConsumeFuel(cause, fuel, (Furnace) this, Collections.singletonList(transaction));
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             this.currentItemBurnTime = 0;
@@ -164,12 +143,12 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
 
         Cause cause = Sponge.getCauseStackManager().getCurrentCause();
         if (this.cookTime == 0) { // Start
-            SmeltEvent.Start event = SpongeEventFactory.createSmeltEventStart(cause, fuel, this, Collections.emptyList());
+            SmeltEvent.Start event = SpongeEventFactory.createSmeltEventStart(cause, fuel, (Furnace) this, Collections.emptyList());
             SpongeImpl.postEvent(event);
             return !event.isCancelled();
 
         } else { // Tick up
-            SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, this, Collections.emptyList());
+            SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, (Furnace) this, Collections.emptyList());
             SpongeImpl.postEvent(event);
             return !event.isCancelled();
         }
@@ -181,7 +160,7 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
         int clampedCookTime = MathHelper.clamp(newCookTime, zero, totalCookTime);
         ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
         Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-        SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, this, Collections.emptyList());
+        SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, (Furnace) this, Collections.emptyList());
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             return this.cookTime; // dont tick down
@@ -191,34 +170,56 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
     }
 
     // Interrupt-Active - e.g. a player removing the currently smelting item
-    @Inject(method = "setInventorySlotContents", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityFurnace;getCookTime(Lnet/minecraft/item/ItemStack;)I"))
+    @Inject(
+        method = "setInventorySlotContents",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/tileentity/TileEntityFurnace;getCookTime(Lnet/minecraft/item/ItemStack;)I"
+        )
+    )
     private void onResetCookTimeActive(CallbackInfo ci) {
-        callInteruptSmeltEvent();
+        impl$callInteruptSmeltEvent();
     }
 
     // Interrupt-Passive - if the currently smelting item was removed in some other way
-    @Inject(method = "update", at = @At(shift = At.Shift.BEFORE, value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/tileentity/TileEntityFurnace;cookTime:I", ordinal = 0),
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityFurnace;smeltItem()V")))
-    private void onResetCookTimePassive(CallbackInfo ci) {
-        callInteruptSmeltEvent();
+    @Inject(method = "update",
+        at = @At(
+            shift = At.Shift.BEFORE,
+            value = "FIELD",
+            opcode = Opcodes.PUTFIELD,
+            target = "Lnet/minecraft/tileentity/TileEntityFurnace;cookTime:I"
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/tileentity/TileEntityFurnace;smeltItem()V"
+            ),
+            to = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/util/math/MathHelper;clamp(III)I"
+            )
+        )
+    )
+    private void impl$onResetCookTimePassive(CallbackInfo ci) {
+        impl$callInteruptSmeltEvent();
     }
 
-    private void callInteruptSmeltEvent() {
+    private void impl$callInteruptSmeltEvent() {
         if (this.cookTime > 0) {
-            ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
-            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-            SmeltEvent.Interrupt event = SpongeEventFactory.createSmeltEventInterrupt(cause, fuel, Collections.emptyList(), this);
+            final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
+            final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+            final SmeltEvent.Interrupt event = SpongeEventFactory.createSmeltEventInterrupt(cause, fuel, Collections.emptyList(), (Furnace) this);
             SpongeImpl.postEvent(event);
         }
     }
 
     // Finish
-    @Inject(method = "smeltItem", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;shrink(I)V"))
-    private void afterSmeltItem(CallbackInfo ci, ItemStack itemStack, ItemStack result, ItemStack outputStack) {
-        ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
-        Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-        SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, Collections.singletonList(ItemStackUtil.snapshotOf(result)), this);
-        SpongeImpl.postEvent(event);
+    @Inject(
+        method = "smeltItem",
+        locals = LocalCapture.CAPTURE_FAILHARD,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;shrink(I)V"))
+    private void impl$afterSmeltItem(CallbackInfo ci, ItemStack itemStack, ItemStack result, ItemStack outputStack) {
+        impl$callSmeltFinish(result);
     }
 
     /**
@@ -233,11 +234,15 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
      * @param outputStack The output
      */
     @Surrogate
-    private void afterSmeltItem(CallbackInfo ci, ItemStack outputStack) {
-        ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
-        Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-        ItemStackSnapshot result = ItemStackUtil.snapshotOf(FurnaceRecipes.instance().getSmeltingResult(this.furnaceItemStacks.get(0)));
-        SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, Collections.singletonList(result), this);
+    private void impl$afterSmeltItem(CallbackInfo ci, ItemStack outputStack) {
+        impl$callSmeltFinish(FurnaceRecipes.instance().getSmeltingResult(this.furnaceItemStacks.get(0)));
+    }
+
+    private void impl$callSmeltFinish(ItemStack result) {
+        final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
+        final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(result);
+        final SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, Collections.singletonList(snapshot), (Furnace) this);
         SpongeImpl.postEvent(event);
     }
 

@@ -95,12 +95,12 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<BlockState> imp
 
     @Override
     protected Optional<BlockState> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQueries.BLOCK_STATE)) {
+        if (!container.contains(DataQueries.Block.BLOCK_STATE)) {
             return Optional.empty();
         }
-        checkDataExists(container, DataQueries.BLOCK_STATE);
+        checkDataExists(container, DataQueries.Block.BLOCK_STATE);
         try {
-            return container.getCatalogType(DataQueries.BLOCK_STATE, BlockState.class);
+            return container.getCatalogType(DataQueries.Block.BLOCK_STATE, BlockState.class);
         } catch (Exception e) {
             throw new InvalidDataException("Could not retrieve a blockstate!", e);
         }

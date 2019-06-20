@@ -43,6 +43,7 @@ import java.util.Optional;
 @Mixin(BlockSand.class)
 public abstract class MixinBlockSand extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getSandTypeFor(blockState));
@@ -53,6 +54,7 @@ public abstract class MixinBlockSand extends MixinBlock {
         return ImmutableSandData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableSandData) {
@@ -71,6 +73,7 @@ public abstract class MixinBlockSand extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutableSandData getSandTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSandData.class, (SandType) (Object) blockState.getValue(BlockSand.VARIANT));
     }

@@ -44,7 +44,6 @@ import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
@@ -54,7 +53,6 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -66,16 +64,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.LockCode;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
@@ -90,7 +87,6 @@ import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.ChangeEntityExperienceEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.event.entity.living.humanoid.ChangeLevelEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -106,6 +102,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
@@ -117,10 +114,9 @@ import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.ITargetedLocation;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
@@ -131,17 +127,12 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayer.class)
-public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEntityPlayer, ITargetedLocation {
-
-    private static final String WORLD_PLAY_SOUND_AT =
-            "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
-    private static final String PLAYER_COLLIDE_ENTITY = "Lnet/minecraft/entity/Entity;onCollideWithPlayer(Lnet/minecraft/entity/player/EntityPlayer;)V";
+public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements PlayerEntityBridge, ITargetedLocation {
 
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
@@ -150,12 +141,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public float experience;
     @Shadow public PlayerCapabilities capabilities;
     @Shadow public InventoryPlayer inventory;
-    @Shadow private BlockPos spawnPos;
-    @Shadow private BlockPos bedLocation;
-    @Shadow protected FoodStats foodStats;
-    @Shadow public InventoryEnderChest enderChest;
+    @Shadow public BlockPos bedLocation;
 
-    @Shadow public abstract boolean canOpen(LockCode code);
     @Shadow public abstract boolean isPlayerSleeping();
     @Shadow public abstract boolean isSpectator();
     @Shadow public abstract int xpBarCap();
@@ -170,8 +157,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void spawnSweepParticles(); //spawnSweepParticles()
     @Shadow public abstract void takeStat(StatBase stat);
     @Shadow protected abstract void destroyVanishingCursedItems(); // Filter vanishing curse enchanted items
-    @Shadow public void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn) {};
-    @Shadow public abstract EntityItem dropItem(boolean dropAll);
+    @Shadow public void wakeUpPlayer(final boolean immediately, final boolean updateWorldFlag, final boolean setSpawn) {};
+    @Shadow @Nullable public abstract EntityItem dropItem(boolean dropAll); // Overridden in MixinEntityPlayerMP for tracking
     @Shadow public abstract FoodStats getFoodStats();
     @Shadow public abstract GameProfile getGameProfile();
     @Shadow public abstract Scoreboard getWorldScoreboard();
@@ -179,31 +166,24 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract void addExperienceLevel(int levels);
     @Shadow public abstract void addScore(int scoreIn);
-    @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 
     @Shadow protected abstract void spawnShoulderEntities();
     @Shadow public abstract boolean isCreative();
 
-    @Shadow public boolean canAttackPlayer(EntityPlayer other) {
+    @Shadow public boolean canAttackPlayer(final EntityPlayer other) {
         return false;
     }
 
     private boolean affectsSpawning = true;
-    private UUID collidingEntityUuid = null;
-    private Vector3d targetedLocation;
+    private Vector3d targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
     private boolean dontRecalculateExperience;
     private boolean shouldRestoreInventory = false;
     protected final boolean isFake = SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this);
 
-    @Inject(method = "<init>(Lnet/minecraft/world/World;Lcom/mojang/authlib/GameProfile;)V", at = @At("RETURN"))
-    public void construct(World worldIn, GameProfile gameProfileIn, CallbackInfo ci) {
-        this.targetedLocation = VecHelper.toVector3d(worldIn.getSpawnPoint());
-    }
-
 
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
-    public void onGetDisplayName(CallbackInfoReturnable<ITextComponent> ci) {
+    private void impl$getDisplayNameWithParsing(final CallbackInfoReturnable<ITextComponent> ci) {
         ci.setReturnValue(LegacyTexts.parseComponent((TextComponentString) ci.getReturnValue(), SpongeTexts.COLOR_CHAR));
     }
 
@@ -213,7 +193,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Override
-    public void setExperienceSinceLevel(int experience) {
+    public void setExperienceSinceLevel(final int experience) {
         this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + experience;
         this.experience = (float) experience / this.xpBarCap();
     }
@@ -224,12 +204,12 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         if (!this.dontRecalculateExperience) {
             boolean isInaccurate = ExperienceHolderUtils.getLevelForExp(this.experienceTotal) != this.experienceLevel;
             if (!isInaccurate) {
-                float experienceLess = (this.getExperienceSinceLevel() - 0.5f) / this.xpBarCap();
-                float experienceMore = (this.getExperienceSinceLevel() + 0.5f) / this.xpBarCap();
+                final float experienceLess = (this.getExperienceSinceLevel() - 0.5f) / this.xpBarCap();
+                final float experienceMore = (this.getExperienceSinceLevel() + 0.5f) / this.xpBarCap();
                 isInaccurate = this.experience < experienceLess || this.experience > experienceMore;
             }
             if (isInaccurate) {
-                int newExperienceInLevel = (int) (this.experience * this.xpBarCap());
+                final int newExperienceInLevel = (int) (this.experience * this.xpBarCap());
                 this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + newExperienceInLevel;
                 this.experience = (float) newExperienceInLevel / this.xpBarCap();
             }
@@ -244,9 +224,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * rounding errors.</a>
      */
     @Inject(method = "addExperienceLevel", at = @At("HEAD"), cancellable = true)
-    private void onAddExperienceLevels(int levels, CallbackInfo ci) {
+    private void onAddExperienceLevels(final int levels, final CallbackInfo ci) {
         if (!this.dontRecalculateExperience) {
-            int newLevel = Math.max(this.experienceLevel + levels, 0);
+            final int newLevel = Math.max(this.experienceLevel + levels, 0);
             postEventAndUpdateExperience(ExperienceHolderUtils.xpAtLevel(newLevel)
                     + (int) (this.experience * ExperienceHolderUtils.getExpBetweenLevels(newLevel)));
             ci.cancel();
@@ -254,7 +234,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Inject(method = "onEnchant", at = @At("RETURN"))
-    private void onEnchantChangeExperienceLevels(ItemStack item, int levels, CallbackInfo ci) {
+    private void onEnchantChangeExperienceLevels(final ItemStack item, final int levels, final CallbackInfo ci) {
         recalculateTotalExperience();
     }
 
@@ -267,7 +247,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Overwrite
     public void addExperience(int amount) {
         this.addScore(amount);
-        int i = Integer.MAX_VALUE - this.experienceTotal;
+        final int i = Integer.MAX_VALUE - this.experienceTotal;
 
         if (amount > i) {
             amount = i;
@@ -284,21 +264,21 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         // Sponge end
     }
 
-    private void postEventAndUpdateExperience(int finalExperience) {
-        ExperienceHolderData data = new SpongeExperienceHolderData();
-        ((SpongeExperienceHolderData) data).setTotalExp(finalExperience);
-        ChangeEntityExperienceEvent event = SpongeEventFactory.createChangeEntityExperienceEvent(
-                Sponge.getCauseStackManager().getCurrentCause(),
-                new ImmutableSpongeExperienceHolderData(this.experienceLevel, this.experienceTotal, this.getExperienceSinceLevel()),
-                data, (Player) this);
+    private void postEventAndUpdateExperience(final int finalExperience) {
+        final SpongeExperienceHolderData data = new SpongeExperienceHolderData();
+        data.setTotalExp(finalExperience);
+        final ImmutableSpongeExperienceHolderData
+            immutable =
+            new ImmutableSpongeExperienceHolderData(this.experienceLevel, this.experienceTotal, this.getExperienceSinceLevel());
+        final ChangeEntityExperienceEvent event = SpongeEventFactory.createChangeEntityExperienceEvent(
+                Sponge.getCauseStackManager().getCurrentCause(), immutable, data, (Player) this);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             return;
         }
         int finalLevel = event.getFinalData().level().get();
         if (finalLevel != this.experienceLevel) {
-            @SuppressWarnings("deprecation")
-            ChangeLevelEvent levelEvent = SpongeEventFactory.createChangeLevelEventTargetPlayer(
+            @SuppressWarnings("deprecation") final org.spongepowered.api.event.entity.living.humanoid.ChangeLevelEvent levelEvent = SpongeEventFactory.createChangeLevelEventTargetPlayer(
                     Sponge.getCauseStackManager().getCurrentCause(), this.experienceLevel, finalLevel, (Player) this);
             SpongeImpl.postEvent(levelEvent);
             if (levelEvent.isCancelled()) {
@@ -324,17 +304,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Inject(method = "readEntityFromNBT", at = @At("RETURN"))
-    private void recalculateXpOnLoad(NBTTagCompound compound, CallbackInfo ci) {
+    private void recalculateXpOnLoad(final NBTTagCompound compound, final CallbackInfo ci) {
         // Fix the mistakes of /xp commands past.
         recalculateTotalExperience();
-    }
-
-    public boolean isFlying() {
-        return this.capabilities.isFlying;
-    }
-
-    public void setFlying(boolean flying) {
-        this.capabilities.isFlying = flying;
     }
 
     /**
@@ -344,9 +316,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Overwrite
     @Override
-    public void onDeath(DamageSource cause) {
+    public void onDeath(final DamageSource cause) {
         final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
-        Optional<DestructEntityEvent.Death>
+        final Optional<DestructEntityEvent.Death>
                 event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause, isMainThread);
         if (event.map(Cancellable::isCancelled).orElse(true)) {
             return;
@@ -379,14 +351,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
-    private boolean onSpongeIsPlayerSleeping(EntityPlayer self) {
+    private boolean onSpongeIsPlayerSleeping(final EntityPlayer self) {
         if (self.isPlayerSleeping()) {
-            if (!((IMixinWorld) this.world).isFake()) {
-                Sponge.getCauseStackManager().pushCause(this);
-                SpongeImpl.postEvent(SpongeEventFactory.
-                        createSleepingEventTick(Sponge.getCauseStackManager().getCurrentCause(),
-                                                this.getWorld().createSnapshot(VecHelper.toVector3i(this.bedLocation)), this));
-                Sponge.getCauseStackManager().popCause();
+            if (!((WorldBridge) this.world).isFake()) {
+                final CauseStackManager csm = Sponge.getCauseStackManager();
+                csm.pushCause(this);
+                final BlockPos bedLocation = this.bedLocation;
+                final BlockSnapshot snapshot = ((org.spongepowered.api.world.World) this.world).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
+                SpongeImpl.postEvent(SpongeEventFactory.createSleepingEventTick(csm.getCurrentCause(), snapshot, (org.spongepowered.api.entity.Entity) this));
+                csm.popCause();
             }
             return true;
         }
@@ -398,9 +371,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      *
      * This prevents sounds from being sent to the server by players who are vanish.
      */
-    @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
-    private void spongePlaySound(World world, EntityPlayer player, double d1, double d2, double d3, SoundEvent sound, SoundCategory category, float volume, float pitch) {
-        if (!this.isVanished()) {
+    @Redirect(method = "playSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"))
+    private void spongePlaySound(final World world, final EntityPlayer player, final double d1, final double d2, final double d3, final SoundEvent sound, final SoundCategory category, final float volume, final float pitch) {
+        if (!this.vanish$isVanished()) {
             this.world.playSound(player, d1, d2, d3, sound, category, volume, pitch);
         }
     }
@@ -411,7 +384,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Override
-    public void setAffectsSpawning(boolean affectsSpawning) {
+    public void setAffectsSpawning(final boolean affectsSpawning) {
         this.affectsSpawning = affectsSpawning;
     }
 
@@ -421,9 +394,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Override
-    public void setTargetedLocation(@Nullable Vector3d vec) {
+    public void setTargetedLocation(@Nullable final Vector3d vec) {
         this.targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.world.getSpawnPoint());
-        if (!((Object) this instanceof EntityPlayerMP)) {
+        //noinspection ConstantConditions
+        if (!((EntityPlayer) (Object) this instanceof EntityPlayerMP)) {
             this.world.setSpawnPoint(VecHelper.toBlockPos(this.targetedLocation));
         }
     }
@@ -447,7 +421,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      *  event is cancelled, or the stack.canPlaceOn
      */
     @Redirect(method = "canPlayerEdit", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;canPlaceOn(Lnet/minecraft/block/Block;)Z"))
-    private boolean canEditSpongeThrowChangePreEvent(ItemStack stack, Block block, BlockPos pos, EnumFacing facing, ItemStack sameStack) {
+    private boolean canEditSpongeThrowChangePreEvent(
+        final ItemStack stack, final Block block, final BlockPos pos, final EnumFacing facing, final ItemStack sameStack) {
         // Lazy evaluation, if the stack isn't placeable anyways, might as well not
         // call the logic.
         if (!stack.canPlaceOn(block)) {
@@ -457,17 +432,17 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         // Just sanity checks, if the player is not in a managed world, then don't bother either.
         // some fake players may exist in pseudo worlds as well, which means we don't want to
         // process on them since the world is not a valid world to plugins.
-        if (this.world instanceof IMixinWorld && !((IMixinWorld) this.world).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+        if (this.world instanceof WorldBridge && !((WorldBridge) this.world).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             // Note that this can potentially cause phase contexts to auto populate frames
             // we shouldn't rely so much on them, but sometimes the extra information is provided
             // through this method.
-            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 // Go ahead and add the item stack in use, just in the event the current phase contexts don't provide
                 // that information.
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
                 // Then go ahead and call the event and return if it was cancelled
                 // if it was cancelled, then there should be no changes needed to roll back
-                return !SpongeCommonEventFactory.callChangeBlockEventPre(((IMixinWorldServer) this.world), pos, this).isCancelled();
+                return !SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) this.world, pos, this).isCancelled();
             }
         }
         // Otherwise, if all else is ignored, or we're not throwing events, we're just going to return the
@@ -487,7 +462,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Overwrite
     @Nullable
-    public EntityItem dropItem(ItemStack itemStackIn, boolean unused) {
+    public EntityItem dropItem(final ItemStack itemStackIn, final boolean unused) {
         return this.dropItem(itemStackIn, false, false);
     }
 
@@ -503,17 +478,17 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Nullable
     @Overwrite
-    public EntityItem dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
+    public EntityItem dropItem(final ItemStack droppedItem, final boolean dropAround, final boolean traceItem) {
         if (droppedItem.isEmpty()) {
             return null;
         }
         // Sponge Start - redirect to our handling to capture and throw events.
-        if (!((IMixinWorld) this.world).isFake()) {
+        if (!((WorldBridge) this.world).isFake()) {
             return EntityUtil.playerDropItem(this, droppedItem, dropAround, traceItem);
         }
         // Sponge end
-        double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
-        EntityItem entityitem = new EntityItem(this.world, this.posX, d0, this.posZ, droppedItem);
+        final double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
+        final EntityItem entityitem = new EntityItem(this.world, this.posX, d0, this.posZ, droppedItem);
         entityitem.setPickupDelay(40);
 
         if (traceItem) {
@@ -521,8 +496,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
 
         if (dropAround) {
-            float f = this.rand.nextFloat() * 0.5F;
-            float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+            final float f = this.rand.nextFloat() * 0.5F;
+            final float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
             entityitem.motionX = (double) (-MathHelper.sin(f1) * f);
             entityitem.motionZ = (double) (MathHelper.cos(f1) * f);
             entityitem.motionY = 0.20000000298023224D;
@@ -533,14 +508,14 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             entityitem.motionZ =
                 (double) (MathHelper.cos(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
             entityitem.motionY = (double) (-MathHelper.sin(this.rotationPitch * 0.017453292F) * f2 + 0.1F);
-            float f3 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+            final float f3 = this.rand.nextFloat() * ((float) Math.PI * 2F);
             f2 = 0.02F * this.rand.nextFloat();
             entityitem.motionX += Math.cos((double) f3) * (double) f2;
             entityitem.motionY += (double) ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
             entityitem.motionZ += Math.sin((double) f3) * (double) f2;
         }
 
-        ItemStack itemstack = this.dropItemAndGetStack(entityitem);
+        final ItemStack itemstack = this.dropItemAndGetStack(entityitem);
 
         if (traceItem) {
             if (itemstack != null && !itemstack.isEmpty()) { // Sponge - add null check
@@ -564,23 +539,16 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @SuppressWarnings("OverwriteModifiers") // This is a MinecraftDev thing, since forge elevates the modifier to public
     @Overwrite
     @Nullable
-    public ItemStack dropItemAndGetStack(EntityItem entity) {
+    public ItemStack dropItemAndGetStack(final EntityItem entity) {
         this.world.spawnEntity(entity);
         return entity.getItem();
     }
 
-    @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY)) // collideWithPlayer
-    private void onPlayerCollideEntity(net.minecraft.entity.Entity entity, EntityPlayer player) {
-        this.collidingEntityUuid = entity.getUniqueID();
+    @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onCollideWithPlayer(Lnet/minecraft/entity/player/EntityPlayer;)V")) // collideWithPlayer
+    private void onPlayerCollideEntity(final net.minecraft.entity.Entity entity, final EntityPlayer player) {
         entity.onCollideWithPlayer(player);
-        this.collidingEntityUuid = null;
     }
 
-
-    @Override
-    public UUID getCollidingEntityUuid() {
-        return this.collidingEntityUuid;
-    }
 
     /**
      * @author dualspiral - October 7th, 2016
@@ -590,7 +558,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * when the {@link DamageSourceRegistryModule#IGNORED_DAMAGE_SOURCE} is being used.
      */
     @Inject(method = "attackEntityFrom", cancellable = true, at = @At(value = "HEAD"))
-    private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void onAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         if (source == DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) {
             // Taken from the original method, wake the player up if they are about to die.
             if (this.isPlayerSleeping() && !this.world.isRemote) {
@@ -635,7 +603,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Overwrite
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public void attackTargetEntityWithCurrentItem(Entity targetEntity) {
+    public void attackTargetEntityWithCurrentItem(final Entity targetEntity) {
         // Sponge Start - Add SpongeImpl hook to override in forge as necessary
         if (!SpongeImplHooks.checkAttackEntity((EntityPlayer) (Object) this, targetEntity)) {
             return;
@@ -656,7 +624,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 // } else {
                 //     enchantmentDamage = EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), EnumCreatureAttribute.UNDEFINED);
                 // }
-                float attackStrength = this.getCooledAttackStrength(0.5F);
+                final float attackStrength = this.getCooledAttackStrength(0.5F);
 
                 final List<ModifierFunction<DamageModifier>> originalFunctions = new ArrayList<>();
 
@@ -680,7 +648,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 this.resetCooldown();
 
                 if (damage > 0.0F || enchantmentDamage > 0.0F) {
-                    boolean isStrongAttack = attackStrength > 0.9F;
+                    final boolean isStrongAttack = attackStrength > 0.9F;
                     boolean isSprintingAttack = false;
                     boolean isCriticalAttack = false;
                     boolean isSweapingAttack = false;
@@ -694,7 +662,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         isSprintingAttack = true;
                     }
 
-                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.isInWater() && !this.isPotionActive(MobEffects.BLINDNESS) && !this.isRiding() && targetEntity instanceof EntityLivingBase;
+                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.shadow$isInWater() && !this.isPotionActive(MobEffects.BLINDNESS) && !this.isRiding() && targetEntity instanceof EntityLivingBase;
                     isCriticalAttack = isCriticalAttack && !this.isSprinting();
 
                     if (isCriticalAttack) {
@@ -705,11 +673,11 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     }
 
                     // damage = damage + enchantmentDamage; // Sponge - We don't need this since our event will re-assign the damage to deal
-                    double distanceWalkedDelta = (double) (this.distanceWalkedModified - this.prevDistanceWalkedModified);
+                    final double distanceWalkedDelta = (double) (this.distanceWalkedModified - this.prevDistanceWalkedModified);
 
                     final ItemStack heldItem = this.getHeldItem(EnumHand.MAIN_HAND);
                     if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround && distanceWalkedDelta < (double) this.getAIMoveSpeed()) {
-                        ItemStack itemstack = heldItem;
+                        final ItemStack itemstack = heldItem;
 
                         if (itemstack.getItem() instanceof ItemSword) {
                             isSweapingAttack = true;
@@ -723,7 +691,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         Sponge.getCauseStackManager().pushCause(damageSource);
                     }
                     final Cause currentCause = isMainthread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), damageSource);
-                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(currentCause, originalFunctions, EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
+                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(currentCause, originalFunctions,
+                        (org.spongepowered.api.entity.Entity) targetEntity, knockbackModifier, originalBaseDamage);
                     SpongeImpl.postEvent(event);
                     if (isMainthread) {
                         Sponge.getCauseStackManager().popCause();
@@ -743,7 +712,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                     float targetOriginalHealth = 0.0F;
                     boolean litEntityOnFire = false;
-                    int fireAspectModifier = EnchantmentHelper.getFireAspectModifier((EntityPlayer) (Object) this);
+                    final int fireAspectModifier = EnchantmentHelper.getFireAspectModifier((EntityPlayer) (Object) this);
 
                     if (targetEntity instanceof EntityLivingBase) {
                         targetOriginalHealth = ((EntityLivingBase) targetEntity).getHealth();
@@ -754,10 +723,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
                     }
 
-                    double targetMotionX = targetEntity.motionX;
-                    double targetMotionY = targetEntity.motionY;
-                    double targetMotionZ = targetEntity.motionZ;
-                    boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer) (Object) this), damage);
+                    final double targetMotionX = targetEntity.motionX;
+                    final double targetMotionY = targetEntity.motionY;
+                    final double targetMotionZ = targetEntity.motionZ;
+                    final boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer) (Object) this), damage);
 
                     if (attackSucceeded) {
                         if (knockbackModifier > 0) {
@@ -773,13 +742,13 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         if (isSweapingAttack) {
-                            for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
+                            for (final EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
                                 if (entitylivingbase != (EntityPlayer) (Object) this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSq(entitylivingbase) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
                                     // entitylivingbase.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                     // entitylivingbase.attackEntityFrom(DamageSource.causePlayerDamage(this), 1.0F);
-                                    final EntityDamageSource sweepingAttackSource = EntityDamageSource.builder().entity(this).type(DamageTypes.SWEEPING_ATTACK).build();
-                                    try (final StackFrame frame = isMainthread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
+                                    final EntityDamageSource sweepingAttackSource = EntityDamageSource.builder().entity((Player) this).type(DamageTypes.SWEEPING_ATTACK).build();
+                                    try (final CauseStackManager.StackFrame frame = isMainthread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
                                         if (isMainthread) {
                                             frame.pushCause(sweepingAttackSource);
                                         }
@@ -792,18 +761,18 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                                 .item(heldSnapshot)
                                                 .type(DamageModifierTypes.SWEEPING)
                                                 .build(),
-                                            (incoming) -> EnchantmentHelper.getSweepingDamageRatio((EntityPlayer) (Object) this) * attackDamage);
+                                            incoming -> EnchantmentHelper.getSweepingDamageRatio((EntityPlayer) (Object) this) * attackDamage);
                                         final List<DamageFunction> sweapingFunctions = new ArrayList<>();
                                         sweapingFunctions.add(sweapingFunction);
-                                        AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(
+                                        final AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(
                                             currentCause,
-                                            sweapingFunctions, EntityUtil.fromNative(entitylivingbase), 1, 1.0D);
+                                            sweapingFunctions, (org.spongepowered.api.entity.Entity) entitylivingbase, 1, 1.0D);
                                         SpongeImpl.postEvent(sweepingAttackEvent);
                                         if (!sweepingAttackEvent.isCancelled()) {
                                             entitylivingbase
                                                 .knockBack((EntityPlayer) (Object) this, sweepingAttackEvent.getKnockbackModifier() * 0.4F,
                                                     (double) MathHelper.sin(this.rotationYaw * 0.017453292F),
-                                                    (double) (-MathHelper.cos(this.rotationYaw * 0.017453292F)));
+                                                    (double) -MathHelper.cos(this.rotationYaw * 0.017453292F));
                                             entitylivingbase.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer) (Object) this),
                                                 (float) sweepingAttackEvent.getFinalOutputDamage());
                                         }
@@ -812,7 +781,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                 }
                             }
 
-                            this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, this.getSoundCategory(), 1.0F, 1.0F);
+                            this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, this.getSoundCategory(), 1.0F, 1.0F);
                             this.spawnSweepParticles();
                         }
 
@@ -825,15 +794,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         if (isCriticalAttack) {
-                            this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, this.getSoundCategory(), 1.0F, 1.0F);
+                            this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, this.getSoundCategory(), 1.0F, 1.0F);
                             this.onCriticalHit(targetEntity);
                         }
 
                         if (!isCriticalAttack && !isSweapingAttack) {
                             if (isStrongAttack) {
-                                this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, this.getSoundCategory(), 1.0F, 1.0F);
+                                this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, this.getSoundCategory(), 1.0F, 1.0F);
                             } else {
-                                this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_WEAK , this.getSoundCategory(), 1.0F, 1.0F);
+                                this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_WEAK , this.getSoundCategory(), 1.0F, 1.0F);
                             }
                         }
 
@@ -848,11 +817,11 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         EnchantmentHelper.applyArthropodEnchantments((EntityPlayer) (Object) this, targetEntity);
-                        ItemStack itemstack1 = this.getHeldItemMainhand();
+                        final ItemStack itemstack1 = this.getHeldItemMainhand();
                         Entity entity = targetEntity;
 
                         if (targetEntity instanceof MultiPartEntityPart) {
-                            IEntityMultiPart ientitymultipart = ((MultiPartEntityPart) targetEntity).parent;
+                            final IEntityMultiPart ientitymultipart = ((MultiPartEntityPart) targetEntity).parent;
 
                             if (ientitymultipart instanceof EntityLivingBase) {
                                 entity = (EntityLivingBase) ientitymultipart;
@@ -867,7 +836,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         if (targetEntity instanceof EntityLivingBase) {
-                            float f5 = targetOriginalHealth - ((EntityLivingBase) targetEntity).getHealth();
+                            final float f5 = targetOriginalHealth - ((EntityLivingBase) targetEntity).getHealth();
                             this.addStat(StatList.DAMAGE_DEALT, Math.round(f5 * 10.0F));
 
                             if (fireAspectModifier > 0) {
@@ -875,14 +844,14 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             }
 
                             if (this.world instanceof WorldServer && f5 > 2.0F) {
-                                int k = (int) ((double) f5 * 0.5D);
+                                final int k = (int) ((double) f5 * 0.5D);
                                 ((WorldServer) this.world).spawnParticle(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.posX, targetEntity.posY + (double) (targetEntity.height * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D, new int[0]);
                             }
                         }
 
                         this.addExhaustion(0.3F);
                     } else {
-                        this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0F, 1.0F);
+                        this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0F, 1.0F);
 
                         if (litEntityOnFire) {
                             targetEntity.extinguish();
@@ -894,27 +863,27 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Inject(method = "setItemStackToSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
-    private void onSetItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack, CallbackInfo ci)
+    private void onSetItemStackToSlot(final EntityEquipmentSlot slotIn, final ItemStack stack, final CallbackInfo ci)
     {
         if (((IMixinInventoryPlayer) this.inventory).capturesTransactions()) {
             if (slotIn == EntityEquipmentSlot.MAINHAND) {
-                ItemStack orig = this.inventory.mainInventory.get(this.inventory.currentItem);
-                Slot slot = ((PlayerInventory) this.inventory).getMain().getHotbar().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
+                final ItemStack orig = this.inventory.mainInventory.get(this.inventory.currentItem);
+                final Slot slot = ((PlayerInventory) this.inventory).getMain().getHotbar().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
                 ((IMixinInventoryPlayer) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn == EntityEquipmentSlot.OFFHAND) {
-                ItemStack orig = this.inventory.offHandInventory.get(0);
-                Slot slot = ((PlayerInventory) this.inventory).getOffhand();
+                final ItemStack orig = this.inventory.offHandInventory.get(0);
+                final Slot slot = ((PlayerInventory) this.inventory).getOffhand();
                 ((IMixinInventoryPlayer) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn.getSlotType() == EntityEquipmentSlot.Type.ARMOR) {
-                ItemStack orig = this.inventory.armorInventory.get(slotIn.getIndex());
-                Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(SlotIndex.of(slotIn.getIndex())).get();
+                final ItemStack orig = this.inventory.armorInventory.get(slotIn.getIndex());
+                final Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(SlotIndex.of(slotIn.getIndex())).get();
                 ((IMixinInventoryPlayer) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             }
         }
     }
 
     @Redirect(method = "setDead", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/inventory/Container;onContainerClosed(Lnet/minecraft/entity/player/EntityPlayer;)V"))
-    private void onOnContainerClosed(Container container, EntityPlayer player) {
+    private void onOnContainerClosed(final Container container, final EntityPlayer player) {
         // Corner case where the server is shutting down on the client, the enitty player mp is also being killed off.
         if (Sponge.isServerAvailable() && SpongeImplHooks.isClientAvailable() && Sponge.getGame().getState() == GameState.SERVER_STOPPING) {
             container.onContainerClosed(player);
@@ -924,7 +893,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             final EntityPlayerMP serverPlayer = (EntityPlayerMP) player;
 
 
-            try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
+            try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
                     .source(serverPlayer)
                     .packetPlayer(serverPlayer)
                     .openContainer(container)) {
@@ -941,7 +910,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Override
-    public void shouldRestoreInventory(boolean restore) {
+    public void shouldRestoreInventory(final boolean restore) {
         this.shouldRestoreInventory = restore;
     }
 
@@ -951,7 +920,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Override
-    public boolean isImmuneToFireForIgniteEvent() {
+    public boolean spongeImpl$isImmuneToFireForIgniteEvent() {
         return this.isSpectator() || this.isCreative();
     }
 }

@@ -32,83 +32,51 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 
 import javax.annotation.Nullable;
 
 @Mixin(BlockEventData.class)
-public abstract class MixinBlockEventData implements IMixinBlockEventData {
+public abstract class MixinBlockEventData implements BlockEventDataBridge {
 
-    private boolean captureBlocks = true;
-    @Nullable private LocatableBlock tickBlock = null;
-    @Nullable private TileEntity tickTileEntity = null;
-    @Nullable private User sourceUser = null;
+    @Nullable private LocatableBlock bridge$TickingBlock = null;
+    @Nullable private TileEntity bridge$TileEntity = null;
+    @Nullable private User bridge$sourceUser = null;
 
     @Shadow public abstract BlockPos getPosition();
-    @Shadow public abstract int getEventID();
-    @Shadow public abstract int getEventParameter();
     @Shadow public abstract Block getBlock();
 
+    @Nullable
     @Override
-    public BlockPos getEventBlockPosition() {
-        return getPosition();
+    public LocatableBlock getBridge$TickingLocatable() {
+        return this.bridge$TickingBlock;
     }
 
     @Override
-    public boolean getCaptureBlocks() {
-        return this.captureBlocks;
-    }
-
-    @Override
-    public int getEventBlockID() {
-        return getEventID();
-    }
-
-    @Override
-    public int getEventBlockParameter() {
-        return getEventParameter();
-    }
-
-    @Override
-    public Block getEventBlock() {
-        return getBlock();
+    public void setBridge$TickingLocatable(@Nullable LocatableBlock tickBlock) {
+        this.bridge$TickingBlock = tickBlock;
     }
 
     @Nullable
     @Override
-    public LocatableBlock getTickBlock() {
-        return this.tickBlock;
+    public TileEntity getBridge$TileEntity() {
+        return this.bridge$TileEntity;
     }
 
     @Override
-    public void setTickBlock(@Nullable LocatableBlock tickBlock) {
-        this.tickBlock = tickBlock;
-    }
-
-    @Nullable
-    @Override
-    public TileEntity getTickTileEntity() {
-        return this.tickTileEntity;
-    }
-
-    @Override
-    public void setTickTileEntity(@Nullable TileEntity tickTileEntity) {
-        this.tickTileEntity = tickTileEntity;
+    public void setBridge$TileEntity(@Nullable TileEntity bridge$TileEntity) {
+        this.bridge$TileEntity = bridge$TileEntity;
     }
 
     @Nullable
     @Override
-    public User getSourceUser() {
-        return this.sourceUser;
+    public User getBridge$sourceUser() {
+        return this.bridge$sourceUser;
     }
 
     @Override
-    public void setSourceUser(User user) {
-        this.sourceUser = user;
+    public void setBridge$sourceUser(@Nullable User user) {
+        this.bridge$sourceUser = user;
     }
 
-    @Override
-    public void setCaptureBlocks(boolean capture) {
-        this.captureBlocks = capture;
-    }
 }

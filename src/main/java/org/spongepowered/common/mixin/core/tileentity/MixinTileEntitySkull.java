@@ -26,47 +26,23 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.tileentity.TileEntitySkull;
-import org.spongepowered.api.block.tileentity.Skull;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfileManager;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.data.processor.common.SkullUtils;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntitySkull;
-
-import java.util.List;
-import java.util.Optional;
+import org.spongepowered.common.bridge.tileentity.SkullBlockEntityBridge;
 
 @Mixin(TileEntitySkull.class)
-@Implements(@Interface(iface = IMixinTileEntitySkull.class, prefix = "skull$"))
-public abstract class MixinTileEntitySkull extends MixinTileEntity implements Skull {
+public abstract class MixinTileEntitySkull extends MixinTileEntity implements SkullBlockEntityBridge {
 
     @Shadow private com.mojang.authlib.GameProfile playerProfile;
     @Shadow private int skullType;
 
-    @Shadow public abstract com.mojang.authlib.GameProfile shadow$getPlayerProfile();
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getSkullData());
-        Optional<RepresentedPlayerData> profileData = get(RepresentedPlayerData.class);
-        if (profileData.isPresent()) {
-            manipulators.add(profileData.get());
-        }
-    }
-
-    @Intrinsic
-    public com.mojang.authlib.GameProfile skull$getPlayerProfile() {
-        return shadow$getPlayerProfile();
-    }
-
-    public void setPlayerProfile(com.mojang.authlib.GameProfile mcProfile, boolean update) {
+    public void bridge$setPlayerProfile(com.mojang.authlib.GameProfile mcProfile, boolean update) {
         this.skullType = 3;
         this.playerProfile = mcProfile;
         if (update) {
@@ -78,14 +54,14 @@ public abstract class MixinTileEntitySkull extends MixinTileEntity implements Sk
      * @author windy - March 13th, 2016
      *
      * @reason Overwrite this method to overload to
-     * {@link #setPlayerProfile(GameProfile, boolean)}. This allows to
+     * {@link #bridge$setPlayerProfile(GameProfile, boolean)}. This allows to
      * set the profile from {@link SkullUtils} without invoking another update.
      *
      * @param mcProfile Minecraft GameProfile
      */
     @Overwrite
     public void setPlayerProfile(com.mojang.authlib.GameProfile mcProfile) {
-        setPlayerProfile(mcProfile, true);
+        bridge$setPlayerProfile(mcProfile, true);
     }
 
     /**
@@ -96,7 +72,25 @@ public abstract class MixinTileEntitySkull extends MixinTileEntity implements Sk
      */
     @Overwrite
     private void updatePlayerProfile() {
-        SkullUtils.updatePlayerProfile((IMixinTileEntitySkull) this);
+        org.spongepowered.api.profile.GameProfile profile = (org.spongepowered.api.profile.GameProfile) ((AccessorTileEntitySkull) this).accessor$getMojangProfile();
+        if (profile != null && profile.getName().isPresent() && !profile.getName().get().isEmpty()) {
+            if (profile.isFilled() && profile.getPropertyMap().containsKey("textures")) {
+                ((TileEntityBridge) this).bridge$markDirty();
+            } else {
+                Sponge.getServer().getGameProfileManager().get(profile.getName().get()).handle((newProfile, thrown) -> {
+                    if (newProfile != null) {
+                        ((SkullBlockEntityBridge) this).bridge$setPlayerProfile((GameProfile) newProfile, false);
+                        ((TileEntityBridge) this).bridge$markDirty();
+                    } else {
+                        SpongeImpl.getLogger().warn("Could not update player GameProfile for Skull: ",
+                                thrown.getMessage());
+                    }
+                    return newProfile;
+                });
+            }
+        } else {
+            ((TileEntityBridge) this).bridge$markDirty();
+        }
     }
 
 }

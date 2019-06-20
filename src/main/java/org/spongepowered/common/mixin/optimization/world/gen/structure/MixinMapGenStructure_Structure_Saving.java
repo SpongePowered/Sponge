@@ -45,37 +45,50 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.category.StructureModCategory;
 import org.spongepowered.common.config.category.StructureSaveCategory;
 
+import java.util.Locale;
+
 @Mixin(MapGenStructure.class)
 public abstract class MixinMapGenStructure_Structure_Saving extends MapGenBase {
-
-    private String modId = "";
-    protected boolean canSaveStructures = true;
 
     @Shadow private MapGenStructureData structureData;
     @Shadow protected Long2ObjectMap<StructureStart> structureMap;
     @Shadow public abstract String getStructureName();
 
-    @Inject(method = "<init>", at = @At(value = "RETURN"))
-    public void onConstruction(CallbackInfo ci) {
-        StructureSaveCategory structureSaveCategory = SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().getStructureSaveCategory();
+    private boolean canSaveStructures = true;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void structureSaving$InitializeState(final CallbackInfo ci) {
+        final StructureSaveCategory structureSaveCategory = SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().getStructureSaveCategory();
         if (structureSaveCategory.isEnabled()) {
-            this.modId = SpongeImplHooks.getModIdFromClass(this.getClass());
-            String structureName = this.getStructureName().toLowerCase();
-            StructureModCategory structureMod = structureSaveCategory.getModList().get(this.modId);
+            final String modId = SpongeImplHooks.getModIdFromClass(this.getClass());
+            final String structureName = this.getStructureName().toLowerCase(Locale.ENGLISH);
+            StructureModCategory structureMod = structureSaveCategory.getModList().get(modId);
             if (structureMod == null) {
                 if (structureSaveCategory.autoPopulateData()) {
-                    structureMod = new StructureModCategory();
-                    structureSaveCategory.getModList().put(this.modId, structureMod);
+                    structureMod = new StructureModCategory(modId);
+                    structureSaveCategory.getModList().put(modId, structureMod);
+                    final Boolean preDefined = structureMod.getStructureList().putIfAbsent(structureName, true);
+                    if (preDefined != null) {
+                        this.canSaveStructures = preDefined;
+                    }
                     SpongeImpl.getGlobalConfigAdapter().save();
                 }
-            } else {
-                Boolean canSave = structureMod.getStructureList().get(structureName);
-                if (canSave != null) {
-                    this.canSaveStructures = canSave;
-                } else if (structureSaveCategory.autoPopulateData()) {
-                    structureMod.getStructureList().put(structureName, true);
-                    SpongeImpl.getGlobalConfigAdapter().save();
+                return;
+            }
+            if (!structureMod.isEnabled()) {
+                this.canSaveStructures = false;
+                if (structureSaveCategory.autoPopulateData()) {
+                    structureMod.getStructureList().putIfAbsent(structureName, false);
                 }
+                SpongeImpl.getGlobalConfigAdapter().save();
+                return;
+            }
+            final Boolean canSave = structureMod.getStructureList().get(structureName);
+            if (canSave != null) {
+                this.canSaveStructures = canSave;
+            } else if (structureSaveCategory.autoPopulateData()) {
+                structureMod.getStructureList().put(structureName, true);
+                SpongeImpl.getGlobalConfigAdapter().save();
             }
         }
     }
@@ -88,7 +101,7 @@ public abstract class MixinMapGenStructure_Structure_Saving extends MapGenBase {
      * supports per-world storage.
      */
     @Overwrite
-    protected void initializeStructureData(World worldIn)
+    protected void initializeStructureData(final World worldIn)
     {
         if (this.structureData == null)
         {
@@ -110,21 +123,21 @@ public abstract class MixinMapGenStructure_Structure_Saving extends MapGenBase {
             }
             else
             {
-                NBTTagCompound nbttagcompound = this.structureData.getTagCompound();
+                final NBTTagCompound nbttagcompound = this.structureData.getTagCompound();
 
-                for (String s : nbttagcompound.getKeySet())
+                for (final String s : nbttagcompound.getKeySet())
                 {
-                    NBTBase nbtbase = nbttagcompound.getTag(s);
+                    final NBTBase nbtbase = nbttagcompound.getTag(s);
 
                     if (nbtbase.getId() == 10)
                     {
-                        NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbtbase;
+                        final NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbtbase;
 
                         if (nbttagcompound1.hasKey("ChunkX") && nbttagcompound1.hasKey("ChunkZ"))
                         {
-                            int i = nbttagcompound1.getInteger("ChunkX");
-                            int j = nbttagcompound1.getInteger("ChunkZ");
-                            StructureStart structurestart = MapGenStructureIO.getStructureStart(nbttagcompound1, worldIn);
+                            final int i = nbttagcompound1.getInteger("ChunkX");
+                            final int j = nbttagcompound1.getInteger("ChunkZ");
+                            final StructureStart structurestart = MapGenStructureIO.getStructureStart(nbttagcompound1, worldIn);
 
                             if (structurestart != null)
                             {

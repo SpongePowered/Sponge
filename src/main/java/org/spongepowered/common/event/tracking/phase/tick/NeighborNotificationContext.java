@@ -32,7 +32,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.bridge.block.BlockBridge;
 
 import javax.annotation.Nullable;
 
@@ -53,7 +53,7 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
     public NeighborNotificationContext source(Object owner) {
         super.source(owner);
         if (owner instanceof LocatableBlock) {
-            final IMixinBlock mixinBlock = BlockUtil.toMixin(((LocatableBlock) owner).getBlockState());
+            final BlockBridge mixinBlock = BlockUtil.toMixin(((LocatableBlock) owner).getBlockState());
             this.setBlockEvents(mixinBlock.allowsBlockEventCreation())
                 .setBulkBlockCaptures(mixinBlock.allowsBlockBulkCapture())
                 .setEntitySpawnEvents(mixinBlock.allowsEntityEventCreation())

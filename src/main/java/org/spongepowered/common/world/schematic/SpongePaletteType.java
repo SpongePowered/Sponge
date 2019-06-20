@@ -25,8 +25,6 @@
 package org.spongepowered.common.world.schematic;
 
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.world.schematic.BlockPalette;
-import org.spongepowered.api.world.schematic.BlockPaletteType;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.common.SpongeCatalogType;

@@ -42,6 +42,7 @@ import java.util.Optional;
 @Mixin(BlockPressurePlate.class)
 public abstract class MixinBlockPressurePlate extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getIsPoweredFor(blockState));

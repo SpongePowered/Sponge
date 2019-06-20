@@ -27,46 +27,36 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-
-import javax.annotation.Nullable;
 
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
     private final BiConsumer<StackFrame, TileEntityTickContext> TILE_ENTITY_MODIFIER =
@@ -127,7 +117,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                     .acceptAndClearIfNotEmpty(entities -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : entities) {
-                            capturedEntities.add(EntityUtil.fromNative(entity));
+                            capturedEntities.add((Entity) entity);
                         }
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });
@@ -140,7 +130,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                 .acceptAndClearIfNotEmpty((id, item) -> {
                     frame.popCause();
                     final List<Entity> entities = new ArrayList<>();
-                    entities.add(EntityUtil.fromNative(item));
+                    entities.add((Entity) item);
                     final Optional<Entity> entity = tickingTile.getWorld().getEntity(id);
                     if (!entity.isPresent()) {
                         // Means that the tile entity is spawning an entity from another entity that doesn't exist
@@ -160,7 +150,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                     frame.pushCause(tickingTile);
                     SpongeCommonEventFactory.callSpawnEntityCustom(entities, context);
                     // Now to clean up the list that is tied to the entity, so that this phase context isn't continuously wrapped
-                    EntityUtil.toMixin(nestedEntity).clearWrappedCaptureList();
+                    ((EntityBridge) nestedEntity).clearWrappedCaptureList();
                 });
         }
     }
@@ -183,7 +173,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     public boolean spawnEntityOrCapture(TileEntityTickContext context, Entity entity, int chunkX, int chunkZ) {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
             .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
-        final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tickingTile;
+        final TileEntityBridge mixinTileEntity = (TileEntityBridge) tickingTile;
 
         // If we do allow events, but there are no event listeners, just spawn.
         // Otherwise, if we forbid events, we want to spawn anyways, don't throw an event.

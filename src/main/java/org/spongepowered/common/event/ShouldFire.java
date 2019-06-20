@@ -26,6 +26,8 @@ package org.spongepowered.common.event;
 
 public class ShouldFire {
 
+    public static boolean PLAYER_CHANGE_CLIENT_SETTINGS_EVENT = false;
+    public static boolean CONSTRUCT_ENTITY_EVENT_PRE = false;
 
     // Format is event class name with underscores
     // For example: SpawnEntityEvent.Spawner becomes SPAWN_ENTITY_EVENT_SPAWNER
@@ -106,4 +108,5 @@ public class ShouldFire {
     public static boolean BREED_ENTITY_EVENT_READY_TO_MATE = false;
     public static boolean BREED_ENTITY_EVENT_FIND_MATE = false;
     public static boolean BREED_ENTITY_EVENT_BREED = false;
+    public static boolean CHANGE_GAME_MODE_EVENT_TARGET_PLAYER = false;
 }

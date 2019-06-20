@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.advancement.ICriterionProgress;
+import org.spongepowered.common.advancement.CriterionProgressBridge;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementProgress;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterionProgress;
 
@@ -48,7 +48,7 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("RedundantCast")
 @Mixin(CriterionProgress.class)
-public abstract class MixinCriterionProgress implements ICriterionProgress, IMixinCriterionProgress {
+public abstract class MixinCriterionProgress implements CriterionProgressBridge, IMixinCriterionProgress {
 
     @Shadow public abstract void obtain();
     @Shadow public abstract void reset();

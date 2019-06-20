@@ -27,25 +27,25 @@ package org.spongepowered.common.mixin.core.network.datasync;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.interfaces.network.datasync.IMixinDataParameter;
+import org.spongepowered.common.bridge.packet.DataParameterBridge;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 @Mixin(DataParameter.class)
-public class MixinDataParameter<T> implements IMixinDataParameter<T> {
+public class MixinDataParameter<T> implements DataParameterBridge<T> {
 
     @Nullable private DataParameterConverter<T> converter;
 
 
     @Override
-    public void setConverter(DataParameterConverter<T> converter) {
+    public void bridge$setDataConverter(DataParameterConverter<T> converter) {
         this.converter = converter;
     }
 
     @Override
-    public Optional<DataParameterConverter<T>> getConverter() {
+    public Optional<DataParameterConverter<T>> bridge$getDataConverter() {
         return Optional.ofNullable(this.converter);
     }
 }

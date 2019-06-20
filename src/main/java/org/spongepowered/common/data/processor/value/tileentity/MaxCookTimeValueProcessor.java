@@ -46,13 +46,14 @@ public class MaxCookTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
         return SpongeValueFactory.boundedBuilder(Keys.MAX_COOK_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(defaultValue)
+                .defaultValue(200)
+                .actualValue(defaultValue)
                 .build();
     }
 
     @Override
     protected boolean set(TileEntityFurnace container, Integer value) {
-        if(container.getStackInSlot(0) == null) return false; //Item cannot be null, the time depends on it
+        if(container.getStackInSlot(0).isEmpty()) return false; //Item cannot be null, the time depends on it
 
         container.setField(3, value);
         return true;
@@ -60,7 +61,7 @@ public class MaxCookTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
 
     @Override
     protected Optional<Integer> getVal(TileEntityFurnace container) {
-        return Optional.of(container.getStackInSlot(0) != null ? container.getField(3) : 0); //Item cannot be null, the time depends on it
+        return Optional.of(container.getStackInSlot(0).isEmpty() ? 0 : container.getField(3)); //Item cannot be null, the time depends on it
     }
 
     @Override

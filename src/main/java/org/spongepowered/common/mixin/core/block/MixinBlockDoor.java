@@ -41,7 +41,6 @@ import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
@@ -52,7 +51,6 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
 import org.spongepowered.common.data.util.DirectionChecker;
 import org.spongepowered.common.data.util.DirectionResolver;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
@@ -145,8 +143,4 @@ public abstract class MixinBlockDoor extends MixinBlock {
                 half == EnumDoorHalf.LOWER ? PortionTypes.BOTTOM : PortionTypes.TOP);
     }
 
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey().replaceAll("tile", "item") + ".name");
-    }
 }

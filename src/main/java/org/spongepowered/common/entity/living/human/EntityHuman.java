@@ -65,8 +65,10 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.mixin.core.network.play.server.AccessorSPacketPlayerListItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -172,7 +174,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Override
     public void readEntityFromNBT(NBTTagCompound tagCompund) {
         super.readEntityFromNBT(tagCompund);
-        String skinUuidString = ((IMixinEntity) this).getSpongeData().getString("skinUuid");
+        String skinUuidString = ((DataCompoundHolder) this).data$getSpongeCompound().getString("skinUuid");
         if (!skinUuidString.isEmpty()) {
             this.updateFakeProfileWithSkin(UUID.fromString(skinUuidString));
         }
@@ -181,7 +183,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Override
     public void writeEntityToNBT(NBTTagCompound tagCompound) {
         super.writeEntityToNBT(tagCompound);
-        NBTTagCompound spongeData = ((IMixinEntity) this).getSpongeData();
+        NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
         if (this.skinUuid != null) {
             spongeData.setString("skinUuid", this.skinUuid.toString());
         } else {
@@ -447,9 +449,11 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      * @param action The action to apply on the tab list
      * @return A new tab list packet
      */
+    @SuppressWarnings("ConstantConditions")
     public SPacketPlayerListItem createPlayerListPacket(SPacketPlayerListItem.Action action) {
         SPacketPlayerListItem packet = new SPacketPlayerListItem(action);
-        packet.players.add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
+        ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas()
+            .add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }
 

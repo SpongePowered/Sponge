@@ -34,7 +34,7 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
-@Plugin(id = "change-experience-event-test", name = "Change experience event test", version = "0.0.0")
+@Plugin(id = "change-experience-event-test", name = "Change experience event test", version = "0.0.0", description = "changes experience")
 public class ChangeExperienceEventTest {
 
     private boolean enabled = false;

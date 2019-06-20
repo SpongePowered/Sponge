@@ -31,8 +31,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -45,7 +45,7 @@ public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<E
     @Override
     public MutableBoundedValue<Double> constructValue(Double defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.SATURATION)
-            .defaultValue(DataConstants.DEFAULT_SATURATION)
+            .defaultValue(Constants.Entity.Player.DEFAULT_SATURATION)
             .minimum(0D)
             .maximum(5.0)
             .actualValue(defaultValue)

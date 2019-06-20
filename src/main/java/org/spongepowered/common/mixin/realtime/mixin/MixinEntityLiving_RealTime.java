@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityLiving.class)
@@ -54,7 +54,7 @@ public abstract class MixinEntityLiving_RealTime extends MixinEntityLivingBase_R
         )
     )
     private void adjustForRealTimeEntityDespawnAge(EntityLiving self, int modifier) {
-        if (((IMixinWorld) this.world).isFake()) {
+        if (((WorldBridge) this.world).isFake()) {
             this.idleTime = modifier;
             return;
         }

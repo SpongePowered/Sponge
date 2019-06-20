@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.block.properties;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.properties.PropertyEnum;
-import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -35,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Map;
 
 @Mixin(value = PropertyEnum.class)
-public abstract class MixinPropertyEnum<E extends Enum<E>> extends MixinPropertyHelper<E> implements EnumTrait<E> {
+public abstract class MixinPropertyEnum<E extends Enum<E>> extends MixinPropertyHelper<E> {
 
     private Integer hashCode;
     @Shadow @Final private ImmutableSet<E> allowedValues;

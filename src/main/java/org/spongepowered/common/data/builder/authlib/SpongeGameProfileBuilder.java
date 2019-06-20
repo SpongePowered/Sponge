@@ -42,14 +42,14 @@ public class SpongeGameProfileBuilder extends AbstractDataBuilder<GameProfile> {
 
     @Override
     protected Optional<GameProfile> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQueries.USER_UUID)) {
+        if (!container.contains(DataQueries.User.UUID)) {
             return Optional.of(SpongeRepresentedPlayerData.NULL_PROFILE);
         }
-        UUID uuid = this.getUUIDByString(container.getString(DataQueries.USER_UUID).get());
-        if (!container.contains(DataQueries.USER_NAME)) {
+        UUID uuid = this.getUUIDByString(container.getString(DataQueries.User.UUID).get());
+        if (!container.contains(DataQueries.User.NAME)) {
             return Optional.of(GameProfile.of(uuid));
         }
-        return Optional.of(GameProfile.of(uuid, container.getString(DataQueries.USER_NAME).get()));
+        return Optional.of(GameProfile.of(uuid, container.getString(DataQueries.User.NAME).get()));
     }
 
     private UUID getUUIDByString(String uuidString) throws InvalidDataException {

@@ -30,17 +30,18 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.bridge.data.VanishingBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
 
-public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
+public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<VanishingBridge, Boolean, Value<Boolean>> {
 
     public VanishCollisionValueProcessor() {
-        super(Entity.class, Keys.VANISH_IGNORES_COLLISION);
+        super(VanishingBridge.class, Keys.VANISH_IGNORES_COLLISION);
     }
 
     @Override
@@ -49,20 +50,20 @@ public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected boolean set(Entity container, Boolean value) {
-        if (!container.world.isRemote) {
-            if (!((IMixinEntity) container).isVanished()) {
-                return false;
-            }
-            ((IMixinEntity) container).setIgnoresCollision(value);
-            return true;
+    protected boolean set(VanishingBridge container, Boolean value) {
+        if (container instanceof Entity && ((Entity) container).world.isRemote) {
+            return false;
         }
-        return false;
+        if (!container.vanish$isVanished()) {
+            return false;
+        }
+        container.vanish$setUncollideable(value);
+        return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(((IMixinEntity) container).ignoresCollision());
+    protected Optional<Boolean> getVal(VanishingBridge container) {
+        return Optional.of(container.vanish$isUncollideable());
     }
 
     @Override

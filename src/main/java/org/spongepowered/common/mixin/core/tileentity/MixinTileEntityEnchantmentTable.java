@@ -24,40 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import net.minecraft.tileentity.TileEntityEnchantmentTable;
-import org.spongepowered.api.block.tileentity.EnchantmentTable;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
-
-import java.util.List;
 
 @NonnullByDefault
 @Mixin(TileEntityEnchantmentTable.class)
-public abstract class MixinTileEntityEnchantmentTable extends MixinTileEntity implements EnchantmentTable, IMixinCustomNameable {
-
-    @Shadow private String customName;
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(of("CustomName"), this.customName);
-        return container;
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        if (((TileEntityEnchantmentTable) (Object) this).hasCustomName()) {
-            manipulators.add(get(DisplayNameData.class).get());
-        }
-    }
+public abstract class MixinTileEntityEnchantmentTable extends MixinTileEntity implements IMixinCustomNameable {
 
     @Override
     public void setCustomDisplayName(String customName) {

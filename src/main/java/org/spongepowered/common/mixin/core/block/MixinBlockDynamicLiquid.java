@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
@@ -46,10 +45,10 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.util.Random;
@@ -59,22 +58,22 @@ import java.util.function.BiConsumer;
 public abstract class MixinBlockDynamicLiquid extends MixinBlockLiquid {
 
     @Override
-    public BiConsumer<CauseStackManager.StackFrame, IMixinWorldServer> getTickFrameModifier() {
+    public BiConsumer<CauseStackManager.StackFrame, ServerWorldBridge> getTickFrameModifier() {
         return (frame, world) -> frame.addContext(EventContextKeys.LIQUID_FLOW, (World) world);
     }
 
     @Inject(method = "canFlowInto", at = @At("HEAD"), cancellable = true)
     private void onCanFlowInto(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<Boolean> cir) {
-        if (!((IMixinWorld) worldIn).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE &&
-            SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos).isCancelled()) {
+        if (!((WorldBridge) worldIn).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE &&
+            SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos).isCancelled()) {
             cir.setReturnValue(false);
         }
     }
 
     @Inject(method = "updateTick", at = @At("HEAD"), cancellable = true)
     private void onUpdateTickHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        if (!((IMixinWorld) worldIn).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos).isCancelled()) {
+        if (!((WorldBridge) worldIn).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos).isCancelled()) {
                 ci.cancel();
             }
         }

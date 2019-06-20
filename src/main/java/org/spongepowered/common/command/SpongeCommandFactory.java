@@ -32,14 +32,11 @@ import static org.spongepowered.api.command.args.GenericArguments.flags;
 import static org.spongepowered.api.command.args.GenericArguments.literal;
 import static org.spongepowered.api.command.args.GenericArguments.optional;
 import static org.spongepowered.api.command.args.GenericArguments.optionalWeak;
-import static org.spongepowered.api.command.args.GenericArguments.plugin;
 import static org.spongepowered.api.command.args.GenericArguments.seq;
 import static org.spongepowered.api.command.args.GenericArguments.string;
 import static org.spongepowered.api.command.args.GenericArguments.world;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
-import org.spongepowered.common.command.args.FilteredPluginsCommandElement;
-import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -88,6 +85,12 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.command.args.FilteredPluginsCommandElement;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.MetricsCategory;
 import org.spongepowered.common.config.type.ConfigBase;
@@ -97,15 +100,10 @@ import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -281,7 +279,7 @@ public class SpongeCommandFactory {
                     if (!world.isPresent() && this.requireWorldLoaded) {
                         throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
-                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorldInfo) properties).getConfigAdapter(),
+                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((WorldInfoBridge) properties).getConfigAdapter(),
                         world.orElse(null), src, args)));
                     ++successes;
                 }
@@ -391,10 +389,10 @@ public class SpongeCommandFactory {
                 }
 
                 protected Text getChunksInfo(WorldServer worldserver) {
-                    if (((IMixinWorld) worldserver).isFake() || worldserver.getWorldInfo() == null) {
+                    if (((WorldBridge) worldserver).isFake() || worldserver.getWorldInfo() == null) {
                         return Text.of(NEWLINE_TEXT, "Fake world");
                     }
-                    return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(((IMixinWorldServer) worldserver).getDimensionId()), NEWLINE_TEXT,
+                    return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(((ServerWorldBridge) worldserver).bridge$getDimensionId()), NEWLINE_TEXT,
                         key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), NEWLINE_TEXT,
                         key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), NEWLINE_TEXT,
                         key("Entities: "), value(worldserver.loadedEntityList.size()), NEWLINE_TEXT,
@@ -523,7 +521,7 @@ public class SpongeCommandFactory {
                     src.sendMessage(Text.of(TextColors.RED, "Players must execute this command!"));
                     return CommandResult.empty();
                 }
-                final EntityPlayerMP entityPlayerMP = EntityUtil.toNative((Player) src);
+                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Player) src;
                 final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F);
                 if (rayTraceResult.typeOfHit != RayTraceResult.Type.BLOCK) {
                     src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,
@@ -532,7 +530,7 @@ public class SpongeCommandFactory {
                 }
                 final WorldServer worldServer = (WorldServer) entityPlayerMP.world;
                 final Chunk chunk = worldServer.getChunk(rayTraceResult.getBlockPos());
-                final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+                final ChunkBridge mixinChunk = (ChunkBridge) chunk;
                 final IBlockState blockState = worldServer.getBlockState(rayTraceResult.getBlockPos());
                 final BlockState spongeState = BlockUtil.fromNative(blockState);
                 src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Type: ", TextColors.BLUE, TextStyles.RESET, spongeState.getId()));
@@ -551,7 +549,7 @@ public class SpongeCommandFactory {
                 if (!(src instanceof Player)) {
                     return CommandResult.empty();
                 }
-                final EntityPlayerMP entityPlayerMP = EntityUtil.toNative((Player) src);
+                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Player) src;
                 final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F, true);
                 if (rayTraceResult.typeOfHit != RayTraceResult.Type.ENTITY) {
                     src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,
@@ -559,8 +557,8 @@ public class SpongeCommandFactory {
                     return CommandResult.empty();
                 }
                 final Entity entityHit = rayTraceResult.entityHit;
-                final IMixinEntity mixinEntity = EntityUtil.toMixin(entityHit);
-                final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entityHit);
+                final EntityBridge mixinEntity = (EntityBridge) entityHit;
+                final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entityHit;
                 final Text.Builder builder = Text.builder();
                 builder.append(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "EntityType: "))
                     .append(Text.of(TextColors.BLUE, TextStyles.RESET, spongeEntity.getType().getId()));
@@ -844,11 +842,11 @@ public class SpongeCommandFactory {
 
     private static void printWorldTickTime(CommandSource src, World world) {
         final long[] worldTickTimes = ((IMixinMinecraftServer) SpongeImpl.getServer()).
-            getWorldTickTimes(((IMixinWorldServer) world).getDimensionId());
+            getWorldTickTimes(((ServerWorldBridge) world).bridge$getDimensionId());
         final double worldMeanTickTime = mean(worldTickTimes) * 1.0e-6d;
         final double worldTps = Math.min(1000.0 / worldMeanTickTime, 20);
         src.sendMessage(Text.of("World [", TextColors.DARK_GREEN, world.getName(), TextColors.RESET, "] (",
-            ((IMixinWorldServer) world).getDimensionId(),
+            ((ServerWorldBridge) world).bridge$getDimensionId(),
             ") TPS: ", TextColors.LIGHT_PURPLE,
             THREE_DECIMAL_DIGITS_FORMATTER.format(worldTps), TextColors.RESET,  ", Mean: ", TextColors.RED,
             THREE_DECIMAL_DIGITS_FORMATTER.format(worldMeanTickTime), "ms"));

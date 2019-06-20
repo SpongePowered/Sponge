@@ -175,6 +175,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
                 width, height, ingredients, ItemStackUtil.toNative(this.result)));
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ShapedCraftingRecipe.Builder from(ShapedCraftingRecipe value) {
         this.aisle.clear();

@@ -36,7 +36,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -96,8 +95,8 @@ public final class InteractEntityPacketState extends BasicPacketState {
             // Something happened?
             return;
         }
-        final World spongeWorld = EntityUtil.getSpongeWorld(player);
-        EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
+        final World spongeWorld = (World) player.world;
+        ((Entity) entity).setNotifier(player.getUniqueID());
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
@@ -116,7 +115,7 @@ public final class InteractEntityPacketState extends BasicPacketState {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
-                final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                final List<Entity> items = entities.stream().map(entity1 -> (Entity) entity1).collect(Collectors.toList());
                 SpongeCommonEventFactory.callSpawnEntity(items, phaseContext);
             });
         }

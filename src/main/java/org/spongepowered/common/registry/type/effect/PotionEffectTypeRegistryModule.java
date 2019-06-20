@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type.effect;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.potion.Potion;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
@@ -45,6 +46,23 @@ import java.util.Optional;
 
 public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<PotionEffectType>,
         AlternateCatalogRegistryModule<PotionEffectType> {
+
+    public static final Map<String, String> potionMapping = ImmutableMap.<String, String>builder()
+            .put("effect.damageBoost", "effect.strength")
+            .put("effect.fireResistance", "effect.fire_resistance")
+            .put("effect.harm", "effect.harming")
+            .put("effect.heal", "effect.healing")
+            .put("effect.invisibility", "effect.invisibility")
+            .put("effect.jump", "effect.leaping")
+            .put("effect.luck", "effect.luck")
+            .put("effect.moveSlowdown", "effect.slowness")
+            .put("effect.moveSpeed", "effect.swiftness")
+            .put("effect.nightVision", "effect.night_vision")
+            .put("effect.poison", "effect.poison")
+            .put("effect.regeneration", "effect.regeneration")
+            .put("effect.waterBreathing", "effect.water_breathing")
+            .put("effect.weakness", "effect.weakness")
+            .build();
 
     public static PotionEffectTypeRegistryModule getInstance() {
         return Holder.INSTANCE;

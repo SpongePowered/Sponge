@@ -41,10 +41,10 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.data.VanishingBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.mixin.core.network.datasync.IMixinEntityDataManager;
+import org.spongepowered.common.mixin.core.network.datasync.AccessorEntityDataManager;
 import org.spongepowered.common.network.SpoofedEntityDataManager;
 
 import java.util.Collection;
@@ -53,7 +53,7 @@ import java.util.Set;
 @Mixin(EntityTrackerEntry.class)
 public abstract class MixinEntityTrackerEntry {
 
-    @Shadow @Final public Entity trackedEntity;
+    @Shadow @Final private Entity trackedEntity;
     @Shadow @Final public Set<EntityPlayerMP> trackingPlayers;
 
     @Shadow public abstract void sendToTrackingAndSelf(Packet<?> packetIn);
@@ -118,14 +118,14 @@ public abstract class MixinEntityTrackerEntry {
 
     @Inject(method = "isVisibleTo", at = @At("HEAD"), cancellable = true)
     private void onVisibilityCheck(EntityPlayerMP entityPlayerMP, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-        if (((IMixinEntity) this.trackedEntity).isVanished()) {
+        if (((VanishingBridge) this.trackedEntity).vanish$isVanished()) {
             callbackInfoReturnable.setReturnValue(false);
         }
     }
 
     @Inject(method = "sendPacketToTrackedPlayers", at = @At("HEAD"), cancellable = true)
     private void checkIfTrackedIsInvisiblePriorToSendingPacketToPlayers(Packet<?> packet, CallbackInfo callBackInfo) {
-        if (((IMixinEntity) this.trackedEntity).isVanished()) {
+        if (((VanishingBridge) this.trackedEntity).vanish$isVanished()) {
             callBackInfo.cancel();
         }
     }
@@ -133,16 +133,16 @@ public abstract class MixinEntityTrackerEntry {
     @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityProperties;<init>(ILjava/util/Collection;)V"))
     private Collection<IAttributeInstance> spongeInjectHealth(Collection<IAttributeInstance> set) {
         if (this.trackedEntity instanceof EntityPlayerMP) {
-            ((IMixinEntityPlayerMP) this.trackedEntity).injectScaledHealth(set, false);
+            ((ServerPlayerEntityBridge) this.trackedEntity).injectScaledHealth(set, false);
         }
         return set;
     }
 
     @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityMetadata;<init>(ILnet/minecraft/network/datasync/EntityDataManager;Z)V"))
     private EntityDataManager spongeRelocateDataManager(EntityDataManager manager) {
-        final Entity player = ((IMixinEntityDataManager) manager).getEntity();
-        if (player instanceof IMixinEntityPlayerMP) {
-            if (((IMixinEntityPlayerMP) player).isHealthScaled()) {
+        final Entity player = ((AccessorEntityDataManager) manager).spongeImpl$getEntity();
+        if (player instanceof ServerPlayerEntityBridge) {
+            if (((ServerPlayerEntityBridge) player).isHealthScaled()) {
                 return new SpoofedEntityDataManager(manager, player);
             }
         }
@@ -152,7 +152,7 @@ public abstract class MixinEntityTrackerEntry {
     @ModifyArg(method = "updatePlayerEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityProperties;<init>(ILjava/util/Collection;)V"))
     private Collection<IAttributeInstance> spongeInjectHealthForUpdate(Collection<IAttributeInstance> set) {
         if (this.trackedEntity instanceof EntityPlayerMP) {
-            ((IMixinEntityPlayerMP) this.trackedEntity).injectScaledHealth(set, false);
+            ((ServerPlayerEntityBridge) this.trackedEntity).injectScaledHealth(set, false);
         }
         return set;
     }

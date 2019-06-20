@@ -39,25 +39,23 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.monster.Monster;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
-import org.spongepowered.common.mixin.core.entity.MixinEntityCreature;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(EntityMob.class)
-public abstract class MixinEntityMob extends MixinEntityCreature implements Monster {
+public abstract class MixinEntityMob extends MixinEntityLiving {
 
     /**
      * @author gabizou - April 8th, 2016
@@ -93,7 +91,7 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
         final DamageSource damageSource = DamageSource.causeMobDamage((EntityMob) (Object) this);
         Sponge.getCauseStackManager().pushCause(damageSource);
         final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions,
-                EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
+            (org.spongepowered.api.entity.Entity) targetEntity, knockbackModifier, originalBaseDamage);
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         if (event.isCancelled()) {
@@ -149,8 +147,8 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
     protected boolean isValidLightLevel()
     {
         final BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
-        final Chunk chunk = ((IMixinChunkProviderServer) this.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
-        if (chunk == null || !((IMixinChunk) chunk).isActive()) {
+        final Chunk chunk = ((ServerChunkProviderBridge) this.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
+        if (chunk == null || !((ChunkBridge) chunk).isActive()) {
             return false;
         }
 
@@ -165,10 +163,10 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
             if (this.world.isThundering()) {
                 int j = this.world.getSkylightSubtracted();;
                 this.world.setSkylightSubtracted(10);
-                passes = !((IMixinWorldServer) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9));
+                passes = !((ServerWorldBridge) this.world).bridge$isLightLevel(chunk, blockpos, this.rand.nextInt(9));
                 this.world.setSkylightSubtracted(j);
             } else { 
-                passes = !((IMixinWorldServer) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9)); 
+                passes = !((ServerWorldBridge) this.world).bridge$isLightLevel(chunk, blockpos, this.rand.nextInt(9));
             }
 
             return passes;

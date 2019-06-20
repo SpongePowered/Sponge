@@ -34,12 +34,12 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.advancement.ITrigger;
+import org.spongepowered.common.advancement.TriggerBridge;
 import org.spongepowered.common.advancement.UnknownFilteredTriggerConfiguration;
 
 @Implements(@Interface(iface = Trigger.class, prefix = "type$"))
 @Mixin(ICriterionTrigger.class)
-public interface MixinICriterionTrigger extends ITrigger {
+public interface MixinICriterionTrigger extends TriggerBridge {
 
     @Shadow ResourceLocation getId();
 

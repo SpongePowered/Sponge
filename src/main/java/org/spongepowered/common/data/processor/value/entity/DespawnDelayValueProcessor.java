@@ -30,10 +30,10 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.common.bridge.entity.ItemEntityBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -46,22 +46,22 @@ public class DespawnDelayValueProcessor extends AbstractSpongeValueProcessor<Ent
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.DESPAWN_DELAY)
-                .defaultValue(DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY)
-                .minimum(DataConstants.Entity.Item.MIN_DESPAWN_DELAY)
-                .maximum(DataConstants.Entity.Item.MAX_DESPAWN_DELAY)
+                .defaultValue(Constants.Entity.Item.DEFAULT_DESPAWN_DELAY)
+                .minimum(Constants.Entity.Item.MIN_DESPAWN_DELAY)
+                .maximum(Constants.Entity.Item.MAX_DESPAWN_DELAY)
                 .actualValue(defaultValue)
                 .build();
     }
 
     @Override
     protected boolean set(EntityItem container, Integer value) {
-        ((IMixinEntityItem) container).setDespawnDelay(value);
+        ((ItemEntityBridge) container).bridge$setDespawnDelay(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(EntityItem container) {
-        return Optional.of(((IMixinEntityItem) container).getDespawnDelay());
+        return Optional.of(((ItemEntityBridge) container).bridge$getDespawnDelay());
     }
 
     @Override

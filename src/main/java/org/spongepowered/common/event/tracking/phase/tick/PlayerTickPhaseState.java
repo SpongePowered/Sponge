@@ -32,7 +32,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -67,7 +66,7 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
             context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
                 final ArrayList<Entity> capturedEntities = new ArrayList<>();
                 for (EntityItem entity : entities) {
-                    capturedEntities.add(EntityUtil.fromNative(entity));
+                    capturedEntities.add((Entity) entity);
                 }
 
                 SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);

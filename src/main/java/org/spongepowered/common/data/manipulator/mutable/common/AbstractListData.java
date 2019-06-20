@@ -115,4 +115,10 @@ public abstract class AbstractListData<E, M extends ListData<E, M, I>, I extends
     public List<E> asList() {
         return getValue();
     }
+
+    @Override
+    public String toString() {
+        return this.immutableClass + "{" +
+               "List=" + this.getValue() + '}';
+    }
 }

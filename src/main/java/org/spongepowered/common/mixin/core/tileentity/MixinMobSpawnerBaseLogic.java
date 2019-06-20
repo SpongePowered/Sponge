@@ -31,7 +31,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import org.apache.logging.log4j.Level;
@@ -44,57 +43,48 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+
+import javax.annotation.Nullable;
 
 @Mixin(MobSpawnerBaseLogic.class)
 public abstract class MixinMobSpawnerBaseLogic {
 
-    private static final String
-            ANVIL_CHUNK_LOADER_READ_ENTITY =
-            "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;";
-
-    @Shadow private int spawnRange;
-
-    @Shadow public abstract BlockPos getSpawnerPosition();
-    @Shadow public abstract World getSpawnerWorld();
-
     /**
      * @author gabizou - January 30th, 2016
      * @author gabizou - Updated April 10th, 2016 - Update for 1.9 since it's passed to the AnvilChunkLoader
-     *
-     * Redirects to throw a ConstructEntityEvent.PRE
-     * @param world
-     * @return
-     */
-    @Redirect(method = "updateSpawner", at = @At(value = "INVOKE", target = ANVIL_CHUNK_LOADER_READ_ENTITY))
-    private Entity onConstruct(NBTTagCompound compound, World world, double x, double y, double z, boolean doesNotForceSpawn) {
-        return readEntityFromCompoundAtWorld(compound, world, x, y, z, doesNotForceSpawn);
-
-    }
-
-    /**
-     * @author gabizou - April 10th, 2016
+     *     * @reason Because this is self referencing with passengers
+     * being recursively read from compound, this needs to remain static and
+     * isolated as it's own method.
      *
      * This is close to a verbatim copy of {@link AnvilChunkLoader#readWorldEntityPos(NBTTagCompound, World, double, double, double, boolean)}
      * with the added bonus of throwing events before entities are constructed with appropriate causes.
      *
+     * Redirects to throw a ConstructEntityEvent.PRE
      * @param compound The compound of the entity to spawn with
      * @param world The world to spawn at
      * @param x The x position
      * @param y The y position
      * @param z The z position
-     * @param attemptToSpawn If false, the entity is not going to be spawned into the world yet
+     * @param doesNotForceSpawn If false, the entity is not going to be spawned into the world yet
      * @return The entity, if successfully created
      */
-    private static Entity readEntityFromCompoundAtWorld(NBTTagCompound compound, World world, double x, double y, double z, boolean attemptToSpawn) {
+    @Nullable
+    @Redirect(method = "updateSpawner",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;"
+        )
+    )
+    private Entity impl$ThrowEventAndConstruct(NBTTagCompound compound, World world, double x, double y, double z, boolean doesNotForceSpawn) {
         final String entityTypeString = compound.getString(NbtDataUtil.ENTITY_TYPE_ID);
         final Class<? extends Entity> clazz = SpongeImplHooks.getEntityClass(new ResourceLocation(entityTypeString));
         if (clazz == null) {
@@ -113,14 +103,16 @@ public abstract class MixinMobSpawnerBaseLogic {
         if (type == null) {
             return null;
         }
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.MOB_SPAWNER);
-            Transform<org.spongepowered.api.world.World> transform = new Transform<>(
+        if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.MOB_SPAWNER);
+                Transform<org.spongepowered.api.world.World> transform = new Transform<>(
                     ((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
-            SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
-                return null;
+                ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
+                SpongeImpl.postEvent(event);
+                if (event.isCancelled()) {
+                    return null;
+                }
             }
         }
         Entity entity;
@@ -136,7 +128,7 @@ public abstract class MixinMobSpawnerBaseLogic {
 
         entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
 
-        if (attemptToSpawn && !world.spawnEntity(entity)) {
+        if (doesNotForceSpawn && !world.spawnEntity(entity)) {
             return null;
         }
 
@@ -145,7 +137,7 @@ public abstract class MixinMobSpawnerBaseLogic {
             final NBTTagList passengerList = compound.getTagList(NbtDataUtil.Minecraft.PASSENGERS, NbtDataUtil.TAG_COMPOUND);
 
             for (int i = 0; i < passengerList.tagCount(); i++) {
-                final Entity passenger = readEntityFromCompoundAtWorld(passengerList.getCompoundTagAt(i), world, x, y, z, attemptToSpawn);
+                final Entity passenger = impl$ThrowEventAndConstruct(passengerList.getCompoundTagAt(i), world, x, y, z, doesNotForceSpawn);
                 if (passenger != null) {
                     passenger.startRiding(entity, true);
                 }

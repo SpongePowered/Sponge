@@ -37,23 +37,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.inventory.IMixinCarriedInventory;
+import org.spongepowered.common.mixin.api.minecraft.entity.passive.MixinEntityAnimal_API;
+import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
+import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
 @Mixin(AbstractHorse.class)
-@Implements(@Interface(iface = Horse.class, prefix = "horse$", unique = true))
-public abstract class MixinAbstractHorse extends MixinEntityAnimal implements Horse {
+public abstract class MixinAbstractHorse extends MixinEntityAgeable implements Horse {
 
     @Shadow protected ContainerHorseChest horseChest;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return ((CarriedInventory) this.horseChest);
-    }
-
     @Inject(method = "initHorseChest", at = @At("RETURN"))
-    private void onInitHorseChest(CallbackInfo ci) {
-        if (horseChest instanceof IMixinCarriedInventory) {
-            ((IMixinCarriedInventory) horseChest).setCarrier(this);
+    private void onInitHorseChest(final CallbackInfo ci) {
+        if (this.horseChest instanceof IMixinCarriedInventory) {
+            ((IMixinCarriedInventory) this.horseChest).setCarrier(this);
         }
     }
 }

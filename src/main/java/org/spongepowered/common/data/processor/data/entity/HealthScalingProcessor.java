@@ -35,7 +35,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthScaleData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 
 import java.util.Optional;
 
@@ -58,7 +58,7 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<En
         if (value > Float.MAX_VALUE) {
             return false;
         }
-        final IMixinEntityPlayerMP mixinPlayer = (IMixinEntityPlayerMP) dataHolder;
+        final ServerPlayerEntityBridge mixinPlayer = (ServerPlayerEntityBridge) dataHolder;
         if (value == 20D) {
             mixinPlayer.setHealthScale(20);
             mixinPlayer.setHealthScaled(true);
@@ -70,7 +70,7 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<En
 
     @Override
     protected Optional<Double> getVal(EntityPlayerMP dataHolder) {
-        final IMixinEntityPlayerMP mixinPlayer = (IMixinEntityPlayerMP) dataHolder;
+        final ServerPlayerEntityBridge mixinPlayer = (ServerPlayerEntityBridge) dataHolder;
         return Optional.ofNullable(mixinPlayer.isHealthScaled() ? mixinPlayer.getHealthScale() : null);
     }
 
@@ -97,12 +97,12 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<En
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (!(container instanceof IMixinEntityPlayerMP)) {
+        if (!(container instanceof ServerPlayerEntityBridge)) {
             return DataTransactionResult.failNoData();
         }
-        final ImmutableValue<Double> current = constructImmutableValue(((IMixinEntityPlayerMP) container).getHealthScale());
-        ((IMixinEntityPlayerMP) container).setHealthScale(20D);
-        ((IMixinEntityPlayerMP) container).setHealthScaled(false);
+        final ImmutableValue<Double> current = constructImmutableValue(((ServerPlayerEntityBridge) container).getHealthScale());
+        ((ServerPlayerEntityBridge) container).setHealthScale(20D);
+        ((ServerPlayerEntityBridge) container).setHealthScaled(false);
         return DataTransactionResult.successRemove(current);
     }
 }

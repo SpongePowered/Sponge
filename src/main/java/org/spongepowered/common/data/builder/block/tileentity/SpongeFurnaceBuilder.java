@@ -44,8 +44,8 @@ public class SpongeFurnaceBuilder extends SpongeLockableBuilder<Furnace> {
     protected Optional<Furnace> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(furnace -> {
             final TileEntityFurnace tileEntityFurnace = (TileEntityFurnace) furnace;
-            if (container.contains(DataQueries.CUSTOM_NAME)) {
-                tileEntityFurnace.setCustomInventoryName(container.getString(DataQueries.CUSTOM_NAME).get());
+            if (container.contains(DataQueries.BlockEntity.CUSTOM_NAME)) {
+                tileEntityFurnace.setCustomInventoryName(container.getString(DataQueries.BlockEntity.CUSTOM_NAME).get());
             }
 
             if (!container.contains(Keys.PASSED_BURN_TIME.getQuery(), Keys.MAX_BURN_TIME.getQuery(),

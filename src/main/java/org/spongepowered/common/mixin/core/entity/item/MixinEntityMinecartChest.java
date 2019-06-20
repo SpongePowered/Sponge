@@ -29,19 +29,16 @@ import org.spongepowered.api.entity.vehicle.minecart.ChestMinecart;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
 @Mixin(EntityMinecartChest.class)
 @Implements(@Interface(iface = ChestMinecart.class, prefix = "minecart$"))
 public abstract class MixinEntityMinecartChest extends MixinEntityMinecartContainer {
 
-    @SuppressWarnings("unchecked")
-    @Inject(method = "<init>*", at = @At("RETURN"))
-    private void onMinecartChestConstructed(CallbackInfo ci) {
-        // Override default Lens with GridLens
-        this.lens = new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
+    @Override
+    protected Lens createLensOnConstruct() {
+        return new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
     }
+
 }

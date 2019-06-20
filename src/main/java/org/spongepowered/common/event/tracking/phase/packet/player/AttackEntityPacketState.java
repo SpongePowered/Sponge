@@ -38,11 +38,9 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -99,8 +97,8 @@ public final class AttackEntityPacketState extends BasicPacketState {
             // Something happened?
             return;
         }
-        final World spongeWorld = EntityUtil.getSpongeWorld(player);
-        EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
+        final World spongeWorld = (World) player.world;
+        ((Entity) entity).setNotifier(player.getUniqueID());
 
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
@@ -135,7 +133,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         final List<Entity> itemEntities = items.stream()
                             .map(data -> data.create(((WorldServer) player.world)))
-                            .map(EntityUtil::fromNative)
+                            .map(entity1 -> (Entity) entity1)
                             .collect(Collectors.toList());
                         frame.pushCause(player);
                         frame.pushCause(affectedEntity.get());
@@ -161,7 +159,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
                     if (!attackedEntities.isPresent()) {
                         continue;
                     }
-                    final List<Entity> items = entry.getValue().stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                    final List<Entity> items = entry.getValue().stream().map(entity1 -> (Entity) entity1).collect(Collectors.toList());
 
                     final DropItemEvent.Destruct destruct =
                         SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), items);

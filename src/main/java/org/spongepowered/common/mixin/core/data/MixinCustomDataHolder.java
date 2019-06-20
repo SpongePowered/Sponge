@@ -39,7 +39,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 
 import java.util.Iterator;
 import java.util.List;
@@ -49,12 +49,12 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin({TileEntity.class, Entity.class, SpongeUser.class})
-public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
+public abstract class MixinCustomDataHolder implements CustomDataHolderBridge {
 
     private List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
     private List<DataView> failedData = Lists.newArrayList();
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "Duplicates"})
     @Override
     public DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function) {
         @Nullable DataManipulator<?, ?> existingManipulator = null;
@@ -111,9 +111,7 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
     @Override
     public boolean supportsCustom(Key<?> key) {
         return this.manipulators.stream()
-                .filter(manipulator -> manipulator.supports(key))
-                .findFirst()
-                .isPresent();
+                .anyMatch(manipulator -> manipulator.supports(key));
     }
 
     @Override

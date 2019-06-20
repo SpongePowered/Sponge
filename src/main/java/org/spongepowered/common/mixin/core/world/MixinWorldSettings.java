@@ -30,36 +30,29 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonParseException;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
-import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 
 import java.io.IOException;
@@ -70,20 +63,15 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(WorldSettings.class)
-@Implements(value = @Interface(iface = WorldArchetype.class, prefix = "archetype$"))
-public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldSettings {
+public abstract class MixinWorldSettings implements WorldSettingsBridge {
 
     @Shadow private boolean commandsAllowed;
     @Shadow private String generatorOptions;
 
-    @Shadow public abstract long shadow$getSeed();
     @Shadow public abstract GameType getGameType();
-    @Shadow public abstract boolean getHardcoreEnabled();
-    @Shadow public abstract boolean isMapFeaturesEnabled();
-    @Shadow public abstract WorldType getTerrainType();
-    @Shadow public abstract boolean shadow$areCommandsAllowed();
 
-    @Nullable private String id, name;
+    @Nullable private String id;
+    @Nullable private String name;
     private DimensionType dimensionType = DimensionTypes.OVERWORLD;
     private Difficulty difficulty = Difficulties.NORMAL;
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
@@ -99,10 +87,11 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     private Collection<WorldGeneratorModifier> generatorModifiers = ImmutableList.of();
     private boolean seedRandomized = false;
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
-    private void onConstruct(WorldInfo info, CallbackInfo ci) {
+    private void impl$reAssignValuesFromIncomingInfo(WorldInfo info, CallbackInfo ci) {
         final WorldProperties properties = (WorldProperties) info;
-        if (((IMixinWorldInfo) properties).getConfigAdapter() != null) {
+        if (((WorldInfoBridge) info).getConfigAdapter() != null) {
             this.dimensionType = properties.getDimensionType();
             this.difficulty = properties.getDifficulty();
             this.serializationBehavior = properties.getSerializationBehavior();
@@ -118,18 +107,23 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
         }
     }
 
-    @Intrinsic
-    public long archetype$getSeed() {
-        return this.shadow$getSeed();
+    @Override
+    public String bridge$getId() {
+        return this.id;
     }
 
     @Override
-    public boolean isSeedRandomized() {
+    public String bridge$getName() {
+        return this.name;
+    }
+
+    @Override
+    public boolean bridge$isSeedRandomized() {
         return this.seedRandomized;
     }
 
     @Override
-    public void setRandomSeed(boolean state) {
+    public void bridge$setRandomSeed(boolean state) {
         this.seedRandomized = state;
     }
 
@@ -144,53 +138,29 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
         }
         // If null, assume custom
         if (settings == null) {
-            settings = DataContainer.createNew().set(DataQueries.WORLD_CUSTOM_SETTINGS, generatorOptions);
+            settings = DataContainer.createNew().set(DataQueries.General.WORLD_CUSTOM_SETTINGS, generatorOptions);
         }
         this.generatorSettings = settings;
     }
 
-    @Override
-    public GameMode getGameMode() {
-        return (GameMode) (Object) this.getGameType();
-    }
 
     @Override
-    public GeneratorType getGeneratorType() {
-        return (GeneratorType) this.getTerrainType();
-    }
-
-    @Override
-    public boolean usesMapFeatures() {
-        return this.isMapFeaturesEnabled();
-    }
-
-    @Override
-    public boolean isHardcore() {
-        return this.getHardcoreEnabled();
-    }
-
-    @Intrinsic
-    public boolean archetype$areCommandsAllowed() {
-        return this.shadow$areCommandsAllowed();
-    }
-
-    @Override
-    public boolean doesGenerateBonusChest() {
+    public boolean bridge$getGeneratesBonusChest() {
         return this.generateBonusChest;
     }
 
     @Override
-    public DimensionType getDimensionType() {
+    public DimensionType bridge$getDimensionType() {
         return this.dimensionType;
     }
 
     @Override
-    public Difficulty getDifficulty() {
+    public Difficulty bridge$getDifficulty() {
         return this.difficulty;
     }
 
     @Override
-    public PortalAgentType getPortalAgentType() {
+    public PortalAgentType bridge$getPortalAgentType() {
         if (this.portalAgentType == null) {
             this.portalAgentType = PortalAgentTypes.DEFAULT;
         }
@@ -198,32 +168,32 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public void setPortalAgentType(PortalAgentType type) {
+    public void bridge$setPortalAgentType(PortalAgentType type) {
         this.portalAgentType = type;
     }
 
     @Override
-    public DataContainer getGeneratorSettings() {
+    public DataContainer bridge$getGeneratorSettings() {
         return this.generatorSettings;
     }
 
     @Override
-    public SerializationBehavior getSerializationBehavior() {
+    public SerializationBehavior bridg$getSerializationBehavior() {
         return this.serializationBehavior;
     }
 
     @Override
-    public boolean isEnabled() {
+    public boolean bridge$isEnabled() {
         return this.isEnabled;
     }
 
     @Override
-    public boolean loadOnStartup() {
+    public boolean bridge$loadOnStartup() {
         return this.loadOnStartup;
     }
 
     @Override
-    public boolean doesKeepSpawnLoaded() {
+    public boolean bridge$doesKeepSpawnLoaded() {
         if (this.keepSpawnLoaded == null) {
             this.keepSpawnLoaded = this.dimensionType == DimensionTypes.OVERWORLD;
         }
@@ -231,32 +201,22 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public boolean doesGenerateSpawnOnLoad() {
+    public boolean bridge$generateSpawnOnLoad() {
         return this.generateSpawnOnLoad;
     }
 
     @Override
-    public boolean isPVPEnabled() {
+    public boolean bridge$isPVPEnabled() {
         return this.pvpEnabled;
     }
 
     @Override
-    public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
+    public Collection<WorldGeneratorModifier> bridge$getGeneratorModifiers() {
         return this.generatorModifiers;
     }
 
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public void setId(String id) {
+    public void bridge$setId(String id) {
         checkNotNull(id);
         if (this.id != null) {
             throw new IllegalStateException("Attempt made to set id twice!");
@@ -266,7 +226,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public void setName(String name) {
+    public void bridge$setName(String name) {
         checkNotNull(name);
         if (this.name != null) {
             throw new IllegalStateException("Attempt made to set name twice!");
@@ -281,24 +241,24 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public void setDimensionType(DimensionType dimensionType) {
+    public void bridge$setDimensionType(DimensionType dimensionType) {
         this.dimensionType = dimensionType;
     }
 
     @Override
-    public void setDifficulty(Difficulty difficulty) {
+    public void bridge$setDifficulty(Difficulty difficulty) {
         this.difficulty = difficulty;
     }
 
     @Override
-    public void setSerializationBehavior(SerializationBehavior behavior) {
+    public void bridge$setSerializationBehavior(SerializationBehavior behavior) {
         this.serializationBehavior = behavior;
     }
 
     @Override
-    public void setGeneratorSettings(DataContainer generatorSettings) {
+    public void bridge$setGeneratorSettings(DataContainer generatorSettings) {
         // Update the generatorOptions string
-        Optional<String> optCustomSettings = generatorSettings.getString(DataQueries.WORLD_CUSTOM_SETTINGS);
+        Optional<String> optCustomSettings = generatorSettings.getString(DataQueries.General.WORLD_CUSTOM_SETTINGS);
         if (optCustomSettings.isPresent()) {
             this.generatorOptions = optCustomSettings.get();
         } else {
@@ -312,52 +272,52 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public void setGeneratorModifiers(ImmutableList<WorldGeneratorModifier> generatorModifiers) {
+    public void bridge$setGeneratorModifiers(ImmutableList<WorldGeneratorModifier> generatorModifiers) {
         this.generatorModifiers = generatorModifiers;
     }
 
     @Override
-    public void setEnabled(boolean state) {
+    public void bridge$setEnabled(boolean state) {
         this.isEnabled = state;
     }
 
     @Override
-    public void setLoadOnStartup(boolean state) {
+    public void bridge$setLoadOnStartup(boolean state) {
         this.loadOnStartup = state;
     }
 
     @Override
-    public void setKeepSpawnLoaded(@Nullable Boolean state) {
+    public void bridge$setKeepSpawnLoaded(@Nullable Boolean state) {
         this.keepSpawnLoaded = state;
     }
 
     @Override
-    public void setGenerateSpawnOnLoad(boolean state) {
+    public void bridge$setGenerateSpawnOnLoad(boolean state) {
         this.generateSpawnOnLoad = state;
     }
 
     @Override
-    public void setPVPEnabled(boolean state) {
+    public void bridge$setPVPEnabled(boolean state) {
         this.pvpEnabled = state;
     }
 
     @Override
-    public void setCommandsAllowed(boolean state) {
+    public void bridge$setCommandsAllowed(boolean state) {
         this.commandsAllowed = state;
     }
 
     @Override
-    public void setGenerateBonusChest(boolean state) {
+    public void bridge$setGenerateBonusChest(boolean state) {
         this.generateBonusChest = state;
     }
 
     @Override
-    public void fromBuilder(boolean state) {
+    public void bridge$fromBuilder(boolean state) {
         this.fromBuilder = state;
     }
 
     @Override
-    public Boolean internalKeepSpawnLoaded() {
+    public Boolean bridge$internalKeepSpawnLoaded() {
         return this.keepSpawnLoaded;
     }
 }

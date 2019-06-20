@@ -25,11 +25,11 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 public class HideAttributesValueProcessor extends AbstractHideFlagsValueProcessor {
 
     public HideAttributesValueProcessor() {
-        super(Keys.HIDE_ATTRIBUTES, DataConstants.HIDE_ATTRIBUTES_FLAG);
+        super(Keys.HIDE_ATTRIBUTES, Constants.Item.HIDE_ATTRIBUTES_FLAG);
     }
 }

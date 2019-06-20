@@ -44,6 +44,7 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -52,9 +53,8 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -105,13 +105,13 @@ public final class PlaceBlockPacketState extends BasicPacketState {
 
     @Override
     public void appendNotifierToBlockEvent(BasicPacketContext context, PhaseContext<?> currentContext,
-        IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+        ServerWorldBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
         final Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
         final BlockState state = ((World) mixinWorldServer).getBlock(pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((World) mixinWorldServer).position(pos.getX(), pos.getY(), pos.getZ()).state(state).build();
 
-        blockEvent.setTickBlock(locatable);
-        blockEvent.setSourceUser(player);
+        blockEvent.setBridge$TickingLocatable(locatable);
+        blockEvent.setBridge$sourceUser(player);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -134,7 +134,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         }
         context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
             final List<Entity> entities =
-                drops.stream().map(drop -> drop.create(player.getServerWorld())).map(EntityUtil::fromNative)
+                drops.stream().map(drop -> drop.create(player.getServerWorld())).map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
             if (!entities.isEmpty()) {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -145,9 +145,9 @@ public final class PlaceBlockPacketState extends BasicPacketState {
 
         });
 
-        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+        final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
         mixinContainer.setCaptureInventory(false);
-        mixinContainer.getCapturedTransactions().clear();
+        mixinContainer.bridge$getCapturedSlotTransactions().clear();
     }
 
     @Override

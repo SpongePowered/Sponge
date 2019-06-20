@@ -156,9 +156,9 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         List<DataView> tiledata = view.getViewList(DataQueries.Schematic.Legacy.TILE_ENTITIES).orElse(null);
         if (tiledata != null) {
             for (DataView tile : tiledata) {
-                int x = tile.getInt(DataQueries.X_POS).get();
-                int y = tile.getInt(DataQueries.Y_POS).get();
-                int z = tile.getInt(DataQueries.Z_POS).get();
+                int x = tile.getInt(DataQueries.Schematic.Legacy.X_POS).get();
+                int y = tile.getInt(DataQueries.Schematic.Legacy.Y_POS).get();
+                int z = tile.getInt(DataQueries.Schematic.Legacy.Z_POS).get();
                 final String tileType = tile.getString(TILE_ID).get();
                 final ResourceLocation name = new ResourceLocation(tileType);
                 TileEntityType type = TileEntityTypeRegistryModule.getInstance()
@@ -185,9 +185,9 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         final List<EntityArchetype> entities = new ArrayList<>();
         view.getViewList(DataQueries.Schematic.Legacy.ENTITIES).ifPresent(entityViews -> {
             for (DataView entity : entityViews) {
-                int x = entity.getInt(DataQueries.X_POS).get();
-                int y = entity.getInt(DataQueries.Y_POS).get();
-                int z = entity.getInt(DataQueries.Z_POS).get();
+                int x = entity.getInt(DataQueries.DataSerializers.X_POS).get();
+                int y = entity.getInt(DataQueries.DataSerializers.Y_POS).get();
+                int z = entity.getInt(DataQueries.DataSerializers.Z_POS).get();
                 final String entityType = entity.getString(DataQueries.Schematic.Legacy.ENTITY_ID).get();
                 final ResourceLocation name = new ResourceLocation(entityType);
                 EntityType type = EntityTypeRegistryModule.getInstance().getById(entityType).orElse(null);
@@ -255,9 +255,9 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         for (Map.Entry<Vector3i, TileEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
             Vector3i pos = entry.getKey();
             DataContainer tiledata = entry.getValue().getTileData();
-            tiledata.set(DataQueries.X_POS, pos.getX() - xMin);
-            tiledata.set(DataQueries.Y_POS, pos.getY() - yMin);
-            tiledata.set(DataQueries.Z_POS, pos.getZ() - zMin);
+            tiledata.set(DataQueries.DataSerializers.X_POS, pos.getX() - xMin);
+            tiledata.set(DataQueries.DataSerializers.Y_POS, pos.getY() - yMin);
+            tiledata.set(DataQueries.DataSerializers.Z_POS, pos.getZ() - zMin);
             tileEntities.add(tiledata);
         }
         data.set(DataQueries.Schematic.Legacy.TILE_ENTITIES, tileEntities);

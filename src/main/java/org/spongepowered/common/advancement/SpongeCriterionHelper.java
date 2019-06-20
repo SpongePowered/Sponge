@@ -74,7 +74,7 @@ public final class SpongeCriterionHelper {
         final String[][] idsArray = new String[criteria.size()][];
         final Iterator<Criterion> it = criteria.values().iterator();
         for (int i = 0; i < criteria.size(); i++) {
-            idsArray[i] = new String[] { ((ICriterion) it.next()).getName() };
+            idsArray[i] = new String[] { ((CriterionBridge) it.next()).getName() };
         }
         return new Tuple<>(criteria, idsArray);
     }

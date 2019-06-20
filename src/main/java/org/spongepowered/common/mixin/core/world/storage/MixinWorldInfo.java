@@ -74,6 +74,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.GameRulesBridge;
+import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -82,9 +84,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinGameRules;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
@@ -105,7 +105,7 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 @Mixin(WorldInfo.class)
 @Implements(@Interface(iface = WorldProperties.class, prefix = "worldproperties$"))
-public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo {
+public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge {
 
     @Shadow public long randomSeed;
     @Shadow private WorldType terrainType;
@@ -154,7 +154,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
     private boolean isMod = false;
     private boolean generateBonusChest;
-    private NBTTagCompound spongeRootLevelNbt = new NBTTagCompound(), spongeNbt = new NBTTagCompound();
+    private NBTTagCompound spongeRootLevelNbt = new NBTTagCompound();
+    private NBTTagCompound spongeNbt = new NBTTagCompound();
     private final NBTTagList playerUniqueIdNbt = new NBTTagList();
     private final BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
     private final List<UUID> pendingUniqueIds = new ArrayList<>();
@@ -191,7 +192,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.createWorldConfig();
         this.setEnabled(archetype.isEnabled());
         this.setLoadOnStartup(archetype.loadOnStartup());
-        if (((IMixinWorldSettings)(Object) settings).internalKeepSpawnLoaded() != null) {
+        if (((WorldSettingsBridge)(Object) settings).bridge$internalKeepSpawnLoaded() != null) {
             this.setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
         }
         this.setGenerateSpawnOnLoad(archetype.doesGenerateSpawnOnLoad());
@@ -597,7 +598,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public boolean removeGameRule(String gameRule) {
         checkNotNull(gameRule, "The gamerule cannot be null!");
-        return ((IMixinGameRules) this.gameRules).removeGameRule(gameRule);
+        return ((GameRulesBridge) this.gameRules).removeGameRule(gameRule);
     }
 
     @Override
@@ -735,7 +736,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             return DataFormats.JSON.read(this.generatorOptions);
         } catch (JsonParseException | IOException ignored) {
         }
-        return DataContainer.createNew().set(DataQueries.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
+        return DataContainer.createNew().set(DataQueries.General.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
     }
 
     @Override

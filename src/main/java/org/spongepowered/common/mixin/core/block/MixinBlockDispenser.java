@@ -26,9 +26,9 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockDispenser;
+import net.minecraft.block.BlockSourceImpl;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
-import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.util.math.BlockPos;
@@ -51,17 +51,19 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
@@ -73,7 +75,7 @@ import javax.annotation.Nullable;
 @Mixin(BlockDispenser.class)
 public abstract class MixinBlockDispenser extends MixinBlock {
 
-    private ItemStackSnapshot originalItem;
+    private ItemStack originalItem;
     private PhaseContext<?> context;
 
     @Shadow protected abstract void dispense(World worldIn, BlockPos pos);
@@ -110,10 +112,10 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     }
 
     @Inject(method = "dispense", at = @At(value = "HEAD"))
-    public void onDispenseHead(World worldIn, BlockPos pos, CallbackInfo ci) {
+    private void impl$CreateContextOnDispensing(World worldIn, BlockPos pos, CallbackInfo ci) {
         final IBlockState state = worldIn.getBlockState(pos);
-        final SpongeBlockSnapshot spongeBlockSnapshot = ((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.ALL);
-        final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunk(pos);
+        final SpongeBlockSnapshot spongeBlockSnapshot = ((ServerWorldBridge) worldIn).bridge$createSnapshot(state, state, pos, BlockChangeFlags.ALL);
+        final ChunkBridge mixinChunk = (ChunkBridge) worldIn.getChunk(pos);
         this.context = BlockPhase.State.DISPENSE.createPhaseContext()
             .source(spongeBlockSnapshot)
             .owner(() -> mixinChunk.getBlockOwner(pos))
@@ -122,18 +124,27 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     }
 
     @Inject(method = "dispense", at = @At(value = "RETURN"))
-    public void onDispenseReturn(World worldIn, BlockPos pos, CallbackInfo ci) {
+    private void impl$CloseContextOnDispensing(World worldIn, BlockPos pos, CallbackInfo ci) {
         this.context.close();
     }
 
-    @Redirect(method = "dispense", at = @At(value = "INVOKE", target = "Lnet/minecraft/dispenser/IBehaviorDispenseItem;dispense(Lnet/minecraft/dispenser/IBlockSource;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;"))
-    public ItemStack onSpongeDispense(IBehaviorDispenseItem ibehaviordispenseitem, IBlockSource source, ItemStack stack) {
-        this.originalItem = ItemStackUtil.snapshotOf(stack);
-        return ibehaviordispenseitem.dispense(source, stack);
+    @Inject(method = "dispense",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/dispenser/IBehaviorDispenseItem;dispense(Lnet/minecraft/dispenser/IBlockSource;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;"
+        ),
+        slice = @Slice(
+            from = @At(value = "FIELD", target = "Lnet/minecraft/dispenser/IBehaviorDispenseItem;DEFAULT_BEHAVIOR:Lnet/minecraft/dispenser/IBehaviorDispenseItem;"),
+            to = @At("TAIL")
+        ),
+        locals = LocalCapture.CAPTURE_FAILSOFT
+    )
+    private void impl$InjectToStoreOriginalItem(World worldIn, BlockPos pos, CallbackInfo ci, BlockSourceImpl source, TileEntityDispenser dispenser, int slotIndex, ItemStack dispensedItem, IBehaviorDispenseItem behavior) {
+        this.originalItem = ItemStackUtil.cloneDefensiveNative(dispensedItem);
     }
 
     @Redirect(method = "dispense", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityDispenser;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
-    public void onSetInventoryContents(TileEntityDispenser dispenser, int index, @Nullable ItemStack stack) {
+    private void impl$SetInventoryContentsThrowingEvent(TileEntityDispenser dispenser, int index, @Nullable ItemStack stack) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         // If we captured nothing, simply set the slot contents and return
         if (context.getCapturedItemsOrEmptyList().isEmpty()) {
@@ -149,7 +160,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
             final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(), ImmutableList.of(snapshot), original);
             SpongeImpl.postEvent(dropEvent);
             if (dropEvent.isCancelled()) {
-                dispenser.setInventorySlotContents(index, (net.minecraft.item.ItemStack) this.originalItem.createStack());
+                dispenser.setInventorySlotContents(index, this.originalItem);
                 context.getCapturedItems().clear();
                 return;
             }

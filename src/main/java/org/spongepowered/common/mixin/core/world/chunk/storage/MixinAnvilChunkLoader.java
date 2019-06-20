@@ -61,9 +61,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.QueuedChunk;
@@ -94,7 +94,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
 
     @Inject(method = "writeChunkToNBT", at = @At(value = "RETURN"))
     public void onWriteChunkToNBT(net.minecraft.world.chunk.Chunk chunkIn, World worldIn, NBTTagCompound compound, CallbackInfo ci) {
-        IMixinChunk chunk = (IMixinChunk) chunkIn;
+        ChunkBridge chunk = (ChunkBridge) chunkIn;
 
         // Add tracked block positions
         if (chunk.getTrackedShortPlayerPositions().size() > 0 || chunk.getTrackedIntPlayerPositions().size() > 0) {
@@ -134,7 +134,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
             final Map<Integer, PlayerTracker> trackedIntPlayerPositions = new HashMap<>();
             final Map<Short, PlayerTracker> trackedShortPlayerPositions = new HashMap<>();
             final NBTTagList positions = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA).getTagList(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, 10);
-            final IMixinChunk chunk = (IMixinChunk) chunkIn;
+            final ChunkBridge chunk = (ChunkBridge) chunkIn;
             for (int i = 0; i < positions.tagCount(); i++) {
                 NBTTagCompound valueNbt = positions.getCompoundTagAt(i);
                 boolean isShortPos = valueNbt.hasKey("pos");

@@ -35,7 +35,6 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -81,7 +80,7 @@ public final class CloseWindowState extends BasicPacketState {
             context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
                 final List<Entity> entities = items
                     .stream()
-                    .map(EntityUtil::fromNative)
+                    .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
                     SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(player.getUniqueID()));
@@ -94,7 +93,7 @@ public final class CloseWindowState extends BasicPacketState {
                     .collect(Collectors.toList());
                 final List<Entity> entities = items
                     .stream()
-                    .map(EntityUtil::fromNative)
+                    .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
                     SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(player.getUniqueID()));

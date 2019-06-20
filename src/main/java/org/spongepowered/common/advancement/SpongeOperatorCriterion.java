@@ -35,7 +35,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeOperatorCriterion implements OperatorCriterion, ICriterion {
+public class SpongeOperatorCriterion implements OperatorCriterion, CriterionBridge {
 
     private final String name;
     private final Collection<AdvancementCriterion> criteria;

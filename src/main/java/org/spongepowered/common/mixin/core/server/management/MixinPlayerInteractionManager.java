@@ -71,14 +71,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
-import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 
@@ -171,7 +171,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         if (isCancelled) {
 
             final IBlockState state = this.player.world.getBlockState(pos);
-            ((IMixinEntityPlayerMP) this.player).sendBlockChange(pos, state);
+            ((ServerPlayerEntityBridge) this.player).sendBlockChange(pos, state);
             this.player.world.notifyBlockUpdate(pos, this.player.world.getBlockState(pos), state, 3);
             return;
         }
@@ -428,19 +428,21 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         // Sponge - start
         final ItemStack oldStack = stack.copy();
         final BlockSnapshot currentSnapshot = BlockSnapshot.NONE;
-        final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(player, oldStack, hand, null, currentSnapshot);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(frame, player, oldStack, hand, null, currentSnapshot);
 
-        if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
-            ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
-        }
+            if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
+                ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
+            }
 
-        this.setLastInteractItemOnBlockCancelled(event.isCancelled()); //|| event.getUseItemResult() == Tristate.FALSE;
+            this.setLastInteractItemOnBlockCancelled(event.isCancelled()); //|| event.getUseItemResult() == Tristate.FALSE;
 
-        if (event.isCancelled()) {
-            this.interactBlockRightClickEventCancelled = true;
+            if (event.isCancelled()) {
+                this.interactBlockRightClickEventCancelled = true;
 
-            ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
-            return EnumActionResult.FAIL;
+                ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
+                return EnumActionResult.FAIL;
+            }
         }
         // Sponge End
 
@@ -463,7 +465,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             // Sanity checks on the world being used (hey, i don't know the rules about clients...
             // and if the world is in fact a responsible server world.
             final EnumActionResult result = actionresult.getType();
-            if (!(worldIn instanceof IMixinWorld) || ((IMixinWorld) worldIn).isFake()) {
+            if (!(worldIn instanceof WorldBridge) || ((WorldBridge) worldIn).isFake()) {
                 return result;
             }
 
@@ -527,7 +529,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
                 frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
-                ((IMixinContainer) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
+                ((ContainerBridge) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
                 if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
                     result = EnumActionResult.FAIL;
                     this.interactBlockRightClickEventCancelled = true;

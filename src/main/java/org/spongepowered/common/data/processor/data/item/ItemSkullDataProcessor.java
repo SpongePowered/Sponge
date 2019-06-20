@@ -55,7 +55,7 @@ public class ItemSkullDataProcessor
 
     @Override
     protected Optional<SkullType> getVal(ItemStack itemStack) {
-        return Optional.of(SkullUtils.getSkullType(itemStack));
+        return Optional.of(SkullUtils.getSkullType(itemStack.getMetadata()));
     }
 
     @Override

@@ -29,7 +29,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
@@ -65,7 +64,7 @@ final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame.pushCause(listener);
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    final List<Entity> items = value.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                    final List<Entity> items = value.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                     SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
                 }
             }));

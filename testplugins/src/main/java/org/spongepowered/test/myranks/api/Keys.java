@@ -35,6 +35,6 @@ public class Keys {
             Key.builder().id("rank")
                     .name("Rank")
                     .query(DataQuery.of("Rank"))
-                    .type(new TypeToken<Value<Rank>>() {})
+                    .type(new TypeToken<Value<Rank>>() { private static final long serialVersionUID = -1; })
                     .build();
 }

@@ -41,21 +41,21 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.block.DyeableBLockBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDyeableData;
-import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
 
 import java.util.List;
 import java.util.Optional;
 
 @Mixin({BlockCarpet.class, BlockColored.class, BlockStainedGlass.class, BlockStainedGlassPane.class, BlockConcretePowder.class})
-public abstract class MixinDyeableBlock extends MixinBlock implements IMixinDyeableBlock {
+public abstract class MixinDyeableBlock extends MixinBlock implements DyeableBLockBridge {
 
-    private PropertyEnum<EnumDyeColor> property;
+    private PropertyEnum<EnumDyeColor> bridge$ColorProperty;
 
     @Override
-    public void setProperty(PropertyEnum<EnumDyeColor> property) {
-        this.property = property;
+    public void bridge$SetColorPropertyEnum(PropertyEnum<EnumDyeColor> property) {
+        this.bridge$ColorProperty = property;
     }
 
     @Override
@@ -71,27 +71,30 @@ public abstract class MixinDyeableBlock extends MixinBlock implements IMixinDyea
         return ImmutableDyeableData.class.isAssignableFrom(immutable) || super.supports(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDyeableData) {
             final DyeColor color = ((ImmutableDyeableData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(this.property, (EnumDyeColor) (Object) color));
+            return Optional.of((BlockState) blockState.withProperty(this.bridge$ColorProperty, (EnumDyeColor) (Object) color));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.DYE_COLOR)) {
             final DyeColor color = (DyeColor) value;
-            return Optional.of((BlockState) blockState.withProperty(this.property, (EnumDyeColor) (Object) color));
+            return Optional.of((BlockState) blockState.withProperty(this.bridge$ColorProperty, (EnumDyeColor) (Object) color));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutableDyeableData getDyeableData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDyeableData.class,
-                (DyeColor) (Object) blockState.getValue(this.property));
+                (DyeColor) (Object) blockState.getValue(this.bridge$ColorProperty));
     }
 
 }

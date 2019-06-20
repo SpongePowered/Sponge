@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 
 import java.util.Optional;
 
@@ -48,7 +48,7 @@ public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageS
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(CallbackInfo callbackInfo) {
         if (!(this.indirectEntity instanceof User) && this.damageSourceEntity != null) { // sources can be null
-            this.owner = EntityUtil.toMixin(super.getSource()).getCreatorUser();
+            this.owner = ((EntityBridge) super.getSource()).getCreatorUser();
             if (this.indirectEntity == null && this.owner.isPresent() && this.owner.get() instanceof Entity) {
                 this.indirectEntity = (Entity) this.owner.get();
             }

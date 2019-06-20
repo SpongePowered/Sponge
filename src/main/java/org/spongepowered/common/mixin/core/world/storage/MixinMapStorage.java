@@ -44,15 +44,15 @@ public abstract class MixinMapStorage {
     // When we have a null saveHandler, we're not in the 'real' Overworld
     // MapStorage
 
-    @Inject(method = "getOrLoadData", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
-    public void onAddToLoadedData(CallbackInfoReturnable<WorldSavedData> ci) {
+    @Inject(method = "getOrLoadData", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false))
+    private void impl$ValidateCallingOnMainThread(CallbackInfoReturnable<WorldSavedData> ci) {
         if (this.saveHandler != null && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             SpongeImpl.getLogger().error("Attempted to call MapStorage#getOrLoadData from off the main thread!", new Exception("Dummy exception"));
         }
     }
 
     @Inject(method = "setData", at = @At(value = "HEAD"))
-    public void onSetData(CallbackInfo ci) {
+    private void impl$ValidateCallingOnMainThread(CallbackInfo ci) {
         if (this.saveHandler != null && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             SpongeImpl.getLogger().error("Attempted to call MapStorage#setData from off the main thread!", new Exception("Dummy exception"));
         }

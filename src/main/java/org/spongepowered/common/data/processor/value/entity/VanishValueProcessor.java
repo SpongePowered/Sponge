@@ -29,17 +29,17 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.player.IUserOrEntity;
 
 import java.util.Optional;
 
-public class VanishValueProcessor extends AbstractSpongeValueProcessor<IUserOrEntity, Boolean, Value<Boolean>> {
+public class VanishValueProcessor extends AbstractSpongeValueProcessor<VanishingBridge, Boolean, Value<Boolean>> {
 
     public VanishValueProcessor() {
-        super(IUserOrEntity.class, Keys.VANISH);
+        super(VanishingBridge.class, Keys.VANISH);
     }
 
     @Override
@@ -48,17 +48,17 @@ public class VanishValueProcessor extends AbstractSpongeValueProcessor<IUserOrEn
     }
 
     @Override
-    protected boolean set(IUserOrEntity container, Boolean value) {
+    protected boolean set(VanishingBridge container, Boolean value) {
         if (container instanceof net.minecraft.entity.Entity && ((net.minecraft.entity.Entity) container).world.isRemote) {
             return false;
         }
-        container.setVanished(value);
+        container.vanish$setVanished(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(IUserOrEntity container) {
-        return Optional.of(container.isVanished());
+    protected Optional<Boolean> getVal(VanishingBridge container) {
+        return Optional.of(container.vanish$isVanished());
     }
 
     @Override

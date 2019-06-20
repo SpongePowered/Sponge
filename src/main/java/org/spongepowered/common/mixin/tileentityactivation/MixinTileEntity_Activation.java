@@ -26,84 +26,84 @@ package org.spongepowered.common.mixin.tileentityactivation;
 
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
+import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 
 @Mixin(TileEntity.class)
-public class MixinTileEntity_Activation implements IModData_Activation {
+public class MixinTileEntity_Activation implements ActivationCapability {
 
     private boolean refreshCache = false;
-    public boolean defaultActivationState = true;
-    public long activatedTick = Integer.MIN_VALUE;
+    private boolean defaultActivationState = true;
+    private long activatedTick = Integer.MIN_VALUE;
     private int activationRange;
     private int ticksExisted;
     private int tickRate = 1;
 
     @Override
-    public final void incrementSpongeTicksExisted() {
+    public final void activation$incrementSpongeTicksExisted() {
         this.ticksExisted++;
     }
 
     @Override
-    public int getSpongeTicksExisted() {
+    public int activation$getSpongeTicksExisted() {
         return this.ticksExisted;
     }
 
     @Override
-    public void inactiveTick() {
+    public void activation$inactiveTick() {
     }
 
     @Override
-    public byte getActivationType() {
+    public byte activation$getActivationType() {
         return 0;
     }
 
     @Override
-    public long getActivatedTick() {
+    public long activation$getActivatedTick() {
         return this.activatedTick;
     }
 
     @Override
-    public boolean getDefaultActivationState() {
+    public boolean activation$getDefaultActivationState() {
         return this.defaultActivationState;
     }
 
     @Override
-    public void setDefaultActivationState(boolean defaultState) {
+    public void activation$setDefaultActivationState(boolean defaultState) {
         this.defaultActivationState = defaultState;
     }
 
     @Override
-    public void setActivatedTick(long tick) {
+    public void activation$setActivatedTick(long tick) {
         this.activatedTick = tick;
     }
 
     @Override
-    public int getSpongeTickRate() {
+    public int activation$getSpongeTickRate() {
         return this.tickRate;
     }
 
     @Override
-    public void setSpongeTickRate(int tickRate) {
+    public void activation$setSpongeTickRate(int tickRate) {
         this.tickRate = tickRate;
     }
 
     @Override
-    public int getActivationRange() {
+    public int activation$getActivationRange() {
         return this.activationRange;
     }
 
     @Override
-    public void setActivationRange(int range) {
+    public void activation$setActivationRange(int range) {
         this.activationRange = range;
     }
 
     @Override
-    public void requiresActivationCacheRefresh(boolean flag) {
+    public void activation$requiresActivationCacheRefresh(boolean flag) {
         this.refreshCache = flag;
     }
 
     @Override
-    public boolean requiresActivationCacheRefresh() {
+    public boolean activation$requiresActivationCacheRefresh() {
         return this.refreshCache;
     }
 }

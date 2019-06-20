@@ -26,6 +26,7 @@ package org.spongepowered.common.world.gen;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.world.WorldServer;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
@@ -79,14 +80,13 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.generation.PopulatorPhaseContext;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
-import org.spongepowered.common.world.WorldUtil;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.extent.SoftBufferExtentViewDownsize;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
@@ -151,7 +151,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                 chunkGeneratorName = "chunkGenerator (" + base.getClass().getName() + ")";
             }
             this.chunkGeneratorTiming =
-                    SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((IMixinWorldServer) world).getTimingsHandler().chunkPopulate);
+                    SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((ServerWorldBridge) world).bridge$getTimingsHandler().chunkPopulate);
         }
 
     }
@@ -281,7 +281,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         Chunk chunk;
         if (this.baseGenerator instanceof SpongeGenerationPopulator && ((SpongeGenerationPopulator) this.baseGenerator).getCachedChunk() != null) {
             chunk = ((SpongeGenerationPopulator) this.baseGenerator).getCachedChunk();
-            ((IMixinChunk) chunk).fill(chunkprimer);
+            ((ChunkBridge) chunk).fill(chunkprimer);
         } else {
             chunk = new Chunk(this.world, chunkprimer, chunkX, chunkZ);
             this.cachedBiomes.fill(chunk.getBiomeArray());
@@ -292,8 +292,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public void populate(int chunkX, int chunkZ) {
-        IMixinWorldServer world = (IMixinWorldServer) this.world;
-        world.getTimingsHandler().chunkPopulate.startTimingIfSync();
+        ServerWorldBridge world = (ServerWorldBridge) this.world;
+        world.bridge$getTimingsHandler().chunkPopulate.startTimingIfSync();
         this.chunkGeneratorTiming.startTimingIfSync();
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         this.rand.setSeed(this.world.getSeed());
@@ -357,7 +357,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                     timing.startTimingIfSync();
                 }
                 try (PhaseContext<?> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
-                    .world(WorldUtil.asNative(world))
+                    .world((WorldServer) world)
                     .populator(type)) {
                     context.buildAndSwitch();
 
@@ -393,7 +393,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
         BlockFalling.fallInstantly = false;
         this.chunkGeneratorTiming.stopTimingIfSync();
-        world.getTimingsHandler().chunkPopulate.stopTimingIfSync();
+        world.bridge$getTimingsHandler().chunkPopulate.stopTimingIfSync();
     }
 
     @Override

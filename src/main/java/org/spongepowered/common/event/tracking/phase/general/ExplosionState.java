@@ -46,9 +46,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -111,7 +109,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         context.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(drops -> drops.asMap()
             .forEach((pos, items) -> {
                 if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
-                    final List<Entity> itemEntities = items.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                    final List<Entity> itemEntities = items.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                     final DropItemEvent.Destruct event =
                         SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
                     SpongeImpl.postEvent(event);

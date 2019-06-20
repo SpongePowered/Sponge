@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.entity.IMixinAreaEffectCloud;
+import org.spongepowered.common.mixin.core.entity.AccessorEntityAreaEffectCloud;
 
 import java.util.Optional;
 
@@ -54,13 +54,13 @@ public class AreaEffectCloudDurationOnUseProcessor extends AbstractSpongeValuePr
 
     @Override
     protected boolean set(EntityAreaEffectCloud container, Integer value) {
-        ((IMixinAreaEffectCloud) container).setDurationOnUse(value);
+        ((AccessorEntityAreaEffectCloud) container).setDurationOnUse(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(EntityAreaEffectCloud container) {
-        return Optional.of(((IMixinAreaEffectCloud) container).getDurationOnUse());
+        return Optional.of(((AccessorEntityAreaEffectCloud) container).getDurationOnUse());
     }
 
     @Override

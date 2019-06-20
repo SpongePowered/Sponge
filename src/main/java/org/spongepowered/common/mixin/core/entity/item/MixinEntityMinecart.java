@@ -42,21 +42,19 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.util.VectorSerializer;
 
 import java.util.ArrayList;
 
 @Mixin(EntityMinecart.class)
-public abstract class MixinEntityMinecart extends MixinEntity implements Minecart {
-
-    private static final double DEFAULT_AIRBORNE_MOD = 0.94999998807907104D;
-    private static final double DEFAULT_DERAILED_MOD = 0.5D;
+public abstract class MixinEntityMinecart extends MixinEntity {
 
     private double maxSpeed = 0.4D;
     private boolean slowWhenEmpty = true;
-    private Vector3d airborneMod = new Vector3d(DEFAULT_AIRBORNE_MOD, DEFAULT_AIRBORNE_MOD, DEFAULT_AIRBORNE_MOD);
-    private Vector3d derailedMod = new Vector3d(DEFAULT_DERAILED_MOD, DEFAULT_DERAILED_MOD, DEFAULT_DERAILED_MOD);
+    private Vector3d airborneMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD);
+    private Vector3d derailedMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, Constants.Entity.Minecart.DEFAULT_DERAILED_MOD);
 
     /**
      * @author Minecrell - December 5th, 2016
@@ -67,17 +65,17 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
         return this.maxSpeed;
     }
 
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = DEFAULT_DERAILED_MOD, ordinal = 0))
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 0))
     private double onDecelerateX(double defaultValue) {
         return this.derailedMod.getX();
     }
 
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = DEFAULT_DERAILED_MOD, ordinal = 1))
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 1))
     private double onDecelerateY(double defaultValue) {
         return this.derailedMod.getY();
     }
 
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = DEFAULT_DERAILED_MOD, ordinal = 2))
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 2))
     private double onDecelerateZ(double defaultValue) {
         return this.derailedMod.getZ();
     }
@@ -92,7 +90,7 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
     private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), this, 0, amount);
+            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), (Minecart) this, 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
@@ -101,54 +99,8 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
     }
 
     @Override
-    public double getSwiftness() {
-        return this.maxSpeed;
-    }
-
-    @Override
-    public void setSwiftness(double maxSpeed) {
-        this.maxSpeed = maxSpeed;
-    }
-
-    @Override
-    public double getPotentialMaxSpeed() {
-        // SpongeForge replaces this method so it returns the result of the Forge method
-        return getMaximumSpeed();
-    }
-
-    @Override
-    public boolean doesSlowWhenEmpty() {
-        return this.slowWhenEmpty;
-    }
-
-    @Override
-    public void setSlowWhenEmpty(boolean slowWhenEmpty) {
-        this.slowWhenEmpty = slowWhenEmpty;
-    }
-
-    @Override
-    public Vector3d getAirborneVelocityMod() {
-        return this.airborneMod;
-    }
-
-    @Override
-    public void setAirborneVelocityMod(Vector3d airborneMod) {
-        this.airborneMod = airborneMod;
-    }
-
-    @Override
-    public Vector3d getDerailedVelocityMod() {
-        return this.derailedMod;
-    }
-
-    @Override
-    public void setDerailedVelocityMod(Vector3d derailedVelocityMod) {
-        this.derailedMod = derailedVelocityMod;
-    }
-
-    @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
+    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey("maxSpeed")) {
             this.maxSpeed = compound.getDouble("maxSpeed");
         }
@@ -164,8 +116,8 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
     }
 
     @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
+    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$writeToSpongeCompound(compound);
         compound.setDouble("maxSpeed", this.maxSpeed);
         compound.setBoolean("slowWhenEmpty", this.slowWhenEmpty);
         compound.setTag("airborneModifier", VectorSerializer.toNbt(this.airborneMod));

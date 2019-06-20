@@ -25,11 +25,11 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 public class HideUnbreakableValueProcessor extends AbstractHideFlagsValueProcessor {
 
     public HideUnbreakableValueProcessor() {
-        super(Keys.HIDE_UNBREAKABLE, DataConstants.HIDE_UNBREAKABLE_FLAG);
+        super(Keys.HIDE_UNBREAKABLE, Constants.Item.HIDE_UNBREAKABLE_FLAG);
     }
 }

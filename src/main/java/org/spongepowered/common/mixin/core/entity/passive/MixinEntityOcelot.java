@@ -35,7 +35,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Ocelot;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,7 +47,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.mixin.api.minecraft.entity.passive.MixinEntityTameable_API;
+import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -56,20 +58,17 @@ import java.util.List;
 import java.util.Random;
 
 @Mixin(EntityOcelot.class)
-public abstract class MixinEntityOcelot extends MixinEntityTameable implements Ocelot {
-
-    @Shadow
-    public abstract int getTameSkin();
+public abstract class MixinEntityOcelot extends MixinEntityAgeable {
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
-    public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand) {
+    private int impl$ThrowTameEvent(Random rand, int bound, EntityPlayer player, EnumHand hand) {
         ItemStack stack = player.getHeldItem(hand);
         int random = rand.nextInt(bound);
         if (random == 0) {
             stack.setCount(stack.getCount() + 1);
-            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
-                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), this))) {
+                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (Ocelot) this))) {
                     stack.setCount(stack.getCount() - 1);
                     return random;
                 }
@@ -79,38 +78,12 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
     }
 
     @Inject(method = "setupTamedAI", at = @At(value = "HEAD"), cancellable = true)
-    public void onSetupTamedAi(CallbackInfo ci) {
+    private void impl$IgnoreAISetupOnClientWorld(CallbackInfo ci) {
         if (this.world.isRemote) {
             // Because ocelot AI tasks are added on the client, for whatever reason
             ci.cancel();
         }
     }
 
-    // Data delegated methods
-
-    @Override
-    public OcelotData getOcelotData() {
-        return new SpongeOcelotData(OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
-    }
-
-    @Override
-    public Value<OcelotType> variant() {
-        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.Ocelot.DEFAULT_TYPE, OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
-        manipulators.add(getOcelotData());
-    }
-
-    @Override
-    public Translation getTranslation() {
-        if (shadow$isTamed()) {
-            return new SpongeTranslation("entity.Cat.name");
-        }
-        return super.getTranslation();
-    }
 
 }

@@ -24,101 +24,66 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.base.MoreObjects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.item.IMixinItem;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.item.ItemBridge;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
-import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(Item.class)
-public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDictionaryEntry {
-
-    public Optional<BlockType> blockType = Optional.empty();
+public abstract class MixinItem implements ItemBridge, SpongeGameDictionaryEntry {
 
     @Shadow private String translationKey;
 
-    @Shadow public abstract int getItemStackLimit();
     @Shadow public abstract String getTranslationKey();
 
-    // A item stack used to retrieve properties
-    @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
-
-    @Override
-    public String getId() {
-        final ResourceLocation resourceLocation = Item.REGISTRY.getNameForObject((Item) (Object) this);
-        checkState(resourceLocation != null, "Attempted to access the id before the Item is registered.");
-        return resourceLocation.toString();
+    /**
+     * @author gabizou - June 10th, 2019 - 1.12.2
+     * @reason This uses the SpongeImplHooks so that we eliminate
+     * more Mixins in SpongeForge and SpongeVanilla. The hook here
+     * is to allow a mod in Forge to replace a previously registered
+     * item. Vanilla doesn't do this, so we don't have to care about
+     * vanilla, but Forge, we have to check against the Item registry.
+     *
+     * @param id The numerical id supposed to be assigned, ignored
+     * @param textualID The location id of the item, like "minecraft:diamond_sword"
+     * @param itemIn The item instance
+     * @param ci callback
+     */
+    @Inject(method = "registerItem(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V", at = @At("RETURN"))
+    private static void spongeImpl$registerItemWithSpongeRegistry(final int id, final ResourceLocation textualID, final Item itemIn, final CallbackInfo ci) {
+        SpongeImplHooks.registerItemForSpongeRegistry(id, textualID, itemIn);
     }
 
     @Override
-    public String getName() {
-        return getId();
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getDefaultProperty(Class<T> propertyClass) {
-        if (this.propertyItemStack == null) {
-            this.propertyItemStack = ItemStackUtil.fromNative(new ItemStack((Item) (Object) this));
-        }
-        return SpongeImpl.getPropertyRegistry().getStore(propertyClass).flatMap(store -> store.getFor(this.propertyItemStack));
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() + ".name");
-    }
-
-    @Override
-    public int getMaxStackQuantity() {
-        return getItemStackLimit();
-    }
-
-    @Override
-    public Optional<BlockType> getBlock() {
-        return this.blockType;
-    }
-
-    @Override
-    public void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list) {
+    public void bridge$gatherManipulators(final ItemStack itemStack, final List<DataManipulator<?, ?>> list) {
         if (!itemStack.hasTagCompound()) {
             return;
         }
 
-        org.spongepowered.api.item.inventory.ItemStack spongeStack = ((org.spongepowered.api.item.inventory.ItemStack) itemStack);
+        final org.spongepowered.api.item.inventory.ItemStack spongeStack = ((org.spongepowered.api.item.inventory.ItemStack) itemStack);
         if (itemStack.isItemEnchanted()) {
-            list.add(getData(itemStack, EnchantmentData.class));
+            list.add(((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(EnchantmentData.class).get());
         }
         spongeStack.get(DisplayNameData.class).ifPresent(list::add);
         spongeStack.get(LoreData.class).ifPresent(list::add);
     }
 
-    protected final <T extends DataManipulator<T, ?>> T getData(ItemStack itemStack, Class<T> manipulatorClass) {
-        return ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(manipulatorClass).get();
-    }
-
     @Override
-    public ItemStack createDictionaryStack(int wildcardValue) {
+    public ItemStack bridge$createDictionaryStack(final int wildcardValue) {
         return new ItemStack((Item) (Object) this, 1, wildcardValue);
     }
 

@@ -35,22 +35,11 @@ import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 @Mixin(TileEntityLockableLoot.class)
 public abstract class MixinTileEntityLockableLoot extends MixinTileEntityLockable implements IMixinCustomNameable {
 
-    @Shadow protected String customName;
-
     @Shadow public abstract void setCustomName(String p_190575_1_);
 
     @Override
     public void setCustomDisplayName(String customName) {
         setCustomName(customName);
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        if (this.customName != null) {
-            container.set(of("CustomName"), this.customName);
-        }
-        return container;
     }
 
 }

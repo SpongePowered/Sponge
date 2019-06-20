@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.ai;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.world.World;
@@ -35,7 +34,6 @@ import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.TristateResult;
-import org.spongepowered.api.event.entity.BreedEntityEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,7 +41,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.ShouldFire;
 
@@ -61,6 +58,7 @@ public abstract class MixinEntityAIMate {
 
     private boolean spawnEntityResult;
 
+    @SuppressWarnings("deprecation")
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ai/EntityAIMate;getNearbyMate()Lnet/minecraft/entity/passive/EntityAnimal;"))
     private EntityAnimal callFindMateEvent(final EntityAIMate entityAIMate) {
         EntityAnimal nearbyMate = this.getNearbyMate();
@@ -71,7 +69,7 @@ public abstract class MixinEntityAIMate {
         if (ShouldFire.BREED_ENTITY_EVENT_FIND_MATE) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this.animal);
-                final BreedEntityEvent.FindMate event =
+                final org.spongepowered.api.event.entity.BreedEntityEvent.FindMate event =
                     SpongeEventFactory.createBreedEntityEventFindMate(Sponge.getCauseStackManager().getCurrentCause(), TristateResult.Result.DEFAULT,
                         TristateResult.Result.DEFAULT, Optional.empty(), (Animal) nearbyMate, (Ageable) this.animal, true);
                 if (SpongeImpl.postEvent(event) || event.getResult() == TristateResult.Result.DENY) {
@@ -90,6 +88,7 @@ public abstract class MixinEntityAIMate {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Redirect(method = "spawnBaby()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z", ordinal = 0))
     private boolean onSpawnBabyInWorld(World world, Entity baby) {
         if (ShouldFire.BREED_ENTITY_EVENT_BREED) {
@@ -97,13 +96,10 @@ public abstract class MixinEntityAIMate {
                 // TODO API 8 is removing this TargetXXXX nonsense so that is why I put the parents into the Cause
                 frame.pushCause(this.animal);
                 frame.pushCause(this.targetMate);
-                final BreedEntityEvent.Breed event = SpongeEventFactory.createBreedEntityEventBreed(Sponge.getCauseStackManager().getCurrentCause(),
+                final org.spongepowered.api.event.entity.BreedEntityEvent.Breed event =
+                    SpongeEventFactory.createBreedEntityEventBreed(Sponge.getCauseStackManager().getCurrentCause(),
                     Optional.empty(), (Ageable) baby, (Ageable) this.targetMate);
-                if (!SpongeImpl.postEvent(event)) {
-                    this.spawnEntityResult = world.spawnEntity(baby);
-                } else {
-                    this.spawnEntityResult = false;
-                }
+                this.spawnEntityResult = !SpongeImpl.postEvent(event) && world.spawnEntity(baby);
             }
         } else {
             this.spawnEntityResult = world.spawnEntity(baby);

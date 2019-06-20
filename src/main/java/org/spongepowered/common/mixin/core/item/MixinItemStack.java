@@ -28,60 +28,24 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import org.apache.logging.log4j.Level;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.persistence.SerializedDataTransaction;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.interfaces.item.IMixinItem;
-import org.spongepowered.common.interfaces.item.IMixinItemStack;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -90,289 +54,18 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.item.ItemStack.class)
-@Implements(@Interface(iface = ItemStack.class, prefix = "itemstack$"))
-public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMixinCustomDataHolder {
+public abstract class MixinItemStack implements CustomDataHolderBridge {       // conflict from overriding ValueContainer#copy() from DataHolder
 
-    private List<DataView> failedData = new ArrayList<>();
-
-    @Shadow public abstract int getCount();
-    @Shadow public abstract void setCount(int size); // Do not use field directly as Minecraft tracks the empty state
-    @Shadow public abstract void setItemDamage(int meta);
-    @Shadow public abstract void setTagCompound(@Nullable NBTTagCompound compound);
-    @Shadow public abstract void setTagInfo(String key, NBTBase nbtBase);
-    @Shadow public abstract int getItemDamage();
-    @Shadow public abstract int getMaxStackSize();
-    @Shadow public abstract boolean hasTagCompound();
     @Shadow public abstract boolean shadow$isEmpty();
     @Shadow public abstract NBTTagCompound getTagCompound();
     @Shadow public abstract NBTTagCompound getOrCreateSubCompound(String key);
-    @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
-    @Shadow public abstract Item shadow$getItem();
-
-    @Shadow private NBTTagCompound stackTagCompound;
-
-    // We deliberate do not check isEmpty in onWrite, onRead, and onCopy
-    // Because Vanilla may set an ItemStack's size to 0, and then
-    // back to a positive number, we need to keep the raw manipulator data
-    // stored, even if the ItemStack is empty. However, we never want expose
-    // this data to plugins when the ItemStack is empty - therefore, we do perfomr
-    // isEmpty checks in API methods
-    @Inject(method = "writeToNBT", at = @At(value = "HEAD"))
-    private void onWrite(NBTTagCompound incoming, CallbackInfoReturnable<NBTTagCompound> info) {
-        if (this.hasManipulators()) {
-            writeSpongeNBT(incoming);
-        }
-    }
-
-    @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
-    private void onRead(NBTTagCompound compound, CallbackInfo info) {
-        if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-            readSpongeNBT(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
-        }
-    }
-
-    @Inject(method = "copy", at = @At("RETURN"))
-    private void onCopy(CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
-        final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
-        if (hasManipulators()) { // no manipulators? no problem.
-            for (DataManipulator<?, ?> manipulator : this.manipulators) {
-                ((IMixinCustomDataHolder) itemStack).offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
-            }
-        }
-    }
-
-    @Inject(method = "splitStack", at = @At("RETURN"))
-    private void onSplit(int amount, CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
-        final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
-        if (hasManipulators()) {
-            for (DataManipulator<?, ?> manipulator : this.manipulators) {
-                ((IMixinCustomDataHolder) itemStack).offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
-            }
-        }
-    }
-
-    @Inject(method = "setTagCompound", at = @At("RETURN"))
-    private void clearManipulatorsAndLoad(NBTTagCompound compound, CallbackInfo callbackInfo) {
-        // If the stack compound reference is changing, our manipulator list is stale and needs to be cleared
-        if (compound != this.stackTagCompound) {
-            this.manipulators.clear();
-        }
-
-        if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-            readSpongeNBT(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
-        }
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "onBlockDestroyed", at = @At("HEAD"))
-    private void capturePlayerOnBlockDestroyed(World worldIn, IBlockState blockIn, BlockPos pos, EntityPlayer playerIn, CallbackInfo ci) {
-        if (!((IMixinWorld) worldIn).isFake()) {
-            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
-            final IPhaseState state = currentContext.state;
-            state.capturePlayerUsingStackToBreakBlock((ItemStack) this, (EntityPlayerMP) playerIn, currentContext);
-        }
-    }
-
-    public int itemstack$getQuantity() {
-        return this.getCount();
-    }
-
-    public ItemType itemstack$getType() {
-        return (ItemType) shadow$getItem();
-    }
-
-    public void itemstack$setQuantity(int quantity) throws IllegalArgumentException {
-        this.setCount(quantity);
-    }
-
-    public int itemstack$getMaxStackQuantity() {
-        return getMaxStackSize();
-    }
-
-    @Override
-    public boolean validateRawData(DataView container) {
-        return false;
-    }
-
-    @Override
-    public void setRawData(DataView container) throws InvalidDataException {
-        if (this.shadow$isEmpty()) {
-            throw new IllegalArgumentException("Cannot set data on empty item stacks!");
-        }
-        if (!container.contains(DataQueries.UNSAFE_NBT)) {
-            throw new InvalidDataException("There's no NBT Data set in the provided container");
-        }
-        final DataView nbtData = container.getView(DataQueries.UNSAFE_NBT).get();
-        try {
-            final int integer = container.getInt(DataQueries.ITEM_DAMAGE_VALUE).orElse(this.getItemDamage());
-            this.setItemDamage(integer);
-            final NBTTagCompound stackCompound = NbtTranslator.getInstance().translate(nbtData);
-            this.setTagCompound(stackCompound);
-        } catch (Exception e) {
-            throw new InvalidDataException("Unable to set raw data or translate raw data for ItemStack setting", e);
-        }
-    }
-
-    @Override
-    public DataHolder copy() {
-        return this.itemstack$copy();
-    }
-
-    public ItemStack itemstack$copy() {
-        return (ItemStack) shadow$copy();
-    }
-
-    @Override
-    public int getContentVersion() {
-        return 1;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.ITEM_TYPE, this.itemstack$getType().getId())
-                .set(DataQueries.ITEM_COUNT, this.itemstack$getQuantity())
-                .set(DataQueries.ITEM_DAMAGE_VALUE, this.getItemDamage());
-        if (hasTagCompound()) { // no tag? no data, simple as that.
-            final NBTTagCompound compound = getTagCompound().copy();
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-                if (spongeCompound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {
-                    spongeCompound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
-                }
-            }
-            NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
-            if (!compound.isEmpty()) {
-                final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
-                container.set(DataQueries.UNSAFE_NBT, unsafeNbt);
-            }
-        }
-        // We only need to include the custom data, not vanilla manipulators supported by sponge implementation
-        final Collection<DataManipulator<?, ?>> manipulators = getCustomManipulators();
-        if (!manipulators.isEmpty()) {
-            container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
-        }
-        try {
-            final NBTTagCompound caps = this.getCapabitilitiesForSpongeContainer();
-            if (caps != null && !caps.isEmpty()) {
-                final DataContainer capsView = NbtTranslator.getInstance().translate(caps);
-                container.set(DataQueries.UNSAFE_NBT.then(NbtDataUtil.FORGE_CAPS), capsView);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return container;
-    }
-
-    public Translation itemstack$getTranslation() {
-        return new SpongeTranslation(shadow$getItem().getTranslationKey((net.minecraft.item.ItemStack) (Object) this) + ".name");
-    }
-
-    public ItemStackSnapshot itemstack$createSnapshot() {
-        return new SpongeItemStackSnapshot((ItemStack)this);
-    }
-
-    public boolean itemstack$equalTo(ItemStack that) {
-        return net.minecraft.item.ItemStack.areItemStacksEqual(
-                (net.minecraft.item.ItemStack) (Object) this,
-                (net.minecraft.item.ItemStack) that
-        );
-    }
-
-    @Intrinsic
-    public boolean itemstack$isEmpty() {
-        return this.shadow$isEmpty();
-    }
-
-    @Override
-    public Collection<DataManipulator<?, ?>> getContainers() {
-        if (this.shadow$isEmpty()) {
-            return Lists.newArrayList();
-        }
-        final List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
-        final Item item = this.shadow$getItem();
-        // Null items should be impossible to create
-        if (item == null) {
-            final PrettyPrinter printer = new PrettyPrinter(60);
-            printer.add("Null Item found!").centre().hr();
-            printer.add("An ItemStack has a null ItemType! This is usually not supported as it will likely have issues elsewhere.");
-            printer.add("Please ask help for seeing if this is an issue with a mod and report it!");
-            printer.add("Printing a Stacktrace:");
-            printer.add(new Exception());
-            printer.log(SpongeImpl.getLogger(), Level.WARN);
-            return manipulators;
-        }
-        ((IMixinItem) item).getManipulatorsFor((net.minecraft.item.ItemStack) (Object) this, manipulators);
-        if (hasManipulators()) {
-            final List<DataManipulator<?, ?>> customManipulators = this.getCustomManipulators();
-            manipulators.addAll(customManipulators);
-        }
-        return manipulators;
-    }
-
-    @Override
-    public void readSpongeNBT(NBTTagCompound compound) {
-        if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
-            final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
-            if (!list.isEmpty()) {
-                compound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
-                final List<DataView> views = Lists.newArrayList();
-                for (int i = 0; i < list.tagCount(); i++) {
-                    final NBTTagCompound dataCompound = list.getCompoundTagAt(i);
-                    views.add(NbtTranslator.getInstance().translateFrom(dataCompound));
-                }
-                final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
-                final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
-                for (DataManipulator<?, ?> manipulator : manipulators) {
-                    offerCustom(manipulator, MergeFunction.IGNORE_ALL);
-                }
-                if (!transaction.failedData.isEmpty()) {
-                    addFailedData(transaction.failedData);
-                }
-            } else {
-                compound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
-                if (compound.isEmpty()) {
-                    getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);
-                    return;
-                }
-            }
-        }
-        if (compound.hasKey(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_LIST)) {
-            final NBTTagList list = compound.getTagList(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_COMPOUND);
-            final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
-            if (list.tagCount() != 0) {
-                for (int i = 0; i < list.tagCount(); i++) {
-                    final NBTTagCompound internal = list.getCompoundTagAt(i);
-                    builder.add(NbtTranslator.getInstance().translateFrom(internal));
-                }
-            }
-            // Re-attempt to deserialize custom data
-            final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(builder.build());
-            final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
-            for (DataManipulator<?, ?> manipulator : manipulators) {
-                offer(manipulator);
-            }
-            if (!transaction.failedData.isEmpty()) {
-                this.addFailedData(transaction.failedData);
-            }
-        }
-        if (compound.isEmpty()) {
-            getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);
-            if (getTagCompound().isEmpty()) {
-                setTagCompound(null);
-            }
-        }
-    }
-
-    @Override
-    public void writeSpongeNBT(NBTTagCompound compound) {
-        resyncCustomToTag();
-    }
+    @Shadow public abstract boolean hasTagCompound();
+    @Shadow public abstract void setTagCompound(@Nullable NBTTagCompound compound);
 
     private List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
+    private List<DataView> failedData = new ArrayList<>();
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "Duplicates"})
     @Override
     public DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function) {
         if (this.shadow$isEmpty()) {
@@ -523,7 +216,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
             return false;
         }
         return this.manipulators.stream()
-                .anyMatch(manipulator -> manipulator.supports(key));
+            .anyMatch(manipulator -> manipulator.supports(key));
     }
 
     @Override
@@ -532,9 +225,9 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
             return Optional.empty();
         }
         return this.manipulators.stream()
-                .filter(manipulator -> manipulator.supports(key))
-                .findFirst()
-                .flatMap(supported -> supported.get(key));
+            .filter(manipulator -> manipulator.supports(key))
+            .findFirst()
+            .flatMap(supported -> supported.get(key));
     }
 
     @Override
@@ -543,8 +236,9 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
             return Optional.empty();
         }
         return this.manipulators.stream()
-                .filter(manipulator -> manipulator.supports(key))
-                .findFirst()
-                .flatMap(supported -> supported.getValue(key));
+            .filter(manipulator -> manipulator.supports(key))
+            .findFirst()
+            .flatMap(supported -> supported.getValue(key));
     }
+
 }

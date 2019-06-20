@@ -32,8 +32,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
@@ -51,7 +51,7 @@ public class ChestRotationValueProcessor extends AbstractSpongeValueProcessor<En
 
     @Override
     protected Value<Vector3d> constructValue(Vector3d actualValue) {
-        return new SpongeValue<>(Keys.CHEST_ROTATION, DataConstants.DEFAULT_CHEST_ROTATION, actualValue);
+        return new SpongeValue<>(Keys.CHEST_ROTATION, Constants.Entity.ArmorStand.DEFAULT_CHEST_ROTATION, actualValue);
     }
 
     @Override

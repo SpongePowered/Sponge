@@ -61,74 +61,12 @@ import java.util.Optional;
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityLockable.class)
-@Implements({@Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$"),
-             @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),})
-public abstract class MixinTileEntityLockable extends MixinTileEntity implements TileEntityCarrier, IInventory, ReusableLensProvider {
+public abstract class MixinTileEntityLockable extends MixinTileEntity implements ReusableLensProvider, MinecraftInventoryAdapter {
 
-    @Shadow private LockCode code;
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        if (this.code != null) {
-            container.set(DataQueries.BLOCK_ENTITY_LOCK_CODE, this.code.getLock());
-        }
-        List<DataView> items = Lists.newArrayList();
-        for (int i = 0; i < getSizeInventory(); i++) {
-            ItemStack stack = getStackInSlot(i);
-            if (!stack.isEmpty()) {
-                // todo make a helper object for this
-                DataContainer stackView = DataContainer.createNew()
-                    .set(Queries.CONTENT_VERSION, 1)
-                    .set(DataQueries.BLOCK_ENTITY_SLOT, i)
-                    .set(DataQueries.BLOCK_ENTITY_SLOT_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).toContainer());
-                items.add(stackView);
-            }
-        }
-        container.set(DataQueries.BLOCK_ENTITY_ITEM_CONTENTS, items);
-        return container;
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        Optional<LockableData> lockData = get(LockableData.class);
-        if (lockData.isPresent()) {
-            manipulators.add(lockData.get());
-        }
-        Optional<InventoryItemData> inventoryData = get(InventoryItemData.class);
-        if (inventoryData.isPresent()) {
-            manipulators.add(inventoryData.get());
-        }
-        if (((TileEntityLockable) (Object) this).hasCustomName()) {
-            manipulators.add(get(DisplayNameData.class).get());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public TileEntityInventory<TileEntityCarrier> getInventory() {
-        return (TileEntityInventory<TileEntityCarrier>) this;
-    }
-
-    @Override
-    public Inventory getInventory(Direction from) {
-        return IMixinSingleBlockCarrier.getInventory(from, this);
-    }
-
-    public Optional<? extends TileEntityCarrier> tileentityinventory$getTileEntity() {
-        return Optional.of(this);
-    }
-
-    public Optional<? extends TileEntityCarrier> tileentityinventory$getCarrier() {
-        return Optional.of(this);
-    }
-
-    @SuppressWarnings("unchecked")
     @Override
     public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
-        SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
-        OrderedInventoryLensImpl lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
+        SlotCollection slots = new SlotCollection.Builder().add(((TileEntityLockable) (Object) this).getSizeInventory()).build();
+        OrderedInventoryLensImpl lens = new OrderedInventoryLensImpl(0, ((TileEntityLockable) (Object) this).getSizeInventory(), 1, slots);
         return new ReusableLens<>(slots, lens);
     }
 

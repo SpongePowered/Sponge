@@ -41,6 +41,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.registry.SpongeGameRegistryRegisterEvent;
+import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.ListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
@@ -71,7 +72,7 @@ public class MixinAdvancementList implements IMixinAdvancementList {
         if (!SpongeImplHooks.isMainThread() || !ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
             return;
         }
-        try (ListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
+        try (EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
                 .source(Sponge.getGame())) {
             context.buildAndSwitch();
 
@@ -90,7 +91,7 @@ public class MixinAdvancementList implements IMixinAdvancementList {
         if (!SpongeImplHooks.isMainThread()) {
             return;
         }
-        try (ListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
+        try (EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
                 .source(Sponge.getGame())) {
             context.buildAndSwitch();
 

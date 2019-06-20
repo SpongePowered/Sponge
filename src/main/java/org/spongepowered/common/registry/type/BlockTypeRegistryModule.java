@@ -48,9 +48,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.interfaces.block.IMixinBlockState;
-import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
+import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
@@ -121,22 +119,18 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
     private void registerCustomBlock(String id, BlockType blockType) {
         this.blockTypeMappings.put(id.toLowerCase(Locale.ENGLISH), blockType);
         registerBlockTrait(id, blockType);
-        ((IMixinBlock) blockType).initializeTrackerState();
+        ((BlockBridge) blockType).initializeTrackerState();
     }
 
 
     private void registerBlockTrait(String id, BlockType block) {
         Block nmsBlock = (Block) block;
         for (IBlockState state : nmsBlock.getBlockState().getValidStates()) {
-            ((IMixinBlockState) state).generateId(nmsBlock);
             BlockStateRegistryModule.getInstance().registerBlockState((BlockState) state);
         }
         for (Map.Entry<BlockTrait<?>, ?> mapEntry : block.getDefaultState().getTraitMap().entrySet()) {
             BlockTrait<?> property = mapEntry.getKey();
             final String propertyId = BlockPropertyIdProvider.getIdAndTryRegistration((IProperty<?>) property, (Block) block, id);
-            if (property instanceof IMixinPropertyHolder) {
-                ((IMixinPropertyHolder) property).setId(propertyId);
-            }
             if (property instanceof EnumTrait) {
                 EnumTraitRegistryModule.getInstance().registerBlock(propertyId, block, (EnumTrait<?>) property);
             } else if (property instanceof IntegerTrait) {

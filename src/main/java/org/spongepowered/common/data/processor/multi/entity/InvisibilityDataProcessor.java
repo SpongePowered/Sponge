@@ -33,19 +33,20 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableInvisibilityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
+import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeInvisibilityData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 
 import java.util.Map;
 import java.util.Optional;
 
 public class InvisibilityDataProcessor
-        extends AbstractEntityDataProcessor<Entity, InvisibilityData, ImmutableInvisibilityData> {
+        extends AbstractMultiDataSingleTargetProcessor<VanishingBridge, InvisibilityData, ImmutableInvisibilityData> {
 
     public InvisibilityDataProcessor() {
-        super(Entity.class);
+        super(VanishingBridge.class);
     }
 
     @Override
@@ -54,37 +55,36 @@ public class InvisibilityDataProcessor
     }
 
     @Override
-    protected boolean doesDataExist(Entity dataHolder) {
+    protected boolean doesDataExist(VanishingBridge dataHolder) {
         return true;
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Map<Key<?>, Object> keyValues) {
-        if (!dataHolder.world.isRemote) {
-            final boolean invis = (Boolean) keyValues.get(Keys.INVISIBLE);
-            final boolean collision = (Boolean) keyValues.get(Keys.VANISH_IGNORES_COLLISION);
-            final boolean untargetable = (Boolean) keyValues.get(Keys.VANISH_PREVENTS_TARGETING);
-            final boolean vanish = (Boolean) keyValues.get(Keys.VANISH);
-            dataHolder.setInvisible(invis);
-            if (vanish) {
-                final IMixinEntity mixinEntity = EntityUtil.toMixin(dataHolder);
-                mixinEntity.setVanished(true);
-                mixinEntity.setIgnoresCollision(collision);
-                mixinEntity.setUntargetable(untargetable);
-            } else {
-                EntityUtil.toMixin(dataHolder).setVanished(false);
-            }
-            return true;
+    protected boolean set(VanishingBridge dataHolder, Map<Key<?>, Object> keyValues) {
+        if (dataHolder instanceof Entity && ((Entity) dataHolder).world.isRemote) {
+            return false;
         }
-        return false;
+        final boolean invis = (Boolean) keyValues.get(Keys.INVISIBLE);
+        final boolean collision = (Boolean) keyValues.get(Keys.VANISH_IGNORES_COLLISION);
+        final boolean untargetable = (Boolean) keyValues.get(Keys.VANISH_PREVENTS_TARGETING);
+        final boolean vanish = (Boolean) keyValues.get(Keys.VANISH);
+        dataHolder.vanish$setInvisible(invis);
+        if (vanish) {
+            dataHolder.vanish$setVanished(true);
+            dataHolder.vanish$setUncollideable(collision);
+            dataHolder.vanish$setUntargetable(untargetable);
+        } else {
+            dataHolder.vanish$setVanished(false);
+        }
+        return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(Entity dataHolder) {
-        return ImmutableMap.of(Keys.INVISIBLE, dataHolder.isInvisible(),
-                Keys.VANISH, ((IMixinEntity) dataHolder).isVanished(),
-                Keys.VANISH_IGNORES_COLLISION, ((IMixinEntity) dataHolder).ignoresCollision(),
-                Keys.VANISH_PREVENTS_TARGETING, ((IMixinEntity) dataHolder).isUntargetable());
+    protected Map<Key<?>, ?> getValues(VanishingBridge dataHolder) {
+        return ImmutableMap.of(Keys.INVISIBLE, dataHolder.vanish$isInvisible(),
+                Keys.VANISH, dataHolder.vanish$isVanished(),
+                Keys.VANISH_IGNORES_COLLISION, dataHolder.vanish$isUncollideable(),
+                Keys.VANISH_PREVENTS_TARGETING, dataHolder.vanish$isUntargetable());
     }
 
     @Override

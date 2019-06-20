@@ -37,7 +37,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGlowingData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -62,12 +62,12 @@ public class GlowingDataProcessor extends AbstractEntitySingleDataProcessor<Enti
 
     @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.GLOWING, value, DataConstants.DEFAULT_GLOWING);
+        return ImmutableSpongeValue.cachedOf(Keys.GLOWING, value, Constants.Entity.DEFAULT_GLOWING);
     }
 
     @Override
     protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.GLOWING, DataConstants.DEFAULT_GLOWING, actualValue);
+        return new SpongeValue<>(Keys.GLOWING, Constants.Entity.DEFAULT_GLOWING, actualValue);
     }
 
     @Override

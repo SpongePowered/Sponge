@@ -36,7 +36,7 @@ import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @Mixin(EntityEnderEye.class)
-public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEnder, ITargetedLocation {
+public abstract class MixinEntityEnderEye extends MixinEntity implements  ITargetedLocation {
 
     @Shadow private double targetX;
     @Shadow private double targetY;
@@ -44,24 +44,14 @@ public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEn
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
 
     @Override
-    public ProjectileSource getShooter() {
-        return this.projectileSource;
+    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$readFromSpongeCompound(compound);
+        ProjectileSourceSerializer.readSourceFromNbt(compound, (EyeOfEnder) this);
     }
 
     @Override
-    public void setShooter(ProjectileSource shooter) {
-        this.projectileSource = shooter;
-    }
-
-    @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, this);
-    }
-
-    @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
+    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, null);
     }
 

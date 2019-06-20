@@ -44,15 +44,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public class BlockPaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<org.spongepowered.api.world.schematic.BlockPaletteType>,
     AlternateCatalogRegistryModule<org.spongepowered.api.world.schematic.BlockPaletteType> {
 
     @RegisterCatalog(org.spongepowered.api.world.schematic.BlockPaletteTypes.class) private final Map<String, org.spongepowered.api.world.schematic.BlockPaletteType> paletteMappings = Maps.newHashMap();
 
     @Override
-    public void registerAdditionalCatalog(org.spongepowered.api.world.schematic.BlockPaletteType extraCatalog) {
+    public void registerAdditionalCatalog(final org.spongepowered.api.world.schematic.BlockPaletteType extraCatalog) {
         checkNotNull(extraCatalog);
-        String id = extraCatalog.getId();
+        final String id = extraCatalog.getId();
         checkArgument(id.indexOf(' ') == -1, "Palette Type ID " + id + " may not contain a space");
         this.paletteMappings.put(id.toLowerCase(Locale.ENGLISH), extraCatalog);
     }

@@ -63,7 +63,7 @@ public class UpdateAnvilEventCost implements AnvilCost {
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew().set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(DataQueries.MATERIALCOST, this.getMaterialCost())
-                .set(DataQueries.LEVELCOST, this.getLevelCost());
+                .set(DataQueries.Anvils.MATERIALCOST, this.getMaterialCost())
+                .set(DataQueries.Anvils.LEVELCOST, this.getLevelCost());
     }
 }

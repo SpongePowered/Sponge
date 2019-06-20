@@ -28,24 +28,23 @@ import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.IMixinGameRules;
+import org.spongepowered.common.bridge.world.GameRulesBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.util.TreeMap;
 
 @Mixin(GameRules.class)
-public abstract class MixinGameRules implements IMixinGameRules {
-
-    private static final GameRules DEFAULT_GAME_RULES = new GameRules();
+public abstract class MixinGameRules implements GameRulesBridge {
 
     @Shadow @Final private TreeMap<String, ?> rules;
 
     @Shadow public abstract void setOrCreateGameRule(String key, String ruleValue);
 
     @Override
-    public boolean removeGameRule(String gameRule) {
+    public boolean removeGameRule(final String gameRule) {
         // Cannot remove default gamerule
-        if (DEFAULT_GAME_RULES.hasRule(gameRule)) {
-            this.setOrCreateGameRule(gameRule, DEFAULT_GAME_RULES.getString(gameRule));
+        if (Constants.Sponge.DEFAULT_GAME_RULES.hasRule(gameRule)) {
+            this.setOrCreateGameRule(gameRule, Constants.Sponge.DEFAULT_GAME_RULES.getString(gameRule));
             return true;
         }
 

@@ -31,9 +31,9 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;
 
@@ -59,14 +59,14 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(ListenerPhaseContext context) {
+    public boolean tracksBlockSpecificDrops(L context) {
         return true;
     }
 
 
     @Override
     public void appendNotifierToBlockEvent(L context, PhaseContext<?> currentContext,
-        IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+        ServerWorldBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
 
     }
 
@@ -74,13 +74,13 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     public void associateNeighborStateNotifier(L unwindingContext, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
         WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         unwindingContext.getCapturedPlayer().ifPresent(player ->
-            ((IMixinChunk) minecraftWorld.getChunk(notifyPos))
+            ((ChunkBridge) minecraftWorld.getChunk(notifyPos))
                 .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
         );
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack stack, EntityPlayerMP playerMP, ListenerPhaseContext context) {
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack stack, EntityPlayerMP playerMP, L context) {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 

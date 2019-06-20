@@ -33,7 +33,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.common.entity.EntityUtil;
 
 import java.util.Random;
 
@@ -258,7 +257,7 @@ public class ItemDropData {
 
             Builder(EntityPlayer player) {
                 this.playerName = player.getName();
-                this.random = EntityUtil.fromNative(player).getRandom();
+                this.random = ((org.spongepowered.api.entity.Entity) player).getRandom();
             }
 
             public Builder stack(ItemStack stack) {

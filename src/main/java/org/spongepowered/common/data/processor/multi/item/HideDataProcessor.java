@@ -36,7 +36,7 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableHideData;
 import org.spongepowered.api.data.manipulator.mutable.item.HideData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeHideData;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.Map;
@@ -60,22 +60,22 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
         }
         int flag = 0;
         if ((boolean) keyValues.get(Keys.HIDE_ENCHANTMENTS)) {
-            flag |= DataConstants.HIDE_ENCHANTMENTS_FLAG;
+            flag |= Constants.Item.HIDE_ENCHANTMENTS_FLAG;
         }
         if ((boolean) keyValues.get(Keys.HIDE_ATTRIBUTES)) {
-            flag |= DataConstants.HIDE_ATTRIBUTES_FLAG;
+            flag |= Constants.Item.HIDE_ATTRIBUTES_FLAG;
         }
         if ((boolean) keyValues.get(Keys.HIDE_UNBREAKABLE)) {
-            flag |= DataConstants.HIDE_UNBREAKABLE_FLAG;
+            flag |= Constants.Item.HIDE_UNBREAKABLE_FLAG;
         }
         if ((boolean) keyValues.get(Keys.HIDE_CAN_DESTROY)) {
-            flag |= DataConstants.HIDE_CAN_DESTROY_FLAG;
+            flag |= Constants.Item.HIDE_CAN_DESTROY_FLAG;
         }
         if ((boolean) keyValues.get(Keys.HIDE_CAN_PLACE)) {
-            flag |= DataConstants.HIDE_CAN_PLACE_FLAG;
+            flag |= Constants.Item.HIDE_CAN_PLACE_FLAG;
         }
         if ((boolean) keyValues.get(Keys.HIDE_MISCELLANEOUS)) {
-            flag |= DataConstants.HIDE_MISCELLANEOUS_FLAG;
+            flag |= Constants.Item.HIDE_MISCELLANEOUS_FLAG;
         }
         dataHolder.getTagCompound().setInteger(NbtDataUtil.ITEM_HIDE_FLAGS, flag);
         return true;
@@ -89,12 +89,12 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
         Map<Key<?>, Boolean> map = Maps.newHashMap();
         int flag = dataHolder.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
 
-        map.put(Keys.HIDE_MISCELLANEOUS, (flag & DataConstants.HIDE_MISCELLANEOUS_FLAG) != 0);
-        map.put(Keys.HIDE_CAN_PLACE, (flag & DataConstants.HIDE_CAN_PLACE_FLAG) != 0);
-        map.put(Keys.HIDE_CAN_DESTROY, (flag & DataConstants.HIDE_CAN_DESTROY_FLAG) != 0);
-        map.put(Keys.HIDE_UNBREAKABLE, (flag & DataConstants.HIDE_UNBREAKABLE_FLAG) != 0);
-        map.put(Keys.HIDE_ATTRIBUTES, (flag & DataConstants.HIDE_ATTRIBUTES_FLAG) != 0);
-        map.put(Keys.HIDE_ENCHANTMENTS, (flag & DataConstants.HIDE_ENCHANTMENTS_FLAG) != 0);
+        map.put(Keys.HIDE_MISCELLANEOUS, (flag & Constants.Item.HIDE_MISCELLANEOUS_FLAG) != 0);
+        map.put(Keys.HIDE_CAN_PLACE, (flag & Constants.Item.HIDE_CAN_PLACE_FLAG) != 0);
+        map.put(Keys.HIDE_CAN_DESTROY, (flag & Constants.Item.HIDE_CAN_DESTROY_FLAG) != 0);
+        map.put(Keys.HIDE_UNBREAKABLE, (flag & Constants.Item.HIDE_UNBREAKABLE_FLAG) != 0);
+        map.put(Keys.HIDE_ATTRIBUTES, (flag & Constants.Item.HIDE_ATTRIBUTES_FLAG) != 0);
+        map.put(Keys.HIDE_ENCHANTMENTS, (flag & Constants.Item.HIDE_ENCHANTMENTS_FLAG) != 0);
 
         return map;
     }

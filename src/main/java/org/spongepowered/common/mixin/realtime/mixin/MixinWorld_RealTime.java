@@ -29,7 +29,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 import javax.annotation.Nullable;
@@ -43,7 +43,7 @@ public abstract class MixinWorld_RealTime implements IMixinRealTimeTicking {
 
     @Override
     public long getRealTimeTicks() {
-        if (((IMixinWorld) this).isFake()) {
+        if (((WorldBridge) this).isFake()) {
             return 1;
         }
         if (this.getMinecraftServer() != null) {

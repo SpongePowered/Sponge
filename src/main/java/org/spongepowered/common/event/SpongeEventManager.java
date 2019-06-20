@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
+import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -59,7 +60,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.ListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.custom.CustomInventoryListener;
 import org.spongepowered.common.util.TypeTokenHelper;
@@ -445,7 +446,7 @@ public class SpongeEventManager implements EventManager {
     }
 
     @Nullable
-    private ListenerPhaseContext createPluginContext(RegisteredListener<?> handler) {
+    private EventListenerPhaseContext createPluginContext(RegisteredListener<?> handler) {
         if (PhaseTracker.getInstance().getCurrentState().allowsEventListener()) {
             return PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
                 .source(handler.getPlugin());
@@ -457,7 +458,7 @@ public class SpongeEventManager implements EventManager {
     public boolean post(Event event) {
         try {
             if (event instanceof InteractInventoryEvent) { // Track usage of Containers
-                ((IMixinContainer) ((InteractInventoryEvent) event).getTargetInventory()).setInUse(true);
+                ((ContainerBridge) ((InteractInventoryEvent) event).getTargetInventory()).setInUse(true);
             }
             // Allow the client thread by default so devs can actually
             // call their own events inside the init events. Only allowing
@@ -465,7 +466,7 @@ public class SpongeEventManager implements EventManager {
             return post(event, !Sponge.isServerAvailable());
         } finally {
             if (event instanceof InteractInventoryEvent) { // Finished using Container
-                ((IMixinContainer) ((InteractInventoryEvent) event).getTargetInventory()).setInUse(false);
+                ((ContainerBridge) ((InteractInventoryEvent) event).getTargetInventory()).setInUse(false);
             }
         }
     }

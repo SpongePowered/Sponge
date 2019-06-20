@@ -53,8 +53,11 @@ public abstract class MixinBlockTrapDoor extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList
-                .<ImmutableDataManipulator<?, ?>>of(getPortionTypeFor(blockState), getIsOpenFor(blockState), getDirectionalData(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
+            .add(getPortionTypeFor(blockState))
+            .add(getIsOpenFor(blockState))
+            .add(getDirectionalData(blockState))
+            .build();
     }
 
     @Override
@@ -63,6 +66,7 @@ public abstract class MixinBlockTrapDoor extends MixinBlock {
                 || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePortionData) {
@@ -110,6 +114,7 @@ public abstract class MixinBlockTrapDoor extends MixinBlock {
                 DirectionResolver.getFor(blockState.getValue(BlockTrapDoor.FACING)));
     }
 
+    @SuppressWarnings("ConstantConditions")
     private PortionType convertType(BlockTrapDoor.DoorHalf type) {
         return (PortionType) (Object) BlockSlab.EnumBlockHalf.valueOf(type.getName().toUpperCase());
     }

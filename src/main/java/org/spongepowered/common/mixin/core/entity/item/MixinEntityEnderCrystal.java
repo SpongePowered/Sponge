@@ -29,16 +29,17 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.EnderCrystal;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinExplosive;
+import org.spongepowered.common.bridge.entity.item.EntityEnderCrystalBridge;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.Optional;
@@ -46,50 +47,50 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityEnderCrystal.class)
-public abstract class MixinEntityEnderCrystal extends MixinEntity implements EnderCrystal, IMixinExplosive {
+public abstract class MixinEntityEnderCrystal extends MixinEntity implements ExplosiveBridge, EntityEnderCrystalBridge {
 
-    private static final String TARGET_NEW_EXPLOSION = "Lnet/minecraft/world/World;createExplosion"
-            + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;";
-    private static final int DEFAULT_EXPLOSION_STRENGTH = 6;
-
-    @Nullable private Object detonationCause;
-    private int explosionStrength = DEFAULT_EXPLOSION_STRENGTH;
+    private int explosionStrength = Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH;
 
     // Explosive Impl
 
     @Override
-    public Optional<Integer> getExplosionRadius() {
+    public Optional<Integer> bridge$getExplosionRadius() {
         return Optional.of(this.explosionStrength);
     }
 
     @Override
-    public void setExplosionRadius(Optional<Integer> radius) {
-        this.explosionStrength = radius.orElse(DEFAULT_EXPLOSION_STRENGTH);
+    public void bridge$setExplosionRadius(Optional<Integer> radius) {
+        this.explosionStrength = radius.orElse(Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH);
     }
 
+    @Redirect(method = "attackEntityFrom",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;"
+        )
+    )
+    @Nullable
+    private net.minecraft.world.Explosion impl$throwEventWithEntity(net.minecraft.world.World world, @Nullable Entity nil, double x,
+                                                    double y, double z, float strength, boolean smoking, DamageSource source, float damage) {
+        return bridge$ThrowEventWithDetonation(world, nil, x, y, z, smoking, source);
+    }
+
+    @Nullable
     @Override
-    public void detonate() {
-        setDead();
-        this.detonationCause = null;
-        onExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionStrength, true);
-    }
-
-    @Inject(method = "attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z", at = @At(value = "INVOKE"))
-    protected void onAttack(DamageSource damageSource, float amount, CallbackInfoReturnable<Boolean> ci) {
-        this.detonationCause = damageSource;
-    }
-
-    @Redirect(method = "attackEntityFrom", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
-    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World world, @Nullable Entity nil, double x,
-                                                    double y, double z, float strength, boolean smoking) {
-        if (this.detonationCause != null) Sponge.getCauseStackManager().pushCause(this.detonationCause);
-        net.minecraft.world.Explosion ex = detonate(Explosion.builder()
+    public net.minecraft.world.Explosion bridge$ThrowEventWithDetonation(net.minecraft.world.World world, @Nullable Entity nil, double x,
+        double y, double z, boolean smoking, @Nullable DamageSource source) {
+        final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
+        try (CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame()){
+            frame.pushCause(this);
+            if (source != null) {
+                frame.pushCause(source);
+            }
+            return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(new Location<>((World) world, new Vector3d(x, y, z)))
                 .radius(this.explosionStrength)
                 .shouldPlaySmoke(smoking))
                 .orElse(null);
-        if (this.detonationCause != null) Sponge.getCauseStackManager().popCause();
-        return ex;
+        }
     }
 
 }

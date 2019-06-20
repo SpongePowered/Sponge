@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.BlockStaticLiquid;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -32,43 +33,48 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collections;
+import java.util.List;
 
 @Mixin(BlockStaticLiquid.class)
 public class MixinBlockStaticLiquid {
 
-    @Redirect(method = "updateTick", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
-    private boolean onSpreadFire(World world, BlockPos pos, IBlockState blockState) {
+    @Redirect(
+        method = "updateTick",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"
+        )
+    )
+    private boolean impl$CheckEventsBeforeSpreadingFire(World world, BlockPos pos, IBlockState blockState) {
         if (!ShouldFire.CHANGE_BLOCK_EVENT_PRE) { // If we're not throwing events... well..
-            if (!((IMixinWorld) world).isFake()) {
-                return PhaseTracker.getInstance().setBlockState(((IMixinWorldServer) world), pos, blockState, BlockChangeFlags.ALL);
-            } else {
-                return world.setBlockState(pos, blockState);
+            if (!((WorldBridge) world).isFake()) {
+                return PhaseTracker.getInstance().setBlockState(((ServerWorldBridge) world), pos, blockState, BlockChangeFlags.ALL);
             }
+            return world.setBlockState(pos, blockState);
         }
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(pos);
             frame.pushCause(this);
-            ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), Collections.singletonList(new Location<>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(pos))));
+            final Vector3i target = VecHelper.toVector3i(pos);
+            final Location<org.spongepowered.api.world.World> location = new Location<>((org.spongepowered.api.world.World) world, target);
+            final List<Location<org.spongepowered.api.world.World>> locations = Collections.singletonList(location);
+            final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), locations);
             if (!SpongeImpl.postEvent(event)) {
-                PhaseTracker.getInstance().setBlockState((IMixinWorldServer) world, pos, blockState, BlockChangeFlags.ALL);
-                return true;
+                return PhaseTracker.getInstance().setBlockState((ServerWorldBridge) world, pos, blockState, BlockChangeFlags.ALL);
             }
             return false;
         }

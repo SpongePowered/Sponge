@@ -35,13 +35,11 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableConnected
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWallData;
 import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeWallData;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -50,6 +48,7 @@ import java.util.Set;
 @Mixin(BlockWall.class)
 public abstract class MixinBlockWall extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getWallTypeFor(blockState), getConnectedDirectionData(blockState));
@@ -60,6 +59,7 @@ public abstract class MixinBlockWall extends MixinBlock {
         return ImmutableWallData.class.isAssignableFrom(immutable) || ImmutableConnectedDirectionData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableWallData) {
@@ -85,6 +85,7 @@ public abstract class MixinBlockWall extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutableWallData getWallTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) (Object) blockState.getValue(BlockWall.VARIANT));
     }
@@ -114,8 +115,4 @@ public abstract class MixinBlockWall extends MixinBlock {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeConnectedDirectionData.class, directions);
     }
 
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + "." + BlockWall.EnumType.NORMAL.getTranslationKey() + ".name");
-    }
 }

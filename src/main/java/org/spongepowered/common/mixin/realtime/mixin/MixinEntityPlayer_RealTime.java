@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityPlayer.class)
@@ -43,7 +43,7 @@ public abstract class MixinEntityPlayer_RealTime extends MixinEntityLivingBase_R
 
     @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayer;xpCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void adjustForRealTimeXpCooldown(EntityPlayer self, int modifier) {
-        if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((IMixinWorld) this.world).isFake()) {
+        if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((WorldBridge) this.world).isFake()) {
             this.xpCooldown = modifier;
         }
         int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
@@ -70,7 +70,7 @@ public abstract class MixinEntityPlayer_RealTime extends MixinEntityLivingBase_R
         )
     )
     private void adjustForRealTimeSleepTimer(EntityPlayer self, int modifier) {
-        if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((IMixinWorld) this.world).isFake()) {
+        if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((WorldBridge) this.world).isFake()) {
             this.sleepTimer = modifier;
         }
         int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
@@ -97,7 +97,7 @@ public abstract class MixinEntityPlayer_RealTime extends MixinEntityLivingBase_R
         )
     )
     private void adjustForRealTimeWakeTimer(EntityPlayer self, int modifier) {
-        if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((IMixinWorld) this.world).isFake()) {
+        if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((WorldBridge) this.world).isFake()) {
             this.sleepTimer = modifier;
         }
         int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();

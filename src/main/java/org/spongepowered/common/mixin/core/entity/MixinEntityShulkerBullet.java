@@ -24,46 +24,32 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityShulkerBullet;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.RayTraceResult;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.ShulkerBullet;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionResolver;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IEntityTargetingEntity;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinShulkerBullet;
 
-import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityShulkerBullet.class)
-public abstract class MixinEntityShulkerBullet extends MixinEntity implements ShulkerBullet, IEntityTargetingEntity, IMixinShulkerBullet {
+public abstract class MixinEntityShulkerBullet extends MixinEntity implements IEntityTargetingEntity, IMixinShulkerBullet {
 
     @Shadow @Nullable private net.minecraft.entity.Entity target;
     @Shadow @Nullable private EnumFacing direction;
 
     @Shadow @Nullable private UUID targetUniqueId;
-
-    @Shadow private EntityLivingBase owner;
-
-    @Nullable public ProjectileSource projectileSource;
 
     @Override
     public Direction getBulletDirection() {
@@ -77,40 +63,6 @@ public abstract class MixinEntityShulkerBullet extends MixinEntity implements Sh
         } else {
             this.direction = DirectionResolver.getFor(direction);
         }
-    }
-
-    @Override
-    public DirectionalData getDirectionalData() {
-        return new SpongeDirectionalData(getBulletDirection());
-    }
-
-    @Override
-    public Value<Direction> direction() {
-        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, getBulletDirection());
-    }
-
-    @Override
-    public ProjectileSource getShooter() {
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        }
-
-        if (this.owner instanceof ProjectileSource) {
-            return (ProjectileSource) this.owner;
-        }
-
-        return ProjectileSource.UNKNOWN;
-    }
-
-    @Override
-    public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof EntityLivingBase) {
-            this.owner = (EntityLivingBase) shooter;
-        } else {
-            this.owner = null;
-        }
-
-        this.projectileSource = shooter;
     }
 
     @Nullable
@@ -129,15 +81,8 @@ public abstract class MixinEntityShulkerBullet extends MixinEntity implements Sh
         }
     }
 
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getTargetData());
-        manipulators.add(getDirectionalData());
-    }
-
     @Inject(method = "bulletHit", at = @At("HEAD"), cancellable = true)
-    public void onBulletHitBlock(RayTraceResult result, CallbackInfo ci) {
+    private void onBulletHitBlock(RayTraceResult result, CallbackInfo ci) {
         if (!this.world.isRemote) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((net.minecraft.entity.Entity) (Object) this, ((Projectile) this).getShooter(), result)) {
                 ci.cancel();

@@ -32,7 +32,7 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,17 +45,15 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-import java.util.List;
-
 import javax.annotation.Nullable;
 
 @Mixin(EntityArrow.class)
-public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMixinEntityArrow {
+public abstract class MixinEntityArrow extends MixinEntity implements IMixinEntityArrow {
 
     @Shadow public Entity shootingEntity;
     @Shadow private int ticksInAir;
-    @Shadow public double damage;
-    @Shadow public boolean inGround;
+    @Shadow private double damage;
+    @Shadow protected boolean inGround;
     @Shadow public int arrowShake;
     @Shadow private int xTile;
     @Shadow private int yTile;
@@ -70,51 +68,24 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
     @Nullable public ProjectileSource projectileSource;
 
     @Override
-    public ProjectileSource getShooter() {
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        } else if (this.shootingEntity instanceof ProjectileSource) {
-            return (ProjectileSource) this.shootingEntity;
-        }
-        return ProjectileSource.UNKNOWN;
+    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
+        super.spongeImpl$readFromSpongeCompound(compound);
+        ProjectileSourceSerializer.readSourceFromNbt(compound, (Arrow) this);
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getKnockbackData());
-    }
-
-    @Override
-    public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof Entity) {
-            // This allows things like Vanilla kill attribution to take place
-            this.shootingEntity = (Entity) shooter;
-        } else {
-            this.shootingEntity = null;
-        }
-        this.projectileSource = shooter;
-    }
-
-    @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, this);
-    }
-
-    @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.getShooter(), this.shootingEntity);
+    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
+        super.spongeImpl$writeToSpongeCompound(compound);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Arrow) this).getShooter(), this.shootingEntity);
     }
 
     /**
      * Collide impact event post for plugins to cancel impact.
      */
     @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
-    private void onProjectileHit(RayTraceResult hitResult, CallbackInfo ci) {
+    private void onProjectileHit(final RayTraceResult hitResult, final CallbackInfo ci) {
         if (!this.world.isRemote) {
-            if (SpongeCommonEventFactory.handleCollideImpactEvent((EntityArrow) (Object) this, getShooter(), hitResult)) {
+            if (SpongeCommonEventFactory.handleCollideImpactEvent((EntityArrow) (Object) this, ((Arrow) this).getShooter(), hitResult)) {
                 // deflect and drop to ground
                 this.motionX *= -0.10000000149011612D;
                 this.motionY *= -0.10000000149011612D;
@@ -125,11 +96,11 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
                 this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
                 // if block was hit, change state to reflect it hit block to avoid onHit logic repeating indefinitely
                 if (hitResult.entityHit == null) {
-                    BlockPos blockpos = hitResult.getBlockPos();
+                    final BlockPos blockpos = hitResult.getBlockPos();
                     this.xTile = blockpos.getX();
                     this.yTile = blockpos.getY();
                     this.zTile = blockpos.getZ();
-                    IBlockState iblockstate = this.world.getBlockState(blockpos);
+                    final IBlockState iblockstate = this.world.getBlockState(blockpos);
                     this.inTile = iblockstate.getBlock();
                     this.inData = this.inTile.getMetaFromState(iblockstate);
                     this.inGround = true;

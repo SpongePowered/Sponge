@@ -61,7 +61,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
         for (Map.Entry<String, ItemType> entry : this.itemTypeMappings.entrySet()) {
             itemTypeMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
         }
-        itemTypeMap.put("none", ((ItemType) this.NONE.getType()));
+        itemTypeMap.put("none", this.NONE.getType());
         return itemTypeMap;
     }
 

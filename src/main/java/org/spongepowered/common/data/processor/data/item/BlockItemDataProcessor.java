@@ -38,7 +38,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBlockItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -77,12 +77,12 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
 
     @Override
     protected Value<BlockState> constructValue(BlockState actualValue) {
-        return new SpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.Catalog.DEFAULT_BLOCK_STATE, actualValue);
+        return new SpongeValue<>(Keys.ITEM_BLOCKSTATE, Constants.Catalog.DEFAULT_BLOCK_STATE, actualValue);
     }
 
     @Override
     protected ImmutableValue<BlockState> constructImmutableValue(BlockState value) {
-        return new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.Catalog.DEFAULT_BLOCK_STATE, value);
+        return new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, Constants.Catalog.DEFAULT_BLOCK_STATE, value);
     }
 
     @Override

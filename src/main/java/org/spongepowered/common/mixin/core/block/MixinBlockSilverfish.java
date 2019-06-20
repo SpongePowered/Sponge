@@ -43,6 +43,7 @@ import java.util.Optional;
 @Mixin(BlockSilverfish.class)
 public abstract class MixinBlockSilverfish extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getSilverfishTypeFor(blockState));

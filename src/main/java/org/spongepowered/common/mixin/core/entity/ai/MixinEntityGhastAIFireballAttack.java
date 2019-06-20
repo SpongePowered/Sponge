@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 @Mixin(EntityGhast.AIFireballAttack.class)
 public abstract class MixinEntityGhastAIFireballAttack extends EntityAIBase {
@@ -42,7 +42,7 @@ public abstract class MixinEntityGhastAIFireballAttack extends EntityAIBase {
     @ModifyArg(method = "updateTask", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity"
             + "(Lnet/minecraft/entity/Entity;)Z"))
     protected Entity onSpawnFireball(Entity entity) {
-        ((IMixinGriefer) entity).setCanGrief(((IMixinGriefer) this.parentEntity).canGrief());
+        ((GrieferBridge) entity).bridge$SetCanGrief(((GrieferBridge) this.parentEntity).bridge$CanGrief());
         return entity;
     }
 }

@@ -32,10 +32,10 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.explosive.FusedExplosive;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
 
 import java.util.Optional;
 
@@ -53,13 +53,13 @@ public class FuseDurationValueProcessor extends AbstractSpongeValueProcessor<Fus
     @Override
     protected boolean set(FusedExplosive container, Integer value) {
         checkArgument(value >= 0, "fuse duration cannot be less than zero");
-        ((IMixinFusedExplosive) container).setFuseDuration(value);
+        ((FusedExplosiveBridge) container).bridge$setFuseDuration(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(FusedExplosive container) {
-        return Optional.of(((IMixinFusedExplosive) container).getFuseDuration());
+        return Optional.of(((FusedExplosiveBridge) container).bridge$getFuseDuration());
     }
 
     @Override

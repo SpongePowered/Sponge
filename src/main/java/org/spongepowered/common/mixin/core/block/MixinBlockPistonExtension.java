@@ -58,6 +58,7 @@ public abstract class MixinBlockPistonExtension extends MixinBlock {
         return ImmutablePistonData.class.isAssignableFrom(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePistonData) {
@@ -85,6 +86,7 @@ public abstract class MixinBlockPistonExtension extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutablePistonData getPistonTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePistonData.class,
                 (PistonType) (Object) blockState.getValue(BlockPistonExtension.TYPE));

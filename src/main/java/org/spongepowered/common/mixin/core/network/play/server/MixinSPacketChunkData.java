@@ -48,23 +48,35 @@ public abstract class MixinSPacketChunkData {
 
     private int calculatedSize;
 
-    @Redirect(method = "<init>(Lnet/minecraft/world/chunk/Chunk;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketChunkData;calculateChunkSize(Lnet/minecraft/world/chunk/Chunk;ZI)I"))
-    private int onCalculateSize(SPacketChunkData sPacketChunkData, Chunk chunkIn, boolean p_189556_2_, int p_189556_3_) {
+    @Redirect(
+        method = "<init>(Lnet/minecraft/world/chunk/Chunk;I)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/network/play/server/SPacketChunkData;calculateChunkSize(Lnet/minecraft/world/chunk/Chunk;ZI)I"
+        )
+    )
+    private int spongeImpl$getCalculatedSizeForArray(SPacketChunkData sPacketChunkData, Chunk chunkIn, boolean p_189556_2_, int p_189556_3_) {
         this.calculatedSize = this.calculateChunkSize(chunkIn, p_189556_2_, p_189556_3_);
         return this.calculatedSize;
     }
 
-    @Redirect(method = "<init>(Lnet/minecraft/world/chunk/Chunk;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketChunkData;extractChunkData(Lnet/minecraft/network/PacketBuffer;Lnet/minecraft/world/chunk/Chunk;ZI)I"))
-    private int onExtractChunkData(SPacketChunkData this$0, PacketBuffer buf, Chunk chunkIn, boolean writeSkylight, int changedSectionFilter) {
+    @Redirect(
+        method = "<init>(Lnet/minecraft/world/chunk/Chunk;I)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/network/play/server/SPacketChunkData;extractChunkData(Lnet/minecraft/network/PacketBuffer;Lnet/minecraft/world/chunk/Chunk;ZI)I"
+        )
+    )
+    private int spongeImpl$surroundExtractingChunkDataWithExceptionPrinter(SPacketChunkData this$0, PacketBuffer buf, Chunk chunkIn, boolean writeSkylight, int changedSectionFilter) {
         try {
             return this$0.extractChunkData(buf, chunkIn, writeSkylight, changedSectionFilter);
         } catch (Exception e) {
-            printVerbosity(chunkIn, writeSkylight, changedSectionFilter, e);
+            spongeImpl$printVerbosity(chunkIn, writeSkylight, changedSectionFilter, e);
             throw new RuntimeException(String.format("Exception creating chunk packet for chunk at '%s %s'!", this.chunkX, this.chunkZ), e);
         }
     }
 
-    private void printVerbosity(Chunk chunkIn, boolean writeSkylight, int changedSectionFilter, Exception e) {
+    private void spongeImpl$printVerbosity(Chunk chunkIn, boolean writeSkylight, int changedSectionFilter, Exception e) {
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to create a ChunkPacket").centre().hr()
             .addWrapped(70, "Sponge has been attempting to resolve an issue where a chunk "
                             + "is being \"serialized\" to a packet, but somehow the chunk data is mismatched "

@@ -33,8 +33,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -46,7 +46,7 @@ public class FallingBlockStateValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected Value<BlockState> constructValue(BlockState value) {
-        return new SpongeValue<>(Keys.FALLING_BLOCK_STATE, DataConstants.Catalog.DEFAULT_FALLING_BLOCK_BLOCKSTATE, value);
+        return new SpongeValue<>(Keys.FALLING_BLOCK_STATE, Constants.Catalog.DEFAULT_FALLING_BLOCK_BLOCKSTATE, value);
     }
 
     @Override

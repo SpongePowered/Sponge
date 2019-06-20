@@ -43,6 +43,7 @@ import java.util.Optional;
 @Mixin(BlockQuartz.class)
 public abstract class MixinBlockQuartz extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getQuartzTypeFor(blockState));
@@ -53,6 +54,7 @@ public abstract class MixinBlockQuartz extends MixinBlock {
         return ImmutableQuartzData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableQuartzData) {
@@ -71,6 +73,7 @@ public abstract class MixinBlockQuartz extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutableQuartzData getQuartzTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeQuartzData.class,
                 (QuartzType) (Object) blockState.getValue(BlockQuartz.VARIANT));

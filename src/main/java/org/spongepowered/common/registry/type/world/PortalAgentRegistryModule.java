@@ -36,7 +36,7 @@ import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.world.IMixinITeleporter;
+import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.SpongePortalAgentType;
 
@@ -83,7 +83,7 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
     public void registerDefaults() {
         final Class clazz = Teleporter.class;
         this.portalAgentTypeMappings.put("minecraft:default",
-            new SpongePortalAgentType("minecraft:default", "Default", (Class<? extends IMixinITeleporter>) clazz));
+            new SpongePortalAgentType("minecraft:default", "Default", (Class<? extends ForgeITeleporterBridge>) clazz));
     }
 
     @Override
@@ -104,7 +104,7 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
             try {
                 Class<?> clazz = Class.forName(portalAgentTypeClass);
                 if (Teleporter.class.isAssignableFrom(clazz)) {
-                    return this.validatePortalAgent((Class<? extends IMixinITeleporter>) clazz);
+                    return this.validatePortalAgent((Class<? extends ForgeITeleporterBridge>) clazz);
                 }
                 SpongeImpl.getLogger().error("Class " + portalAgentTypeClass + " is not a valid PortalAgentType class for world " + worldName +". Falling back to default type...");
             } catch (ClassNotFoundException e) {
@@ -115,12 +115,12 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
         return PortalAgentTypes.DEFAULT;
     }
 
-    public PortalAgentType validatePortalAgent(IMixinITeleporter teleporter) {
+    public PortalAgentType validatePortalAgent(ForgeITeleporterBridge teleporter) {
         return this.validatePortalAgent(teleporter.getClass());
     }
 
     @SuppressWarnings("unchecked")
-    private PortalAgentType validatePortalAgent(Class<? extends IMixinITeleporter> clazz) {
+    private PortalAgentType validatePortalAgent(Class<? extends ForgeITeleporterBridge> clazz) {
         PortalAgentType portalAgentType = this.portalAgentClassToTypeMappings.get(clazz);
         if (portalAgentType != null) {
             return portalAgentType;

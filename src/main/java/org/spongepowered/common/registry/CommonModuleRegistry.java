@@ -125,7 +125,6 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.gen.populator.*;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
 import org.spongepowered.api.world.gen.type.MushroomType;
-import org.spongepowered.api.world.schematic.BlockPaletteType;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
@@ -206,7 +205,7 @@ import java.util.List;
 public final class CommonModuleRegistry {
 
     public static CommonModuleRegistry getInstance() {
-        return Holder.INSTANCE;
+        return CommonModuleRegistry.Holder.INSTANCE;
     }
 
     public void registerDefaultModules() {
@@ -327,7 +326,7 @@ public final class CommonModuleRegistry {
         ;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
     protected void registerCommonModules(SpongeGameRegistry registry) {
         registry.registerModule(new ArgumentRegistryModule())
                 .registerModule(BlockChangeFlagRegistryModule.getInstance())
@@ -437,7 +436,7 @@ public final class CommonModuleRegistry {
                 .registerModule(PortalAgentType.class, PortalAgentRegistryModule.getInstance())
                 .registerModule(HandType.class, HandTypeRegistryModule.getInstance())
                 .registerModule(PickupRule.class, new PickupRuleRegistryModule())
-                .registerModule(BlockPaletteType.class, new BlockPaletteTypeRegistryModule())
+                .registerModule(org.spongepowered.api.world.schematic.BlockPaletteType.class, new BlockPaletteTypeRegistryModule())
                 .registerModule((Class<PaletteType<?>>) (Class<?>) PaletteType.class, new PaletteTypeRegistryModule())
                 .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
                 .registerModule(DismountType.class, new DismountTypeRegistryModule())
@@ -458,7 +457,7 @@ public final class CommonModuleRegistry {
                 .registerModule(AdvancementType.class, new AdvancementTypeRegistryModule())
                 .registerModule(Trigger.class, TriggerTypeRegistryModule.getInstance())
                 .registerModule(new CriterionRegistryModule())
-                .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
+                .registerModule((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class, SpongeManipulatorRegistry.getInstance())
                 .registerModule(new ItemStackComparatorRegistryModule())
                 .registerModule(HandPreference.class, HandPreferenceRegistryModule.getInstance())
 

@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.entity.Entity;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 
 public class EntityTickContext extends TickContext<EntityTickContext> {
 
@@ -45,8 +45,8 @@ public class EntityTickContext extends TickContext<EntityTickContext> {
     @Override
     public EntityTickContext source(Object owner) {
         super.source(owner);
-        if (owner instanceof IMixinEntity) {
-            final IMixinEntity mixinEntity = (IMixinEntity) owner;
+        if (owner instanceof EntityBridge) {
+            final EntityBridge mixinEntity = (EntityBridge) owner;
             setBulkBlockCaptures(mixinEntity.allowsBlockBulkCapture());
             setBlockEvents(mixinEntity.allowsBlockEventCreation());
             setBulkEntityCaptures(mixinEntity.allowsEntityBulkCapture());

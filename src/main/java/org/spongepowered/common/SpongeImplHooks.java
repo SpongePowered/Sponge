@@ -32,6 +32,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -42,10 +43,10 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
@@ -73,8 +74,10 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -87,19 +90,14 @@ import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.world.IMixinITeleporter;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.tileentity.MixinTileEntity;
-import org.spongepowered.common.mixin.core.world.MixinWorldServer;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.WorldManager;
@@ -230,7 +228,7 @@ public final class SpongeImplHooks {
         return world.getPlayerChunkMap().getChunkIterator();
     }
 
-    public static void registerPortalAgentType(@Nullable IMixinITeleporter teleporter) {
+    public static void registerPortalAgentType(@Nullable ForgeITeleporterBridge teleporter) {
         // Overwritten in SpongeForge
     }
 
@@ -307,7 +305,9 @@ public final class SpongeImplHooks {
             final Object o = Util.runTask(task, logger);
             return o;
         } catch (Exception e) {
-            phaseTracker.printExceptionFromPhase(e);
+            phaseTracker
+                .printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", e);
+
             return null;
         }
     }
@@ -428,11 +428,11 @@ public final class SpongeImplHooks {
     }
 
     public static BlockPos getBedLocation(EntityPlayer playerIn, int dimension) {
-        return ((IMixinEntityPlayer) playerIn).getBedLocation(dimension);
+        return ((PlayerEntityBridge) playerIn).getBedLocation(dimension);
     }
 
     public static boolean isSpawnForced(EntityPlayer playerIn, int dimension) {
-        return ((IMixinEntityPlayer) playerIn).isSpawnForced(dimension);
+        return ((PlayerEntityBridge) playerIn).isSpawnForced(dimension);
     }
 
     public static Inventory toInventory(Object inventory, @Nullable Object forgeItemHandler) {
@@ -453,16 +453,16 @@ public final class SpongeImplHooks {
      * @author gabizou - April 21st, 2018
      * Gets the enchantment modifier for looting on the entity living base from the damage source, but in forge cases, we need to use their hooks.
      *
-     * @param mixinEntityLivingBase
+     * @param target
      * @param entity
      * @param cause
      * @return
      */
-    public static int getLootingEnchantmentModifier(IMixinEntityLivingBase mixinEntityLivingBase, EntityLivingBase entity, DamageSource cause) {
+    public static int getLootingEnchantmentModifier(EntityLivingBase target, EntityLivingBase entity, DamageSource cause) {
         return EnchantmentHelper.getLootingModifier(entity);
     }
 
-    public static double getWorldMaxEntityRadius(IMixinWorldServer mixinWorldServer) {
+    public static double getWorldMaxEntityRadius(WorldServer worldServer) {
         return 2.0D;
     }
 
@@ -522,7 +522,7 @@ public final class SpongeImplHooks {
         throw new UnsupportedOperationException("SpongeCommon does not have it's own ecosystem, this needs to be mixed into for implementations depending on SpongeCommon");
     }
 
-    public static TileEntityType getTileEntityType(Class<? extends IMixinTileEntity> aClass) {
+    public static TileEntityType getTileEntityType(Class<? extends TileEntity> aClass) {
         return SpongeImpl.getRegistry().getTranslated(aClass, TileEntityType.class);
     }
 
@@ -663,6 +663,7 @@ public final class SpongeImplHooks {
      * @param entity The vanilla entity item
      * @return The custom item entity for the dropped item
      */
+    @Nullable
     public static Entity getCustomEntityIfItem(Entity entity) {
         return entity;
     }
@@ -675,5 +676,33 @@ public final class SpongeImplHooks {
      */
     public static boolean shouldTickTile(ITickable tile) {
         return true;
+    }
+
+    /**
+     * Used for compatibility with Forge where Forge uses wrapped Items
+     * since they allow for registry replacements.
+     *
+     * @param mixinItem_api The item
+     * @return The resource location id
+     */
+    @Nullable
+    public static ResourceLocation getItemResourceLocation(Item mixinItem_api) {
+        return Item.REGISTRY.getNameForObject(mixinItem_api);
+    }
+
+    public static void registerItemForSpongeRegistry(int id, ResourceLocation textualID, Item itemIn) {
+        ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) itemIn);
+    }
+
+    public static void writeItemStackCapabilitiesToDataView(DataContainer container, net.minecraft.item.ItemStack stack) {
+
+    }
+
+    public static boolean canEnchantmentBeAppliedToItem(Enchantment enchantment, net.minecraft.item.ItemStack stack) {
+        return enchantment.canApply(stack);
+    }
+
+    public static void setCapabilitiesFromSpongeBuilder(ItemStack stack, NBTTagCompound compoundTag) {
+
     }
 }

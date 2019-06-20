@@ -31,9 +31,7 @@ import static org.spongepowered.api.entity.EntityTypes.UNKNOWN;
 
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -44,11 +42,11 @@ import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
-import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -110,13 +108,14 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     public EntityArchetype.Builder from(Entity entity) {
         checkNotNull(entity, "Cannot build an EntityArchetype for a null entity!");
         this.entityType = checkNotNull(entity.getType(), "Entity is returning a null EntityType!");
-        final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
+        final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final NBTTagCompound compound = new NBTTagCompound();
         minecraftEntity.writeToNBT(compound);
         compound.setString(NbtDataUtil.Schematic.ENTITY_ID, entity.getType().getId());
         compound.removeTag(NbtDataUtil.UUID);
         compound.removeTag(NbtDataUtil.UUID_MOST);
         compound.removeTag(NbtDataUtil.UUID_LEAST);
+        compound.setBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN, true);
         this.compound = compound;
         return this;
     }
@@ -173,7 +172,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         checkNotNull(this.entityType);
         checkState(this.entityType != UNKNOWN);
         if (this.entityData != null) {
-            this.entityData.remove(DataQueries.USER_UUID);
+            this.entityData.remove(DataQueries.User.UUID);
         }
         return new SpongeEntityArchetype(this);
     }

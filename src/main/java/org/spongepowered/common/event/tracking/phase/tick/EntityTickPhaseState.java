@@ -34,6 +34,7 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.CombatEntry;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -46,6 +47,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -98,10 +100,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         phaseContext.addNotifierAndOwnerToCauseStack(frame);
         // If we're doing bulk captures for blocks, go ahead and do them. otherwise continue with entity checks
         if (phaseContext.allowsBulkBlockCaptures()) {
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
             if (!TrackingUtil.processBlockCaptures(this, phaseContext)) {
-                EntityUtil.toMixin(tickingEntity).onCancelledBlockChange(phaseContext);
+                ((EntityBridge) tickingEntity).onCancelledBlockChange(phaseContext);
             }
         }
         // And finally, if we're not capturing entities, there's nothing left for us to do.
@@ -159,7 +159,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 .acceptAndClearIfNotEmpty(entities -> {
                     final ArrayList<Entity> capturedEntities = new ArrayList<>();
                     for (EntityItem entity : entities) {
-                        capturedEntities.add(EntityUtil.fromNative(entity));
+                        capturedEntities.add((Entity) entity);
                     }
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                     SpongeCommonEventFactory.callDropItemCustom(capturedEntities, phaseContext);
@@ -176,7 +176,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     if (!entityItems.isEmpty()) {
                         frame.pushCause(snapshot);
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                        final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                        final List<Entity> items = entityItems.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                         SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
 
                         frame.popCause();
@@ -187,8 +187,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         phaseContext.getCapturedItemStackSupplier()
                 .acceptAndClearIfNotEmpty(drops -> {
                     final List<Entity> items = drops.stream()
-                            .map(drop -> drop.create(EntityUtil.getMinecraftWorld(tickingEntity)))
-                            .map(EntityUtil::fromNative)
+                            .map(drop -> drop.create((WorldServer) tickingEntity.getWorld()))
+                            .map(entity -> (Entity) entity)
                             .collect(Collectors.toList());
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                     SpongeCommonEventFactory.callDropItemCustom(items, phaseContext);
@@ -200,7 +200,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             .acceptAndClearIfNotEmpty(blockDrops -> blockDrops.asMap().forEach((pos, drops) -> {
                 final List<Entity> items = drops.stream()
                     .filter(entity -> entity instanceof EntityItem)
-                    .map(EntityUtil::fromNative)
+                    .map(entity2 -> (Entity) entity2)
                     .collect(Collectors.toList());
                 final BlockSnapshot snapshot = tickingEntity.getWorld().createSnapshot(VecHelper.toVector3i(pos));
                 frame.pushCause(snapshot);
@@ -210,7 +210,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 }
                 final List<Entity> nonItems = drops.stream()
                     .filter(entity -> !(entity instanceof EntityItem))
-                    .map(EntityUtil::fromNative)
+                    .map(entity1 -> (Entity) entity1)
                     .collect(Collectors.toList());
                 if (!nonItems.isEmpty()) {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
@@ -221,7 +221,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     private void appendContextOfPossibleEntityDeath(Entity tickingEntity, CauseStackManager.StackFrame frame) {
-        if (EntityUtil.isEntityDead(tickingEntity)) {
+        if (EntityUtil.isEntityDead((net.minecraft.entity.Entity) tickingEntity)) {
             if (tickingEntity instanceof EntityLivingBase) {
                 CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
                 if (entry != null) {
@@ -245,11 +245,11 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-            for (EntityHanging entityHanging : EntityUtil.findHangingEntities(EntityUtil.getMinecraftWorld(tickingEntity), blockPos)) {
+            for (EntityHanging entityHanging : EntityUtil.findHangingEntities((WorldServer) tickingEntity.getWorld(), blockPos)) {
                 if (entityHanging instanceof EntityItemFrame) {
                     final EntityItemFrame itemFrame = (EntityItemFrame) entityHanging;
                     if (!itemFrame.isDead) {
-                        itemFrame.dropItemOrSelf(EntityUtil.toNative(tickingEntity), true);
+                        itemFrame.dropItemOrSelf((net.minecraft.entity.Entity) tickingEntity, true);
                     }
                     itemFrame.setDead();
                 }
@@ -280,7 +280,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             // Look at net.minecraft.world.World#breakBlock
             final Optional<BlockPos> pos = context.getCaptureBlockPos().getPos();
             if (pos.isPresent()) {
-                return context.getPerBlockEntitySpawnSuppplier().get().put(pos.get(), EntityUtil.toNative(entity));
+                return context.getPerBlockEntitySpawnSuppplier().get().put(pos.get(), (net.minecraft.entity.Entity) entity);
             } else {
                 return context.getCapturedEntities().add(entity);
             }

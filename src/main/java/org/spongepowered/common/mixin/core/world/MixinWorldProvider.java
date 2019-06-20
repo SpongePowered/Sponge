@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.service.context.Context;
@@ -39,12 +38,12 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.WorldProviderBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 @NonnullByDefault
 @Mixin(WorldProvider.class)
-public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvider {
+public abstract class MixinWorldProvider implements Dimension, WorldProviderBridge {
 
     @Shadow public WorldType terrainType;
     @Shadow protected World world;
@@ -87,17 +86,13 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     }
 
     @Override
-    public void setGeneratorSettings(String generatorSettings) {
+    public void bridge$setGeneratorSettings(String generatorSettings) {
         this.generatorSettings = generatorSettings;
     }
 
     @Override
-    public float getMovementFactor() {
-        if (((Object) this) instanceof WorldProviderHell) {
-            return 8.0f;
-        } else {
-            return 1.0f;
-        }
+    public float bridge$getMovementFactor() {
+        return 1.0f;
     }
 
     @Override
@@ -106,7 +101,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     }
 
     @Override
-    public WorldBorder createServerWorldBorder() {
+    public WorldBorder bridge$createServerWorldBorder() {
         return createWorldBorder();
     }
 
@@ -118,7 +113,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     public boolean canDropChunk(int x, int z) {
         final boolean isSpawnChunk = this.world.isSpawnChunk(x, z);
 
-        return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.provider.getDimensionType(), ((IMixinWorldServer) this.world)
-                .getDimensionId());
+        return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.provider.getDimensionType(), ((ServerWorldBridge) this.world)
+                .bridge$getDimensionId());
     }
 }

@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
-import org.spongepowered.common.mixin.core.entity.IMixinAreaEffectCloud;
+import org.spongepowered.common.mixin.core.entity.AccessorEntityAreaEffectCloud;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,14 +56,14 @@ public class AreaEffectCloudPotionEffectsProcessor extends AbstractSpongeValuePr
         for (PotionEffect effect : value) {
             effects.add((net.minecraft.potion.PotionEffect) effect);
         }
-        ((IMixinAreaEffectCloud) container).setPotionEffects(effects);
+        ((AccessorEntityAreaEffectCloud) container).setPotionEffects(effects);
         return true;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected Optional<List<PotionEffect>> getVal(EntityAreaEffectCloud container) {
-        return Optional.of(((List<PotionEffect>) (List<?>) ((IMixinAreaEffectCloud) container).getPotionEffects()));
+        return Optional.of(((List<PotionEffect>) (List<?>) ((AccessorEntityAreaEffectCloud) container).getPotionEffects()));
     }
 
     @Override

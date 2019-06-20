@@ -48,18 +48,18 @@ public class SpongeFireworkEffectDataBuilder extends AbstractDataBuilder<Firewor
 
     @Override
     protected Optional<FireworkEffect> buildContent(DataView container) throws InvalidDataException {
-        if (container.contains(DataQueries.FIREWORK_SHAPE, DataQueries.FIREWORK_COLORS, DataQueries.FIREWORK_FADE_COLORS,
-                DataQueries.FIREWORK_FLICKERS, DataQueries.FIREWORK_TRAILS)) {
-            final String fireworkShapeId = DataUtil.getData(container, DataQueries.FIREWORK_SHAPE, String.class);
+        if (container.contains(DataQueries.FireWorks.FIREWORK_SHAPE, DataQueries.FireWorks.FIREWORK_COLORS, DataQueries.FireWorks.FIREWORK_FADE_COLORS,
+                DataQueries.FireWorks.FIREWORK_FLICKERS, DataQueries.FireWorks.FIREWORK_TRAILS)) {
+            final String fireworkShapeId = DataUtil.getData(container, DataQueries.FireWorks.FIREWORK_SHAPE, String.class);
             final Optional<FireworkShape> shapeOptional = Sponge.getRegistry().getType(FireworkShape.class, fireworkShapeId);
             if (!shapeOptional.isPresent()) {
                 throw new InvalidDataException("Could not find the FireworkShape for the provided id: " + fireworkShapeId);
             }
             final FireworkShape shape = shapeOptional.get();
-            final boolean trails = DataUtil.getData(container, DataQueries.FIREWORK_TRAILS, Boolean.class);
-            final boolean flickers = DataUtil.getData(container, DataQueries.FIREWORK_FLICKERS, Boolean.class);
-            final List<Color> colors = container.getSerializableList(DataQueries.FIREWORK_COLORS, Color.class).get();
-            final List<Color> fadeColors = container.getSerializableList(DataQueries.FIREWORK_FADE_COLORS, Color.class).get();
+            final boolean trails = DataUtil.getData(container, DataQueries.FireWorks.FIREWORK_TRAILS, Boolean.class);
+            final boolean flickers = DataUtil.getData(container, DataQueries.FireWorks.FIREWORK_FLICKERS, Boolean.class);
+            final List<Color> colors = container.getSerializableList(DataQueries.FireWorks.FIREWORK_COLORS, Color.class).get();
+            final List<Color> fadeColors = container.getSerializableList(DataQueries.FireWorks.FIREWORK_FADE_COLORS, Color.class).get();
             return Optional.of(FireworkEffect.builder()
                     .colors(colors)
                     .flicker(flickers)

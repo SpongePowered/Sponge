@@ -24,59 +24,25 @@
  */
 package org.spongepowered.common.mixin.core.entity.boss;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.entity.boss.dragon.phase.PhaseHover;
-import net.minecraft.entity.boss.dragon.phase.PhaseManager;
-import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.end.DragonFightManager;
-import org.spongepowered.api.boss.ServerBossBar;
-import org.spongepowered.api.entity.EnderCrystal;
-import org.spongepowered.api.entity.living.complex.EnderDragon;
-import org.spongepowered.api.entity.living.complex.EnderDragonPart;
 import org.spongepowered.asm.lib.Opcodes;
-import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseManager;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
-
-import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityDragon.class)
-public abstract class MixinEntityDragon extends MixinEntityLiving implements EnderDragon {
-
-    @Shadow public MultiPartEntityPart[] dragonPartArray;
-    @Shadow public EntityEnderCrystal healingEnderCrystal;
-    @Final @Shadow private DragonFightManager fightManager;
-    @Shadow @Final private PhaseManager phaseManager;
-
-    @Override
-    public Set<EnderDragonPart> getParts() {
-        Builder<EnderDragonPart> builder = ImmutableSet.builder();
-
-        for (MultiPartEntityPart part : this.dragonPartArray) {
-            builder.add((EnderDragonPart) part);
-        }
-
-        return builder.build();
-    }
+public abstract class MixinEntityDragon extends MixinEntityLiving {
 
     /**
      * @author gabizou - April 13th, 2018
@@ -103,13 +69,8 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
         ),
         require = 0 // Forge rewrites the material request to block.isAir
     )
-    private Block onCanGrief(IBlockState state) {
-        return ((IMixinGriefer) this).canGrief() ? state.getBlock() : Blocks.AIR;
-    }
-    
-    @Override
-    public Optional<EnderCrystal> getHealingCrystal() {
-        return Optional.ofNullable((EnderCrystal) this.healingEnderCrystal);
+    private Block spongeImpl$onCanGrief(IBlockState state) {
+        return ((GrieferBridge) this).bridge$CanGrief() ? state.getBlock() : Blocks.AIR;
     }
 
     /**
@@ -120,7 +81,7 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
      */
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/dragon/phase/IPhase;getTargetLocation()Lnet/minecraft/util/math/Vec3d;"))
     @Nullable
-    private Vec3d getTargetLocationOrNull(IPhase iPhase) {
+    private Vec3d spongeImpl$getTargetLocationOrNull(IPhase iPhase) {
         Vec3d target = iPhase.getTargetLocation();
         if (target != null && target.x == this.posX && target.z == this.posZ) {
             return null; // Skips the movement code
@@ -128,13 +89,4 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
         return target;
     }
 
-    @Override
-    public ServerBossBar getBossBar() {
-        return (ServerBossBar) this.fightManager.bossInfo;
-    }
-
-    @Override
-    public EnderDragonPhaseManager getPhaseManager() {
-        return (EnderDragonPhaseManager) this.phaseManager;
-    }
 }

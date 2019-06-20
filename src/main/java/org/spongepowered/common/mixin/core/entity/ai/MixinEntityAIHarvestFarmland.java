@@ -28,15 +28,13 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIHarvestFarmland;
 import net.minecraft.entity.ai.EntityAIMoveToBlock;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 @Mixin(EntityAIHarvestFarmland.class)
 public abstract class MixinEntityAIHarvestFarmland extends EntityAIMoveToBlock {
@@ -62,7 +60,7 @@ public abstract class MixinEntityAIHarvestFarmland extends EntityAIMoveToBlock {
     )
     private void onCanGrief(CallbackInfoReturnable<Boolean> cir) {
         if (this.runDelay <= 0) {
-            if (!((IMixinGriefer) this.villager).canGrief()) {
+            if (!((GrieferBridge) this.villager).bridge$CanGrief()) {
                 cir.setReturnValue(false);
             }
         }

@@ -36,26 +36,26 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressive
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinAggressive;
+import org.spongepowered.common.bridge.entity.AggressiveBridge;
 
 import java.util.Optional;
 
 public class AggressiveDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<IMixinAggressive, Boolean, Value<Boolean>, AggressiveData, ImmutableAggressiveData> {
+        extends AbstractSingleDataSingleTargetProcessor<AggressiveBridge, Boolean, Value<Boolean>, AggressiveData, ImmutableAggressiveData> {
 
     public AggressiveDataProcessor() {
-        super(Keys.ANGRY, IMixinAggressive.class);
+        super(Keys.ANGRY, AggressiveBridge.class);
     }
 
     @Override
-    protected boolean set(IMixinAggressive entity, Boolean value) {
-        entity.setAngry(value);
+    protected boolean set(AggressiveBridge entity, Boolean value) {
+        entity.bridge$setAngry(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(IMixinAggressive entity) {
-        return OptBool.of(entity.isAngry());
+    protected Optional<Boolean> getVal(AggressiveBridge entity) {
+        return OptBool.of(entity.bridge$isAngry());
     }
 
     @Override

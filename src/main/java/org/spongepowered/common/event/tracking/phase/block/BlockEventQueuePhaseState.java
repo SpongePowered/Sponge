@@ -29,21 +29,21 @@ import java.util.function.BiConsumer;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 
 public class BlockEventQueuePhaseState extends BlockPhaseState {
 
     public final BiConsumer<StackFrame, GeneralizedContext> FRAME_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
-        final IMixinBlockEventData blockEventData = context.getSource(IMixinBlockEventData.class).orElse(null);
+        final BlockEventDataBridge blockEventData = context.getSource(BlockEventDataBridge.class).orElse(null);
         if (blockEventData != null) {
-            if (blockEventData.getTickTileEntity() != null) {
-                frame.pushCause(blockEventData.getTickTileEntity());
+            if (blockEventData.getBridge$TileEntity() != null) {
+                frame.pushCause(blockEventData.getBridge$TileEntity());
             }
-            if (blockEventData.getTickBlock() != null) {
-                if (blockEventData.getTickTileEntity() == null) {
-                    frame.pushCause(blockEventData.getTickBlock());
+            if (blockEventData.getBridge$TickingLocatable() != null) {
+                if (blockEventData.getBridge$TileEntity() == null) {
+                    frame.pushCause(blockEventData.getBridge$TickingLocatable());
                 }
-                frame.addContext(EventContextKeys.BLOCK_EVENT_QUEUE, blockEventData.getTickBlock());
+                frame.addContext(EventContextKeys.BLOCK_EVENT_QUEUE, blockEventData.getBridge$TickingLocatable());
             }
         }
     });

@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeGenerationData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public final class SpongeGenerationData extends AbstractIntData<GenerationData, ImmutableGenerationData> implements GenerationData {
@@ -50,7 +50,7 @@ public final class SpongeGenerationData extends AbstractIntData<GenerationData, 
                 .actualValue(this.getValue())
                 .defaultValue(0)
                 .minimum(0)
-                .maximum(DataConstants.MAXIMUM_GENERATION)
+                .maximum(Constants.Item.Book.MAXIMUM_GENERATION)
                 .build();
     }
 
