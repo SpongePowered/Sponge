@@ -30,7 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.bridge.block.BlockBridge;
 
@@ -53,7 +52,7 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
     public NeighborNotificationContext source(Object owner) {
         super.source(owner);
         if (owner instanceof LocatableBlock) {
-            final BlockBridge mixinBlock = BlockUtil.toMixin(((LocatableBlock) owner).getBlockState());
+            final BlockBridge mixinBlock = (BlockBridge) ((IBlockState) ((LocatableBlock) owner).getBlockState()).getBlock();
             this.setBlockEvents(mixinBlock.allowsBlockEventCreation())
                 .setBulkBlockCaptures(mixinBlock.allowsBlockBulkCapture())
                 .setEntitySpawnEvents(mixinBlock.allowsEntityEventCreation())

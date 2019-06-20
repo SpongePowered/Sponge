@@ -123,7 +123,6 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
@@ -552,8 +551,8 @@ public class SpongeCommonEventFactory {
     public static ChangeBlockEvent.Modify callChangeBlockEventModifyLiquidMix(
         final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, @Nullable Object source) {
 
-        final BlockState fromState = BlockUtil.fromNative(worldIn.getBlockState(pos));
-        final BlockState toState = BlockUtil.fromNative(state);
+        final BlockState fromState = (BlockState) worldIn.getBlockState(pos);
+        final BlockState toState = (BlockState) state;
         boolean pushSource = false;
         if (source == null) {
             // If source is null the source is the block itself

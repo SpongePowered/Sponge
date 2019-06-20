@@ -124,7 +124,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -980,7 +979,7 @@ public abstract class MixinWorld_API implements World {
         checkNotNull(state, "state");
         SPacketBlockChange packet = new SPacketBlockChange();
         packet.blockPosition = new BlockPos(x, y, z);
-        packet.blockState = BlockUtil.toNative(state);
+        packet.blockState = (IBlockState) state;
 
         for (EntityPlayer player : this.playerEntities) {
             if (player instanceof EntityPlayerMP) {

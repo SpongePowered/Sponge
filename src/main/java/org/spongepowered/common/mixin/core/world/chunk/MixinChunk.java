@@ -622,8 +622,8 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
         final IBlockState state, final IBlockState extended, final BlockPos pos, final BlockChangeFlag updateFlag, @Nullable final TileEntity existing) {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.reset();
-        builder.blockState((BlockState) state)
-            .extendedState((BlockState) extended)
+        builder.blockState(state)
+            .extendedState(extended)
             .worldId(((org.spongepowered.api.world.World) this.world).getUniqueId())
             .position(VecHelper.toVector3i(pos));
         final Optional<UUID> creator = getBlockOwnerUUID(pos);

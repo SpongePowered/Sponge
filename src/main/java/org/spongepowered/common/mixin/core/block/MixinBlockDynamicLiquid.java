@@ -44,7 +44,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -102,7 +101,7 @@ public abstract class MixinBlockDynamicLiquid extends MixinBlockLiquid {
             ci.cancel();
             return;
         }
-        if (!worldIn.setBlockState(targetPos, BlockUtil.toNative(transaction.getFinal().getState()))) {
+        if (!worldIn.setBlockState(targetPos, (IBlockState) transaction.getFinal().getState())) {
             ci.cancel();
         }
     }
@@ -143,7 +142,7 @@ public abstract class MixinBlockDynamicLiquid extends MixinBlockLiquid {
 
             // Transaction modified?
             if (transaction.getCustom().isPresent()) {
-                worldIn.setBlockState(pos, BlockUtil.toNative(transaction.getFinal().getState()));
+                worldIn.setBlockState(pos, (IBlockState) transaction.getFinal().getState());
                 ci.cancel();
             }
             // else do vanilla logic

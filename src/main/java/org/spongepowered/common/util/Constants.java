@@ -46,6 +46,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.EnumSet;
+import java.util.UUID;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -116,6 +117,8 @@ public final class Constants {
          */
         public static final EnumFacing[] NOTIFY_DIRECTIONS = {EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH};
         public static final EnumSet<EnumFacing> NOTIFY_DIRECTION_SET = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
+        public static final UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
         public static final class Teleporter {
 
             public static final int DEFAULT_SEARCH_RADIUS = 128;

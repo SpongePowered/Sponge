@@ -73,10 +73,10 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.TimingBridge;
+import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
@@ -144,7 +144,7 @@ public final class TrackingUtil {
             final Chunk chunk = worldServer.getChunk(blockPos);
             final IBlockState newState = chunk.getBlockState(blockPos);
             builder.position(blockSnapshot.getPosition());
-            builder.blockState((BlockState) newState);
+            builder.blockState(newState);
             try {
                 builder.extendedState((BlockState) newState.getActualState(worldServer, blockPos));
             } catch (Throwable e) {
@@ -290,7 +290,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
 
         try (final PhaseContext<?> context = phaseContext;
-             final Timing timing = BlockUtil.toMixin(state).getTimingsHandler()) {
+             final Timing timing = ((BlockBridge) state.getBlock()).getTimingsHandler()) {
             timing.startTiming();
             context.buildAndSwitch();
             block.updateTick(world, pos, state, random);
@@ -876,7 +876,7 @@ public final class TrackingUtil {
         final BlockSnapshot finalSnapshot = transaction.getFinal();
         final SpongeBlockSnapshot spongeSnapshot = (SpongeBlockSnapshot) finalSnapshot;
         final BlockPos pos = spongeSnapshot.getBlockPos();
-        final Block block = BlockUtil.toBlock(spongeSnapshot);
+        final Block block = ((IBlockState) spongeSnapshot.getState()).getBlock();
         spongeSnapshot.getWorldServer()
             .map(world -> world.getChunk(pos))
             .map(chunk -> (ChunkBridge) chunk)

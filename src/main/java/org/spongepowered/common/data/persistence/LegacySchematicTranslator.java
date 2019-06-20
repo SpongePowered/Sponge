@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -53,7 +54,6 @@ import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
@@ -172,7 +172,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 tileNbt = VANILLA_FIXER.process(FixTypes.BLOCK_ENTITY, tileNbt, 0);
                 upgraded = NbtTranslator.getInstance().translate(tileNbt);
 
-                if (type!= null && SpongeImplHooks.hasBlockTileEntity(((Block) state.getType()), BlockUtil.toNative(state))) {
+                if (type!= null && SpongeImplHooks.hasBlockTileEntity(((Block) state.getType()), (IBlockState) state)) {
                     TileEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
                         .state(state)
                         .tileData(upgraded)

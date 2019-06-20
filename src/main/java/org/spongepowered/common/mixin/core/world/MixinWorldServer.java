@@ -1839,8 +1839,8 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     public SpongeBlockSnapshot bridge$createSnapshot(final IBlockState state, final IBlockState extended, final BlockPos pos, final BlockChangeFlag updateFlag) {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.reset();
-        builder.blockState((BlockState) state)
-                .extendedState((BlockState) extended)
+        builder.blockState(state)
+                .extendedState(extended)
                 .worldId(((org.spongepowered.api.world.World) this).getUniqueId())
                 .position(VecHelper.toVector3i(pos));
         final Optional<UUID> creator = ((org.spongepowered.api.world.World) this).getCreator(pos.getX(), pos.getY(), pos.getZ());
@@ -1880,8 +1880,8 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         @Nullable final net.minecraft.tileentity.TileEntity tileEntity) {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.reset();
-        builder.blockState((BlockState) state)
-            .extendedState((BlockState) state)
+        builder.blockState(state)
+            .extendedState(state)
             .worldId(((org.spongepowered.api.world.World) this).getUniqueId())
             .position(VecHelper.toVector3i(pos));
         if (tileEntity != null) { // Store the information of the tile entity onto the snapshot

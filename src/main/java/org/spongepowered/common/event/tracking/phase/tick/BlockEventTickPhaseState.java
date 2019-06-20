@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -44,7 +45,6 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -160,7 +160,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             final LocatableBlock source = (LocatableBlock) context.getSource();
             // Basically, if the source was a tile entity, and during the block event, it changed?
             // and if any of the transaction cancelled, the whole thing should be cancelled.
-            if (SpongeImplHooks.hasBlockTileEntity(BlockUtil.toBlock(source.getBlockState()), BlockUtil.toNative(source.getBlockState()))) {
+            if (SpongeImplHooks.hasBlockTileEntity(((IBlockState) source.getBlockState()).getBlock(), (IBlockState) source.getBlockState())) {
                 context.setWasNotCancelled(noCancelledTransactions);
                 return !noCancelledTransactions;
             }
@@ -171,12 +171,12 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             return postEvent.getTransactions().stream().anyMatch(transaction -> {
                 final BlockState state = transaction.getOriginal().getState();
                 final BlockType type = state.getType();
-                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, BlockUtil.toNative(state));
+                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, (IBlockState) state);
                 if (!hasTile && !transaction.getIntermediary().isEmpty()) { // Check intermediary
                     return transaction.getIntermediary().stream().anyMatch(inter -> {
                         final BlockState iterState = inter.getState();
                         final BlockType interType = state.getType();
-                        final boolean interMediaryHasTile = SpongeImplHooks.hasBlockTileEntity((Block) interType, BlockUtil.toNative(iterState));
+                        final boolean interMediaryHasTile = SpongeImplHooks.hasBlockTileEntity((Block) interType, (IBlockState) iterState);
                         context.setWasNotCancelled(!interMediaryHasTile);
                         return interMediaryHasTile;
                     });

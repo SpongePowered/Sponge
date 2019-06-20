@@ -53,7 +53,6 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
@@ -235,7 +234,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 
     @Override
     public ItemStack.Builder fromBlockState(BlockState blockState) {
-        final IBlockState minecraftState = BlockUtil.toNative(blockState);
+        final IBlockState minecraftState = (IBlockState) blockState;
         final Optional<ItemType> item = blockState.getType().getItem();
         if (!item.isPresent()) {
             new PrettyPrinter(60).add("Invalid BlockState").centre().hr()

@@ -37,7 +37,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 @Mixin(BlockLiquid.class)
@@ -61,7 +60,7 @@ public abstract class MixinBlockLiquid extends MixinBlock {
             cir.setReturnValue(false);
             return;
         }
-        boolean success = worldIn.setBlockState(pos, BlockUtil.toNative(transaction.getFinal().getState()));
+        boolean success = worldIn.setBlockState(pos, (IBlockState) transaction.getFinal().getState());
         if (!success) {
             cir.setReturnValue(false);
         }

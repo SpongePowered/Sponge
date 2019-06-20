@@ -26,6 +26,7 @@ package org.spongepowered.common.block;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -77,8 +78,8 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     @Override
     public Optional<org.spongepowered.api.block.tileentity.TileEntity> apply(Location<World> location) {
         final BlockState currentState = location.getBlock();
-        final Block currentBlock = BlockUtil.toBlock(currentState);
-        final Block newBlock = BlockUtil.toBlock(this.blockState);
+        final Block currentBlock = ((IBlockState) currentState).getBlock();
+        final Block newBlock = ((IBlockState) this.blockState).getBlock();
         final net.minecraft.world.World minecraftWorld = (net.minecraft.world.World) location.getExtent();
 
         BlockPos blockpos = VecHelper.toBlockPos(location);

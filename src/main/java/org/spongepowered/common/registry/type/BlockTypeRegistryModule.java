@@ -46,7 +46,6 @@ import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.registry.RegistryHelper;
@@ -56,6 +55,7 @@ import org.spongepowered.common.registry.type.block.BooleanTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.EnumTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -143,7 +143,11 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
 
     @Override
     public void registerDefaults() {
-        BlockSnapshot NONE_SNAPSHOT = new SpongeBlockSnapshotBuilder().worldId(BlockUtil.INVALID_WORLD_UUID).position(new Vector3i(0, 0, 0)).blockState((BlockState) Blocks.AIR.getDefaultState()).build();
+        BlockSnapshot NONE_SNAPSHOT = new SpongeBlockSnapshotBuilder()
+            .worldId(Constants.World.INVALID_WORLD_UUID)
+            .position(new Vector3i(0, 0, 0))
+            .blockState(Blocks.AIR.getDefaultState())
+            .build();
         RegistryHelper.setFinalStatic(BlockSnapshot.class, "NONE", NONE_SNAPSHOT);
         this.blockTypeMappings.put("none", (BlockType) Blocks.AIR);
     }

@@ -25,8 +25,8 @@
 package org.spongepowered.common.world.teleport;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.common.block.BlockUtil;
 
 public class NoPortalTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
@@ -42,11 +42,11 @@ public class NoPortalTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return BlockUtil.toNative(blockState).getMaterial() != Material.PORTAL && super.isSafeFloorMaterial(blockState);
+        return ((IBlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeFloorMaterial(blockState);
     }
 
     @Override
     public boolean isSafeBodyMaterial(BlockState blockState) {
-        return BlockUtil.toNative(blockState).getMaterial() != Material.PORTAL && super.isSafeBodyMaterial(blockState);
+        return ((IBlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeBodyMaterial(blockState);
     }
 }

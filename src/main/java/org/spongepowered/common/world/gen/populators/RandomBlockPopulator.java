@@ -38,7 +38,6 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.RandomBlock;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -86,7 +85,7 @@ public class RandomBlockPopulator implements RandomBlock {
                 if (((WorldBridge) world).isFake()) {
                     world.setBlock(pos.getBlockPosition(), this.state, BlockChangeFlags.PHYSICS_OBSERVER);
                 } else { // This is the most direct call to set a block state, due to neighboring updates we don't want to cause.
-                    PhaseTracker.getInstance().setBlockState((ServerWorldBridge) world, VecHelper.toBlockPos(pos), BlockUtil.toNative(this.state), BlockChangeFlags.PHYSICS_OBSERVER);
+                    PhaseTracker.getInstance().setBlockState((ServerWorldBridge) world, VecHelper.toBlockPos(pos), (IBlockState) this.state, BlockChangeFlags.PHYSICS_OBSERVER);
                 }
                 // Liquids force a block update tick so they may flow during world gen
                 try {

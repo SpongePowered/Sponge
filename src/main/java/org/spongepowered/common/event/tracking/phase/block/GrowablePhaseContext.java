@@ -86,7 +86,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
             .worldId(((org.spongepowered.api.world.World) this.world).getUniqueId())
             .position(VecHelper.toVector3i(this.pos))
-            .blockState((BlockState) this.blockState)
+            .blockState(this.blockState)
             .flag(BlockChangeFlags.PHYSICS_OBSERVER);
         this.priorContext.applyOwnerIfAvailable((owner) -> builder.creator(owner.getUniqueId()));
         this.priorContext.applyNotifierIfAvailable((notifier) -> builder.notifier(notifier.getUniqueId()));

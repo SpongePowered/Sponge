@@ -29,14 +29,12 @@ import net.minecraft.block.BlockAnvil;
 import net.minecraft.block.BlockCauldron;
 import net.minecraft.block.BlockChorusPlant;
 import net.minecraft.block.BlockFence;
-import net.minecraft.block.BlockGlass;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
-import org.spongepowered.common.block.BlockUtil;
 
 import java.util.Set;
 
@@ -57,12 +55,12 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return !NOT_SAFE_FLOOR.contains(BlockUtil.toNative(blockState).getMaterial());
+        return !NOT_SAFE_FLOOR.contains(((IBlockState) blockState).getMaterial());
     }
 
     @Override
     public boolean isSafeBodyMaterial(BlockState blockState) {
-        IBlockState state = BlockUtil.toNative(blockState);
+        IBlockState state = (IBlockState) blockState;
         Material material = state.getMaterial();
 
         // Deny blocks that suffocate
