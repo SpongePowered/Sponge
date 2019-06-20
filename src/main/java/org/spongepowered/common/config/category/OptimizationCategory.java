@@ -88,6 +88,17 @@ public class OptimizationCategory extends ConfigCategory {
             + "It is strongly reccomended to keep this on, unless explicitly advised otherwise by a Sponge developer")
     private boolean mapOptimization = true;
 
+    @Setting(value = "optimize-hoppers", comment = "Based on Aikar's optimizationo of Hoppers, setting this to 'true'\n"
+                                                   + "will allow for hoppers to save performing server -> client updates\n"
+                                                   + "when transferring items. Because hoppers can transfer items multiple\n"
+                                                   + "times per tick, these updates can get costly on the server, with\n"
+                                                   + "little to no benefit to the client. Because of the nature of the\n"
+                                                   + "change, the default will be 'false' due to the inability to pre-emptively\n"
+                                                   + "foretell whether mod compatibility will fail with these changes or not.\n"
+                                                   + "Refer to: https://github.com/PaperMC/Paper/blob/8175ec916f31dcd130fe0884fe46bdc187d829aa/Spigot-Server-Patches/0269-Optimize-Hoppers.patch\n"
+                                                   + "for more details.")
+    private boolean optimizeHoppers = false;
+
     public OptimizationCategory() {
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
@@ -158,5 +169,9 @@ public class OptimizationCategory extends ConfigCategory {
 
     public void setPandaRedstone(boolean pandaRedstone) {
         this.pandaRedstone = pandaRedstone;
+    }
+
+    public boolean isOptimizeHoppers() {
+        return this.optimizeHoppers;
     }
 }

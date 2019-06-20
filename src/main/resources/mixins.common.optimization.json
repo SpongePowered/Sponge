@@ -18,6 +18,8 @@
         "world.storage.MixinMapInfo_MapOptimization",
         "server.MixinMinecraftServer_MapOptimization",
         "network.play.server.MixinSPacketChunkData_Async_Lighting",
+        "tileentity.MixinTileEntity_HopperOptimization",
+        "tileentity.MixinTileEntityHopper_HopperOptimization",
         "world.MixinChunk_Async_Lighting",
         "world.MixinWorldServer_Async_Lighting",
         "world.gen.MixinChunkProviderServer_Async_Lighting",

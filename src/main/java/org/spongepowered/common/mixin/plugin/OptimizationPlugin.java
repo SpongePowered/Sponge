@@ -122,6 +122,10 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::useMapOptimization)
             .put("org.spongepowered.common.mixin.optimization.server.MixinMinecraftServer_MapOptimization",
                     OptimizationCategory::useMapOptimization)
+            .put("org.spongepowered.common.mixin.optimization.tileentity.MixinTileEntity_HopperOptimization",
+                    OptimizationCategory::isOptimizeHoppers)
+            .put("org.spongepowered.common.mixin.optimization.tileentity.MixinTileEntityHopper_HopperOptimization",
+                    OptimizationCategory::isOptimizeHoppers)
             .build();
 
 }
