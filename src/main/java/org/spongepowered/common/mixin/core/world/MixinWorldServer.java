@@ -349,11 +349,6 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     }
 
     @Override
-    public boolean isProcessingExplosion() {
-        return this.processingExplosion;
-    }
-
-    @Override
     public boolean bridge$isMinecraftChunkLoaded(final int x, final int z, final boolean allowEmpty) {
         return this.isChunkLoaded(x, z, allowEmpty);
     }
@@ -1264,7 +1259,6 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     public Explosion triggerInternalExplosion(org.spongepowered.api.world.explosion.Explosion explosion,
             final Function<Explosion, PhaseContext<?>> contextCreator) {
         // Sponge start
-        this.processingExplosion = true;
         final Explosion originalExplosion = (Explosion) explosion;
         // Set up the pre event
         final ExplosionEvent.Pre
@@ -1272,7 +1266,6 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
                 SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                         explosion, ((org.spongepowered.api.world.World) this));
         if (SpongeImpl.postEvent(event)) {
-            this.processingExplosion = false;
             return (Explosion) explosion;
         }
         explosion = event.getExplosion();
@@ -1334,9 +1327,6 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             }
             // Sponge End
 
-
-            // Sponge Start - end processing
-            this.processingExplosion = false;
         }
         // Sponge End
         return mcExplosion;
@@ -1926,6 +1916,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
      * @param isSmoking Whether blocks will break
      * @return The explosion
      */
+    @SuppressWarnings("ConstantConditions")
     @Overwrite
     public Explosion newExplosion(@Nullable final net.minecraft.entity.Entity entityIn, final double x, final double y, final double z, final float strength, final boolean isFlaming,
             final boolean isSmoking) {

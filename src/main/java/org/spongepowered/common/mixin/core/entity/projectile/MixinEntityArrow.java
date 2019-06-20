@@ -32,7 +32,6 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,13 +41,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityArrow.class)
-public abstract class MixinEntityArrow extends MixinEntity implements IMixinEntityArrow {
+public abstract class MixinEntityArrow extends MixinEntity {
 
     @Shadow public Entity shootingEntity;
     @Shadow private int ticksInAir;
@@ -112,8 +110,4 @@ public abstract class MixinEntityArrow extends MixinEntity implements IMixinEnti
         }
     }
 
-    @Override
-    public boolean isInGround() {
-        return this.inGround;
-    }
 }

@@ -82,8 +82,6 @@ public interface ServerWorldBridge extends WorldBridge {
 
     SpongeChunkGenerator bridge$createChunkGenerator(SpongeWorldGenerator newGenerator);
 
-    boolean isProcessingExplosion();
-
     boolean bridge$isMinecraftChunkLoaded(int x, int z, boolean allowEmpty);
 
     boolean bridge$isLightLevel(Chunk chunk, BlockPos pos, int level);
