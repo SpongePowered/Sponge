@@ -305,7 +305,9 @@ public final class SpongeImplHooks {
             final Object o = Util.runTask(task, logger);
             return o;
         } catch (Exception e) {
-            phaseTracker.printExceptionFromPhase(e);
+            phaseTracker
+                .printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", e);
+
             return null;
         }
     }
