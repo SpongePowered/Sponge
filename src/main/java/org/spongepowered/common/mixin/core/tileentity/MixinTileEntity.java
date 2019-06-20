@@ -189,25 +189,6 @@ abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, 
     }
 
     @Override
-    @Nullable
-    public ChunkBridge getActiveChunk() {
-        return this.activeChunk.get();
-    }
-
-    @Override
-    public void setActiveChunk(@Nullable final ChunkBridge chunk) {
-        if (chunk == null && this.world != null && !this.world.isRemote && this.tileEntityInvalid) {
-            if (this.isTicking) {
-                // If a TE is currently ticking and has been invalidated, delay clearing active chunk until finished
-                // This is done to avoid issues during unwind when calling bridge$getActiveChunk
-                // Note: This occurs with TE's such as pistons that invalidate during movement
-                return;
-            }
-        }
-        this.activeChunk = new WeakReference<>(chunk);
-    }
-
-    @Override
     public boolean shouldTick() {
         final ChunkBridge chunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
         // Don't tick if chunk is queued for unload or is in progress of being scheduled for unload

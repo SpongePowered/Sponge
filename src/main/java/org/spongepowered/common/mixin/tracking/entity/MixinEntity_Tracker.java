@@ -36,6 +36,7 @@ import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.profile.SpongeProfileManager;
@@ -61,8 +62,8 @@ public abstract class MixinEntity_Tracker implements Entity, EntityBridge {
         } else if (NbtDataUtil.SPONGE_ENTITY_NOTIFIER.equals(nbtKey)) {
             this.notifier = uuid;
         }
-        if (data$hasRootCompound()) {
-            final NBTTagCompound spongeData = data$getSpongeCompound();
+        if (((DataCompoundHolder) this).data$hasRootCompound()) {
+            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
             if (!spongeData.hasKey(nbtKey)) {
                 if (uuid == null) {
                     return;
@@ -130,7 +131,7 @@ public abstract class MixinEntity_Tracker implements Entity, EntityBridge {
         } else if (this.notifier != null && NbtDataUtil.SPONGE_ENTITY_NOTIFIER.equals(nbtKey)) {
             return this.notifier;
         }
-        NBTTagCompound nbt = data$getSpongeCompound();
+        NBTTagCompound nbt = ((DataCompoundHolder) this).data$getSpongeCompound();
         if (!nbt.hasKey(nbtKey)) {
             return null;
         }

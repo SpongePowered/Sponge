@@ -116,6 +116,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
@@ -315,8 +316,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         // Copy over sponge data from the old player.
         // Allows plugins to specify data that persists after players respawn.
         final EntityBridge oldEntity = (EntityBridge) oldPlayer;
-        if (oldEntity.data$hasRootCompound()) {
-            final NBTTagCompound old = oldEntity.data$getRootCompound();
+        if (((DataCompoundHolder) oldEntity).data$hasRootCompound()) {
+            final NBTTagCompound old = ((DataCompoundHolder) oldEntity).data$getRootCompound();
             if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
                 this.data$getRootCompound().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
                 this.spongeImpl$readFromSpongeCompound(this.data$getSpongeCompound());

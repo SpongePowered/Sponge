@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(WorldServer.class)
@@ -37,7 +37,7 @@ public abstract class MixinWorldServer_RealTime extends MixinWorld_RealTime impl
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void fixTimeOfDayForRealTime(CallbackInfo ci) {
-        if (((IMixinWorld) this).isFake()) {
+        if (((WorldBridge) this).isFake()) {
             return;
         }
         if (this.worldInfo.getGameRulesInstance().getBoolean("doDaylightCycle")) {
