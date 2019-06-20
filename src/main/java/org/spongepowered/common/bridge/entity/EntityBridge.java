@@ -36,8 +36,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
 import java.util.Optional;
@@ -45,7 +43,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface EntityBridge extends TrackableBridge, DataCompoundHolder {
+public interface EntityBridge extends TrackableBridge {
 
     boolean isInConstructPhase();
 
@@ -109,11 +107,6 @@ public interface EntityBridge extends TrackableBridge, DataCompoundHolder {
     default void onJoinWorld() {
 
     }
-
-    @Nullable
-    ChunkBridge getActiveChunk();
-
-    void setActiveChunk(@Nullable ChunkBridge chunk);
 
     boolean shouldTick();
 

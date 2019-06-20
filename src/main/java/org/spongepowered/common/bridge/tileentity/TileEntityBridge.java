@@ -27,9 +27,7 @@ package org.spongepowered.common.bridge.tileentity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.world.ChunkBridge;
 
 import javax.annotation.Nullable;
 
@@ -51,11 +49,6 @@ public interface TileEntityBridge extends TrackableBridge {
     @Nullable User getSpongeOwner();
 
     @Nullable User getSpongeNotifier();
-
-    @Nullable
-    ChunkBridge getActiveChunk();
-
-    void setActiveChunk(@Nullable ChunkBridge chunk);
 
     boolean shouldTick();
 

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.mixin.core.world.chunk;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
@@ -68,8 +68,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.util.Constants;
@@ -167,11 +167,11 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
         this.persistedChunk = flag;
         // update persisted status for entities and TE's
         for (final TileEntity tileEntity : this.tileEntities.values()) {
-            ((TileEntityBridge) tileEntity).setActiveChunk(this);
+            ((ActiveChunkReferantBridge) tileEntity).bridge$setActiveChunk(this);
         }
         for (final ClassInheritanceMultiMap<Entity> entityList : this.entityLists) {
             for (final Entity entity : entityList) {
-                ((EntityBridge) entity).setActiveChunk(this);
+                ((ActiveChunkReferantBridge) entity).bridge$setActiveChunk(this);
             }
         }
     }
@@ -188,24 +188,24 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
 
     @Inject(method = "addEntity", at = @At("RETURN"))
     private void impl$SetActiveChunkOnEntityAdd(final Entity entityIn, final CallbackInfo ci) {
-        ((EntityBridge) entityIn).setActiveChunk(this);
+        ((ActiveChunkReferantBridge) entityIn).bridge$setActiveChunk(this);
     }
 
     @Inject(
         method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))
     private void impl$SetActiveChunkOnTileEntityAdd(final BlockPos pos, final TileEntity tileEntityIn, final CallbackInfo ci) {
-        ((TileEntityBridge) tileEntityIn).setActiveChunk(this);
+        ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(this);
     }
 
     @Inject(method = "removeEntityAtIndex", at = @At("RETURN"))
     private void impl$ResetEntityActiveChunk(final Entity entityIn, final int index, final CallbackInfo ci) {
-        ((EntityBridge) entityIn).setActiveChunk(null);
+        ((ActiveChunkReferantBridge) entityIn).bridge$setActiveChunk(null);
     }
 
     @Redirect(method = "removeTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;invalidate()V"))
     private void impl$resetTileEntityActiveChunk(final TileEntity tileEntityIn) {
-        ((TileEntityBridge) tileEntityIn).setActiveChunk(null);
+        ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(null);
         tileEntityIn.invalidate();
     }
 
@@ -599,7 +599,7 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
             // we don't want to be removing.
             this.tileEntities.put(removed.getPos(), tileentity);
         }
-        ((TileEntityBridge) removed).setActiveChunk(null);
+        ((ActiveChunkReferantBridge) removed).bridge$setActiveChunk(null);
         removed.invalidate();
     }
 
@@ -614,7 +614,7 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
             this.tileEntities.get(pos).invalidate();
         }
         added.validate();
-        ((TileEntityBridge) added).setActiveChunk(this);
+        ((ActiveChunkReferantBridge) added).bridge$setActiveChunk(this);
         this.tileEntities.put(pos, added);
     }
 

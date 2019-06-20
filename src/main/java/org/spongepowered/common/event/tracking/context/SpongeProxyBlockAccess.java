@@ -39,7 +39,8 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -342,7 +343,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             this.processingWorld.loadedTileEntityList.remove(removed);
             this.processingWorld.tickableTileEntities.remove(removed);
         }
-        ChunkBridge activeChunk = ((TileEntityBridge) removed).getActiveChunk();
+        ChunkBridge activeChunk = ((ActiveChunkReferantBridge) removed).bridge$getActiveChunk();
         if (activeChunk != null) {
             activeChunk.removeTileEntity(removed);
         }

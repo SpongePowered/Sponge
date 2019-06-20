@@ -61,7 +61,8 @@ import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
@@ -389,7 +390,7 @@ public class EntityActivationRange {
         if (entity.world.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
             return true;
         }
-        final ChunkBridge activeChunk = ((EntityBridge) entity).getActiveChunk();
+        final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();
         if (activeChunk == null) {
             // Should never happen but just in case for mods, always tick
             return true;

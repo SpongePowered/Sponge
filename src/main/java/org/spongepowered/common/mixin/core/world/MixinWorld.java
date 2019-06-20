@@ -76,6 +76,7 @@ import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -766,7 +767,7 @@ public abstract class MixinWorld implements WorldBridge {
             // int j = entity1.chunkCoordX;
             // int k1 = entity1.chunkCoordZ;
 
-            final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((EntityBridge) entity1).getActiveChunk();
+            final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((ActiveChunkReferantBridge) entity1).bridge$getActiveChunk();
             if (activeChunk != null) {
                 activeChunk.removeEntity(entity1);
             }
@@ -822,7 +823,7 @@ public abstract class MixinWorld implements WorldBridge {
                 int l1 = entity2.chunkCoordX;
                 int i2 = entity2.chunkCoordZ;
 
-                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((EntityBridge) entity2).getActiveChunk();
+                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((ActiveChunkReferantBridge) entity2).bridge$getActiveChunk();
                 if (activeChunk == null) {
                     this.getChunk(l1, i2).removeEntity(entity2);
                 } else {
@@ -873,7 +874,7 @@ public abstract class MixinWorld implements WorldBridge {
                 iterator.remove();
                 this.loadedTileEntityList.remove(tileentity);
                 // Sponge start - use cached chunk
-                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((TileEntityBridge) tileentity).getActiveChunk();
+                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((ActiveChunkReferantBridge) tileentity).bridge$getActiveChunk();
                 if (activeChunk != null) {
                     //this.getChunk(tileentity.getPos()).removeTileEntity(tileentity.getPos());
                     //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desynced

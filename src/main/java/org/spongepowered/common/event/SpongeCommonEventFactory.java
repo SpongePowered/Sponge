@@ -128,7 +128,8 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.inventory.UpdateAnvilEventCost;
@@ -1020,7 +1021,7 @@ public class SpongeCommonEventFactory {
                 if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
                     final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
                     context.applyNotifierIfAvailable(notifier -> {
-                        ChunkBridge spongeChunk = spongeEntity.getActiveChunk();
+                        ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();
                         if (spongeChunk == null) {
                             spongeChunk = (ChunkBridge) world.getChunk(pos);
                         }

@@ -30,7 +30,7 @@ import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 
 import java.util.Optional;

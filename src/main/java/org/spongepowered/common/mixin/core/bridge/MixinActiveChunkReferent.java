@@ -22,33 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.world.gen;
+package org.spongepowered.common.mixin.core.bridge;
 
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.gen.ChunkProviderServer;
-import org.spongepowered.asm.mixin.Dynamic;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.entity.Entity;
+import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 
-@Mixin(value = ChunkProviderServer.class, priority = 1002)
-public abstract class MixinChunkProviderServer_Async_Lighting {
+import java.lang.ref.WeakReference;
 
-    @Shadow @Final public WorldServer world;
+import javax.annotation.Nullable;
 
-    @Dynamic
-    @Redirect(method = "tick",
-        at = @At(
-            value = "INVOKE",
-            target = "Lorg/spongepowered/common/bridge/world/ChunkBridge;isPersistedChunk()Z",
-            remap = false))
-    private boolean asyncLighting$UsePendingLightUpdatesForAsyncChunk(ChunkBridge chunk) {
-        return chunk.isPersistedChunk()
-               || chunk.getPendingLightUpdates().get() > 0
-               || this.world.getTotalWorldTime() - chunk.getLightUpdateTime() < 20;
+@Mixin({Entity.class, TileEntity.class})
+public class MixinActiveChunkReferent implements ActiveChunkReferantBridge {
 
+    private WeakReference<ChunkBridge> activeChunk$ChunkReference = new WeakReference<>(null);
+
+    @Override
+    @Nullable
+    public ChunkBridge bridge$getActiveChunk() {
+        return this.activeChunk$ChunkReference.get();
     }
+
+    @Override
+    public void bridge$setActiveChunk(@Nullable final ChunkBridge chunk) {
+        this.activeChunk$ChunkReference = new WeakReference<>(chunk);
+    }
+
 }

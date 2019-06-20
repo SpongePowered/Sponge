@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.bridge.world.chunk;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;

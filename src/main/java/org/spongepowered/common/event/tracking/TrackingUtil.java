@@ -81,7 +81,8 @@ import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
@@ -223,12 +224,12 @@ public final class TrackingUtil {
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
         final TileEntityBridge mixinTileEntity = (TileEntityBridge) tile;
         final BlockPos pos = tileEntity.getPos();
-        final ChunkBridge chunk = ((TileEntityBridge) tile).getActiveChunk();
+        final ChunkBridge chunk = ((ActiveChunkReferantBridge) tile).bridge$getActiveChunk();
         if (!mixinTileEntity.shouldTick()) {
             return;
         }
         if (chunk == null) {
-            mixinTileEntity.setActiveChunk((ChunkBridge) tileEntity.getWorld().getChunk(tileEntity.getPos()));
+            ((ActiveChunkReferantBridge) tile).bridge$setActiveChunk((ChunkBridge) tileEntity.getWorld().getChunk(tileEntity.getPos()));
         }
 
         final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(mixinTileEntity);
@@ -260,7 +261,7 @@ public final class TrackingUtil {
         }
         // We delay clearing active chunk if TE is invalidated during tick so we must remove it after
         if (tileEntity.isInvalid()) {
-            mixinTileEntity.setActiveChunk(null);
+            ((ActiveChunkReferantBridge) tileEntity).bridge$setActiveChunk(null);
         }
         mixinTileEntity.setIsTicking(false);
     }

@@ -73,8 +73,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -87,10 +85,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.TimingBridge;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -110,7 +110,6 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -119,16 +118,12 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(Entity.class)
-@Implements(
-    {@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entityApi$"),
-     @Interface(iface = TimingBridge.class, prefix = "timing$")}
-)
-public abstract class MixinEntity implements EntityBridge, TrackableBridge, VanishingBridge, InvulnerableTrackedBridge, TimingBridge {
+public abstract class MixinEntity implements EntityBridge, TrackableBridge, VanishingBridge, InvulnerableTrackedBridge, TimingBridge,
+    DataCompoundHolder {
 
     // @formatter:off
     protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((Entity) (Object) this).getClass());
     private boolean teleporting;
-    private WeakReference<ChunkBridge> activeChunk = new WeakReference<>(null);
     private float origWidth;
     private float origHeight;
     private boolean isConstructing = true;
@@ -846,19 +841,8 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
     }
 
     @Override
-    @Nullable
-    public ChunkBridge getActiveChunk() {
-        return this.activeChunk.get();
-    }
-
-    @Override
-    public void setActiveChunk(@Nullable final ChunkBridge chunk) {
-        this.activeChunk = new WeakReference<>(chunk);
-    }
-
-    @Override
     public boolean shouldTick() {
-        final ChunkBridge chunk = this.getActiveChunk();
+        final ChunkBridge chunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
         // Don't tick if chunk is queued for unload or is in progress of being scheduled for unload
         // See https://github.com/SpongePowered/SpongeVanilla/issues/344
         return chunk == null || chunk.isActive();

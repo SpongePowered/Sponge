@@ -41,7 +41,8 @@ import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
@@ -100,7 +101,7 @@ abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, 
 
     @Inject(method = "invalidate", at = @At("RETURN"))
     private void impl$RemoveActiveChunkOnInvalidate(final CallbackInfo ci) {
-        this.setActiveChunk(null);
+        ((ActiveChunkReferantBridge) this).bridge$setActiveChunk(null);
     }
 
     /**
@@ -198,7 +199,7 @@ abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, 
         if (chunk == null && this.world != null && !this.world.isRemote && this.tileEntityInvalid) {
             if (this.isTicking) {
                 // If a TE is currently ticking and has been invalidated, delay clearing active chunk until finished
-                // This is done to avoid issues during unwind when calling getActiveChunk
+                // This is done to avoid issues during unwind when calling bridge$getActiveChunk
                 // Note: This occurs with TE's such as pistons that invalidate during movement
                 return;
             }
@@ -208,7 +209,7 @@ abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, 
 
     @Override
     public boolean shouldTick() {
-        final ChunkBridge chunk = this.getActiveChunk();
+        final ChunkBridge chunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
         // Don't tick if chunk is queued for unload or is in progress of being scheduled for unload
         // See https://github.com/SpongePowered/SpongeVanilla/issues/344
         if (chunk == null) {

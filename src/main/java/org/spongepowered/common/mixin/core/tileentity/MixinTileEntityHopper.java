@@ -43,12 +43,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -103,7 +103,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
         ((EntityBridge) entityItem).getCreatorUser().ifPresent(owner -> {
             if (inventory instanceof TileEntity) {
                 TileEntity te = (TileEntity) inventory;
-                ChunkBridge spongeChunk = ((TileEntityBridge) te).getActiveChunk();
+                ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) te).bridge$getActiveChunk();
                 spongeChunk.addTrackedBlockPosition(te.getBlockType(), te.getPos(), owner, PlayerTracker.Type.NOTIFIER);
             }
         });

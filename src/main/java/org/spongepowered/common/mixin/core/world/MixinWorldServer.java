@@ -139,7 +139,8 @@ import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
@@ -2230,8 +2231,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             super.markChunkDirty(pos, unusedTileEntity);
             return;
         }
-        final TileEntityBridge spongeTileEntity = (TileEntityBridge) unusedTileEntity;
-        final ChunkBridge chunk = spongeTileEntity.getActiveChunk();
+        final ChunkBridge chunk = ((ActiveChunkReferantBridge) unusedTileEntity).bridge$getActiveChunk();
         if (chunk != null) {
             chunk.markChunkDirty();
         }
