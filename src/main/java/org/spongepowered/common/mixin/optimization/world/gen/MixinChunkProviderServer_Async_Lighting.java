@@ -43,7 +43,7 @@ public abstract class MixinChunkProviderServer_Async_Lighting {
     @Redirect(method = "tick",
         at = @At(
             value = "INVOKE",
-            target = "Lorg/spongepowered/common/bridge/world/ChunkBridge;isPersistedChunk()Z",
+            target = "Lorg/spongepowered/common/bridge/world/chunk/ChunkBridge;isPersistedChunk()Z",
             remap = false))
     private boolean asyncLighting$UsePendingLightUpdatesForAsyncChunk(ChunkBridge chunk) {
         return chunk.isPersistedChunk()
