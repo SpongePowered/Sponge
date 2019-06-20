@@ -27,7 +27,9 @@ package org.spongepowered.common.config.category;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.Tristate;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -35,28 +37,22 @@ import java.util.Optional;
 @ConfigSerializable
 public class MetricsCategory {
 
-    @Setting(value = "default-permission", comment = "Determines whether plugins that are newly added are allowed to perform\n"
-                                        + "data/metric collection by default. Plugins detected by Sponge will be added "
-                                        + "to the \"plugin-permissions\" section with this value.\n\n"
-                                        + "Set to true to enable metric gathering by default, false otherwise.")
-    private boolean defaultPermission = false;
+    @Setting(value = "global-state", comment = "The global collection state that should be respected by all plugins that have no specified "
+      + "collection state. If undefined then it is treated as disabled.")
+    private Tristate globalState = Tristate.UNDEFINED;
 
-    @Setting(value = "plugin-permissions", comment = "Provides (or revokes) permission for metric gathering on a per plugin basis.\n"
-                                                   + "Entries should be in the format \"plugin-id=<true|false>\".\n\n"
-                                                   + "Deleting an entry from this list will reset it to the default specified in\n"
-                                                   + "\"default-permission\"")
-    private Map<String, Boolean> perPluginPermissions = new HashMap<>();
+    @Setting(value = "plugin-states", comment = "Plugin-specific collection states that override the global collection state.")
+    private final Map<String, Tristate> pluginStates = new HashMap<>();
 
-    public boolean isGloballyEnabled() {
-        return this.defaultPermission;
+    public Tristate getGlobalCollectionState() {
+        return this.globalState;
     }
 
-    public Optional<Boolean> getPluginPermission(PluginContainer container) {
-        return Optional.ofNullable(this.perPluginPermissions.get(container.getId()));
+    public Tristate getCollectionState(PluginContainer container) {
+        return Optional.ofNullable(this.pluginStates.get(container.getId())).orElse(Tristate.UNDEFINED);
     }
 
-    public Map<String, Boolean> getPluginPermissions() {
-        return new HashMap<>(this.perPluginPermissions);
+    public Map<String, Tristate> getCollectionStates() {
+        return Collections.unmodifiableMap(this.pluginStates);
     }
-
 }

@@ -37,6 +37,10 @@ import static org.spongepowered.api.command.args.GenericArguments.string;
 import static org.spongepowered.api.command.args.GenericArguments.world;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.common.command.args.FilteredPluginsCommandElement;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -116,6 +120,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -187,12 +192,18 @@ public class SpongeCommandFactory {
     };
     private static final Text NOT_FOUND = Text.of("notFound");
 
-    private static final Map<String, Tristate> ENABLED_CHOICES = ImmutableMap.<String, Tristate>builder()
+    private static final Map<String, Tristate> COLLECTION_STATE_CHOICES = ImmutableMap.<String, Tristate>builder()
+        .put("true", Tristate.TRUE)
+        .put("on", Tristate.TRUE)
         .put("enable", Tristate.TRUE)
         .put("enabled", Tristate.TRUE)
-        .put("disabled", Tristate.FALSE)
+        .put("false", Tristate.FALSE)
+        .put("off", Tristate.FALSE)
         .put("disable", Tristate.FALSE)
+        .put("disabled", Tristate.FALSE)
         .put("default", Tristate.UNDEFINED)
+        .put("undefine", Tristate.UNDEFINED)
+        .put("undefined", Tristate.UNDEFINED)
         .build();
 
     /**
@@ -927,94 +938,109 @@ public class SpongeCommandFactory {
 
     private static CommandCallable createSpongeMetricsCommand() {
         return CommandSpec.builder()
-            .arguments(
-                GenericArguments.optional(GenericArguments.onlyOne(GenericArguments.plugin(Text.of(PLUGIN_KEY)))),
-                GenericArguments.optional(GenericArguments.onlyOne(
-                    GenericArguments.choicesInsensitive(Text.of(ENABLED_KEY), ENABLED_CHOICES))))
-            .description(Text.of("Gets or sets permission for metric plugins to operate."))
-            .permission("sponge.command.metrics")
-            .executor((source, context) -> {
-                final SpongeConfig<GlobalConfig> configAdapter = SpongeImpl.getGlobalConfigAdapter();
-                final MetricsCategory category = configAdapter.getConfig().getMetricsCategory();
-                if (!context.hasAny(PLUGIN_KEY)) {
-                    // No plugins means that we deal with global state
-                    if (category.isGloballyEnabled()) {
-                        source.sendMessage(Text.of("Metric collection default permission is currently ", ENABLED_TEXT));
-                    } else {
-                        source.sendMessage(Text.of("Metric collection default permission is currently ", DISABLED_TEXT));
-                    }
-                } else {
-                    PluginContainer container = context.requireOne(PLUGIN_KEY);
-                    if (context.hasAny(ENABLED_KEY)) {
-                        Tristate stateToSet = context.requireOne(ENABLED_KEY);
-                        if (stateToSet == Tristate.UNDEFINED) {
-                            // set to default
-                            setPermissions(category, container, category.isGloballyEnabled())
-                                .handle((node, exception) -> {
-                                    if (exception == null) {
-                                        createMessageTask(
-                                            source,
-                                            Text.of("Metric collection for ", container.getName(),
-                                                " is now set to the default value (",
-                                                category.isGloballyEnabled() ? ENABLED_TEXT : DISABLED_TEXT, ")"));
-                                    } else {
-                                        createMessageTask(source, FAILED_TEXT);
-                                    }
+          .arguments(
+            optionalWeak(onlyOne(plugin(PLUGIN_KEY))),
+            optional(onlyOne(choicesInsensitive(COLLECTION_STATE_KEY, COLLECTION_STATE_CHOICES))))
+          .description(Text.of("Gets or sets the metrics collection state")).permission("sponge.command.metrics").executor((source, context) -> {
+              final SpongeConfig<GlobalConfig> config = SpongeImpl.getGlobalConfigAdapter();
+              final MetricsCategory category = config.getConfig().getMetricsCategory();
 
-                                    return node;
-                                });
+              // If both a plugin and collection state are not specified then just display information
+              if (!context.hasAny(PLUGIN_KEY) && !context.hasAny(COLLECTION_STATE_KEY)) {
+                  final Optional<Integer> page = context.getOne(PAGE_KEY);
+                  final List<Text> contents = new ArrayList<>();
+                  contents.add(getMetricsText(TextColors.YELLOW, null, category.getGlobalCollectionState()));
+                  for (final PluginContainer container : Sponge.getPluginManager().getPlugins()) {
+                      contents.add(getMetricsText(TextColors.LIGHT_PURPLE, container, category.getCollectionState(container)));
+                  }
 
-                        } else if (stateToSet == Tristate.TRUE) {
-                            setPermissions(category, container, true)
-                                .handle((node, exception) -> {
-                                    if (exception == null) {
-                                        createMessageTask(
-                                            source,
-                                            Text.of("Set metric collection for ", container.getName(), " to ", ENABLED_TEXT));
-                                    } else {
-                                        createMessageTask(source, FAILED_TEXT);
-                                    }
+                  if (source instanceof Player) {
+                      PaginationList.builder().title(Text.of("Sponge Metrics")).header(Text
+                        .of(TextColors.RED, TextStyles.BOLD, "Warning: ", TextColors.RESET, TextStyles.RESET,
+                          "Collection states " + "may not always be respected by plugins.", Text.NEW_LINE)).contents(contents).padding(Text.of("-"))
+                        .linesPerPage(18).build().sendTo(source, page.orElse(1));
+                  } else {
+                      source.sendMessage(Text.joinWith(Text.NEW_LINE, contents));
+                  }
 
-                                    return node;
-                                });
-                        } else { // it's false
-                            setPermissions(category, container, false)
-                                .handle((node, exception) -> {
-                                    if (exception == null) {
-                                        createMessageTask(
-                                            source,
-                                            Text.of("Set metric collection for ", container.getName(), " to ", DISABLED_TEXT));
-                                    } else {
-                                        createMessageTask(source, FAILED_TEXT);
-                                    }
+                  return CommandResult.success();
+              }
 
-                                    return node;
-                                });
-                        }
-                        configAdapter.save();
-                    } else {
-                        boolean state = category.getPluginPermission(container).orElseGet(category::isGloballyEnabled);
-                        if (state) {
-                            source.sendMessage(Text.of("Metric collection for ", container.getName(), " is currently ", ENABLED_TEXT));
-                        } else {
-                            source.sendMessage(Text.of("Metric collection for ", container.getName(), " is currently ", DISABLED_TEXT));
-                        }
-                    }
-                }
+              final Optional<PluginContainer> optContainer = context.getOne(PLUGIN_KEY);
+              final Tristate state = context.requireOne(COLLECTION_STATE_KEY);
 
-                return CommandResult.success();
-            })
-            .build();
+              // If a plugin is specified then update the collection state for it
+              if (optContainer.isPresent()) {
+                  setMetricsPluginPermission(category, optContainer.get(), state).handle((node, exception) -> {
+                      if (exception == null) {
+                          createMessageTask(source, Text
+                            .of("Set collection state for ", optContainer.get().getName(), " to ", getStateText(optContainer.orElse(null), state)));
+                      } else {
+                          createMessageTask(source, FAILED_TEXT);
+                      }
+
+                      return node;
+                  });
+                  return CommandResult.success();
+              }
+
+              // If a plugin is not specified then update the global state
+              setMetricsGlobalPermission(category, state).handle((node, exception) -> {
+                  if (exception == null) {
+                      createMessageTask(source, Text.of("Set global collection state to ", getStateText(optContainer.orElse(null), state)));
+                  } else {
+                      createMessageTask(source, FAILED_TEXT);
+                  }
+
+                  return node;
+              });
+
+              return CommandResult.success();
+          }).build();
     }
 
-    private static CompletableFuture<CommentedConfigurationNode> setPermissions(
-        final MetricsCategory category,
-        final PluginContainer container,
-        final boolean enabled) {
+    private static Text getStateText(@Nullable PluginContainer container, Tristate state) {
+        switch (state) {
+            case TRUE:
+                return Text.of(TextColors.GREEN, "Enabled").toBuilder()
+                  .onHover(TextActions.showText(Text.of("Metrics collection is enabled.")))
+                  .build();
+            case FALSE:
+                return Text.of(TextColors.RED, "Disabled").toBuilder()
+                  .onHover(TextActions.showText(Text.of("Metrics collection is disabled.")))
+                  .build();
+            default:
+                return Text.of(TextColors.GRAY, "Undefined").toBuilder()
+                  .onHover(TextActions.showText(Text.of(container == null
+                    ? "Metrics collection has not been defined and will be treated as disabled"
+                    : "Metrics collection follows the global state")))
+                  .build();
+        }
+    }
 
-        final Map<String, Boolean> permissions = category.getPluginPermissions();
-        permissions.put(container.getId(), enabled);
-        return SpongeHooks.savePluginsInMetricsConfig(permissions);
+
+    private static Text getMetricsText(TextColor nameColor, @Nullable PluginContainer container, Tristate state) {
+        final Text collectionText = getStateText(container, state);
+
+        return Text.builder()
+          .append(Text.of(" * ", nameColor, container == null ? "Global" : container.getName(), TextColors.RESET, Text.NEW_LINE))
+          .append(Text.of("     Collection: ")).append(collectionText).build();
+    }
+
+    private static CompletableFuture<CommentedConfigurationNode> setMetricsGlobalPermission(MetricsCategory category, Tristate state) {
+        return SpongeImpl.getGlobalConfigAdapter().updateSetting("metrics.global-state", state, new TypeToken<Tristate>() {});
+    }
+
+    private static CompletableFuture<CommentedConfigurationNode> setMetricsPluginPermission(MetricsCategory category, PluginContainer container,
+      Tristate state) {
+        final Map<String, Tristate> pluginStates = new HashMap<>(category.getCollectionStates());
+        if (state == Tristate.UNDEFINED) {
+            pluginStates.remove(container.getId());
+        } else {
+            pluginStates.put(container.getId(), state);
+        }
+
+        return SpongeHooks.savePluginsInMetricsConfig(pluginStates);
     }
 
     private static void createMessageTask(final CommandSource source, final Text message) {

@@ -51,6 +51,7 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.TrackableBridge;
@@ -510,21 +511,8 @@ public class SpongeHooks {
         ConfigTeleportHelperFilter.invalidateCache();
     }
 
-    public static void populatePluginsInMetricsConfig() {
-        final boolean globalState = SpongeImpl.getGlobalConfigAdapter().getConfig().getMetricsCategory().isGloballyEnabled();
-        final Map<String, Boolean> entries = SpongeImpl.getGlobalConfigAdapter().getConfig().getMetricsCategory().getPluginPermissions();
-        Sponge.getPluginManager().getPlugins().stream()
-                .filter(SpongeImplHooks.getPluginFilterPredicate()).forEach(plugin -> entries.putIfAbsent(plugin.getId(), globalState));
-
-        try {
-            savePluginsInMetricsConfig(entries).get();
-        } catch (InterruptedException | ExecutionException e) {
-            SpongeImpl.getLogger().warn("Could not populate the plugin list for metric collection", e);
-        }
-    }
-
-    public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(final Map<String, Boolean> entries) {
+    public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(final Map<String, Tristate> entries) {
         return SpongeImpl.getGlobalConfigAdapter()
-                .updateSetting("metrics.plugin-permissions", entries, new TypeToken<Map<String, Boolean>>() { private static final long serialVersionUID = -1; });
+            .updateSetting("metrics.plugin-states", entries, new TypeToken<Map<String, Tristate>>() {});
     }
 }
