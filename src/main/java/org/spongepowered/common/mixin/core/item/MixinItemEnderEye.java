@@ -48,6 +48,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
@@ -76,6 +77,7 @@ public class MixinItemEnderEye extends Item {
      * @param rayTraceResult The raytrace validated using the item
      * @param targetPos The target position of the dungeon
      */
+    @SuppressWarnings("Duplicates")
     @Inject(
         method = "onItemRightClick",
         at = @At(
@@ -83,15 +85,42 @@ public class MixinItemEnderEye extends Item {
             target = "net/minecraft/entity/item/EntityEnderEye"
         ),
         locals = LocalCapture.CAPTURE_FAILSOFT,
+        require = 1,
         cancellable = true
     )
-    private void spongeImpl$ThrowPreBeforeSpawning(World worldIn, EntityPlayer playerIn, EnumHand handIn,
-        CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack used, RayTraceResult rayTraceResult, @Nullable BlockPos targetPos) {
+    private void implThrowForPreEvent(final World worldIn, final EntityPlayer playerIn, final EnumHand handIn,
+        final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, final RayTraceResult rayTraceResult, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.height / 2.0F), playerIn.posZ);
             final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
                 targetPosition);
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                EntityTypes.EYE_OF_ENDER, targetTransform);
+            if (SpongeImpl.postEvent(event)) {
+                cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, used));
+            }
+        }
+    }
+
+    /**
+     * In production, the RayTraceResult is lost.
+     *
+     * @param worldIn
+     * @param playerIn
+     * @param handIn
+     * @param cir
+     * @param used
+     * @param targetPos
+     */
+    @SuppressWarnings("Duplicates")
+    @Surrogate
+    private void implThrowForPreEvent(final World worldIn, final EntityPlayer playerIn, final EnumHand handIn,
+        final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
+        if (targetPos != null && !((WorldBridge) worldIn).isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+            final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.height / 2.0F), playerIn.posZ);
+            final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
+                targetPosition);
+            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 EntityTypes.EYE_OF_ENDER, targetTransform);
             if (SpongeImpl.postEvent(event)) {
                 cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, used));
@@ -135,9 +164,34 @@ public class MixinItemEnderEye extends Item {
         ),
         locals = LocalCapture.CAPTURE_FAILSOFT
     )
-    private void spongeImpl$setShooterBeforeSpawning(World worldIn, EntityPlayer playerIn, EnumHand handIn,
-        CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack playerStack, RayTraceResult result,
-        BlockPos targetPos, EntityEnderEye enderEye) {
+    private void implSetShooter(final World worldIn, final EntityPlayer playerIn, final EnumHand handIn,
+        final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack playerStack, final RayTraceResult result,
+        final BlockPos targetPos, final EntityEnderEye enderEye) {
+        if (((WorldBridge) worldIn).isFake()) {
+            return;
+        }
+        ((EyeOfEnder) enderEye).setShooter((ProjectileSource) playerIn);
+    }
+
+    /**
+     * The RayTraceResult is lost, and somehow, production JVM will shove the CallbackInfoReturnable
+     * into the LVT.... So.... Don't care which one is actually on the stack, it might be the one from
+     * {@link #implThrowForPreEvent(World, EntityPlayer, EnumHand, CallbackInfoReturnable, ItemStack, BlockPos)}
+     * or some other injection. Either way, this one works in production.
+     *
+     * @param worldIn
+     * @param playerIn
+     * @param handIn
+     * @param cir
+     * @param playerStack
+     * @param targetPos
+     * @param enderEye
+     * @param preEventCir
+     */
+    @Surrogate
+    private void implSetShooter(final World worldIn, final EntityPlayer playerIn, final EnumHand handIn,
+        final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack playerStack,
+        final BlockPos targetPos, final EntityEnderEye enderEye, final CallbackInfoReturnable<ActionResult<ItemStack>> preEventCir) {
         if (((WorldBridge) worldIn).isFake()) {
             return;
         }
