@@ -205,8 +205,8 @@ public abstract class DataHolderMixin_API implements DataHolder {
             } else {
                 if (!((SpongeUser) holder).isInitialized()) {
                     ((SpongeUser) holder).initialize();
-                    ((SpongeUser) holder).markDirty();
                 }
+                ((SpongeUser) holder).markDirty();
             }
         }
         final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = DataUtil.getBaseValueProcessor(key);
@@ -239,8 +239,8 @@ public abstract class DataHolderMixin_API implements DataHolder {
             } else {
                 if (!((SpongeUser) holder).isInitialized()) {
                     ((SpongeUser) holder).initialize();
-                    ((SpongeUser) holder).markDirty();
                 }
+                ((SpongeUser) holder).markDirty();
             }
         }
         final Optional<DataProcessor> optional = DataUtil.getWildDataProcessor(valueContainer.getClass());
@@ -308,8 +308,8 @@ public abstract class DataHolderMixin_API implements DataHolder {
             } else {
                 if (!((SpongeUser) holder).isInitialized()) {
                     ((SpongeUser) holder).initialize();
-                    ((SpongeUser) holder).markDirty();
                 }
+                ((SpongeUser) holder).markDirty();
             }
         }
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(containerClass);
@@ -343,8 +343,8 @@ public abstract class DataHolderMixin_API implements DataHolder {
             } else {
                 if (!((SpongeUser) holder).isInitialized()) {
                     ((SpongeUser) holder).initialize();
-                    ((SpongeUser) holder).markDirty();
                 }
+                ((SpongeUser) holder).markDirty();
             }
         }
         final Optional<ValueProcessor<?, ?>> optional = DataUtil.getWildValueProcessor(checkNotNull(key));
