@@ -126,6 +126,12 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::isOptimizeHoppers)
             .put("org.spongepowered.common.mixin.optimization.tileentity.MixinTileEntityHopper_HopperOptimization",
                     OptimizationCategory::isOptimizeHoppers)
+            .put("org.spongepowered.common.mixin.optimization.entity.MixinEntity_UseActiveChunkForCollisions",
+                    OptimizationCategory::isUseActiveChunkForCollisions)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinWorld_UseActiveChunkForCollisions",
+                    OptimizationCategory::isUseActiveChunkForCollisions)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_UseActiveChunkForCollisions",
+                    OptimizationCategory::isUseActiveChunkForCollisions)
             .build();
 
 }

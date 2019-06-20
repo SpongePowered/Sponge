@@ -99,6 +99,18 @@ public class OptimizationCategory extends ConfigCategory {
                                                    + "for more details.")
     private boolean optimizeHoppers = false;
 
+    @Setting(value = "use-active-chunks-for-collisions", comment = "Vanilla performs a lot of is area loaded checks during\n"
+                                                                   + "entity collision calculations with blocks, and because\n"
+                                                                   + "these calculations require fetching the chunks to see\n"
+                                                                   + "if they are loaded, before getting the block states\n"
+                                                                   + "from those chunks, there can be some small performance\n"
+                                                                   + "increase by checking the entity's owned active chunk\n"
+                                                                   + "it may currently reside in. Essentially, instead of\n"
+                                                                   + "asking the world if those chunks are loaded, the entity\n"
+                                                                   + "would know whether it's chunks are loaded and that neighbor's\n"
+                                                                   + "chunks are loaded.")
+    private boolean useActiveChunkForCollisions = false;
+
     public OptimizationCategory() {
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
@@ -173,5 +185,9 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean isOptimizeHoppers() {
         return this.optimizeHoppers;
+    }
+
+    public boolean isUseActiveChunkForCollisions() {
+        return useActiveChunkForCollisions;
     }
 }

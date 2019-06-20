@@ -10,6 +10,7 @@
         "block.MixinBlockRedstoneWire_PandaRedstone",
         "block.MixinBlockRedstoneWire_Eigen",
         "enchantment.MixinEnchantmentHelper_No_Source_Leak",
+        "entity.MixinEntity_UseActiveChunkForCollisions",
         "entity.MixinEntityTameable_Cached_Owner",
         "entity.item.MixinEntityItemFrame_MapOptimization",
         "entity.MixinEntityTrackerEntry_MapOptimization",
@@ -21,7 +22,9 @@
         "tileentity.MixinTileEntity_HopperOptimization",
         "tileentity.MixinTileEntityHopper_HopperOptimization",
         "world.MixinChunk_Async_Lighting",
+        "world.MixinWorld_UseActiveChunkForCollisions",
         "world.MixinWorldServer_Async_Lighting",
+        "world.MixinWorldServer_UseActiveChunkForCollisions",
         "world.gen.MixinChunkProviderServer_Async_Lighting",
         "world.gen.structure.MixinMapGenStructure_Structure_Saving"
     ],
