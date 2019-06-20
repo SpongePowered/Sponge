@@ -34,9 +34,8 @@ import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
 @RunWith(LaunchWrapperTestRunner.class)
@@ -44,13 +43,17 @@ public class SchematicUpgradeTest {
 
     @Test
     public void testUpgradingv1Tov2() throws IOException {
-        File inputFile = new File(this.getClass().getClassLoader().getResource("loadv1.schematic").getFile());
-        DataContainer container = DataFormats.NBT.readFrom(new GZIPInputStream(new FileInputStream(inputFile)));
-        final Schematic v1Schem = DataTranslators.SCHEMATIC.translate(container);
-        inputFile = new File(this.getClass().getClassLoader().getResource("loadv2.schematic").getFile());
-        container = DataFormats.NBT.readFrom(new GZIPInputStream(new FileInputStream(inputFile)));
-        final Schematic v2Schem = DataTranslators.SCHEMATIC.translate(container);
-        assertEquals(v1Schem, v2Schem);
+        final ClassLoader classLoader = this.getClass().getClassLoader();
+        try (final InputStream v1InputStream = classLoader.getResource("loadv1.schematic").openStream();
+             final InputStream v2InputStream = classLoader.getResource("loadv2.schematic").openStream();
+             final GZIPInputStream v1GzipInputStream = new GZIPInputStream(v1InputStream);
+             final GZIPInputStream v2GzipInputStream = new GZIPInputStream(v2InputStream)){
+                final DataContainer v1Container = DataFormats.NBT.readFrom(v1GzipInputStream);
+                final Schematic v1Schem = DataTranslators.SCHEMATIC.translate(v1Container);
+                final DataContainer v2Container = DataFormats.NBT.readFrom(v2GzipInputStream);
+                final Schematic v2Schem = DataTranslators.SCHEMATIC.translate(v2Container);
+                assertEquals(v1Schem, v2Schem);
+        }
     }
 
 }
