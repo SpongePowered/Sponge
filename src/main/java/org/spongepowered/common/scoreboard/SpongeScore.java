@@ -28,8 +28,8 @@ import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.interfaces.IMixinScore;
-import org.spongepowered.common.interfaces.IMixinScoreObjective;
+import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
+import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.HashMap;
@@ -86,11 +86,12 @@ public class SpongeScore implements Score {
     public Set<Objective> getObjectives() {
         Set<Objective> objectives = new HashSet<>();
         for (ScoreObjective objective: this.scores.keySet()) {
-            objectives.add(((IMixinScoreObjective) objective).getSpongeObjective());
+            objectives.add(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
         }
         return objectives;
     }
 
+    @SuppressWarnings("ConstantConditions")
     public net.minecraft.scoreboard.Score getScoreFor(ScoreObjective objective) {
         if (this.scores.containsKey(objective)) {
             return this.scores.get(objective);
@@ -102,7 +103,7 @@ public class SpongeScore implements Score {
         // sending packets until everything is in the proper state.
         score.scorePoints = this.score;
 
-        ((IMixinScore) score).setSpongeScore(this);
+        ((ScoreBridge) score).bridge$setSpongeScore(this);
         this.scores.put(objective, score);
 
         return score;

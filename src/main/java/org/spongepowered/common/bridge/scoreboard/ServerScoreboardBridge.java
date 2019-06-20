@@ -22,35 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.scoreboard;
+package org.spongepowered.common.bridge.scoreboard;
 
-import com.google.common.base.CaseFormat;
-import net.minecraft.scoreboard.IScoreCriteria;
-import net.minecraft.scoreboard.ScoreCriteria;
-import net.minecraft.scoreboard.ScoreCriteriaColored;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 
-import javax.annotation.Nullable;
+public interface ServerScoreboardBridge extends ScoreboardBridge {
 
-@Mixin(value = {ScoreCriteriaColored.class, ScoreCriteria.class})
-@Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
-public abstract class MixinCriterion implements IScoreCriteria { // Trick to allow avoid shadowing, since multiple targets are used
+    void bridge$addPlayer(EntityPlayerMP player, boolean sendPackets);
 
-    @Nullable private String spongeId;
+    void bridge$removePlayer(EntityPlayerMP player, boolean sendPackets);
 
-    @Intrinsic
-    public String criterion$getName() {
-        return this.getName();
-    }
+    void bridge$sendToPlayers(Packet<?> packet);
 
-    public String criterion$getId() {
-        if (this.spongeId == null) {
-            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.getName().replace("count", "s"));
-        }
-        return this.spongeId;
-    }
 }

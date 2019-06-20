@@ -132,9 +132,9 @@ import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
-import org.spongepowered.common.interfaces.IMixinServerScoreboard;
+import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.interfaces.IMixinTeam;
+import org.spongepowered.common.bridge.scoreboard.TeamBridge;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
@@ -523,7 +523,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Override
     public void initScoreboard() {
-        ((IMixinServerScoreboard) this.getWorldScoreboard()).addPlayer((EntityPlayerMP) (Object) this, true);
+        ((ServerScoreboardBridge) this.getWorldScoreboard()).bridge$addPlayer((EntityPlayerMP) (Object) this, true);
     }
 
     @Override
@@ -542,12 +542,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     @Override
     public void setScoreboardOnRespawn(final Scoreboard scoreboard) {
         this.impl$spongeScoreboard = scoreboard;
-        ((IMixinServerScoreboard) ((Player) this).getScoreboard()).addPlayer((EntityPlayerMP) (Object) this, false);
+        ((ServerScoreboardBridge) ((Player) this).getScoreboard()).bridge$addPlayer((EntityPlayerMP) (Object) this, false);
     }
 
     @Override
     public void removeScoreboardOnRespawn() {
-        ((IMixinServerScoreboard) ((Player) this).getScoreboard()).removePlayer((EntityPlayerMP) (Object) this, false);
+        ((ServerScoreboardBridge) ((Player) this).getScoreboard()).bridge$removePlayer((EntityPlayerMP) (Object) this, false);
     }
 
     @Override
@@ -558,9 +558,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
             if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
                 if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
-                    return ((IMixinTeam) team).getTeamChannel(player);
+                    return ((TeamBridge) team).bridge$getTeamChannel(player);
                 } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
-                    return ((IMixinTeam) team).getNonTeamChannel();
+                    return ((TeamBridge) team).bridge$getNonTeamChannel();
                 }
             } else {
                 return ((Player) this).getMessageChannel();

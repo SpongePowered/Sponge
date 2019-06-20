@@ -31,7 +31,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketEntityEffect;
 import net.minecraft.network.play.server.SPacketEntityStatus;
@@ -93,7 +92,7 @@ import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.player.PlayerPhase;
-import org.spongepowered.common.interfaces.IMixinServerScoreboard;
+import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -102,7 +101,6 @@ import org.spongepowered.common.service.ban.SpongeUserListBans;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.whitelist.SpongeUserListWhitelist;
 import org.spongepowered.common.text.chat.ChatUtil;
-import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -405,7 +403,7 @@ public abstract class MixinPlayerList implements PlayerListBridge {
         ((SpongeUser) ((ServerPlayerEntityBridge) player).getUserObject()).readFromNbt(nbt);
 
         // Remove player reference from scoreboard
-        ((IMixinServerScoreboard) ((Player) player).getScoreboard()).removePlayer(player, false);
+        ((ServerScoreboardBridge) ((Player) player).getScoreboard()).bridge$removePlayer(player, false);
     }
 
     @Redirect(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;removeEntity(Lnet/minecraft/entity/Entity;)V"))

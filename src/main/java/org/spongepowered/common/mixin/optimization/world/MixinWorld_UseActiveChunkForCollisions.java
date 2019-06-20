@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 
@@ -63,7 +63,7 @@ public abstract class MixinWorld_UseActiveChunkForCollisions {
     @Redirect(method = "handleMaterialAcceleration", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(IIIIIIZ)Z"))
     private boolean activeCollision$IgnoreAreaIsLoaded(final World world, final int xStart, final int yStart, final int zStart,
         final int xEnd, final int yEnd, final int zEnd, final boolean allowEmpty) {
-        if (((ServerWorldBridge) this).isFake()) {
+        if (((WorldBridge) this).isFake()) {
             return world.isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd, allowEmpty);
         }
         return true;

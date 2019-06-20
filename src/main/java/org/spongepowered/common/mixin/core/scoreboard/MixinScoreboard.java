@@ -30,16 +30,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.IMixinScoreboard;
+import org.spongepowered.common.bridge.scoreboard.ScoreboardBridge;
 
 @Mixin(Scoreboard.class)
-public abstract class MixinScoreboardClientCheck implements IMixinScoreboard {
+public abstract class MixinScoreboard implements ScoreboardBridge {
 
     private boolean isClient;
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(CallbackInfo ci) {
-        this.isClient = !(((Object) this) instanceof ServerScoreboard);
+    private void onInit(final CallbackInfo ci) {
+        this.isClient = !((Scoreboard) (Object) this instanceof ServerScoreboard);
     }
 
     @Override

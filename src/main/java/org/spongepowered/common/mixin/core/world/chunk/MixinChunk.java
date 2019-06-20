@@ -46,7 +46,6 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.IChunkGenerator;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
@@ -82,7 +81,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.interfaces.IMixinCachable;
+import org.spongepowered.common.bridge.util.CacheKeyed;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.util.SpongeHooks;
@@ -100,7 +99,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.chunk.Chunk.class)
-public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
+public abstract class MixinChunk implements ChunkBridge, CacheKeyed {
 
 
     @Shadow @Final private World world;
@@ -138,7 +137,7 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
     }
 
     @Override
-    public long getCacheKey() {
+    public long cache$getCacheKey() {
         return this.cacheKey;
     }
 

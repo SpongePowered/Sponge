@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.Sets;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -44,7 +43,6 @@ import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCustomSound;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSoundEffect;
-import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
@@ -69,7 +67,6 @@ import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
@@ -122,7 +119,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.bridge.packet.ResourcePackBridge;
-import org.spongepowered.common.interfaces.IMixinServerScoreboard;
+import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
@@ -132,8 +129,6 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
-import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.time.Duration;
@@ -354,9 +349,9 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
         if (((ServerPlayerEntityBridge) this).bridge$hasDelegate()) {
             ((Player) ((ServerPlayerEntityBridge) this).bridge$getDelegate()).setScoreboard(scoreboard);
         }
-        ((IMixinServerScoreboard) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).removePlayer((EntityPlayerMP) (Object) this, true);
+        ((ServerScoreboardBridge) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).bridge$removePlayer((EntityPlayerMP) (Object) this, true);
         ((ServerPlayerEntityBridge) this).bridge$replaceScoreboard(scoreboard);
-        ((IMixinServerScoreboard) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).addPlayer((EntityPlayerMP) (Object) this, true);
+        ((ServerScoreboardBridge) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).bridge$addPlayer((EntityPlayerMP) (Object) this, true);
     }
 
     @Override

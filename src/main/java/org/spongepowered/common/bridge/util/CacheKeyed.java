@@ -22,14 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.bridge.util;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.text.channel.MessageChannel;
+public interface CacheKeyed {
 
-public interface IMixinTeam {
+    long cache$getCacheKey();
 
-    MessageChannel getTeamChannel(EntityPlayerMP player);
-
-    MessageChannel getNonTeamChannel();
 }

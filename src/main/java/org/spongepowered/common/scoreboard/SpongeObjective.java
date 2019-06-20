@@ -34,7 +34,7 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.interfaces.IMixinScoreObjective;
+import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Collection;
@@ -231,7 +231,7 @@ public class SpongeObjective implements Objective {
         objective.displayName = SpongeTexts.toLegacy(this.displayName);
         objective.renderType = (IScoreCriteria.EnumRenderType) (Object) this.displayMode;
 
-        ((IMixinScoreObjective) objective).setSpongeObjective(this);
+        ((ScoreObjectiveBridge) objective).bridge$setSpongeObjective(this);
         this.objectives.put(scoreboard, objective);
 
         return objective;

@@ -96,7 +96,8 @@ public abstract class MixinEntityEndermanAIPlaceBlock extends EntityAIBase {
     private boolean onUpdateCancel(IBlockState blockState, World world, BlockPos pos, Block toPlace, IBlockState old, IBlockState state) {
         if (state.isFullCube()) {
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-                final Location<org.spongepowered.api.world.World> location = VecHelper.toLocation(world, pos);
+                final Location<org.spongepowered.api.world.World> location =
+                    new Location<org.spongepowered.api.world.World>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(pos));
                 final List<Location<org.spongepowered.api.world.World>> list = new ArrayList<>(1);
                 list.add(location);
                 final Cause cause = Sponge.getCauseStackManager().getCurrentCause();

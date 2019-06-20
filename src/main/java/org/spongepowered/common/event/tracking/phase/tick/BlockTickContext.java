@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.world.LocatableBlock;
@@ -47,14 +48,15 @@ public class BlockTickContext extends LocationBasedTickContext<BlockTickContext>
         super.source(owner);
         if (owner instanceof LocatableBlock) {
             final LocatableBlock locatableBlock = (LocatableBlock) owner;
-            final TrackableBridge mixinBlock = (BlockBridge) ((IBlockState) locatableBlock.getBlockState()).getBlock();
-            this.tickingBlock = (BlockBridge) ;
-            this.providesModifier = !(mixinBlock instanceof BlockDynamicLiquid);
+            final Block block = ((IBlockState) locatableBlock.getBlockState()).getBlock();
+            final TrackableBridge trackable = (BlockBridge) block;
+            this.tickingBlock = (BlockBridge) block;
+            this.providesModifier = !(trackable instanceof BlockDynamicLiquid);
             this.world = locatableBlock.getWorld();
-            this.setBlockEvents(mixinBlock.allowsBlockEventCreation())
-                .setBulkBlockCaptures(mixinBlock.allowsBlockBulkCapture())
-                .setEntitySpawnEvents(mixinBlock.allowsEntityEventCreation())
-                .setBulkEntityCaptures(mixinBlock.allowsEntityBulkCapture());
+            this.setBlockEvents(trackable.allowsBlockEventCreation())
+                .setBulkBlockCaptures(trackable.allowsBlockBulkCapture())
+                .setEntitySpawnEvents(trackable.allowsEntityEventCreation())
+                .setBulkEntityCaptures(trackable.allowsEntityBulkCapture());
         }
         return this;
     }

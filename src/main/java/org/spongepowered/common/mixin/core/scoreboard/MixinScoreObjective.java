@@ -35,55 +35,57 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.IMixinScoreObjective;
-import org.spongepowered.common.interfaces.IMixinScoreboard;
+import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
+import org.spongepowered.common.bridge.scoreboard.ScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.text.SpongeTexts;
 
+import javax.annotation.Nullable;
+
 @Mixin(ScoreObjective.class)
-public abstract class MixinScoreObjective implements IMixinScoreObjective {
+public abstract class MixinScoreObjective implements ScoreObjectiveBridge {
 
     @Shadow @Final public Scoreboard scoreboard;
 
-    public SpongeObjective spongeObjective;
+    @Nullable private SpongeObjective impl$spongeScoreboard;
 
     @Override
-    public SpongeObjective getSpongeObjective() {
-        return this.spongeObjective;
+    public SpongeObjective bridge$getSpongeObjective() {
+        return this.impl$spongeScoreboard;
     }
 
     @Override
-    public void setSpongeObjective(SpongeObjective spongeObjective) {
-        this.spongeObjective = spongeObjective;
+    public void bridge$setSpongeObjective(final SpongeObjective spongeObjective) {
+        this.impl$spongeScoreboard = spongeObjective;
     }
 
     @Inject(method = "setDisplayName", at = @At("HEAD"), cancellable = true)
-    public void onSetDisplayName(String name, CallbackInfo ci) {
-        if (this.scoreboard != null && ((IMixinScoreboard) this.scoreboard).isClient()) {
+    private void onSetDisplayName(final String name, final CallbackInfo ci) {
+        if (this.scoreboard != null && ((ScoreboardBridge) this.scoreboard).isClient()) {
             return; // Let the normal logic take over.
         }
 
-        if (this.spongeObjective == null) {
+        if (this.impl$spongeScoreboard == null) {
             SpongeImpl.getLogger().warn("Returning objective cause null!");
             ci.cancel();
             return;
         }
-        this.spongeObjective.setDisplayName(SpongeTexts.fromLegacy(name));
+        this.impl$spongeScoreboard.setDisplayName(SpongeTexts.fromLegacy(name));
         ci.cancel();
     }
 
     @Inject(method = "setRenderType", at = @At("HEAD"), cancellable = true)
-    public void onSetRenderType(IScoreCriteria.EnumRenderType type, CallbackInfo ci) {
-        if (this.scoreboard != null && ((IMixinScoreboard) this.scoreboard).isClient()) {
+    private void onSetRenderType(final IScoreCriteria.EnumRenderType type, final CallbackInfo ci) {
+        if (this.scoreboard != null && ((ScoreboardBridge) this.scoreboard).isClient()) {
             return; // Let the normal logic take over.
         }
 
-        if (this.spongeObjective == null) {
+        if (this.impl$spongeScoreboard == null) {
             SpongeImpl.getLogger().warn("Returning render objective cause null!");
             ci.cancel();
             return;
         }
-        this.spongeObjective.setDisplayMode((ObjectiveDisplayMode) (Object) type);
+        this.impl$spongeScoreboard.setDisplayMode((ObjectiveDisplayMode) (Object) type);
         ci.cancel();
     }
 }

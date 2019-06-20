@@ -22,14 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.api.minecraft.scoreboard;
 
-import org.spongepowered.common.scoreboard.SpongeScore;
+import com.google.common.base.CaseFormat;
+import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.ScoreCriteria;
+import net.minecraft.scoreboard.ScoreCriteriaColored;
+import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface IMixinScore {
+import javax.annotation.Nullable;
 
-    void setSpongeScore(SpongeScore score);
+@Mixin(value = {ScoreCriteriaColored.class, ScoreCriteria.class})
+@Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
+public abstract class MixinCriterion_API implements IScoreCriteria { // Trick to allow avoid shadowing, since multiple targets are used
 
-    SpongeScore getSpongeScore();
+    @Nullable private String spongeId;
 
+    @Intrinsic
+    public String criterion$getName() {
+        return this.getName();
+    }
+
+    public String criterion$getId() {
+        if (this.spongeId == null) {
+            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.getName().replace("count", "s"));
+        }
+        return this.spongeId;
+    }
 }

@@ -22,38 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.scoreboard;
+package org.spongepowered.common.bridge.scoreboard;
 
-import com.google.common.base.CaseFormat;
-import net.minecraft.scoreboard.Team;
-import org.spongepowered.api.scoreboard.Visibility;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+public interface ScoreboardBridge {
 
-@Mixin(Team.EnumVisible.class)
-public abstract class MixinEnumVisible implements Visibility {
-
-    @Shadow @Final public String internalName;
-
-    private String spongeId;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void setSpongeIdAtConstructor(String nameIn, int idIn, String enumName, int ordinal, CallbackInfo callbackInfo) {
-        this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.internalName);
-    }
-
-    @Override
-    public String getId() {
-        return this.spongeId;
-    }
-
-    @Override
-    public String getName() {
-        return this.internalName;
-    }
+    boolean isClient();
 
 }

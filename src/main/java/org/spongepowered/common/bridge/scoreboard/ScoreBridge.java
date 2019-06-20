@@ -22,35 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.scoreboard;
+package org.spongepowered.common.bridge.scoreboard;
 
-import com.google.common.base.CaseFormat;
-import net.minecraft.scoreboard.Team;
-import org.spongepowered.api.scoreboard.CollisionRule;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.scoreboard.SpongeScore;
 
-import javax.annotation.Nullable;
+public interface ScoreBridge {
 
-@Mixin(Team.CollisionRule.class)
-public class MixinCollisionRule implements CollisionRule {
+    void bridge$setSpongeScore(SpongeScore score);
 
-    @Shadow @Final public String name;
-
-    @Nullable private String spongeId;
-
-    @Override
-    public String getId() {
-        if (this.spongeId == null) {
-            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.name);
-        }
-        return this.spongeId;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
+    SpongeScore bridge$getSpongeScore();
 
 }

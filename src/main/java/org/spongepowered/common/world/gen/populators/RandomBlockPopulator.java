@@ -53,14 +53,14 @@ public class RandomBlockPopulator implements RandomBlock {
     private Predicate<Location<World>> check;
     private BlockState state;
 
-    public RandomBlockPopulator(BlockState block, VariableAmount count, VariableAmount height) {
+    public RandomBlockPopulator(final BlockState block, final VariableAmount count, final VariableAmount height) {
         this.count = checkNotNull(count);
         this.state = checkNotNull(block);
         this.height = checkNotNull(height);
         this.check = (t) -> true;
     }
 
-    public RandomBlockPopulator(BlockState block, VariableAmount count, VariableAmount height, Predicate<Location<World>> check) {
+    public RandomBlockPopulator(final BlockState block, final VariableAmount count, final VariableAmount height, final Predicate<Location<World>> check) {
         this.count = checkNotNull(count);
         this.state = checkNotNull(block);
         this.height = checkNotNull(height);
@@ -73,14 +73,14 @@ public class RandomBlockPopulator implements RandomBlock {
     }
 
     @Override
-    public void populate(org.spongepowered.api.world.World world, Extent extent, Random random) {
-        Vector3i min = extent.getBlockMin();
-        Vector3i size = extent.getBlockSize();
-        int n = this.count.getFlooredAmount(random);
-        Location<World> chunkMin = new Location<World>(world, min.getX(), min.getY(),
+    public void populate(final org.spongepowered.api.world.World world, final Extent extent, final Random random) {
+        final Vector3i min = extent.getBlockMin();
+        final Vector3i size = extent.getBlockSize();
+        final int n = this.count.getFlooredAmount(random);
+        final Location<World> chunkMin = new Location<World>(world, min.getX(), min.getY(),
                 min.getZ());
         for (int i = 0; i < n; i++) {
-            Location<World> pos = chunkMin.add(random.nextInt(size.getX()), this.height.getFlooredAmount(random), random.nextInt(size.getZ()));
+            final Location<World> pos = chunkMin.add(random.nextInt(size.getX()), this.height.getFlooredAmount(random), random.nextInt(size.getZ()));
             if (this.check.test(pos)) {
                 if (((WorldBridge) world).isFake()) {
                     world.setBlock(pos.getBlockPosition(), this.state, BlockChangeFlags.PHYSICS_OBSERVER);
@@ -103,7 +103,7 @@ public class RandomBlockPopulator implements RandomBlock {
     }
 
     @Override
-    public void setBlock(BlockState block) {
+    public void setBlock(final BlockState block) {
         this.state = checkNotNull(block);
     }
 
@@ -113,7 +113,7 @@ public class RandomBlockPopulator implements RandomBlock {
     }
 
     @Override
-    public void setAttemptsPerChunk(VariableAmount count) {
+    public void setAttemptsPerChunk(final VariableAmount count) {
         this.count = checkNotNull(count);
     }
 
@@ -123,7 +123,7 @@ public class RandomBlockPopulator implements RandomBlock {
     }
 
     @Override
-    public void getPlacementTarget(Predicate<Location<World>> target) {
+    public void getPlacementTarget(final Predicate<Location<World>> target) {
         this.check = checkNotNull(target);
     }
 
@@ -133,7 +133,7 @@ public class RandomBlockPopulator implements RandomBlock {
     }
 
     @Override
-    public void setHeightRange(VariableAmount height) {
+    public void setHeightRange(final VariableAmount height) {
         this.height = checkNotNull(height);
     }
 

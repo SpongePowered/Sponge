@@ -22,17 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
-
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-
-public interface IMixinServerScoreboard extends IMixinScoreboard {
-
-    void addPlayer(EntityPlayerMP player, boolean sendPackets);
-
-    void removePlayer(EntityPlayerMP player, boolean sendPackets);
-
-    void sendToPlayers(Packet<?> packet);
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.mixin.api.minecraft.scoreboard;

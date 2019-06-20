@@ -22,36 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.mixin.api.minecraft.scoreboard;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import org.spongepowered.common.bridge.util.CacheKeyed;
+import net.minecraft.scoreboard.IScoreCriteria;
+import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
+@Mixin(IScoreCriteria.EnumRenderType.class)
+public abstract class MixinIScoreCriteria$EnumRenderType_API implements ObjectiveDisplayMode {
 
-public class CachedLong2ObjectMap<V extends CacheKeyed> extends Long2ObjectOpenHashMap<V> {
-
-    private static final long serialVersionUID = 190617916448550012L;
-    @Nullable private V lastRetrievedValue = null;
+    @Shadow @Final private String renderType;
 
     @Override
-    public V get(long key) {
-        if (this.lastRetrievedValue != null && key == this.lastRetrievedValue.cache$getCacheKey()) {
-            return this.lastRetrievedValue;
-        }
-        return this.lastRetrievedValue = super.get(key);
+    public String getId() {
+        return this.renderType;
     }
 
     @Override
-    public V remove(long key) {
-        if (this.lastRetrievedValue != null && key == this.lastRetrievedValue.cache$getCacheKey()) {
-            this.lastRetrievedValue = null;
-        }
-        return super.remove(key);
+    public String getName() {
+        return this.renderType;
     }
 
-    @Override
-    public boolean containsKey(long key) {
-        return this.get(key) != null;
-    }
 }

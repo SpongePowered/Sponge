@@ -22,27 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.scoreboard;
+package org.spongepowered.common.bridge.scoreboard;
 
-import net.minecraft.scoreboard.IScoreCriteria;
-import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.scoreboard.SpongeObjective;
 
-@Mixin(IScoreCriteria.EnumRenderType.class)
-public abstract class MixinScoreboardObjectiveDisplayType implements ObjectiveDisplayMode {
+public interface ScoreObjectiveBridge {
 
-    @Shadow @Final public String renderType;
+    void bridge$setSpongeObjective(SpongeObjective objective);
 
-    @Override
-    public String getId() {
-        return this.renderType;
-    }
-
-    @Override
-    public String getName() {
-        return this.renderType;
-    }
-
+    SpongeObjective bridge$getSpongeObjective();
 }

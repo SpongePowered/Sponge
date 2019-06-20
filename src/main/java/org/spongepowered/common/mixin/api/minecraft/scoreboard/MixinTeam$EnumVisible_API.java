@@ -22,13 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.api.minecraft.scoreboard;
 
-import org.spongepowered.common.scoreboard.SpongeObjective;
+import com.google.common.base.CaseFormat;
+import net.minecraft.scoreboard.Team;
+import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-public interface IMixinScoreObjective {
+@Mixin(Team.EnumVisible.class)
+public abstract class MixinTeam$EnumVisible_API implements Visibility {
 
-    void setSpongeObjective(SpongeObjective objective);
+    @Shadow @Final public String internalName;
 
-    SpongeObjective getSpongeObjective();
+    private String spongeId;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void setSpongeIdAtConstructor(String nameIn, int idIn, String enumName, int ordinal, CallbackInfo callbackInfo) {
+        this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.internalName);
+    }
+
+    @Override
+    public String getId() {
+        return this.spongeId;
+    }
+
+    @Override
+    public String getName() {
+        return this.internalName;
+    }
+
 }
