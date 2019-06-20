@@ -133,6 +133,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.TimingHolder;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
@@ -2252,7 +2253,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
 
     @Override
     public void stopTimingForWeatherEntityTickCrash(net.minecraft.entity.Entity updatingEntity) {
-        ((EntityBridge) updatingEntity).bridge$getTimingsHandler().stopTiming();
+        ((TimingHolder) updatingEntity).bridge$getTimingsHandler().stopTiming();
     }
 
     @Override
@@ -2273,7 +2274,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
 
     @Override
     public void stopTimingTickEntityCrash(net.minecraft.entity.Entity updatingEntity) {
-        ((EntityBridge) updatingEntity).bridge$getTimingsHandler().stopTiming();
+        ((TimingHolder) updatingEntity).bridge$getTimingsHandler().stopTiming();
     }
 
     @Override
@@ -2293,7 +2294,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
 
     @Override
     public void stopTimingTickTileEntityCrash(net.minecraft.tileentity.TileEntity updatingTileEntity) {
-        ((TileEntityBridge) updatingTileEntity).bridge$getTimingsHandler().stopTiming();
+        ((TimingHolder) updatingTileEntity).bridge$getTimingsHandler().stopTiming();
     }
 
     @Override

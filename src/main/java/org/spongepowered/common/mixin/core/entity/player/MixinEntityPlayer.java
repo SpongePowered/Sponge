@@ -373,7 +373,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"))
     private void spongePlaySound(final World world, final EntityPlayer player, final double d1, final double d2, final double d3, final SoundEvent sound, final SoundCategory category, final float volume, final float pitch) {
-        if (!this.isVanished()) {
+        if (!this.vanish$isVanished()) {
             this.world.playSound(player, d1, d2, d3, sound, category, volume, pitch);
         }
     }

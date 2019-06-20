@@ -27,6 +27,7 @@ package org.spongepowered.common.data.util;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.common.util.Constants;
 
 @SuppressWarnings("DeprecatedIsStillUsed")
 public final class DataQueries {
@@ -245,7 +246,7 @@ public final class DataQueries {
     public static final class Compatibility {
 
         public static final class Forge {
-            public static final DataQuery ROOT = of(NbtDataUtil.FORGE_DATA);
+            public static final DataQuery ROOT = of(Constants.Forge.FORGE_DATA);
         }
 
     }

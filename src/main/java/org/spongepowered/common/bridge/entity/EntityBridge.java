@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.bridge.entity;
 
-import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.Transform;
@@ -37,19 +35,17 @@ import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.bridge.TimingHolder;
-import org.spongepowered.common.bridge.world.ChunkBridge;
-import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.entity.player.IUserOrEntity;
-import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface EntityBridge extends TrackableBridge, IUserOrEntity, TimingHolder {
+public interface EntityBridge extends TrackableBridge, DataCompoundHolder {
 
     boolean isInConstructPhase();
 
@@ -88,31 +84,7 @@ public interface EntityBridge extends TrackableBridge, IUserOrEntity, TimingHold
 
     void trackEntityUniqueId(String nbtKey, @Nullable UUID uuid);
 
-    NBTTagCompound getEntityData();
-
-    default NBTTagCompound getSpongeData() {
-        final NBTTagCompound data = this.getEntityData();
-        if (!data.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-            data.setTag(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
-        }
-        return data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-    }
-
-
-
     void bridge$setImplVelocity(Vector3d velocity);
-
-    boolean isVanished();
-
-    void setVanished(boolean vanished);
-
-    boolean ignoresCollision();
-
-    void setIgnoresCollision(boolean prevents);
-
-    boolean isUntargetable();
-
-    void setUntargetable(boolean untargetable);
 
     @Nullable Text getDisplayNameText();
 
@@ -134,10 +106,6 @@ public interface EntityBridge extends TrackableBridge, IUserOrEntity, TimingHold
 
     void createForgeCapabilities();
 
-    // Timings
-    @Override
-    Timing bridge$getTimingsHandler();
-
     default void onJoinWorld() {
 
     }
@@ -148,9 +116,6 @@ public interface EntityBridge extends TrackableBridge, IUserOrEntity, TimingHold
     void setActiveChunk(@Nullable ChunkBridge chunk);
 
     boolean shouldTick();
-
-    @Override
-    void setInvulnerable(boolean value);
 
     default void clearWrappedCaptureList() {
 

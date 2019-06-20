@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
-import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
@@ -42,7 +41,6 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerChest;
@@ -68,7 +66,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
-import net.minecraft.stats.StatisticsManagerServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -163,31 +160,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Shadow @Final public MinecraftServer server;
     @Shadow @Final public PlayerInteractionManager interactionManager;
-    @Shadow @Final private PlayerAdvancements advancements;
-    @Shadow private String language;
     @Shadow public NetHandlerPlayServer connection;
     @Shadow public int lastExperience;
-    @Shadow private EntityPlayer.EnumChatVisibility chatVisibility = EntityPlayer.EnumChatVisibility.FULL;
-    @Shadow private boolean chatColours;
-    @Shadow public boolean queuedEndExit;
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
     @Shadow public boolean isChangingQuantityOnly;
-    @Shadow private int currentWindowId;
 
-    @Shadow public abstract Entity getSpectatingEntity();
-    @Shadow public abstract void setSpectatingEntity(Entity entity);
-    @Shadow public abstract void sendPlayerAbilities();
     @Shadow @Override public abstract void takeStat(StatBase stat);
-    @Shadow public abstract StatisticsManagerServer getStatFile();
-    @Shadow public abstract void displayGUIChest(IInventory chestInventory);
-    @Shadow public abstract void displayGui(IInteractionObject guiOwner);
-    @Shadow public abstract void openGuiHorseInventory(AbstractHorse horse, IInventory horseInventory);
-    @Shadow public abstract void closeScreen();
-    @Shadow private void getNextWindowId() { }
-    @Shadow public abstract void closeContainer();
     @Shadow public abstract WorldServer getServerWorld();
-    @Shadow protected abstract boolean canPlayersAttack();
 
     // Used to restore original item received in a packet after canceling an event
     private ItemStack impl$packetItem = ItemStack.EMPTY;
@@ -335,10 +315,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         // Copy over sponge data from the old player.
         // Allows plugins to specify data that persists after players respawn.
         final EntityBridge oldEntity = (EntityBridge) oldPlayer;
-        final NBTTagCompound old = oldEntity.getEntityData();
-        if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
-            this.spongeImpl$readFromSpongeCompound(this.getSpongeData());
+        if (oldEntity.data$hasRootCompound()) {
+            final NBTTagCompound old = oldEntity.data$getRootCompound();
+            if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
+                this.data$getRootCompound().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
+                this.spongeImpl$readFromSpongeCompound(this.data$getSpongeCompound());
+            }
         }
     }
 

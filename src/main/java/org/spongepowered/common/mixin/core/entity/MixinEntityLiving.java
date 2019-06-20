@@ -56,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
@@ -205,7 +206,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase {
     private void onSetAttackTarget(@Nullable final EntityLivingBase entitylivingbaseIn, final CallbackInfo ci) {
         if (!this.world.isRemote && ShouldFire.SET_A_I_TARGET_EVENT) {
             if (entitylivingbaseIn != null) {
-                if (((EntityBridge) entitylivingbaseIn).isVanished() && ((EntityBridge) entitylivingbaseIn).isUntargetable()) {
+                if (((VanishingBridge) entitylivingbaseIn).vanish$isVanished() && ((VanishingBridge) entitylivingbaseIn).vanish$isUntargetable()) {
                     this.attackTarget = null;
                     ci.cancel();
                 } else {
@@ -231,7 +232,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase {
     @Overwrite
     public EntityLivingBase getAttackTarget() {
         if (this.attackTarget != null) {
-            if (((EntityBridge) this.attackTarget).isVanished() && ((EntityBridge) this.attackTarget).isUntargetable()) {
+            if (((VanishingBridge) this.attackTarget).vanish$isVanished() && ((VanishingBridge) this.attackTarget).vanish$isUntargetable()) {
                 this.attackTarget = null;
             }
         }

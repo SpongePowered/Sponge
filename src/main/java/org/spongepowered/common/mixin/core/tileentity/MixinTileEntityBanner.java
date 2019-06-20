@@ -51,8 +51,6 @@ import org.spongepowered.common.util.NonNullArrayList;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 @NonnullByDefault
 @Mixin(TileEntityBanner.class)
 public abstract class MixinTileEntityBanner extends MixinTileEntity implements IMixinBanner {
@@ -79,7 +77,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements I
     }
 
     private void impl$markDirtyAndUpdate() {
-        this.markDirty();
+        this.bridge$markDirty();
         if (this.world != null && !this.world.isRemote) {
             ((WorldServer) this.world).getPlayerChunkMap().markBlockForUpdate(this.getPos());
         }

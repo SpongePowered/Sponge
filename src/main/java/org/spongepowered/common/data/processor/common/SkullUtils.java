@@ -143,12 +143,12 @@ public class SkullUtils {
         GameProfile profile = (GameProfile) ((AccessorTileEntitySkull) skull).accessor$getMojangProfile();
         if (profile != null && profile.getName().isPresent() && !profile.getName().get().isEmpty()) {
             if (profile.isFilled() && profile.getPropertyMap().containsKey("textures")) {
-                skull.markDirty();
+                skull.bridge$markDirty();
             } else {
                 Sponge.getServer().getGameProfileManager().get(profile.getName().get()).handle((newProfile, thrown) -> {
                     if (newProfile != null) {
                         skull.bridge$setPlayerProfile((com.mojang.authlib.GameProfile) newProfile, false);
-                        skull.markDirty();
+                        skull.bridge$markDirty();
                     } else {
                         SpongeImpl.getLogger().warn("Could not update player GameProfile for Skull: ",
                                 thrown.getMessage());
@@ -157,7 +157,7 @@ public class SkullUtils {
                 });
             }
         } else {
-            skull.markDirty();
+            skull.bridge$markDirty();
         }
     }
 }

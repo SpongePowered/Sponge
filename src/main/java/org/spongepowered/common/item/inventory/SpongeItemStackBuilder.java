@@ -61,6 +61,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -330,8 +331,8 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (this.keyValues != null) {
             this.keyValues.forEach((key, value) -> stack.offer((Key) key, value));
         }
-        if (this.compound != null && this.compound.hasKey(NbtDataUtil.FORGE_CAPS, NbtDataUtil.TAG_COMPOUND)) {
-            final NBTTagCompound compoundTag = this.compound.getCompoundTag(NbtDataUtil.FORGE_CAPS);
+        if (this.compound != null && this.compound.hasKey(Constants.Forge.FORGE_CAPS, NbtDataUtil.TAG_COMPOUND)) {
+            final NBTTagCompound compoundTag = this.compound.getCompoundTag(Constants.Forge.FORGE_CAPS);
             if (compoundTag != null) {
                 SpongeImplHooks.setCapabilitiesFromSpongeBuilder(stack, compoundTag);
             }

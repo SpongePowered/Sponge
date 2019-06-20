@@ -65,6 +65,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.mixin.core.network.play.server.AccessorSPacketPlayerListItem;
@@ -173,7 +174,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Override
     public void readEntityFromNBT(NBTTagCompound tagCompund) {
         super.readEntityFromNBT(tagCompund);
-        String skinUuidString = ((EntityBridge) this).getSpongeData().getString("skinUuid");
+        String skinUuidString = ((DataCompoundHolder) this).data$getSpongeCompound().getString("skinUuid");
         if (!skinUuidString.isEmpty()) {
             this.updateFakeProfileWithSkin(UUID.fromString(skinUuidString));
         }
@@ -182,7 +183,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Override
     public void writeEntityToNBT(NBTTagCompound tagCompound) {
         super.writeEntityToNBT(tagCompound);
-        NBTTagCompound spongeData = ((EntityBridge) this).getSpongeData();
+        NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
         if (this.skinUuid != null) {
             spongeData.setString("skinUuid", this.skinUuid.toString());
         } else {

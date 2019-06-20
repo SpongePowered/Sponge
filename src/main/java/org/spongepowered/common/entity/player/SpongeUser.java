@@ -56,6 +56,7 @@ import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
@@ -100,6 +101,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     private float rotationPitch;
     private boolean invulnerable;
     private boolean isVanished;
+    private boolean isInvisible;
+    private boolean isVanishCollide;
+    private boolean isVanishTarget;
 
     private SpongeUserInventory inventory; // lazy load when accessing inventory
     private InventoryEnderChest enderChest; // lazy load when accessing inventory
@@ -285,7 +289,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         // org.spongepowered.common.mixin.core.entity.MixinEntity#readSpongeNBT
 
 
-        final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA).getCompoundTag(NbtDataUtil.SPONGE_DATA);
+        final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Forge.FORGE_DATA).getCompoundTag(NbtDataUtil.SPONGE_DATA);
         CustomDataNbtUtil.readCustomData(spongeCompound, ((DataHolder) this));
         //if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
         //    ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
@@ -311,9 +315,14 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         // extra data
 
         if (!spongeCompound.isEmpty()) {
-            this.isVanished = spongeCompound.getBoolean(NbtDataUtil.IS_VANISHED);
+            this.isVanished = spongeCompound.getBoolean(Constants.Sponge.Entity.IS_VANISHED);
+            this.isInvisible = spongeCompound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE);
+            if (this.isVanished) {
+                this.isVanishTarget = spongeCompound.getBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
+                this.isVanishCollide = spongeCompound.getBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
+            }
 
-            final NBTTagList spawnList = spongeCompound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
+            final NBTTagList spawnList = spongeCompound.getTagList(Constants.Sponge.User.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
 
             for (int i = 0; i < spawnList.tagCount(); i++) {
                 final NBTTagCompound spawnCompound = spawnList.getCompoundTagAt(i);
@@ -321,10 +330,10 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
                 final UUID uuid = spawnCompound.getUniqueId(NbtDataUtil.UUID);
 
                 if (uuid.getLeastSignificantBits() != 0 && uuid.getMostSignificantBits() != 0) {
-                    final double xPos = spawnCompound.getDouble(NbtDataUtil.USER_SPAWN_X);
-                    final double yPos = spawnCompound.getDouble(NbtDataUtil.USER_SPAWN_Y);
-                    final double zPos = spawnCompound.getDouble(NbtDataUtil.USER_SPAWN_Z);
-                    final boolean forced = spawnCompound.getBoolean(NbtDataUtil.USER_SPAWN_FORCED);
+                    final double xPos = spawnCompound.getDouble(Constants.Sponge.User.USER_SPAWN_X);
+                    final double yPos = spawnCompound.getDouble(Constants.Sponge.User.USER_SPAWN_Y);
+                    final double zPos = spawnCompound.getDouble(Constants.Sponge.User.USER_SPAWN_Z);
+                    final boolean forced = spawnCompound.getBoolean(Constants.Sponge.User.USER_SPAWN_FORCED);
                     this.spawnLocations.put(uuid, new RespawnLocation.Builder()
                             .forceSpawn(forced)
                             .position(new Vector3d(xPos, yPos, zPos))
@@ -371,10 +380,13 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
         compound.setBoolean(NbtDataUtil.Minecraft.INVULNERABLE, this.invulnerable);
 
-        final NBTTagCompound forgeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA);
+        final NBTTagCompound forgeCompound = compound.getCompoundTag(Constants.Forge.FORGE_DATA);
         final NBTTagCompound spongeCompound = forgeCompound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-        spongeCompound.removeTag(NbtDataUtil.USER_SPAWN_LIST);
-        spongeCompound.removeTag(NbtDataUtil.IS_VANISHED);
+        spongeCompound.removeTag(Constants.Sponge.User.USER_SPAWN_LIST);
+        spongeCompound.removeTag(Constants.Sponge.Entity.IS_VANISHED);
+        spongeCompound.removeTag(Constants.Sponge.Entity.IS_INVISIBLE);
+        spongeCompound.removeTag(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
+        spongeCompound.removeTag(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
 
         final NBTTagList spawnList = new NBTTagList();
         for (Entry<UUID, RespawnLocation> entry : this.spawnLocations.entrySet()) {
@@ -382,22 +394,27 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
             final NBTTagCompound spawnCompound = new NBTTagCompound();
             spawnCompound.setUniqueId(NbtDataUtil.UUID, entry.getKey());
-            spawnCompound.setDouble(NbtDataUtil.USER_SPAWN_X, respawn.getPosition().getX());
-            spawnCompound.setDouble(NbtDataUtil.USER_SPAWN_Y, respawn.getPosition().getY());
-            spawnCompound.setDouble(NbtDataUtil.USER_SPAWN_Z, respawn.getPosition().getZ());
-            spawnCompound.setBoolean(NbtDataUtil.USER_SPAWN_FORCED, false); // No way to know
+            spawnCompound.setDouble(Constants.Sponge.User.USER_SPAWN_X, respawn.getPosition().getX());
+            spawnCompound.setDouble(Constants.Sponge.User.USER_SPAWN_Y, respawn.getPosition().getY());
+            spawnCompound.setDouble(Constants.Sponge.User.USER_SPAWN_Z, respawn.getPosition().getZ());
+            spawnCompound.setBoolean(Constants.Sponge.User.USER_SPAWN_FORCED, false); // No way to know
             spawnList.appendTag(spawnCompound);
         }
 
         if (!spawnList.isEmpty()) {
-            spongeCompound.setTag(NbtDataUtil.USER_SPAWN_LIST, spawnList);
+            spongeCompound.setTag(Constants.Sponge.User.USER_SPAWN_LIST, spawnList);
         }
         if (this.isVanished) {
-            spongeCompound.setBoolean(NbtDataUtil.IS_VANISHED, true);
+            spongeCompound.setBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
+            spongeCompound.setBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, this.isVanishCollide);
+            spongeCompound.setBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, this.isVanishTarget);
+        }
+        if (this.isInvisible) {
+            spongeCompound.setBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
         }
         if (!spongeCompound.isEmpty()) {
             forgeCompound.setTag(NbtDataUtil.SPONGE_DATA, spongeCompound);
-            compound.setTag(NbtDataUtil.FORGE_DATA, forgeCompound);
+            compound.setTag(Constants.Forge.FORGE_DATA, forgeCompound);
         }
 
         CustomDataNbtUtil.writeCustomData(spongeCompound, ((DataHolder) this));

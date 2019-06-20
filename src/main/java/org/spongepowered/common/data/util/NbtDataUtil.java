@@ -40,6 +40,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.ColorUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -130,11 +131,6 @@ public final class NbtDataUtil {
 
     public static final String CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
 
-    public static final String USER_SPAWN_X = "SpawnX";
-    public static final String USER_SPAWN_Y = "SpawnY";
-    public static final String USER_SPAWN_Z = "SpawnZ";
-    public static final String USER_SPAWN_FORCED = "SpawnForced";
-    public static final String USER_SPAWN_LIST = "Spawns";
     public static final String UUID = "UUID";
 
     public static final String CHUNK_DATA_LEVEL = "Level";
@@ -175,10 +171,7 @@ public final class NbtDataUtil {
     public static final String PORTAL_AGENT_TYPE = "portalAgentType";
     public static final String WORLD_SERIALIZATION_BEHAVIOR = "serializationBehavior";
     public static final String HEALTH_SCALE = "HealthScale";
-    public static final String IS_VANISHED = "IsVanished";
 
-    // Compatibility tags for Forge
-    public static final String FORGE_DATA = "ForgeData";
     public static final String DIMENSION_TYPE = "dimensionType";
     public static final String DIMENSION_ID = "dimensionId";
     public static final String UUID_MOST = "UUIDMost";
@@ -188,7 +181,6 @@ public final class NbtDataUtil {
     public static final String FORGE_ENTITY_TYPE = "entity_name";
     public static final String LEGACY_DIMENSION_ARRAY = "DimensionArray";
     public static final String USED_DIMENSION_IDS = "UsedIDs";
-    public static final String FORGE_CAPS = "ForgeCaps";
 
     // Legacy migration tags from Bukkit
     public static final String BUKKIT = "bukkit";
@@ -287,8 +279,8 @@ public final class NbtDataUtil {
     }
 
     public static NBTTagCompound filterSpongeCustomData(NBTTagCompound rootCompound) {
-        if (rootCompound.hasKey(FORGE_DATA, TAG_COMPOUND)) {
-            final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(FORGE_DATA);
+        if (rootCompound.hasKey(Constants.Forge.FORGE_DATA, TAG_COMPOUND)) {
+            final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(Constants.Forge.FORGE_DATA);
             if (forgeCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
                 cleanseInnerCompound(forgeCompound, SPONGE_DATA);
             }

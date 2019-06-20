@@ -22,51 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.tileentity;
+package org.spongepowered.common.bridge.data;
 
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.common.bridge.TimingHolder;
-import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.common.data.util.NbtDataUtil;
 
-import javax.annotation.Nullable;
+public interface DataCompoundHolder {
 
-public interface TileEntityBridge extends TrackableBridge, TimingHolder {
+    boolean data$hasRootCompound();
 
-    void bridge$markDirty();
+    NBTTagCompound data$getRootCompound();
 
-    boolean isVanilla();
-
-    // Tracking
-    default SpawnType getTickedSpawnType() {
-        return SpawnTypes.BLOCK_SPAWNING;
+    default NBTTagCompound data$getSpongeCompound() {
+        final NBTTagCompound data = this.data$getRootCompound();
+        if (!data.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            data.setTag(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
+        }
+        return data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
     }
 
-    void setSpongeOwner(@Nullable User owner);
-
-    void setSpongeNotifier(@Nullable User notifier);
-
-    @Nullable User getSpongeOwner();
-
-    @Nullable User getSpongeNotifier();
-
-    @Nullable
-    ChunkBridge getActiveChunk();
-
-    void setActiveChunk(@Nullable ChunkBridge chunk);
-
-    boolean shouldTick();
-
-    boolean isTicking();
-
-    void setIsTicking(boolean ticking);
-
-    boolean isCaptured();
-
-    void setCaptured(boolean captured);
-    default String getPrettyPrinterString() {
-        return  this.toString();
-    }
 }

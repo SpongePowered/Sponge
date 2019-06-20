@@ -67,9 +67,24 @@ public final class Constants {
         public static final GameRules DEFAULT_GAME_RULES = new GameRules();
 
         public static final class EntityArchetype {
-
             public static final String REQUIRES_EXTRA_INITIAL_SPAWN = "RequireInitialSpawn";
+        }
 
+        public static final class Entity {
+
+            public static final String IS_VANISHED = "IsVanished";
+            public static final String IS_INVISIBLE = "IsInvisible";
+            public static final String VANISH_UNCOLLIDEABLE = "VanishUnCollideable";
+            public static final String VANISH_UNTARGETABLE = "VanishUnTargetable";
+        }
+
+        public static final class User {
+
+            public static final String USER_SPAWN_X = "SpawnX";
+            public static final String USER_SPAWN_Y = "SpawnY";
+            public static final String USER_SPAWN_Z = "SpawnZ";
+            public static final String USER_SPAWN_FORCED = "SpawnForced";
+            public static final String USER_SPAWN_LIST = "Spawns";
         }
     }
 
@@ -396,4 +411,15 @@ public final class Constants {
 
     private Constants() {}
 
+    /**
+     * Compatibility constants used by Forge that may
+     * or may not be used in Common, but are needed in
+     * SpongeVanilla.
+     */
+    public static class Forge {
+
+        public static final String PERSISTED_NBT_TAG = "PlayerPersisted";
+        public static final String FORGE_DATA = "ForgeData";
+        public static final String FORGE_CAPS = "ForgeCaps";
+    }
 }

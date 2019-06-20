@@ -22,15 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.player;
+package org.spongepowered.common.bridge.data;
 
-public interface IUserOrEntity {
+public interface VanishingBridge {
 
-    void setInvulnerable(boolean value);
+    boolean vanish$isInvisible();
 
-    boolean getIsInvulnerable();
+    void vanish$setInvisible(boolean invisible);
 
-    boolean isVanished();
+    boolean vanish$isVanished();
 
-    void setVanished(boolean vanished);
+    void vanish$setVanished(boolean vanished);
+
+    boolean vanish$isUncollideable();
+
+    void vanish$setUncollideable(boolean uncollideable);
+
+    boolean vanish$isUntargetable();
+
+    void vanish$setUntargetable(boolean untargetable);
 }

@@ -33,7 +33,6 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
@@ -63,8 +62,8 @@ public interface CustomDataHolderBridge {
     DataTransactionResult removeCustom(Key<?> key);
 
     default void removeCustomFromNbt(DataManipulator<?, ?> manipulator) {
-        if (this instanceof EntityBridge) {
-            final NBTTagCompound spongeData = ((EntityBridge) this).getSpongeData();
+        if (this instanceof DataCompoundHolder) {
+            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
             if (spongeData.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
                 final NBTTagList tagList = spongeData.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
                 if (!tagList.isEmpty()) {

@@ -30,7 +30,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -39,7 +38,6 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.WorldServer;
@@ -68,7 +66,6 @@ import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -76,8 +73,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
@@ -90,8 +89,6 @@ import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.bridge.world.TeleporterBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
@@ -113,8 +110,6 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     // @formatter:off
     protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((net.minecraft.entity.Entity) (Object) this).getClass());
 
-    @Shadow @Nullable public net.minecraft.entity.Entity ridingEntity;
-    @Shadow @Final private List<net.minecraft.entity.Entity> riddenByEntities;
     @Shadow public net.minecraft.world.World world;
     @Shadow public double posX;
     @Shadow public double posY;
@@ -124,21 +119,15 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     @Shadow public double motionZ;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
-    @Shadow public boolean velocityChanged;
     @Shadow public boolean onGround;
     @Shadow public boolean isDead;
     @Shadow public float width;
     @Shadow public float height;
-    @Shadow public float prevDistanceWalkedModified;
-    @Shadow public float distanceWalkedModified;
-    @Shadow public float fallDistance;
     @Shadow protected Random rand;
     @Shadow public int ticksExisted;
     @Shadow public int fire;
-    @Shadow public int hurtResistantTime;
     @Shadow protected EntityDataManager dataManager;
     @Shadow public int dimension;
-    @Shadow private boolean invulnerable;
     @Shadow protected UUID entityUniqueID;
 
     @Shadow public abstract void setPosition(double x, double y, double z);
@@ -146,36 +135,20 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     @Shadow public abstract int getAir();
     @Shadow public abstract void setAir(int air);
     @Shadow public abstract float getEyeHeight();
-    @Shadow public abstract void setCustomNameTag(String name);
     @Shadow public abstract UUID getUniqueID();
     @Shadow public abstract AxisAlignedBB getEntityBoundingBox();
     @Shadow public abstract void setFire(int seconds);
     @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract int getEntityId();
-    @Shadow public abstract boolean isBeingRidden();
-    @Shadow public abstract SoundCategory getSoundCategory();
     @Shadow public abstract List<net.minecraft.entity.Entity> shadow$getPassengers();
     @Shadow public abstract net.minecraft.entity.Entity getLowestRidingEntity();
     @Shadow public abstract net.minecraft.entity.Entity getRidingEntity();
     @Shadow public abstract void removePassengers();
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
     @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
-    @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
-    @Shadow public abstract boolean isSprinting();
-    @Shadow public abstract boolean isInWater();
-    @Shadow public abstract boolean isRiding();
-    @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract double getDistanceSq(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
     @Shadow public abstract boolean hasNoGravity();
-    @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
-    @Shadow protected abstract void removePassenger(net.minecraft.entity.Entity passenger);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
-    @Shadow protected abstract void setSize(float width, float height);
-    @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract void extinguish();
-    @Shadow protected abstract void setFlag(int flag, boolean set);
 
     // @formatter:on
 
@@ -661,7 +634,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     public boolean canSee(final org.spongepowered.api.entity.Entity entity) {
         // note: this implementation will be changing with contextual data
         final Optional<Boolean> optional = entity.get(Keys.VANISH);
-        return (!optional.isPresent() || !optional.get()) && !((EntityBridge) entity).isVanished();
+        return (!optional.isPresent() || !optional.get()) && !((VanishingBridge) entity).vanish$isVanished();
     }
 
     @Override

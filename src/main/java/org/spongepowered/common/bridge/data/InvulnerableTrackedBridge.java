@@ -22,51 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.tileentity;
+package org.spongepowered.common.bridge.data;
 
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.common.bridge.TimingHolder;
-import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.world.ChunkBridge;
+public interface InvulnerableTrackedBridge {
 
-import javax.annotation.Nullable;
+    void bridge$setInvulnerable(boolean value);
 
-public interface TileEntityBridge extends TrackableBridge, TimingHolder {
+    boolean bridge$getIsInvulnerable();
 
-    void bridge$markDirty();
-
-    boolean isVanilla();
-
-    // Tracking
-    default SpawnType getTickedSpawnType() {
-        return SpawnTypes.BLOCK_SPAWNING;
-    }
-
-    void setSpongeOwner(@Nullable User owner);
-
-    void setSpongeNotifier(@Nullable User notifier);
-
-    @Nullable User getSpongeOwner();
-
-    @Nullable User getSpongeNotifier();
-
-    @Nullable
-    ChunkBridge getActiveChunk();
-
-    void setActiveChunk(@Nullable ChunkBridge chunk);
-
-    boolean shouldTick();
-
-    boolean isTicking();
-
-    void setIsTicking(boolean ticking);
-
-    boolean isCaptured();
-
-    void setCaptured(boolean captured);
-    default String getPrettyPrinterString() {
-        return  this.toString();
-    }
 }

@@ -45,9 +45,7 @@ public class InventoryOpenCloseTest implements LoadableModule {
     @Inject private PluginContainer container;
     public static final String ID = "inventoryopenclosetest";
     public static final String DESCRIPTION = "A plugin to test open and close during inventory events.";
-    private final InventoryOpenCloseListener listener = new InventoryOpenCloseListener();
-
-
+    private final InventoryOpenCloseListener listener = new InventoryOpenCloseListener(this);
 
     @Override
     public void enable(CommandSource src) {
@@ -56,11 +54,15 @@ public class InventoryOpenCloseTest implements LoadableModule {
 
     public static class InventoryOpenCloseListener {
 
-        private final PluginContainer container = Sponge.getPluginManager().getPlugin(ID).get();
+        private final InventoryOpenCloseTest container;
+
+        InventoryOpenCloseListener(InventoryOpenCloseTest container) {
+            this.container = container;
+        }
 
         @Listener
         public void onInventoryPrimary(ClickInventoryEvent.Primary event, @First Player player) {
-            Inventory inv = Inventory.builder().build(this.container);
+            Inventory inv = Inventory.builder().build(this.container.container);
             // This will open the inventory the next tick
             player.openInventory(inv);
         }

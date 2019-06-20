@@ -29,6 +29,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.datafix.IFixableData;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.UUID;
 
@@ -41,7 +42,7 @@ public class EntityTrackedUser implements IFixableData {
 
     @Override
     public NBTTagCompound fixTagCompound(NBTTagCompound compound) {
-        final NBTBase forgeCompound = compound.getTag(NbtDataUtil.FORGE_DATA);
+        final NBTBase forgeCompound = compound.getTag(Constants.Forge.FORGE_DATA);
         if (forgeCompound != null) {
             final NBTTagCompound forgeData = (NBTTagCompound) forgeCompound;
             final NBTBase spongeCompound = forgeData.getTag(NbtDataUtil.SPONGE_DATA);

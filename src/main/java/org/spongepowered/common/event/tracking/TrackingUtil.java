@@ -199,7 +199,7 @@ public final class TrackingUtil {
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
         try (
              final EntityTickContext context = tickContext;
-             final Timing entityTiming = mixinEntity.bridge$getTimingsHandler()
+             final Timing entityTiming = ((TimingHolder) entity).bridge$getTimingsHandler()
              ) {
             entityTiming.startTiming();
             mixinEntity.getNotifierUser()
@@ -252,7 +252,7 @@ public final class TrackingUtil {
             phaseContext.buildAndSwitch();
 
             mixinTileEntity.setIsTicking(true);
-            try (Timing timing = mixinTileEntity.bridge$getTimingsHandler().startTiming()) {
+            try (Timing timing = ((TimingHolder) tileEntity).bridge$getTimingsHandler().startTiming()) {
                 tile.update();
             }
         } catch (Exception e) {

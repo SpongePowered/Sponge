@@ -70,18 +70,19 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldProviderBridge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.bridge.world.WorldProviderBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeDimension;
@@ -374,7 +375,7 @@ public abstract class MixinWorld implements WorldBridge {
         Iterator<net.minecraft.entity.Entity> iterator = entities.iterator();
         while (iterator.hasNext()) {
             net.minecraft.entity.Entity entity = iterator.next();
-            if (((EntityBridge) entity).isVanished() && ((EntityBridge) entity).ignoresCollision()) {
+            if (((VanishingBridge) entity).vanish$isVanished() && ((VanishingBridge) entity).vanish$isUncollideable()) {
                 iterator.remove();
             }
         }
@@ -383,15 +384,13 @@ public abstract class MixinWorld implements WorldBridge {
 
     @Redirect(method = "getClosestPlayer(DDDDLcom/google/common/base/Predicate;)Lnet/minecraft/entity/player/EntityPlayer;", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     private boolean onGetClosestPlayerCheck(com.google.common.base.Predicate<net.minecraft.entity.Entity> predicate, Object entityPlayer) {
-        EntityPlayer player = (EntityPlayer) entityPlayer;
-        EntityBridge mixinEntity = (EntityBridge) player;
-        return predicate.apply(player) && !mixinEntity.isVanished();
+        return predicate.apply((EntityPlayer) entityPlayer) && !((VanishingBridge) entityPlayer).vanish$isVanished();
     }
 
     @Inject(method = "playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", at = @At("HEAD"), cancellable = true)
     private void spongePlaySoundAtEntity(EntityPlayer entity, double x, double y, double z, SoundEvent name, net.minecraft.util.SoundCategory category, float volume, float pitch, CallbackInfo callbackInfo) {
         if (entity instanceof EntityBridge) {
-            if (((EntityBridge) entity).isVanished()) {
+            if (((VanishingBridge) entity).vanish$isVanished()) {
                 callbackInfo.cancel();
             }
         }

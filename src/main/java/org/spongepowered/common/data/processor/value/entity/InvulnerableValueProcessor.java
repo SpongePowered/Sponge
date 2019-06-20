@@ -31,14 +31,14 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.player.IUserOrEntity;
+import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 
 import java.util.Optional;
 
-public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<IUserOrEntity, Boolean, Value<Boolean>> {
+public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<InvulnerableTrackedBridge, Boolean, Value<Boolean>> {
 
     public InvulnerableValueProcessor() {
-        super(IUserOrEntity.class, Keys.INVULNERABLE);
+        super(InvulnerableTrackedBridge.class, Keys.INVULNERABLE);
     }
 
     @Override
@@ -47,14 +47,14 @@ public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<IUs
     }
 
     @Override
-    protected boolean set(IUserOrEntity container, Boolean value) {
-        container.setInvulnerable(value);
+    protected boolean set(InvulnerableTrackedBridge container, Boolean value) {
+        container.bridge$setInvulnerable(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(IUserOrEntity container) {
-        return Optional.of(container.getIsInvulnerable());
+    protected Optional<Boolean> getVal(InvulnerableTrackedBridge container) {
+        return Optional.of(container.bridge$getIsInvulnerable());
     }
 
     @Override

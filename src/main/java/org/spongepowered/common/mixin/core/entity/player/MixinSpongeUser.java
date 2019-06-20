@@ -43,18 +43,20 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.player.IUserOrEntity;
+import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
+import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.mixin.api.minecraft.entity.player.MixinEntityPlayerMP_API;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(value = SpongeUser.class, remap = false)
-public abstract class MixinSpongeUser implements User, IMixinSubject, IUserOrEntity {
+public abstract class MixinSpongeUser implements User, IMixinSubject, InvulnerableTrackedBridge, VanishingBridge {
 
     @Shadow @Final private com.mojang.authlib.GameProfile profile;
 
@@ -65,14 +67,14 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserOrEnt
     @Shadow private float rotationPitch;
     @Shadow private float rotationYaw;
     @Shadow private boolean invulnerable;
+    @Shadow private boolean isInvisible;
     @Shadow private boolean isVanished;
-
-    @Shadow
-    public abstract void markDirty();
-
-    @Shadow protected abstract SpongeUser loadEnderInventory();
-
+    @Shadow private boolean isVanishCollide;
+    @Shadow private boolean isVanishTarget;
     @Shadow private InventoryEnderChest enderChest;
+
+    @Shadow public abstract void markDirty();
+    @Shadow protected abstract SpongeUser loadEnderInventory();
 
     @Override
     public GameProfile getProfile() {
@@ -176,10 +178,10 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserOrEnt
     }
 
     @Override
-    public void setInvulnerable(boolean value) {
+    public void bridge$setInvulnerable(boolean value) {
         Optional<Player> playerOpt = getPlayer();
         if (playerOpt.isPresent()) {
-            ((EntityBridge) playerOpt.get()).setInvulnerable(value);
+            ((InvulnerableTrackedBridge) playerOpt.get()).bridge$setInvulnerable(value);
             return;
         }
         this.invulnerable = value;
@@ -187,15 +189,15 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserOrEnt
     }
 
     @Override
-    public boolean getIsInvulnerable() {
+    public boolean bridge$getIsInvulnerable() {
         return this.invulnerable;
     }
 
     @Override
-    public void setVanished(boolean vanished) {
+    public void vanish$setVanished(boolean vanished) {
         Optional<Player> playerOpt = getPlayer();
         if (playerOpt.isPresent()) {
-            ((EntityBridge) playerOpt.get()).setVanished(vanished);
+            ((VanishingBridge) playerOpt.get()).vanish$setVanished(vanished);
             return;
         }
         this.isVanished = vanished;
@@ -203,12 +205,53 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserOrEnt
     }
 
     @Override
-    public boolean isVanished() {
-        Optional<Player> playerOpt = getPlayer();
-        if (playerOpt.isPresent()) {
-            return ((EntityBridge) playerOpt.get()).isVanished();
+    public boolean vanish$isVanished() {
+        return getPlayer().map(player -> ((VanishingBridge) player).vanish$isVanished()).orElseGet(() -> this.isVanished);
+    }
+
+    @Override
+    public boolean vanish$isInvisible() {
+        return getPlayer().map(player -> ((VanishingBridge) player).vanish$isInvisible()).orElseGet(() -> this.isInvisible);
+    }
+
+    @Override
+    public void vanish$setInvisible(boolean invisible) {
+        final Optional<Player> player = getPlayer();
+        if (player.isPresent()) {
+            ((VanishingBridge) player.get()).vanish$setInvisible(invisible);
+            return;
         }
-        return this.isVanished;
+        this.isInvisible = invisible;
+    }
+
+    @Override
+    public boolean vanish$isUncollideable() {
+        return getPlayer().map(player -> ((VanishingBridge) player).vanish$isUncollideable()).orElseGet(() -> this.isVanishCollide);
+    }
+
+    @Override
+    public void vanish$setUncollideable(boolean uncollideable) {
+        final Optional<Player> player = getPlayer();
+        if (player.isPresent()) {
+            ((VanishingBridge) player.get()).vanish$setUncollideable(uncollideable);
+            return;
+        }
+        this.isVanishCollide = uncollideable;
+    }
+
+    @Override
+    public boolean vanish$isUntargetable() {
+        return getPlayer().map(player -> ((VanishingBridge) player).vanish$isUntargetable()).orElseGet(() -> this.isVanishTarget);
+    }
+
+    @Override
+    public void vanish$setUntargetable(boolean untargetable) {
+        final Optional<Player> player = getPlayer();
+        if (player.isPresent()) {
+            ((VanishingBridge) player.get()).vanish$setUntargetable(untargetable);
+            return;
+        }
+        this.isVanishTarget = untargetable;
     }
 
     @Override

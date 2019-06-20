@@ -28,6 +28,9 @@ import net.minecraft.entity.item.EntityBoat;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.entity.vehicle.Boat;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
@@ -37,6 +40,7 @@ import java.util.List;
 
 // TODO 1.9: Refactor this for boat overhaul
 @Mixin(EntityBoat.class)
+@Implements(@Interface(iface = Boat.class, prefix = "apiBoat$"))
 public abstract class MixinEntityBoat_API extends MixinEntity_API implements Boat {
 
     @Shadow public abstract EntityBoat.Type getBoatType();
@@ -65,8 +69,8 @@ public abstract class MixinEntityBoat_API extends MixinEntity_API implements Boa
         }
     }
 
-    @Override
-    public boolean isInWater() {
+    @Intrinsic
+    public boolean apiBoat$isInWater() {
         return !this.onGround;
     }
 

@@ -591,7 +591,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
     private void spawnItemParticle(final World world, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord, final double zCoord, final double xOffset,
             final double yOffset, final double zOffset, final int ... p_175688_14_) {
-        if (!this.isVanished()) {
+        if (!this.vanish$isVanished()) {
             this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }
@@ -846,7 +846,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
      */
     @Overwrite
     public boolean canBeCollidedWith() {
-        return !(this.isVanished() && this.ignoresCollision()) && !this.isDead;
+        return !(this.vanish$isVanished() && this.vanish$isUncollideable()) && !this.isDead;
     }
 
     @Override
@@ -858,7 +858,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     private void spongeSpawnParticleForFallState(
         final WorldServer worldServer, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord,
             final double zCoord, final int numberOfParticles, final double xOffset, final double yOffset, final double zOffset, final double particleSpeed, final int... extraArgs) {
-        if (!this.isVanished()) {
+        if (!this.vanish$isVanished()) {
             worldServer.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, extraArgs);
         }
 

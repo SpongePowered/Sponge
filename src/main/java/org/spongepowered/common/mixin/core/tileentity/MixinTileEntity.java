@@ -31,17 +31,15 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.TimingHolder;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
@@ -53,10 +51,8 @@ import java.lang.ref.WeakReference;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntity.class)
-@Implements(@Interface(iface = TileEntityBridge.class, prefix = "tile$"))
-abstract class MixinTileEntity implements TileEntityBridge {
+abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, TimingHolder {
 
     // uses different name to not clash with SpongeForge
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
@@ -81,16 +77,16 @@ abstract class MixinTileEntity implements TileEntityBridge {
     @Shadow public abstract BlockPos getPos();
     @Shadow public abstract Block getBlockType();
     @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
-    @Override @Shadow public abstract void markDirty();
+    @Shadow public abstract void shadow$markDirty();
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     private void impl$RefreshTrackerStates(final CallbackInfo ci) {
         this.refreshTrackerStates();
     }
 
-    @Intrinsic
-    public void tile$markDirty() {
-        this.markDirty();
+    @Override
+    public void bridge$markDirty() {
+        this.shadow$markDirty();
     }
 
 
@@ -118,7 +114,7 @@ abstract class MixinTileEntity implements TileEntityBridge {
     @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
     private void impl$WriteSpongeDataToCompound(final NBTTagCompound compound, final CallbackInfoReturnable<NBTTagCompound> ci) {
         if (!((CustomDataHolderBridge) this).getCustomManipulators().isEmpty()) {
-            this.bridge$writeToSpongeCompound(this.getSpongeData());
+            this.bridge$writeToSpongeCompound(this.data$getSpongeCompound());
         }
     }
 
@@ -132,8 +128,8 @@ abstract class MixinTileEntity implements TileEntityBridge {
      */
     @Inject(method = "Lnet/minecraft/tileentity/TileEntity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     private void impl$ReadSpongeDataFromCompound(final NBTTagCompound compound, final CallbackInfo ci) {
-        if (this.hasTileDataCompound()) {
-            this.bridge$readFromSpongeCompound(this.getSpongeData());
+        if (this.data$hasRootCompound()) {
+            this.bridge$readFromSpongeCompound(this.data$getSpongeCompound());
         }
     }
 

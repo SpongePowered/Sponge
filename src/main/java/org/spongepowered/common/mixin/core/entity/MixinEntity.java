@@ -87,6 +87,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.TimingHolder;
+import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
+import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -105,6 +107,7 @@ import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.lang.ref.WeakReference;
@@ -120,7 +123,7 @@ import javax.annotation.Nullable;
     {@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entityApi$"),
      @Interface(iface = TimingHolder.class, prefix = "timing$")}
 )
-public abstract class MixinEntity implements EntityBridge, TrackableBridge {
+public abstract class MixinEntity implements EntityBridge, TrackableBridge, VanishingBridge, InvulnerableTrackedBridge, TimingHolder {
 
     // @formatter:off
     protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((Entity) (Object) this).getClass());
@@ -200,10 +203,11 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
     @Shadow public abstract void extinguish();
     @Shadow protected abstract void setFlag(int flag, boolean set);
     @Shadow @Nullable public Entity changeDimension(int dimension) { return null; } // Shadow
+    @Shadow public abstract boolean isInvisible();
+    @Shadow public abstract void setInvisible(boolean invisible);
+    @Shadow public abstract Entity getLowestRidingEntity();
 
     // @formatter:on
-
-    @Shadow public abstract Entity getLowestRidingEntity();
 
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void impl$UpdateDimension(final Entity self, final int dimensionId, final net.minecraft.world.World worldIn) {
@@ -493,7 +497,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
     }
 
     @Override
-    public boolean getIsInvulnerable() {
+    public boolean bridge$getIsInvulnerable() {
         return this.invulnerable;
     }
 
@@ -509,7 +513,9 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
      */
     @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
     private void onSpongeWriteToNBT(final NBTTagCompound compound, final CallbackInfoReturnable<NBTTagCompound> ci) {
-        this.spongeImpl$writeToSpongeCompound(this.getSpongeData());
+        if (this.data$hasRootCompound()) {
+            this.spongeImpl$writeToSpongeCompound(this.data$getSpongeCompound());
+        }
     }
 
     /**
@@ -527,7 +533,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
         if (this.isConstructing) {
             firePostConstructEvents(); // Do this early as possible
         }
-        this.spongeImpl$readFromSpongeCompound(this.getSpongeData());
+        this.spongeImpl$readFromSpongeCompound(this.data$getSpongeCompound());
     }
 
     /**
@@ -544,8 +550,13 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
             ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
         }
-        if (compound.hasKey(NbtDataUtil.IS_VANISHED, NbtDataUtil.TAG_BYTE)) {
-            this.setVanished(compound.getBoolean(NbtDataUtil.IS_VANISHED));
+        if (compound.hasKey(Constants.Sponge.Entity.IS_VANISHED, NbtDataUtil.TAG_BYTE)) {
+            this.vanish$setVanished(compound.getBoolean(Constants.Sponge.Entity.IS_VANISHED));
+            this.vanish$setUncollideable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE));
+            this.vanish$setUntargetable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE));
+        }
+        if (compound.hasKey(Constants.Sponge.Entity.IS_INVISIBLE, NbtDataUtil.TAG_BYTE)) {
+            this.vanish$setInvisible(compound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE));
         }
     }
 
@@ -564,7 +575,16 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
             compound.setBoolean(NbtDataUtil.CAN_GRIEF, ((GrieferBridge) this).bridge$CanGrief());
         }
         if (this.isVanished) {
-            compound.setBoolean(NbtDataUtil.IS_VANISHED, true);
+            compound.setBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
+            if (this.vanish$isUncollideable()) {
+                compound.setBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, true);
+            }
+            if (this.vanish$isUntargetable()) {
+                compound.setBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, true);
+            }
+        }
+        if (this.isInvisible()) {
+            compound.setBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
         }
     }
 
@@ -659,36 +679,45 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
     }
 
 
+    @Override
+    public boolean vanish$isInvisible() {
+        return this.isInvisible();
+    }
 
     @Override
-    public boolean isVanished() {
+    public void vanish$setInvisible(boolean invisible) {
+        this.setInvisible(invisible);
+    }
+
+    @Override
+    public boolean vanish$isVanished() {
         return this.isVanished;
     }
 
     @Override
-    public void setVanished(final boolean vanished) {
+    public void vanish$setVanished(final boolean vanished) {
         this.isVanished = vanished;
         this.pendingVisibilityUpdate = true;
         this.visibilityTicks = 20;
     }
 
     @Override
-    public boolean ignoresCollision() {
+    public boolean vanish$isUncollideable() {
         return this.collision;
     }
 
     @Override
-    public void setIgnoresCollision(final boolean prevents) {
+    public void vanish$setUncollideable(final boolean prevents) {
         this.collision = prevents;
     }
 
     @Override
-    public boolean isUntargetable() {
+    public boolean vanish$isUntargetable() {
         return this.untargetable;
     }
 
     @Override
-    public void setUntargetable(final boolean untargetable) {
+    public void vanish$setUntargetable(final boolean untargetable) {
         this.untargetable = untargetable;
     }
 
@@ -705,7 +734,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
 
     @Redirect(method = "applyEntityCollision", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;noClip:Z", opcode = Opcodes.GETFIELD))
     private boolean spongeApplyEntityCollisionCheckVanish(final Entity entity) {
-        return entity.noClip || ((EntityBridge) entity).isVanished();
+        return entity.noClip || ((VanishingBridge) entity).vanish$isVanished();
     }
 
     @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
@@ -836,7 +865,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
     }
 
     @Override
-    public void setInvulnerable(final boolean value) {
+    public void bridge$setInvulnerable(final boolean value) {
         this.invulnerable = value;
     }
 
