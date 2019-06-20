@@ -739,6 +739,7 @@ public final class WorldManager {
             }
 
             WorldInfo worldInfo = saveHandler.loadWorldInfo();
+
             WorldSettings worldSettings;
 
             // If this is integrated server, we need to use the WorldSettings from the client's Single Player menu to construct the worlds
@@ -769,9 +770,20 @@ public final class WorldManager {
             }
 
             // Safety check to ensure we'll get a unique id no matter what
-            if (((WorldProperties) worldInfo).getUniqueId() == null) {
+            UUID uniqueId = ((WorldProperties) worldInfo).getUniqueId();
+            if (uniqueId == null) {
                 setUuidOnProperties(dimensionId == 0 ? currentSavesDir.getParent() : currentSavesDir, (WorldProperties) worldInfo);
+                uniqueId = ((WorldProperties) worldInfo).getUniqueId();
             }
+
+            // Check if this world's unique id has already been registered
+            final String previousWorldForUUID = worldUuidByFolderName.inverse().get(uniqueId);
+            if (previousWorldForUUID != null) {
+                SpongeImpl.getLogger().error("UUID [{}] has already been registered by world [{}] but is attempting to be registered by world [{}]."
+                    + " This means worlds have been copied outside of Sponge. Skipping world load...", uniqueId, previousWorldForUUID, worldInfo.getWorldName());
+                continue;
+            }
+
 
             // Safety check to ensure the world info has the dimension id set
             if (((IMixinWorldInfo) worldInfo).getDimensionId() == null) {
