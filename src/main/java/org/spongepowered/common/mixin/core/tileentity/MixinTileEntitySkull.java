@@ -26,10 +26,13 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.tileentity.TileEntitySkull;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.bridge.tileentity.SkullBlockEntityBridge;
 
@@ -69,7 +72,25 @@ public abstract class MixinTileEntitySkull extends MixinTileEntity implements Sk
      */
     @Overwrite
     private void updatePlayerProfile() {
-        SkullUtils.updatePlayerProfile(this);
+        org.spongepowered.api.profile.GameProfile profile = (org.spongepowered.api.profile.GameProfile) ((AccessorTileEntitySkull) this).accessor$getMojangProfile();
+        if (profile != null && profile.getName().isPresent() && !profile.getName().get().isEmpty()) {
+            if (profile.isFilled() && profile.getPropertyMap().containsKey("textures")) {
+                ((TileEntityBridge) this).bridge$markDirty();
+            } else {
+                Sponge.getServer().getGameProfileManager().get(profile.getName().get()).handle((newProfile, thrown) -> {
+                    if (newProfile != null) {
+                        ((SkullBlockEntityBridge) this).bridge$setPlayerProfile((GameProfile) newProfile, false);
+                        ((TileEntityBridge) this).bridge$markDirty();
+                    } else {
+                        SpongeImpl.getLogger().warn("Could not update player GameProfile for Skull: ",
+                                thrown.getMessage());
+                    }
+                    return newProfile;
+                });
+            }
+        } else {
+            ((TileEntityBridge) this).bridge$markDirty();
+        }
     }
 
 }

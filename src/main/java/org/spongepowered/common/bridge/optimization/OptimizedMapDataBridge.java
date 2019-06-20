@@ -34,7 +34,7 @@ import org.spongepowered.common.config.category.OptimizationCategory;
  * Only used for the {@link OptimizationCategory#useMapOptimization()}
  * mixins targeting {@link MapData}.
  */
-public interface OptimizedMapData {
+public interface OptimizedMapDataBridge {
 
     void bridge$tickMap();
 

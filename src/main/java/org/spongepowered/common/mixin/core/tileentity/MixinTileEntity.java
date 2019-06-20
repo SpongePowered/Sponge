@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.TimingHolder;
+import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
@@ -52,7 +52,7 @@ import java.lang.ref.WeakReference;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.tileentity.TileEntity.class)
-abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, TimingHolder {
+abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, TimingBridge {
 
     // uses different name to not clash with SpongeForge
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");

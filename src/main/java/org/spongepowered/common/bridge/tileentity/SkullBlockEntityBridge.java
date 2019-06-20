@@ -29,7 +29,7 @@ import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 
 import javax.annotation.Nullable;
 
-public interface SkullBlockEntityBridge extends TileEntityBridge {
+public interface SkullBlockEntityBridge {
 
     void bridge$setPlayerProfile(GameProfile mcProfile, boolean update);
 

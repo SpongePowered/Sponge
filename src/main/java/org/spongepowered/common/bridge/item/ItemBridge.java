@@ -31,6 +31,6 @@ import java.util.List;
 
 public interface ItemBridge {
 
-    void bridge$getSpongeManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list);
+    void bridge$gatherManipulators(ItemStack itemStack, List<DataManipulator<?, ?>> list);
 
 }

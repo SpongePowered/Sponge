@@ -51,7 +51,7 @@ public class SkullRepresentedPlayerDataProcessor extends
 
     @Override
     public boolean supports(TileEntitySkull skull) {
-        return SkullUtils.getSkullType(skull).equals(SkullTypes.PLAYER);
+        return SkullUtils.getSkullType(skull.getSkullType()).equals(SkullTypes.PLAYER);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class SkullRepresentedPlayerDataProcessor extends
 
     @Override
     protected Optional<GameProfile> getVal(TileEntitySkull entity) {
-        return SkullUtils.getProfile(entity);
+        return Optional.ofNullable((GameProfile) entity.getPlayerProfile());
     }
 
     @Override

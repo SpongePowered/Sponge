@@ -86,7 +86,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.TimingHolder;
+import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
@@ -121,9 +121,9 @@ import javax.annotation.Nullable;
 @Mixin(Entity.class)
 @Implements(
     {@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entityApi$"),
-     @Interface(iface = TimingHolder.class, prefix = "timing$")}
+     @Interface(iface = TimingBridge.class, prefix = "timing$")}
 )
-public abstract class MixinEntity implements EntityBridge, TrackableBridge, VanishingBridge, InvulnerableTrackedBridge, TimingHolder {
+public abstract class MixinEntity implements EntityBridge, TrackableBridge, VanishingBridge, InvulnerableTrackedBridge, TimingBridge {
 
     // @formatter:off
     protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((Entity) (Object) this).getClass());

@@ -51,7 +51,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.optimization.OptimizedMapData;
+import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 import org.spongepowered.common.interfaces.world.IMixinMapInfo_MapOptimization;
 
 import java.lang.reflect.Constructor;
@@ -66,7 +66,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Mixin(MapData.class)
-public abstract class MixinMapData_MapOptimization extends WorldSavedData implements OptimizedMapData {
+public abstract class MixinMapData_MapOptimization extends WorldSavedData implements OptimizedMapDataBridge {
 
 
     public MixinMapData_MapOptimization(String name) {

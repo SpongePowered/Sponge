@@ -46,12 +46,13 @@ public abstract class MixinTileEntitySkull_API extends MixinTileEntity_API imple
 
     @Override
     public SkullData getSkullData() {
-        return new SpongeSkullData(SkullUtils.getSkullType((TileEntitySkull) (Object) this));
+        return new SpongeSkullData(SkullUtils.getSkullType(((TileEntitySkull) (Object) this).getSkullType()));
     }
 
     @Override
     public Value<SkullType> skullType() {
-        return new SpongeValue<>(Keys.SKULL_TYPE, Constants.TileEntity.Skull.DEFAULT_TYPE, SkullUtils.getSkullType((TileEntitySkull) (Object) this));
+        return new SpongeValue<>(Keys.SKULL_TYPE, Constants.TileEntity.Skull.DEFAULT_TYPE,
+            SkullUtils.getSkullType(((TileEntitySkull) (Object) this).getSkullType()));
     }
 
     @Override

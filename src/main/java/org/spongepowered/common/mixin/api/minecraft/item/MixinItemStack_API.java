@@ -202,7 +202,7 @@ public abstract class MixinItemStack_API implements DataHolder {       // confli
             printer.log(SpongeImpl.getLogger(), Level.WARN);
             return manipulators;
         }
-        ((ItemBridge) item).bridge$getSpongeManipulatorsFor((net.minecraft.item.ItemStack) (Object) this, manipulators);
+        ((ItemBridge) item).bridge$gatherManipulators((net.minecraft.item.ItemStack) (Object) this, manipulators);
         if (((CustomDataHolderBridge) this).hasManipulators()) {
             final List<DataManipulator<?, ?>> customManipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
             manipulators.addAll(customManipulators);

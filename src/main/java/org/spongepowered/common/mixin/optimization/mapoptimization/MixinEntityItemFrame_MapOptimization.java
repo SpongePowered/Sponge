@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.optimization.OptimizedMapData;
+import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
@@ -48,9 +48,9 @@ public abstract class MixinEntityItemFrame_MapOptimization extends MixinEntity {
         }
 
         if (stack.getItem() instanceof ItemMap) {
-            ((OptimizedMapData) ((ItemMap) stack.getItem()).getMapData(stack, this.world)).bridge$updateItemFrameDecoration((EntityItemFrame) (Object) this);
+            ((OptimizedMapDataBridge) ((ItemMap) stack.getItem()).getMapData(stack, this.world)).bridge$updateItemFrameDecoration((EntityItemFrame) (Object) this);
         } else if (this.getDisplayedItem().getItem() instanceof ItemMap && stack.isEmpty()) {
-            ((OptimizedMapData) ((ItemMap) this.getDisplayedItem().getItem()).getMapData(stack, this.world)).bridge$removeItemFrame((EntityItemFrame) (Object) this);
+            ((OptimizedMapDataBridge) ((ItemMap) this.getDisplayedItem().getItem()).getMapData(stack, this.world)).bridge$removeItemFrame((EntityItemFrame) (Object) this);
         }
     }
 

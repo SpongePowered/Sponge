@@ -76,7 +76,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.TimingHolder;
+import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
@@ -171,7 +171,7 @@ public final class TrackingUtil {
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
         try (final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingHolder) entity).bridge$getTimingsHandler()
+             final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
         ) {
             mixinEntity.getNotifierUser()
                     .ifPresent(context::notifier);
@@ -199,7 +199,7 @@ public final class TrackingUtil {
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
         try (
              final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingHolder) entity).bridge$getTimingsHandler()
+             final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
              ) {
             entityTiming.startTiming();
             mixinEntity.getNotifierUser()
@@ -252,7 +252,7 @@ public final class TrackingUtil {
             phaseContext.buildAndSwitch();
 
             mixinTileEntity.setIsTicking(true);
-            try (Timing timing = ((TimingHolder) tileEntity).bridge$getTimingsHandler().startTiming()) {
+            try (Timing timing = ((TimingBridge) tileEntity).bridge$getTimingsHandler().startTiming()) {
                 tile.update();
             }
         } catch (Exception e) {

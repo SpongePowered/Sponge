@@ -101,6 +101,7 @@ public final class Constants {
     public static final class World {
 
 
+        public static final int CHUNK_GC_TICK_INTERVAL = 600;
         public static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
         public static final Vector3i BIOME_MIN = new Vector3i(Constants.World.BLOCK_MIN.getX(), 0, Constants.World.BLOCK_MIN.getZ());
         public static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);

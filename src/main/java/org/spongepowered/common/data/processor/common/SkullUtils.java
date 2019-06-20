@@ -37,11 +37,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.bridge.tileentity.SkullBlockEntityBridge;
-import org.spongepowered.common.mixin.core.tileentity.AccessorTileEntitySkull;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -49,12 +46,12 @@ import javax.annotation.Nullable;
 
 public class SkullUtils {
 
-    public static boolean supportsObject(Object object) {
+    public static boolean supportsObject(final Object object) {
         return object instanceof TileEntitySkull || isValidItemStack(object);
     }
 
-    public static SkullType getSkullType(int skullType) {
-        for (SkullType type : SpongeImpl.getRegistry().getAllOf(SkullType.class)){
+    public static SkullType getSkullType(final int skullType) {
+        for (final SkullType type : SpongeImpl.getRegistry().getAllOf(SkullType.class)){
             if (type instanceof SpongeSkullType && ((SpongeSkullType) type).getByteId() == skullType) {
                 return type;
             }
@@ -62,31 +59,19 @@ public class SkullUtils {
         return Constants.TileEntity.Skull.DEFAULT_TYPE;
     }
 
-    public static boolean isValidItemStack(Object container) {
+    public static boolean isValidItemStack(final Object container) {
         return container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.SKULL);
     }
 
-    public static SkullType getSkullType(TileEntitySkull tileEntitySkull) {
-        return SkullUtils.getSkullType(tileEntitySkull.getSkullType());
-    }
-
-    public static void setSkullType(TileEntitySkull tileEntitySkull, int skullType) {
+    public static void setSkullType(final TileEntitySkull tileEntitySkull, final int skullType) {
         tileEntitySkull.setType(skullType);
         tileEntitySkull.markDirty();
         tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
                 .getBlockState(tileEntitySkull.getPos()), 3);
     }
 
-    public static SkullType getSkullType(ItemStack itemStack) {
-        return SkullUtils.getSkullType(itemStack.getMetadata());
-    }
-
-    public static Optional<GameProfile> getProfile(TileEntitySkull entity) {
-        return Optional.ofNullable((GameProfile) entity.getPlayerProfile());
-    }
-
-    public static boolean setProfile(TileEntitySkull tileEntitySkull, @Nullable GameProfile profile) {
-        if (getSkullType(tileEntitySkull).equals(SkullTypes.PLAYER)) {
+    public static boolean setProfile(final TileEntitySkull tileEntitySkull, @Nullable final GameProfile profile) {
+        if (SkullUtils.getSkullType(tileEntitySkull.getSkullType()).equals(SkullTypes.PLAYER)) {
             final GameProfile newProfile = SpongeRepresentedPlayerData.NULL_PROFILE.equals(profile) ? null : resolveProfileIfNecessary(profile);
             tileEntitySkull.setPlayerProfile((com.mojang.authlib.GameProfile) newProfile);
             tileEntitySkull.markDirty();
@@ -97,17 +82,8 @@ public class SkullUtils {
         return false;
     }
 
-    public static Optional<GameProfile> getProfile(ItemStack skull) {
-        if (isValidItemStack(skull) && getSkullType(skull).equals(SkullTypes.PLAYER)) {
-            final NBTTagCompound nbt = skull.getSubCompound(NbtDataUtil.ITEM_SKULL_OWNER);
-            final com.mojang.authlib.GameProfile mcProfile = nbt == null ? null : NBTUtil.readGameProfileFromNBT(nbt);
-            return Optional.ofNullable((GameProfile) mcProfile);
-        }
-        return Optional.empty();
-    }
-
-    public static boolean setProfile(ItemStack skull, @Nullable GameProfile profile) {
-        if (isValidItemStack(skull) && getSkullType(skull).equals(SkullTypes.PLAYER)) {
+    public static boolean setProfile(final ItemStack skull, @Nullable final GameProfile profile) {
+        if (isValidItemStack(skull) && SkullUtils.getSkullType(skull.getMetadata()).equals(SkullTypes.PLAYER)) {
             if (profile == null || profile.equals(SpongeRepresentedPlayerData.NULL_PROFILE)) {
                 if (skull.getTagCompound() != null) {
                     skull.getTagCompound().removeTag(NbtDataUtil.ITEM_SKULL_OWNER);
@@ -122,7 +98,7 @@ public class SkullUtils {
         return false;
     }
 
-    private static @Nullable GameProfile resolveProfileIfNecessary(@Nullable GameProfile profile) {
+    private static @Nullable GameProfile resolveProfileIfNecessary(@Nullable final GameProfile profile) {
         if (profile == null) {
             return null;
         }
@@ -139,25 +115,4 @@ public class SkullUtils {
         }
     }
 
-    public static void updatePlayerProfile(SkullBlockEntityBridge skull) {
-        GameProfile profile = (GameProfile) ((AccessorTileEntitySkull) skull).accessor$getMojangProfile();
-        if (profile != null && profile.getName().isPresent() && !profile.getName().get().isEmpty()) {
-            if (profile.isFilled() && profile.getPropertyMap().containsKey("textures")) {
-                skull.bridge$markDirty();
-            } else {
-                Sponge.getServer().getGameProfileManager().get(profile.getName().get()).handle((newProfile, thrown) -> {
-                    if (newProfile != null) {
-                        skull.bridge$setPlayerProfile((com.mojang.authlib.GameProfile) newProfile, false);
-                        skull.bridge$markDirty();
-                    } else {
-                        SpongeImpl.getLogger().warn("Could not update player GameProfile for Skull: ",
-                                thrown.getMessage());
-                    }
-                    return newProfile;
-                });
-            }
-        } else {
-            skull.bridge$markDirty();
-        }
-    }
 }

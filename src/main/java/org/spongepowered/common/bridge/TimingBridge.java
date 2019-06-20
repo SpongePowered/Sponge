@@ -26,7 +26,7 @@ package org.spongepowered.common.bridge;
 
 import co.aikar.timings.Timing;
 
-public interface TimingHolder {
+public interface TimingBridge {
 
     Timing bridge$getTimingsHandler();
 

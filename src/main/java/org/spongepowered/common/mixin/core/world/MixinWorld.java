@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -49,12 +48,12 @@ import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.Dimension;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -69,7 +68,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
@@ -85,7 +83,6 @@ import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.world.SpongeDimension;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -99,18 +96,9 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.world.World.class)
 public abstract class MixinWorld implements WorldBridge {
 
-    private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
-    private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
-    private static final Vector3i BLOCK_SIZE = BLOCK_MAX.sub(BLOCK_MIN).add(Vector3i.ONE);
-    private static final Vector3i BIOME_MIN = new Vector3i(BLOCK_MIN.getX(), 0, BLOCK_MIN.getZ());
-    private static final Vector3i BIOME_MAX = new Vector3i(BLOCK_MAX.getX(), 256, BLOCK_MAX.getZ());
-    private static final Vector3i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(Vector3i.ONE);
-    public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-
     boolean processingExplosion = false;
     private boolean isDefinitelyFake = false;
     private boolean hasChecked = false;
-    private SpongeDimension spongeDimensionWrapper;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -203,19 +191,11 @@ public abstract class MixinWorld implements WorldBridge {
         return false; // shadowed
     }
     @Shadow public abstract void playEvent(int i, BlockPos pos, int stateId);
+    @Shadow public abstract WorldBorder getWorldBorder();
     @Shadow public boolean isBlockModifiable(EntityPlayer player, BlockPos pos) {
         return true; // shadowed so we can call from MixinWorldServer in spongeforge.
     }
 
-    @Override
-    public Dimension bridge$getDimensionWrapper() {
-        return this.spongeDimensionWrapper;
-    }
-
-    @Inject(method = "<init>", at = @At(value = "RETURN"))
-    private void onInit(CallbackInfo ci) {
-        this.spongeDimensionWrapper = new SpongeDimension(this.provider);
-    }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
                                                                      + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))

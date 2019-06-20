@@ -64,30 +64,26 @@ public abstract class MixinItem implements ItemBridge, SpongeGameDictionaryEntry
      * @param ci callback
      */
     @Inject(method = "registerItem(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V", at = @At("RETURN"))
-    private static void spongeImpl$registerItemWithSpongeRegistry(int id, ResourceLocation textualID, Item itemIn, CallbackInfo ci) {
+    private static void spongeImpl$registerItemWithSpongeRegistry(final int id, final ResourceLocation textualID, final Item itemIn, final CallbackInfo ci) {
         SpongeImplHooks.registerItemForSpongeRegistry(id, textualID, itemIn);
     }
 
     @Override
-    public void bridge$getSpongeManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list) {
+    public void bridge$gatherManipulators(final ItemStack itemStack, final List<DataManipulator<?, ?>> list) {
         if (!itemStack.hasTagCompound()) {
             return;
         }
 
-        org.spongepowered.api.item.inventory.ItemStack spongeStack = ((org.spongepowered.api.item.inventory.ItemStack) itemStack);
+        final org.spongepowered.api.item.inventory.ItemStack spongeStack = ((org.spongepowered.api.item.inventory.ItemStack) itemStack);
         if (itemStack.isItemEnchanted()) {
-            list.add(getData(itemStack, EnchantmentData.class));
+            list.add(((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(EnchantmentData.class).get());
         }
         spongeStack.get(DisplayNameData.class).ifPresent(list::add);
         spongeStack.get(LoreData.class).ifPresent(list::add);
     }
 
-    protected final <T extends DataManipulator<T, ?>> T getData(ItemStack itemStack, Class<T> manipulatorClass) {
-        return ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(manipulatorClass).get();
-    }
-
     @Override
-    public ItemStack bridge$createDictionaryStack(int wildcardValue) {
+    public ItemStack bridge$createDictionaryStack(final int wildcardValue) {
         return new ItemStack((Item) (Object) this, 1, wildcardValue);
     }
 

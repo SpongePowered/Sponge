@@ -195,6 +195,7 @@ public abstract class MixinWorld_API implements World {
 
     @Nullable private Context worldContext;
     boolean processingExplosion = false;
+    @Nullable private SpongeDimension api$dimension;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -499,7 +500,10 @@ public abstract class MixinWorld_API implements World {
 
     @Override
     public Dimension getDimension() {
-        return ((WorldBridge) this).bridge$getDimensionWrapper();
+        if (this.api$dimension == null) {
+            this.api$dimension = new SpongeDimension(this.provider);
+        }
+        return this.api$dimension;
     }
 
     @Override
