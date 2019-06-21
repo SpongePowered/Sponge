@@ -57,7 +57,7 @@ public abstract class MixinMinecraftBlockDamageSource_API extends MixinDamageSou
             .add("Name", this.damageType)
             .add("Type", getType().getId())
             .add("BlockSnapshot", getBlockSnapshot())
-            .add("LocationBridge", this.location)
+            .add("Location", this.location)
             .toString();
     }
 }
