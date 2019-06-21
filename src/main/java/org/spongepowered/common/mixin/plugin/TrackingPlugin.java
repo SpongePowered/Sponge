@@ -45,7 +45,8 @@ public class TrackingPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().useTracking();
+        return true;
+//        return SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().useTracking();
     }
 
     @Override
