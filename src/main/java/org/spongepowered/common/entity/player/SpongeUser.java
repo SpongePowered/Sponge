@@ -40,6 +40,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.ArmorEquipable;
@@ -53,6 +54,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.player.BedLocationsBridge;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
@@ -125,6 +127,15 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     public boolean isInitialized() {
         return this.nbt != null;
+    }
+
+    public void invalidate() {
+        this.nbt = null;
+
+        ((CustomDataHolderBridge) this).getFailedData().clear();
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) this).getCustomManipulators()) {
+            ((CustomDataHolderBridge) this).removeCustom((Class<? extends DataManipulator<?, ?>>) manipulator.getClass());
+        }
     }
 
     public void initialize() {
@@ -445,10 +456,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         if (this.isInvisible) {
             spongeCompound.setBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
         }
-        if (!spongeCompound.isEmpty()) {
-            forgeCompound.setTag(Constants.Sponge.SPONGE_DATA, spongeCompound);
-            compound.setTag(Constants.Forge.FORGE_DATA, forgeCompound);
-        }
+        
+	forgeCompound.setTag(Constants.Sponge.SPONGE_DATA, spongeCompound);
+        compound.setTag(Constants.Forge.FORGE_DATA, forgeCompound);
 
         CustomDataNbtUtil.writeCustomData(spongeCompound, ((DataHolder) this));
     }
@@ -570,12 +580,18 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         Preconditions.checkState(isInitialized(), "SpongeUser {} is not initialized", this.profile.getId());
         final SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
         final File dataFile = new File(saveHandler.playersDirectory, getUniqueId() + ".dat");
-        NBTTagCompound tag = new NBTTagCompound();
+        NBTTagCompound tag;
+        try {
+            tag = CompressedStreamTools.readCompressed(new FileInputStream(dataFile));
+        } catch (IOException ignored) {
+            // Nevermind
+            tag = new NBTTagCompound();
+        }
         writeToNbt(tag);
         try (final FileOutputStream out = new FileOutputStream(dataFile)) {
             CompressedStreamTools.writeCompressed(tag, out);
             dirtyUsers.remove(this);
-            this.nbt = null;
+            invalidate();
         } catch (IOException e) {
             SpongeImpl.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
         }
