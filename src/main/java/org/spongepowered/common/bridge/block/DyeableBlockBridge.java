@@ -22,31 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.bridge.block;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.item.EnumDyeColor;
 
-import java.nio.file.Path;
+public interface DyeableBlockBridge {
 
-public interface IMixinDimensionType {
+    void bridge$SetColorPropertyEnum(PropertyEnum<EnumDyeColor> property);
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
-
-    Context getContext();
-
-    String getEnumName();
-
-    String getModId();
-
-    Path getConfigPath();
-
-    boolean shouldGenerateSpawnOnLoad();
-
-    boolean shouldLoadSpawn();
-
-    boolean shouldKeepSpawnLoaded();
-
-    void setShouldLoadSpawn(boolean keepSpawnLoaded);
 }

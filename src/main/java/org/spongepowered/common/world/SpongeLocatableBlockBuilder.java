@@ -65,7 +65,7 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
 
     @Override
     public SpongeLocatableBlockBuilder location(Location<World> location) {
-        checkNotNull(location, "Location cannot be null!");
+        checkNotNull(location, "LocationBridge cannot be null!");
         this.blockState = location.getBlock();
         this.position = location.getBlockPosition();
         this.worldId = location.getExtent().getUniqueId();

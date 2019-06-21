@@ -29,7 +29,7 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 
 public class SpongeDimension implements Dimension {
 
@@ -71,7 +71,7 @@ public class SpongeDimension implements Dimension {
 
     @Override
     public Context getContext() {
-        return ((IMixinDimensionType) (Object) this.worldProvider.getDimensionType()).getContext();
+        return ((DimensionTypeBridge) (Object) this.worldProvider.getDimensionType()).getContext();
     }
 
     // These methods are overwritten in SpongeForge

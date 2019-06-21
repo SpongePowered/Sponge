@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
@@ -97,7 +97,7 @@ public abstract class MixinWorldProvider implements Dimension, WorldProviderBrid
 
     @Override
     public Context getContext() {
-        return ((IMixinDimensionType) (Object) getDimensionType()).getContext();
+        return ((DimensionTypeBridge) (Object) getDimensionType()).getContext();
     }
 
     @Override

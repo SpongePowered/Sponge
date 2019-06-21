@@ -46,7 +46,7 @@ public class MinecraftBlockDamageSource extends DamageSource {
         return MoreObjects.toStringHelper("BlockDamageSource")
             .add("Name", this.damageType)
             .add("BlockSnapshot", this.blockSnapshot)
-            .add("Location", this.location)
+            .add("LocationBridge", this.location)
             .toString();
     }
 }

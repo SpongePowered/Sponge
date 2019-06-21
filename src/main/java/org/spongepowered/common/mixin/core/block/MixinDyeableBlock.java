@@ -41,7 +41,7 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.block.DyeableBLockBridge;
+import org.spongepowered.common.bridge.block.DyeableBlockBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDyeableData;
 
@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Mixin({BlockCarpet.class, BlockColored.class, BlockStainedGlass.class, BlockStainedGlassPane.class, BlockConcretePowder.class})
-public abstract class MixinDyeableBlock extends MixinBlock implements DyeableBLockBridge {
+public abstract class MixinDyeableBlock extends MixinBlock implements DyeableBlockBridge {
 
     private PropertyEnum<EnumDyeColor> bridge$ColorProperty;
 

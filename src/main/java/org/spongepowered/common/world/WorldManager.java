@@ -78,7 +78,7 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinIntegratedServer;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
@@ -720,7 +720,7 @@ public final class WorldManager {
 
             // Step 2 - See if we are allowed to load it
             if (dimensionId != 0) {
-                final SpongeConfig<? extends GeneralConfigBase> spongeConfig = SpongeHooks.getConfigAdapter(((IMixinDimensionType)(Object) dimensionType).getConfigPath(), worldFolderName);
+                final SpongeConfig<? extends GeneralConfigBase> spongeConfig = SpongeHooks.getConfigAdapter(((DimensionTypeBridge)(Object) dimensionType).getConfigPath(), worldFolderName);
                 if (!spongeConfig.getConfig().getWorld().isWorldEnabled()) {
                     SpongeImpl.getLogger().warn("World [{}] ({}/{}) is disabled. World will not be loaded...", worldFolder,
                         apiDimensionType.getId(), dimensionId);
@@ -765,7 +765,7 @@ public final class WorldManager {
                 // create config
                 ((WorldInfoBridge) worldInfo).setDimensionType(apiDimensionType);
                 ((WorldInfoBridge) worldInfo).createWorldConfig();
-                ((WorldProperties) worldInfo).setGenerateSpawnOnLoad(((IMixinDimensionType) (Object) dimensionType).shouldGenerateSpawnOnLoad());
+                ((WorldProperties) worldInfo).setGenerateSpawnOnLoad(((DimensionTypeBridge) (Object) dimensionType).shouldGenerateSpawnOnLoad());
             }
 
             // Safety check to ensure we'll get a unique id no matter what
@@ -825,7 +825,7 @@ public final class WorldManager {
         worldSettings.setGeneratorOptions(generatorOptions);
 
         ((WorldSettingsBridge) (Object) worldSettings).bridge$setDimensionType(dimensionType);
-        ((WorldSettingsBridge)(Object) worldSettings).bridge$setGenerateSpawnOnLoad(((IMixinDimensionType) dimensionType).shouldGenerateSpawnOnLoad());
+        ((WorldSettingsBridge)(Object) worldSettings).bridge$setGenerateSpawnOnLoad(((DimensionTypeBridge) dimensionType).shouldGenerateSpawnOnLoad());
 
         final WorldInfo worldInfo = new WorldInfo(worldSettings, worldFolderName);
         setUuidOnProperties(dimensionId == 0 ? currentSaveRoot.getParent() : currentSaveRoot, (WorldProperties) worldInfo);
@@ -867,7 +867,7 @@ public final class WorldManager {
             worldServer.initialize(worldSettings);
         }
 
-        if (((IMixinDimensionType) ((org.spongepowered.api.world.World) worldServer).getDimension().getType()).shouldLoadSpawn()) {
+        if (((DimensionTypeBridge) ((org.spongepowered.api.world.World) worldServer).getDimension().getType()).shouldLoadSpawn()) {
             ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
         }
 

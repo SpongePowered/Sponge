@@ -42,7 +42,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
-import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.world.WorldManager;
 
@@ -50,7 +50,7 @@ import java.nio.file.Path;
 
 @Mixin(DimensionType.class)
 @Implements(value = @Interface(iface = org.spongepowered.api.world.DimensionType.class, prefix = "dimensionType$"))
-public abstract class MixinDimensionType implements IMixinDimensionType {
+public abstract class MixinDimensionType implements DimensionTypeBridge {
 
     @Shadow @Final private Class <? extends WorldProvider> clazz;
     @Shadow public abstract String getName();

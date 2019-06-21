@@ -83,7 +83,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
@@ -245,11 +245,11 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
 
         if (this.isValid()) {
             this.worldConfig =
-                    new SpongeConfig<>(SpongeConfig.Type.WORLD, ((IMixinDimensionType) this.dimensionType).getConfigPath()
+                    new SpongeConfig<>(SpongeConfig.Type.WORLD, ((DimensionTypeBridge) this.dimensionType).getConfigPath()
                             .resolve(this.levelName)
                             .resolve("world.conf"),
                             SpongeImpl.ECOSYSTEM_ID,
-                            ((IMixinDimensionType) getDimensionType()).getDimensionConfig(),
+                            ((DimensionTypeBridge) getDimensionType()).getDimensionConfig(),
                             false);
         } else {
             this.worldConfig = SpongeConfig.newDummyConfig(SpongeConfig.Type.WORLD);
@@ -640,7 +640,7 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
     public boolean loadOnStartup() {
         Boolean loadOnStartup = this.getConfigAdapter().getConfig().getWorld().loadOnStartup();
         if (loadOnStartup == null) {
-           loadOnStartup = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+           loadOnStartup = ((DimensionTypeBridge) this.dimensionType).shouldGenerateSpawnOnLoad();
            this.setLoadOnStartup(loadOnStartup);
         }
         return loadOnStartup;
@@ -656,10 +656,10 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
     public boolean doesKeepSpawnLoaded() {
         Boolean keepSpawnLoaded = this.getConfigAdapter().getConfig().getWorld().getKeepSpawnLoaded();
         if (keepSpawnLoaded == null) {
-            keepSpawnLoaded = ((IMixinDimensionType) this.dimensionType).shouldLoadSpawn();
+            keepSpawnLoaded = ((DimensionTypeBridge) this.dimensionType).shouldLoadSpawn();
         } else if (this.isMod && !keepSpawnLoaded) { // If disabled and a mod dimension, validate
             if (this.dimensionId == ((net.minecraft.world.DimensionType)(Object) this.dimensionType).getId()) {
-                keepSpawnLoaded = ((IMixinDimensionType) this.dimensionType).shouldKeepSpawnLoaded();
+                keepSpawnLoaded = ((DimensionTypeBridge) this.dimensionType).shouldKeepSpawnLoaded();
                 this.setKeepSpawnLoaded(keepSpawnLoaded);
             }
         }
@@ -676,7 +676,7 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
     public boolean doesGenerateSpawnOnLoad() {
         Boolean shouldGenerateSpawn = this.getConfigAdapter().getConfig().getWorld().getGenerateSpawnOnLoad();
         if (shouldGenerateSpawn == null) {
-            shouldGenerateSpawn = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+            shouldGenerateSpawn = ((DimensionTypeBridge) this.dimensionType).shouldGenerateSpawnOnLoad();
             this.setGenerateSpawnOnLoad(shouldGenerateSpawn);
         }
         return shouldGenerateSpawn;

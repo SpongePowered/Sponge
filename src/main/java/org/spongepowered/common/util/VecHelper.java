@@ -58,7 +58,7 @@ public final class VecHelper {
         return new BlockPos(vector.getX(), vector.getY(), vector.getZ());
     }
 
-    // === SpongeAPI Location --> BlockPos ===
+    // === SpongeAPI LocationBridge --> BlockPos ===
     @SuppressWarnings("ConstantConditions")
     public static BlockPos toBlockPos(Location<?> location) {
         if (location == null) {

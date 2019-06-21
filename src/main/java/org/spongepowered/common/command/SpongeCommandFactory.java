@@ -100,7 +100,7 @@ import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
-import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -267,7 +267,7 @@ public class SpongeCommandFactory {
             }
             if (args.hasAny("dimension")) {
                 for (DimensionType dimensionType : args.<DimensionType>getAll("dimension")) {
-                    src.sendMessage(Text.of("Dimension ", dimensionType.getName(), ": ", processDimension(((IMixinDimensionType) dimensionType).
+                    src.sendMessage(Text.of("Dimension ", dimensionType.getName(), ": ", processDimension(((DimensionTypeBridge) dimensionType).
                         getDimensionConfig(), dimensionType, src, args)));
                     ++successes;
                 }

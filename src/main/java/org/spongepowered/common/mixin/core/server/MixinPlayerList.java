@@ -287,7 +287,7 @@ public abstract class MixinPlayerList implements PlayerListBridge {
         location = toTransform.getLocation();
 
         if (!(location.getExtent() instanceof WorldServer)) {
-            SpongeImpl.getLogger().warn("Location set in PlayerRespawnEvent was invalid, using original location instead");
+            SpongeImpl.getLogger().warn("LocationBridge set in PlayerRespawnEvent was invalid, using original location instead");
             location = event.getFromTransform().getLocation();
         }
         worldServer = (WorldServer) location.getExtent();

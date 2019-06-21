@@ -118,7 +118,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     @Override
     public Explosion build() throws IllegalStateException {
         // TODO Check coordinates and if world is loaded here.
-        checkState(this.location != null, "Location is null!");
+        checkState(this.location != null, "LocationBridge is null!");
 
         World world = this.location.getExtent();
         Vector3d origin = this.location.getPosition();

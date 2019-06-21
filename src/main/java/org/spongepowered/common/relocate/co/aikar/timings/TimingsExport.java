@@ -329,7 +329,7 @@ class TimingsExport extends Thread {
                 return;
             }
 
-            timingsURL = con.getHeaderField("Location");
+            timingsURL = con.getHeaderField("LocationBridge");
             this.listeners.send(Text.of(TextColors.GREEN, "View Timings Report: ", TextActions.openUrl(new URL(timingsURL)), timingsURL));
 
             if (response != null && !response.isEmpty()) {

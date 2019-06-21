@@ -29,13 +29,13 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.bridge.world.LocationBridge;
 import org.spongepowered.common.util.VecHelper;
 
 import javax.annotation.Nullable;
 
 @Mixin(value = Location.class, remap = false)
-public abstract class MixinLocation_Impl implements IMixinLocation {
+public abstract class MixinLocation_Impl implements LocationBridge {
 
     @Shadow public abstract Vector3i getBlockPosition();
 
