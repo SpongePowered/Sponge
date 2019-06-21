@@ -663,6 +663,7 @@ public final class SpongeImplHooks {
      * @param entity The vanilla entity item
      * @return The custom item entity for the dropped item
      */
+    @SuppressWarnings("ConstantConditions")
     @Nullable
     public static Entity getCustomEntityIfItem(Entity entity) {
         return entity;

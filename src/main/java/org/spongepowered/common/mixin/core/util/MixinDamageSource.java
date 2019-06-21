@@ -32,7 +32,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.Explosion;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -42,10 +41,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 
-import java.util.Optional;
-import java.util.UUID;
+import javax.annotation.Nullable;
 
 @Mixin(value = net.minecraft.util.DamageSource.class, priority = 990)
 public abstract class MixinDamageSource implements DamageSource {
@@ -61,6 +61,7 @@ public abstract class MixinDamageSource implements DamageSource {
     @Shadow public abstract boolean isDifficultyScaled();
     @Shadow public abstract boolean isExplosion();
 
+    @Shadow public boolean explosion;
     private DamageType apiDamageType;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -82,22 +83,19 @@ public abstract class MixinDamageSource implements DamageSource {
     }
 
     @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;", at = @At("HEAD"), cancellable = true)
-    private static void onSetExplosionSource(Explosion explosionIn, CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
-        if (explosionIn != null && explosionIn.exploder != null && explosionIn.world != null) {
-            if (explosionIn.getExplosivePlacedBy() == null) {
+    private static void onSetExplosionSource(@Nullable Explosion explosionIn, CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
+        if (explosionIn != null && explosionIn.exploder != null && !((WorldBridge) explosionIn.world).isFake()) {
+            if (explosionIn.getExplosivePlacedBy() == null && explosionIn.exploder instanceof OwnershipTrackedBridge) {
                 // check creator
-                Entity spongeEntity = (Entity) explosionIn.exploder;
-                Optional<UUID> creatorUuid = spongeEntity.getCreator();
-                if (creatorUuid.isPresent()) {
-                    EntityPlayer player = explosionIn.world.getPlayerEntityByUUID(creatorUuid.get());
-                    if (player != null) {
-                        EntityDamageSourceIndirect damageSource =
-                                new EntityDamageSourceIndirect("explosion.player",
-                                        explosionIn.exploder, player);
+                OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) explosionIn.exploder;
+                spongeEntity.tracked$getOwnerReference()
+                    .filter(user -> user instanceof EntityPlayer)
+                    .map(user -> (EntityPlayer) user)
+                    .ifPresent(player -> {
+                        EntityDamageSourceIndirect damageSource = new EntityDamageSourceIndirect("explosion.player", explosionIn.exploder, player);
                         damageSource.setDifficultyScaled().setExplosion();
                         cir.setReturnValue(damageSource);
-                    }
-                }
+                    });
             }
         }
     }

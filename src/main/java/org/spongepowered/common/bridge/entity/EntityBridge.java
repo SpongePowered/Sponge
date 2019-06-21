@@ -35,6 +35,7 @@ import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
@@ -45,15 +46,15 @@ import javax.annotation.Nullable;
 
 public interface EntityBridge {
 
-    boolean isInConstructPhase();
+    boolean bridge$isConstructing();
 
-    void firePostConstructEvents();
+    void bridge$fireConstructors();
 
     /**
      * Gets whether this entity has been added to a World's tracked entity lists
      * @return True if this entity is being tracked in a world's chunk lists.
      */
-    boolean isTrackedInWorld();
+    boolean bridge$isWorldTracked();
 
     /**
      * Sets an entity to be tracked or untracked. Specifically used in
@@ -62,17 +63,9 @@ public interface EntityBridge {
      *
      * @param tracked Tracked
      */
-    void setTrackedInWorld(boolean tracked);
+    void bridge$setWorldTracked(boolean tracked);
 
     boolean removePassengers(DismountType type);
-
-    Optional<User> getTrackedPlayer(String nbtKey);
-
-    Optional<User> getCreatorUser();
-
-    Optional<User> getNotifierUser();
-
-    void trackEntityUniqueId(String nbtKey, @Nullable UUID uuid);
 
     void bridge$setImplVelocity(Vector3d velocity);
 

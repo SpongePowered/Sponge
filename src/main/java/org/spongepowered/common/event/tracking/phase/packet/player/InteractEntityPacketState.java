@@ -30,12 +30,14 @@ import net.minecraft.network.play.client.CPacketUseEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -96,7 +98,11 @@ public final class InteractEntityPacketState extends BasicPacketState {
             return;
         }
         final World spongeWorld = (World) player.world;
-        ((Entity) entity).setNotifier(player.getUniqueID());
+        if (entity instanceof OwnershipTrackedBridge) {
+            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) player);
+        } else {
+            ((Entity) entity).setNotifier(player.getUniqueID());
+        }
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.

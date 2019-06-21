@@ -3,7 +3,9 @@
     "package": "org.spongepowered.common.mixin.tracking",
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.TrackingPlugin",
+    "mixinPriority" : 1111,
     "mixins": [
+        "bridge.MixinOwnershipTrackedBridge",
         "entity.MixinEntity_Tracker",
         "world.MixinChunk_Tracker",
         "world.MixinWorld_Tracker"

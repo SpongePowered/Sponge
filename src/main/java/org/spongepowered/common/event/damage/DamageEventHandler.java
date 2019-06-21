@@ -64,9 +64,9 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -369,18 +369,17 @@ public class DamageEventHandler {
     public static void generateCauseFor(DamageSource damageSource, CauseStackManager.StackFrame frame) {
         if (damageSource instanceof EntityDamageSourceIndirect) {
             net.minecraft.entity.Entity source = damageSource.getTrueSource();
-            if (!(source instanceof EntityPlayer) && source != null) {
-                final EntityBridge mixinEntity = (EntityBridge) source;
-                mixinEntity.getNotifierUser().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
-                mixinEntity.getCreatorUser().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
+            if (!(source instanceof EntityPlayer) && source instanceof OwnershipTrackedBridge) {
+                final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) source;
+                ownerBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+                ownerBridge.tracked$getOwnerReference().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
             }
         } else if (damageSource instanceof EntityDamageSource) {
             net.minecraft.entity.Entity source = damageSource.getTrueSource();
-            if (!(source instanceof EntityPlayer) && source != null) {
-                final EntityBridge mixinEntity = (EntityBridge) source;
-                // TODO only have a UUID, want a user
-                mixinEntity.getNotifierUser().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
-                mixinEntity.getCreatorUser().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
+            if (!(source instanceof EntityPlayer) && source instanceof OwnershipTrackedBridge) {
+                final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) source;
+                ownerBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+                ownerBridge.tracked$getOwnerReference().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
             }
         } else if (damageSource instanceof BlockDamageSource) {
             Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();

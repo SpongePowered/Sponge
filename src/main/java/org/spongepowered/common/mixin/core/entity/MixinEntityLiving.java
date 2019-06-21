@@ -57,7 +57,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.VanishingBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -101,8 +100,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase {
     }
 
     @Override
-    public void firePostConstructEvents() {
-        super.firePostConstructEvents();
+    public void bridge$fireConstructors() {
+        super.bridge$fireConstructors();
         if (ShouldFire.A_I_TASK_EVENT_ADD) {
             handleDelayedTaskEventFiring((IMixinEntityAITasks) this.tasks);
             handleDelayedTaskEventFiring((IMixinEntityAITasks) this.targetTasks);

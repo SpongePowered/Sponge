@@ -68,6 +68,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -954,8 +955,8 @@ public final class PhaseTracker {
         }
 
         // Sponge Start - handle construction phases
-        if (((EntityBridge) entity).isInConstructPhase()) {
-            ((EntityBridge) entity).firePostConstructEvents();
+        if (((EntityBridge) entity).bridge$isConstructing()) {
+            ((EntityBridge) entity).bridge$fireConstructors();
         }
 
         final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) world;
@@ -986,22 +987,30 @@ public final class PhaseTracker {
                     final IEntityOwnable ownable = (IEntityOwnable) entity;
                     final net.minecraft.entity.Entity owner = ownable.getOwner();
                     if (owner instanceof EntityPlayer) {
-                        context. owner = (User) owner;
-                        ((Entity) entity).setCreator(ownable.getOwnerId());
+                        context.owner = (User) owner;
+                        if (entity instanceof OwnershipTrackedBridge) {
+                            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) owner);
+                        } else {
+                            ((Entity) entity).setCreator(ownable.getOwnerId());
+                        }
                     }
                 } else if (entity instanceof EntityThrowable) {
                     final EntityThrowable throwable = (EntityThrowable) entity;
                     final EntityLivingBase thrower = throwable.getThrower();
                     if (thrower != null) {
                         final User user;
-                        if (!(thrower instanceof EntityPlayer)) {
-                            user = ((EntityBridge) thrower).getCreatorUser().orElse(null);
+                        if (thrower instanceof OwnershipTrackedBridge) {
+                            user = ((OwnershipTrackedBridge) thrower).tracked$getOwnerReference().orElse(null);
                         } else {
                             user = (User) thrower;
                         }
                         if (user != null) {
                             context.owner = user;
-                            ((Entity) entity).setCreator(user.getUniqueId());
+                            if (entity instanceof OwnershipTrackedBridge) {
+                                ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(user);
+                            } else {
+                                ((Entity) entity).setCreator(user.getUniqueId());
+                            }
                         }
                     }
                 }
@@ -1050,8 +1059,8 @@ public final class PhaseTracker {
         checkNotNull(entity, "Entity cannot be null!");
 
         // Sponge Start - handle construction phases
-        if (((EntityBridge) entity).isInConstructPhase()) {
-            ((EntityBridge) entity).firePostConstructEvents();
+        if (((EntityBridge) entity).bridge$isConstructing()) {
+            ((EntityBridge) entity).bridge$fireConstructors();
         }
 
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;

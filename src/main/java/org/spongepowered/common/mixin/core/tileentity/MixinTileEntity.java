@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
@@ -50,6 +51,7 @@ import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -59,9 +61,6 @@ abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, 
     // uses different name to not clash with SpongeForge
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
     @Nullable private Timing timing;
-    // caches owner and notifier to avoid constant lookups in chunk
-    @Nullable private User spongeOwner;
-    @Nullable private User spongeNotifier;
     private boolean isTicking = false;
     // Used by tracker config
     private boolean allowsBlockBulkCapture = true;
@@ -70,7 +69,6 @@ abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, 
     private boolean allowsEntityEventCreation = true;
     private boolean isCaptured = false;
 
-    @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World world;
     @Shadow private int blockMetadata;
     @Shadow protected BlockPos pos;
@@ -166,27 +164,6 @@ abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, 
         return this.timing;
     }
 
-    @Override
-    public void setSpongeOwner(@Nullable final User owner) {
-        this.spongeOwner = owner;
-    }
-
-    @Nullable
-    @Override
-    public User getSpongeOwner() {
-        return this.spongeOwner;
-    }
-
-    @Override
-    public void setSpongeNotifier(@Nullable final User notifier) {
-        this.spongeNotifier = notifier;
-    }
-
-    @Nullable
-    @Override
-    public User getSpongeNotifier() {
-        return this.spongeNotifier;
-    }
 
     @Override
     public boolean shouldTick() {

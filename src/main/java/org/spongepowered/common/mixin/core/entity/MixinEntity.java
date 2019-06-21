@@ -60,7 +60,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -84,13 +83,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.TimingBridge;
+import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishingBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
@@ -99,26 +102,20 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
-import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 @Mixin(Entity.class)
-public abstract class MixinEntity implements EntityBridge, TrackableBridge, VanishingBridge, InvulnerableTrackedBridge, TimingBridge,
-    DataCompoundHolder {
+public abstract class MixinEntity implements EntityBridge, TrackableBridge, VanishingBridge, InvulnerableTrackedBridge, TimingBridge {
 
     // @formatter:off
     protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((Entity) (Object) this).getClass());
@@ -224,22 +221,22 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
     }
 
     @Override
-    public boolean isInConstructPhase() {
+    public boolean bridge$isConstructing() {
         return this.isConstructing;
     }
 
     @Override
-    public void firePostConstructEvents() {
+    public void bridge$fireConstructors() {
         this.isConstructing = false;
     }
 
     @Override
-    public boolean isTrackedInWorld() {
+    public boolean bridge$isWorldTracked() {
         return this.trackedInWorld;
     }
 
     @Override
-    public void setTrackedInWorld(final boolean tracked) {
+    public void bridge$setWorldTracked(final boolean tracked) {
         this.trackedInWorld = tracked;
     }
 
@@ -468,8 +465,8 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
      */
     @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
     private void onSpongeWriteToNBT(final NBTTagCompound compound, final CallbackInfoReturnable<NBTTagCompound> ci) {
-        if (this.data$hasRootCompound()) {
-            this.spongeImpl$writeToSpongeCompound(this.data$getSpongeCompound());
+        if (((DataCompoundHolder) this).data$hasRootCompound()) {
+            this.spongeImpl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeCompound());
         }
     }
 
@@ -486,9 +483,9 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
     @Inject(method = "readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     private void onSpongeReadFromNBT(final NBTTagCompound compound, final CallbackInfo ci) {
         if (this.isConstructing) {
-            firePostConstructEvents(); // Do this early as possible
+            bridge$fireConstructors(); // Do this early as possible
         }
-        this.spongeImpl$readFromSpongeCompound(this.data$getSpongeCompound());
+        this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeCompound());
     }
 
     /**
@@ -541,25 +538,6 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
         if (this.isInvisible()) {
             compound.setBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
         }
-    }
-
-    @Override
-    public Optional<User> getTrackedPlayer(final String nbtKey) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<User> getCreatorUser() {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<User> getNotifierUser() {
-        return Optional.empty();
-    }
-
-    @Override
-    public void trackEntityUniqueId(final String nbtKey, @Nullable final UUID uuid) {
     }
 
     @Override

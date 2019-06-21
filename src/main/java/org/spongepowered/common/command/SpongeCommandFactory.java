@@ -65,7 +65,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
@@ -84,6 +83,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -562,12 +562,12 @@ public class SpongeCommandFactory {
                 builder.append(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "EntityType: "))
                     .append(Text.of(TextColors.BLUE, TextStyles.RESET, spongeEntity.getType().getId()));
                 src.sendMessage(builder.build());
-                final Optional<User> owner = mixinEntity.getCreatorUser();
-                final Optional<User> notifier = mixinEntity.getNotifierUser();
-                src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Owner: ", TextColors.BLUE, TextStyles.RESET,
-                    owner));
-                src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Notifier: ", TextColors.BLUE, TextStyles.RESET,
-                    notifier));
+                ((OwnershipTrackedBridge) entityHit).tracked$getOwnerReference()
+                    .ifPresent(owner -> src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Owner: ", TextColors.BLUE, TextStyles.RESET,
+                        owner)));
+                ((OwnershipTrackedBridge) entityHit).tracked$getNotifierReference()
+                    .ifPresent(notifier -> src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Notifier: ", TextColors.BLUE, TextStyles.RESET, notifier)));
+
                 return CommandResult.success();
             })
             .build();

@@ -40,6 +40,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -97,7 +98,11 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
             return;
         }
         final World spongeWorld = (World) player.world;
-        ((Entity) entity).setNotifier(player.getUniqueID());
+        if (entity instanceof OwnershipTrackedBridge) {
+            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(player);
+        } else {
+            ((Entity) entity).setNotifier(player.getUniqueID());
+        }
 
 
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

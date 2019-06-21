@@ -34,23 +34,23 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 
-import java.util.Optional;
+import javax.annotation.Nullable;
 
 @Mixin(value = EntityDamageSourceIndirect.class, priority = 992)
 public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageSource implements IndirectEntityDamageSource {
 
-    @Shadow private Entity indirectEntity;
+    @Shadow @Nullable protected Entity indirectEntity;
 
-    private Optional<User> owner;
+    @Nullable private User owner;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(CallbackInfo callbackInfo) {
         if (!(this.indirectEntity instanceof User) && this.damageSourceEntity != null) { // sources can be null
-            this.owner = ((EntityBridge) super.getSource()).getCreatorUser();
-            if (this.indirectEntity == null && this.owner.isPresent() && this.owner.get() instanceof Entity) {
-                this.indirectEntity = (Entity) this.owner.get();
+            this.owner = ((OwnershipTrackedBridge) super.getSource()).tracked$getOwnerReference().orElse(null);
+            if (this.indirectEntity == null && this.owner instanceof Entity) {
+                this.indirectEntity = (Entity) this.owner;
             }
         }
     }
@@ -67,8 +67,8 @@ public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageS
             .add("Type", this.getType().getId())
             .add("Source", this.getSource())
             .add("IndirectSource", this.getIndirectSource());
-        if (this.owner != null && this.owner.isPresent()) {
-            helper.add("SourceOwner", this.owner.get());
+        if (this.owner != null) {
+            helper.add("SourceOwner", this.owner);
         }
         return helper.toString();
     }

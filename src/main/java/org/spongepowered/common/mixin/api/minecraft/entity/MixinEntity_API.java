@@ -604,20 +604,20 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
 
     @Override
     public Optional<UUID> getCreator() {
-        return Optional.empty();
+        return Optional.empty(); // Mixed in via MixinEntity_Tracker
     }
 
     @Override
     public Optional<UUID> getNotifier() {
-        return Optional.empty();
+        return Optional.empty(); // Mixed in via MixinEntity_Tracker
     }
 
     @Override
-    public void setCreator(@Nullable final UUID uuid) {
+    public void setCreator(@Nullable final UUID uuid) {  // Mixed in via MixinEntity_Tracker
     }
 
     @Override
-    public void setNotifier(@Nullable final UUID uuid) {
+    public void setNotifier(@Nullable final UUID uuid) { // Mixed in via MixinEntity_Tracker
     }
 
     @Override

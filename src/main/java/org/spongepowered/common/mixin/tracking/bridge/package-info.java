@@ -22,34 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.tileentity;
-
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
-
-public interface TileEntityBridge {
-
-    void bridge$markDirty();
-
-    boolean isVanilla();
-
-    // Tracking
-    default SpawnType getTickedSpawnType() {
-        return SpawnTypes.BLOCK_SPAWNING;
-    }
-
-    boolean shouldTick();
-
-    boolean isTicking();
-
-    void setIsTicking(boolean ticking);
-
-    boolean isCaptured();
-
-    void setCaptured(boolean captured);
-
-    default String getPrettyPrinterString() {
-        return  this.toString();
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.mixin.tracking.bridge;

@@ -125,6 +125,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
@@ -961,9 +962,9 @@ public class SpongeCommonEventFactory {
         }
         if (source instanceof EntityDamageSource) {
             final EntityDamageSource damageSource = (EntityDamageSource) source;
-            final EntityBridge spongeEntity = (EntityBridge) damageSource.getImmediateSource();
+            final OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) damageSource.getImmediateSource();
             if (spongeEntity != null) {
-                sourceCreator = spongeEntity.getCreatorUser();
+                sourceCreator = spongeEntity.tracked$getOwnerReference();
             }
         }
 
@@ -1003,12 +1004,9 @@ public class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause( entity);
 
-            if (!(entity instanceof EntityPlayer)) {
-                final EntityBridge spongeEntity = (EntityBridge) entity;
-                final User user = spongeEntity.getCreatorUser().orElse(null);
-                if (user != null) {
-                    frame.addContext(EventContextKeys.OWNER, user);
-                }
+            if (entity instanceof OwnershipTrackedBridge) {
+                final OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) entity;
+                spongeEntity.tracked$getOwnerReference().ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
             }
 
             // TODO: Add target side support

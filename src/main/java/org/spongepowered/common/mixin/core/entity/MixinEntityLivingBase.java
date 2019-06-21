@@ -82,6 +82,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -330,8 +331,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
             final EntityDeathContext context = EntityPhase.State.DEATH.createPhaseContext()
                 .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source)
                 .source(this);
-            this.getNotifierUser().ifPresent(context::notifier);
-            this.getCreatorUser().ifPresent(context::owner);
+            if (this instanceof OwnershipTrackedBridge) {
+                ((OwnershipTrackedBridge) this).tracked$getNotifierReference().ifPresent(context::notifier);
+                ((OwnershipTrackedBridge) this).tracked$getOwnerReference().ifPresent(context::owner);
+            }
             return context;
         }
         return null;

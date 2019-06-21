@@ -47,6 +47,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
@@ -55,7 +56,6 @@ import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
@@ -68,7 +68,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-@Mixin(value = net.minecraft.world.chunk.Chunk.class, priority = 1111)
+@Mixin(value = net.minecraft.world.chunk.Chunk.class)
 public abstract class MixinChunk_Tracker implements ChunkBridge {
 
 
@@ -107,18 +107,18 @@ public abstract class MixinChunk_Tracker implements ChunkBridge {
         // Update TE tracking cache
         if (block instanceof ITileEntityProvider) {
             final TileEntity tileEntity = this.tileEntities.get(pos);
-            if (tileEntity != null) {
-                final TileEntityBridge spongeTile = (TileEntityBridge) tileEntity;
+            if (tileEntity instanceof OwnershipTrackedBridge) {
+                final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) tileEntity;
                 if (trackerType == PlayerTracker.Type.NOTIFIER) {
-                    if (spongeTile.getSpongeNotifier() == user) {
+                    if (ownerBridge.tracked$getNotifierReference().orElse(null) == user) {
                         return;
                     }
-                    spongeTile.setSpongeNotifier(user);
+                    ownerBridge.tracked$setNotifier(user);
                 } else {
-                    if (spongeTile.getSpongeOwner() == user) {
+                    if (ownerBridge.tracked$getOwnerReference().orElse(null) == user) {
                         return;
                     }
-                    spongeTile.setSpongeOwner(user);
+                    ownerBridge.tracked$setOwnerReference(user);
                 }
             }
         }

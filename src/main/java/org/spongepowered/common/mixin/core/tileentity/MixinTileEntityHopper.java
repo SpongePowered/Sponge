@@ -41,7 +41,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -97,7 +97,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
     @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"))
     private static void impl$trackNotifierWhenTransferring(IInventory inventory, IInventory hopper, EntityItem entityItem,
         CallbackInfoReturnable<Boolean> callbackInfo) {
-        ((EntityBridge) entityItem).getCreatorUser().ifPresent(owner -> {
+        ((OwnershipTrackedBridge) entityItem).tracked$getOwnerReference().ifPresent(owner -> {
             if (inventory instanceof TileEntity) {
                 TileEntity te = (TileEntity) inventory;
                 ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) te).bridge$getActiveChunk();

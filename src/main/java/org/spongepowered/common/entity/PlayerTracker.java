@@ -24,11 +24,19 @@
  */
 package org.spongepowered.common.entity;
 
+import org.spongepowered.common.data.util.NbtDataUtil;
+
 public class PlayerTracker {
 
     public enum Type {
-        OWNER,
-        NOTIFIER
+        OWNER(NbtDataUtil.SPONGE_ENTITY_CREATOR),
+        NOTIFIER(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+
+        public final String compoundKey;
+
+        Type(String compoundKey) {
+            this.compoundKey = compoundKey;
+        }
     }
 
     public int ownerIndex;

@@ -99,6 +99,7 @@ import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
@@ -135,7 +136,7 @@ import javax.annotation.Nullable;
 
 public final class EntityUtil {
 
-    public static final Function<PhaseContext<?>, Supplier<Optional<UUID>>> ENTITY_CREATOR_FUNCTION = (context) ->
+    public static final Function<PhaseContext<?>, Supplier<Optional<User>>> ENTITY_CREATOR_FUNCTION = (context) ->
         () -> Stream.<Supplier<Optional<User>>>builder()
             .add(() -> context.getSource(User.class))
             .add(context::getNotifier)
@@ -144,7 +145,6 @@ public final class EntityUtil {
             .map(Supplier::get)
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .map(User::getUniqueId)
             .findFirst();
 
     private EntityUtil() {
@@ -700,7 +700,7 @@ public final class EntityUtil {
         return color.getBitMask() | style.getBitMask();
     }
 
-    public static boolean processEntitySpawnsFromEvent(SpawnEntityEvent event, Supplier<Optional<UUID>> entityCreatorSupplier) {
+    public static boolean processEntitySpawnsFromEvent(SpawnEntityEvent event, Supplier<Optional<User>> entityCreatorSupplier) {
         boolean spawnedAny = false;
         for (org.spongepowered.api.entity.Entity entity : event.getEntities()) {
             // Here is where we need to handle the custom items potentially having custom entities
@@ -713,7 +713,8 @@ public final class EntityUtil {
         return processEntitySpawnsFromEvent(destruct, ENTITY_CREATOR_FUNCTION.apply(context));
     }
 
-    public static boolean processEntitySpawn(org.spongepowered.api.entity.Entity entity, Supplier<Optional<UUID>> supplier) {
+    @SuppressWarnings("ConstantConditions")
+    public static boolean processEntitySpawn(org.spongepowered.api.entity.Entity entity, Supplier<Optional<User>> supplier) {
         final Entity minecraftEntity = (Entity) entity;
         if (minecraftEntity instanceof EntityItem) {
             final ItemStack item = ((EntityItem) minecraftEntity).getItem();
@@ -723,7 +724,11 @@ public final class EntityUtil {
                     // Bypass spawning the entity item, since it is established that the custom entity is spawned.
                     final Entity entityToSpawn = customEntityItem.get();
                     supplier.get()
-                        .ifPresent(((org.spongepowered.api.entity.Entity) entityToSpawn)::setCreator);
+                        .ifPresent(spawned -> {
+                            if (entityToSpawn instanceof OwnershipTrackedBridge) {
+                                ((OwnershipTrackedBridge) entityToSpawn).tracked$setOwnerReference(spawned);
+                            }
+                        });
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
@@ -733,7 +738,11 @@ public final class EntityUtil {
             }
         }
         supplier.get()
-            .ifPresent(entity::setCreator);
+            .ifPresent(spawned -> {
+                if (entity instanceof OwnershipTrackedBridge) {
+                    ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(spawned);
+                }
+            });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
         ((ServerWorldBridge) entity.getWorld()).bridge$forceSpawnEntity(entity);
         return true;

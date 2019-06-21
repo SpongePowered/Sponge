@@ -35,8 +35,8 @@ import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 
 import java.util.Optional;
 
@@ -85,10 +85,10 @@ public final class SpongeMessageHandler {
             notifier = spongeChunk.getBlockNotifier(pos);
         } else if (message.type == 1) { // entity
             Entity entity = sender.world.getEntityByID(message.entityId);
-            if (entity != null) {
-                EntityBridge spongeEntity = (EntityBridge) entity;
-                owner = spongeEntity.getCreatorUser();
-                notifier = spongeEntity.getNotifierUser();
+            if (entity instanceof OwnershipTrackedBridge) {
+                OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) entity;
+                owner = ownerBridge.tracked$getOwnerReference();
+                notifier = ownerBridge.tracked$getNotifierReference();
             }
         }
 

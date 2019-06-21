@@ -41,6 +41,7 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -98,7 +99,11 @@ public final class AttackEntityPacketState extends BasicPacketState {
             return;
         }
         final World spongeWorld = (World) player.world;
-        ((Entity) entity).setNotifier(player.getUniqueID());
+        if (entity instanceof OwnershipTrackedBridge) {
+            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(player);
+        } else {
+            ((Entity) entity).setNotifier(player.getUniqueID());
+        }
 
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {

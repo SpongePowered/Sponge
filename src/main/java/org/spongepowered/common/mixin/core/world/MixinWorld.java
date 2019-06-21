@@ -221,14 +221,14 @@ public abstract class MixinWorld implements WorldBridge {
     @Inject(method = "onEntityAdded", at = @At("TAIL"))
     private void onEntityAddedToWorldMarkAsTracked(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
         if (!this.isFake()) { // Only set the value if the entity is not fake
-            ((EntityBridge) entityIn).setTrackedInWorld(true);
+            ((EntityBridge) entityIn).bridge$setWorldTracked(true);
         }
     }
 
     @Inject(method = "onEntityRemoved", at = @At("TAIL"))
     private void onEntityRemovedFromWorldMarkAsUntracked(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
-        if (!this.isFake() || ((EntityBridge) entityIn).isTrackedInWorld()) {
-            ((EntityBridge) entityIn).setTrackedInWorld(false);
+        if (!this.isFake() || ((EntityBridge) entityIn).bridge$isWorldTracked()) {
+            ((EntityBridge) entityIn).bridge$setWorldTracked(false);
         }
     }
 

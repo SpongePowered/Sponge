@@ -71,6 +71,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -108,6 +109,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperience
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
@@ -127,6 +129,7 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -922,5 +925,30 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Override
     public boolean spongeImpl$isImmuneToFireForIgniteEvent() {
         return this.isSpectator() || this.isCreative();
+    }
+
+    @Override
+    public void tracked$setOwner(@Nullable User user) { }
+
+    @Override
+    public void tracked$setNotifier(@Nullable User user) { }
+
+    @Override
+    public Optional<User> tracked$getTrackedUser(PlayerTracker.Type nbtKey) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> tracked$getOwnerUser() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> tracked$getNotifierUser() {
+        return Optional.empty();
+    }
+
+    @Override
+    public void tracked$setTrackedUUID(PlayerTracker.Type nbtKey, @Nullable UUID uuid) {
     }
 }

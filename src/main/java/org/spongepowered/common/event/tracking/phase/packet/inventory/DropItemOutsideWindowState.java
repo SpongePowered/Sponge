@@ -29,6 +29,7 @@ import net.minecraft.network.Packet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -38,6 +39,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 
 import java.util.List;
@@ -47,8 +49,8 @@ import javax.annotation.Nullable;
 
 public final class DropItemOutsideWindowState extends BasicInventoryPacketState {
 
-    public DropItemOutsideWindowState() {
-        super(PacketConstants.MODE_CLICK | PacketConstants.BUTTON_PRIMARY | PacketConstants.BUTTON_SECONDARY | PacketConstants.CLICK_OUTSIDE_WINDOW);
+    public DropItemOutsideWindowState(int stateid) {
+        super(stateid);
     }
 
     @Override
@@ -68,7 +70,11 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
             for (Entity currentEntity : capturedEntities) {
-                currentEntity.setCreator(playerMP.getUniqueID());
+                if (currentEntity instanceof OwnershipTrackedBridge) {
+                    ((OwnershipTrackedBridge) currentEntity).tracked$setOwnerReference((Player) playerMP);
+                } else {
+                    currentEntity.setCreator(playerMP.getUniqueID());
+                }
             }
             if (usedButton == PacketConstants.PACKET_BUTTON_PRIMARY_ID) {
                 return SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(frame.getCurrentCause(), transaction, capturedEntities,

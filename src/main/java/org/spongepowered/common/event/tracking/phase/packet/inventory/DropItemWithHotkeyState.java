@@ -33,6 +33,7 @@ import net.minecraft.util.EnumHand;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -46,6 +47,7 @@ import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
@@ -136,8 +138,11 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             for (Entity currentEntity : capturedEntities) {
-                currentEntity.setCreator(playerMP.getUniqueID());
-            }
+                if (currentEntity instanceof OwnershipTrackedBridge) {
+                    ((OwnershipTrackedBridge) currentEntity).tracked$setOwnerReference((Player) playerMP);
+                } else {
+                    currentEntity.setCreator(playerMP.getUniqueID());
+                }            }
 
             // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')
             ClickInventoryEvent.Drop event;

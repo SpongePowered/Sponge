@@ -72,7 +72,6 @@ import org.spongepowered.common.event.tracking.phase.packet.inventory.CloseWindo
 import org.spongepowered.common.event.tracking.phase.packet.inventory.CreativeInventoryPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DoubleClickInventoryState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropInventoryState;
-import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemOutsideWindowNoOpState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemOutsideWindowState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemWithHotkeyState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.EnchantItemPacketState;
@@ -143,9 +142,9 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState PRIMARY_INVENTORY_CLICK = new PrimaryInventoryClickState();
         public static final BasicInventoryPacketState SECONDARY_INVENTORY_CLICK = new SecondaryInventoryClickState();
         public static final BasicInventoryPacketState MIDDLE_INVENTORY_CLICK = new MiddleInventoryClickState();
-        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState();
+        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState(PacketConstants.MODE_CLICK | PacketConstants.BUTTON_PRIMARY | PacketConstants.BUTTON_SECONDARY | PacketConstants.CLICK_OUTSIDE_WINDOW);
         public static final BasicInventoryPacketState DROP_ITEM_WITH_HOTKEY = new DropItemWithHotkeyState();
-        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW_NOOP = new DropItemOutsideWindowNoOpState();
+        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW_NOOP = new DropItemOutsideWindowState(PacketConstants.MODE_DROP | PacketConstants.BUTTON_PRIMARY | PacketConstants.BUTTON_SECONDARY | PacketConstants.CLICK_OUTSIDE_WINDOW);
         public static final BasicInventoryPacketState DROP_ITEMS = new BasicInventoryPacketState();
         static final BasicInventoryPacketState DROP_INVENTORY = new DropInventoryState();
         public static final BasicInventoryPacketState SWITCH_HOTBAR_NUMBER_PRESS = new SwitchHotbarNumberPressState();

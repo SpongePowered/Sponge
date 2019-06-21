@@ -149,8 +149,8 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z", remap = false))
     private boolean onAddEntityTask(Set<EntityAITasks.EntityAITaskEntry> set, Object entry, int priority, EntityAIBase base) {
         ((EntityGoalBridge) base).setGoal((Goal<?>) this);
-        if (!ShouldFire.A_I_TASK_EVENT_ADD || this.owner == null || ((EntityBridge) this.owner).isInConstructPhase()) {
-            // Event is fired in firePostConstructEvents
+        if (!ShouldFire.A_I_TASK_EVENT_ADD || this.owner == null || ((EntityBridge) this.owner).bridge$isConstructing()) {
+            // Event is fired in bridge$fireConstructors
             return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
         }
         final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(), priority, priority,
@@ -205,7 +205,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
             // Sponge start
             if (otherAiBase.equals(aiBase)) {
                 AITaskEvent.Remove event = null;
-                if (ShouldFire.A_I_TASK_EVENT_REMOVE && this.owner != null && !((EntityBridge) this.owner).isInConstructPhase()) {
+                if (ShouldFire.A_I_TASK_EVENT_REMOVE && this.owner != null && !((EntityBridge) this.owner).bridge$isConstructing()) {
                     event = SpongeEventFactory.createAITaskEventRemove(Sponge.getCauseStackManager().getCurrentCause(),
                             (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
                     SpongeImpl.postEvent(event);
