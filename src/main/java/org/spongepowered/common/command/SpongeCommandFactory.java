@@ -562,12 +562,15 @@ public class SpongeCommandFactory {
                 builder.append(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "EntityType: "))
                     .append(Text.of(TextColors.BLUE, TextStyles.RESET, spongeEntity.getType().getId()));
                 src.sendMessage(builder.build());
-                ((OwnershipTrackedBridge) entityHit).tracked$getOwnerReference()
-                    .ifPresent(owner -> src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Owner: ", TextColors.BLUE, TextStyles.RESET,
-                        owner)));
-                ((OwnershipTrackedBridge) entityHit).tracked$getNotifierReference()
-                    .ifPresent(notifier -> src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Notifier: ", TextColors.BLUE, TextStyles.RESET, notifier)));
-
+                if (entityHit instanceof OwnershipTrackedBridge) {
+                    ((OwnershipTrackedBridge) entityHit).tracked$getOwnerReference()
+                        .ifPresent(
+                            owner -> src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Owner: ", TextColors.BLUE, TextStyles.RESET,
+                                owner)));
+                    ((OwnershipTrackedBridge) entityHit).tracked$getNotifierReference()
+                        .ifPresent(notifier -> src
+                            .sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Notifier: ", TextColors.BLUE, TextStyles.RESET, notifier)));
+                }
                 return CommandResult.success();
             })
             .build();

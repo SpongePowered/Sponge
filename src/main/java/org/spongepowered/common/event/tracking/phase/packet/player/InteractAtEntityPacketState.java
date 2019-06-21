@@ -31,6 +31,7 @@ import net.minecraft.network.play.client.CPacketUseEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -99,7 +100,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
         }
         final World spongeWorld = (World) player.world;
         if (entity instanceof OwnershipTrackedBridge) {
-            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(player);
+            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) player);
         } else {
             ((Entity) entity).setNotifier(player.getUniqueID());
         }

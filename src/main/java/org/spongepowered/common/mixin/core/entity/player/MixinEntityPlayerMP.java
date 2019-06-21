@@ -319,8 +319,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         if (((DataCompoundHolder) oldEntity).data$hasRootCompound()) {
             final NBTTagCompound old = ((DataCompoundHolder) oldEntity).data$getRootCompound();
             if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                this.data$getRootCompound().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
-                this.spongeImpl$readFromSpongeCompound(this.data$getSpongeCompound());
+                ((DataCompoundHolder) this).data$getRootCompound().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
+                this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeCompound());
             }
         }
     }

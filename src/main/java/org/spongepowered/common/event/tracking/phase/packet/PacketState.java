@@ -77,7 +77,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
 
     protected static void processEntities(EntityPlayerMP player, Collection<Entity> entities) {
         for (Entity entity : entities) {
-            EntityUtil.processEntitySpawn(entity, () -> Optional.of(player.getUniqueID()));
+            EntityUtil.processEntitySpawn(entity, () -> Optional.of((Player) player));
         }
     }
 

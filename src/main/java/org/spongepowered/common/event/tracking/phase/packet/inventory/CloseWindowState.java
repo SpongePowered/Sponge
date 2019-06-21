@@ -30,6 +30,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.network.Packet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -83,7 +84,7 @@ public final class CloseWindowState extends BasicPacketState {
                     .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(player.getUniqueID()));
+                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of((Player) player));
                 }
             });
             // Pre-merged items
@@ -96,7 +97,7 @@ public final class CloseWindowState extends BasicPacketState {
                     .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(player.getUniqueID()));
+                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of((Player) player));
                 }
             });
         }

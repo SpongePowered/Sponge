@@ -927,28 +927,4 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         return this.isSpectator() || this.isCreative();
     }
 
-    @Override
-    public void tracked$setOwner(@Nullable User user) { }
-
-    @Override
-    public void tracked$setNotifier(@Nullable User user) { }
-
-    @Override
-    public Optional<User> tracked$getTrackedUser(PlayerTracker.Type nbtKey) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<User> tracked$getOwnerUser() {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<User> tracked$getNotifierUser() {
-        return Optional.empty();
-    }
-
-    @Override
-    public void tracked$setTrackedUUID(PlayerTracker.Type nbtKey, @Nullable UUID uuid) {
-    }
 }

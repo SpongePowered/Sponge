@@ -33,6 +33,7 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -100,7 +101,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
         }
         final World spongeWorld = (World) player.world;
         if (entity instanceof OwnershipTrackedBridge) {
-            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(player);
+            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) player);
         } else {
             ((Entity) entity).setNotifier(player.getUniqueID());
         }

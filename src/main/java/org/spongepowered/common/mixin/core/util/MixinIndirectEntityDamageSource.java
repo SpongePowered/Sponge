@@ -48,7 +48,9 @@ public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageS
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(CallbackInfo callbackInfo) {
         if (!(this.indirectEntity instanceof User) && this.damageSourceEntity != null) { // sources can be null
-            this.owner = ((OwnershipTrackedBridge) super.getSource()).tracked$getOwnerReference().orElse(null);
+            this.owner = super.getSource() instanceof OwnershipTrackedBridge
+                         ? ((OwnershipTrackedBridge) super.getSource()).tracked$getOwnerReference().orElse(null)
+                         : null;
             if (this.indirectEntity == null && this.owner instanceof Entity) {
                 this.indirectEntity = (Entity) this.owner;
             }

@@ -226,7 +226,7 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static void callDropItemCustom(final List<Entity> items, final PhaseContext<?> context, final Supplier<Optional<UUID>> supplier) {
+    public static void callDropItemCustom(final List<Entity> items, final PhaseContext<?> context, final Supplier<Optional<User>> supplier) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
             final DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), items);
@@ -237,7 +237,7 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static void callDropItemClose(final List<Entity> items, final PhaseContext<?> context, final Supplier<Optional<UUID>> supplier) {
+    public static void callDropItemClose(final List<Entity> items, final PhaseContext<?> context, final Supplier<Optional<User>> supplier) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
             final DropItemEvent.Close event = SpongeEventFactory.createDropItemEventClose(frame.getCurrentCause(), items);
@@ -962,9 +962,11 @@ public class SpongeCommonEventFactory {
         }
         if (source instanceof EntityDamageSource) {
             final EntityDamageSource damageSource = (EntityDamageSource) source;
-            final OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) damageSource.getImmediateSource();
-            if (spongeEntity != null) {
-                sourceCreator = spongeEntity.tracked$getOwnerReference();
+            if (damageSource.getImmediateSource() instanceof OwnershipTrackedBridge) {
+                final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) damageSource.getImmediateSource();
+                if (ownerBridge != null) {
+                    sourceCreator = ownerBridge.tracked$getOwnerReference();
+                }
             }
         }
 

@@ -188,7 +188,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                         {
                             final boolean isPlayer = sender instanceof Player;
                             final Player player = isPlayer ? (Player) sender : null;
-                            EntityUtil.processEntitySpawnsFromEvent(destruct, () -> Optional.ofNullable(isPlayer ? player.getUniqueId() : null));
+                            EntityUtil.processEntitySpawnsFromEvent(destruct, () -> Optional.ofNullable(isPlayer ? player : null));
                         }
 
                     }

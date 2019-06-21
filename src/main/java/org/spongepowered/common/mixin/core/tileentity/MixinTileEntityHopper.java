@@ -97,13 +97,15 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
     @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"))
     private static void impl$trackNotifierWhenTransferring(IInventory inventory, IInventory hopper, EntityItem entityItem,
         CallbackInfoReturnable<Boolean> callbackInfo) {
-        ((OwnershipTrackedBridge) entityItem).tracked$getOwnerReference().ifPresent(owner -> {
-            if (inventory instanceof TileEntity) {
-                TileEntity te = (TileEntity) inventory;
-                ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) te).bridge$getActiveChunk();
-                spongeChunk.addTrackedBlockPosition(te.getBlockType(), te.getPos(), owner, PlayerTracker.Type.NOTIFIER);
-            }
-        });
+        if (entityItem instanceof OwnershipTrackedBridge) {
+            ((OwnershipTrackedBridge) entityItem).tracked$getOwnerReference().ifPresent(owner -> {
+                if (inventory instanceof TileEntity) {
+                    TileEntity te = (TileEntity) inventory;
+                    ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) te).bridge$getActiveChunk();
+                    spongeChunk.addTrackedBlockPosition(te.getBlockType(), te.getPos(), owner, PlayerTracker.Type.NOTIFIER);
+                }
+            });
+        }
     }
 
     // Call PreEvents
