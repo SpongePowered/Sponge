@@ -36,6 +36,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.bridge.world.LocationBridge;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 
 public final class VecHelper {
@@ -64,7 +65,7 @@ public final class VecHelper {
         if (location == null) {
             return null;
         }
-        return ((IMixinLocation) (Object) location).getBlockPos();
+        return ((LocationBridge) (Object) location).getBlockPos();
     }
     // === MC BlockPos --> Flow Vector3i ==
 
