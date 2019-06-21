@@ -31,10 +31,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 import org.spongepowered.common.mixin.core.world.storage.AccessorMapStorage;
 import org.spongepowered.common.world.WorldManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(MinecraftServer.class)
@@ -44,13 +46,21 @@ public abstract class MixinMinecraftServer_MapOptimization {
     // need to tick it once per server tick
     @Inject(method = "tick", at = @At(value = "RETURN"))
     private void onEndTickMapOptimization(CallbackInfo ci) {
-        final List<WorldSavedData> loadedData = ((AccessorMapStorage) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList();
-        for (WorldSavedData next : loadedData) {
-            if (!(next instanceof MapData)) {
-                continue;
-            }
 
-            ((OptimizedMapDataBridge) next).bridge$tickMap();
+        final List<WorldSavedData> data;
+
+        // Mods, such as TwilightForest, may add themselves to this list when ticking which will cause a CME.
+        if (!SpongeImplHooks.isVanilla()) {
+            data = new ArrayList<>(
+                ((AccessorMapStorage) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList());
         }
+        else {
+            data = ((AccessorMapStorage) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList();
+        }
+
+        data
+            .stream()
+            .filter(wsd -> wsd instanceof MapData)
+            .forEach(wsd -> ((OptimizedMapDataBridge) wsd).bridge$tickMap());
     }
 }
