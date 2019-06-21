@@ -118,7 +118,7 @@ public interface ChunkBridge {
 
     boolean isQueuedForUnload();
 
-    CopyOnWriteArrayList<Short> getQueuedLightingUpdates(EnumSkyBlock type);
+    Set<Short> getQueuedLightingUpdates(EnumSkyBlock type);
 
     void markChunkDirty();
 

@@ -47,9 +47,11 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -58,13 +60,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class MixinChunk_Async_Lighting implements ChunkBridge {
 
     // Keeps track of block positions in this chunk currently queued for sky light update
-    private CopyOnWriteArrayList<Short> queuedSkyLightingUpdates = new CopyOnWriteArrayList<>();
+    private Set<Short> queuedSkyLightingUpdates = ConcurrentHashMap.newKeySet();
     // Keeps track of block positions in this chunk currently queued for block light update
-    private CopyOnWriteArrayList<Short> queuedBlockLightingUpdates = new CopyOnWriteArrayList<>();
+    private Set<Short> queuedBlockLightingUpdates = ConcurrentHashMap.newKeySet();
     private AtomicInteger pendingLightUpdates = new AtomicInteger();
     private long lightUpdateTime;
     private ExecutorService lightExecutorService;
-    private static final List<Chunk> EMPTY_LIST = new ArrayList<>();
+    private static final List<Chunk> EMPTY_LIST = Collections.emptyList();
     private static final BlockPos DUMMY_POS = new BlockPos(0, 0, 0);
     private boolean isServerChunk;
 
@@ -705,7 +707,7 @@ public abstract class MixinChunk_Async_Lighting implements ChunkBridge {
      * @return The list of queued block positions, empty if none
      */
     @Override
-    public CopyOnWriteArrayList<Short> getQueuedLightingUpdates(EnumSkyBlock type) {
+    public Set<Short> getQueuedLightingUpdates(EnumSkyBlock type) {
         if (type == EnumSkyBlock.SKY) {
             return this.queuedSkyLightingUpdates;
         }

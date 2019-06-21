@@ -335,20 +335,26 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
             } else if (i >= 14) {
                 return i;
             } else {
-                for (EnumFacing enumfacing : EnumFacing.values()) {
-                    BlockPos blockpos = pos.offset(enumfacing);
-                    int k = this.getLightForAsync(lightType, blockpos, currentChunk, neighbors) - j;
+                BlockPos.PooledMutableBlockPos pooledBlockPos = BlockPos.PooledMutableBlockPos.retain();
 
-                    if (k > i) {
-                        i = k;
+                try {
+                    for (EnumFacing enumfacing : EnumFacing.values()) {
+                        pooledBlockPos.setPos(pos).move(enumfacing);
+                        int k = this.getLightForAsync(lightType, pooledBlockPos, currentChunk, neighbors) - j;
+
+                        if (k > i) {
+                            i = k;
+                        }
+
+                        if (i >= 14) {
+                            return i;
+                        }
                     }
 
-                    if (i >= 14) {
-                        return i;
-                    }
+                    return i;
+                } finally {
+                    pooledBlockPos.release();
                 }
-
-                return i;
             }
         }
     }
