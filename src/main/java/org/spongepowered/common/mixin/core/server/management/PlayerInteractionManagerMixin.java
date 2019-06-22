@@ -70,6 +70,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
@@ -522,6 +524,25 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
             }
 
             return actionresult.getType();
+        }
+    }
+
+    /**
+     * Some mods (e.g. OreExcavator) will call tryHarvestBlock directly, and
+     * the cause stack may not have the player on it. This should fix that.
+     * See SpongeForge#2789.
+     */
+    @Inject(method = "tryHarvestBlock", at = @At("HEAD"))
+    private void impl$addPlayerToCauseForHarvest(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        Sponge.getCauseStackManager().pushCause(this.player);
+    }
+
+    @Inject(method = "tryHarvestBlock", at = @At("RETURN"))
+    private void impl$rempvePlayerFromCauseForHarvest(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        Object cause = Sponge.getCauseStackManager().popCause();
+        if (cause != this.player) {
+            SpongeImpl.getLogger().warn("tryHarvestBlock(): expected to pop " + this.player + " but got " + cause);
+            SpongeImpl.getLogger().warn("Remaining cause: " + Sponge.getCauseStackManager().getCurrentCause());
         }
     }
 
