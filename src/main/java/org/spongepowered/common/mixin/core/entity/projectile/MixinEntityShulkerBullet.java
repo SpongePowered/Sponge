@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity;
+package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.projectile.EntityShulkerBullet;
 import net.minecraft.util.EnumFacing;
@@ -38,6 +38,7 @@ import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IEntityTargetingEntity;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinShulkerBullet;
+import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.UUID;
 

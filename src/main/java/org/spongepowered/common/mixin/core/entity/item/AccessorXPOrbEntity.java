@@ -26,23 +26,13 @@ package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.entity.IMixinEntityXPOrb;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(EntityXPOrb.class)
-public abstract class MixinEntityXPOrb extends MixinEntity implements IMixinEntityXPOrb {
+public interface AccessorXPOrbEntity {
 
-    @Shadow private int xpValue;
+    @Accessor("xpValue") int accessor$getExperience();
 
-    @Override
-    public int getExperience() {
-        return this.xpValue;
-    }
-
-    @Override
-    public void setExperience(int experience) {
-        this.xpValue = experience;
-    }
+    @Accessor("xpValue") void accessor$setExperience(int xp);
 
 }

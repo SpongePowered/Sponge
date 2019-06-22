@@ -22,12 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity;
+package org.spongepowered.common.mixin.core.entity.projectile;
 
-public interface IMixinEntityXPOrb {
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.EntityShulkerBullet;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    int getExperience();
+import java.util.UUID;
 
-    void setExperience(int experience);
+import javax.annotation.Nullable;
+
+@Mixin(EntityShulkerBullet.class)
+public interface AccessorShulkerBulletEntity {
+
+    @Accessor("target") @Nullable Entity accessor$getTarget();
+
+    @Accessor("target") void accessor$setTarget(@Nullable Entity target);
+
+    @Accessor("targetUniqueId") void accessor$setTargetId(@Nullable UUID target);
 
 }

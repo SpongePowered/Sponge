@@ -25,6 +25,8 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.EntityShulkerBullet;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetedEntityData;
@@ -32,29 +34,40 @@ import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetedEntityData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.IEntityTargetingEntity;
+import org.spongepowered.common.mixin.core.entity.projectile.AccessorShulkerBulletEntity;
 
 import java.util.Optional;
 
-public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingleDataProcessor<Entity, org.spongepowered.api.entity.EntitySnapshot,
-        Value<org.spongepowered.api.entity.EntitySnapshot>, TargetedEntityData, ImmutableTargetedEntityData> {
+public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataSingleTargetProcessor<AccessorShulkerBulletEntity, EntitySnapshot,
+        Value<EntitySnapshot>, TargetedEntityData, ImmutableTargetedEntityData> {
 
     public EntityTargetedEntityDataProcessor() {
-        super(Entity.class, Keys.TARGETED_ENTITY);
+        super(Keys.TARGETED_ENTITY, AccessorShulkerBulletEntity.class);
     }
 
     @Override
-    protected boolean set(Entity dataHolder, org.spongepowered.api.entity.EntitySnapshot value) {
-        ((IEntityTargetingEntity) dataHolder).setTargetedEntity((Entity) value);
+    protected boolean set(AccessorShulkerBulletEntity dataHolder, org.spongepowered.api.entity.EntitySnapshot value) {
+        if (!value.getUniqueId().isPresent()) {
+            return false;
+        }
+        final Entity newTarget = ((WorldServer) ((EntityShulkerBullet) dataHolder).world).getEntityFromUuid(value.getUniqueId().get());
+        if (newTarget == null) {
+            return false;
+        }
+        dataHolder.accessor$setTarget(newTarget);
+        dataHolder.accessor$setTargetId(newTarget.getUniqueID());
         return true;
     }
 
     @Override
-    protected Optional<org.spongepowered.api.entity.EntitySnapshot> getVal(Entity dataHolder) {
+    protected Optional<org.spongepowered.api.entity.EntitySnapshot> getVal(AccessorShulkerBulletEntity dataHolder) {
         Entity entity = ((IEntityTargetingEntity) dataHolder).getTargetedEntity();
         if (entity == null) {
             return Optional.empty();
@@ -68,7 +81,7 @@ public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingl
     }
 
     @Override
-    public boolean supports(Entity dataHolder) {
+    public boolean supports(AccessorShulkerBulletEntity dataHolder) {
         return dataHolder instanceof IEntityTargetingEntity;
     }
 
@@ -79,10 +92,21 @@ public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingl
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        Optional<org.spongepowered.api.entity.EntitySnapshot> maybeTargetedEntity = container.get(Keys.TARGETED_ENTITY);
-        if (maybeTargetedEntity.isPresent()) {
-            ((IEntityTargetingEntity) container).setTargetedEntity(null);
-            return DataTransactionResult.successRemove(new ImmutableSpongeValue<>(Keys.TARGETED_ENTITY, maybeTargetedEntity.get()));
+        if (container instanceof AccessorShulkerBulletEntity) {
+            final Entity target = ((AccessorShulkerBulletEntity) container).accessor$getTarget();
+            if (target == null) {
+                return DataTransactionResult.successNoData();
+            }
+            final DataTransactionResult
+                result =
+                DataTransactionResult.builder()
+                    .replace(new ImmutableSpongeValue<>(Keys.TARGETED_ENTITY, ((org.spongepowered.api.entity.Entity) target).createSnapshot()))
+                    .result(DataTransactionResult.Type.SUCCESS)
+                    .build();
+
+            ((AccessorShulkerBulletEntity) container).accessor$setTarget(null);
+            ((AccessorShulkerBulletEntity) container).accessor$setTargetId(null);
+            return result;
         }
 
         return DataTransactionResult.successNoData();

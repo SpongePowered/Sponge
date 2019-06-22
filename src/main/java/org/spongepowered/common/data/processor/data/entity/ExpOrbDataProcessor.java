@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
@@ -33,28 +32,28 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.interfaces.entity.IMixinEntityXPOrb;
+import org.spongepowered.common.mixin.core.entity.item.AccessorXPOrbEntity;
 
 import java.util.Optional;
 
 public class ExpOrbDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityXPOrb, Integer, MutableBoundedValue<Integer>, ExpOrbData, ImmutableExpOrbData> {
+    AbstractSingleDataSingleTargetProcessor<AccessorXPOrbEntity, Integer, MutableBoundedValue<Integer>, ExpOrbData, ImmutableExpOrbData> {
 
     public ExpOrbDataProcessor() {
-        super(EntityXPOrb.class, Keys.CONTAINED_EXPERIENCE);
+        super(Keys.CONTAINED_EXPERIENCE, AccessorXPOrbEntity.class);
     }
 
     @Override
-    protected boolean set(EntityXPOrb entity, Integer value) {
-        ((IMixinEntityXPOrb) entity).setExperience(value);
+    protected boolean set(AccessorXPOrbEntity entity, Integer value) {
+        entity.accessor$setExperience(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityXPOrb entity) {
-        return Optional.of(((IMixinEntityXPOrb) entity).getExperience());
+    protected Optional<Integer> getVal(AccessorXPOrbEntity entity) {
+        return Optional.of(entity.accessor$getExperience());
     }
 
     @Override
