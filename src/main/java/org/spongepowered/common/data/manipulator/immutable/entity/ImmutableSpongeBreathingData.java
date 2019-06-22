@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.util.Constants;
 
 public class ImmutableSpongeBreathingData extends AbstractImmutableData<ImmutableBreathingData, BreathingData> implements ImmutableBreathingData {
 
@@ -56,7 +57,7 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
 
         this.maxAirValue = SpongeValueFactory.boundedBuilder(Keys.MAX_AIR)
                 .actualValue(this.maxAir)
-                .defaultValue(300)
+                .defaultValue(Constants.Sponge.Entity.DEFAULT_MAX_AIR)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .build()

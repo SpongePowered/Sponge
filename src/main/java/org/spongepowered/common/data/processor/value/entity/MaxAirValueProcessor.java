@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -44,7 +45,7 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<BaseLivin
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_AIR)
-            .defaultValue(300)
+            .defaultValue(Constants.Sponge.Entity.DEFAULT_MAX_AIR)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
             .actualValue(defaultValue)
@@ -53,6 +54,9 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<BaseLivin
 
     @Override
     protected boolean set(BaseLivingEntityBridge container, Integer value) {
+        if (value < 0) {
+            return false;
+        }
         container.bridge$setMaxAir(value);
         return true;
     }

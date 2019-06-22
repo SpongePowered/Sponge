@@ -38,6 +38,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
 import java.util.Optional;
@@ -50,7 +51,7 @@ public class BreathingDataProcessor extends AbstractEntityDataProcessor<EntityLi
 
     @Override
     protected BreathingData createManipulator() {
-        return new SpongeBreathingData(300, 300);
+        return new SpongeBreathingData(Constants.Sponge.Entity.DEFAULT_MAX_AIR, Constants.Sponge.Entity.DEFAULT_MAX_AIR);
     }
 
     @Override

@@ -58,11 +58,11 @@ public class EntityTrackedUser implements IFixableData {
     private static void process(NBTTagCompound spongeData, String type) {
         if (spongeData.hasKey(type, NbtDataUtil.TAG_COMPOUND)) {
             final NBTTagCompound creatorTag = spongeData.getCompoundTag(type);
-            final long least = creatorTag.getLong(NbtDataUtil.Deprecated.Entity.UUID_LEAST_1_8);
-            final long most = creatorTag.getLong(NbtDataUtil.Deprecated.Entity.UUID_MOST_1_8);
+            final long least = creatorTag.getLong(Constants.Deprecated.Entity.UUID_LEAST_1_8);
+            final long most = creatorTag.getLong(Constants.Deprecated.Entity.UUID_MOST_1_8);
             final UUID creator = new UUID(most, least);
-            creatorTag.removeTag(NbtDataUtil.Deprecated.Entity.UUID_LEAST_1_8);
-            creatorTag.removeTag(NbtDataUtil.Deprecated.Entity.UUID_MOST_1_8);
+            creatorTag.removeTag(Constants.Deprecated.Entity.UUID_LEAST_1_8);
+            creatorTag.removeTag(Constants.Deprecated.Entity.UUID_MOST_1_8);
             creatorTag.setUniqueId(NbtDataUtil.UUID, creator);
         }
     }

@@ -69,7 +69,6 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityLivingBase_API extends MixinEntity_API implements Living {
 
     @Shadow @Nullable public EntityLivingBase revengeTarget;
-
     @Shadow protected float lastDamage;
 
     @Shadow public abstract void setHealth(float health);
@@ -114,12 +113,7 @@ public abstract class MixinEntityLivingBase_API extends MixinEntity_API implemen
     @Shadow private boolean checkTotemDeathProtection(DamageSource p_190628_1_) {
         return false; // SHADOWED
     }
-
     @Shadow public abstract boolean attemptTeleport(double x, double y, double z);
-
-    private int deathEventsPosted;
-    private int maxAir = 300;
-    @Nullable private ItemStack activeItemStackCopy;
 
     @Override
     public Vector3d getHeadRotation() {

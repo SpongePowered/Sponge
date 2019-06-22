@@ -419,6 +419,7 @@ public final class Constants {
 
     }
 
+
     private Constants() {}
 
     /**
@@ -431,5 +432,28 @@ public final class Constants {
         public static final String PERSISTED_NBT_TAG = "PlayerPersisted";
         public static final String FORGE_DATA = "ForgeData";
         public static final String FORGE_CAPS = "ForgeCaps";
+    }
+
+    public static final class Deprecated {
+
+        public static final class Entity {
+            public static final String UUID_LEAST_1_8 = "uuid_least";
+            public static final String UUID_MOST_1_8 = "uuid_most";
+
+            private Entity() {
+            }
+        }
+
+        public static final class World {
+
+            public static final String WORLD_UUID_LEAST_1_8 = "uuid_least";
+            public static final String WORLD_UUID_MOST_1_8 = "uuid_most";
+
+            private World() {
+            }
+        }
+
+        private Deprecated() {
+        }
     }
 }

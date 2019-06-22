@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.util.Constants;
 
 public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBreathingData> implements BreathingData {
 
@@ -46,7 +47,7 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
     }
 
     public SpongeBreathingData() {
-        this(300, 300);
+        this(Constants.Sponge.Entity.DEFAULT_MAX_AIR, Constants.Sponge.Entity.DEFAULT_MAX_AIR);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
     @Override
     public MutableBoundedValue<Integer> remainingAir() {
         return SpongeValueFactory.boundedBuilder(Keys.REMAINING_AIR)
-            .defaultValue(300)
+            .defaultValue(Constants.Sponge.Entity.DEFAULT_MAX_AIR)
             .minimum(-20)
             .maximum(Integer.MAX_VALUE)
             .actualValue(this.remainingAir)

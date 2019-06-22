@@ -182,32 +182,34 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements BaseL
         return false; // SHADOWED
     }
 
-    private int deathEventsPosted;
-    private int maxAir = Constants.Sponge.Entity.DEFAULT_MAX_AIR;
-    @Nullable private ItemStack activeItemStackCopy;
+    private int impl$deathEventsPosted;
+    private int impl$maxAir = Constants.Sponge.Entity.DEFAULT_MAX_AIR;
+    @Nullable private ItemStack impl$activeItemStackCopy;
 
     @Override
     public int bridge$getMaxAir() {
-        return this.maxAir;
+        return this.impl$maxAir;
     }
 
     @Override
     public void bridge$setMaxAir(final int air) {
-        this.maxAir = air;
+        this.impl$maxAir = air;
     }
 
     @Override
     public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey(Constants.Sponge.Entity.MAX_AIR)) {
-            this.maxAir = compound.getInteger(Constants.Sponge.Entity.MAX_AIR);
+            this.impl$maxAir = compound.getInteger(Constants.Sponge.Entity.MAX_AIR);
         }
     }
 
     @Override
     public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        compound.setInteger(Constants.Sponge.Entity.MAX_AIR, this.maxAir);
+        if (this.impl$maxAir != Constants.Sponge.Entity.DEFAULT_MAX_AIR) { // We don't need to set max air unless it's really necessary
+            compound.setInteger(Constants.Sponge.Entity.MAX_AIR, this.impl$maxAir);
+        }
     }
 
     /**
@@ -228,16 +230,16 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements BaseL
         // This will transitively call the forge event
         final boolean isMainThread = !((WorldBridge) this.world).isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
-            if (isMainThread && this.deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
+            if (isMainThread && this.impl$deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
-                this.deathEventsPosted++;
+                this.impl$deathEventsPosted++;
                 if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause, isMainThread).map(Cancellable::isCancelled).orElse(true)) {
                     // Since the forge event is cancellable
                     return;
                 }
             }
         } else {
-            this.deathEventsPosted = 0;
+            this.impl$deathEventsPosted = 0;
         }
 
         // Double check that the PhaseTracker is already capturing the Death phase
@@ -295,7 +297,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements BaseL
 
     @Override
     public void bridge$resetDeathEventsPosted() {
-        this.deathEventsPosted = 0;
+        this.impl$deathEventsPosted = 0;
     }
 
     /**
@@ -1068,7 +1070,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements BaseL
             resetActiveHand();
             ci.cancel();
         } else {
-            this.activeItemStackCopy = this.activeItemStack.copy();
+            this.impl$activeItemStackCopy = this.activeItemStack.copy();
         }
     }
 
@@ -1087,7 +1089,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements BaseL
         // set the copy back in the player's hand, since it may have been already
         // modified if an ItemFood is being used.
 
-        final ItemStackSnapshot activeItemStackSnapshot = ItemStackUtil.snapshotOf(this.activeItemStackCopy == null ? ItemStack.EMPTY : this.activeItemStackCopy);
+        final ItemStackSnapshot activeItemStackSnapshot = ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy == null ? ItemStack.EMPTY : this.impl$activeItemStackCopy);
 
 
         final UseItemStackEvent.Replace event;
@@ -1097,16 +1099,16 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements BaseL
             this.addSelfToFrame(frame, activeItemStackSnapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventReplace(Sponge.getCauseStackManager().getCurrentCause(),
                     this.activeItemStackUseCount, this.activeItemStackUseCount, activeItemStackSnapshot,
-                    new Transaction<>(ItemStackUtil.snapshotOf(this.activeItemStackCopy), snapshot));
+                    new Transaction<>(ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy), snapshot));
         }
 
         if (SpongeImpl.postEvent(event)) {
-            this.setHeldItem(hand, this.activeItemStackCopy.copy());
+            this.setHeldItem(hand, this.impl$activeItemStackCopy.copy());
             return;
         }
 
         if (!event.getItemStackResult().isValid()) {
-            this.setHeldItem(hand, this.activeItemStackCopy.copy());
+            this.setHeldItem(hand, this.impl$activeItemStackCopy.copy());
             return;
         }
 
@@ -1138,16 +1140,16 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements BaseL
             return;
         }
 
-        // If we finished using an item, activeItemStackCopy will be non-null
-        // However, if a player stopped using an item early, activeItemStackCopy will not be set
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStackCopy != null ? this.activeItemStackCopy : this.activeItemStack);
+        // If we finished using an item, impl$activeItemStackCopy will be non-null
+        // However, if a player stopped using an item early, impl$activeItemStackCopy will not be set
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy != null ? this.impl$activeItemStackCopy : this.activeItemStack);
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             this.addSelfToFrame(frame, snapshot);
             SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventReset(Sponge.getCauseStackManager().getCurrentCause(),
                     this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot));
         }
-        this.activeItemStackCopy = null;
+        this.impl$activeItemStackCopy = null;
     }
 
     // End implementation of UseItemStackEvent

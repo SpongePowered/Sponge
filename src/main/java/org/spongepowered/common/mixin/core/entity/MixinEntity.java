@@ -352,10 +352,6 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
 
     }
 
-    public void supplyVanillaManipulators(final List<DataManipulator<?, ?>> manipulators) {
-
-    }
-
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "setPosition", at = @At("HEAD"))
     private void onSetPosition(final double x, final double y, final double z, final CallbackInfo ci) {

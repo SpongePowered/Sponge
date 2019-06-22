@@ -30,6 +30,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,8 +44,8 @@ public class EntityAirConverter extends DataParameterConverter<Integer> {
     @Override
     public Optional<DataTransactionResult> createTransaction(Integer currentValue, Integer value) {
         return Optional.of(DataTransactionResult.builder()
-            .replace(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, currentValue, Integer::compareTo, 0, 300))
-            .success(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, value, Integer::compareTo, 0, 300))
+            .replace(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, Constants.Sponge.Entity.DEFAULT_MAX_AIR, currentValue, Integer::compareTo, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))
+            .success(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, Constants.Sponge.Entity.DEFAULT_MAX_AIR, value, Integer::compareTo, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))
             .result(DataTransactionResult.Type.SUCCESS)
             .build()
             );
