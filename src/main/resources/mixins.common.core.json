@@ -348,7 +348,6 @@
         "server.management.MixinPlayerProfileCache",
         "server.management.MixinPlayerProfileCacheEntry",
         "server.management.MixinUserBanEntry",
-        "server.management.MixinUserList",
         "server.management.MixinUserListEntryBan",
         "server.management.MixinUserListIPBansEntry",
         "server.network.MixinNetHandlerHandshakeTCP",
