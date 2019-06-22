@@ -34,21 +34,21 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
+import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 
 import javax.annotation.Nullable;
 
 @Mixin(PlayerChunkMap.class)
-public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
+public abstract class MixinPlayerChunkMap implements PlayerChunkMapBridge {
 
     @Shadow @Final private WorldServer world;
 
     @Shadow @Nullable public abstract PlayerChunkMapEntry getEntry(int chunkX, int chunkZ);
 
     @Override
-    public boolean isChunkInUse(int x, int z) {
+    public boolean bridge$isChunkInUse(int x, int z) {
         PlayerChunkMapEntry playerInstance = this.getEntry(x, z);
         return playerInstance != null && playerInstance.players.size() > 0;
     }

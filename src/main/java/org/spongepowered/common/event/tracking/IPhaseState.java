@@ -75,7 +75,7 @@ import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationCo
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
+import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.core.world.chunk.MixinChunk;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
@@ -858,7 +858,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
                 final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
                 final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
                 if (entry != null) {
-                    ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
+                    ((PlayerChunkMapEntryBridge) entry).bridge$markBiomesForUpdate();
                 }
             });
         }

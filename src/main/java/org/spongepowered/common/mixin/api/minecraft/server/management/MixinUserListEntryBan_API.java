@@ -22,66 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.ban;
+package org.spongepowered.common.mixin.api.minecraft.server.management;
 
 import net.minecraft.server.management.UserListEntry;
 import net.minecraft.server.management.UserListEntryBan;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.bridge.server.management.BanUserListEntryBridge;
 
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
 @Mixin(UserListEntryBan.class)
-public abstract class MixinBanEntry<T> extends UserListEntry<T> implements Ban {
+public abstract class MixinUserListEntryBan_API<T> extends UserListEntry<T> implements Ban {
 
-    public MixinBanEntry(T p_i1146_1_) {
+    MixinUserListEntryBan_API(T p_i1146_1_) {
         super(p_i1146_1_);
     }
 
-    @Shadow @Final private String reason;
-    @Shadow @Final private String bannedBy;
-    @Shadow @Final private Date banStartDate;
-    @Shadow @Final private Date banEndDate;
-
-    private Optional<Text> spongeReason;
-    private Text source;
-
-    private Optional<CommandSource> commandSource = Optional.empty();
-
-    @Inject(method = "<init>*", at = @At("RETURN"))
-    public void onInitMixinBanEntry(CallbackInfo ci) { // Prevent this from being overriden in MixinIPBanEntry
-        this.spongeReason = this.reason == null ? Optional.empty() : Optional.of(SpongeTexts.fromLegacy(this.reason));
-        this.source = SpongeTexts.fromLegacy(this.bannedBy);
-
-        this.setSource();
-    }
-
-    private void setSource() {
-        Optional<Player> user;
-
-        if (this.bannedBy.equals("Server")) { // There could be a user called Server, but of course Mojang doesn't care...
-            this.commandSource = Optional.of(SpongeImpl.getGame().getServer().getConsole());
-        } else if ((user = Sponge.getGame().getServer().getPlayer(this.bannedBy)).isPresent()) {
-            this.commandSource = Optional.of(user.get());
-        }
-    }
+    @Shadow @Final protected Date banStartDate;
+    @Shadow @Final protected Date banEndDate;
 
     @Override
     public Optional<Text> getReason() {
-        return this.spongeReason;
+        return ((BanUserListEntryBridge) this).bridge$getReason();
     }
 
     @Override
@@ -91,12 +60,12 @@ public abstract class MixinBanEntry<T> extends UserListEntry<T> implements Ban {
 
     @Override
     public Optional<Text> getBanSource() {
-        return Optional.of(this.source);
+        return ((BanUserListEntryBridge) this).bridge$getSource();
     }
 
     @Override
     public Optional<CommandSource> getBanCommandSource() {
-        return this.commandSource;
+        return ((BanUserListEntryBridge) this).bridge$getCmdSource();
     }
 
     @Override

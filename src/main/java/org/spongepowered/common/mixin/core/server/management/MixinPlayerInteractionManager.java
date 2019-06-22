@@ -71,21 +71,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 
 import javax.annotation.Nullable;
 
 @Mixin(value = PlayerInteractionManager.class)
-public abstract class MixinPlayerInteractionManager implements IMixinPlayerInteractionManager {
+public abstract class MixinPlayerInteractionManager implements PlayerInteractionManagerBridge {
 
     @Shadow public EntityPlayerMP player;
     @Shadow public net.minecraft.world.World world;
@@ -104,32 +104,22 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     private boolean lastInteractItemOnBlockCancelled = false;
 
     @Override
-    public boolean isInteractBlockRightClickCancelled() {
+    public boolean bridge$isInteractBlockRightClickCancelled() {
         return this.interactBlockRightClickEventCancelled;
     }
 
     @Override
-    public void setInteractBlockRightClickCancelled(boolean cancelled) {
+    public void bridge$setInteractBlockRightClickCancelled(boolean cancelled) {
         this.interactBlockRightClickEventCancelled = cancelled;
     }
 
     @Override
-    public boolean isInteractBlockLeftClickCancelled() {
-        return this.interactBlockLeftClickEventCancelled;
-    }
-
-    @Override
-    public void setInteractBlockLeftClickCancelled(boolean cancelled) {
-        this.interactBlockLeftClickEventCancelled = cancelled;
-    }
-
-    @Override
-    public boolean isLastInteractItemOnBlockCancelled() {
+    public boolean bridge$isLastInteractItemOnBlockCancelled() {
         return this.lastInteractItemOnBlockCancelled;
     }
 
     @Override
-    public void setLastInteractItemOnBlockCancelled(boolean lastInteractItemOnBlockCancelled) {
+    public void bridge$setLastInteractItemOnBlockCancelled(boolean lastInteractItemOnBlockCancelled) {
         this.lastInteractItemOnBlockCancelled = lastInteractItemOnBlockCancelled;
     }
 
@@ -279,7 +269,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             }
         }
 
-        this.setLastInteractItemOnBlockCancelled(event.isCancelled() || event.getUseItemResult() == Tristate.FALSE);
+        this.bridge$setLastInteractItemOnBlockCancelled(event.isCancelled() || event.getUseItemResult() == Tristate.FALSE);
 
         if (event.isCancelled()) {
             final IBlockState state = (IBlockState) currentSnapshot.getState();
@@ -306,7 +296,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             }
             SpongeImplHooks.shouldCloseScreen(worldIn, pos, forgeEventObject, this.player);
 
-            ((IMixinPlayerInteractionManager) this.player.interactionManager).setInteractBlockRightClickCancelled(true);
+            ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$setInteractBlockRightClickCancelled(true);
 
             ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
             return SpongeImplHooks.getInteractionCancellationResult(forgeEventObject);
@@ -346,7 +336,17 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                     }
                 }
 
-                result = this.handleOpenEvent(lastOpenContainer, this.player, currentSnapshot, result);
+                if (lastOpenContainer != player.openContainer) {
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        frame.pushCause(player);
+                        frame.addContext(EventContextKeys.BLOCK_HIT, currentSnapshot);
+                        ((ContainerBridge) player.openContainer).setOpenLocation(currentSnapshot.getLocation().orElse(null));
+                        if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(this.player)) {
+                            result = EnumActionResult.FAIL;
+                            this.interactBlockRightClickEventCancelled = true;
+                        }
+                    }
+                }
             } else {
                 // Need to send a block change to the client, because otherwise, they are not
                 // going to be told about the block change.
@@ -435,7 +435,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
             }
 
-            this.setLastInteractItemOnBlockCancelled(event.isCancelled()); //|| event.getUseItemResult() == Tristate.FALSE;
+            this.bridge$setLastInteractItemOnBlockCancelled(event.isCancelled()); //|| event.getUseItemResult() == Tristate.FALSE;
 
             if (event.isCancelled()) {
                 this.interactBlockRightClickEventCancelled = true;
@@ -523,19 +523,4 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         }
     }
 
-    @Override
-    public EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, BlockSnapshot blockSnapshot, EnumActionResult result) {
-        if (lastOpenContainer != player.openContainer) {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(player);
-                frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
-                ((ContainerBridge) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
-                if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
-                    result = EnumActionResult.FAIL;
-                    this.interactBlockRightClickEventCancelled = true;
-                }
-            }
-        }
-        return result;
-    }
 }

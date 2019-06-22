@@ -140,7 +140,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
+import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -628,12 +628,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             // Only do a restore if something actually changed. The client does an identity check ('==')
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && ((IMixinPlayerInteractionManager) this.player.interactionManager).isInteractBlockRightClickCancelled()) {
+            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$isInteractBlockRightClickCancelled()) {
                 PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
             }
         }
         context.interactItemChanged(false);
-        ((IMixinPlayerInteractionManager) this.player.interactionManager).setInteractBlockRightClickCancelled(false);
+        ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$setInteractBlockRightClickCancelled(false);
         return actionResult;
     }
 
@@ -651,12 +651,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             // Only do a restore if something actually changed. The client does an identity check ('==')
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand))  && ((IMixinPlayerInteractionManager) this.player.interactionManager).isInteractBlockRightClickCancelled()) {
+            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand))  && ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$isInteractBlockRightClickCancelled()) {
                 PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
             }
         }
         packetContext.interactItemChanged(false);
-        ((IMixinPlayerInteractionManager) this.player.interactionManager).setInteractBlockRightClickCancelled(false);
+        ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$setInteractBlockRightClickCancelled(false);
         return actionResult;
     }
 
@@ -768,7 +768,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         // If the time between packets is small enough, use the last result.
         if (packetDiff < 100) {
             // Use previous result and avoid firing a second event
-            if (((IMixinPlayerInteractionManager) this.player.interactionManager).isLastInteractItemOnBlockCancelled()) {
+            if (((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$isLastInteractItemOnBlockCancelled()) {
                 ci.cancel();
             }
         }

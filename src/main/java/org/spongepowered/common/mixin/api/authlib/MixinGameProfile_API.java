@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.authlib;
+package org.spongepowered.common.mixin.api.authlib;
 
 import com.google.common.collect.Multimap;
 import com.mojang.authlib.GameProfile;
@@ -43,43 +43,47 @@ import javax.annotation.Nullable;
 
 @Mixin(value = GameProfile.class, remap = false)
 @Implements(value = @Interface(iface = org.spongepowered.api.profile.GameProfile.class, prefix = "profile$"))
-public abstract class MixinGameProfile {
+public abstract class MixinGameProfile_API implements org.spongepowered.api.profile.GameProfile {
 
     @Shadow public abstract UUID getId();
-    @Nullable @Shadow public abstract String getName();
+    @Nullable @Shadow public abstract String shadow$getName();
     @Shadow public abstract PropertyMap getProperties();
     @Shadow public abstract boolean isComplete();
 
-    public UUID profile$getUniqueId() {
+    @Override
+    public UUID getUniqueId() {
         return this.getId();
     }
 
-    public Optional<String> profile$getName() {
-        return Optional.ofNullable(this.getName());
+    @Override
+    public Optional<String> getName() {
+        return Optional.ofNullable(this.shadow$getName());
     }
 
     @SuppressWarnings("unchecked")
-    public Multimap<String, ProfileProperty> profile$getPropertyMap() {
+    @Override
+    public Multimap<String, ProfileProperty> getPropertyMap() {
         return (Multimap<String, ProfileProperty>) (Object) this.getProperties();
     }
 
-    public boolean profile$isFilled() {
+    @Override
+    public boolean isFilled() {
         return this.isComplete();
     }
 
-    public int profile$getContentVersion() {
+    @Override
+    public int getContentVersion() {
         return 0;
     }
 
-    public DataContainer profile$toContainer() {
+    @Override
+    public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew();
 
-        container.set(Queries.CONTENT_VERSION, this.profile$getContentVersion());
-        container.set(DataQueries.User.UUID, this.profile$getUniqueId().toString());
+        container.set(Queries.CONTENT_VERSION, this.getContentVersion());
+        container.set(DataQueries.User.UUID, this.getUniqueId().toString());
 
-        if (this.profile$getName().isPresent()) {
-            container.set(DataQueries.User.NAME, this.profile$getName().get());
-        }
+        this.getName().ifPresent(name -> container.set(DataQueries.User.NAME, name));
 
         return container;
     }

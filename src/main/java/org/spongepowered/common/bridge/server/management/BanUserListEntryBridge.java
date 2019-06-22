@@ -22,9 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.server.management;
+package org.spongepowered.common.bridge.server.management;
 
-public interface IMixinPlayerChunkMapEntry {
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.text.Text;
 
-    void markBiomesForUpdate();
+import java.util.Optional;
+
+public interface BanUserListEntryBridge {
+
+    Optional<Text> bridge$getReason();
+
+    Optional<Text> bridge$getSource();
+
+    Optional<CommandSource> bridge$getCmdSource();
+
 }

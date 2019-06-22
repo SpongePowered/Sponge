@@ -22,27 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.server.management;
+package org.spongepowered.common.bridge.server.management;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.util.EnumActionResult;
-import org.spongepowered.api.block.BlockSnapshot;
+import com.mojang.authlib.GameProfile;
 
-public interface IMixinPlayerInteractionManager {
+import java.util.Date;
 
-    EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, BlockSnapshot blockSnapshot, EnumActionResult result);
+/**
+ * Can be converted to an Accessor Mixin, but waiting on a mixin issue to be updated.
+ */
+public interface PlayerProfileCacheEntryBridge {
 
-    boolean isInteractBlockRightClickCancelled();
+    GameProfile bridge$getProfile();
 
-    void setInteractBlockRightClickCancelled(boolean cancelled);
-
-    boolean isInteractBlockLeftClickCancelled();
-
-    void setInteractBlockLeftClickCancelled(boolean cancelled);
-
-    boolean isLastInteractItemOnBlockCancelled();
-
-    void setLastInteractItemOnBlockCancelled(boolean lastInteractItemOnBlockCancelled);
+    Date bridge$getExpirationDate();
 
 }

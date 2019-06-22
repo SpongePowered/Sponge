@@ -22,33 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.management;
+package org.spongepowered.common.bridge.server.management;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.server.management.PlayerProfileCache;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCacheEntryBridge;
+public interface PlayerChunkMapBridge {
 
-import java.util.Date;
-
-@Mixin(targets = "net/minecraft/server/management/PlayerProfileCache$ProfileEntry")
-public abstract class MixinPlayerProfileCacheEntry implements PlayerProfileCacheEntryBridge {
-
-    @Shadow public abstract GameProfile getGameProfile();
-    @Shadow public abstract Date getExpirationDate();
-
-    @Override
-    public GameProfile bridge$getProfile() {
-        return this.getGameProfile();
-    }
-
-    @Override
-    public Date bridge$getExpirationDate() {
-        return this.getExpirationDate();
-    }
-
+    boolean bridge$isChunkInUse(int x, int z);
 }

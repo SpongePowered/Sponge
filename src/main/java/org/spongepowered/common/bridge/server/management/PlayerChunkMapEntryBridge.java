@@ -22,5 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.mixin.core.ban;
+package org.spongepowered.common.bridge.server.management;
+
+public interface PlayerChunkMapEntryBridge {
+
+    void bridge$markBiomesForUpdate();
+}

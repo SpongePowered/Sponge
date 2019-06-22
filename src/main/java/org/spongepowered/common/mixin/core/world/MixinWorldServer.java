@@ -160,7 +160,7 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
+import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -1082,7 +1082,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             }
 
             // If a player is currently using the chunk, skip it
-            if (((IMixinPlayerChunkMap) this.getPlayerChunkMap()).isChunkInUse(chunk.x, chunk.z)) {
+            if (((PlayerChunkMapBridge) this.getPlayerChunkMap()).bridge$isChunkInUse(chunk.x, chunk.z)) {
                 continue;
             }
 

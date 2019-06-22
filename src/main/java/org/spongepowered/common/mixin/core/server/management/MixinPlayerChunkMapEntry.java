@@ -36,13 +36,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
+import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
+import org.spongepowered.common.util.Constants;
 
 @Mixin(PlayerChunkMapEntry.class)
-public abstract class MixinPlayerChunkMapEntry implements IMixinPlayerChunkMapEntry {
+public abstract class MixinPlayerChunkMapEntry implements PlayerChunkMapEntryBridge {
 
-    @Shadow @Final private PlayerChunkMap playerChunkMap;
-    @Shadow @Final private ChunkPos pos;
+    @Shadow @Final public PlayerChunkMap playerChunkMap;
+    @Shadow @Final public ChunkPos pos;
     @Shadow public int changes;
     @Shadow public int changedSectionFilter;
     @Shadow public abstract void sendPacket(Packet<?> packetIn);
@@ -50,10 +51,10 @@ public abstract class MixinPlayerChunkMapEntry implements IMixinPlayerChunkMapEn
     private boolean updateBiomes;
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
-    public void resendUpdatedBiomes(CallbackInfo ci) {
+    private void impl$UpdateBimoes(CallbackInfo ci) {
         final Chunk chunk = this.playerChunkMap.getWorldServer().getChunk(this.pos.x, this.pos.z);
         if (this.updateBiomes) {
-            this.sendPacket(new SPacketChunkData(chunk, 65535));
+            this.sendPacket(new SPacketChunkData(chunk, Constants.Networking.Packets.CHANGED_SECTION_FILTER_ALL));
             this.changes = 0;
             this.changedSectionFilter = 0;
             this.updateBiomes = false;
@@ -62,7 +63,7 @@ public abstract class MixinPlayerChunkMapEntry implements IMixinPlayerChunkMapEn
     }
 
     @Override
-    public void markBiomesForUpdate() {
+    public void bridge$markBiomesForUpdate() {
         this.updateBiomes = true;
         this.playerChunkMap.dirtyEntries.add((PlayerChunkMapEntry) (Object) this);
     }

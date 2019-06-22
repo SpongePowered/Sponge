@@ -73,7 +73,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
+import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -225,7 +225,7 @@ public abstract class MixinChunk_API implements Chunk {
         if (this.world instanceof WorldServer) {
             final PlayerChunkMapEntry entry = ((WorldServer) this.world).getPlayerChunkMap().getEntry(this.x, this.z);
             if (entry != null) {
-                ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
+                ((PlayerChunkMapEntryBridge) entry).bridge$markBiomesForUpdate();
             }
         }
     }

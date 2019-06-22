@@ -22,16 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.server.management;
+package org.spongepowered.common.bridge.server.management;
 
-import com.mojang.authlib.GameProfile;
+public interface PlayerProfileCacheBridge {
 
-import java.util.Date;
-
-public interface IMixinPlayerProfileCacheEntry {
-
-    GameProfile getGameProfile();
-
-    Date getExpirationDate();
-
+    void bridge$setCanSave(boolean flag);
 }

@@ -22,9 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.server.management;
-
-public interface IMixinPlayerChunkMap {
-
-    boolean isChunkInUse(int x, int z);
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.mixin.core.authlib.properties;

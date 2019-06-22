@@ -31,7 +31,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
 import org.spongepowered.api.event.world.SaveWorldEvent;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerProfileCache;
+import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.Iterator;
@@ -74,9 +74,9 @@ public class SpongeInternalListeners {
             if (event.getTargetWorld().getUniqueId().equals(Sponge.getServer().getDefaultWorld().get().getUniqueId())) {
                 SpongeUsernameCache.save();
                 final MinecraftServer server = SpongeImpl.getServer();
-                ((IMixinPlayerProfileCache) server.getPlayerProfileCache()).setCanSave(true);
+                ((PlayerProfileCacheBridge) server.getPlayerProfileCache()).bridge$setCanSave(true);
                 server.getPlayerProfileCache().save();
-                ((IMixinPlayerProfileCache) server.getPlayerProfileCache()).setCanSave(false);
+                ((PlayerProfileCacheBridge) server.getPlayerProfileCache()).bridge$setCanSave(false);
             }
         }
     }

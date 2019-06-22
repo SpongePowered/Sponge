@@ -44,7 +44,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerProfileCache;
+import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import java.net.InetSocketAddress;
@@ -127,9 +127,9 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
 
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerProfileCache;save()V"))
     private void onSave(PlayerProfileCache cache) {
-        ((IMixinPlayerProfileCache) this.getPlayerProfileCache()).setCanSave(true);
+        ((PlayerProfileCacheBridge) this.getPlayerProfileCache()).bridge$setCanSave(true);
         this.getPlayerProfileCache().save();
-        ((IMixinPlayerProfileCache) this.getPlayerProfileCache()).setCanSave(false);
+        ((PlayerProfileCacheBridge) this.getPlayerProfileCache()).bridge$setCanSave(false);
     }
 
 

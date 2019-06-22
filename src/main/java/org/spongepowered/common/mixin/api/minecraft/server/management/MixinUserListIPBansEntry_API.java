@@ -22,33 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.management;
+package org.spongepowered.common.mixin.api.minecraft.server.management;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.server.management.PlayerProfileCache;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import net.minecraft.server.management.UserListIPBansEntry;
+import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.util.ban.BanType;
+import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCacheEntryBridge;
+import org.spongepowered.common.bridge.server.management.IPBanUserLIstEntryBridge;
 
-import java.util.Date;
+import java.net.InetAddress;
 
-@Mixin(targets = "net/minecraft/server/management/PlayerProfileCache$ProfileEntry")
-public abstract class MixinPlayerProfileCacheEntry implements PlayerProfileCacheEntryBridge {
+@Mixin(UserListIPBansEntry.class)
+public abstract class MixinUserListIPBansEntry_API extends MixinUserListEntryBan_API<String> implements Ban.Ip {
 
-    @Shadow public abstract GameProfile getGameProfile();
-    @Shadow public abstract Date getExpirationDate();
-
-    @Override
-    public GameProfile bridge$getProfile() {
-        return this.getGameProfile();
+    public MixinUserListIPBansEntry_API(String p_i1146_1_) {
+        super(p_i1146_1_);
     }
 
     @Override
-    public Date bridge$getExpirationDate() {
-        return this.getExpirationDate();
+    public BanType getType() {
+        return BanTypes.IP;
     }
 
+    @Override
+    public InetAddress getAddress() {
+        return ((IPBanUserLIstEntryBridge) this).bridge$getAddress();
+    }
 }

@@ -145,6 +145,10 @@ public final class Constants {
 
         public static final int MAX_STRING_LENGTH_BYTES = Short.MAX_VALUE;
         public static final int MAX_STRING_LENGTH = Constants.Networking.MAX_STRING_LENGTH_BYTES >> 2;
+        public static final class Packets {
+
+            public static final int CHANGED_SECTION_FILTER_ALL = 65535;
+        }
     }
 
     public static final class Item {

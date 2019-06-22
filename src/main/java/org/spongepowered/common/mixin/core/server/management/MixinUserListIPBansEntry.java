@@ -22,39 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.ban;
+package org.spongepowered.common.mixin.core.server.management;
 
 import com.google.gson.JsonObject;
-import net.minecraft.server.management.UserListEntryBan;
 import net.minecraft.server.management.UserListIPBansEntry;
-import org.spongepowered.api.util.ban.Ban;
-import org.spongepowered.api.util.ban.BanType;
-import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.server.management.IPBanUserLIstEntryBridge;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
 
 @Mixin(UserListIPBansEntry.class)
-public abstract class MixinIPBanEntry extends UserListEntryBan<String> implements Ban.Ip {
-
-    public MixinIPBanEntry(String valueIn, Date startDate, String banner, Date endDate, String banReason) {
-        super(valueIn, startDate, banner, endDate, banReason);
-    }
+public abstract class MixinUserListIPBansEntry extends MixinUserListEntryBan<String> implements IPBanUserLIstEntryBridge {
 
     private InetAddress address;
 
+    MixinUserListIPBansEntry(String p_i1146_1_) {
+        super(p_i1146_1_);
+    }
+
     @Inject(method = "<init>(Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;)V", at = @At("RETURN"))
-    public void onInit(CallbackInfo ci) {
+    private void impl$UpdateInetAddress(CallbackInfo ci) {
         this.setAddress();
     }
 
     @Inject(method = "<init>(Lcom/google/gson/JsonObject;)V", at = @At("RETURN"))
-    public void onInit(JsonObject object, CallbackInfo ci) {
+    private void impl$UpdateInetAddress(JsonObject object, CallbackInfo ci) {
         this.setAddress();
     }
 
@@ -67,12 +63,7 @@ public abstract class MixinIPBanEntry extends UserListEntryBan<String> implement
     }
 
     @Override
-    public BanType getType() {
-        return BanTypes.IP;
-    }
-
-    @Override
-    public InetAddress getAddress() {
+    public InetAddress bridge$getAddress() {
         return this.address;
     }
 }

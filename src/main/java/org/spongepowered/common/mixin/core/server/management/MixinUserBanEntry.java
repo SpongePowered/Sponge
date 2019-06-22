@@ -22,14 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.ban;
+package org.spongepowered.common.mixin.core.server.management;
 
 import net.minecraft.server.management.UserListBansEntry;
-import net.minecraft.server.management.UserListEntryBan;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.ban.Ban;
-import org.spongepowered.api.util.ban.BanType;
-import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
@@ -38,10 +34,10 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import java.util.Date;
 
 @Mixin(UserListBansEntry.class)
-public abstract class MixinUserBanEntry extends UserListEntryBan<com.mojang.authlib.GameProfile> implements Ban.Profile {
+public abstract class MixinUserBanEntry extends MixinUserListEntryBan<com.mojang.authlib.GameProfile> {
 
-    public MixinUserBanEntry(com.mojang.authlib.GameProfile valueIn, Date startDate, String banner, Date endDate, String banReason) {
-        super(valueIn, startDate, banner, endDate, banReason);
+    public MixinUserBanEntry(com.mojang.authlib.GameProfile p_i1146_1_) {
+        super(p_i1146_1_);
     }
 
     /**
@@ -56,13 +52,4 @@ public abstract class MixinUserBanEntry extends UserListEntryBan<com.mojang.auth
         args.setAll(profile, startDate, banner, endDate, banReason);
     }
 
-    @Override
-    public BanType getType() {
-        return BanTypes.PROFILE;
-    }
-
-    @Override
-    public GameProfile getProfile() {
-        return (GameProfile) this.getValue();
-    }
 }

@@ -22,14 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.authlib;
+package org.spongepowered.common.mixin.api.authlib.properties;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.mojang.authlib.properties.Property;
 import org.spongepowered.api.profile.property.ProfileProperty;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -38,45 +34,14 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(value = Property.class, remap = false)
-@Implements(@Interface(iface = ProfileProperty.class, prefix = "property$"))
-public abstract class MixinProperty {
+public abstract class MixinProperty_API implements ProfileProperty{
 
-    @Shadow public abstract String getName();
-    @Shadow public abstract String getValue();
-    @Nullable @Shadow public abstract String getSignature();
-
-    public Optional<String> property$getSignature() {
-        return Optional.ofNullable(this.getSignature());
-    }
+    @Nullable @Shadow public abstract String shadow$getSignature();
 
     @Override
-    public boolean equals(@Nullable Object other) {
-        if (this == other) {
-            return true;
-        }
-
-        if (other == null || !(other instanceof ProfileProperty)) {
-            return false;
-        }
-
-        ProfileProperty that = (ProfileProperty) other;
-        return Objects.equal(this.getName(), that.getName())
-                && Objects.equal(this.getValue(), that.getValue())
-                && Objects.equal(this.property$getSignature(), that.getSignature());
+    public Optional<String> getSignature() { // We don't need to make this @Implements because the signature difference
+        return Optional.ofNullable(this.shadow$getSignature());
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.getName(), this.getValue(), this.property$getSignature());
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("name", this.getName())
-                .add("value", this.getValue())
-                .add("signature", this.property$getSignature())
-                .toString();
-    }
 
 }

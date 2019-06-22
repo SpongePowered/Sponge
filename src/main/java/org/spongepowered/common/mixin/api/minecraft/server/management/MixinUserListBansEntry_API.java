@@ -22,42 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.management;
+package org.spongepowered.common.mixin.api.minecraft.server.management;
 
-import net.minecraft.server.management.UserList;
-import org.apache.logging.log4j.Logger;
+import net.minecraft.server.management.UserListBansEntry;
+import net.minecraft.server.management.UserListEntryBan;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.util.ban.BanType;
+import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-import java.io.File;
-import java.util.List;
+import java.util.Date;
 
-/**
- * A note, this is ONLY TO BE APPLIED TO THE SERVER!!
- */
-@Mixin(UserList.class)
-public abstract class MixinUserList {
+@Mixin(UserListBansEntry.class)
+public abstract class MixinUserListBansEntry_API extends MixinUserListEntryBan_API<com.mojang.authlib.GameProfile> implements Ban.Profile {
 
-    @Shadow private static Logger LOGGER;
-    @Shadow public File saveFile;
-    @Shadow public abstract String getObjectKey(Object obj);
-
-    @Redirect(method = "removeExpired", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false))
-    private boolean impl$fixAddingToList(List<Object> list, Object object) {
-        return list.add(this.getObjectKey(object)); // Mojang didn't implement this correctly, so we'll fix it
+    MixinUserListBansEntry_API(com.mojang.authlib.GameProfile p_i1146_1_) {
+        super(p_i1146_1_);
     }
 
-    // Don't throw exception if user list file does not exist
-    @Inject(method = "readSavedFile", at = @At("HEAD"), cancellable = true)
-    private void onReadSavedFile(CallbackInfo ci) {
-        if (!this.saveFile.exists()) {
-            LOGGER.warn("{} does not exist, creating it.", this.saveFile.getName());
-            ci.cancel();
-        }
+    @Override
+    public BanType getType() {
+        return BanTypes.PROFILE;
     }
 
+    @Override
+    public GameProfile getProfile() {
+        return (GameProfile) this.getValue();
+    }
 }
