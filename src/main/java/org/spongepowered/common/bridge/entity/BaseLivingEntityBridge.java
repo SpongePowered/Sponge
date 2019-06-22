@@ -22,18 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity.projectile;
+package org.spongepowered.common.bridge.entity;
 
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.util.Direction;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.DamageSource;
+import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
-import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Optional;
 
-public interface IMixinShulkerBullet {
+// in 1.14, this can be named MobEntityBridge.
+public interface BaseLivingEntityBridge {
 
-    Direction getBulletDirection();
+    boolean bridge$damageEntityHook(DamageSource damageSource, float damage);
 
-    void setBulletDirection(Direction direction);
+    int bridge$getMaxAir();
 
-    void setBulletTarget(@Nullable Entity target);
+    void bridge$setMaxAir(int max);
+
+    Optional<List<DamageFunction>> bridge$provideArmorModifiers(EntityLivingBase entityLivingBase, DamageSource source, double damage);
+
+    float bridge$applyModDamage(EntityLivingBase entityLivingBase, DamageSource source, float damage);
+
+    void bridge$applyArmorDamage(EntityLivingBase entityLivingBase, DamageSource source, DamageEntityEvent entityEvent, DamageModifier modifier);
+
+    boolean bridge$hookModAttack(EntityLivingBase entityLivingBase, DamageSource source, float amount);
+
+    void bridge$resetDeathEventsPosted();
+
 }

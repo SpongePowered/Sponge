@@ -32,7 +32,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
+import org.spongepowered.common.mixin.core.entity.AccessorEntityLivingBase;
 
 import java.util.Optional;
 
@@ -43,32 +44,32 @@ public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<Entit
     }
 
     @Override
-    protected OptionalValue<Double> constructValue(Optional<Double> actualValue) {
+    protected OptionalValue<Double> constructValue(final Optional<Double> actualValue) {
         return SpongeValueFactory.getInstance().createOptionalValue(Keys.LAST_DAMAGE, actualValue.orElse(null));
     }
 
     @Override
-    protected boolean set(EntityLivingBase container, Optional<Double> value) {
+    protected boolean set(final EntityLivingBase container, final Optional<Double> value) {
         if (value.isPresent()) {
-            ((IMixinEntityLivingBase) container).setLastDamage(value.get());
+            ((AccessorEntityLivingBase) container).accessor$setLastDamage(value.get().floatValue());
             return true;
         }
         return false;
     }
 
     @Override
-    protected Optional<Optional<Double>> getVal(EntityLivingBase container) {
+    protected Optional<Optional<Double>> getVal(final EntityLivingBase container) {
         return Optional.of(Optional.ofNullable(container.getRevengeTarget() == null ?
-                null : ((IMixinEntityLivingBase) container).getLastDamageTaken()));
+                null : new Double(((AccessorEntityLivingBase) container).accessor$getLastDamage())));
     }
 
     @Override
-    protected ImmutableValue<Optional<Double>> constructImmutableValue(Optional<Double> value) {
+    protected ImmutableValue<Optional<Double>> constructImmutableValue(final Optional<Double> value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

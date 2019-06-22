@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.projectile.EntityShulkerBullet;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
@@ -34,29 +34,35 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.projectile.IMixinShulkerBullet;
+import org.spongepowered.common.mixin.core.entity.projectile.AccessorShulkerBulletEntity;
 
 import java.util.Optional;
 
-public class ShulkerBulletDirectionalDataProcessor extends AbstractEntitySingleDataProcessor<EntityShulkerBullet, Direction, Value<Direction>,
+public class ShulkerBulletDirectionalDataProcessor extends AbstractSingleDataSingleTargetProcessor<AccessorShulkerBulletEntity, Direction, Value<Direction>,
         DirectionalData, ImmutableDirectionalData> {
 
     public ShulkerBulletDirectionalDataProcessor() {
-        super(EntityShulkerBullet.class, Keys.DIRECTION);
+        super(Keys.DIRECTION, AccessorShulkerBulletEntity.class);
     }
 
     @Override
-    protected boolean set(EntityShulkerBullet dataHolder, Direction value) {
-        ((IMixinShulkerBullet) dataHolder).setBulletDirection(value);
+    protected boolean set(AccessorShulkerBulletEntity dataHolder, Direction value) {
+        if (value == Direction.NONE) {
+            dataHolder.accessor$setDirection(null);
+        } else {
+            dataHolder.accessor$setDirection(DirectionResolver.getFor(value));
+        }
         return true;
     }
 
     @Override
-    protected Optional<Direction> getVal(EntityShulkerBullet dataHolder) {
-        return Optional.of(((IMixinShulkerBullet) dataHolder).getBulletDirection());
+    protected Optional<Direction> getVal(AccessorShulkerBulletEntity dataHolder) {
+        final EnumFacing direction = dataHolder.accessor$getDirection();
+        return Optional.of(direction != null ? DirectionResolver.getFor(direction) : Direction.NONE);
     }
 
     @Override
@@ -65,8 +71,8 @@ public class ShulkerBulletDirectionalDataProcessor extends AbstractEntitySingleD
     }
 
     @Override
-    public boolean supports(EntityShulkerBullet dataHolder) {
-        return dataHolder instanceof IMixinShulkerBullet;
+    public boolean supports(AccessorShulkerBulletEntity dataHolder) {
+        return true;
     }
 
     @Override

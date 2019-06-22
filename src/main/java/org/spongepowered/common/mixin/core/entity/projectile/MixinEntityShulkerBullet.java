@@ -25,65 +25,20 @@
 package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.projectile.EntityShulkerBullet;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.IEntityTargetingEntity;
-import org.spongepowered.common.interfaces.entity.projectile.IMixinShulkerBullet;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
 @Mixin(EntityShulkerBullet.class)
-public abstract class MixinEntityShulkerBullet extends MixinEntity implements IEntityTargetingEntity, IMixinShulkerBullet {
-
-    @Shadow @Nullable private net.minecraft.entity.Entity target;
-    @Shadow @Nullable private EnumFacing direction;
-
-    @Shadow @Nullable private UUID targetUniqueId;
-
-    @Override
-    public Direction getBulletDirection() {
-        return this.direction != null ? DirectionResolver.getFor(this.direction) : Direction.NONE;
-    }
-
-    @Override
-    public void setBulletDirection(Direction direction) {
-        if (direction == Direction.NONE) {
-            this.direction = null;
-        } else {
-            this.direction = DirectionResolver.getFor(direction);
-        }
-    }
-
-    @Nullable
-    @Override
-    public net.minecraft.entity.Entity getTargetedEntity() {
-        return this.target;
-    }
-
-    @Override
-    public void setTargetedEntity(@Nullable net.minecraft.entity.Entity entity) {
-        this.target = entity;
-        if (entity != null) {
-            this.targetUniqueId = entity.getUniqueID();
-        } else {
-            this.targetUniqueId = null;
-        }
-    }
+public abstract class MixinEntityShulkerBullet extends MixinEntity {
 
     @Inject(method = "bulletHit", at = @At("HEAD"), cancellable = true)
-    private void onBulletHitBlock(RayTraceResult result, CallbackInfo ci) {
+    private void onBulletHitBlock(final RayTraceResult result, final CallbackInfo ci) {
         if (!this.world.isRemote) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((net.minecraft.entity.Entity) (Object) this, ((Projectile) this).getShooter(), result)) {
                 ci.cancel();

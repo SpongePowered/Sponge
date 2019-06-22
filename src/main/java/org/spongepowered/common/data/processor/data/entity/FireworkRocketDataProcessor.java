@@ -60,14 +60,14 @@ public class FireworkRocketDataProcessor extends
     }
 
     @Override
-    public boolean supports(EntityType entityType) {
+    public boolean supports(final EntityType entityType) {
         return entityType.equals(EntityTypes.FIREWORK);
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityFireworkRocket firework) {
-        ItemStack item = FireworkUtils.getItem(firework);
-        NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
+    protected Optional<Integer> getVal(final EntityFireworkRocket firework) {
+        final ItemStack item = FireworkUtils.getItem(firework);
+        final NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
         if (fireworks.hasKey("Flight")) {
             return Optional.of((int) fireworks.getByte("Flight"));
         }
@@ -76,26 +76,26 @@ public class FireworkRocketDataProcessor extends
     }
 
     @Override
-    protected boolean set(EntityFireworkRocket firework, Integer modifier) {
-        ItemStack item = FireworkUtils.getItem(firework);
-        NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
+    protected boolean set(final EntityFireworkRocket firework, final Integer modifier) {
+        final ItemStack item = FireworkUtils.getItem(firework);
+        final NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
         fireworks.setByte("Flight", modifier.byteValue());
         ((AccessorEntityFireworkRocket) firework).spongeImpl$setLifeTime(10 * modifier.byteValue() + ((AccessorEntity) firework).accessor$getRandom().nextInt(6) + ((AccessorEntity) firework).accessor$getRandom().nextInt(7));
         return true;
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer value) {
+    protected MutableBoundedValue<Integer> constructValue(final Integer value) {
         return new SpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE, value);
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return new ImmutableSpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, value, 0, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE);
     }
 

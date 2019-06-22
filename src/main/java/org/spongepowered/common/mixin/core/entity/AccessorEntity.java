@@ -38,4 +38,6 @@ public interface AccessorEntity {
 
     @Invoker("copyDataFromOld") void accessor$CopyDataFromOldEntity(Entity entity);
 
+    @Invoker("setFlag") void accessor$setEntityFlag(int flag, boolean set);
+
 }

@@ -43,29 +43,25 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
-import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
 @Mixin(EntityFireworkRocket.class)
-public abstract class MixinEntityFireworkRocket extends MixinEntity implements IMixinEntityFireworkRocket {
+public abstract class MixinEntityFireworkRocket extends MixinEntity implements FusedExplosiveBridge {
 
     @Shadow private int fireworkAge;
     @Shadow private int lifetime;
 
     @Shadow public abstract void onUpdate();
 
-    private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
-    private int explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
+    private ProjectileSource impl$projectileSource = ProjectileSource.UNKNOWN;
+    private int impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
 
-    @Override
-    public void setModifier(byte modifier) {
-        this.lifetime = 10 * modifier + this.rand.nextInt(6) + this.rand.nextInt(7);
-    }
 
     @Override
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
@@ -76,7 +72,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements I
     @Override
     public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, null);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, this.impl$projectileSource, null);
     }
 
     @Override
@@ -102,12 +98,12 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements I
 
     @Override
     public Optional<Integer> bridge$getExplosionRadius() {
-        return Optional.of(this.explosionRadius);
+        return Optional.of(this.impl$explosionRadius);
     }
 
     @Override
     public void bridge$setExplosionRadius(Optional<Integer> radius) {
-        this.explosionRadius = radius.orElse(Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS);
+        this.impl$explosionRadius = radius.orElse(Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS);
     }
 
     @SuppressWarnings("deprecation")
@@ -124,7 +120,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements I
             SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .sourceExplosive(((Firework) this))
                 .location(((Firework) this).getLocation())
-                .radius(this.explosionRadius))
+                .radius(this.impl$explosionRadius))
                 .ifPresent(explosion -> world.setEntityState(self, state));
         }
     }

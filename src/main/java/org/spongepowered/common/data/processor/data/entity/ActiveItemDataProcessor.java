@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableActiveItemData;
@@ -37,29 +38,30 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeActiveItem
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.Optional;
 
-public class ActiveItemDataProcessor extends AbstractSingleDataSingleTargetProcessor<Living, ItemStackSnapshot,
+public class ActiveItemDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityLivingBase, ItemStackSnapshot,
         Value<ItemStackSnapshot>, ActiveItemData, ImmutableActiveItemData> {
 
     public ActiveItemDataProcessor() {
-        super(Keys.ACTIVE_ITEM, Living.class);
+        super(Keys.ACTIVE_ITEM, EntityLivingBase.class);
     }
 
     @Override
-    protected boolean set(Living dataHolder, ItemStackSnapshot value) {
+    protected boolean set(EntityLivingBase dataHolder, ItemStackSnapshot value) {
         if (value == null || value.isEmpty()) {
-            ((IMixinEntityLivingBase) dataHolder).stopTheActiveHand();
+            dataHolder.stopActiveHand();
             return true;
         }
         return false;
     }
 
     @Override
-    protected Optional<ItemStackSnapshot> getVal(Living dataHolder) {
-        return Optional.of(((IMixinEntityLivingBase) dataHolder).getActiveItemSnapshot());
+    protected Optional<ItemStackSnapshot> getVal(EntityLivingBase dataHolder) {
+        return Optional.of(ItemStackUtil.snapshotOf(dataHolder.getActiveItemStack()));
     }
 
     @Override

@@ -36,11 +36,9 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetedEntityData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.IEntityTargetingEntity;
 import org.spongepowered.common.mixin.core.entity.projectile.AccessorShulkerBulletEntity;
 
 import java.util.Optional;
@@ -68,7 +66,7 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
 
     @Override
     protected Optional<org.spongepowered.api.entity.EntitySnapshot> getVal(AccessorShulkerBulletEntity dataHolder) {
-        Entity entity = ((IEntityTargetingEntity) dataHolder).getTargetedEntity();
+        Entity entity = dataHolder.accessor$getTarget();
         if (entity == null) {
             return Optional.empty();
         }
@@ -82,7 +80,7 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
 
     @Override
     public boolean supports(AccessorShulkerBulletEntity dataHolder) {
-        return dataHolder instanceof IEntityTargetingEntity;
+        return true;
     }
 
     @Override

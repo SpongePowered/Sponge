@@ -31,14 +31,14 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
 
 import java.util.Optional;
 
-public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<IMixinEntityLivingBase, Integer, MutableBoundedValue<Integer>> {
+public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<BaseLivingEntityBridge, Integer, MutableBoundedValue<Integer>> {
 
     public MaxAirValueProcessor() {
-        super(IMixinEntityLivingBase.class, Keys.MAX_AIR);
+        super(BaseLivingEntityBridge.class, Keys.MAX_AIR);
     }
 
     @Override
@@ -52,14 +52,14 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<IMixinEnt
     }
 
     @Override
-    protected boolean set(IMixinEntityLivingBase container, Integer value) {
-        container.setMaxAir(value);
+    protected boolean set(BaseLivingEntityBridge container, Integer value) {
+        container.bridge$setMaxAir(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(IMixinEntityLivingBase container) {
-        return Optional.of(container.getMaxAir());
+    protected Optional<Integer> getVal(BaseLivingEntityBridge container) {
+        return Optional.of(container.bridge$getMaxAir());
     }
 
     @Override

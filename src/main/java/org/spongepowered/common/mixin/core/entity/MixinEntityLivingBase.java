@@ -95,7 +95,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityDeathContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -119,7 +119,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(value = EntityLivingBase.class, priority = 999)
-public abstract class MixinEntityLivingBase extends MixinEntity implements IMixinEntityLivingBase {
+public abstract class MixinEntityLivingBase extends MixinEntity implements BaseLivingEntityBridge {
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
@@ -183,36 +183,31 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     private int deathEventsPosted;
-    private int maxAir = 300;
+    private int maxAir = Constants.Sponge.Entity.DEFAULT_MAX_AIR;
     @Nullable private ItemStack activeItemStackCopy;
 
     @Override
-    public int getMaxAir() {
+    public int bridge$getMaxAir() {
         return this.maxAir;
     }
 
     @Override
-    public void setMaxAir(final int air) {
+    public void bridge$setMaxAir(final int air) {
         this.maxAir = air;
-    }
-
-    @Override
-    public void setLastDamage(final double damage) {
-        this.lastDamage = (float) damage;
     }
 
     @Override
     public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.hasKey("maxAir")) {
-            this.maxAir = compound.getInteger("maxAir");
+        if (compound.hasKey(Constants.Sponge.Entity.MAX_AIR)) {
+            this.maxAir = compound.getInteger(Constants.Sponge.Entity.MAX_AIR);
         }
     }
 
     @Override
     public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        compound.setInteger("maxAir", this.maxAir);
+        compound.setInteger(Constants.Sponge.Entity.MAX_AIR, this.maxAir);
     }
 
     /**
@@ -299,7 +294,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Override
-    public void resetDeathEventsPosted() {
+    public void bridge$resetDeathEventsPosted() {
         this.deathEventsPosted = 0;
     }
 
@@ -315,7 +310,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     @Inject(method = "setHealth", at = @At("HEAD"))
     private void onSetHealthResetEvents(final float health, final CallbackInfo info) {
         if (this.getHealth() <= 0 && health > 0) {
-            resetDeathEventsPosted();
+            bridge$resetDeathEventsPosted();
         }
     }
 
@@ -342,7 +337,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
 
     @Redirect(method = "applyPotionDamageCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;isPotionActive(Lnet/minecraft/potion/Potion;)Z") )
     private boolean onIsPotionActive(final EntityLivingBase entityIn, final Potion potion) {
-        return false; // handled in our damageEntityHook
+        return false; // handled in our bridge$damageEntityHook
     }
 
     /**
@@ -354,7 +349,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
      */
     @Redirect(method = "applyArmorCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;damageArmor(F)V") )
     private void onDamageArmor(final EntityLivingBase entityIn, final float damage) {
-        // do nothing as this is handled in our damageEntityHook
+        // do nothing as this is handled in our bridge$damageEntityHook
     }
 
     /**
@@ -363,7 +358,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
      */
     @Overwrite
     protected void damageEntity(final DamageSource damageSource, final float damage) {
-        this.damageEntityHook(damageSource, damage);
+        this.bridge$damageEntityHook(damageSource, damage);
     }
 
     /**
@@ -391,7 +386,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
             return false;
         }
         // Sponge - This hook is for forge use mainly
-        if (!this.hookModAttack((EntityLivingBase) (Object) this, source, amount)) {
+        if (!this.bridge$hookModAttack((EntityLivingBase) (Object) this, source, amount)) {
             return false;
         }
         // Sponge end
@@ -424,7 +419,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 // we comment out the logic below
                 final boolean flag = amount > 0.0F && this.canBlockDamageSource(source);
 
-                // Sponge start - this is handled in our damageEntityHook
+                // Sponge start - this is handled in our bridge$damageEntityHook
 //                boolean flag = false;
 //
 //                if (amount > 0.0F && this.canBlockDamageSource(source))
@@ -450,17 +445,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 boolean flag1 = true;
 
                 if ((float) this.hurtResistantTime > (float) this.maxHurtResistantTime / 2.0F) {
-                    if (amount <= this.lastDamage) { // Technically, this is wrong since 'amount' won't be 0 if a shield is used. However, we need damageEntityHook so that we process the shield, so we leave it as-is
+                    if (amount <= this.lastDamage) { // Technically, this is wrong since 'amount' won't be 0 if a shield is used. However, we need bridge$damageEntityHook so that we process the shield, so we leave it as-is
                         return false;
                     }
 
                     // Sponge start - reroute to our damage hook
                     // only if the class is unmodded. If it's a modded class, then it should be calling our
-                    // damageEntity method, which would re-run our damageEntityHook.
+                    // damageEntity method, which would re-run our bridge$damageEntityHook.
                     if (this.entityType.isModdedDamageEntityMethod) {
                         this.damageEntity(source, amount - this.lastDamage);
                     } else {
-                        if (!this.damageEntityHook(source, amount - this.lastDamage)) {
+                        if (!this.bridge$damageEntityHook(source, amount - this.lastDamage)) {
                             return false;
                         }
                     }
@@ -474,7 +469,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                     if (this.entityType.isModdedDamageEntityMethod) {
                         this.damageEntity(source, amount);
                     } else {
-                        if (!this.damageEntityHook(source, amount)) {
+                        if (!this.bridge$damageEntityHook(source, amount)) {
                             return false;
                         }
                     }
@@ -601,11 +596,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public boolean damageEntityHook(final DamageSource damageSource, float damage) {
+    public boolean bridge$damageEntityHook(final DamageSource damageSource, float damage) {
         if (!this.isEntityInvulnerable(damageSource)) {
             final boolean human = (EntityLivingBase) (Object) this instanceof EntityPlayer;
             // apply forge damage hook
-            damage = applyModDamage((EntityLivingBase) (Object) this, damageSource, damage);
+            damage = bridge$applyModDamage((EntityLivingBase) (Object) this, damageSource, damage);
             final float originalDamage = damage; // set after forge hook.
             if (damage <= 0) {
                 damage = 0;
@@ -615,7 +610,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
             final Optional<DamageFunction> hardHatFunction =
                 DamageEventHandler.createHardHatModifier((EntityLivingBase) (Object) this, damageSource);
             final Optional<List<DamageFunction>> armorFunction =
-                provideArmorModifiers((EntityLivingBase) (Object) this, damageSource, damage);
+                bridge$provideArmorModifiers((EntityLivingBase) (Object) this, damageSource, damage);
             final Optional<DamageFunction> resistanceFunction =
                 DamageEventHandler.createResistanceModifier((EntityLivingBase) (Object) this, damageSource);
             final Optional<List<DamageFunction>> armorEnchantments =
@@ -672,7 +667,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 // Armor
                 if (!damageSource.isUnblockable()) {
                     for (final DamageFunction modifier : event.getModifiers()) {
-                        applyArmorDamage((EntityLivingBase) (Object) this, damageSource, event, modifier.getModifier());
+                        bridge$applyArmorDamage((EntityLivingBase) (Object) this, damageSource, event, modifier.getModifier());
                     }
                 }
 
@@ -819,18 +814,18 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Override
-    public float applyModDamage(final EntityLivingBase entityLivingBase, final DamageSource source, final float damage) {
+    public float bridge$applyModDamage(final EntityLivingBase entityLivingBase, final DamageSource source, final float damage) {
         return damage;
     }
 
     @Override
-    public Optional<List<DamageFunction>> provideArmorModifiers(final EntityLivingBase entityLivingBase,
-                                                                                                         final DamageSource source, final double damage) {
+    public Optional<List<DamageFunction>> bridge$provideArmorModifiers(final EntityLivingBase entityLivingBase,
+        final DamageSource source, final double damage) {
         return DamageEventHandler.createArmorModifiers(entityLivingBase, source, damage);
     }
 
     @Override
-    public void applyArmorDamage(
+    public void bridge$applyArmorDamage(
         final EntityLivingBase entityLivingBase, final DamageSource source, final DamageEntityEvent entityEvent, final DamageModifier modifier) {
         final Optional<DamageObject> optional = modifier.getCause().first(DamageObject.class);
         if (optional.isPresent()) {
@@ -839,7 +834,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Override
-    public boolean hookModAttack(final EntityLivingBase entityLivingBase, final DamageSource source, final float amount) {
+    public boolean bridge$hookModAttack(final EntityLivingBase entityLivingBase, final DamageSource source, final float amount) {
         return true;
     }
 
@@ -850,11 +845,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     @Overwrite
     public boolean canBeCollidedWith() {
         return !(this.vanish$isVanished() && this.vanish$isUncollideable()) && !this.isDead;
-    }
-
-    @Override
-    public int getRecentlyHit() {
-        return this.recentlyHit;
     }
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDIDDDD[I)V"))
@@ -869,15 +859,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
 
     @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
     private void causeTrackDeathUpdate(final EntityLivingBase entityLivingBase) {
-        if (!entityLivingBase.world.isRemote) {
+        if (!this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                  final PhaseContext<?> context = EntityPhase.State.DEATH_UPDATE.createPhaseContext().source(entityLivingBase)) {
                 context.buildAndSwitch();
-                frame.pushCause(entityLivingBase);
-                ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
+                frame.pushCause(this);
+                this.onDeathUpdate();
             }
         } else {
-            ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
+            this.onDeathUpdate();
         }
     }
 
@@ -899,7 +889,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
             return; // Ignore Equipment on player spawn/respawn
         }
         final ItemStack after = this.getItemStackFromSlot(entityEquipmentSlot);
-        final EntityLivingBase entity = (EntityLivingBase) (IMixinEntityLivingBase) this;
+        final EntityLivingBase entity = (EntityLivingBase) (BaseLivingEntityBridge) this;
         if (!ItemStack.areItemStacksEqual(after, before)) {
             final InventoryAdapter slotAdapter;
             if (entity instanceof EntityPlayerMP) {
@@ -945,11 +935,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
         }
     }
 
-    @Override
-    public void onSpongeDeathUpdate() {
-        this.onDeathUpdate();
-    }
-
     @Redirect(method = "onDeathUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getExperiencePoints(Lnet/minecraft/entity/player/EntityPlayer;)I"))
     private int onGetExperiencePoints(final EntityLivingBase entity, final EntityPlayer attackingPlayer) {
         if (entity instanceof ServerPlayerEntityBridge) {
@@ -975,11 +960,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     // Data delegated methods
-
-    @Override
-    public void setElytraFlying(final boolean value) {
-        setFlag(Constants.Entity.ELYTRA_FLYING_FLAG, value);
-    }
 
     // Start implementation of UseItemstackEvent
 
@@ -1171,15 +1151,5 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     // End implementation of UseItemStackEvent
-
-    @Override
-    public ItemStackSnapshot getActiveItemSnapshot() {
-        return ItemStackUtil.snapshotOf(this.activeItemStack);
-    }
-
-    @Override
-    public void stopTheActiveHand() {
-        stopActiveHand();
-    }
 
 }

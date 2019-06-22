@@ -77,6 +77,8 @@ public final class Constants {
             public static final String IS_INVISIBLE = "IsInvisible";
             public static final String VANISH_UNCOLLIDEABLE = "VanishUnCollideable";
             public static final String VANISH_UNTARGETABLE = "VanishUnTargetable";
+            public static final String MAX_AIR = "maxAir";
+            public static final int DEFAULT_MAX_AIR = 300;
         }
 
         public static final class User {

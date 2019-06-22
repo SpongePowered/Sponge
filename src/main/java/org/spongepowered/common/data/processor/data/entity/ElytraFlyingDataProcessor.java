@@ -36,7 +36,9 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElytraFlyi
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
+import org.spongepowered.common.mixin.core.entity.AccessorEntity;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -47,28 +49,28 @@ public class ElytraFlyingDataProcessor extends AbstractEntitySingleDataProcessor
     }
 
     @Override
-    protected boolean set(EntityLivingBase dataHolder, Boolean value) {
-        ((IMixinEntityLivingBase) dataHolder).setElytraFlying(value);
+    protected boolean set(final EntityLivingBase dataHolder, final Boolean value) {
+        ((AccessorEntity) dataHolder).accessor$setEntityFlag(Constants.Entity.ELYTRA_FLYING_FLAG, value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityLivingBase dataHolder) {
+    protected Optional<Boolean> getVal(final EntityLivingBase dataHolder) {
         return Optional.of(dataHolder.isElytraFlying());
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(this.key, false, value);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Value<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<>(this.key, false, actualValue);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
