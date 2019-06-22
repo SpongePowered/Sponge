@@ -190,6 +190,14 @@ public final class DataQueries {
         public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
         public static final DataQuery SNAPSHOT_TILE_DATA = of("TileEntityData");
 
+        public static final class AccelerationData {
+
+            // Acceleration
+            public static final DataQuery ACCELERATION_X = of("X");
+            public static final DataQuery ACCELERATION_Y = of("Y");
+            public static final DataQuery ACCELERATION_Z = of("Z");
+        }
+
         public static final class PlayerData {
 
             // SpongePlayerData

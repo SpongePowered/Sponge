@@ -24,28 +24,29 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.RayTraceResult;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.entity.FireballEntityBridge;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-import javax.annotation.Nullable;
-
 @Mixin(EntityFireball.class)
-public abstract class MixinEntityFireball extends MixinEntity {
+public abstract class MixinEntityFireball extends MixinEntity implements FireballEntityBridge {
 
     @Shadow public EntityLivingBase shootingEntity;
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
+    @Shadow public double accelerationX;
+    @Shadow public double accelerationY;
+    @Shadow public double accelerationZ;
 
     @Override
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
@@ -69,5 +70,12 @@ public abstract class MixinEntityFireball extends MixinEntity {
         if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((Fireball) this).getShooter(), movingObjectPosition)) {
             this.onImpact(movingObjectPosition);
         }
+    }
+
+    @Override
+    public void bridge$setImplAcceleration(final Vector3d acceleration) {
+        this.accelerationX = acceleration.getX();
+        this.accelerationY = acceleration.getY();
+        this.accelerationZ = acceleration.getZ();
     }
 }

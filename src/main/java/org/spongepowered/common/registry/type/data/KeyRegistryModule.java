@@ -100,6 +100,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("velocity", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("velocity").name("Velocity").query(of("Velocity")).build());
 
+        this.register("acceleration", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("acceleration").name("Acceleration").query(of("Acceleration")).build());
+
         this.register("food_level", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("food_level").name("Food Level").query(of("FoodLevel")).build());
 
         this.register("saturation", Key.builder().type(TypeTokens.DOUBLE_VALUE_TOKEN).id("food_saturation_level").name("Food Saturation Level").query(of("FoodSaturationLevel")).build());

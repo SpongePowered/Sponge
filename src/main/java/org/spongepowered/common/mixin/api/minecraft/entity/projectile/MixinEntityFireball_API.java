@@ -26,11 +26,15 @@ package org.spongepowered.common.mixin.api.minecraft.entity.projectile;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityFireball;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAccelerationData;
 import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
+
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -38,6 +42,9 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityFireball_API extends MixinEntity_API implements Fireball {
 
     @Shadow @Nullable public EntityLivingBase shootingEntity;
+    @Shadow public double accelerationX;
+    @Shadow public double accelerationY;
+    @Shadow public double accelerationZ;
 
     @Nullable private ProjectileSource projectileSource = null;
 
@@ -64,4 +71,10 @@ public abstract class MixinEntityFireball_API extends MixinEntity_API implements
         }
     }
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final List<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+
+        manipulators.add(new SpongeAccelerationData(this.accelerationX, this.accelerationY, this.accelerationZ));
+    }
 }

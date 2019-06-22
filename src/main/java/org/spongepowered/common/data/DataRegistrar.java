@@ -263,6 +263,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(VelocityData.class, SpongeVelocityData.class, ImmutableVelocityData.class,
                 ImmutableSpongeVelocityData.class, new VelocityDataProcessor());
 
+        DataUtil.registerDualProcessor(AccelerationData.class, SpongeAccelerationData.class, ImmutableAccelerationData.class,
+          ImmutableSpongeAccelerationData.class, new AccelerationDataProcessor());
+
         DataUtil.registerDataProcessorAndImpl(FoodData.class, SpongeFoodData.class, ImmutableFoodData.class,
                 ImmutableSpongeFoodData.class, new FoodDataProcessor());
 
