@@ -43,6 +43,7 @@ import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -77,11 +78,11 @@ public class StoredEnchantmentDataProcessor extends
 
     @Override
     protected Optional<List<Enchantment>> getVal(ItemStack entity) {
-        if (!entity.hasTagCompound() || !entity.getTagCompound().hasKey(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, NbtDataUtil.TAG_LIST)) {
+        if (!entity.hasTagCompound() || !entity.getTagCompound().hasKey(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_LIST)) {
             return Optional.empty();
         }
         List<Enchantment> list = Lists.newArrayList();
-        NBTTagList tags = entity.getTagCompound().getTagList(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, NbtDataUtil.TAG_COMPOUND);
+        NBTTagList tags = entity.getTagCompound().getTagList(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < tags.tagCount(); i++) {
             NBTTagCompound tag = tags.getCompoundTagAt(i);
             list.add(new SpongeEnchantment(
@@ -105,7 +106,7 @@ public class StoredEnchantmentDataProcessor extends
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (supports(container)) {
             ItemStack stack = (ItemStack) container;
-            if (stack.hasTagCompound() && stack.getTagCompound().hasKey(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, NbtDataUtil.TAG_COMPOUND)) {
+            if (stack.hasTagCompound() && stack.getTagCompound().hasKey(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND)) {
                 stack.getTagCompound().removeTag(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST);
             }
             return DataTransactionResult.successNoData();

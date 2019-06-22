@@ -35,6 +35,7 @@ import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -57,7 +58,7 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
         if (!container.hasTagCompound()) {
             container.setTagCompound(new NBTTagCompound());
         }
-        if (container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
+        if (container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
             int flag = container.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
             if (value) {
                 container.getTagCompound()
@@ -77,7 +78,7 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
 
     @Override
     protected Optional<Boolean> getVal(ItemStack container) {
-        if (container.hasTagCompound() && container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
+        if (container.hasTagCompound() && container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
             int flag = container.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
             if ((flag & this.flag) != 0) {
                 return OptBool.TRUE;

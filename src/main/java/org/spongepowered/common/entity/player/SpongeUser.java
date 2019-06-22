@@ -123,9 +123,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
         // net.minecraft.entity.Entity#readFromNBT
 
-        NBTTagList position = compound.getTagList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
+        NBTTagList position = compound.getTagList(NbtDataUtil.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
         //NBTTagList motion = compound.getTagList("Motion", NbtDataUtil.TAG_DOUBLE);
-        NBTTagList rotation = compound.getTagList(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.TAG_FLOAT);
+        NBTTagList rotation = compound.getTagList(NbtDataUtil.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
         //this.motionX = motion.getDoubleAt(0);
         //this.motionY = motion.getDoubleAt(1);
         //this.motionZ = motion.getDoubleAt(2);
@@ -322,7 +322,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
                 this.isVanishCollide = spongeCompound.getBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
             }
 
-            final NBTTagList spawnList = spongeCompound.getTagList(Constants.Sponge.User.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
+            final NBTTagList spawnList = spongeCompound.getTagList(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
 
             for (int i = 0; i < spawnList.tagCount(); i++) {
                 final NBTTagCompound spawnCompound = spawnList.getCompoundTagAt(i);

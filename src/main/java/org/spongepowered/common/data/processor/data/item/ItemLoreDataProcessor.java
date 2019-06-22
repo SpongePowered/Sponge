@@ -43,6 +43,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -91,7 +92,7 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
         if (subCompound == null) {
             return Optional.empty();
         }
-        if (!subCompound.hasKey(NbtDataUtil.ITEM_LORE, NbtDataUtil.TAG_LIST)) {
+        if (!subCompound.hasKey(NbtDataUtil.ITEM_LORE, Constants.NBT.TAG_LIST)) {
             return Optional.empty();
         }
         return Optional.of(NbtDataUtil.getLoreFromNBT(subCompound));

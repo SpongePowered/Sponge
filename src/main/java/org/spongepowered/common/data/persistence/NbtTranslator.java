@@ -41,6 +41,7 @@ import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagLong;
+import net.minecraft.nbt.NBTTagLongArray;
 import net.minecraft.nbt.NBTTagShort;
 import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.data.DataContainer;
@@ -49,7 +50,8 @@ import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.mixin.core.nbt.AccessorNBTTagLongArray;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Map;
@@ -131,6 +133,15 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                     array[counter++] = data;
                 }
                 return new NBTTagIntArray(array);
+            } else if (value instanceof long[]) {
+                return new NBTTagLongArray((long[]) value);
+            } else if (value instanceof Long[]) {
+                long[] array = new long[((Long[]) value).length];
+                int counter = 0;
+                for (Long data : (Long[]) value) {
+                    array[counter++] = data;
+                }
+                return new NBTTagLongArray(array);
             }
         } else if (value instanceof List) {
             NBTTagList list = new NBTTagList();
@@ -177,37 +188,37 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         checkNotNull(view);
         checkNotNull(key);
         checkArgument(!key.isEmpty());
-        checkArgument(type > NbtDataUtil.TAG_END && type <= NbtDataUtil.TAG_INT_ARRAY);
+        checkArgument(type > Constants.NBT.TAG_END && type <= Constants.NBT.TAG_INT_ARRAY);
         switch (type) {
-            case NbtDataUtil.TAG_BYTE:
+            case Constants.NBT.TAG_BYTE:
                 if (key.contains(BOOLEAN_IDENTIFER)) {
                     view.set(of(key.replace(BOOLEAN_IDENTIFER, "")), (((NBTTagByte) base).getByte() != 0));
                 } else {
                     view.set(of(key), ((NBTTagByte) base).getByte());
                 }
                 break;
-            case NbtDataUtil.TAG_SHORT:
+            case Constants.NBT.TAG_SHORT:
                 view.set(of(key), ((NBTTagShort) base).getShort());
                 break;
-            case NbtDataUtil.TAG_INT:
+            case Constants.NBT.TAG_INT:
                 view.set(of(key), ((NBTTagInt) base).getInt());
                 break;
-            case NbtDataUtil.TAG_LONG:
+            case Constants.NBT.TAG_LONG:
                 view.set(of(key), ((NBTTagLong) base).getLong());
                 break;
-            case NbtDataUtil.TAG_FLOAT:
+            case Constants.NBT.TAG_FLOAT:
                 view.set(of(key), ((NBTTagFloat) base).getFloat());
                 break;
-            case NbtDataUtil.TAG_DOUBLE:
+            case Constants.NBT.TAG_DOUBLE:
                 view.set(of(key), ((NBTTagDouble) base).getDouble());
                 break;
-            case NbtDataUtil.TAG_BYTE_ARRAY:
+            case Constants.NBT.TAG_BYTE_ARRAY:
                 view.set(of(key), ((NBTTagByteArray) base).getByteArray());
                 break;
-            case NbtDataUtil.TAG_STRING:
+            case Constants.NBT.TAG_STRING:
                 view.set(of(key), ((NBTTagString) base).getString());
                 break;
-            case NbtDataUtil.TAG_LIST:
+            case Constants.NBT.TAG_LIST:
                 NBTTagList list = (NBTTagList) base;
                 byte listType = (byte) list.getTagType();
                 int count = list.tagCount();
@@ -217,7 +228,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 }
                 view.set(of(key), objectList);
                 break;
-            case NbtDataUtil.TAG_COMPOUND:
+            case Constants.NBT.TAG_COMPOUND:
                 DataView internalView = view.createView(of(key));
                 NBTTagCompound compound = (NBTTagCompound) base;
                 for (String internalKey : compound.getKeySet()) {
@@ -230,8 +241,11 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                     setInternal(internalBase, internalType, internalView, internalKey);
                 }
                 break;
-            case NbtDataUtil.TAG_INT_ARRAY:
+            case Constants.NBT.TAG_INT_ARRAY:
                 view.set(of(key), ((NBTTagIntArray) base).getIntArray());
+                break;
+            case Constants.NBT.TAG_LONG_ARRAY:
+                view.set(of(key), ((AccessorNBTTagLongArray) base).accessor$getLongArray());
                 break;
             default:
                 throw new IllegalArgumentException("Unknown NBT type " + type);
@@ -241,23 +255,23 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static Object fromTagBase(NBTBase base, byte type) {
         switch (type) {
-            case NbtDataUtil.TAG_BYTE:
+            case Constants.NBT.TAG_BYTE:
                 return ((NBTTagByte) base).getByte();
-            case NbtDataUtil.TAG_SHORT:
+            case Constants.NBT.TAG_SHORT:
                 return (((NBTTagShort) base)).getShort();
-            case NbtDataUtil.TAG_INT:
+            case Constants.NBT.TAG_INT:
                 return ((NBTTagInt) base).getInt();
-            case NbtDataUtil.TAG_LONG:
+            case Constants.NBT.TAG_LONG:
                 return ((NBTTagLong) base).getLong();
-            case NbtDataUtil.TAG_FLOAT:
+            case Constants.NBT.TAG_FLOAT:
                 return ((NBTTagFloat) base).getFloat();
-            case NbtDataUtil.TAG_DOUBLE:
+            case Constants.NBT.TAG_DOUBLE:
                 return ((NBTTagDouble) base).getDouble();
-            case NbtDataUtil.TAG_BYTE_ARRAY:
+            case Constants.NBT.TAG_BYTE_ARRAY:
                 return ((NBTTagByteArray) base).getByteArray();
-            case NbtDataUtil.TAG_STRING:
+            case Constants.NBT.TAG_STRING:
                 return ((NBTTagString) base).getString();
-            case NbtDataUtil.TAG_LIST:
+            case Constants.NBT.TAG_LIST:
                 NBTTagList list = (NBTTagList) base;
                 byte listType = (byte) list.getTagType();
                 int count = list.tagCount();
@@ -266,10 +280,12 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                     objectList.add(fromTagBase(list.get(i), listType));
                 }
                 return objectList;
-            case NbtDataUtil.TAG_COMPOUND:
+            case Constants.NBT.TAG_COMPOUND:
                 return getViewFromCompound((NBTTagCompound) base);
-            case NbtDataUtil.TAG_INT_ARRAY:
+            case Constants.NBT.TAG_INT_ARRAY:
                 return ((NBTTagIntArray) base).getIntArray();
+            case Constants.NBT.TAG_LONG_ARRAY:
+                return ((AccessorNBTTagLongArray) base).accessor$getLongArray();
             default :
                 return null;
         }

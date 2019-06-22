@@ -54,6 +54,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -100,7 +101,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             }
 
             final NBTTagCompound compound = ((ItemStack) holder).getSubCompound(NbtDataUtil.ITEM_DISPLAY);
-            if (compound != null && compound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, NbtDataUtil.TAG_STRING)) {
+            if (compound != null && compound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
                 return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(NbtDataUtil.ITEM_DISPLAY_NAME))));
             }
             return Optional.empty();

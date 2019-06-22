@@ -86,11 +86,11 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         if (this.position != null) {
             return Optional.of(this.position);
         }
-        if (!this.data.hasKey(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_LIST)) {
+        if (!this.data.hasKey(NbtDataUtil.ENTITY_POSITION, Constants.NBT.TAG_LIST)) {
             return Optional.empty();
         }
         try {
-            NBTTagList pos = this.data.getTagList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
+            NBTTagList pos = this.data.getTagList(NbtDataUtil.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
             double x = pos.getDoubleAt(0);
             double y = pos.getDoubleAt(1);
             double z = pos.getDoubleAt(2);

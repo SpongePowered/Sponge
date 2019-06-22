@@ -38,6 +38,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
+import org.spongepowered.common.util.Constants;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -93,11 +94,11 @@ public class WorldStorageUtil {
 
         // Checks are based on AnvilChunkLoader#checkedReadChunkFromNBT
 
-        if (!data.hasKey(NbtDataUtil.CHUNK_DATA_LEVEL, NbtDataUtil.TAG_COMPOUND)) {
+        if (!data.hasKey(NbtDataUtil.CHUNK_DATA_LEVEL, Constants.NBT.TAG_COMPOUND)) {
             return null;
         }
         NBTTagCompound level = data.getCompoundTag(NbtDataUtil.CHUNK_DATA_LEVEL);
-        if (!level.hasKey(NbtDataUtil.CHUNK_DATA_SECTIONS, NbtDataUtil.TAG_LIST)) {
+        if (!level.hasKey(NbtDataUtil.CHUNK_DATA_SECTIONS, Constants.NBT.TAG_LIST)) {
             return null;
         }
         return NbtTranslator.getInstance().translateFrom(level);

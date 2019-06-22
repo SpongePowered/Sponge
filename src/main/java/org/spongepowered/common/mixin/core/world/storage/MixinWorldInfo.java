@@ -88,6 +88,7 @@ import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.FunctionalUtil;
 import org.spongepowered.common.world.WorldManager;
 
@@ -827,8 +828,8 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
                 this.serializationBehavior = SerializationBehaviors.NONE;
             }
         }
-        if (nbt.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_LIST)) {
-            final NBTTagList playerIdList = nbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
+        if (nbt.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
+            final NBTTagList playerIdList = nbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < playerIdList.tagCount(); i++) {
                 final NBTTagCompound playerId = playerIdList.getCompoundTagAt(i);
                 final UUID playerUuid = playerId.getUniqueId(NbtDataUtil.UUID);
@@ -864,7 +865,7 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
             this.spongeNbt.setShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
             this.spongeNbt.setBoolean(NbtDataUtil.HAS_CUSTOM_DIFFICULTY, this.hasCustomDifficulty);
             final Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
-            final NBTTagList playerIdList = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
+            final NBTTagList playerIdList = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
             while (iterator.hasNext()) {
                 final NBTTagCompound compound = new NBTTagCompound();
                 compound.setUniqueId(NbtDataUtil.UUID, iterator.next());

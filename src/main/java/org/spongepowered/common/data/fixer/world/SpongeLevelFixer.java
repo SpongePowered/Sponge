@@ -52,8 +52,8 @@ public class SpongeLevelFixer implements IFixableData {
 
         }
         // Fixes the Player Id Table
-        if (compound.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_LIST)) {
-            final NBTTagList playerIdList = compound.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
+        if (compound.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
+            final NBTTagList playerIdList = compound.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < playerIdList.tagCount(); i++) {
                 final NBTTagCompound playerIdCompound = playerIdList.getCompoundTagAt(i);
                 final long least = playerIdCompound.getLong(Constants.Deprecated.World.WORLD_UUID_LEAST_1_8);

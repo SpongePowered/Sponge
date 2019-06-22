@@ -38,10 +38,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
 import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.UUID;
 
@@ -70,7 +70,7 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                         NBTTagCompound nbt = loadNbt();
                         String name = nbt.getString("name");
                         EntityType type = null;
-                        if (nbt.hasKey("type", NbtDataUtil.TAG_STRING)) {
+                        if (nbt.hasKey("type", Constants.NBT.TAG_STRING)) {
                             type = SpongeImpl.getGame().getRegistry().getType(EntityType.class, name).orElse(null);
                         }
 

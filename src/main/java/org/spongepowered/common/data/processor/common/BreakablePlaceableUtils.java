@@ -31,7 +31,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 import java.util.Set;
@@ -72,7 +72,7 @@ public final class BreakablePlaceableUtils {
         if (tag == null) {
             return Optional.empty();
         }
-        NBTTagList blockIds = tag.getTagList(nbtKey, NbtDataUtil.TAG_STRING);
+        NBTTagList blockIds = tag.getTagList(nbtKey, Constants.NBT.TAG_STRING);
         if (blockIds.isEmpty()) {
             return Optional.empty();
         }

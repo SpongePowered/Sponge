@@ -58,7 +58,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -498,12 +497,12 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
             ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
         }
-        if (compound.hasKey(Constants.Sponge.Entity.IS_VANISHED, NbtDataUtil.TAG_BYTE)) {
+        if (compound.hasKey(Constants.Sponge.Entity.IS_VANISHED, Constants.NBT.TAG_BYTE)) {
             this.vanish$setVanished(compound.getBoolean(Constants.Sponge.Entity.IS_VANISHED));
             this.vanish$setUncollideable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE));
             this.vanish$setUntargetable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE));
         }
-        if (compound.hasKey(Constants.Sponge.Entity.IS_INVISIBLE, NbtDataUtil.TAG_BYTE)) {
+        if (compound.hasKey(Constants.Sponge.Entity.IS_INVISIBLE, Constants.NBT.TAG_BYTE)) {
             this.vanish$setInvisible(compound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE));
         }
     }

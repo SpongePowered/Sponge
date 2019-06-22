@@ -320,6 +320,7 @@
         "item.inventory.MixinTraitAdapter",
         "item.inventory.MixinTraitInventory",
         "item.recipe.smelting.MixinSmeltingRecipe",
+        "nbt.AccessorNBTTagLongArray",
         "nbt.MixinNBTTagCompound",
         "network.MixinNetHandlerPlayServer",
         "network.MixinNetworkManager",

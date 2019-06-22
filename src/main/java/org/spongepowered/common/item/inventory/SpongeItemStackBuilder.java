@@ -173,7 +173,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.damageValue = getData(container, DataQueries.ItemStack.DAMAGE_VALUE, Integer.class);
         if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
             final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.Sponge.UNSAFE_NBT).get());
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            if (compound.hasKey(NbtDataUtil.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
                 compound.removeTag(NbtDataUtil.SPONGE_DATA);
             }
             this.compound = compound;
@@ -330,7 +330,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (this.keyValues != null) {
             this.keyValues.forEach((key, value) -> stack.offer((Key) key, value));
         }
-        if (this.compound != null && this.compound.hasKey(Constants.Forge.FORGE_CAPS, NbtDataUtil.TAG_COMPOUND)) {
+        if (this.compound != null && this.compound.hasKey(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
             final NBTTagCompound compoundTag = this.compound.getCompoundTag(Constants.Forge.FORGE_CAPS);
             if (compoundTag != null) {
                 SpongeImplHooks.setCapabilitiesFromSpongeBuilder(stack, compoundTag);

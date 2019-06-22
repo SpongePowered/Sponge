@@ -138,21 +138,6 @@ public final class NbtDataUtil {
 
     public static final String SPAWNABLE_ENTITY_TAG = "EntityTag";
 
-    // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
-    public static final byte TAG_END = 0;
-    public static final byte TAG_BYTE = 1;
-    public static final byte TAG_SHORT = 2;
-    public static final byte TAG_INT = 3;
-    public static final byte TAG_LONG = 4;
-    public static final byte TAG_FLOAT = 5;
-    public static final byte TAG_DOUBLE = 6;
-    public static final byte TAG_BYTE_ARRAY = 7;
-    public static final byte TAG_STRING = 8;
-    public static final byte TAG_LIST = 9;
-    public static final byte TAG_COMPOUND = 10;
-    public static final byte TAG_INT_ARRAY = 11;
-    public static final byte TAG_ANY_NUMERIC = 99;
-
     // These are Sponge's NBT tag keys
     public static final String SPONGE_DATA = "SpongeData";
     public static final String SPONGE_ENTITY_CREATOR = "Creator";
@@ -249,19 +234,19 @@ public final class NbtDataUtil {
      * @return The sub compound keyed by the provided string key
      */
     public static NBTTagCompound getOrCreateSubCompound(NBTTagCompound mainCompound, final String key) {
-        if (!mainCompound.hasKey(key, TAG_COMPOUND)) {
+        if (!mainCompound.hasKey(key, Constants.NBT.TAG_COMPOUND)) {
             mainCompound.setTag(key, new NBTTagCompound());
         }
         return mainCompound.getCompoundTag(key);
     }
 
     public static NBTTagCompound filterSpongeCustomData(NBTTagCompound rootCompound) {
-        if (rootCompound.hasKey(Constants.Forge.FORGE_DATA, TAG_COMPOUND)) {
+        if (rootCompound.hasKey(Constants.Forge.FORGE_DATA, Constants.NBT.TAG_COMPOUND)) {
             final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(Constants.Forge.FORGE_DATA);
-            if (forgeCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
+            if (forgeCompound.hasKey(SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
                 cleanseInnerCompound(forgeCompound, SPONGE_DATA);
             }
-        } else if (rootCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
+        } else if (rootCompound.hasKey(SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
             cleanseInnerCompound(rootCompound, SPONGE_DATA);
         }
         return rootCompound;
@@ -275,7 +260,7 @@ public final class NbtDataUtil {
     }
 
     public static List<Text> getLoreFromNBT(NBTTagCompound subCompound) {
-        final NBTTagList list = subCompound.getTagList(ITEM_LORE, TAG_STRING);
+        final NBTTagList list = subCompound.getTagList(ITEM_LORE, Constants.NBT.TAG_STRING);
         return SpongeTexts.fromNbtLegacy(list);
     }
 
@@ -317,7 +302,7 @@ public final class NbtDataUtil {
     }
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {
-        final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, TAG_STRING);
+        final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
         if (list.isEmpty()) {
             return new ArrayList<>();
         }
@@ -331,7 +316,7 @@ public final class NbtDataUtil {
     }
 
     public static List<String> getPlainPagesFromNBT(NBTTagCompound compound) {
-        final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, TAG_STRING);
+        final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
         List<String> stringList = new ArrayList<>();
         if (!list.isEmpty()) {
             for (int i = 0; i < list.tagCount(); i++) {

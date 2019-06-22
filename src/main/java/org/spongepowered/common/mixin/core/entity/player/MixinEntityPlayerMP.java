@@ -198,7 +198,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     @Override
     public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, NbtDataUtil.TAG_DOUBLE)) {
+        if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, Constants.NBT.TAG_DOUBLE)) {
             this.impl$healthScaling = true;
             this.impl$healthScale = compound.getDouble(NbtDataUtil.HEALTH_SCALE);
         }

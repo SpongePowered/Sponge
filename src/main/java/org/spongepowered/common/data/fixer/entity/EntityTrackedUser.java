@@ -56,7 +56,7 @@ public class EntityTrackedUser implements IFixableData {
     }
 
     private static void process(NBTTagCompound spongeData, String type) {
-        if (spongeData.hasKey(type, NbtDataUtil.TAG_COMPOUND)) {
+        if (spongeData.hasKey(type, Constants.NBT.TAG_COMPOUND)) {
             final NBTTagCompound creatorTag = spongeData.getCompoundTag(type);
             final long least = creatorTag.getLong(Constants.Deprecated.Entity.UUID_LEAST_1_8);
             final long most = creatorTag.getLong(Constants.Deprecated.Entity.UUID_MOST_1_8);

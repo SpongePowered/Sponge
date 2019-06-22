@@ -46,6 +46,7 @@ import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinSaveHandler;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -208,7 +209,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         NBTTagCompound compound = CompressedStreamTools.readCompressed(inputStream);
         Instant lastPlayed = Instant.now();
         // first try to migrate bukkit join data stuff
-        if (compound.hasKey(NbtDataUtil.BUKKIT, NbtDataUtil.TAG_COMPOUND)) {
+        if (compound.hasKey(NbtDataUtil.BUKKIT, Constants.NBT.TAG_COMPOUND)) {
             final NBTTagCompound bukkitCompound = compound.getCompoundTag(NbtDataUtil.BUKKIT);
             creation = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_FIRST_PLAYED));
             lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_LAST_PLAYED));

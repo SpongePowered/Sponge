@@ -39,6 +39,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -75,7 +76,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
             return Optional.of(SpongeTexts.fromLegacy(titleString));
         }
         final NBTTagCompound mainCompound = container.getSubCompound(NbtDataUtil.ITEM_DISPLAY);
-        if (mainCompound != null && mainCompound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, NbtDataUtil.TAG_STRING)) {
+        if (mainCompound != null && mainCompound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
             final String displayString = mainCompound.getString(NbtDataUtil.ITEM_DISPLAY_NAME);
             return Optional.of(SpongeTexts.fromLegacy(displayString));
         }

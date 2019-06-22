@@ -42,6 +42,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeFireworkShape;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -178,7 +179,7 @@ public class FireworkUtils {
             NBTTagCompound fireworks = item.getSubCompound("Fireworks");
             if(fireworks == null || !fireworks.hasKey("Explosions")) return Optional.empty();
 
-            NBTTagList effectsNbt = fireworks.getTagList("Explosions", NbtDataUtil.TAG_COMPOUND);
+            NBTTagList effectsNbt = fireworks.getTagList("Explosions", Constants.NBT.TAG_COMPOUND);
             effects = Lists.newArrayList();
             for(int i = 0; i < effectsNbt.tagCount(); i++) {
                 NBTTagCompound effectNbt = effectsNbt.getCompoundTagAt(i);

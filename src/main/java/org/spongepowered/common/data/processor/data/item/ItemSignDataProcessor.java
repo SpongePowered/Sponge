@@ -48,6 +48,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +65,7 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
             return Optional.empty();
         }
         final NBTTagCompound mainCompound = itemStack.getTagCompound();
-        if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, NbtDataUtil.TAG_COMPOUND)
+        if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, Constants.NBT.TAG_COMPOUND)
                 || !mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG).hasKey(NbtDataUtil.BLOCK_ENTITY_ID)) {
             return Optional.empty();
         }

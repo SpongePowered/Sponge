@@ -52,6 +52,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 
@@ -133,8 +134,8 @@ public abstract class MixinMobSpawnerBaseLogic {
         }
 
 
-        if (compound.hasKey(NbtDataUtil.Minecraft.PASSENGERS, NbtDataUtil.TAG_LIST)) {
-            final NBTTagList passengerList = compound.getTagList(NbtDataUtil.Minecraft.PASSENGERS, NbtDataUtil.TAG_COMPOUND);
+        if (compound.hasKey(NbtDataUtil.Minecraft.PASSENGERS, Constants.NBT.TAG_LIST)) {
+            final NBTTagList passengerList = compound.getTagList(NbtDataUtil.Minecraft.PASSENGERS, Constants.NBT.TAG_COMPOUND);
 
             for (int i = 0; i < passengerList.tagCount(); i++) {
                 final Entity passenger = impl$ThrowEventAndConstruct(passengerList.getCompoundTagAt(i), world, x, y, z, doesNotForceSpawn);
