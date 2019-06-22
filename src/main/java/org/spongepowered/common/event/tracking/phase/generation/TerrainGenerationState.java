@@ -30,8 +30,4 @@ public class TerrainGenerationState extends BasicGenerationState {
         super("TERRAIN_GENERATION");
     }
 
-    @Override
-    public boolean allowChunkLoads() {
-        return true;
-    }
 }

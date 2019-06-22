@@ -37,6 +37,11 @@ public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericG
     }
 
     @Override
+    public boolean doesDenyChunkRequests() {
+        return true;
+    }
+
+    @Override
     public boolean ignoresBlockUpdateTick(GenericGenerationContext context) {
         return false;
     }

@@ -36,8 +36,5 @@ final class PopulatorGenerationPhaseState extends GeneralGenerationPhaseState<Po
             .addEntityCaptures();
     }
 
-    @Override
-    public boolean allowChunkLoads() {
-        return true;
-    }
+
 }

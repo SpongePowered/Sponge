@@ -67,9 +67,4 @@ final class ChangingToDimensionState extends EntityPhaseState<DimensionChangeCon
         return true;
     }
 
-    @Override
-    public boolean allowChunkLoads() {
-        return true;
-    }
-
 }

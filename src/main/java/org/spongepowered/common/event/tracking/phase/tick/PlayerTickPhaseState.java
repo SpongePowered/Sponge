@@ -100,11 +100,6 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
     }
 
     @Override
-    public boolean allowChunkLoads() {
-        return true;
-    }
-
-    @Override
     public boolean doesCaptureEntitySpawns() {
         return false;
     }

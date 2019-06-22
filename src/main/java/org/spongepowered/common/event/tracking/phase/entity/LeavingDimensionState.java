@@ -33,9 +33,4 @@ final class LeavingDimensionState extends EntityPhaseState<BasicEntityContext> {
     public BasicEntityContext createPhaseContext() {
         return new BasicEntityContext(this);
     }
-
-    @Override
-    public boolean allowChunkLoads() {
-        return true;
-    }
 }
