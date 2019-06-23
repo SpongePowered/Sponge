@@ -74,7 +74,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.VanishingBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
@@ -218,67 +218,72 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
             }
 
             final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) ((WorldServer) this.world).getChunkProvider();
-            chunkProviderServer.setForceChunkRequests(true);
+            final boolean previous = chunkProviderServer.bridge$getForceChunkRequests();
+            chunkProviderServer.bridge$setForceChunkRequests(true);
+            try {
+                final List<net.minecraft.entity.Entity> passengers = ((Entity) (Object) this).getPassengers();
 
-            final List<net.minecraft.entity.Entity> passengers = ((Entity) (Object) this).getPassengers();
+                boolean isTeleporting = true;
+                boolean isChangingDimension = false;
+                if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
+                    if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
+                        // Close open containers
+                        final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Object) this;
+                        if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
+                            ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
+                        }
 
-            boolean isTeleporting = true;
-            boolean isChangingDimension = false;
-            if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
-                if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
-                    // Close open containers
-                    final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Object) this;
-                    if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
-                        ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
+                        EntityUtil.transferPlayerToWorld(entityPlayerMP, event, (WorldServer) location.getExtent(),
+                            (TeleporterBridge) ((WorldServer) location.getExtent()).getDefaultTeleporter());
+                    } else {
+                        EntityUtil.transferEntityToWorld((Entity) (Object) this, event, (WorldServer) location.getExtent(),
+                            (TeleporterBridge) ((WorldServer) location.getExtent()).getDefaultTeleporter(), false);
                     }
 
-                    EntityUtil.transferPlayerToWorld(entityPlayerMP, event, (WorldServer) location.getExtent(),
-                        (TeleporterBridge) ((WorldServer) location.getExtent()).getDefaultTeleporter());
+                    isChangingDimension = true;
+                }
+
+                double distance = location.getPosition().distance(this.getPosition());
+
+                if (distance <= 4) {
+                    isTeleporting = false;
+                }
+
+                if ((Entity) (Object) this instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) (Object) this).connection != null) {
+                    final EntityPlayerMP player = (EntityPlayerMP) (Entity) (Object) this;
+
+                    // No reason to attempt to load chunks unless we're teleporting
+                    if (isTeleporting || isChangingDimension) {
+                        // Close open containers
+                        if (player.openContainer != player.inventoryContainer) {
+                            ((Player) player).closeInventory(); // Call API method to make sure we capture it
+                        }
+
+                        ((WorldServer) location.getExtent()).getChunkProvider()
+                            .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
+                    }
+                    player.connection
+                        .setPlayerLocation(location.getX(), location.getY(), location.getZ(), ((Entity) (Object) this).rotationYaw,
+                            ((Entity) (Object) this).rotationPitch);
+                    ((IMixinNetHandlerPlayServer) player.connection).setLastMoveLocation(null); // Set last move to teleport target
                 } else {
-                    EntityUtil.transferEntityToWorld((Entity) (Object) this, event, (WorldServer) location.getExtent(),
-                        (TeleporterBridge) ((WorldServer) location.getExtent()).getDefaultTeleporter(), false);
+                    setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
                 }
 
-                isChangingDimension = true;
-            }
-
-            double distance = location.getPosition().distance(this.getPosition());
-
-            if (distance <= 4) {
-                isTeleporting = false;
-            }
-
-            if ((Entity) (Object) this instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) (Object) this).connection != null) {
-                final EntityPlayerMP player = (EntityPlayerMP) (Entity) (Object) this;
-
-                // No reason to attempt to load chunks unless we're teleporting
                 if (isTeleporting || isChangingDimension) {
-                    // Close open containers
-                    if (player.openContainer != player.inventoryContainer) {
-                        ((Player) player).closeInventory(); // Call API method to make sure we capture it
+                    // Re-attach passengers
+                    for (net.minecraft.entity.Entity passenger : passengers) {
+                        if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.world).getUniqueId()) {
+                            ((org.spongepowered.api.entity.Entity) passenger).setLocation(location);
+                        }
+                        passenger.startRiding((Entity) (Object) this, true);
                     }
-
-                    ((WorldServer) location.getExtent()).getChunkProvider().loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
                 }
-                player.connection
-                    .setPlayerLocation(location.getX(), location.getY(), location.getZ(), ((Entity) (Object) this).rotationYaw, ((Entity) (Object) this).rotationPitch);
-                ((IMixinNetHandlerPlayServer) player.connection).setLastMoveLocation(null); // Set last move to teleport target
-            } else {
-                setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
+                return true;
+            } finally {
+                chunkProviderServer.bridge$setForceChunkRequests(previous);
             }
 
-            if (isTeleporting || isChangingDimension) {
-                // Re-attach passengers
-                for (net.minecraft.entity.Entity passenger : passengers) {
-                    if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.world).getUniqueId()) {
-                        ((org.spongepowered.api.entity.Entity) passenger).setLocation(location);
-                    }
-                    passenger.startRiding((Entity) (Object) this, true);
-                }
-            }
-
-            chunkProviderServer.setForceChunkRequests(false);
-            return true;
         }
     }
 

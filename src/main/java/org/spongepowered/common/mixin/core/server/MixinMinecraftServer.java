@@ -108,7 +108,7 @@ import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
@@ -368,7 +368,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) worldServer.getChunkProvider();
-        chunkProviderServer.setForceChunkRequests(true);
+        chunkProviderServer.bridge$setForceChunkRequests(true);
 
         try (GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
             .source(worldServer)
@@ -395,7 +395,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             }
             this.clearCurrentTask();
         }
-        chunkProviderServer.setForceChunkRequests(false);
+        chunkProviderServer.bridge$setForceChunkRequests(false);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

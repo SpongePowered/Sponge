@@ -22,33 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
-
-import javax.annotation.Nullable;
+package org.spongepowered.common.bridge.world.chunk;
 
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
+import org.spongepowered.common.mixin.core.world.gen.MixinChunkProviderServer;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface ServerChunkProviderBridge {
+/**
+ * Specific bridge for the {@link ChunkProviderServer}, with a direct
+ * pairing to {@link WorldServer} as a hard requirement.
+ */
+public interface ServerChunkProviderBridge extends ChunkProviderBridge {
 
-    CompletableFuture<Boolean> doesChunkExistSync(Vector3i chunkCoords);
+    CompletableFuture<Boolean> bridge$doesChunkExistSync(Vector3i chunkCoords);
 
-    boolean getForceChunkRequests();
+    boolean bridge$getForceChunkRequests();
 
-    void setMaxChunkUnloads(int maxUnloads);
+    void bridge$setDenyChunkRequests(boolean flag);
 
-    void setDenyChunkRequests(boolean flag);
+    void bridge$setForceChunkRequests(boolean flag);
 
-    void setForceChunkRequests(boolean flag);
+    void bridge$unloadChunkAndSave(Chunk chunk);
 
-    void unloadChunkAndSave(Chunk chunk);
+    long bridge$getChunkUnloadDelay();
 
-    @Nullable Chunk getLoadedChunkWithoutMarkingActive(int x, int z);
+    /**
+     * Used strictly for implementation, because this method
+     * is used in various other places, SpongeForge needs to
+     * override this specifically for forge's async chunk loading
+     * and SpongeVanilla has to use this specially from it's own
+     * ported implementation.
+     *
+     * @param x
+     * @param z
+     * @return The chunk loaded forcefully
+     * look at MixinChunkProviderServer#impl$ProvideChunkForced(Chunk, int, int)
+     */
+    Chunk impl$loadChunkForce(final int x, final int z);
 
-    long getChunkUnloadDelay();
 
-    WorldServer getWorld();
 }

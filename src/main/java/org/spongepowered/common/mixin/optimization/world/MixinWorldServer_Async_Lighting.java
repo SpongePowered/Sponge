@@ -38,7 +38,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.core.world.MixinWorld;
 
 import java.util.List;
@@ -205,7 +205,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         }
 
         if (currentChunk == null) {
-            currentChunk = ((ServerChunkProviderBridge) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            currentChunk = ((ServerChunkProviderBridge) this.chunkProvider).bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         }
 
         final ChunkBridge spongeChunk = (ChunkBridge) currentChunk;

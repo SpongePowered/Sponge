@@ -44,7 +44,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.time.Duration;
@@ -353,13 +353,13 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
     }
 
     private boolean checkChunkExistsAnvil(Vector3i v) {
-        CompletableFuture<Boolean> ret = ((ServerChunkProviderBridge) world.getWorldStorage()).doesChunkExistSync(v);
+        CompletableFuture<Boolean> ret = ((ServerChunkProviderBridge) this.world.getWorldStorage()).bridge$doesChunkExistSync(v);
         try {
             return ret.get();
         } catch (InterruptedException | ExecutionException e) {
             SpongeImpl.getLogger().error(
                     "Could not determine chunk's existence on world {}: {} {}. Assuming false.",
-                    world.getName(), v.getX(), v.getZ());
+                this.world.getName(), v.getX(), v.getZ());
             return false;
         }
     }

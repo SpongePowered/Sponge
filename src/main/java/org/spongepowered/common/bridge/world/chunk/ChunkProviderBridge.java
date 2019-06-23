@@ -22,33 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.bridge.world.chunk;
 
-import net.minecraft.world.ChunkCache;
-import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import net.minecraft.world.gen.ChunkProviderServer;
 
-@Mixin(ChunkCache.class)
-public class MixinChunkCache {
+import javax.annotation.Nullable;
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
-    private Chunk onConstruct(World worldIn, int chunkX, int chunkZ) {
-        if (worldIn.isRemote) {
-            return worldIn.getChunk(chunkX, chunkZ);
-        }
+/**
+ * Implemented for both {@link ChunkProviderServer} and
+ * the client version.
+ */
+public interface ChunkProviderBridge {
 
-        final net.minecraft.world.chunk.Chunk chunk =
-                ((ServerChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
-        ChunkBridge spongeChunk = (ChunkBridge) chunk;
-        if (chunk == null || chunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {
-            return null;
-        }
+    void bridge$setMaxChunkUnloads(int maxUnloads);
 
-        return chunk;
-    }
+    @Nullable Chunk bridge$getLoadedChunkWithoutMarkingActive(int x, int z);
+
 }

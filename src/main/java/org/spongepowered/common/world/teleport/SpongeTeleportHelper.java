@@ -37,7 +37,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,8 +64,9 @@ public class SpongeTeleportHelper implements TeleportHelper {
             filters.add(TeleportHelperFilters.CONFIG);
         }
 
-        ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge)((net.minecraft.world.WorldServer) world).getChunkProvider();
-        chunkProviderServer.setForceChunkRequests(true);
+        final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge)((net.minecraft.world.WorldServer) world).getChunkProvider();
+        final boolean previous = chunkProviderServer.bridge$getForceChunkRequests();
+        chunkProviderServer.bridge$setForceChunkRequests(true);
 
         try {
             // Get the vectors to check, and get the block types with them.
@@ -75,7 +76,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             return result.map(vector3i -> new Location<>(world, vector3i.toDouble().add(0.5, 0, 0.5)));
         } finally {
             // Just in case some exception occurs, we want this to disable again.
-            chunkProviderServer.setForceChunkRequests(false);
+            chunkProviderServer.bridge$setForceChunkRequests(previous);
         }
 
     }

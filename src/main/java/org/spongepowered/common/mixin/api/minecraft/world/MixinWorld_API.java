@@ -50,16 +50,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketBlockChange;
-import net.minecraft.network.play.server.SPacketChunkData;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerChunkMapEntry;
-import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.IWorldEventListener;
@@ -68,7 +64,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -130,10 +125,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeDimension;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -254,83 +246,7 @@ public abstract class MixinWorld_API implements World {
 
     @Override
     public Optional<Chunk> regenerateChunk(int cx, int cy, int cz, ChunkRegenerateFlag flag) {
-        List<EntityPlayerMP> playerList = new ArrayList<>();
-        List<net.minecraft.entity.Entity> entityList = new ArrayList<>();
-        Chunk spongeChunk = null;
-        try (PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING.createPhaseContext()
-                .world((net.minecraft.world.World)(Object) this)) {
-            context.buildAndSwitch();
-            spongeChunk = this.loadChunk(cx, cy, cz, false).orElse(null);
-        }
-
-        if (spongeChunk == null) {
-            if (!flag.create()) {
-                return Optional.empty();
-            }
-            // This should generate a chunk so there won't be a need to regenerate one
-            return this.loadChunk(cx, cy, cz, true);
-        }
-
-        final net.minecraft.world.chunk.Chunk chunk = (net.minecraft.world.chunk.Chunk) spongeChunk;
-        final boolean keepEntities = flag.entities();
-        try (PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING.createPhaseContext()
-                .chunk(chunk)) {
-            context.buildAndSwitch();
-            // If we reached this point, an existing chunk was found so we need to regen
-            for (ClassInheritanceMultiMap<net.minecraft.entity.Entity> multiEntityList : chunk.getEntityLists()) {
-                for (net.minecraft.entity.Entity entity : multiEntityList) {
-                    if (entity instanceof EntityPlayerMP) {
-                        playerList.add((EntityPlayerMP) entity);
-                        entityList.add(entity);
-                    } else if (keepEntities) {
-                        entityList.add(entity);
-                    }
-                }
-            }
-
-            for (net.minecraft.entity.Entity entity : entityList) {
-                chunk.removeEntity(entity);
-            }
-
-            final ChunkProviderServer chunkProviderServer = (ChunkProviderServer) chunk.getWorld().getChunkProvider();
-            ((ServerChunkProviderBridge) chunkProviderServer).unloadChunkAndSave(chunk);
-            net.minecraft.world.chunk.Chunk newChunk = chunkProviderServer.chunkGenerator.generateChunk(cx, cz);
-            PlayerChunkMapEntry playerChunk = ((WorldServer) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
-            if (playerChunk != null) {
-                playerChunk.chunk = newChunk;
-            }
-
-            if (newChunk != null) {
-                WorldServer world = (WorldServer) newChunk.getWorld();
-                world.getChunkProvider().loadedChunks.put(ChunkPos.asLong(cx, cz), newChunk);
-                newChunk.onLoad();
-                newChunk.populate(world.getChunkProvider().chunkGenerator);
-                for (net.minecraft.entity.Entity entity: entityList) {
-                    newChunk.addEntity(entity);
-                }
-
-                if (((ServerChunkProviderBridge) chunkProviderServer).getLoadedChunkWithoutMarkingActive(cx, cz) == null) {
-                    return Optional.of((Chunk) newChunk);
-                }
-
-                final PlayerChunkMapEntry playerChunkMapEntry = ((WorldServer) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
-                if (playerChunkMapEntry != null) {
-                    List<EntityPlayerMP> chunkPlayers = playerChunkMapEntry.players;
-                    // We deliberately send two packets, to avoid sending a 'fullChunk' packet
-                    // (a changedSectionFilter of 65535). fullChunk packets cause the client to
-                    // completely overwrite its current chunk with a new chunk instance. This causes
-                    // weird issues, such as making any entities in that chunk invisible (until they leave it
-                    // for a new chunk)
-                    // - Aaron1011
-                    for (EntityPlayerMP playerMP: chunkPlayers) {
-                        playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 65534));
-                        playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 1));
-                    }
-                }
-            }
-
-            return Optional.of((Chunk) newChunk);
-        }
+        return Optional.empty(); // World does not do this, WorldServer can, but not WorldClient.
     }
 
     @Override

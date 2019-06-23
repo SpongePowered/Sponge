@@ -44,7 +44,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -229,7 +229,7 @@ public abstract class MixinChunk_Async_Lighting implements ChunkBridge {
 
     @Redirect(method = "enqueueRelightChecks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"))
     private IBlockState onRelightChecksGetBlockState(World world, BlockPos pos) {
-        Chunk chunk = ((ServerChunkProviderBridge) world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        Chunk chunk = ((ServerChunkProviderBridge) world.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
 
         final ChunkBridge spongeChunk = (ChunkBridge) chunk;
         if (chunk == null || chunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {

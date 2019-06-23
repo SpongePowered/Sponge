@@ -31,7 +31,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -46,7 +46,7 @@ public abstract class MixinWorld_Tracker implements World {
 
     @Override
     public Optional<UUID> getCreator(int x, int y, int z) {
-        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -59,7 +59,7 @@ public abstract class MixinWorld_Tracker implements World {
 
     @Override
     public Optional<UUID> getNotifier(int x, int y, int z) {
-        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -72,7 +72,7 @@ public abstract class MixinWorld_Tracker implements World {
 
     @Override
     public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
-        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }
@@ -83,7 +83,7 @@ public abstract class MixinWorld_Tracker implements World {
 
     @Override
     public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
-        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }

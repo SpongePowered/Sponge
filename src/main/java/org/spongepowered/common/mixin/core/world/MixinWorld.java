@@ -46,7 +46,6 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -72,7 +71,6 @@ import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
@@ -142,7 +140,7 @@ public abstract class MixinWorld implements WorldBridge {
     @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
     @Shadow protected abstract int getRawLight(BlockPos pos, EnumSkyBlock lightType);
     @Shadow public abstract int getSkylightSubtracted();
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
+    @Shadow @Nullable public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
     @Shadow public abstract WorldInfo getWorldInfo();
     @Shadow public abstract boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos);
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
@@ -196,6 +194,7 @@ public abstract class MixinWorld implements WorldBridge {
     @Shadow public boolean isBlockModifiable(EntityPlayer player, BlockPos pos) {
         return true; // shadowed so we can call from MixinWorldServer in spongeforge.
     }
+    @Shadow public boolean canSeeSky(BlockPos pos) { return false; } // Shadowed
 
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
@@ -433,22 +432,7 @@ public abstract class MixinWorld implements WorldBridge {
         }
     }
 
-    /**
-     * @author blood - February 20th, 2017
-     * @reason Avoids loading unloaded chunk when checking for sky.
-     *
-     * @param pos The position to get the light for
-     * @return Whether block position can see sky
-     */
-    @Overwrite
-    public boolean canSeeSky(BlockPos pos) {
-        final net.minecraft.world.chunk.Chunk chunk = ((ServerChunkProviderBridge) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
-        if (chunk == null || chunk.unloadQueued) {
-            return false;
-        }
 
-        return chunk.canSeeSky(pos);
-    }
 
     @Override
     public int getRawBlockLight(BlockPos pos, EnumSkyBlock lightType) {
@@ -457,21 +441,17 @@ public abstract class MixinWorld implements WorldBridge {
 
     /**
      * @author gabizou - July 25th, 2016
+     * @author gabizou - June 23rd, 2019 - 1.12.2 - Make protected so that MixinWorldServer can override with the chunk provider.
      * @reason Optimizes several blockstate lookups for getting raw light.
      *
      * @param pos The position to get the light for
      * @param enumSkyBlock The light type
-     * @return The raw light
      */
     @Inject(method = "getRawLight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState" +
             "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"), cancellable = true)
-    private void onLightGetBlockState(BlockPos pos, EnumSkyBlock enumSkyBlock, CallbackInfoReturnable<Integer> cir) {
+    protected void impl$getRawLightWithoutMarkingChunkActive(BlockPos pos, EnumSkyBlock enumSkyBlock, CallbackInfoReturnable<Integer> cir) {
         final net.minecraft.world.chunk.Chunk chunk;
-        if (!this.isFake()) {
-            chunk = ((ServerChunkProviderBridge) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
-        } else {
-            chunk = this.getChunk(pos);
-        }
+        chunk = this.getChunk(pos);
         if (chunk == null || chunk.unloadQueued) {
             cir.setReturnValue(0);
         }

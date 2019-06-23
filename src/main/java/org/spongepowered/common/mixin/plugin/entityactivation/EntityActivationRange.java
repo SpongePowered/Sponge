@@ -72,7 +72,7 @@ import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 
 import java.util.Map;
@@ -243,7 +243,7 @@ public class EntityActivationRange {
             for (int i1 = i; i1 <= j; ++i1) {
                 for (int j1 = k; j1 <= l; ++j1) {
                     WorldServer worldserver = (WorldServer) world;
-                    Chunk chunk = ((ServerChunkProviderBridge) worldserver.getChunkProvider()).getLoadedChunkWithoutMarkingActive(i1, j1);
+                    Chunk chunk = ((ServerChunkProviderBridge) worldserver.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(i1, j1);
                     if (chunk != null) {
                         activateChunkEntities(player, chunk);
                     }

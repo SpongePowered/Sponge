@@ -26,18 +26,16 @@ package org.spongepowered.common.mixin.core.world.gen;
 
 import com.flowpowered.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.SerializationBehaviors;
-import org.spongepowered.api.world.storage.ChunkDataStream;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -49,98 +47,75 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeEmptyChunk;
-import org.spongepowered.common.world.storage.SpongeChunkDataStream;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(ChunkProviderServer.class)
-public abstract class MixinChunkProviderServer implements WorldStorage, ServerChunkProviderBridge {
+public abstract class MixinChunkProviderServer implements ServerChunkProviderBridge, ChunkProviderBridge {
 
-    private SpongeEmptyChunk EMPTY_CHUNK;
-    private boolean denyChunkRequests = true;
-    private boolean forceChunkRequests = false;
-    private long chunkUnloadDelay = 15000;
-    private int maxChunkUnloads = 100;
+    private SpongeEmptyChunk impl$EMPTY_CHUNK;
+    private boolean impl$denyChunkRequests = true;
+    private boolean impl$forceChunkRequests = false;
+    private long impl$chunkUnloadDelay = Constants.World.DEFAULT_CHUNK_UNLOAD_DELAY;
+    private int impl$maxChunkUnloads = Constants.World.MAX_CHUNK_UNLOADS;
 
     @Shadow @Final public WorldServer world;
-    @Shadow @Final private IChunkLoader chunkLoader;
+    @Shadow @Final public IChunkLoader chunkLoader;
     @Shadow public IChunkGenerator chunkGenerator;
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Shadow @Final @Mutable public Long2ObjectMap<Chunk> loadedChunks = new CachedLong2ObjectMap();
 
     @Shadow public abstract Chunk getLoadedChunk(int x, int z);
     @Shadow public abstract Chunk loadChunk(int x, int z);
-    @Shadow public abstract Chunk loadChunkFromFile(int x, int z);
+    @Shadow protected abstract Chunk loadChunkFromFile(int x, int z);
     @Shadow public abstract Chunk provideChunk(int x, int z);
-    @Shadow public abstract void saveChunkExtraData(Chunk chunkIn);
-    @Shadow public abstract void saveChunkData(Chunk chunkIn);
+    @Shadow protected abstract void saveChunkExtraData(Chunk chunkIn);
+    @Shadow protected abstract void saveChunkData(Chunk chunkIn);
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onConstruct(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn, CallbackInfo ci) {
+    private void impl$setUpCommonFields(
+        final WorldServer worldObjIn, final IChunkLoader chunkLoaderIn, final IChunkGenerator chunkGeneratorIn, final CallbackInfo ci) {
         if (((WorldBridge) worldObjIn).isFake()) {
             return;
         }
-        this.EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
+        this.impl$EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
         final WorldCategory worldCategory = ((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getWorld();
 
         ((ServerWorldBridge) worldObjIn).bridge$updateConfigCache();
 
-        this.denyChunkRequests = worldCategory.getDenyChunkRequests();
-        this.chunkUnloadDelay = worldCategory.getChunkUnloadDelay() * 1000;
-        this.maxChunkUnloads = worldCategory.getMaxChunkUnloads();
+        this.impl$denyChunkRequests = worldCategory.getDenyChunkRequests();
+        this.impl$chunkUnloadDelay = worldCategory.getChunkUnloadDelay() * 1000;
+        this.impl$maxChunkUnloads = worldCategory.getMaxChunkUnloads();
     }
 
     @Override
-    public WorldServer getWorld() {
-        return this.world;
-    }
-
-    @Override
-    public ChunkDataStream getGeneratedChunks() {
-        if (!(this.chunkLoader instanceof IMixinAnvilChunkLoader)) {
-            throw new UnsupportedOperationException("unknown chunkLoader");
-        }
-        return new SpongeChunkDataStream(((IMixinAnvilChunkLoader) this.chunkLoader).getWorldDir());
-    }
-
-    @Override
-    public CompletableFuture<Boolean> doesChunkExist(Vector3i chunkCoords) {
-        return WorldStorageUtil.doesChunkExist(this.world, this.chunkLoader, chunkCoords);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> doesChunkExistSync(Vector3i chunkCoords) {
+    public CompletableFuture<Boolean> bridge$doesChunkExistSync(final Vector3i chunkCoords) {
         return WorldStorageUtil.doesChunkExistSync(this.world, this.chunkLoader, chunkCoords);
-    }
-
-    @Override
-    public CompletableFuture<Optional<DataContainer>> getChunkData(Vector3i chunkCoords) {
-        return WorldStorageUtil.getChunkData(this.world, this.chunkLoader, chunkCoords);
-    }
-
-    @Override
-    public WorldProperties getWorldProperties() {
-        return (WorldProperties) this.world.getWorldInfo();
     }
 
     /**
@@ -150,7 +125,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
      * @param chunkIn The chunk to queue
      */
     @Overwrite
-    public void queueUnload(Chunk chunkIn)
+    public void queueUnload(final Chunk chunkIn)
     {
         if (!((ChunkBridge) chunkIn).isPersistedChunk() && this.world.provider.canDropChunk(chunkIn.x, chunkIn.z))
         {
@@ -160,53 +135,74 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
         }
     }
 
-    // split from loadChunk to avoid 2 lookups with our inject
-    private Chunk loadChunkForce(int x, int z) {
-        Chunk chunk = this.loadChunkFromFile(x, z);
 
-        if (chunk != null)
-        {
-            this.loadedChunks.put(ChunkPos.asLong(x, z), chunk);
-            chunk.onLoad();
-            chunk.populate((ChunkProviderServer) (Object) this, this.chunkGenerator);
-        }
 
-        return chunk;
-    }
-
-    @Redirect(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;loadChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
-    private Chunk impl$ProvideChunkForced(ChunkProviderServer chunkProviderServer, int x, int z) {
-        if (!this.denyChunkRequests) {
+    @Redirect(method = "provideChunk",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/gen/ChunkProviderServer;loadChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
+    private Chunk impl$ProvideChunkForced(final ChunkProviderServer chunkProviderServer, final int x, final int z) {
+        if (!this.impl$denyChunkRequests) {
             return this.loadChunk(x, z);
         }
 
         Chunk chunk = this.getLoadedChunk(x, z);
         if (chunk == null && this.canDenyChunkRequest()) {
-            return this.EMPTY_CHUNK;
+            return this.impl$EMPTY_CHUNK;
         }
 
         if (chunk == null) {
-            chunk = this.loadChunkForce(x, z);
+            chunk = this.impl$loadChunkForce(x, z);
         }
 
         return chunk;
     }
 
-    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/ChunkPos;asLong(II)J"))
-    private void onProvideChunkStart(int x, int z, CallbackInfoReturnable<Chunk> cir) {
+    @Inject(method = "provideChunk",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/util/math/ChunkPos;asLong(II)J"))
+    private void impl$StartTerrainGenerationPhase(final int x, final int z, final CallbackInfoReturnable<Chunk> cir) {
         GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
             .world(this.world)
             .buildAndSwitch();
     }
 
-    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V", shift = Shift.AFTER))
-    private void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
+    @Inject(method = "provideChunk",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/chunk/Chunk;populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V",
+            shift = Shift.AFTER))
+    private void impl$EndTerrainGenerationPhase(final int x, final int z, final CallbackInfoReturnable<Chunk> ci) {
         PhaseTracker.getInstance().getCurrentContext().close();
     }
 
-    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"))
-    private void onError(CallbackInfoReturnable<Chunk> ci) {
-        PhaseTracker.getInstance().getCurrentContext().close();
+    @Inject(method = "provideChunk",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/crash/CrashReportCategory;addCrashSection(Ljava/lang/String;Ljava/lang/Object;)V",
+            ordinal = 2,
+            shift = Shift.AFTER
+        ),
+        locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    private void impl$StopGenerationPhaseFromError(final int x, final int z, final CallbackInfoReturnable<Chunk> cir, final Chunk ungenerated,
+        final long chunkIndex, final Throwable error, final CrashReport report, final CrashReportCategory chunkGenerationCategory,
+        final ChunkProviderServer provider, final int someVar, final int someOther) {
+
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        report.makeCategory("Current PhaseState")
+            .addDetail(currentContext.state.toString(), () -> {
+
+                final PrettyPrinter printer = new PrettyPrinter(50);
+                PhaseTracker.CONTEXT_PRINTER.accept(printer, currentContext);
+                final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                printer.print(new PrintStream(stream));
+
+                return stream.toString();
+            });
+        // Since we still want to complete the phase in the case we can recover, we still must close the current context.
+        currentContext.close();
     }
 
     private boolean canDenyChunkRequest() {
@@ -214,7 +210,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
             return true;
         }
 
-        if (this.forceChunkRequests) {
+        if (this.impl$forceChunkRequests) {
             return false;
         }
 
@@ -248,28 +244,28 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
     }
 
     @Override
-    public boolean getForceChunkRequests() {
-        return this.forceChunkRequests;
+    public boolean bridge$getForceChunkRequests() {
+        return this.impl$forceChunkRequests;
     }
 
     @Override
-    public void setMaxChunkUnloads(int maxUnloads) {
-        this.maxChunkUnloads = maxUnloads;
+    public void bridge$setMaxChunkUnloads(final int maxUnloads) {
+        this.impl$maxChunkUnloads = maxUnloads;
     }
 
     @Override
-    public void setForceChunkRequests(boolean flag) {
-        this.forceChunkRequests = flag;
+    public void bridge$setForceChunkRequests(final boolean flag) {
+        this.impl$forceChunkRequests = flag;
     }
 
     @Override
-    public void setDenyChunkRequests(boolean flag) {
-        this.denyChunkRequests = flag;
+    public void bridge$setDenyChunkRequests(final boolean flag) {
+        this.impl$denyChunkRequests = flag;
     }
 
     @Override
-    public long getChunkUnloadDelay() {
-        return this.chunkUnloadDelay;
+    public long bridge$getChunkUnloadDelay() {
+        return this.impl$chunkUnloadDelay;
     }
 
     /**
@@ -286,15 +282,15 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
         if (!this.world.disableLevelSaving && !((WorldBridge) this.world).isFake())
         {
             ((ServerWorldBridge) this.world).bridge$getTimingsHandler().doChunkUnload.startTiming();
-            Iterator<Chunk> iterator = this.loadedChunks.values().iterator();
+            final Iterator<Chunk> iterator = this.loadedChunks.values().iterator();
             int chunksUnloaded = 0;
-            long now = System.currentTimeMillis();
-            while (chunksUnloaded < this.maxChunkUnloads && iterator.hasNext()) {
-                Chunk chunk = iterator.next();
-                ChunkBridge spongeChunk = (ChunkBridge) chunk;
+            final long now = System.currentTimeMillis();
+            while (chunksUnloaded < this.impl$maxChunkUnloads && iterator.hasNext()) {
+                final Chunk chunk = iterator.next();
+                final ChunkBridge spongeChunk = (ChunkBridge) chunk;
                 if (chunk != null && chunk.unloadQueued && !spongeChunk.isPersistedChunk()) {
-                    if (this.getChunkUnloadDelay() > 0) {
-                        if ((now - spongeChunk.getScheduledForUnload()) < this.chunkUnloadDelay) {
+                    if (this.bridge$getChunkUnloadDelay() > 0) {
+                        if ((now - spongeChunk.getScheduledForUnload()) < this.impl$chunkUnloadDelay) {
                             continue;
                         }
                         spongeChunk.setScheduledForUnload(-1);
@@ -316,35 +312,34 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
     // Copy of getLoadedChunk without marking chunk active.
     // This allows the chunk to unload if currently queued.
     @Override
-    public Chunk getLoadedChunkWithoutMarkingActive(int x, int z){
-        long i = ChunkPos.asLong(x, z);
-        Chunk chunk = this.loadedChunks.get(i);
-        return chunk;
+    public Chunk bridge$getLoadedChunkWithoutMarkingActive(final int x, final int z){
+        final long i = ChunkPos.asLong(x, z);
+        return this.loadedChunks.get(i);
     }
 
     @Inject(method = "canSave", at = @At("HEAD"), cancellable = true)
-    public void onCanSave(CallbackInfoReturnable<Boolean> cir) {
+    private void impl$IgnoreIfWorldSaveDisabled(final CallbackInfoReturnable<Boolean> cir) {
         if (((WorldProperties)this.world.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             cir.setReturnValue(false);
         }
     }
 
     @Inject(method = "saveChunkData", at = @At("HEAD"), cancellable = true)
-    public void onSaveChunkData(Chunk chunkIn, CallbackInfo ci) {
+    private void impl$IgnoreIfWorldSaveDisabled(final Chunk chunkIn, final CallbackInfo ci) {
         if (((WorldProperties)this.world.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             ci.cancel();
         }
     }
 
     @Inject(method = "flushToDisk", at = @At("HEAD"), cancellable = true)
-    public void onFlushToDisk(CallbackInfo ci) {
+    private void impl$IgnoreIfWorldSaveDisabled(final CallbackInfo ci) {
         if (((WorldProperties)this.world.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             ci.cancel();
         }
     }
 
     @Override
-    public void unloadChunkAndSave(Chunk chunk) {
+    public void bridge$unloadChunkAndSave(final Chunk chunk) {
         boolean saveChunk = false;
         if (chunk.needsSaving(true)) {
             saveChunk = true;

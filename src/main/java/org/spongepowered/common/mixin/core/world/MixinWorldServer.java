@@ -138,11 +138,14 @@ import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.WorldProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
-import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.WorldCategory;
@@ -160,10 +163,7 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
-import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.bridge.world.WorldProviderBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
@@ -358,15 +358,16 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.worldInfo).getConfigAdapter();
 
         // update cached settings
-        this.chunkGCLoadThreshold = configAdapter.getConfig().getWorld().getChunkLoadThreshold();
-        this.chunkGCTickInterval = configAdapter.getConfig().getWorld().getTickInterval();
-        this.weatherIceAndSnowEnabled = configAdapter.getConfig().getWorld().getWeatherIceAndSnow();
-        this.weatherThunderEnabled = configAdapter.getConfig().getWorld().getWeatherThunder();
-        this.chunkUnloadDelay = configAdapter.getConfig().getWorld().getChunkUnloadDelay() * 1000;
+        final WorldCategory worldCategory = configAdapter.getConfig().getWorld();
+        this.chunkGCLoadThreshold = worldCategory.getChunkLoadThreshold();
+        this.chunkGCTickInterval = worldCategory.getTickInterval();
+        this.weatherIceAndSnowEnabled = worldCategory.getWeatherIceAndSnow();
+        this.weatherThunderEnabled = worldCategory.getWeatherThunder();
+        this.chunkUnloadDelay = worldCategory.getChunkUnloadDelay() * 1000;
         if (this.getChunkProvider() != null) {
-            final int maxChunkUnloads = configAdapter.getConfig().getWorld().getMaxChunkUnloads();
-            ((ServerChunkProviderBridge) this.getChunkProvider()).setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
-            ((ServerChunkProviderBridge) this.getChunkProvider()).setDenyChunkRequests(configAdapter.getConfig().getWorld().getDenyChunkRequests());
+            final int maxChunkUnloads = worldCategory.getMaxChunkUnloads();
+            ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
+            ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$setDenyChunkRequests(worldCategory.getDenyChunkRequests());
             for (final net.minecraft.entity.Entity entity : this.loadedEntityList) {
                 if (entity instanceof ActivationCapability) {
                     ((ActivationCapability) entity).activation$requiresActivationCacheRefresh(true);
@@ -468,6 +469,42 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             biomeProvider = worldServer.provider.biomeProvider;
         }
         return new SpongeWorldGenerator(worldServer, (BiomeGenerator) biomeProvider, SpongeGenerationPopulator.of(worldServer, chunkGenerator));
+    }
+    /**
+     * @author blood - February 20th, 2017
+     * @reason Avoids loading unloaded chunk when checking for sky.
+     *
+     * @param pos The position to get the light for
+     * @return Whether block position can see sky
+     *
+     * Technically an overwrite since it's overriding a method from {@link World#canSeeSky(BlockPos)}
+     */
+    @Override
+    public boolean canSeeSky(BlockPos pos) {
+        if (this.isFake()) {
+            return super.canSeeSky(pos);
+        }
+        final net.minecraft.world.chunk.Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider())
+            .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+
+        if (chunk == null || chunk.unloadQueued) {
+            return false;
+        }
+
+        return chunk.canSeeSky(pos);
+    }
+
+    @Override
+    protected void impl$getRawLightWithoutMarkingChunkActive(BlockPos pos, EnumSkyBlock enumSkyBlock, CallbackInfoReturnable<Integer> cir) {
+        if (this.isFake()) {
+            super.impl$getRawLightWithoutMarkingChunkActive(pos, enumSkyBlock, cir);
+            return;
+        }
+        final Chunk chunk = ((ServerChunkProviderBridge) ((WorldServer) (Object) this).getChunkProvider())
+            .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        if (chunk == null || chunk.unloadQueued) {
+            cir.setReturnValue(0);
+        }
     }
 
     /**
@@ -701,7 +738,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             posX = fromPos.getX();
             posZ = fromPos.getZ();
         }
-        final net.minecraft.world.chunk.Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(posX >> 4, posZ >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(posX >> 4, posZ >> 4);
         return chunk != null && ((ChunkBridge) chunk).areNeighborsLoaded();
     }
 
@@ -1476,9 +1513,8 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
      */
     @Override
     public void neighborChanged(final BlockPos pos, Block blockIn, final BlockPos otherPos) { // notifyBlockOfStateChange
-        final Chunk chunk =
-                ((ServerChunkProviderBridge) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(otherPos.getX() >> 4, otherPos.getZ() >>
-                                                                                                                               4);
+        final Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider())
+            .bridge$getLoadedChunkWithoutMarkingActive(otherPos.getX() >> 4, otherPos.getZ() >> 4);
 
         // Don't let neighbor updates trigger a chunk load ever
         if (chunk == null) {
@@ -1618,8 +1654,8 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             return true;
         }
 
-        final Chunk chunk =
-            ((ServerChunkProviderBridge) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(sourcePos.getX() >> 4, sourcePos.getZ() >> 4);
+        final Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider())
+            .bridge$getLoadedChunkWithoutMarkingActive(sourcePos.getX() >> 4, sourcePos.getZ() >> 4);
 
         // Don't let neighbor updates trigger a chunk load ever
         return chunk == null;
@@ -1956,20 +1992,26 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         } else {
             // ExtraUtilities 2 expects to get the proper chunk while mining or it gets stuck in infinite loop
             // TODO add TE config to disable/enable chunk loads
-            final boolean forceChunkRequests = ((ServerChunkProviderBridge) this.getChunkProvider()).getForceChunkRequests();
+            final boolean forceChunkRequests = ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$getForceChunkRequests();
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final IPhaseState<?> currentState = phaseTracker.getCurrentState();
-            if (currentState == TickPhase.Tick.TILE_ENTITY) {
-                ((ServerChunkProviderBridge) this.getChunkProvider()).setForceChunkRequests(true);
+            final boolean entered = currentState == TickPhase.Tick.TILE_ENTITY;
+            if (entered) {
+                ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$setForceChunkRequests(true);
             }
-            // Proxies have block changes for bulk special captures
-            final IBlockState blockState = this.proxyBlockAccess.getBlockState(pos);
-            if (blockState != null) {
-                return blockState;
+            try {
+                // Proxies have block changes for bulk special captures
+                final IBlockState blockState = this.proxyBlockAccess.getBlockState(pos);
+                if (blockState != null) {
+                    return blockState;
+                }
+                final net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
+                return chunk.getBlockState(pos);
+            } finally {
+                if (entered) {
+                    ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$setForceChunkRequests(forceChunkRequests);
+                }
             }
-            final net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
-            ((ServerChunkProviderBridge) this.getChunkProvider()).setForceChunkRequests(forceChunkRequests);
-            return chunk.getBlockState(pos);
         }
     }
 
@@ -1993,7 +2035,8 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     public boolean spongeIsAreaLoadedForCheckingLight(
         final World thisWorld, final BlockPos pos, final int radius, final boolean allowEmtpy, final EnumSkyBlock lightType,
             final BlockPos samePosition) {
-        final Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        final Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider())
+            .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         return !(chunk == null || !((ChunkBridge) chunk).areNeighborsLoaded());
     }
 
@@ -2017,7 +2060,8 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             }
             // Sponge Start - Use our hook to get the chunk only if it is loaded
             // return this.getChunk(pos).getLightSubtracted(pos, 0);
-            final Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            final Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider())
+                .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
             return chunk == null ? 0 : chunk.getLightSubtracted(pos, 0);
             // Sponge End
         }
@@ -2072,7 +2116,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
                 // Sponge - Gets only loaded chunks, unloaded chunks will not get loaded to check lighting
                 // Chunk chunk = this.getChunk(pos);
                 // return chunk.getLightSubtracted(pos, this.skylightSubtracted);
-                final Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+                final Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
                 return chunk == null ? 0 : chunk.getLightSubtracted(pos, this.getSkylightSubtracted());
                 // Sponge End
             }
@@ -2101,7 +2145,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             // Sponge End
             return type.defaultLightValue;
         } else {
-            final Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            final Chunk chunk = ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
             if (chunk == null) {
                 return type.defaultLightValue;
             }
@@ -2165,7 +2209,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         xEnd = xEnd >> 4;
         zEnd = zEnd >> 4;
 
-        final net.minecraft.world.chunk.Chunk base = ((ServerChunkProviderBridge) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(xStart, zStart);
+        final net.minecraft.world.chunk.Chunk base = ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(xStart, zStart);
         if (base == null) {
             return false;
         }
@@ -2211,7 +2255,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
      */
     @Overwrite
     protected boolean isChunkLoaded(final int x, final int z, final boolean allowEmpty) {
-        final ChunkBridge spongeChunk = (ChunkBridge) ((ServerChunkProviderBridge) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x, z);
+        final ChunkBridge spongeChunk = (ChunkBridge) ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x, z);
         return spongeChunk != null && (!spongeChunk.isQueuedForUnload() || spongeChunk.isPersistedChunk());
     }
 

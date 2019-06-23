@@ -22,33 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
-
-import net.minecraft.world.ChunkCache;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
-
-@Mixin(ChunkCache.class)
-public class MixinChunkCache {
-
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
-    private Chunk onConstruct(World worldIn, int chunkX, int chunkZ) {
-        if (worldIn.isRemote) {
-            return worldIn.getChunk(chunkX, chunkZ);
-        }
-
-        final net.minecraft.world.chunk.Chunk chunk =
-                ((ServerChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
-        ChunkBridge spongeChunk = (ChunkBridge) chunk;
-        if (chunk == null || chunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {
-            return null;
-        }
-
-        return chunk;
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.mixin.api.minecraft.world.gen;

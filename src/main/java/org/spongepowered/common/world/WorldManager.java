@@ -82,7 +82,7 @@ import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.DataInputStream;
@@ -837,6 +837,7 @@ public final class WorldManager {
 
     }
 
+    @SuppressWarnings("ConstantConditions")
     private static WorldServer createWorldFromProperties(int dimensionId, ISaveHandler saveHandler, WorldInfo worldInfo, @Nullable WorldSettings
         worldSettings) {
         final MinecraftServer server = SpongeImpl.getServer();
@@ -847,7 +848,7 @@ public final class WorldManager {
 
         WorldManager.reorderWorldsVanillaFirst();
 
-        ((IMixinMinecraftServer) SpongeImpl.getServer()).putWorldTickTimes(dimensionId, new long[100]);
+        ((IMixinMinecraftServer) server).putWorldTickTimes(dimensionId, new long[100]);
 
         worldServer.init();
 
@@ -858,27 +859,29 @@ public final class WorldManager {
             worldServer.getWorldInfo().setGameType(server.getGameType());
         }
 
-        ((ServerChunkProviderBridge) worldServer.getChunkProvider()).setForceChunkRequests(true);
-        SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(),
-            (org.spongepowered.api.world.World) worldServer));
+        ((ServerChunkProviderBridge) worldServer.getChunkProvider()).bridge$setForceChunkRequests(true);
+        try {
+            SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                (org.spongepowered.api.world.World) worldServer));
 
-        // WorldSettings is only non-null here if this is a newly generated WorldInfo and therefore we need to initialize to calculate spawn.
-        if (worldSettings != null) {
-            worldServer.initialize(worldSettings);
+            // WorldSettings is only non-null here if this is a newly generated WorldInfo and therefore we need to initialize to calculate spawn.
+            if (worldSettings != null) {
+                worldServer.initialize(worldSettings);
+            }
+
+            if (((DimensionTypeBridge) ((org.spongepowered.api.world.World) worldServer).getDimension().getType()).shouldLoadSpawn()) {
+                ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
+            }
+
+            // While we try to prevnt mods from changing a worlds' WorldInfo, we aren't always
+            // successful. We re-do the fake world check to catch any changes made to WorldInfo
+            // that would make it invalid
+            ((WorldBridge) worldServer).clearFakeCheck();
+
+            return worldServer;
+        } finally {
+            ((ServerChunkProviderBridge) worldServer.getChunkProvider()).bridge$setForceChunkRequests(false);
         }
-
-        if (((DimensionTypeBridge) ((org.spongepowered.api.world.World) worldServer).getDimension().getType()).shouldLoadSpawn()) {
-            ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
-        }
-
-        ((ServerChunkProviderBridge) worldServer.getChunkProvider()).setForceChunkRequests(false);
-
-        // While we try to prevnt mods from changing a worlds' WorldInfo, we aren't always
-        // successful. We re-do the fake world check to catch any changes made to WorldInfo
-        // that would make it invalid
-        ((WorldBridge) worldServer).clearFakeCheck();
-
-        return worldServer;
     }
 
     /**

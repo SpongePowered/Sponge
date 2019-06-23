@@ -219,6 +219,7 @@
         "minecraft.world.MixinWorldSettings_API",
         "minecraft.world.MixinExplosion_API",
         "minecraft.world.MixinTeleporter_API",
-        "minecraft.world.chunk.MixinChunk_API"
+        "minecraft.world.chunk.MixinChunk_API",
+        "minecraft.world.gen.MixinChunkProviderServer_API"
     ]
 }

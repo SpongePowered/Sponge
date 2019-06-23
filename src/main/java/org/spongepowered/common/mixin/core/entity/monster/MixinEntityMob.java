@@ -48,7 +48,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
 import java.util.ArrayList;
@@ -147,7 +147,7 @@ public abstract class MixinEntityMob extends MixinEntityLiving {
     protected boolean isValidLightLevel()
     {
         final BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
-        final Chunk chunk = ((ServerChunkProviderBridge) this.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
+        final Chunk chunk = ((ServerChunkProviderBridge) this.world.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
         if (chunk == null || !((ChunkBridge) chunk).isActive()) {
             return false;
         }

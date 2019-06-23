@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 
 @Mixin(Village.class)
 public abstract class MixinVillage {
@@ -41,7 +41,7 @@ public abstract class MixinVillage {
 
     @Inject(method = "isWoodDoor", at = @At("HEAD"), cancellable = true)
     private void impl$isWoodDoor(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        if (!this.world.isRemote && ((ServerChunkProviderBridge) this.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4) == null) {
+        if (!this.world.isRemote && ((ServerChunkProviderBridge) this.world.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4) == null) {
             cir.setReturnValue(false);
         }
     }

@@ -67,7 +67,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 
@@ -344,7 +344,7 @@ public class DamageEventHandler {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     BlockPos blockPos = new BlockPos(k1, l1, i2);
-                    final Chunk chunk = spongeChunkProvider.getLoadedChunkWithoutMarkingActive(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+                    final Chunk chunk = spongeChunkProvider.bridge$getLoadedChunkWithoutMarkingActive(blockPos.getX() >> 4, blockPos.getZ() >> 4);
                     if (chunk == null) {
                         continue;
                     }
