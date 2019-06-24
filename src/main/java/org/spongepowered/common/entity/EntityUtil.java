@@ -729,14 +729,18 @@ public final class EntityUtil {
                                 ((OwnershipTrackedBridge) entityToSpawn).tracked$setOwnerReference(spawned);
                             }
                         });
+                    if (entityToSpawn.isDead) {
+                        entityToSpawn.isDead = false;
+                    }
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
-                    ((ServerWorldBridge) entity.getWorld()).bridge$forceSpawnEntity(entity);
+                    ((ServerWorldBridge) entityToSpawn.world).bridge$forceSpawnEntity(entity);
                     return true;
                 }
             }
         }
+
         supplier.get()
             .ifPresent(spawned -> {
                 if (entity instanceof OwnershipTrackedBridge) {

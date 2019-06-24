@@ -66,8 +66,8 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 
@@ -339,7 +339,7 @@ public class DamageEventHandler {
         int l = MathHelper.floor(bb.maxY + 1.0D);
         int i1 = MathHelper.floor(bb.minZ);
         int j1 = MathHelper.floor(bb.maxZ + 1.0D);
-        final ServerChunkProviderBridge spongeChunkProvider = (ServerChunkProviderBridge) entity.world.getChunkProvider();
+        final ChunkProviderBridge spongeChunkProvider = (ChunkProviderBridge) entity.world.getChunkProvider();
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {

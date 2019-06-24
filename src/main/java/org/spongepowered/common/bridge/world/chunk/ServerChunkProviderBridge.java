@@ -37,7 +37,7 @@ import java.util.concurrent.CompletableFuture;
  * Specific bridge for the {@link ChunkProviderServer}, with a direct
  * pairing to {@link WorldServer} as a hard requirement.
  */
-public interface ServerChunkProviderBridge extends ChunkProviderBridge {
+public interface ServerChunkProviderBridge {
 
     CompletableFuture<Boolean> bridge$doesChunkExistSync(Vector3i chunkCoords);
 

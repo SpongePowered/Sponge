@@ -67,11 +67,13 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.util.CacheKeyed;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -81,9 +83,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.bridge.util.CacheKeyed;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.gen.WorldGenConstants;
@@ -223,7 +223,7 @@ public abstract class MixinChunk implements ChunkBridge, CacheKeyed {
     private void impl$UpdateNeighborsOnLoad(final CallbackInfo ci) {
         for (final Direction direction : Constants.Chunk.CARDINAL_DIRECTIONS) {
             final Vector3i neighborPosition = ((Chunk) this).getPosition().add(direction.asBlockOffset());
-            final ServerChunkProviderBridge spongeChunkProvider = (ServerChunkProviderBridge) this.world.getChunkProvider();
+            final ChunkProviderBridge spongeChunkProvider = (ChunkProviderBridge) this.world.getChunkProvider();
             final net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.bridge$getLoadedChunkWithoutMarkingActive
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
@@ -246,7 +246,7 @@ public abstract class MixinChunk implements ChunkBridge, CacheKeyed {
     private void impl$UpdateNeighborsOnUnload(final CallbackInfo ci) {
         for (final Direction direction : Constants.Chunk.CARDINAL_DIRECTIONS) {
             final Vector3i neighborPosition = ((Chunk) this).getPosition().add(direction.asBlockOffset());
-            final ServerChunkProviderBridge spongeChunkProvider = (ServerChunkProviderBridge) this.world.getChunkProvider();
+            final ChunkProviderBridge spongeChunkProvider = (ChunkProviderBridge) this.world.getChunkProvider();
             final net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.bridge$getLoadedChunkWithoutMarkingActive
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
@@ -681,7 +681,7 @@ public abstract class MixinChunk implements ChunkBridge, CacheKeyed {
             target = "Lnet/minecraft/world/chunk/IChunkProvider;getLoadedChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
     private net.minecraft.world.chunk.Chunk impl$GetChunkWithoutMarkingAsActive(final IChunkProvider chunkProvider, final int x, final int z) {
         // Don't mark chunks as active
-        return ((ServerChunkProviderBridge) chunkProvider).bridge$getLoadedChunkWithoutMarkingActive(x, z);
+        return ((ChunkProviderBridge) chunkProvider).bridge$getLoadedChunkWithoutMarkingActive(x, z);
     }
 
     @Inject(

@@ -96,6 +96,7 @@ import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.block.AccessorBlockFire;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
@@ -190,7 +191,7 @@ public final class SpongeImplHooks {
     // Block
 
     public static boolean isBlockFlammable(Block block, IBlockAccess world, BlockPos pos, EnumFacing face) {
-        return Blocks.FIRE.getFlammability(block) > 0;
+        return ((AccessorBlockFire) Blocks.FIRE).accessor$getBlockFlamability(block) > 0;
     }
 
     public static int getBlockLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {

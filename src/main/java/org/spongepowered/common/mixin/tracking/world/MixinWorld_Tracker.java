@@ -31,7 +31,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -45,50 +45,50 @@ public abstract class MixinWorld_Tracker implements World {
     @Shadow public abstract IChunkProvider getChunkProvider();
 
     @Override
-    public Optional<UUID> getCreator(int x, int y, int z) {
-        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+    public Optional<UUID> getCreator(final int x, final int y, final int z) {
+        final Chunk chunk = ((ChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
 
-        BlockPos pos = new BlockPos(x, y, z);
+        final BlockPos pos = new BlockPos(x, y, z);
         // The difference here saves the user lookup check for snapshot creation, very hot when considering
         // blocks changing with potentially n block notifiers and n block owners.
         return ((ChunkBridge) chunk).getBlockOwnerUUID(pos);
     }
 
     @Override
-    public Optional<UUID> getNotifier(int x, int y, int z) {
-        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+    public Optional<UUID> getNotifier(final int x, final int y, final int z) {
+        final Chunk chunk = ((ChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
 
-        BlockPos pos = new BlockPos(x, y, z);
+        final BlockPos pos = new BlockPos(x, y, z);
         // The difference here saves the user lookup check for snapshot creation, very hot when considering
         // blocks changing with potentially n block notifiers and n block owners.
         return ((ChunkBridge) chunk).getBlockNotifierUUID(pos);
     }
 
     @Override
-    public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
-        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+    public void setCreator(final int x, final int y, final int z, @Nullable final UUID uuid) {
+        final Chunk chunk = ((ChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }
 
-        BlockPos pos = new BlockPos(x, y, z);
+        final BlockPos pos = new BlockPos(x, y, z);
         ((ChunkBridge) chunk).setBlockCreator(pos, uuid);
     }
 
     @Override
-    public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
-        final Chunk chunk = ((ServerChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+    public void setNotifier(final int x, final int y, final int z, @Nullable final UUID uuid) {
+        final Chunk chunk = ((ChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }
 
-        BlockPos pos = new BlockPos(x, y, z);
+        final BlockPos pos = new BlockPos(x, y, z);
         ((ChunkBridge) chunk).setBlockNotifier(pos, uuid);
     }
 

@@ -33,8 +33,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.IRangedAttackMob;
-import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.MultiPartEntityPart;
+import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.entity.item.EntityEnderCrystal;
@@ -61,18 +61,18 @@ import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.WorldInfoBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 
 import java.util.Map;
@@ -243,7 +243,7 @@ public class EntityActivationRange {
             for (int i1 = i; i1 <= j; ++i1) {
                 for (int j1 = k; j1 <= l; ++j1) {
                     WorldServer worldserver = (WorldServer) world;
-                    Chunk chunk = ((ServerChunkProviderBridge) worldserver.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(i1, j1);
+                    Chunk chunk = ((ChunkProviderBridge) worldserver.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(i1, j1);
                     if (chunk != null) {
                         activateChunkEntities(player, chunk);
                     }

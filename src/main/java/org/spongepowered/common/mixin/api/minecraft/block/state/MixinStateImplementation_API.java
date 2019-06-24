@@ -74,7 +74,7 @@ import javax.annotation.Nullable;
  * This shares implementation with {@link MixinIBlockState_API}, since this
  * all relies on Data API implementations.
  */
-@Mixin(net.minecraft.block.state.BlockStateContainer.StateImplementation.class)
+@Mixin(targets = "net.minecraft.block.state.BlockStateContainer$StateImplementation")
 public abstract class MixinStateImplementation_API extends BlockStateBase implements BlockState {
 
     @Shadow @Final private Block block;
