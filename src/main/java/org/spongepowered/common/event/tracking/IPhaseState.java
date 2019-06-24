@@ -193,6 +193,18 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean isWorldGeneration() {
         return false;
     }
+
+    /**
+     * If this returns {@link true}, block decays will be processed in this
+     * phase state. If this returns {@link false}, block decays will be
+     * processed in a separate phase state.
+     *
+     * @return Whether this phase should track decays
+     */
+    default boolean includesDecays() {
+        return false;
+    }
+
     /**
      * Specifically designed to allow certain registries use the event listener hooks to prevent unnecessary off-threaded
      * checks and allows for registries to restrict additional registrations ouside of events.

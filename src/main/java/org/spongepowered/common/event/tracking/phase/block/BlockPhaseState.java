@@ -83,6 +83,11 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
         return true;
     }
 
+    @Override
+    public boolean includesDecays() {
+        return true;
+    }
+
     private final String className = this.getClass().getSimpleName();
 
     @Override

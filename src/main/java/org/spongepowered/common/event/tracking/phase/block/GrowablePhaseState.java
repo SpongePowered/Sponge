@@ -100,4 +100,8 @@ public class GrowablePhaseState implements IPhaseState<GrowablePhaseContext> {
         return true;
     }
 
+    @Override
+    public boolean includesDecays() {
+        return true;
+    }
 }
