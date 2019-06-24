@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.entity.AccessorEntityAreaEffectCloud;
+import org.spongepowered.common.mixin.core.entity.EntityAreaEffectCloudAccessor;
 
 import java.util.Optional;
 
@@ -60,7 +60,7 @@ public class AreaEffectCloudRadiusOnUseProcessor extends AbstractSpongeValueProc
 
     @Override
     protected Optional<Double> getVal(EntityAreaEffectCloud container) {
-        return Optional.of((double) ((AccessorEntityAreaEffectCloud) container).getRadiusOnUse());
+        return Optional.of((double) ((EntityAreaEffectCloudAccessor) container).getRadiusOnUse());
     }
 
     @Override

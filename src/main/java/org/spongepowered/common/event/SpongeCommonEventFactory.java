@@ -141,7 +141,7 @@ import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -164,7 +164,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -327,7 +326,7 @@ public class SpongeCommonEventFactory {
             }
 
             boolean fullTransfer = true;
-            final IMixinInventoryPlayer capture = (IMixinInventoryPlayer) player.inventory;
+            final InventoryPlayerBridge capture = (InventoryPlayerBridge) player.inventory;
             capture.setCapture(true);
             for (final ItemStackSnapshot item : list) {
                 final org.spongepowered.api.item.inventory.ItemStack itemStack = item.createStack();
@@ -353,7 +352,7 @@ public class SpongeCommonEventFactory {
         return true;
     }
 
-    public static boolean callPlayerChangeInventoryPickupEvent(final EntityPlayer player, final IMixinInventoryPlayer inventory) {
+    public static boolean callPlayerChangeInventoryPickupEvent(final EntityPlayer player, final InventoryPlayerBridge inventory) {
         if (inventory.getCapturedTransactions().isEmpty()) {
             return true;
         }

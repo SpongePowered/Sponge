@@ -268,7 +268,7 @@ public class SpongeCommandFactory {
             if (args.hasAny("dimension")) {
                 for (DimensionType dimensionType : args.<DimensionType>getAll("dimension")) {
                     src.sendMessage(Text.of("Dimension ", dimensionType.getName(), ": ", processDimension(((DimensionTypeBridge) dimensionType).
-                        getDimensionConfig(), dimensionType, src, args)));
+                        bridge$getDimensionConfig(), dimensionType, src, args)));
                     ++successes;
                 }
             }

@@ -71,7 +71,7 @@ public class SpongeDimension implements Dimension {
 
     @Override
     public Context getContext() {
-        return ((DimensionTypeBridge) (Object) this.worldProvider.getDimensionType()).getContext();
+        return ((DimensionTypeBridge) (Object) this.worldProvider.getDimensionType()).bridge$getContext();
     }
 
     // These methods are overwritten in SpongeForge

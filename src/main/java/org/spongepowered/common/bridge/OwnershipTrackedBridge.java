@@ -30,7 +30,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.mixin.tracking.bridge.MixinOwnershipTrackedBridge;
+import org.spongepowered.common.mixin.tracking.bridge.OwnershipTrackedBridgeMixin;
 import org.spongepowered.common.mixin.tracking.entity.MixinEntity_Tracker;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.mixin.tracking.world.MixinWorld_Tracker;
@@ -43,7 +43,7 @@ import javax.annotation.Nullable;
 /**
  * An optionally implemented interface to bridge getting the
  * {@link UUID} and/or {@link User} from the targets. This
- * is implemented by {@link MixinOwnershipTrackedBridge}
+ * is implemented by {@link OwnershipTrackedBridgeMixin}
  * backing hooks and implementation by {@link MixinEntity_Tracker},
  * {@link MixinChunk_Tracker}, and {@link MixinWorld_Tracker}.
  * Note that it is not guaranteed this interface is mixed onto

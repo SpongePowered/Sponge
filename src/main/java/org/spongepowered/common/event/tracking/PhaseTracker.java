@@ -817,7 +817,7 @@ public final class PhaseTracker {
 //            this.printUnexpectedBlockChange(mixinWorld, pos, currentState, newState);
         }
         // We can allow the block to get changed, regardless how it's captured, not captured, etc.
-        // because MixinChunk will perform the necessary changes, and appropriately prevent any specific
+        // because ChunkMixin will perform the necessary changes, and appropriately prevent any specific
         // physics handling.
 
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
@@ -840,11 +840,11 @@ public final class PhaseTracker {
 
         // Sponge Start - At this point, we can stop and check for captures.
         //  by short circuiting here, we avoid additional block processing that would otherwise
-        //  have potential side effects (and MixinChunk#setBlockState does a wonderful job at avoiding
+        //  have potential side effects (and ChunkMixin#setBlockState does a wonderful job at avoiding
         //  unnecessary logic in those cases).
         if (((IPhaseState) phaseState).doesBulkBlockCapture(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
             // Basically at this point, there's nothing left for us to do since
-            // MixinChunk will capture the block change, and submit it to be
+            // ChunkMixin will capture the block change, and submit it to be
             // "captured". It's only when there's immediate block event
             // processing that we need to actually create the event and process
             // that transaction.

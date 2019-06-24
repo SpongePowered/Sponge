@@ -77,7 +77,7 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.mixin.core.world.chunk.MixinChunk;
+import org.spongepowered.common.mixin.core.world.chunk.ChunkMixin;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -816,7 +816,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         IBlockState iblockstate, BlockPos sourcePos) {
     }
     /**
-     * Specifically captures a block change by {@link MixinChunk#setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)}
+     * Specifically captures a block change by {@link ChunkMixin#setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)}
      * such that the change of a {@link IBlockState} will be appropriately logged, along with any changes of tile entities being removed
      * or added, likewise, this will avoid duplicating transactions later after the fact, in the event that multiple changes are taking
      * place, including but not withstanding, tile entity replacements after the fact.

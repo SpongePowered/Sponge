@@ -78,7 +78,7 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.world.biome.IMixinBiome;
+import org.spongepowered.common.bridge.world.biome.BiomeBridge;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 import org.spongepowered.common.world.gen.SpongePopulatorType;
@@ -239,7 +239,7 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         if (hasRegistrationFor(biome.getClass())) {
             PopulatorType removed = this.populatorClassToTypeMappings.remove(biome.getClass());
             this.populatorTypeMappings.remove(removed.getId());
-            SpongePopulatorType replacement = new SpongePopulatorType(((BiomeType) biome).getName(), ((IMixinBiome) biome).getModId());
+            SpongePopulatorType replacement = new SpongePopulatorType(((BiomeType) biome).getName(), ((BiomeBridge) biome).bridge$getModId());
             this.populatorClassToTypeMappings.put(biome.getClass(), replacement);
             registerAdditionalCatalog(replacement);
             return replacement;

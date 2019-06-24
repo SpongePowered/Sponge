@@ -36,7 +36,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
-import org.spongepowered.common.interfaces.world.biome.IMixinBiome;
+import org.spongepowered.common.bridge.world.biome.BiomeBridge;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
@@ -66,9 +66,9 @@ public final class BiomeTypeRegistryModule
                 String id = ((BiomeType) biome).getId();
                 if (id == null) {
                     ResourceLocation reg_id = Biome.REGISTRY.getNameForObject(biome);
-                    ((IMixinBiome) biome).setModId(reg_id.getNamespace());
+                    ((BiomeBridge) biome).bridge$setModId(reg_id.getNamespace());
                     id = reg_id.toString();
-                    ((IMixinBiome) biome).setId(id);
+                    ((BiomeBridge) biome).bridge$setId(id);
                 }
                 this.biomeTypes.add((BiomeType) biome);
                 this.catalogTypeMap.put(id, (BiomeType) biome);
@@ -83,9 +83,9 @@ public final class BiomeTypeRegistryModule
                 String id = ((BiomeType) biome).getId();
                 if (id == null) {
                     ResourceLocation reg_id = Biome.REGISTRY.getNameForObject(biome);
-                    ((IMixinBiome) biome).setModId(reg_id.getNamespace());
+                    ((BiomeBridge) biome).bridge$setModId(reg_id.getNamespace());
                     id = reg_id.toString();
-                    ((IMixinBiome) biome).setId(id);
+                    ((BiomeBridge) biome).bridge$setId(id);
                 }
                 this.biomeTypes.add((BiomeType) biome);
                 this.catalogTypeMap.put(id, (BiomeType) biome);

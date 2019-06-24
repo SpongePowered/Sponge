@@ -47,9 +47,7 @@ import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
-import org.spongepowered.common.mixin.api.minecraft.entity.player.MixinEntityPlayerMP_API;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Optional;

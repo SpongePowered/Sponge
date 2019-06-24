@@ -114,7 +114,7 @@ import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.entity.AccessorEntity;
+import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
@@ -127,7 +127,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -278,7 +277,7 @@ public final class EntityUtil {
                 return entity;
             }
 
-            ((AccessorEntity) toReturn).accessor$CopyDataFromOldEntity(entity);
+            ((EntityAccessor) toReturn).accessor$CopyDataFromOldEntity(entity);
         } else {
             toReturn = entity;
         }
@@ -601,7 +600,7 @@ public final class EntityUtil {
                 fromWorld.profiler.startSection("placing");
                 if (!teleporter.bridge$isVanilla() || toWorld.provider instanceof WorldProviderEnd) {
                     // Have to assume mod teleporters or end -> overworld always port. We set this state for nether ports in
-                    // MixinTeleporter#bridge$placeEntity
+                    // TeleporterMixin#bridge$placeEntity
                     context.setDidPort(true);
                 }
 

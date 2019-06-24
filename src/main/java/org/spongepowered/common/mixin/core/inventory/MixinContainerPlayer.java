@@ -30,7 +30,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
@@ -86,6 +86,6 @@ public abstract class MixinContainerPlayer extends MixinContainer implements IMi
 
     @Override
     protected void markClean() {
-        ((IMixinInventoryPlayer) this.player.inventory).markClean();
+        ((InventoryPlayerBridge) this.player.inventory).markClean();
     }
 }

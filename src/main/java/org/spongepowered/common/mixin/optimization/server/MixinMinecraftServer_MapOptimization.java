@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
-import org.spongepowered.common.mixin.core.world.storage.AccessorMapStorage;
+import org.spongepowered.common.mixin.core.world.storage.MapStorageAccessor;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
@@ -52,10 +52,10 @@ public abstract class MixinMinecraftServer_MapOptimization {
         // Mods, such as TwilightForest, may add themselves to this list when ticking which will cause a CME.
         if (!SpongeImplHooks.isVanilla()) {
             data = new ArrayList<>(
-                ((AccessorMapStorage) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList());
+                ((MapStorageAccessor) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList());
         }
         else {
-            data = ((AccessorMapStorage) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList();
+            data = ((MapStorageAccessor) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList();
         }
 
         data

@@ -679,7 +679,7 @@ public final class TrackingUtil {
         // flags, we have to abide by the changes accordingly. Likewise, this interacts with neighbor notifications being performed.
         if (transaction.getIntermediary().isEmpty()) {
             // We call onBlockAdded here for blocks without a TileEntity.
-            // MixinChunk#setBlockState will call onBlockAdded for blocks
+            // ChunkMixin#setBlockState will call onBlockAdded for blocks
             // with a TileEntity or when capturing is not being done.
             performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, originalChangeFlag, originalState, newState);
 

@@ -48,7 +48,6 @@ import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.command.TabCompleteEvent;
@@ -62,7 +61,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -327,7 +326,8 @@ public class SpongeCommandManager implements CommandManager {
                     context.owner((User) source);
                     context.notifier((User) source);
                 }
-                final IMixinInventoryPlayer inventory = source instanceof EntityPlayer ? ((IMixinInventoryPlayer) ((EntityPlayer) source).inventory) : null;
+                final InventoryPlayerBridge
+                    inventory = source instanceof EntityPlayer ? ((InventoryPlayerBridge) ((EntityPlayer) source).inventory) : null;
                 if (inventory != null) {
                     // Enable player inventory capture
                     context.inventory(inventory);

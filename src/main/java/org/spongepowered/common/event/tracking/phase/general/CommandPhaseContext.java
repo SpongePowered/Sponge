@@ -26,14 +26,14 @@ package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 
 import javax.annotation.Nullable;
 
 public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext> {
 
     @Nullable String command;
-    @Nullable private IMixinInventoryPlayer inventory;
+    @Nullable private InventoryPlayerBridge inventory;
 
     CommandPhaseContext(IPhaseState<CommandPhaseContext> state) {
         super(state);
@@ -60,7 +60,7 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
         return printer;
     }
 
-    public CommandPhaseContext inventory(IMixinInventoryPlayer inventory) {
+    public CommandPhaseContext inventory(InventoryPlayerBridge inventory) {
         this.inventory = inventory;
         return this;
     }

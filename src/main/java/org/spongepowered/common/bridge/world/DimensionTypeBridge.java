@@ -32,21 +32,21 @@ import java.nio.file.Path;
 
 public interface DimensionTypeBridge {
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
+    SpongeConfig<DimensionConfig> bridge$getDimensionConfig();
 
-    Context getContext();
+    Context bridge$getContext();
 
-    String getEnumName();
+    Path bridge$getConfigPath();
 
-    String getModId();
+    boolean bridge$shouldGenerateSpawnOnLoad();
 
-    Path getConfigPath();
+    boolean bridge$shouldLoadSpawn();
 
-    boolean shouldGenerateSpawnOnLoad();
+    boolean bridge$shouldKeepSpawnLoaded();
 
-    boolean shouldLoadSpawn();
-
-    boolean shouldKeepSpawnLoaded();
-
+    // TODO - migrate this to DimensionTypeBridge_Forge
     void setShouldLoadSpawn(boolean keepSpawnLoaded);
+
+    String bridge$getSanitizedId();
+
 }

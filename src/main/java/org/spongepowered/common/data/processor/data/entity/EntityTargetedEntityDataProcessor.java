@@ -39,19 +39,19 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetedEn
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.projectile.AccessorShulkerBulletEntity;
+import org.spongepowered.common.mixin.core.entity.projectile.ShulkerBulletEntityAccessor;
 
 import java.util.Optional;
 
-public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataSingleTargetProcessor<AccessorShulkerBulletEntity, EntitySnapshot,
+public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataSingleTargetProcessor<ShulkerBulletEntityAccessor, EntitySnapshot,
         Value<EntitySnapshot>, TargetedEntityData, ImmutableTargetedEntityData> {
 
     public EntityTargetedEntityDataProcessor() {
-        super(Keys.TARGETED_ENTITY, AccessorShulkerBulletEntity.class);
+        super(Keys.TARGETED_ENTITY, ShulkerBulletEntityAccessor.class);
     }
 
     @Override
-    protected boolean set(AccessorShulkerBulletEntity dataHolder, org.spongepowered.api.entity.EntitySnapshot value) {
+    protected boolean set(ShulkerBulletEntityAccessor dataHolder, org.spongepowered.api.entity.EntitySnapshot value) {
         if (!value.getUniqueId().isPresent()) {
             return false;
         }
@@ -65,7 +65,7 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
     }
 
     @Override
-    protected Optional<org.spongepowered.api.entity.EntitySnapshot> getVal(AccessorShulkerBulletEntity dataHolder) {
+    protected Optional<org.spongepowered.api.entity.EntitySnapshot> getVal(ShulkerBulletEntityAccessor dataHolder) {
         Entity entity = dataHolder.accessor$getTarget();
         if (entity == null) {
             return Optional.empty();
@@ -79,7 +79,7 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
     }
 
     @Override
-    public boolean supports(AccessorShulkerBulletEntity dataHolder) {
+    public boolean supports(ShulkerBulletEntityAccessor dataHolder) {
         return true;
     }
 
@@ -90,8 +90,8 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (container instanceof AccessorShulkerBulletEntity) {
-            final Entity target = ((AccessorShulkerBulletEntity) container).accessor$getTarget();
+        if (container instanceof ShulkerBulletEntityAccessor) {
+            final Entity target = ((ShulkerBulletEntityAccessor) container).accessor$getTarget();
             if (target == null) {
                 return DataTransactionResult.successNoData();
             }
@@ -102,8 +102,8 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
                     .result(DataTransactionResult.Type.SUCCESS)
                     .build();
 
-            ((AccessorShulkerBulletEntity) container).accessor$setTarget(null);
-            ((AccessorShulkerBulletEntity) container).accessor$setTargetId(null);
+            ((ShulkerBulletEntityAccessor) container).accessor$setTarget(null);
+            ((ShulkerBulletEntityAccessor) container).accessor$setTargetId(null);
             return result;
         }
 

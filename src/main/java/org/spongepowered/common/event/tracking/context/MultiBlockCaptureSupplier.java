@@ -52,8 +52,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.mixin.core.world.chunk.MixinChunk;
-import org.spongepowered.common.mixin.core.world.AccessorServerWorld;
+import org.spongepowered.common.mixin.core.world.chunk.ChunkMixin;
+import org.spongepowered.common.mixin.core.world.WorldServerAccessor;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -410,7 +410,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     /**
-     * Specifically called by {@link MixinChunk#setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)} while it is preparing
+     * Specifically called by {@link ChunkMixin#setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)} while it is preparing
      * various transactional aspects, such as potential tile entity removals, replacements, etc. Specifically should never be called outside
      * of that reaction since {@link BlockTransaction#enqueueChanges(SpongeProxyBlockAccess, MultiBlockCaptureSupplier)}
      * does not get called automatically, it is called prior to queueing potential tile replacements, and prior to calling to
@@ -646,7 +646,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 if (hasEvents) {
                     final SpongeBlockSnapshot original = (SpongeBlockSnapshot) transaction.getOriginal();
                     original.getWorldServer().ifPresent(worldServer -> {
-                        final AccessorServerWorld accessor = (AccessorServerWorld) worldServer;
+                        final WorldServerAccessor accessor = (WorldServerAccessor) worldServer;
                         final WorldServer.ServerBlockEventList queue = accessor.getBlockEventQueueForSponge()[accessor.getBlockEventCacheIndexForSponge()];
                         for (BlockEventData blockEventData : scheduledEvents.get(original.getBlockPos())) {
                             boolean equals = false;

@@ -296,7 +296,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.worldEnabled = true;
         this.loadOnStartup = true;
         this.keepSpawnLoaded = null;
-        this.generateSpawnOnLoad = ((DimensionTypeBridge) this.dimensionType).shouldGenerateSpawnOnLoad();
+        this.generateSpawnOnLoad = ((DimensionTypeBridge) this.dimensionType).bridge$shouldGenerateSpawnOnLoad();
         this.generatorSettings = DataContainer.createNew();
         this.generatorModifiers = ImmutableList.of();
         this.pvpEnabled = true;

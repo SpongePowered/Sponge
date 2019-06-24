@@ -412,7 +412,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     void queueRemoval(TileEntity removed) {
         if (removed != null) {
             // Set the tile entity to the affected tile entities so it is retrieved
-            // by the hooks in MixinWorldServer for getting tiles for removal.
+            // by the hooks in WorldServerMixin for getting tiles for removal.
             final BlockPos pos = removed.getPos();
             this.affectedTileEntities.put(pos, null);
             markRemovedTile(pos);

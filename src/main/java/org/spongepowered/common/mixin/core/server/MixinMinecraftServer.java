@@ -109,7 +109,7 @@ import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
-import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
+import org.spongepowered.common.mixin.core.world.storage.WorldInfoMixin;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
@@ -327,7 +327,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      *
      * @reason Sponge rewrites the method to use the Sponge {@link WorldManager} to load worlds,
      * migrating old worlds, upgrading worlds to our standard, and configuration loading. Also
-     * validates that the {@link MixinWorldInfo onConstruction} will not be doing anything
+     * validates that the {@link WorldInfoMixin onConstruction} will not be doing anything
      * silly during map conversions.
      */
     @Overwrite

@@ -10,7 +10,7 @@
         "MixinChunk_TileEntityActivation",
         "MixinSpongeImplHooks_TileEntityActivation",
         "MixinTileEntity_Activation",
-        "MixinWorldServer_TileEntityActivation"
+        "WorldServerMixin_TileEntityActivation"
     ],
     "injectors": {
         "defaultRequire": 1
