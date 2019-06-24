@@ -25,9 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
-public final class BlockPhase extends TrackingPhase {
+public final class BlockPhase {
 
     public static final class State {
         public static final IPhaseState<?> BLOCK_DECAY = new BlockDecayPhaseState();
@@ -49,15 +48,7 @@ public final class BlockPhase extends TrackingPhase {
 
     }
 
-    public static BlockPhase getInstance() {
-        return Holder.INSTANCE;
-    }
-
     private BlockPhase() {
-    }
-
-    private static final class Holder {
-        static final BlockPhase INSTANCE = new BlockPhase();
     }
 
 

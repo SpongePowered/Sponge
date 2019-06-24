@@ -59,12 +59,15 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -73,10 +76,6 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase.Listener
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.core.world.chunk.MixinChunk;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.world.BlockChange;
@@ -92,10 +91,7 @@ import javax.annotation.Nullable;
 
 /**
  * A literal phase state of which the {@link World} is currently running
- * in. The state itself is owned by {@link TrackingPhase}s as the phase
- * defines what to do upon
- * {@link IPhaseState#unwind(PhaseContext)}.
- * As these should be enums, there's no data that should be stored on
+ * in. As these should be enums, there's no data that should be stored on
  * this state. It can have control flow with {@link #isNotReEntrant()}
  * where preventing switching to another state is possible (likely points out
  * either errors or runaway states not being unwound).
@@ -114,15 +110,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             frame.addContext(EventContextKeys.NOTIFIER, ctx.notifier);
         }
     };
-
-    /**
-     * A near useless method, except in some logic where we want a "global"
-     * "Is this state part of this phase at all" where we have not made an "is" method
-     * for them.
-     *
-     * @return The parented tracking phase
-     */
-    TrackingPhase getPhase();
 
     /**
      * Creates a minimalized {@link PhaseContext} for this specific state. In some cases,

@@ -25,9 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
-public final class EntityPhase extends TrackingPhase {
+public final class EntityPhase {
 
     public static final class State {
         public static final IPhaseState<EntityDeathContext> DEATH = new EntityDeathState();
@@ -43,15 +42,7 @@ public final class EntityPhase extends TrackingPhase {
     }
 
 
-    public static EntityPhase getInstance() {
-        return Holder.INSTANCE;
-    }
-
     private EntityPhase() {
-    }
-
-    private static final class Holder {
-        static final EntityPhase INSTANCE = new EntityPhase();
     }
 
 }

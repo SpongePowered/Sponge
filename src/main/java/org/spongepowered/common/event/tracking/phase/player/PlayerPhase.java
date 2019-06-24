@@ -26,25 +26,15 @@ package org.spongepowered.common.event.tracking.phase.player;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
-public final class PlayerPhase extends TrackingPhase {
+public final class PlayerPhase {
 
     public static final class State {
 
         public static final IPhaseState<GeneralizedContext> PLAYER_LOGOUT = new PlayerLogoutPhaseState();
     }
 
-    public static PlayerPhase getInstance() {
-        return Holder.INSTANCE;
-    }
-
     PlayerPhase() {
-    }
-
-    private static final class Holder {
-
-        static final PlayerPhase INSTANCE = new PlayerPhase();
     }
 
 }

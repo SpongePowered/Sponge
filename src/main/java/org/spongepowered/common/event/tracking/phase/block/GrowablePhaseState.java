@@ -35,8 +35,6 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
@@ -53,11 +51,6 @@ public class GrowablePhaseState implements IPhaseState<GrowablePhaseContext> {
             stackFrame.addContext(EventContextKeys.GROWTH_ORIGIN, growablePhaseContext.snapshot);
 
         });
-
-    @Override
-    public TrackingPhase getPhase() {
-        return TrackingPhases.BLOCK;
-    }
 
     @Override
     public GrowablePhaseContext createPhaseContext() {

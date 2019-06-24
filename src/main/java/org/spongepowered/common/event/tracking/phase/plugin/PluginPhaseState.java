@@ -25,15 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 public abstract class PluginPhaseState<P extends PluginPhaseContext<P>> implements IPhaseState<P> {
-
-    @Override
-    public final TrackingPhase getPhase() {
-        return TrackingPhases.PLUGIN;
-    }
 
     private final String className = this.getClass().getSimpleName();
 

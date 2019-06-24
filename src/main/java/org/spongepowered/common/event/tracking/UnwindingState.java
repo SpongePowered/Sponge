@@ -41,8 +41,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -63,11 +61,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
     private static final class Holder {
         static final UnwindingState INSTANCE = new UnwindingState();
-    }
-
-    @Override
-    public final TrackingPhase getPhase() {
-        return TrackingPhases.GENERAL;
     }
 
     @Override

@@ -25,9 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
-public final class TickPhase extends TrackingPhase {
+public final class TickPhase {
 
     public static final class Tick {
 
@@ -48,15 +47,7 @@ public final class TickPhase extends TrackingPhase {
         }
     }
 
-    public static TickPhase getInstance() {
-        return Holder.INSTANCE;
-    }
-
     private TickPhase() {
-    }
-
-    private static final class Holder {
-        static final TickPhase INSTANCE = new TickPhase();
     }
 
 }

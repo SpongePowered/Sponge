@@ -47,7 +47,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
@@ -173,17 +172,17 @@ public final class PacketPhaseUtil {
                     packetIn.processPacket(netHandler);
                 } else {
                     final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
-                    IPhaseState<? extends PacketContext<?>> packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
+                    IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
                     // At the very least make an unknown packet state case.
                     final PacketContext<?> context = packetState.createPhaseContext();
-                    if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
+                    if (!PacketPhase.getInstance().isPacketInvalid(packetIn, packetPlayer, packetState)) {
                         context
                             .source(packetPlayer)
                             .packetPlayer(packetPlayer)
                             .packet(packetIn)
                             .cursor(cursor);
 
-                        TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
+                        PacketPhase.getInstance().populateContext(packetIn, packetPlayer, packetState, context);
                         context.owner((Player) packetPlayer);
                         context.notifier((Player) packetPlayer);
                     }

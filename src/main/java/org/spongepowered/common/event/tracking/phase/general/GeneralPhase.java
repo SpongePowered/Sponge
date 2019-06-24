@@ -25,12 +25,11 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.UnwindingState;
 import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
+import org.spongepowered.common.event.tracking.UnwindingState;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
-public final class GeneralPhase extends TrackingPhase {
+public final class GeneralPhase {
 
     public static final class State {
         public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
@@ -49,15 +48,7 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
 
-    public static GeneralPhase getInstance() {
-        return Holder.INSTANCE;
-    }
-
     private GeneralPhase() {
-    }
-
-    private static final class Holder {
-        static final GeneralPhase INSTANCE = new GeneralPhase();
     }
 
 

@@ -25,9 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
-public final class PluginPhase extends TrackingPhase {
+public final class PluginPhase {
 
     public static final class State {
 
@@ -54,16 +53,7 @@ public final class PluginPhase extends TrackingPhase {
 
     }
 
-    public static PluginPhase getInstance() {
-        return Holder.INSTANCE;
-    }
-
     private PluginPhase() {
-    }
-
-    private static final class Holder {
-
-        static final PluginPhase INSTANCE = new PluginPhase();
     }
 
 }

@@ -28,7 +28,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 import java.util.function.BiConsumer;
 
@@ -41,11 +40,6 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
         });
 
     BlockPhaseState() {
-    }
-
-    @Override
-    public final BlockPhase getPhase() {
-        return TrackingPhases.BLOCK;
     }
 
     @Override

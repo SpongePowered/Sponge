@@ -26,19 +26,12 @@ package org.spongepowered.common.event.tracking.phase.world.dragon;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
 /* TODO - Expand dragon phases so that various things can be configurable
   including but not withstanding, being able to set up multiple dragons
   or configuring how the respawn events happen.
 */
-public final class DragonPhase extends TrackingPhase {
-
-    private static final DragonPhase instance = new DragonPhase();
-
-    public static DragonPhase getInstance() {
-        return instance;
-    }
+public final class DragonPhase {
 
     public static final class State {
 

@@ -32,8 +32,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 import java.util.ArrayList;
 
@@ -41,11 +39,6 @@ abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G>
 
     @Override
     public abstract void unwind(G context);
-
-    @Override
-    public final TrackingPhase getPhase() {
-        return TrackingPhases.GENERAL;
-    }
 
     /**
      * A duplicate of {@link IPhaseState#spawnEntityOrCapture(PhaseContext, Entity, int, int)}
