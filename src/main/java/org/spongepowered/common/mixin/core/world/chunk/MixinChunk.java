@@ -128,8 +128,12 @@ public abstract class MixinChunk implements ChunkBridge, CacheKeyed {
     private boolean persistedChunk = false;
     private boolean isSpawning = false;
     private net.minecraft.world.chunk.Chunk[] neighbors = new net.minecraft.world.chunk.Chunk[4];
-    private long cacheKey = ChunkPos.asLong(this.x, this.z);
+    private long cacheKey;
 
+    @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
+    private void impl$onConstruct(World worldIn, int x, int z, CallbackInfo ci) {
+        this.cacheKey = ChunkPos.asLong(x, z);
+    }
 
     @Override
     public net.minecraft.world.chunk.Chunk[] getNeighborArray() {
