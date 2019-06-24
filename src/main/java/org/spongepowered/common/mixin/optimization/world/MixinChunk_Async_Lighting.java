@@ -44,6 +44,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 
 import java.util.ArrayList;
@@ -97,7 +98,7 @@ public abstract class MixinChunk_Async_Lighting implements ChunkBridge {
     @Shadow public abstract int getBlockLightOpacity(int x, int y, int z);
     @Shadow public abstract void updateSkylightNeighborHeight(int x, int z, int startY, int endY);
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
     public void onConstruct(World worldIn, int x, int z, CallbackInfo ci) {
         this.isServerChunk = !((WorldBridge) worldIn).isFake();
         if (this.isServerChunk) {
@@ -229,7 +230,8 @@ public abstract class MixinChunk_Async_Lighting implements ChunkBridge {
 
     @Redirect(method = "enqueueRelightChecks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"))
     private IBlockState onRelightChecksGetBlockState(World world, BlockPos pos) {
-        Chunk chunk = ((ServerChunkProviderBridge) world.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        Chunk chunk = ((ChunkProviderBridge) world.getChunkProvider())
+            .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
 
         final ChunkBridge spongeChunk = (ChunkBridge) chunk;
         if (chunk == null || chunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {
@@ -257,7 +259,7 @@ public abstract class MixinChunk_Async_Lighting implements ChunkBridge {
         return world.checkLight(pos);
     }
 
-    @Inject(method = "checkLight", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "checkLight()V", at = @At("HEAD"), cancellable = true)
     private void checkLightHead(CallbackInfo ci) {
         if (this.isServerChunk) {
             if (this.world.getMinecraftServer().isServerStopped() || this.lightExecutorService.isShutdown()) {
