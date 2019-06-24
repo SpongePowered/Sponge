@@ -65,10 +65,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                 .ifPresent(frame::pushCause)
         );
 
-    private String name;
-
-    TileEntityTickPhaseState(String name) {
-        this.name = name;
+    TileEntityTickPhaseState() {
     }
 
     @Override
@@ -251,10 +248,5 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     @Override
     public boolean hasSpecificBlockProcess(TileEntityTickContext context) {
         return true;
-    }
-
-    @Override
-    public String toString() {
-        return this.name;
     }
 }

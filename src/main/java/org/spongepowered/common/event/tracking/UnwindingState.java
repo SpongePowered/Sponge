@@ -327,10 +327,11 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         ((IPhaseState) unwindingState).postBlockTransactionApplication(blockChange, snapshotTransaction, unwindingContext);
     }
 
+    private final String desc = TrackingUtil.phaseStateToString("General", this);
 
     @Override
     public String toString() {
-        return "GeneralPhase{UnwindingState}";
+        return this.desc;
     }
 
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.block;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.function.BiConsumer;
@@ -82,10 +83,10 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
         return true;
     }
 
-    private final String className = this.getClass().getSimpleName();
+    private final String desc = TrackingUtil.phaseStateToString("Block", this);
 
     @Override
     public String toString() {
-        return this.className;
+        return this.desc;
     }
 }

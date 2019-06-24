@@ -24,20 +24,21 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.BasicInventoryPacketState;
 
 public abstract class NamedInventoryState extends BasicInventoryPacketState {
 
-    private final String name;
+    private final String desc;
 
     public NamedInventoryState(String name, int stateId, int stateMask) {
         super(stateId, stateMask);
-        this.name = name;
+        this.desc = TrackingUtil.phaseStateToString("Packet", name, this);
     }
 
     @Override
     public String toString() {
-        return this.name;
+        return this.desc;
     }
 
 }

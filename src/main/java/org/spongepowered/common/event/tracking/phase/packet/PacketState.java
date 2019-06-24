@@ -196,12 +196,11 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         return SpawnTypes.PLACEMENT;
     }
 
-
-    private final String className = this.getClass().getSimpleName();
+    private final String desc = TrackingUtil.phaseStateToString("Packet", this);
 
     @Override
     public String toString() {
-        return this.className;
+        return this.desc;
     }
 
 }

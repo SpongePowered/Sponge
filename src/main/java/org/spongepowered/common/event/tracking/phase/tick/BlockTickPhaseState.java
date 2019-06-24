@@ -66,10 +66,10 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
                 context.tickingBlock.getTickFrameModifier().accept(frame, (ServerWorldBridge) context.world);
             }
         );
-    private final String name;
+    private final String desc;
 
     BlockTickPhaseState(String name) {
-        this.name = name;
+        this.desc = TrackingUtil.phaseStateToString("Tick", name, this);
     }
 
     @Override
@@ -227,7 +227,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
 
     @Override
     public String toString() {
-        return this.name;
+        return this.desc;
     }
 
 }

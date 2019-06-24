@@ -32,6 +32,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
 
@@ -71,11 +72,11 @@ abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G>
         return false;
     }
 
-    private final String className = this.getClass().getSimpleName();
+    private final String desc = TrackingUtil.phaseStateToString("General", this);
 
     @Override
     public String toString() {
-        return this.className;
+        return this.desc;
     }
 
 }

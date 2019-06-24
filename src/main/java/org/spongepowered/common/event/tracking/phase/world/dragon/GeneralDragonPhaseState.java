@@ -40,10 +40,10 @@ public class GeneralDragonPhaseState implements IPhaseState<GeneralizedContext> 
         TrackingUtil.processBlockCaptures(this, phaseContext);
     }
 
-    private final String className = this.getClass().getSimpleName();
+    private final String desc = TrackingUtil.phaseStateToString("Dragon", this);
 
     @Override
     public String toString() {
-        return this.className;
+        return this.desc;
     }
 }

@@ -35,6 +35,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 
 import java.util.ArrayList;
@@ -53,9 +54,11 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     private Set<IPhaseState<?>> compatibleStates = new HashSet<>();
     private boolean isBaked = false;
     private final String id;
+    private final String desc;
 
     GeneralGenerationPhaseState(String id) {
         this.id = id;
+        this.desc = TrackingUtil.phaseStateToString("Generation", id, this);
     }
 
     final GeneralGenerationPhaseState addCompatibleState(IPhaseState<?> state) {
@@ -193,10 +196,8 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
         return Objects.hashCode(this.id);
     }
 
-    private final String className = this.getClass().getSimpleName();
-
     @Override
     public String toString() {
-        return this.className + "{" + this.id +  "}";
+        return this.desc;
     }
 }

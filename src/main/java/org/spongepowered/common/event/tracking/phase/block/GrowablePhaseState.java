@@ -97,4 +97,11 @@ public class GrowablePhaseState implements IPhaseState<GrowablePhaseContext> {
     public boolean includesDecays() {
         return true;
     }
+
+    private final String desc = TrackingUtil.phaseStateToString("Growable", this);
+
+    @Override
+    public String toString() {
+        return this.desc;
+    }
 }
