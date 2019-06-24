@@ -41,6 +41,7 @@ import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.profile.SpongeProfileManager;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.lang.ref.WeakReference;
@@ -161,11 +162,11 @@ public class MixinOwnershipTrackedBridge implements OwnershipTrackedBridge {
             }
             if (!spongeData.hasKey(type.compoundKey)) {
                 NBTTagCompound sourceNbt = new NBTTagCompound();
-                sourceNbt.setUniqueId(NbtDataUtil.UUID, uuid);
+                sourceNbt.setUniqueId(Constants.UUID, uuid);
                 spongeData.setTag(type.compoundKey, sourceNbt);
             } else {
                 final NBTTagCompound compoundTag = spongeData.getCompoundTag(type.compoundKey);
-                compoundTag.setUniqueId(NbtDataUtil.UUID, uuid);
+                compoundTag.setUniqueId(Constants.UUID, uuid);
             }
         }
     }
@@ -196,7 +197,7 @@ public class MixinOwnershipTrackedBridge implements OwnershipTrackedBridge {
             return null;
         }
 
-        UUID uniqueId = creatorNbt.getUniqueId(NbtDataUtil.UUID);
+        UUID uniqueId = creatorNbt.getUniqueId(Constants.UUID);
         if (PlayerTracker.Type.OWNER == nbtKey) {
             this.tracked$owner = uniqueId;
         } else if (PlayerTracker.Type.NOTIFIER == nbtKey) {

@@ -63,7 +63,7 @@ public class EntityTrackedUser implements IFixableData {
             final UUID creator = new UUID(most, least);
             creatorTag.removeTag(Constants.Deprecated.Entity.UUID_LEAST_1_8);
             creatorTag.removeTag(Constants.Deprecated.Entity.UUID_MOST_1_8);
-            creatorTag.setUniqueId(NbtDataUtil.UUID, creator);
+            creatorTag.setUniqueId(Constants.UUID, creator);
         }
     }
 }

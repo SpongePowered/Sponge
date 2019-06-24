@@ -62,6 +62,8 @@ import java.util.UUID;
  */
 public final class Constants {
 
+    public static final String UUID = "UUID";
+
     public static final class Sponge {
 
         public static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
@@ -123,7 +125,7 @@ public final class Constants {
          */
         public static final EnumFacing[] NOTIFY_DIRECTIONS = {EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH};
         public static final EnumSet<EnumFacing> NOTIFY_DIRECTION_SET = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
-        public static final UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        public static final UUID INVALID_WORLD_UUID = java.util.UUID.fromString("00000000-0000-0000-0000-000000000000");
         public static final int DEFAULT_CHUNK_UNLOAD_DELAY = 15000;
         public static final int MAX_CHUNK_UNLOADS = 100;
 

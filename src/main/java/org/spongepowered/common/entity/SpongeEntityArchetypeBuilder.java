@@ -112,7 +112,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         final NBTTagCompound compound = new NBTTagCompound();
         minecraftEntity.writeToNBT(compound);
         compound.setString(NbtDataUtil.Schematic.ENTITY_ID, entity.getType().getId());
-        compound.removeTag(NbtDataUtil.UUID);
+        compound.removeTag(Constants.UUID);
         compound.removeTag(NbtDataUtil.UUID_MOST);
         compound.removeTag(NbtDataUtil.UUID_LEAST);
         compound.setBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN, true);

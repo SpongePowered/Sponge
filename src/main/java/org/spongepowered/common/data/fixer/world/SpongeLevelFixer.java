@@ -48,7 +48,7 @@ public class SpongeLevelFixer implements IFixableData {
             final UUID worldId = new UUID(most, least);
             compound.removeTag(Constants.Deprecated.World.WORLD_UUID_LEAST_1_8);
             compound.removeTag(Constants.Deprecated.World.WORLD_UUID_MOST_1_8);
-            compound.setUniqueId(NbtDataUtil.UUID, worldId);
+            compound.setUniqueId(Constants.UUID, worldId);
 
         }
         // Fixes the Player Id Table
@@ -61,7 +61,7 @@ public class SpongeLevelFixer implements IFixableData {
                 playerIdCompound.removeTag(Constants.Deprecated.World.WORLD_UUID_LEAST_1_8);
                 playerIdCompound.removeTag(Constants.Deprecated.World.WORLD_UUID_MOST_1_8);
                 final UUID playerId = new UUID(most, least);
-                playerIdCompound.setUniqueId(NbtDataUtil.UUID, playerId);
+                playerIdCompound.setUniqueId(Constants.UUID, playerId);
             }
         }
         return compound;

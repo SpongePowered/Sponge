@@ -804,7 +804,7 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
 
     @Override
     public void readSpongeNbt(NBTTagCompound nbt) {
-        final UUID nbtUniqueId = nbt.getUniqueId(NbtDataUtil.UUID);
+        final UUID nbtUniqueId = nbt.getUniqueId(Constants.UUID);
         if (UUID.fromString("00000000-0000-0000-0000-000000000000").equals(nbtUniqueId)) {
             return;
         }
@@ -832,7 +832,7 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
             final NBTTagList playerIdList = nbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < playerIdList.tagCount(); i++) {
                 final NBTTagCompound playerId = playerIdList.getCompoundTagAt(i);
-                final UUID playerUuid = playerId.getUniqueId(NbtDataUtil.UUID);
+                final UUID playerUuid = playerId.getUniqueId(Constants.UUID);
                 final Integer playerIndex = this.playerUniqueIdMap.inverse().get(playerUuid);
                 if (playerIndex == null) {
                     this.playerUniqueIdMap.put(this.trackedUniqueIdCount++, playerUuid);
@@ -848,7 +848,7 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
         // Never save Sponge data if we have no UUID
         if (this.uuid != null && this.isValid()) {
             this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
-            this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
+            this.spongeNbt.setUniqueId(Constants.UUID, this.uuid);
             this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimensionId);
             this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
             this.spongeNbt.setBoolean(NbtDataUtil.GENERATE_BONUS_CHEST, this.generateBonusChest);
@@ -868,7 +868,7 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
             final NBTTagList playerIdList = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
             while (iterator.hasNext()) {
                 final NBTTagCompound compound = new NBTTagCompound();
-                compound.setUniqueId(NbtDataUtil.UUID, iterator.next());
+                compound.setUniqueId(Constants.UUID, iterator.next());
                 playerIdList.appendTag(compound);
                 iterator.remove();
             }

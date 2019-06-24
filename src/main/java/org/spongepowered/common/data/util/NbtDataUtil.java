@@ -131,8 +131,6 @@ public final class NbtDataUtil {
 
     public static final String CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
 
-    public static final String UUID = "UUID";
-
     public static final String CHUNK_DATA_LEVEL = "Level";
     public static final String CHUNK_DATA_SECTIONS = "Sections";
 

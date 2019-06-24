@@ -83,6 +83,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.DataInputStream;
@@ -1031,7 +1032,7 @@ public final class WorldManager {
                 }
 
                 spongeDataCompound.setString(NbtDataUtil.DIMENSION_TYPE, dimensionTypeId);
-                if (!spongeDataCompound.hasUniqueId(NbtDataUtil.UUID)) {
+                if (!spongeDataCompound.hasUniqueId(Constants.UUID)) {
                     SpongeImpl.getLogger().error("World [{}] (DIM{}) has no valid unique identifier. This is a critical error and should be reported"
                             + " to Sponge ASAP.", worldFolderName, dimensionId);
                     continue;

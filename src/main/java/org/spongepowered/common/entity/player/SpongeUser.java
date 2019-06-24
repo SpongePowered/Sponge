@@ -327,7 +327,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             for (int i = 0; i < spawnList.tagCount(); i++) {
                 final NBTTagCompound spawnCompound = spawnList.getCompoundTagAt(i);
 
-                final UUID uuid = spawnCompound.getUniqueId(NbtDataUtil.UUID);
+                final UUID uuid = spawnCompound.getUniqueId(Constants.UUID);
 
                 if (uuid.getLeastSignificantBits() != 0 && uuid.getMostSignificantBits() != 0) {
                     final double xPos = spawnCompound.getDouble(Constants.Sponge.User.USER_SPAWN_X);
@@ -393,7 +393,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             final RespawnLocation respawn = entry.getValue();
 
             final NBTTagCompound spawnCompound = new NBTTagCompound();
-            spawnCompound.setUniqueId(NbtDataUtil.UUID, entry.getKey());
+            spawnCompound.setUniqueId(Constants.UUID, entry.getKey());
             spawnCompound.setDouble(Constants.Sponge.User.USER_SPAWN_X, respawn.getPosition().getX());
             spawnCompound.setDouble(Constants.Sponge.User.USER_SPAWN_Y, respawn.getPosition().getY());
             spawnCompound.setDouble(Constants.Sponge.User.USER_SPAWN_Z, respawn.getPosition().getZ());

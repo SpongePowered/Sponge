@@ -90,6 +90,7 @@ import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
@@ -599,7 +600,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
             final NBTTagCompound compound = new NBTTagCompound();
             writeToNBT(compound);
             final Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(this.entityType.getId()), this.world);
-            compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
+            compound.setUniqueId(Constants.UUID, entity.getUniqueID());
             entity.readFromNBT(compound);
             return (org.spongepowered.api.entity.Entity) entity;
         } catch (final Exception e) {
