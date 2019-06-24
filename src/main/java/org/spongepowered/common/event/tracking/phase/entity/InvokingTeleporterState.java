@@ -66,4 +66,10 @@ public final class InvokingTeleporterState extends EntityPhaseState<InvokingTele
     public boolean tracksEntitySpecificDrops() {
         return true;
     }
+
+    @Override
+    public boolean doesDenyChunkRequests() {
+        return false;
+    }
+
 }

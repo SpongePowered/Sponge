@@ -92,6 +92,11 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> implements IP
         return true;
     }
 
+    @Override
+    public boolean doesDenyChunkRequests() {
+        return true;
+    }
+
 }
 
 

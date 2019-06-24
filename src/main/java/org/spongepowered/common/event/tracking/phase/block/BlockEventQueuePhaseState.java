@@ -57,4 +57,5 @@ public class BlockEventQueuePhaseState extends BlockPhaseState {
     public BiConsumer<StackFrame, GeneralizedContext> getFrameModifier() {
         return this.FRAME_MODIFIER;
     }
+
 }

@@ -96,6 +96,11 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     }
 
     @Override
+    public boolean doesDenyChunkRequests() {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "DimensionTickPhase";
     }

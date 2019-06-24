@@ -129,4 +129,5 @@ final class BlockDecayPhaseState extends BlockPhaseState {
             return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, snapshot, originalBlock);
         }
     }
+
 }

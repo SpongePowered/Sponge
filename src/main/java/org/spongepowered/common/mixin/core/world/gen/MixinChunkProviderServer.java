@@ -60,11 +60,7 @@ import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeEmptyChunk;
@@ -147,7 +143,7 @@ public abstract class MixinChunkProviderServer implements ServerChunkProviderBri
         }
 
         Chunk chunk = this.getLoadedChunk(x, z);
-        if (chunk == null && this.canDenyChunkRequest()) {
+        if (chunk == null && this.impl$canDenyChunkRequest()) {
             return this.impl$EMPTY_CHUNK;
         }
 
@@ -205,7 +201,7 @@ public abstract class MixinChunkProviderServer implements ServerChunkProviderBri
         currentContext.close();
     }
 
-    private boolean canDenyChunkRequest() {
+    private boolean impl$canDenyChunkRequest() {
         if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             return true;
         }
@@ -216,31 +212,7 @@ public abstract class MixinChunkProviderServer implements ServerChunkProviderBri
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> currentState = phaseTracker.getCurrentState();
-        // States that cannot deny chunks
-        if (currentState == TickPhase.Tick.PLAYER
-            || currentState == TickPhase.Tick.DIMENSION
-            || currentState == EntityPhase.State.CHANGING_DIMENSION
-            || currentState == EntityPhase.State.INVOKING_TELEPORTER
-            || currentState == EntityPhase.State.LEAVING_DIMENSION) {
-            return false;
-        }
-
-        // States that can deny chunks
-        if (currentState == GenerationPhase.State.WORLD_SPAWNER_SPAWNING
-            || currentState == PluginPhase.Listener.PRE_SERVER_TICK_LISTENER
-            || currentState == PluginPhase.Listener.POST_SERVER_TICK_LISTENER) {
-            return true;
-        }
-
-        // Phases that can deny chunks
-        if (currentState.getPhase() == TrackingPhases.BLOCK
-            || currentState.getPhase() == TrackingPhases.ENTITY
-            || currentState.getPhase() == TrackingPhases.TICK) {
-            return true;
-        }
-
-
-        return false;
+        return currentState.doesDenyChunkRequests();
     }
 
     @Override

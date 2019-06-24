@@ -100,4 +100,5 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     public boolean doesBlockEventTracking(GeneralizedContext context) {
         return false;
     }
+
 }

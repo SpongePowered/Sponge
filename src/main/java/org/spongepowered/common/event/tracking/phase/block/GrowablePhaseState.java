@@ -95,4 +95,9 @@ public class GrowablePhaseState implements IPhaseState<GrowablePhaseContext> {
         return true;
     }
 
+    @Override
+    public boolean doesDenyChunkRequests() {
+        return true;
+    }
+
 }
