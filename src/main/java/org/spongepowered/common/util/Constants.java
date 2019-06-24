@@ -433,7 +433,7 @@ public final class Constants {
             public static final DataQuery USES_QUERY = of("Uses");
         }
 
-        public static final class FireWorks {
+        public static final class Fireworks {
 
             // Firework Effects
             public static final DataQuery FIREWORK_SHAPE = of("Type");

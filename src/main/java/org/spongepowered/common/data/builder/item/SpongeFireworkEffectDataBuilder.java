@@ -48,18 +48,18 @@ public class SpongeFireworkEffectDataBuilder extends AbstractDataBuilder<Firewor
 
     @Override
     protected Optional<FireworkEffect> buildContent(DataView container) throws InvalidDataException {
-        if (container.contains(Constants.Item.FireWorks.FIREWORK_SHAPE, Constants.Item.FireWorks.FIREWORK_COLORS, Constants.Item.FireWorks.FIREWORK_FADE_COLORS,
-                Constants.Item.FireWorks.FIREWORK_FLICKERS, Constants.Item.FireWorks.FIREWORK_TRAILS)) {
-            final String fireworkShapeId = DataUtil.getData(container, Constants.Item.FireWorks.FIREWORK_SHAPE, String.class);
+        if (container.contains(Constants.Item.Fireworks.FIREWORK_SHAPE, Constants.Item.Fireworks.FIREWORK_COLORS, Constants.Item.Fireworks.FIREWORK_FADE_COLORS,
+                Constants.Item.Fireworks.FIREWORK_FLICKERS, Constants.Item.Fireworks.FIREWORK_TRAILS)) {
+            final String fireworkShapeId = DataUtil.getData(container, Constants.Item.Fireworks.FIREWORK_SHAPE, String.class);
             final Optional<FireworkShape> shapeOptional = Sponge.getRegistry().getType(FireworkShape.class, fireworkShapeId);
             if (!shapeOptional.isPresent()) {
                 throw new InvalidDataException("Could not find the FireworkShape for the provided id: " + fireworkShapeId);
             }
             final FireworkShape shape = shapeOptional.get();
-            final boolean trails = DataUtil.getData(container, Constants.Item.FireWorks.FIREWORK_TRAILS, Boolean.class);
-            final boolean flickers = DataUtil.getData(container, Constants.Item.FireWorks.FIREWORK_FLICKERS, Boolean.class);
-            final List<Color> colors = container.getSerializableList(Constants.Item.FireWorks.FIREWORK_COLORS, Color.class).get();
-            final List<Color> fadeColors = container.getSerializableList(Constants.Item.FireWorks.FIREWORK_FADE_COLORS, Color.class).get();
+            final boolean trails = DataUtil.getData(container, Constants.Item.Fireworks.FIREWORK_TRAILS, Boolean.class);
+            final boolean flickers = DataUtil.getData(container, Constants.Item.Fireworks.FIREWORK_FLICKERS, Boolean.class);
+            final List<Color> colors = container.getSerializableList(Constants.Item.Fireworks.FIREWORK_COLORS, Color.class).get();
+            final List<Color> fadeColors = container.getSerializableList(Constants.Item.Fireworks.FIREWORK_FADE_COLORS, Color.class).get();
             return Optional.of(FireworkEffect.builder()
                     .colors(colors)
                     .flicker(flickers)

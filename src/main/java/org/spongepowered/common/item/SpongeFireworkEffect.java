@@ -108,11 +108,11 @@ public class SpongeFireworkEffect implements FireworkEffect {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(Constants.Item.FireWorks.FIREWORK_SHAPE, this.shape.getId())
-                .set(Constants.Item.FireWorks.FIREWORK_COLORS, this.colors)
-                .set(Constants.Item.FireWorks.FIREWORK_FADE_COLORS, this.fades)
-                .set(Constants.Item.FireWorks.FIREWORK_TRAILS, this.trails)
-                .set(Constants.Item.FireWorks.FIREWORK_FLICKERS, this.flicker);
+                .set(Constants.Item.Fireworks.FIREWORK_SHAPE, this.shape.getId())
+                .set(Constants.Item.Fireworks.FIREWORK_COLORS, this.colors)
+                .set(Constants.Item.Fireworks.FIREWORK_FADE_COLORS, this.fades)
+                .set(Constants.Item.Fireworks.FIREWORK_TRAILS, this.trails)
+                .set(Constants.Item.Fireworks.FIREWORK_FLICKERS, this.flicker);
     }
 
     @Override
