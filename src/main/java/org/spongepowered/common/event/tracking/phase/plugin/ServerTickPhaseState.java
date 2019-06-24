@@ -92,6 +92,6 @@ final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.name + "}";
+        return this.name;
     }
 }

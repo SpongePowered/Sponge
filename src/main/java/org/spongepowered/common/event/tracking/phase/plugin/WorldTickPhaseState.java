@@ -76,6 +76,6 @@ final class WorldTickPhaseState extends ListenerPhaseState<WorldTickContext> {
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.name + "}";
+        return this.name;
     }
 }

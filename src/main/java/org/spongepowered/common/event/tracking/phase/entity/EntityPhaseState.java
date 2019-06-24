@@ -29,7 +29,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -39,8 +38,6 @@ import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public abstract class EntityPhaseState<E extends EntityContext<E>> implements IPhaseState<E> {
 
@@ -63,7 +60,7 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> implements IP
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.className;
     }
 
     void standardSpawnCapturedEntities(PhaseContext<?> context, List<Entity> entities) {

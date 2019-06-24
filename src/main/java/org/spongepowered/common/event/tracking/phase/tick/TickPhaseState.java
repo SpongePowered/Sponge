@@ -112,6 +112,6 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.className;
     }
 }

@@ -39,7 +39,7 @@ public abstract class PluginPhaseState<P extends PluginPhaseContext<P>> implemen
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.className;
     }
 
 }

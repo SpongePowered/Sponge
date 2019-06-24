@@ -204,6 +204,6 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + ":" + this.id +  "}";
+        return this.className + "{" + this.id +  "}";
     }
 }

@@ -208,7 +208,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.className;
     }
 
 }

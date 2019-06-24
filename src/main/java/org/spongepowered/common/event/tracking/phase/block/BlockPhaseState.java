@@ -92,6 +92,6 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.className;
     }
 }

@@ -82,6 +82,6 @@ final class PlayerLogoutPhaseState implements IPhaseState<GeneralizedContext> {
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.className;
     }
 }

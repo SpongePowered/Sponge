@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.world.dragon;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -52,6 +51,6 @@ public class GeneralDragonPhaseState implements IPhaseState<GeneralizedContext> 
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.className;
     }
 }

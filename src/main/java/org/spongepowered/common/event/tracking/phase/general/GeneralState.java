@@ -82,7 +82,7 @@ abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G>
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.className;
     }
 
 }
