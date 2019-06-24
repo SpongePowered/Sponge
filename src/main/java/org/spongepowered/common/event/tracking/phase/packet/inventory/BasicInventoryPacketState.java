@@ -46,11 +46,11 @@ import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -76,7 +76,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
      * Don't care about anything
      */
     public BasicInventoryPacketState() {
-        this(0, PacketConstants.MASK_NONE);
+        this(0, Constants.Networking.MASK_NONE);
     }
 
     /**
@@ -85,7 +85,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
      * @param stateId state
      */
     public BasicInventoryPacketState(int stateId) {
-        this(stateId, PacketConstants.MASK_ALL);
+        this(stateId, Constants.Networking.MASK_ALL);
     }
 
     /**
@@ -120,7 +120,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     @Override
     public boolean matches(int packetState) {
-        return this.stateMask != PacketConstants.MASK_NONE && ((packetState & this.stateMask & this.stateId) == (packetState & this.stateMask));
+        return this.stateMask != Constants.Networking.MASK_NONE && ((packetState & this.stateMask & this.stateId) == (packetState & this.stateMask));
     }
 
     @Override

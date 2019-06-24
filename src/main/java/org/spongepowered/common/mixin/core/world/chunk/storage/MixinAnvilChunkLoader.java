@@ -62,7 +62,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -101,8 +100,8 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         if (chunk.getTrackedShortPlayerPositions().size() > 0 || chunk.getTrackedIntPlayerPositions().size() > 0) {
             NBTTagCompound trackedNbt = new NBTTagCompound();
             NBTTagList positions = new NBTTagList();
-            trackedNbt.setTag(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, positions);
-            compound.setTag(NbtDataUtil.SPONGE_DATA, trackedNbt);
+            trackedNbt.setTag(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, positions);
+            compound.setTag(Constants.Sponge.SPONGE_DATA, trackedNbt);
 
             for (Map.Entry<Short, PlayerTracker> mapEntry : chunk.getTrackedShortPlayerPositions().entrySet()) {
                 Short pos = mapEntry.getKey();
@@ -131,10 +130,10 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
     private void onReadChunkFromNBT(World worldIn, NBTTagCompound compound, CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, int chunkX,
       int chunkZ, net.minecraft.world.chunk.Chunk chunkIn) {
-        if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+        if (compound.hasKey(Constants.Sponge.SPONGE_DATA)) {
             final Map<Integer, PlayerTracker> trackedIntPlayerPositions = new HashMap<>();
             final Map<Short, PlayerTracker> trackedShortPlayerPositions = new HashMap<>();
-            final NBTTagList positions = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA).getTagList(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, 10);
+            final NBTTagList positions = compound.getCompoundTag(Constants.Sponge.SPONGE_DATA).getTagList(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, 10);
             final ChunkBridge chunk = (ChunkBridge) chunkIn;
             for (int i = 0; i < positions.tagCount(); i++) {
                 NBTTagCompound valueNbt = positions.getCompoundTagAt(i);
@@ -171,12 +170,12 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
      */
     @Redirect(method = "readChunkEntity", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT), require = 0, expect = 0)
     private static Entity onReadChunkEntity(NBTTagCompound compound, World world, Chunk chunk) {
-        if ("Minecart".equals(compound.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
-            compound.setString(NbtDataUtil.ENTITY_TYPE_ID,
-                    EntityMinecart.Type.values()[compound.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
-            compound.removeTag(NbtDataUtil.MINECART_TYPE);
+        if ("Minecart".equals(compound.getString(Constants.Entity.ENTITY_TYPE_ID))) {
+            compound.setString(Constants.Entity.ENTITY_TYPE_ID,
+                    EntityMinecart.Type.values()[compound.getInteger(Constants.Entity.Minecart.MINECART_TYPE)].getName());
+            compound.removeTag(Constants.Entity.Minecart.MINECART_TYPE);
         }
-        Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(compound.getString(NbtDataUtil.ENTITY_TYPE_ID)));
+        Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(compound.getString(Constants.Entity.ENTITY_TYPE_ID)));
         if (entityClass == null) {
             return null;
         }
@@ -184,8 +183,8 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         if (type == null) {
             return null;
         }
-        NBTTagList positionList = compound.getTagList(NbtDataUtil.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
-        NBTTagList rotationList = compound.getTagList(NbtDataUtil.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
+        NBTTagList positionList = compound.getTagList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+        NBTTagList rotationList = compound.getTagList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
         Vector3d position = new Vector3d(positionList.getDoubleAt(0), positionList.getDoubleAt(1), positionList.getDoubleAt(2));
         Vector3d rotation = new Vector3d(rotationList.getFloatAt(0), rotationList.getFloatAt(1), 0);
         Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, position, rotation);

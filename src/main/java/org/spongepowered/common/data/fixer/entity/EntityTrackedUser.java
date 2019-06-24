@@ -28,7 +28,6 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.datafix.IFixableData;
 import org.spongepowered.common.data.util.DataVersions;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.UUID;
@@ -45,11 +44,11 @@ public class EntityTrackedUser implements IFixableData {
         final NBTBase forgeCompound = compound.getTag(Constants.Forge.FORGE_DATA);
         if (forgeCompound != null) {
             final NBTTagCompound forgeData = (NBTTagCompound) forgeCompound;
-            final NBTBase spongeCompound = forgeData.getTag(NbtDataUtil.SPONGE_DATA);
+            final NBTBase spongeCompound = forgeData.getTag(Constants.Sponge.SPONGE_DATA);
             if (spongeCompound != null) {
                 final NBTTagCompound spongeData = (NBTTagCompound) spongeCompound;
-                process(spongeData, NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                process(spongeData, NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+                process(spongeData, Constants.Sponge.SPONGE_ENTITY_CREATOR);
+                process(spongeData, Constants.Sponge.SPONGE_ENTITY_NOTIFIER);
             }
         }
         return compound;
@@ -58,11 +57,11 @@ public class EntityTrackedUser implements IFixableData {
     private static void process(NBTTagCompound spongeData, String type) {
         if (spongeData.hasKey(type, Constants.NBT.TAG_COMPOUND)) {
             final NBTTagCompound creatorTag = spongeData.getCompoundTag(type);
-            final long least = creatorTag.getLong(Constants.Deprecated.Entity.UUID_LEAST_1_8);
-            final long most = creatorTag.getLong(Constants.Deprecated.Entity.UUID_MOST_1_8);
+            final long least = creatorTag.getLong(Constants.Legacy.Entity.UUID_LEAST_1_8);
+            final long most = creatorTag.getLong(Constants.Legacy.Entity.UUID_MOST_1_8);
             final UUID creator = new UUID(most, least);
-            creatorTag.removeTag(Constants.Deprecated.Entity.UUID_LEAST_1_8);
-            creatorTag.removeTag(Constants.Deprecated.Entity.UUID_MOST_1_8);
+            creatorTag.removeTag(Constants.Legacy.Entity.UUID_LEAST_1_8);
+            creatorTag.removeTag(Constants.Legacy.Entity.UUID_MOST_1_8);
             creatorTag.setUniqueId(Constants.UUID, creator);
         }
     }

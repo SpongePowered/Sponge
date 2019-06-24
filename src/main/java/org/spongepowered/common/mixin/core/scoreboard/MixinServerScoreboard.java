@@ -55,8 +55,8 @@ import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
-import org.spongepowered.common.scoreboard.SpongeScoreboardConstants;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -85,7 +85,7 @@ public abstract class MixinServerScoreboard extends Scoreboard implements Server
 
     @Inject(method = "onScoreObjectiveAdded", at = @At("RETURN"))
     private void impl$UpdatePlayersScoreObjective(final ScoreObjective objective, final CallbackInfo ci) {
-        this.bridge$sendToPlayers(new SPacketScoreboardObjective(objective, SpongeScoreboardConstants.OBJECTIVE_PACKET_ADD));
+        this.bridge$sendToPlayers(new SPacketScoreboardObjective(objective, Constants.Scoreboards.OBJECTIVE_PACKET_ADD));
     }
 
     /**

@@ -40,7 +40,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
-import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -76,7 +76,7 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
                     currentEntity.setCreator(playerMP.getUniqueID());
                 }
             }
-            if (usedButton == PacketConstants.PACKET_BUTTON_PRIMARY_ID) {
+            if (usedButton == Constants.Networking.PACKET_BUTTON_PRIMARY_ID) {
                 return SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(frame.getCurrentCause(), transaction, capturedEntities,
                         Optional.ofNullable(slot), openContainer, slotTransactions);
             } else {

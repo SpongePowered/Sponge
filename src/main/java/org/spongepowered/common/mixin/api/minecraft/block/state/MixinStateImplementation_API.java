@@ -55,10 +55,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -352,7 +352,7 @@ public abstract class MixinStateImplementation_API extends BlockStateBase implem
     public DataContainer toContainer() {
         return DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.Block.BLOCK_STATE, this.getId());
+            .set(Constants.Block.BLOCK_STATE, this.getId());
     }
 
     @Override

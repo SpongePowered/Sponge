@@ -44,7 +44,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinSaveHandler;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
@@ -119,8 +118,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
                         actualFile.getName() + "]!", ex);
             }
             ((WorldInfoBridge) info).setSpongeRootLevelNBT(compound);
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+            if (compound.hasKey(Constants.Sponge.SPONGE_DATA)) {
+                final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Sponge.SPONGE_DATA);
                 DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
                 ((WorldInfoBridge) info).readSpongeNbt(spongeCompound);
             }
@@ -209,10 +208,10 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         NBTTagCompound compound = CompressedStreamTools.readCompressed(inputStream);
         Instant lastPlayed = Instant.now();
         // first try to migrate bukkit join data stuff
-        if (compound.hasKey(NbtDataUtil.BUKKIT, Constants.NBT.TAG_COMPOUND)) {
-            final NBTTagCompound bukkitCompound = compound.getCompoundTag(NbtDataUtil.BUKKIT);
-            creation = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_FIRST_PLAYED));
-            lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_LAST_PLAYED));
+        if (compound.hasKey(Constants.Bukkit.BUKKIT, Constants.NBT.TAG_COMPOUND)) {
+            final NBTTagCompound bukkitCompound = compound.getCompoundTag(Constants.Bukkit.BUKKIT);
+            creation = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_FIRST_PLAYED));
+            lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_LAST_PLAYED));
         }
         UUID playerId = null;
         if (compound.hasUniqueId(Constants.UUID)) {

@@ -79,9 +79,7 @@ import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
@@ -222,8 +220,8 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
 
     // used in all init methods
     private void onConstructionCommon() {
-        this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
-        this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
+        this.spongeNbt.setTag(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
+        this.spongeRootLevelNbt.setTag(Constants.Sponge.SPONGE_DATA, this.spongeNbt);
     }
 
     @Inject(method = "updateTagCompound", at = @At("HEAD"))
@@ -737,7 +735,7 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
             return DataFormats.JSON.read(this.generatorOptions);
         } catch (JsonParseException | IOException ignored) {
         }
-        return DataContainer.createNew().set(DataQueries.General.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
+        return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
     }
 
     @Override
@@ -797,8 +795,8 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
     @Override
     public void setSpongeRootLevelNBT(NBTTagCompound nbt) {
         this.spongeRootLevelNbt = nbt;
-        if (nbt.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            this.spongeNbt = nbt.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+        if (nbt.hasKey(Constants.Sponge.SPONGE_DATA)) {
+            this.spongeNbt = nbt.getCompoundTag(Constants.Sponge.SPONGE_DATA);
         }
     }
 
@@ -809,17 +807,17 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
             return;
         }
         this.uuid = nbtUniqueId;
-        this.dimensionId = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
-        final String dimensionTypeId = nbt.getString(NbtDataUtil.DIMENSION_TYPE);
+        this.dimensionId = nbt.getInteger(Constants.Sponge.World.DIMENSION_ID);
+        final String dimensionTypeId = nbt.getString(Constants.Sponge.World.DIMENSION_TYPE);
         final DimensionType dimensionType = (org.spongepowered.api.world.DimensionType)(Object) WorldManager.getDimensionType(this.dimensionId).orElse(null);
         this.setDimensionType(dimensionType != null ? dimensionType : DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)
                 .orElseThrow(FunctionalUtil.invalidArgument("Could not find a DimensionType registered for world '" + this.getWorldName() + "' with dim id: " + this.dimensionId)));
-        this.generateBonusChest = nbt.getBoolean(NbtDataUtil.GENERATE_BONUS_CHEST);
-        this.portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(nbt.getString(NbtDataUtil.PORTAL_AGENT_TYPE), this.levelName);
-        this.hasCustomDifficulty = nbt.getBoolean(NbtDataUtil.HAS_CUSTOM_DIFFICULTY);
+        this.generateBonusChest = nbt.getBoolean(Constants.World.GENERATE_BONUS_CHEST);
+        this.portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(nbt.getString(Constants.Sponge.World.PORTAL_AGENT_TYPE), this.levelName);
+        this.hasCustomDifficulty = nbt.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);
         this.trackedUniqueIdCount = 0;
-        if (nbt.hasKey(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR)) {
-            short saveBehavior = nbt.getShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR);
+        if (nbt.hasKey(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR)) {
+            short saveBehavior = nbt.getShort(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR);
             if (saveBehavior == 1) {
                 this.serializationBehavior = SerializationBehaviors.AUTOMATIC;
             } else if (saveBehavior == 0) {
@@ -828,8 +826,8 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
                 this.serializationBehavior = SerializationBehaviors.NONE;
             }
         }
-        if (nbt.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
-            final NBTTagList playerIdList = nbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
+        if (nbt.hasKey(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
+            final NBTTagList playerIdList = nbt.getTagList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < playerIdList.tagCount(); i++) {
                 final NBTTagCompound playerId = playerIdList.getCompoundTagAt(i);
                 final UUID playerUuid = playerId.getUniqueId(Constants.UUID);
@@ -847,25 +845,25 @@ public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge
     private void writeSpongeNbt() {
         // Never save Sponge data if we have no UUID
         if (this.uuid != null && this.isValid()) {
-            this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
+            this.spongeNbt.setInteger(Constants.Sponge.DATA_VERSION, DataUtil.DATA_VERSION);
             this.spongeNbt.setUniqueId(Constants.UUID, this.uuid);
-            this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimensionId);
-            this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
-            this.spongeNbt.setBoolean(NbtDataUtil.GENERATE_BONUS_CHEST, this.generateBonusChest);
+            this.spongeNbt.setInteger(Constants.Sponge.World.DIMENSION_ID, this.dimensionId);
+            this.spongeNbt.setString(Constants.Sponge.World.DIMENSION_TYPE, this.dimensionType.getId());
+            this.spongeNbt.setBoolean(Constants.World.GENERATE_BONUS_CHEST, this.generateBonusChest);
             if (this.portalAgentType == null) {
                 this.portalAgentType = PortalAgentTypes.DEFAULT;
             }
-            this.spongeNbt.setString(NbtDataUtil.PORTAL_AGENT_TYPE, this.portalAgentType.getPortalAgentClass().getName());
+            this.spongeNbt.setString(Constants.Sponge.World.PORTAL_AGENT_TYPE, this.portalAgentType.getPortalAgentClass().getName());
             short saveBehavior = 1;
             if (this.serializationBehavior == SerializationBehaviors.NONE) {
                 saveBehavior = -1;
             } else if (this.serializationBehavior == SerializationBehaviors.MANUAL) {
                 saveBehavior = 0;
             }
-            this.spongeNbt.setShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
-            this.spongeNbt.setBoolean(NbtDataUtil.HAS_CUSTOM_DIFFICULTY, this.hasCustomDifficulty);
+            this.spongeNbt.setShort(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
+            this.spongeNbt.setBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY, this.hasCustomDifficulty);
             final Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
-            final NBTTagList playerIdList = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
+            final NBTTagList playerIdList = this.spongeNbt.getTagList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
             while (iterator.hasNext()) {
                 final NBTTagCompound compound = new NBTTagCompound();
                 compound.setUniqueId(Constants.UUID, iterator.next());

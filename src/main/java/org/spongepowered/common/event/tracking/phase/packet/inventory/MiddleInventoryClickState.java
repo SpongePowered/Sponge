@@ -34,7 +34,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 public final class MiddleInventoryClickState extends BasicInventoryPacketState {
 
     public MiddleInventoryClickState() {
-        super(PacketConstants.MODE_CLICK | PacketConstants.MODE_PICKBLOCK | PacketConstants.BUTTON_MIDDLE | PacketConstants.CLICK_INSIDE_WINDOW | PacketConstants.CLICK_OUTSIDE_WINDOW);
+        super(Constants.Networking.MODE_CLICK | Constants.Networking.MODE_PICKBLOCK | Constants.Networking.BUTTON_MIDDLE | Constants.Networking.CLICK_INSIDE_WINDOW | Constants.Networking.CLICK_OUTSIDE_WINDOW);
     }
 
     @Override

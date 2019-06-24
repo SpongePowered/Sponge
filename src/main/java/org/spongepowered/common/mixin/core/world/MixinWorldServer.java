@@ -151,7 +151,6 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -210,7 +209,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     private int chunkGCLoadThreshold = 0;
     private int chunkGCTickInterval = Constants.World.CHUNK_GC_TICK_INTERVAL;
     private int chunkLoadCount = 0;
-    private long chunkUnloadDelay = 30000;
+    private long chunkUnloadDelay = Constants.World.CHUNK_UNLOAD_DELAY;
     private boolean weatherThunderEnabled = true;
     private boolean weatherIceAndSnowEnabled = true;
     private int dimensionId;
@@ -433,7 +432,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         // This string can be a JSON string, or be a string of a custom format
 
         // Try to convert to custom format
-        final Optional<String> optCustomSettings = settings.getString(DataQueries.General.WORLD_CUSTOM_SETTINGS);
+        final Optional<String> optCustomSettings = settings.getString(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS);
         if (optCustomSettings.isPresent()) {
             return this.bridge$createWorldGenerator(optCustomSettings.get());
         }

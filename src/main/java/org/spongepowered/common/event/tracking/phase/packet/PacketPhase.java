@@ -100,6 +100,7 @@ import org.spongepowered.common.event.tracking.phase.packet.player.StopSleepingP
 import org.spongepowered.common.event.tracking.phase.packet.player.UnknownPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.UpdateSignState;
 import org.spongepowered.common.event.tracking.phase.packet.player.UseItemPacketState;
+import org.spongepowered.common.util.Constants;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -142,9 +143,11 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState PRIMARY_INVENTORY_CLICK = new PrimaryInventoryClickState();
         public static final BasicInventoryPacketState SECONDARY_INVENTORY_CLICK = new SecondaryInventoryClickState();
         public static final BasicInventoryPacketState MIDDLE_INVENTORY_CLICK = new MiddleInventoryClickState();
-        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState(PacketConstants.MODE_CLICK | PacketConstants.BUTTON_PRIMARY | PacketConstants.BUTTON_SECONDARY | PacketConstants.CLICK_OUTSIDE_WINDOW);
+        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState(
+            Constants.Networking.MODE_CLICK | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_OUTSIDE_WINDOW);
         public static final BasicInventoryPacketState DROP_ITEM_WITH_HOTKEY = new DropItemWithHotkeyState();
-        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW_NOOP = new DropItemOutsideWindowState(PacketConstants.MODE_DROP | PacketConstants.BUTTON_PRIMARY | PacketConstants.BUTTON_SECONDARY | PacketConstants.CLICK_OUTSIDE_WINDOW);
+        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW_NOOP = new DropItemOutsideWindowState(
+            Constants.Networking.MODE_DROP | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_OUTSIDE_WINDOW);
         public static final BasicInventoryPacketState DROP_ITEMS = new BasicInventoryPacketState();
         static final BasicInventoryPacketState DROP_INVENTORY = new DropInventoryState();
         public static final BasicInventoryPacketState SWITCH_HOTBAR_NUMBER_PRESS = new SwitchHotbarNumberPressState();
@@ -152,13 +155,13 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState SECONDARY_INVENTORY_SHIFT_CLICK = new SecondaryInventoryShiftClickState();
         static final BasicInventoryPacketState DOUBLE_CLICK_INVENTORY = new DoubleClickInventoryState();
 
-        static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_START = new DragInventoryStartState("PRIMARY_DRAG_INVENTORY_START", PacketConstants.DRAG_MODE_PRIMARY_BUTTON);
-        static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_START = new DragInventoryStartState("SECONDARY_DRAG_INVENTORY_START", PacketConstants.DRAG_MODE_SECONDARY_BUTTON);
-        static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_START = new DragInventoryStartState("MIDDLE_DRAG_INVENTORY_START", PacketConstants.DRAG_MODE_MIDDLE_BUTTON);
+        static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_START = new DragInventoryStartState("PRIMARY_DRAG_INVENTORY_START", Constants.Networking.DRAG_MODE_PRIMARY_BUTTON);
+        static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_START = new DragInventoryStartState("SECONDARY_DRAG_INVENTORY_START", Constants.Networking.DRAG_MODE_SECONDARY_BUTTON);
+        static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_START = new DragInventoryStartState("MIDDLE_DRAG_INVENTORY_START", Constants.Networking.DRAG_MODE_MIDDLE_BUTTON);
 
-        static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("PRIMARY_DRAG_INVENTORY_ADD_SLOT", PacketConstants.DRAG_MODE_PRIMARY_BUTTON);
-        static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("SECONDARY_DRAG_INVENTORY_ADD_SLOT", PacketConstants.DRAG_MODE_SECONDARY_BUTTON);
-        static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("MIDDLE_DRAG_INVENTORY_ADD_SLOT", PacketConstants.DRAG_MODE_MIDDLE_BUTTON);
+        static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("PRIMARY_DRAG_INVENTORY_ADD_SLOT", Constants.Networking.DRAG_MODE_PRIMARY_BUTTON);
+        static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("SECONDARY_DRAG_INVENTORY_ADD_SLOT", Constants.Networking.DRAG_MODE_SECONDARY_BUTTON);
+        static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("MIDDLE_DRAG_INVENTORY_ADD_SLOT", Constants.Networking.DRAG_MODE_MIDDLE_BUTTON);
 
         static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_STOP = new PrimaryDragInventoryStopState();
         static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_STOP = new SecondaryDragInventoryStopState();
@@ -236,7 +239,7 @@ public final class PacketPhase extends TrackingPhase {
     private static BasicInventoryPacketState fromWindowPacket(CPacketClickWindow windowPacket) {
         final int mode = 0x01 << 9 << windowPacket.getClickType().ordinal();
         final int packed = windowPacket.getUsedButton();
-        final int unpacked = mode == PacketConstants.MODE_DRAG ? (0x01 << 6 << (packed >> 2 & 3)) | (0x01 << 3 << (packed & 3)) : (0x01 << (packed & 3));
+        final int unpacked = mode == Constants.Networking.MODE_DRAG ? (0x01 << 6 << (packed >> 2 & 3)) | (0x01 << 3 << (packed & 3)) : (0x01 << (packed & 3));
 
         BasicInventoryPacketState inventory = fromState(clickType(windowPacket.getSlotId()) | mode | unpacked);
         if (inventory == Inventory.INVENTORY) {
@@ -247,7 +250,7 @@ public final class PacketPhase extends TrackingPhase {
 
 
     private static int clickType(int slotId) {
-        return (slotId == PacketConstants.MAGIC_CLICK_OUTSIDE_SURVIVAL || slotId == PacketConstants.MAGIC_CLICK_OUTSIDE_CREATIVE) ? PacketConstants.CLICK_OUTSIDE_WINDOW : PacketConstants.CLICK_INSIDE_WINDOW;
+        return (slotId == Constants.Networking.MAGIC_CLICK_OUTSIDE_SURVIVAL || slotId == Constants.Networking.MAGIC_CLICK_OUTSIDE_CREATIVE) ? Constants.Networking.CLICK_OUTSIDE_WINDOW : Constants.Networking.CLICK_INSIDE_WINDOW;
     }
 
 

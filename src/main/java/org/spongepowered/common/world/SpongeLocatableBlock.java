@@ -41,7 +41,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -104,7 +104,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
                 .set(Queries.POSITION_X, this.position.getX())
                 .set(Queries.POSITION_Y, this.position.getY())
                 .set(Queries.POSITION_Z, this.position.getZ())
-                .set(DataQueries.Block.BLOCK_STATE, this.blockState);
+                .set(Constants.Block.BLOCK_STATE, this.blockState);
     }
 
     @Override

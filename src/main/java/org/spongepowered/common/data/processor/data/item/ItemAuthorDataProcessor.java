@@ -41,6 +41,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -62,16 +63,16 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
 
     @Override
     protected boolean set(ItemStack itemStack, Text value) {
-        NbtDataUtil.getOrCreateCompound(itemStack).setString(NbtDataUtil.ITEM_BOOK_AUTHOR, SpongeTexts.toLegacy(value));
+        NbtDataUtil.getOrCreateCompound(itemStack).setString(Constants.Item.Book.ITEM_BOOK_AUTHOR, SpongeTexts.toLegacy(value));
         return true;
     }
 
     @Override
     protected Optional<Text> getVal(ItemStack itemStack) {
-        if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)) {
+        if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(Constants.Item.Book.ITEM_BOOK_AUTHOR)) {
             return Optional.empty();
         }
-        final String json = itemStack.getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
+        final String json = itemStack.getTagCompound().getString(Constants.Item.Book.ITEM_BOOK_AUTHOR);
         final Text author = TextSerializers.JSON.deserializeUnchecked(json);
         return Optional.of(author);
     }

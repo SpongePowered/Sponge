@@ -45,6 +45,7 @@ import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProc
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -77,7 +78,7 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
     @Override
     protected boolean set(ItemStack stack, String value) {
         NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(stack);
-        NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.BLOCK_ENTITY_TAG);
+        NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, Constants.Item.BLOCK_ENTITY_TAG);
         LockCode code = new LockCode(value);
         if (code.isEmpty()) {
             tileCompound.removeTag("Lock");
@@ -92,7 +93,7 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
         if (container.getTagCompound() == null) {
             return Optional.of("");
         }
-        NBTTagCompound tileCompound = container.getTagCompound().getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
+        NBTTagCompound tileCompound = container.getTagCompound().getCompoundTag(Constants.Item.BLOCK_ENTITY_TAG);
         LockCode code = LockCode.fromNBT(tileCompound);
         if (code.isEmpty()) {
             return Optional.empty();

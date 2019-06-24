@@ -30,7 +30,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 
@@ -43,7 +43,7 @@ public abstract class MixinTileEntityLockableLoot_API<T extends TileEntity & Car
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         if (this.customName != null) {
-            container.set(DataQueries.BlockEntity.LOCKABLE_CONTAINER_CUSTOM_NAME, this.customName);
+            container.set(Constants.TileEntity.LOCKABLE_CONTAINER_CUSTOM_NAME, this.customName);
         }
         return container;
     }

@@ -33,7 +33,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 
@@ -54,8 +54,8 @@ public abstract class MixinTileEntityBeacon_API extends MixinTileEntityLockable_
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(DataQueries.BlockEntity.Beacon.PRIMARY, getField(1));
-        container.set(DataQueries.BlockEntity.Beacon.SECONDARY, getField(2));
+        container.set(Constants.TileEntity.Beacon.PRIMARY, getField(1));
+        container.set(Constants.TileEntity.Beacon.SECONDARY, getField(2));
         return container;
     }
 

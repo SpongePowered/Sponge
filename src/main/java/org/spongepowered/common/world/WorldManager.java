@@ -72,7 +72,6 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinIntegratedServer;
@@ -984,22 +983,22 @@ public final class WorldManager {
                     continue;
                 }
 
-                NBTTagCompound spongeDataCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+                NBTTagCompound spongeDataCompound = compound.getCompoundTag(Constants.Sponge.SPONGE_DATA);
 
-                if (!compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+                if (!compound.hasKey(Constants.Sponge.SPONGE_DATA)) {
                     SpongeImpl.getLogger()
                             .error("World [{}] has Sponge related data in the form of [level-sponge.dat] but the structure is not proper."
                                             + " Generally, the data is within a [{}] tag but it is not for this world. Report to Sponge ASAP.",
-                                    worldFolderName, NbtDataUtil.SPONGE_DATA);
+                                    worldFolderName, Constants.Sponge.SPONGE_DATA);
                     continue;
                 }
 
-                if (!spongeDataCompound.hasKey(NbtDataUtil.DIMENSION_ID)) {
+                if (!spongeDataCompound.hasKey(Constants.Sponge.World.DIMENSION_ID)) {
                     SpongeImpl.getLogger().error("World [{}] has no dimension id. Report this to Sponge ASAP.", worldFolderName);
                     continue;
                 }
 
-                int dimensionId = spongeDataCompound.getInteger(NbtDataUtil.DIMENSION_ID);
+                int dimensionId = spongeDataCompound.getInteger(Constants.Sponge.World.DIMENSION_ID);
 
                 // TODO: Evaulate all uses of Integer.MIN_VALUE for dimension ids
                 /*if (dimensionId == Integer.MIN_VALUE) {
@@ -1015,8 +1014,8 @@ public final class WorldManager {
 
                 String dimensionTypeId = "overworld";
 
-                if (spongeDataCompound.hasKey(NbtDataUtil.DIMENSION_TYPE)) {
-                    dimensionTypeId = spongeDataCompound.getString(NbtDataUtil.DIMENSION_TYPE);
+                if (spongeDataCompound.hasKey(Constants.Sponge.World.DIMENSION_TYPE)) {
+                    dimensionTypeId = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
                 } else {
                     SpongeImpl.getLogger().warn("World [{}] (DIM{}) has no specified dimension type. Defaulting to [{}}]...", worldFolderName,
                             dimensionId, DimensionTypes.OVERWORLD.getName());
@@ -1031,7 +1030,7 @@ public final class WorldManager {
                     continue;
                 }
 
-                spongeDataCompound.setString(NbtDataUtil.DIMENSION_TYPE, dimensionTypeId);
+                spongeDataCompound.setString(Constants.Sponge.World.DIMENSION_TYPE, dimensionTypeId);
                 if (!spongeDataCompound.hasUniqueId(Constants.UUID)) {
                     SpongeImpl.getLogger().error("World [{}] (DIM{}) has no valid unique identifier. This is a critical error and should be reported"
                             + " to Sponge ASAP.", worldFolderName, dimensionId);
@@ -1258,12 +1257,12 @@ public final class WorldManager {
         if (compound == null) {
             dimensionTypeByDimensionId.keySet().stream().filter(dimensionId -> dimensionId >= 0).forEach(usedDimensionIds::add);
         } else {
-            for (int id : compound.getIntArray(NbtDataUtil.USED_DIMENSION_IDS)) {
+            for (int id : compound.getIntArray(Constants.Forge.USED_DIMENSION_IDS)) {
                 usedDimensionIds.add(id);
             }
 
             // legacy data (load but don't save)
-            int[] intArray = compound.getIntArray(NbtDataUtil.LEGACY_DIMENSION_ARRAY);
+            int[] intArray = compound.getIntArray(Constants.Legacy.LEGACY_DIMENSION_ARRAY);
             for (int i = 0; i < intArray.length; i++) {
                 int data = intArray[i];
                 if (data == 0) continue;
@@ -1276,7 +1275,7 @@ public final class WorldManager {
 
     public static NBTTagCompound saveDimensionDataMap() {
         NBTTagCompound dimMap = new NBTTagCompound();
-        dimMap.setIntArray(NbtDataUtil.USED_DIMENSION_IDS, usedDimensionIds.toIntArray());
+        dimMap.setIntArray(Constants.Forge.USED_DIMENSION_IDS, usedDimensionIds.toIntArray());
         return dimMap;
     }
 

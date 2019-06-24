@@ -35,7 +35,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleType;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,18 +55,18 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
 
     @Override
     protected Optional<ParticleEffect> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQueries.Particles.PARTICLE_TYPE, DataQueries.Particles.PARTICLE_OPTIONS)) {
+        if (!container.contains(Constants.Particles.PARTICLE_TYPE, Constants.Particles.PARTICLE_OPTIONS)) {
             return Optional.empty();
         }
-        ParticleType particleType = container.getCatalogType(DataQueries.Particles.PARTICLE_TYPE, ParticleType.class).get();
+        ParticleType particleType = container.getCatalogType(Constants.Particles.PARTICLE_TYPE, ParticleType.class).get();
         Map<ParticleOption<?>, Object> options = new HashMap<>();
-        container.getViewList(DataQueries.Particles.PARTICLE_OPTIONS).get().forEach(view -> {
-            ParticleOption<?> option = view.getCatalogType(DataQueries.Particles.PARTICLE_OPTION_KEY, ParticleOption.class).get();
+        container.getViewList(Constants.Particles.PARTICLE_OPTIONS).get().forEach(view -> {
+            ParticleOption<?> option = view.getCatalogType(Constants.Particles.PARTICLE_OPTION_KEY, ParticleOption.class).get();
             Object value;
             if (option.getValueType().isAssignableFrom(DataSerializable.class)) {
-                value = view.getSerializable(DataQueries.Particles.PARTICLE_OPTION_VALUE, (Class<? extends DataSerializable>) option.getValueType()).get();
+                value = view.getSerializable(Constants.Particles.PARTICLE_OPTION_VALUE, (Class<? extends DataSerializable>) option.getValueType()).get();
             } else {
-                value = view.getObject(DataQueries.Particles.PARTICLE_OPTION_VALUE, option.getValueType()).get();
+                value = view.getObject(Constants.Particles.PARTICLE_OPTION_VALUE, option.getValueType()).get();
             }
             options.put(option, value);
         });

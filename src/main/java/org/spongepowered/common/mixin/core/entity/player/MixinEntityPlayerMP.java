@@ -122,7 +122,6 @@ import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -191,16 +190,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         if (this.impl$healthScaling) {
-            compound.setDouble(NbtDataUtil.HEALTH_SCALE, this.impl$healthScale);
+            compound.setDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE, this.impl$healthScale);
         }
     }
 
     @Override
     public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, Constants.NBT.TAG_DOUBLE)) {
+        if (compound.hasKey(Constants.Sponge.Entity.Player.HEALTH_SCALE, Constants.NBT.TAG_DOUBLE)) {
             this.impl$healthScaling = true;
-            this.impl$healthScale = compound.getDouble(NbtDataUtil.HEALTH_SCALE);
+            this.impl$healthScale = compound.getDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE);
         }
     }
 
@@ -318,8 +317,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         final EntityBridge oldEntity = (EntityBridge) oldPlayer;
         if (((DataCompoundHolder) oldEntity).data$hasRootCompound()) {
             final NBTTagCompound old = ((DataCompoundHolder) oldEntity).data$getRootCompound();
-            if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                ((DataCompoundHolder) this).data$getRootCompound().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
+            if (old.hasKey(Constants.Sponge.SPONGE_DATA)) {
+                ((DataCompoundHolder) this).data$getRootCompound().setTag(Constants.Sponge.SPONGE_DATA, old.getCompoundTag(Constants.Sponge.SPONGE_DATA));
                 this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeCompound());
             }
         }

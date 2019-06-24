@@ -94,7 +94,6 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.ShouldFire;
@@ -494,8 +493,8 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
      */
     protected void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         CustomDataNbtUtil.readCustomData(compound, ((org.spongepowered.api.entity.Entity) this));
-        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
-            ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
+        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(Constants.Sponge.Entity.CAN_GRIEF)) {
+            ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(Constants.Sponge.Entity.CAN_GRIEF));
         }
         if (compound.hasKey(Constants.Sponge.Entity.IS_VANISHED, Constants.NBT.TAG_BYTE)) {
             this.vanish$setVanished(compound.getBoolean(Constants.Sponge.Entity.IS_VANISHED));
@@ -519,7 +518,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
     protected void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         CustomDataNbtUtil.writeCustomData(compound, (org.spongepowered.api.entity.Entity) this);
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer()) {
-            compound.setBoolean(NbtDataUtil.CAN_GRIEF, ((GrieferBridge) this).bridge$CanGrief());
+            compound.setBoolean(Constants.Sponge.Entity.CAN_GRIEF, ((GrieferBridge) this).bridge$CanGrief());
         }
         if (this.vanish$isVanished) {
             compound.setBoolean(Constants.Sponge.Entity.IS_VANISHED, true);

@@ -39,7 +39,7 @@ import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -73,8 +73,8 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
         this.volume = fluidStack.getVolume();
         DataContainer datacontainer = fluidStack.toContainer();
         this.container = null;
-        if (datacontainer.contains(DataQueries.Sponge.UNSAFE_NBT)) {
-            this.container = datacontainer.getView(DataQueries.Sponge.UNSAFE_NBT).get();
+        if (datacontainer.contains(Constants.Sponge.UNSAFE_NBT)) {
+            this.container = datacontainer.getView(Constants.Sponge.UNSAFE_NBT).get();
         }
         return this;
     }
@@ -111,19 +111,19 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
     @Override
     protected Optional<FluidStackSnapshot> buildContent(DataView container) throws InvalidDataException {
         try {
-            if (container.contains(DataQueries.Fluids.FLUID_TYPE, DataQueries.Fluids.FLUID_VOLUME)) {
-                final String fluidId = container.getString(DataQueries.Fluids.FLUID_TYPE).get();
+            if (container.contains(Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME)) {
+                final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
                 final Optional<FluidType> type = Sponge.getRegistry().getType(FluidType.class, fluidId);
                 if (!type.isPresent()) {
                     throw new InvalidDataException("Unknown fluid id found: " + fluidId);
                 }
                 final FluidType fluidType = type.get();
-                final int volume = container.getInt(DataQueries.Fluids.FLUID_VOLUME).get();
+                final int volume = container.getInt(Constants.Fluids.FLUID_VOLUME).get();
                 SpongeFluidStackSnapshotBuilder builder = new SpongeFluidStackSnapshotBuilder();
                 builder.fluid(fluidType)
                         .volume(volume);
-                if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
-                    builder.container = container.getView(DataQueries.Sponge.UNSAFE_NBT).get().copy();
+                if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
+                    builder.container = container.getView(Constants.Sponge.UNSAFE_NBT).get().copy();
                 }
                 return Optional.of(builder.build());
             }

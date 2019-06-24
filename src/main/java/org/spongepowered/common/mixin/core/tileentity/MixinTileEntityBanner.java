@@ -43,9 +43,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinBanner;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.ArrayList;
@@ -89,10 +89,10 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements I
             final SpongeGameRegistry registry = SpongeImpl.getRegistry();
             for (int i = 0; i < this.patterns.tagCount(); i++) {
                 final NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
-                final String patternId = tagCompound.getString(NbtDataUtil.BANNER_PATTERN_ID);
+                final String patternId = tagCompound.getString(Constants.TileEntity.Banner.BANNER_PATTERN_ID);
                 this.patternLayers.add(new SpongePatternLayer(
                     SpongeImpl.getRegistry().getType(BannerPatternShape.class, patternId).get(),
-                    registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger(NbtDataUtil.BANNER_PATTERN_COLOR)).getName()).get()));
+                    registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR)).getName()).get()));
             }
         }
         this.impl$markDirtyAndUpdate();
@@ -110,8 +110,8 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements I
         this.patterns = new NBTTagList();
         for (final PatternLayer layer : this.patternLayers) {
             final NBTTagCompound compound = new NBTTagCompound();
-            compound.setString(NbtDataUtil.BANNER_PATTERN_ID, layer.getShape().getName());
-            compound.setInteger(NbtDataUtil.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
+            compound.setString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, layer.getShape().getName());
+            compound.setInteger(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
             this.patterns.appendTag(compound);
         }
         impl$markDirtyAndUpdate();

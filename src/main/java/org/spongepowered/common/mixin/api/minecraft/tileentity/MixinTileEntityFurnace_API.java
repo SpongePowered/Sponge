@@ -36,7 +36,6 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
 
@@ -115,13 +114,13 @@ public abstract class MixinTileEntityFurnace_API extends MixinTileEntityLockable
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(DataQueries.BlockEntity.Furnace.BURN_TIME, this.getField(0));
-        container.set(DataQueries.BlockEntity.Furnace.BURN_TIME_TOTAL, this.getField(Constants.TileEntity.Furnace.PASSED_BURN_FIELD));
-        container.set(DataQueries.BlockEntity.Furnace.COOK_TIME, this.getField(Constants.TileEntity.Furnace.MAX_COOKTIME_FIELD) - this.getField(
+        container.set(Constants.TileEntity.Furnace.BURN_TIME, this.getField(0));
+        container.set(Constants.TileEntity.Furnace.BURN_TIME_TOTAL, this.getField(Constants.TileEntity.Furnace.PASSED_BURN_FIELD));
+        container.set(Constants.TileEntity.Furnace.COOK_TIME, this.getField(Constants.TileEntity.Furnace.MAX_COOKTIME_FIELD) - this.getField(
             Constants.TileEntity.Furnace.PASSED_COOK_FIELD));
-        container.set(DataQueries.BlockEntity.Furnace.COOK_TIME_TOTAL, this.getField(Constants.TileEntity.Furnace.MAX_COOKTIME_FIELD));
+        container.set(Constants.TileEntity.Furnace.COOK_TIME_TOTAL, this.getField(Constants.TileEntity.Furnace.MAX_COOKTIME_FIELD));
         if (this.furnaceCustomName != null) {
-            container.set(DataQueries.BlockEntity.CUSTOM_NAME, this.furnaceCustomName);
+            container.set(Constants.TileEntity.CUSTOM_NAME, this.furnaceCustomName);
         }
         return container;
     }

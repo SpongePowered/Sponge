@@ -31,7 +31,7 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Objects;
@@ -108,11 +108,11 @@ public class SpongeFireworkEffect implements FireworkEffect {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.FireWorks.FIREWORK_SHAPE, this.shape.getId())
-                .set(DataQueries.FireWorks.FIREWORK_COLORS, this.colors)
-                .set(DataQueries.FireWorks.FIREWORK_FADE_COLORS, this.fades)
-                .set(DataQueries.FireWorks.FIREWORK_TRAILS, this.trails)
-                .set(DataQueries.FireWorks.FIREWORK_FLICKERS, this.flicker);
+                .set(Constants.Item.FireWorks.FIREWORK_SHAPE, this.shape.getId())
+                .set(Constants.Item.FireWorks.FIREWORK_COLORS, this.colors)
+                .set(Constants.Item.FireWorks.FIREWORK_FADE_COLORS, this.fades)
+                .set(Constants.Item.FireWorks.FIREWORK_TRAILS, this.trails)
+                .set(Constants.Item.FireWorks.FIREWORK_FLICKERS, this.flicker);
     }
 
     @Override

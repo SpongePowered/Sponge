@@ -36,7 +36,7 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableDurability
 import org.spongepowered.api.data.manipulator.mutable.item.DurabilityData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeDurabilityData;
 import org.spongepowered.common.data.processor.common.AbstractItemDataProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
 import java.util.Optional;
@@ -62,15 +62,15 @@ public class DurabilityDataProcessor extends AbstractItemDataProcessor<Durabilit
         if (!itemStack.hasTagCompound()) {
             itemStack.setTagCompound(new NBTTagCompound());
         }
-        itemStack.getTagCompound().setBoolean(NbtDataUtil.ITEM_UNBREAKABLE, unbreakable);
+        itemStack.getTagCompound().setBoolean(Constants.Item.ITEM_UNBREAKABLE, unbreakable);
         return true;
     }
 
     @Override
     public Map<Key<?>, ?> getValues(ItemStack itemStack) {
-        if (itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_UNBREAKABLE)) {
+        if (itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey(Constants.Item.ITEM_UNBREAKABLE)) {
             return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getItemDamage(),
-                    Keys.UNBREAKABLE, itemStack.getTagCompound().getBoolean(NbtDataUtil.ITEM_UNBREAKABLE));
+                    Keys.UNBREAKABLE, itemStack.getTagCompound().getBoolean(Constants.Item.ITEM_UNBREAKABLE));
         }
         return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getItemDamage(), Keys.UNBREAKABLE, false);
     }

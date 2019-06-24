@@ -29,9 +29,9 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 
 public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataContentUpdater {
 
@@ -47,18 +47,18 @@ public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataC
 
     @Override
     public DataView update(DataView content) {
-        if (content.contains(DataQueries.Sponge.UNSAFE_NBT)) {
-            NBTTagCompound compound = NbtTranslator.getInstance().translateData(content.getView(DataQueries.Sponge.UNSAFE_NBT).get());
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-                if (spongeCompound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {
-                    spongeCompound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+        if (content.contains(Constants.Sponge.UNSAFE_NBT)) {
+            NBTTagCompound compound = NbtTranslator.getInstance().translateData(content.getView(Constants.Sponge.UNSAFE_NBT).get());
+            if (compound.hasKey(Constants.Sponge.SPONGE_DATA)) {
+                final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Sponge.SPONGE_DATA);
+                if (spongeCompound.hasKey(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
+                    spongeCompound.removeTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
             NbtDataUtil.filterSpongeCustomData(compound);
-            content.remove(DataQueries.Sponge.UNSAFE_NBT);
+            content.remove(Constants.Sponge.UNSAFE_NBT);
             if (!compound.isEmpty()) {
-                content.set(DataQueries.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translate(compound));
+                content.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translate(compound));
             }
         }
         content.set(Queries.CONTENT_VERSION, this.getOutputVersion());

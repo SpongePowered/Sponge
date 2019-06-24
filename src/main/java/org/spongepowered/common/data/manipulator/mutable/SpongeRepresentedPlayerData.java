@@ -35,8 +35,8 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedPlayerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -103,10 +103,10 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
         if (this.getValue().getUniqueId() != null) {
-            container.set(this.usedKey.getQuery().then(DataQueries.GameProfile.GAME_PROFILE_ID), this.getValue().getUniqueId().toString());
+            container.set(this.usedKey.getQuery().then(Constants.GameProfile.GAME_PROFILE_ID), this.getValue().getUniqueId().toString());
         }
         if (this.getValue().getName().isPresent()) {
-            container.set(this.usedKey.getQuery().then(DataQueries.GameProfile.GAME_PROFILE_NAME), this.getValue().getName().get());
+            container.set(this.usedKey.getQuery().then(Constants.GameProfile.GAME_PROFILE_NAME), this.getValue().getName().get());
         }
         return container;
     }

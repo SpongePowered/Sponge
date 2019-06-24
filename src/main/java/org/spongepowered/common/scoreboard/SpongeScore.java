@@ -31,6 +31,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,8 +49,8 @@ public class SpongeScore implements Score {
     public SpongeScore(Text name) {
         this.name = name;
         this.legacyName = SpongeTexts.toLegacy(name);
-        if (this.legacyName.length() > SpongeScoreboardConstants.SCORE_NAME_LENGTH) {
-            throw new IllegalArgumentException(String.format("The score name %s is too long! It must be at most %s characters.", this.legacyName, SpongeScoreboardConstants.SCORE_NAME_LENGTH));
+        if (this.legacyName.length() > Constants.Scoreboards.SCORE_NAME_LENGTH) {
+            throw new IllegalArgumentException(String.format("The score name %s is too long! It must be at most %s characters.", this.legacyName, Constants.Scoreboards.SCORE_NAME_LENGTH));
         }
     }
 

@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.bridge.entity.ItemEntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -134,15 +133,15 @@ public abstract class MixinEntityItem extends MixinEntity implements ItemEntityB
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
 
-        this.infinitePickupDelay = compound.getBoolean(NbtDataUtil.INFINITE_PICKUP_DELAY);
-        if (compound.hasKey(NbtDataUtil.PREVIOUS_PICKUP_DELAY, Constants.NBT.TAG_ANY_NUMERIC)) {
-            this.previousPickupDelay = compound.getInteger(NbtDataUtil.PREVIOUS_PICKUP_DELAY);
+        this.infinitePickupDelay = compound.getBoolean(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY);
+        if (compound.hasKey(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY, Constants.NBT.TAG_ANY_NUMERIC)) {
+            this.previousPickupDelay = compound.getInteger(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY);
         } else {
             this.previousPickupDelay = MAGIC_PREVIOUS;
         }
-        this.infiniteDespawnDelay = compound.getBoolean(NbtDataUtil.INFINITE_DESPAWN_DELAY);
-        if (compound.hasKey(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, Constants.NBT.TAG_ANY_NUMERIC)) {
-            this.previousDespawnDelay = compound.getInteger(NbtDataUtil.PREVIOUS_DESPAWN_DELAY);
+        this.infiniteDespawnDelay = compound.getBoolean(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY);
+        if (compound.hasKey(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, Constants.NBT.TAG_ANY_NUMERIC)) {
+            this.previousDespawnDelay = compound.getInteger(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY);
         } else {
             this.previousDespawnDelay = MAGIC_PREVIOUS;
         }
@@ -174,10 +173,10 @@ public abstract class MixinEntityItem extends MixinEntity implements ItemEntityB
     public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
 
-        compound.setBoolean(NbtDataUtil.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
-        compound.setShort(NbtDataUtil.PREVIOUS_PICKUP_DELAY, (short) this.previousPickupDelay);
-        compound.setBoolean(NbtDataUtil.INFINITE_DESPAWN_DELAY, this.infiniteDespawnDelay);
-        compound.setShort(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
+        compound.setBoolean(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
+        compound.setShort(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY, (short) this.previousPickupDelay);
+        compound.setBoolean(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY, this.infiniteDespawnDelay);
+        compound.setShort(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
     }
 
     @Inject(

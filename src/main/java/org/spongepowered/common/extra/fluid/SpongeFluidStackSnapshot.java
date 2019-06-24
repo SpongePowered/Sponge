@@ -36,7 +36,7 @@ import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
 import org.spongepowered.api.extra.fluid.FluidTypes;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -92,10 +92,10 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
     public DataContainer toContainer() {
         DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(DataQueries.Fluids.FLUID_TYPE, this.fluidType.getId())
-            .set(DataQueries.Fluids.FLUID_VOLUME, this.volume);
+            .set(Constants.Fluids.FLUID_TYPE, this.fluidType.getId())
+            .set(Constants.Fluids.FLUID_VOLUME, this.volume);
         if (this.extraData != null) {
-            container.set(DataQueries.Sponge.UNSAFE_NBT, this.extraData);
+            container.set(Constants.Sponge.UNSAFE_NBT, this.extraData);
         }
         return container;
     }

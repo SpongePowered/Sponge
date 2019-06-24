@@ -42,8 +42,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -124,18 +124,18 @@ public abstract class MixinItemStack implements CustomDataHolderBridge {       /
             for (DataView dataView : manipulatorViews) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
-            final NBTTagCompound spongeCompound = getOrCreateSubCompound(NbtDataUtil.SPONGE_DATA);
-            spongeCompound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, newList);
+            final NBTTagCompound spongeCompound = getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
+            spongeCompound.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else if (!this.failedData.isEmpty()) {
             final NBTTagList newList = new NBTTagList();
             for (DataView failedDatum : this.failedData) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
             }
-            final NBTTagCompound spongeCompound = getOrCreateSubCompound(NbtDataUtil.SPONGE_DATA);
-            spongeCompound.setTag(NbtDataUtil.FAILED_CUSTOM_DATA, newList);
+            final NBTTagCompound spongeCompound = getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
+            spongeCompound.setTag(Constants.Sponge.FAILED_CUSTOM_DATA, newList);
         } else {
             if (hasTagCompound()) {
-                this.getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);
+                this.getTagCompound().removeTag(Constants.Sponge.SPONGE_DATA);
                 if (this.getTagCompound().isEmpty()) {
                     this.setTagCompound(null);
                 }

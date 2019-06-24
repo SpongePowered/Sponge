@@ -24,29 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import com.google.common.collect.Lists;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityLockable;
-import net.minecraft.world.LockCode;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
-import org.spongepowered.api.data.manipulator.mutable.item.InventoryItemData;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.type.TileEntityInventory;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -54,9 +34,6 @@ import org.spongepowered.common.item.inventory.lens.ReusableLensProvider;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-
-import java.util.List;
-import java.util.Optional;
 
 @SuppressWarnings("rawtypes")
 @NonnullByDefault

@@ -30,8 +30,8 @@ import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.block.tileentity.CommandBlock;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -44,17 +44,18 @@ public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock>
     @Override
     protected Optional<CommandBlock> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(commandBlock -> {
-            if (!container.contains(DataQueries.BlockEntity.CommandBlock.STORED_COMMAND, DataQueries.BlockEntity.CommandBlock.SUCCESS_COUNT, DataQueries.BlockEntity.CommandBlock.DOES_TRACK_OUTPUT)) {
+            if (!container.contains(
+                Constants.TileEntity.CommandBlock.STORED_COMMAND, Constants.TileEntity.CommandBlock.SUCCESS_COUNT, Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT)) {
                 ((TileEntity) commandBlock).invalidate();
                 return Optional.empty();
             }
             CommandBlockBaseLogic cmdBlockLogic = ((TileEntityCommandBlock) commandBlock).getCommandBlockLogic();
-            cmdBlockLogic.setCommand(container.getString(DataQueries.BlockEntity.CommandBlock.STORED_COMMAND).get());
-            cmdBlockLogic.successCount = container.getInt(DataQueries.BlockEntity.CommandBlock.SUCCESS_COUNT).get();
-            cmdBlockLogic.setTrackOutput(container.getBoolean(DataQueries.BlockEntity.CommandBlock.DOES_TRACK_OUTPUT).get());
+            cmdBlockLogic.setCommand(container.getString(Constants.TileEntity.CommandBlock.STORED_COMMAND).get());
+            cmdBlockLogic.successCount = container.getInt(Constants.TileEntity.CommandBlock.SUCCESS_COUNT).get();
+            cmdBlockLogic.setTrackOutput(container.getBoolean(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT).get());
             if (cmdBlockLogic.shouldTrackOutput()) {
                 cmdBlockLogic.setLastOutput(SpongeTexts.toComponent(SpongeTexts.fromLegacy(
-                        container.getString(DataQueries.BlockEntity.CommandBlock.TRACKED_OUTPUT).get())));
+                        container.getString(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT).get())));
             }
             ((TileEntityCommandBlock)commandBlock).validate();
             return Optional.of(commandBlock);

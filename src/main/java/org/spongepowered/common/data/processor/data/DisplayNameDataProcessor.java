@@ -97,12 +97,12 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
                     return Optional.empty(); // The book wasn't initialized.
                 }
 
-                return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(NbtDataUtil.ITEM_BOOK_TITLE))));
+                return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(Constants.Item.Book.ITEM_BOOK_TITLE))));
             }
 
-            final NBTTagCompound compound = ((ItemStack) holder).getSubCompound(NbtDataUtil.ITEM_DISPLAY);
-            if (compound != null && compound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
-                return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(NbtDataUtil.ITEM_DISPLAY_NAME))));
+            final NBTTagCompound compound = ((ItemStack) holder).getSubCompound(Constants.Item.ITEM_DISPLAY);
+            if (compound != null && compound.hasKey(Constants.Item.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
+                return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(Constants.Item.ITEM_DISPLAY_NAME))));
             }
             return Optional.empty();
         } else if (holder instanceof IWorldNameable) {
@@ -148,7 +148,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             final ImmutableValue<Text> immutableValue = merged.displayName().asImmutable();
             ItemStack stack = (ItemStack) holder;
             if (stack.getItem() == Items.WRITTEN_BOOK) {
-                NbtDataUtil.getOrCreateCompound(stack).setString(NbtDataUtil.ITEM_BOOK_TITLE, SpongeTexts.toLegacy(newValue));
+                NbtDataUtil.getOrCreateCompound(stack).setString(Constants.Item.Book.ITEM_BOOK_TITLE, SpongeTexts.toLegacy(newValue));
             } else {
                 stack.setStackDisplayName(SpongeTexts.toLegacy(newValue));
             }

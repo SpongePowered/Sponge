@@ -29,7 +29,7 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 public class SpongePatternLayer implements PatternLayer {
 
@@ -60,8 +60,8 @@ public class SpongePatternLayer implements PatternLayer {
     public DataContainer toContainer() {
         return DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.BlockEntity.Banner.SHAPE, this.id.getId())
-            .set(DataQueries.BlockEntity.Banner.COLOR, this.color.getName());
+            .set(Constants.TileEntity.Banner.SHAPE, this.id.getId())
+            .set(Constants.TileEntity.Banner.COLOR, this.color.getName());
     }
 
 }

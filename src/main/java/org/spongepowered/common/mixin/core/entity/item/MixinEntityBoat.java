@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.core.entity.item;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.util.Constants;
 
 @Mixin(EntityBoat.class)
 public abstract class MixinEntityBoat extends MixinEntity {
@@ -41,26 +41,26 @@ public abstract class MixinEntityBoat extends MixinEntity {
     @Override
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.hasKey(NbtDataUtil.BOAT_MAX_SPEED)) {
-            this.maxSpeed = compound.getDouble(NbtDataUtil.BOAT_MAX_SPEED);
+        if (compound.hasKey(Constants.Entity.Boat.BOAT_MAX_SPEED)) {
+            this.maxSpeed = compound.getDouble(Constants.Entity.Boat.BOAT_MAX_SPEED);
         }
-        if (compound.hasKey(NbtDataUtil.BOAT_MOVE_ON_LAND)) {
-            this.moveOnLand = compound.getBoolean(NbtDataUtil.BOAT_MOVE_ON_LAND);
+        if (compound.hasKey(Constants.Entity.Boat.BOAT_MOVE_ON_LAND)) {
+            this.moveOnLand = compound.getBoolean(Constants.Entity.Boat.BOAT_MOVE_ON_LAND);
         }
-        if (compound.hasKey(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED)) {
-            this.occupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED);
+        if (compound.hasKey(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED)) {
+            this.occupiedDecelerationSpeed = compound.getDouble(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED);
         }
-        if (compound.hasKey(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED)) {
-            this.unoccupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED);
+        if (compound.hasKey(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED)) {
+            this.unoccupiedDecelerationSpeed = compound.getDouble(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED);
         }
     }
 
     @Override
     public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        compound.setDouble(NbtDataUtil.BOAT_MAX_SPEED, this.maxSpeed);
-        compound.setBoolean(NbtDataUtil.BOAT_MOVE_ON_LAND, this.moveOnLand);
-        compound.setDouble(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED, this.occupiedDecelerationSpeed);
-        compound.setDouble(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED, this.unoccupiedDecelerationSpeed);
+        compound.setDouble(Constants.Entity.Boat.BOAT_MAX_SPEED, this.maxSpeed);
+        compound.setBoolean(Constants.Entity.Boat.BOAT_MOVE_ON_LAND, this.moveOnLand);
+        compound.setDouble(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED, this.occupiedDecelerationSpeed);
+        compound.setDouble(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED, this.unoccupiedDecelerationSpeed);
     }
 }

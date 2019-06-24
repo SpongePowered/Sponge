@@ -50,11 +50,11 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ import javax.annotation.Nullable;
 public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
     public DropItemWithHotkeyState() {
-        super(PacketConstants.MODE_DROP | PacketConstants.BUTTON_PRIMARY | PacketConstants.BUTTON_SECONDARY | PacketConstants.CLICK_INSIDE_WINDOW);
+        super(Constants.Networking.MODE_DROP | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_INSIDE_WINDOW);
     }
 
     @Override
@@ -98,7 +98,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     Slot slot;
                     if (context.getPacket() instanceof CPacketPlayerDigging) {
                         final CPacketPlayerDigging packetIn = context.getPacket();
-                        usedButton = packetIn.getAction() == CPacketPlayerDigging.Action.DROP_ITEM ? PacketConstants.PACKET_BUTTON_PRIMARY_ID : 1;
+                        usedButton = packetIn.getAction() == CPacketPlayerDigging.Action.DROP_ITEM ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID : 1;
                         slot = ((PlayerInventory) player.inventory).getEquipment().getSlot(EquipmentTypes.MAIN_HAND).orElse(null);
                     } else {
                         final CPacketClickWindow packetIn = context.getPacket();
@@ -146,7 +146,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
             // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')
             ClickInventoryEvent.Drop event;
-            if (usedButton == PacketConstants.PACKET_BUTTON_PRIMARY_ID) {
+            if (usedButton == Constants.Networking.PACKET_BUTTON_PRIMARY_ID) {
                 event = SpongeEventFactory.createClickInventoryEventDropSingle(Sponge.getCauseStackManager().getCurrentCause(),
                         transaction, capturedEntities, Optional.ofNullable(slot), openContainer, slotTransactions);
             } else {

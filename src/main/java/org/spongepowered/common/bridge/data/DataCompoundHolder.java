@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.data;
 
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.util.Constants;
 
 public interface DataCompoundHolder {
@@ -36,10 +35,10 @@ public interface DataCompoundHolder {
 
     default NBTTagCompound data$getSpongeCompound() {
         final NBTTagCompound data = this.data$getRootCompound();
-        if (!data.hasKey(NbtDataUtil.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            data.setTag(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
+        if (!data.hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+            data.setTag(Constants.Sponge.SPONGE_DATA, new NBTTagCompound());
         }
-        return data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+        return data.getCompoundTag(Constants.Sponge.SPONGE_DATA);
     }
 
 }

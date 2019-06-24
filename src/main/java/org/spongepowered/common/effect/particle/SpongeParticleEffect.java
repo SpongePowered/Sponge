@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOption;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
 import java.util.Optional;
@@ -72,10 +72,10 @@ public class SpongeParticleEffect implements ParticleEffect {
     @Override
     public DataContainer toContainer() {
         DataContainer dataContainer = DataContainer.createNew();
-        dataContainer.set(DataQueries.Particles.PARTICLE_TYPE, this.type);
-        dataContainer.set(DataQueries.Particles.PARTICLE_OPTIONS, this.options.entrySet().stream().map(entry -> DataContainer.createNew()
-                .set(DataQueries.Particles.PARTICLE_OPTION_KEY, entry.getKey())
-                .set(DataQueries.Particles.PARTICLE_OPTION_VALUE, entry.getValue()))
+        dataContainer.set(Constants.Particles.PARTICLE_TYPE, this.type);
+        dataContainer.set(Constants.Particles.PARTICLE_OPTIONS, this.options.entrySet().stream().map(entry -> DataContainer.createNew()
+                .set(Constants.Particles.PARTICLE_OPTION_KEY, entry.getKey())
+                .set(Constants.Particles.PARTICLE_OPTION_VALUE, entry.getValue()))
                 .collect(Collectors.toList()));
         return dataContainer;
     }

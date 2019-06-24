@@ -56,10 +56,10 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -175,29 +175,29 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
                 .set(Queries.WORLD_ID, this.worldUuid.toString())
-                .set(DataQueries.Entity.TYPE, this.entityType.getId())
-                .createView(DataQueries.Sponge.SNAPSHOT_WORLD_POSITION)
+                .set(Constants.Entity.TYPE, this.entityType.getId())
+                .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, this.position.getX())
                 .set(Queries.POSITION_Y, this.position.getY())
                 .set(Queries.POSITION_Z, this.position.getZ())
                 .getContainer()
-                .createView(DataQueries.Entity.ROTATION)
+                .createView(Constants.Entity.ROTATION)
                 .set(Queries.POSITION_X, this.rotation.getX())
                 .set(Queries.POSITION_Y, this.rotation.getY())
                 .set(Queries.POSITION_Z, this.rotation.getZ())
                 .getContainer()
-                .createView(DataQueries.Entity.SCALE)
+                .createView(Constants.Entity.SCALE)
                 .set(Queries.POSITION_X, this.scale.getX())
                 .set(Queries.POSITION_Y, this.scale.getY())
                 .set(Queries.POSITION_Z, this.scale.getZ())
                 .getContainer()
-                .set(DataQueries.Sponge.DATA_MANIPULATORS, dataList);
+                .set(Constants.Sponge.DATA_MANIPULATORS, dataList);
 
         if (this.entityUuid != null) {
-            container.set(DataQueries.Entity.UUID, this.entityUuid.toString());
+            container.set(Constants.Entity.UUID, this.entityUuid.toString());
         }
         if (this.compound != null) {
-            container.set(DataQueries.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
+            container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
         }
 
         return container;

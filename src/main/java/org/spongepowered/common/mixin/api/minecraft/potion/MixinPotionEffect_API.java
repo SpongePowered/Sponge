@@ -29,15 +29,14 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
+import org.spongepowered.common.util.Constants;
 
 @Mixin(net.minecraft.potion.PotionEffect.class)
 @Implements(@Interface(iface = PotionEffect.class, prefix = "potionEffect$"))
@@ -83,10 +82,10 @@ public abstract class MixinPotionEffect_API implements PotionEffect {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.Potions.POTION_TYPE, this.getType().getId())
-                .set(DataQueries.Potions.POTION_DURATION, this.duration)
-                .set(DataQueries.Potions.POTION_AMPLIFIER, this.amplifier)
-                .set(DataQueries.Potions.POTION_AMBIANCE, this.isAmbient)
-                .set(DataQueries.Potions.POTION_SHOWS_PARTICLES, this.showParticles);
+                .set(Constants.Item.Potions.POTION_TYPE, this.getType().getId())
+                .set(Constants.Item.Potions.POTION_DURATION, this.duration)
+                .set(Constants.Item.Potions.POTION_AMPLIFIER, this.amplifier)
+                .set(Constants.Item.Potions.POTION_AMBIANCE, this.isAmbient)
+                .set(Constants.Item.Potions.POTION_SHOWS_PARTICLES, this.showParticles);
     }
 }

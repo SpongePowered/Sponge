@@ -28,7 +28,7 @@ import net.minecraft.tileentity.TileEntityChest;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -41,8 +41,8 @@ public class SpongeChestBuilder extends SpongeLockableBuilder<Chest> {
     @Override
     protected Optional<Chest> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(chest -> {
-            if (container.contains(DataQueries.BlockEntity.CUSTOM_NAME)) {
-                ((TileEntityChest) chest).setCustomName(container.getString(DataQueries.BlockEntity.CUSTOM_NAME).get());
+            if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
+                ((TileEntityChest) chest).setCustomName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
             ((TileEntityChest) chest).validate();
             return chest;

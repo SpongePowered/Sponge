@@ -41,7 +41,6 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.item.WitherSkullEntityBridge;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 
@@ -80,8 +79,8 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     @Override
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+        if (compound.hasKey(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
+            this.damage = compound.getFloat(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
             this.damageSet = true;
         }
     }
@@ -90,9 +89,9 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         if (this.damageSet) {
-            compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
+            compound.setFloat(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.damage);
         } else {
-            compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+            compound.removeTag(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
         }
     }
 

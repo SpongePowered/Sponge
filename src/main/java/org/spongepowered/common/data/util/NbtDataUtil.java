@@ -57,130 +57,8 @@ import java.util.Optional;
  */
 public final class NbtDataUtil {
 
-    public static final String DATA_VERSION = "DataVersion";
-    public static final String BANNER_PATTERN_ID = "Pattern";
-    public static final String BANNER_PATTERN_COLOR = "Color";
-    public static final String ENTITY_ROTATION = "Rotation";
-    public static final String CUSTOM_DATA_CLASS = "DataClass";
-    public static final String CUSTOM_DATA = "ManipulatorData";
-    public static final String BANNER_BASE = "Base";
-    public static final String BANNER_PATTERNS = "Patterns";
-    public static final String FAILED_CUSTOM_DATA = "FailedData";
-    public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
-    public static final String ARMOR_COLOR_DISPLAY_TAG = "display";
-
     private NbtDataUtil() {
     }
-
-    public static final class Minecraft {
-
-        public static final String PASSENGERS = "Passengers";
-
-        public static final String IS_FLYING = "flying";
-
-        public static final String INVENTORY = "Inventory";
-        public static final String ENDERCHEST_INVENTORY = "EnderItems";
-
-        public static final String SELECTED_ITEM_SLOT = "SelectedItemSlot";
-        public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
-
-        public static final String INVULNERABLE = "Invulnerable";
-    }
-
-    public static final class Schematic {
-        public static final String TILE_ENTITY_ID = "Id";
-        public static final String ENTITY_ID = "Id";
-        public static final String TILE_ENTITY_POS = "Pos";
-    }
-
-    // These are the various tag compound id's for getting to various places
-    public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
-    public static final String BLOCK_ENTITY_ID = "id";
-    public static final String SIGN = "Sign";
-
-    public static final String TILE_ENTITY_POSITION_X = "x";
-    public static final String TILE_ENTITY_POSITION_Y = "y";
-    public static final String TILE_ENTITY_POSITION_Z = "z";
-
-    public static final String ITEM_ENCHANTMENT_LIST = "ench";
-    public static final String ITEM_STORED_ENCHANTMENTS_LIST = "StoredEnchantments";
-    public static final String ITEM_ENCHANTMENT_ID = "id";
-    public static final String ITEM_ENCHANTMENT_LEVEL = "lvl";
-
-    public static final String ITEM_DISPLAY = "display";
-    public static final String ITEM_DISPLAY_NAME = "Name";
-    public static final String ITEM_LORE = "Lore";
-    public static final String ITEM_COLOR = "color";
-
-    public static final String ITEM_BOOK_PAGES = "pages";
-    public static final String ITEM_BOOK_TITLE = "title";
-    public static final String ITEM_BOOK_AUTHOR = "author";
-    public static final String ITEM_BOOK_RESOLVED = "resolved";
-    public static final String ITEM_BOOK_GENERATION = "generation";
-
-    public static final String ITEM_BREAKABLE_BLOCKS = "CanDestroy";
-    public static final String ITEM_PLACEABLE_BLOCKS = "CanPlaceOn";
-
-    public static final String ITEM_SKULL_OWNER = "SkullOwner";
-
-    public static final String ITEM_UNBREAKABLE = "Unbreakable";
-
-    public static final String ITEM_HIDE_FLAGS = "HideFlags";
-
-    public static final String ITEM_POTION_TYPE = "Potion";
-
-    public static final String CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
-
-    public static final String CHUNK_DATA_LEVEL = "Level";
-    public static final String CHUNK_DATA_SECTIONS = "Sections";
-
-    public static final String SPAWNABLE_ENTITY_TAG = "EntityTag";
-
-    // These are Sponge's NBT tag keys
-    public static final String SPONGE_DATA = "SpongeData";
-    public static final String SPONGE_ENTITY_CREATOR = "Creator";
-    public static final String SPONGE_ENTITY_NOTIFIER = "Notifier";
-    public static final String SPONGE_BLOCK_POS_TABLE = "BlockPosTable";
-    public static final String SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
-    public static final String CUSTOM_MANIPULATOR_TAG_LIST = "CustomManipulators";
-    public static final String MANIPULATOR_ID = "ManipulatorId";
-    public static final String PROJECTILE_DAMAGE_AMOUNT = "damageAmount";
-    public static final String BOAT_MAX_SPEED = "maxSpeed";
-    public static final String BOAT_MOVE_ON_LAND = "moveOnLand";
-    public static final String BOAT_OCCUPIED_DECELERATION_SPEED = "occupiedDecelerationSpeed";
-    public static final String BOAT_UNOCCUPIED_DECELERATION_SPEED = "unoccupiedDecelerationSpeed";
-    public static final String CAN_GRIEF = "CanGrief";
-    public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
-    public static final String PORTAL_AGENT_TYPE = "portalAgentType";
-    public static final String WORLD_SERIALIZATION_BEHAVIOR = "serializationBehavior";
-    public static final String HEALTH_SCALE = "HealthScale";
-
-    public static final String DIMENSION_TYPE = "dimensionType";
-    public static final String DIMENSION_ID = "dimensionId";
-    public static final String UUID_MOST = "UUIDMost";
-    public static final String UUID_LEAST = "UUIDLeast";
-    public static final String INVALID_TITLE = "invalid";
-    public static final String IS_MOD = "isMod";
-    public static final String FORGE_ENTITY_TYPE = "entity_name";
-    public static final String LEGACY_DIMENSION_ARRAY = "DimensionArray";
-    public static final String USED_DIMENSION_IDS = "UsedIDs";
-
-    // Legacy migration tags from Bukkit
-    public static final String BUKKIT = "bukkit";
-    public static final String BUKKIT_FIRST_PLAYED = "firstPlayed";
-    public static final String BUKKIT_LAST_PLAYED = "lastPlayed";
-
-    // These are used by Minecraft's internals for entity spawning
-    public static final String ENTITY_TYPE_ID = "id";
-    public static final String MINECART_TYPE = "Type";
-    public static final String ENTITY_POSITION = "Pos";
-    public static final String ENTITY_DIMENSION = "Dimension";
-
-    // These are used by pickup/despawn delay for ItemEntity
-    public static final String INFINITE_PICKUP_DELAY = "InfinitePickupDelay";
-    public static final String INFINITE_DESPAWN_DELAY = "InfiniteDespawnDelay";
-    public static final String PREVIOUS_PICKUP_DELAY = "PreviousPickupDelay";
-    public static final String PREVIOUS_DESPAWN_DELAY = "PreviousDespawnDelay";
 
     // These methods are provided as API like getters since the internal ItemStack does return nullable NBTTagCompounds.
 
@@ -241,11 +119,11 @@ public final class NbtDataUtil {
     public static NBTTagCompound filterSpongeCustomData(NBTTagCompound rootCompound) {
         if (rootCompound.hasKey(Constants.Forge.FORGE_DATA, Constants.NBT.TAG_COMPOUND)) {
             final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(Constants.Forge.FORGE_DATA);
-            if (forgeCompound.hasKey(SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-                cleanseInnerCompound(forgeCompound, SPONGE_DATA);
+            if (forgeCompound.hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+                cleanseInnerCompound(forgeCompound, Constants.Sponge.SPONGE_DATA);
             }
-        } else if (rootCompound.hasKey(SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            cleanseInnerCompound(rootCompound, SPONGE_DATA);
+        } else if (rootCompound.hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+            cleanseInnerCompound(rootCompound, Constants.Sponge.SPONGE_DATA);
         }
         return rootCompound;
     }
@@ -258,49 +136,49 @@ public final class NbtDataUtil {
     }
 
     public static List<Text> getLoreFromNBT(NBTTagCompound subCompound) {
-        final NBTTagList list = subCompound.getTagList(ITEM_LORE, Constants.NBT.TAG_STRING);
+        final NBTTagList list = subCompound.getTagList(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
         return SpongeTexts.fromNbtLegacy(list);
     }
 
     public static void removeLoreFromNBT(ItemStack stack) {
-        if(stack.getSubCompound(ITEM_DISPLAY) == null) {
+        if(stack.getSubCompound(Constants.Item.ITEM_DISPLAY) == null) {
             return;
         }
-        stack.getSubCompound(ITEM_DISPLAY).removeTag(ITEM_LORE);
+        stack.getSubCompound(Constants.Item.ITEM_DISPLAY).removeTag(Constants.Item.ITEM_LORE);
     }
 
     public static void setLoreToNBT(ItemStack stack, List<Text> lore) {
         final NBTTagList list =  SpongeTexts.asLegacy(lore);
-        stack.getOrCreateSubCompound(ITEM_DISPLAY).setTag(ITEM_LORE, list); // setSubCompound
+        stack.getOrCreateSubCompound(Constants.Item.ITEM_DISPLAY).setTag(Constants.Item.ITEM_LORE, list); // setSubCompound
     }
 
     public static boolean hasColorFromNBT(ItemStack stack) {
         return stack.hasTagCompound() &&
-                stack.getTagCompound().hasKey(ITEM_DISPLAY) &&
-                stack.getTagCompound().getCompoundTag(ITEM_DISPLAY).hasKey(ITEM_COLOR);
+               stack.getTagCompound().hasKey(Constants.Item.ITEM_DISPLAY) &&
+               stack.getTagCompound().getCompoundTag(Constants.Item.ITEM_DISPLAY).hasKey(Constants.Item.ITEM_COLOR);
     }
 
     public static Optional<Color> getColorFromNBT(NBTTagCompound subCompound) {
-        if (!subCompound.hasKey(ITEM_COLOR)) {
+        if (!subCompound.hasKey(Constants.Item.ITEM_COLOR)) {
             return Optional.empty();
         }
-        return Optional.of(Color.ofRgb(subCompound.getInteger(ITEM_COLOR)));
+        return Optional.of(Color.ofRgb(subCompound.getInteger(Constants.Item.ITEM_COLOR)));
     }
 
     public static void removeColorFromNBT(ItemStack stack) {
-        if(stack.getSubCompound(ITEM_DISPLAY) == null) {
+        if(stack.getSubCompound(Constants.Item.ITEM_DISPLAY) == null) {
             return;
         }
-        stack.getSubCompound(ITEM_DISPLAY).removeTag(ITEM_COLOR);
+        stack.getSubCompound(Constants.Item.ITEM_DISPLAY).removeTag(Constants.Item.ITEM_COLOR);
     }
 
     public static void setColorToNbt(ItemStack stack, Color color) {
         final int mojangColor = ColorUtil.javaColorToMojangColor(color);
-        stack.getOrCreateSubCompound(ITEM_DISPLAY).setInteger(ITEM_COLOR, mojangColor);
+        stack.getOrCreateSubCompound(Constants.Item.ITEM_DISPLAY).setInteger(Constants.Item.ITEM_COLOR, mojangColor);
     }
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {
-        final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
+        final NBTTagList list = compound.getTagList(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
         if (list.isEmpty()) {
             return new ArrayList<>();
         }
@@ -314,7 +192,7 @@ public final class NbtDataUtil {
     }
 
     public static List<String> getPlainPagesFromNBT(NBTTagCompound compound) {
-        final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
+        final NBTTagList list = compound.getTagList(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
         List<String> stringList = new ArrayList<>();
         if (!list.isEmpty()) {
             for (int i = 0; i < list.tagCount(); i++) {
@@ -329,7 +207,7 @@ public final class NbtDataUtil {
         if (!stack.hasTagCompound()) {
             return;
         }
-        stack.getTagCompound().setTag(ITEM_BOOK_PAGES, list);
+        stack.getTagCompound().setTag(Constants.Item.Book.ITEM_BOOK_PAGES, list);
     }
 
     public static void setPagesToNBT(ItemStack stack, List<Text> pages) {
@@ -346,14 +224,14 @@ public final class NbtDataUtil {
 
     private static void setPagesToNBT(ItemStack stack, NBTTagList list) {
         final NBTTagCompound compound = getOrCreateCompound(stack);
-        compound.setTag(ITEM_BOOK_PAGES, list);
-        if (!compound.hasKey(ITEM_BOOK_TITLE)) {
-            compound.setString(ITEM_BOOK_TITLE, INVALID_TITLE);
+        compound.setTag(Constants.Item.Book.ITEM_BOOK_PAGES, list);
+        if (!compound.hasKey(Constants.Item.Book.ITEM_BOOK_TITLE)) {
+            compound.setString(Constants.Item.Book.ITEM_BOOK_TITLE, Constants.Item.Book.INVALID_TITLE);
         }
-        if (!compound.hasKey(ITEM_BOOK_AUTHOR)) {
-            compound.setString(ITEM_BOOK_AUTHOR, INVALID_TITLE);
+        if (!compound.hasKey(Constants.Item.Book.ITEM_BOOK_AUTHOR)) {
+            compound.setString(Constants.Item.Book.ITEM_BOOK_AUTHOR, Constants.Item.Book.INVALID_TITLE);
         }
-        compound.setBoolean(ITEM_BOOK_RESOLVED, true);
+        compound.setBoolean(Constants.Item.Book.ITEM_BOOK_RESOLVED, true);
     }
 
     public static List<Enchantment> getItemEnchantments(ItemStack itemStack) {
@@ -364,8 +242,8 @@ public final class NbtDataUtil {
         final NBTTagList list = itemStack.getEnchantmentTagList();
         for (int i = 0; i < list.tagCount(); i++) {
             final NBTTagCompound compound = list.getCompoundTagAt(i);
-            final short enchantmentId = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
-            final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
+            final short enchantmentId = compound.getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
+            final short level = compound.getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
 
             final EnchantmentType enchantmentType = (EnchantmentType) net.minecraft.enchantment.Enchantment.getEnchantmentByID(enchantmentId);
             if (enchantmentType == null) {
@@ -386,7 +264,7 @@ public final class NbtDataUtil {
         }
 
         if (value.isEmpty()) { // if there's no enchantments, remove the tag that says there's enchantments
-            compound.removeTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST);
+            compound.removeTag(Constants.Item.ITEM_ENCHANTMENT_LIST);
             return;
         }
 
@@ -398,12 +276,12 @@ public final class NbtDataUtil {
         final NBTTagList newList = new NBTTagList(); // construct the enchantment list
         for (Map.Entry<EnchantmentType, Integer> entry : valueMap.entrySet()) {
             final NBTTagCompound enchantmentCompound = new NBTTagCompound();
-            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
-            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
+            enchantmentCompound.setShort(Constants.Item.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
+            enchantmentCompound.setShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
             newList.appendTag(enchantmentCompound);
         }
 
-        compound.setTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST, newList);
+        compound.setTag(Constants.Item.ITEM_ENCHANTMENT_LIST, newList);
     }
 
     public static NBTTagList newDoubleNBTList(double... numbers) {

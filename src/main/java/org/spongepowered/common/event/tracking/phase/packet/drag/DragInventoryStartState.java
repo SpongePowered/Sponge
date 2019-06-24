@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
-import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
+import org.spongepowered.common.util.Constants;
 
 public final class DragInventoryStartState extends NamedInventoryState {
 
     public DragInventoryStartState(String name, int buttonId) {
-        super(name, PacketConstants.MODE_DRAG | buttonId | PacketConstants.DRAG_STATUS_STARTED | PacketConstants.CLICK_OUTSIDE_WINDOW, PacketConstants.MASK_DRAG);
+        super(name, Constants.Networking.MODE_DRAG | buttonId | Constants.Networking.DRAG_STATUS_STARTED | Constants.Networking.CLICK_OUTSIDE_WINDOW, Constants.Networking.MASK_DRAG);
     }
 
 }

@@ -42,6 +42,7 @@ import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProc
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -100,7 +101,7 @@ public class ItemEnchantmentDataProcessor
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            stack.getTagCompound().removeTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST);
+            stack.getTagCompound().removeTag(Constants.Item.ITEM_ENCHANTMENT_LIST);
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();

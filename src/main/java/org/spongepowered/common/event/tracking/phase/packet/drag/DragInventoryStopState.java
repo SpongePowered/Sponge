@@ -34,16 +34,16 @@ import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 
 public abstract class DragInventoryStopState extends NamedInventoryState {
 
     public DragInventoryStopState(String name, int buttonId) {
-        super(name, PacketConstants.MODE_DRAG | buttonId | PacketConstants.DRAG_STATUS_STOPPED | PacketConstants.CLICK_OUTSIDE_WINDOW, PacketConstants.MASK_DRAG);
+        super(name, Constants.Networking.MODE_DRAG | buttonId | Constants.Networking.DRAG_STATUS_STOPPED | Constants.Networking.CLICK_OUTSIDE_WINDOW, Constants.Networking.MASK_DRAG);
     }
 
     @Override

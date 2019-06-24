@@ -33,8 +33,8 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -54,7 +54,7 @@ public class SpongeBlockStateMetaContentUpdater implements DataContentUpdater {
     @Override
     public DataView update(DataView content) {
         // Right, so we have to get the block type id
-        final String blockTypeId = content.getString(DataQueries.Block.BLOCK_TYPE).get();
+        final String blockTypeId = content.getString(Constants.Block.BLOCK_TYPE).get();
         // Check if it's there....
         final Optional<BlockType> blockType = Sponge.getRegistry().getType(BlockType.class, blockTypeId);
         if (!blockType.isPresent()) {
@@ -62,7 +62,7 @@ public class SpongeBlockStateMetaContentUpdater implements DataContentUpdater {
             throw new InvalidDataException("Could not find a block type for the given id: " + blockTypeId);
         }
         // Get the meta, if it wasn't available, just default to the default block state.
-        final int meta = content.getInt(DataQueries.Block.BLOCK_STATE_UNSAFE_META).orElse(0);
+        final int meta = content.getInt(Constants.Block.BLOCK_STATE_UNSAFE_META).orElse(0);
         // Get the block type
         final BlockType type = blockType.get();
         // Cast to internal and get the block state from damage value, this is purely
@@ -71,13 +71,13 @@ public class SpongeBlockStateMetaContentUpdater implements DataContentUpdater {
 
         final IBlockState blockState = ((Block) type).getStateFromMeta(meta);
         // Now that we have the actual block state, delete the old data
-        content.remove(DataQueries.Block.BLOCK_TYPE);
-        content.remove(DataQueries.Block.BLOCK_STATE_UNSAFE_META);
+        content.remove(Constants.Block.BLOCK_TYPE);
+        content.remove(Constants.Block.BLOCK_STATE_UNSAFE_META);
 
         // Cast to the API state to get the id
         final BlockState apiState = (BlockState) blockState;
         // set the id
-        content.set(DataQueries.Block.BLOCK_STATE, apiState.getId());
+        content.set(Constants.Block.BLOCK_STATE, apiState.getId());
         // set the version!!
         content.set(Queries.CONTENT_VERSION, 2);
         // Presto!

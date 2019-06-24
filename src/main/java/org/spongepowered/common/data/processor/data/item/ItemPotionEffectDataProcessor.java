@@ -41,9 +41,9 @@ import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionEffectData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,7 +67,7 @@ public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcess
             ((net.minecraft.potion.PotionEffect) effect).writeCustomPotionEffectToNBT(potionCompound);
             potionList.appendTag(potionCompound);
         }
-        mainCompound.setTag(NbtDataUtil.CUSTOM_POTION_EFFECTS, potionList);
+        mainCompound.setTag(Constants.Item.CUSTOM_POTION_EFFECTS, potionList);
         return true;
     }
 
@@ -113,7 +113,7 @@ public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcess
         }
 
         final NBTTagCompound tagCompound = itemStack.getTagCompound();
-        tagCompound.setTag(NbtDataUtil.CUSTOM_POTION_EFFECTS, new NBTTagList());
+        tagCompound.setTag(Constants.Item.CUSTOM_POTION_EFFECTS, new NBTTagList());
         if (currentEffects.isPresent()) {
             return DataTransactionResult.successRemove(constructImmutableValue(currentEffects.get()));
         }

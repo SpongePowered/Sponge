@@ -34,7 +34,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingDa
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingData;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -52,7 +52,7 @@ public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData,
 
     @Override
     public Optional<FlyingData> readFrom(NBTTagCompound compound) {
-        final NBTBase tag = compound.getTag(NbtDataUtil.Minecraft.IS_FLYING);
+        final NBTBase tag = compound.getTag(Constants.Entity.Player.IS_FLYING);
         if (tag != null) {
             return Optional.of(new SpongeFlyingData(((NBTTagByte) tag).getByte() != 0));
         }
@@ -66,7 +66,7 @@ public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData,
 
     @Override
     public Optional<NBTTagCompound> storeToCompound(NBTTagCompound compound, FlyingData manipulator) {
-        compound.setBoolean(NbtDataUtil.Minecraft.IS_FLYING, manipulator.flying().get());
+        compound.setBoolean(Constants.Entity.Player.IS_FLYING, manipulator.flying().get());
         return Optional.of(compound);
     }
 

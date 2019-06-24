@@ -27,8 +27,8 @@ package org.spongepowered.common.data.persistence.schematic;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.util.Constants;
 
 // TODO - Migrate this to DataFixer DSL in 1.14.
 public class SchematicUpdater1_to_2 implements DataContentUpdater {
@@ -45,22 +45,22 @@ public class SchematicUpdater1_to_2 implements DataContentUpdater {
 
     @Override
     public DataView update(DataView content) {
-        content.set(DataQueries.Schematic.VERSION, 2);
-        content.set(DataQueries.Schematic.DATA_VERSION, DataUtil.MINECRAFT_DATA_VERSION);
-        content.getViewList(DataQueries.Schematic.Versions.V1_TILE_ENTITY_DATA).ifPresent(tiles -> {
+        content.set(Constants.Sponge.Schematic.VERSION, 2);
+        content.set(Constants.Sponge.Schematic.DATA_VERSION, DataUtil.MINECRAFT_DATA_VERSION);
+        content.getViewList(Constants.Sponge.Schematic.Versions.V1_TILE_ENTITY_DATA).ifPresent(tiles -> {
             tiles.forEach(tile -> {
                 // Remove unnecessary version information.
-                tile.getString(DataQueries.Schematic.Versions.V1_TILE_ENTITY_ID).ifPresent(id -> {
+                tile.getString(Constants.Sponge.Schematic.Versions.V1_TILE_ENTITY_ID).ifPresent(id -> {
                     // This is a fix for v1 created schematics by SpongeCommon implementation that was
                     // unfortunately breaking the rules on the schematic format. The format called for
                     // using "Id", but the implementation was saving "id", and it was reading "id".
-                    tile.remove(DataQueries.Schematic.Versions.V1_TILE_ENTITY_ID);
-                    tile.set(DataQueries.Schematic.BLOCKENTITY_ID, id);
+                    tile.remove(Constants.Sponge.Schematic.Versions.V1_TILE_ENTITY_ID);
+                    tile.set(Constants.Sponge.Schematic.BLOCKENTITY_ID, id);
                 });
                 tile.remove(Queries.CONTENT_VERSION);
             });
-            content.remove(DataQueries.Schematic.Versions.V1_TILE_ENTITY_DATA);
-            content.set(DataQueries.Schematic.BLOCKENTITY_DATA, tiles);
+            content.remove(Constants.Sponge.Schematic.Versions.V1_TILE_ENTITY_DATA);
+            content.set(Constants.Sponge.Schematic.BLOCKENTITY_DATA, tiles);
         });
         return content;
     }

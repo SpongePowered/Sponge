@@ -47,6 +47,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -62,8 +63,8 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
         final ResourceLocation name = EntityList.getKey((Class<? extends Entity>) value.getEntityClass());
         if (EntityList.ENTITY_EGGS.containsKey(name)) {
             final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(itemStack);
-            final NBTTagCompound subCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.SPAWNABLE_ENTITY_TAG);
-            subCompound.setString(NbtDataUtil.ENTITY_TYPE_ID, name.toString());
+            final NBTTagCompound subCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG);
+            subCompound.setString(Constants.Entity.ENTITY_TYPE_ID, name.toString());
             return true;
         }
         return false;
@@ -105,7 +106,7 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
             return DataTransactionResult.successNoData();
         }
         try {
-            NbtDataUtil.getItemCompound(itemStack).get().removeTag(NbtDataUtil.SPAWNABLE_ENTITY_TAG);
+            NbtDataUtil.getItemCompound(itemStack).get().removeTag(Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG);
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         } catch (Exception e) {
             return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();

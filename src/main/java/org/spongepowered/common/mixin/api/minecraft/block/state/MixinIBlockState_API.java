@@ -44,8 +44,8 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -181,7 +181,7 @@ public interface MixinIBlockState_API extends IBlockState, BlockState {
     default DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.Block.BLOCK_STATE, getId());
+                .set(Constants.Block.BLOCK_STATE, getId());
     }
 
     @Override

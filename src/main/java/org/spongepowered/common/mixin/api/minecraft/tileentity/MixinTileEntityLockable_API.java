@@ -47,9 +47,9 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,7 +67,7 @@ public abstract class MixinTileEntityLockable_API<T extends TileEntity & Carrier
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         if (this.code != null) {
-            container.set(DataQueries.BlockEntity.LOCK_CODE, this.code.getLock());
+            container.set(Constants.TileEntity.LOCK_CODE, this.code.getLock());
         }
         List<DataView> items = Lists.newArrayList();
         for (int i = 0; i < ((IInventory) this).getSizeInventory(); i++) {
@@ -76,12 +76,12 @@ public abstract class MixinTileEntityLockable_API<T extends TileEntity & Carrier
                 // todo make a helper object for this
                 DataContainer stackView = DataContainer.createNew()
                     .set(Queries.CONTENT_VERSION, 1)
-                    .set(DataQueries.BlockEntity.SLOT, i)
-                    .set(DataQueries.BlockEntity.SLOT_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).toContainer());
+                    .set(Constants.TileEntity.SLOT, i)
+                    .set(Constants.TileEntity.SLOT_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).toContainer());
                 items.add(stackView);
             }
         }
-        container.set(DataQueries.BlockEntity.ITEM_CONTENTS, items);
+        container.set(Constants.TileEntity.ITEM_CONTENTS, items);
         return container;
     }
 

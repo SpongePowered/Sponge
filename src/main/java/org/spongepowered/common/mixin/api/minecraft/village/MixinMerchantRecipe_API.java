@@ -33,7 +33,7 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -104,12 +104,12 @@ public abstract class MixinMerchantRecipe_API implements TradeOffer {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.TradeOffer.FIRST_QUERY, this.getFirstBuyingItem())
-                .set(DataQueries.TradeOffer.SECOND_QUERY, this.hasSecondItem() ? this.getSecondBuyingItem().get() : "none")
-                .set(DataQueries.TradeOffer.BUYING_QUERY, this.getItemToBuy())
-                .set(DataQueries.TradeOffer.EXPERIENCE_QUERY, this.doesGrantExperience())
-                .set(DataQueries.TradeOffer.MAX_QUERY, this.getMaxTradeUses())
-                .set(DataQueries.TradeOffer.USES_QUERY, this.getUses());
+                .set(Constants.Item.TradeOffer.FIRST_QUERY, this.getFirstBuyingItem())
+                .set(Constants.Item.TradeOffer.SECOND_QUERY, this.hasSecondItem() ? this.getSecondBuyingItem().get() : "none")
+                .set(Constants.Item.TradeOffer.BUYING_QUERY, this.getItemToBuy())
+                .set(Constants.Item.TradeOffer.EXPERIENCE_QUERY, this.doesGrantExperience())
+                .set(Constants.Item.TradeOffer.MAX_QUERY, this.getMaxTradeUses())
+                .set(Constants.Item.TradeOffer.USES_QUERY, this.getUses());
     }
 
 }

@@ -28,7 +28,7 @@ import net.minecraft.tileentity.TileEntityDispenser;
 import org.spongepowered.api.block.tileentity.carrier.Dispenser;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -41,8 +41,8 @@ public class SpongeDispenserBuilder extends SpongeLockableBuilder<Dispenser> {
     @Override
     protected Optional<Dispenser> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(dispenser -> {
-            if (container.contains(DataQueries.BlockEntity.CUSTOM_NAME)) {
-                ((TileEntityDispenser) dispenser).setCustomName(container.getString(DataQueries.BlockEntity.CUSTOM_NAME).get());
+            if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
+                ((TileEntityDispenser) dispenser).setCustomName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
             ((TileEntityDispenser) dispenser).validate();
             return dispenser;

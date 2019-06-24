@@ -34,7 +34,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -65,17 +64,17 @@ public interface CustomDataHolderBridge {
     default void removeCustomFromNbt(DataManipulator<?, ?> manipulator) {
         if (this instanceof DataCompoundHolder) {
             final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
-            if (spongeData.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
-                final NBTTagList tagList = spongeData.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
+            if (spongeData.hasKey(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
+                final NBTTagList tagList = spongeData.getTagList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
                 if (!tagList.isEmpty()) {
                     String id = DataUtil.getRegistrationFor(manipulator).getId();
                     for (int i = 0; i < tagList.tagCount(); i++) {
                         final NBTTagCompound tag = tagList.getCompoundTagAt(i);
-                        if (id.equals(tag.getString(NbtDataUtil.MANIPULATOR_ID))) {
+                        if (id.equals(tag.getString(Constants.Sponge.MANIPULATOR_ID))) {
                             tagList.removeTag(i);
                             break;
                         }
-                        final String dataClass = tag.getString(NbtDataUtil.CUSTOM_DATA_CLASS);
+                        final String dataClass = tag.getString(Constants.Sponge.CUSTOM_DATA_CLASS);
                         if (dataClass.equalsIgnoreCase(manipulator.getClass().getName())) {
                             tagList.removeTag(i);
                             break;

@@ -44,8 +44,8 @@ import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Objects;
@@ -118,9 +118,9 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(DataQueries.TileEntityArchetype.TILE_TYPE, this.type)
-                .set(DataQueries.TileEntityArchetype.BLOCK_STATE, this.blockState)
-                .set(DataQueries.TileEntityArchetype.TILE_DATA, getTileData())
+                .set(Constants.Sponge.TileEntityArchetype.TILE_TYPE, this.type)
+                .set(Constants.Sponge.TileEntityArchetype.BLOCK_STATE, this.blockState)
+                .set(Constants.Sponge.TileEntityArchetype.TILE_DATA, getTileData())
                 ;
     }
 

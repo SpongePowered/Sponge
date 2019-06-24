@@ -35,8 +35,8 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -65,20 +65,20 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
     @Override
     protected Optional<PotionEffect> buildContent(DataView container) throws InvalidDataException {
         checkNotNull(container);
-        if (!container.contains(DataQueries.Potions.POTION_TYPE) || !container.contains(DataQueries.Potions.POTION_DURATION)
-            || !container.contains(DataQueries.Potions.POTION_AMPLIFIER) || !container.contains(DataQueries.Potions.POTION_AMBIANCE)
-            || !container.contains(DataQueries.Potions.POTION_SHOWS_PARTICLES)) {
+        if (!container.contains(Constants.Item.Potions.POTION_TYPE) || !container.contains(Constants.Item.Potions.POTION_DURATION)
+            || !container.contains(Constants.Item.Potions.POTION_AMPLIFIER) || !container.contains(Constants.Item.Potions.POTION_AMBIANCE)
+            || !container.contains(Constants.Item.Potions.POTION_SHOWS_PARTICLES)) {
             return Optional.empty();
         }
-        String effectName = container.getString(DataQueries.Potions.POTION_TYPE).get();
+        String effectName = container.getString(Constants.Item.Potions.POTION_TYPE).get();
         Optional<PotionEffectType> optional = Sponge.getRegistry().getType(PotionEffectType.class, effectName);
         if (!optional.isPresent()) {
             throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
         }
-        int duration = container.getInt(DataQueries.Potions.POTION_DURATION).get();
-        int amplifier = container.getInt(DataQueries.Potions.POTION_AMPLIFIER).get();
-        boolean ambience = container.getBoolean(DataQueries.Potions.POTION_AMBIANCE).get();
-        boolean particles = container.getBoolean(DataQueries.Potions.POTION_SHOWS_PARTICLES).get();
+        int duration = container.getInt(Constants.Item.Potions.POTION_DURATION).get();
+        int amplifier = container.getInt(Constants.Item.Potions.POTION_AMPLIFIER).get();
+        boolean ambience = container.getBoolean(Constants.Item.Potions.POTION_AMBIANCE).get();
+        boolean particles = container.getBoolean(Constants.Item.Potions.POTION_SHOWS_PARTICLES).get();
         PotionEffect.Builder builder = new SpongePotionBuilder();
 
         return Optional.of(builder.potionType(optional.get())

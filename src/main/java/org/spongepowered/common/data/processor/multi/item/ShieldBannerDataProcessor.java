@@ -43,8 +43,8 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.processor.common.AbstractItemDataProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
 import java.util.Optional;
@@ -74,22 +74,22 @@ public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerD
 
             for (PatternLayer layer : patternLayers) {
                 NBTTagCompound compound = new NBTTagCompound();
-                compound.setString(NbtDataUtil.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).getHashname());
-                compound.setInteger(NbtDataUtil.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
+                compound.setString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).getHashname());
+                compound.setInteger(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
                 patterns.appendTag(compound);
             }
-            blockEntity.setTag(NbtDataUtil.BANNER_PATTERNS, patterns);
+            blockEntity.setTag(Constants.TileEntity.Banner.BANNER_PATTERNS, patterns);
         }
-        blockEntity.setInteger(NbtDataUtil.BANNER_BASE, ((EnumDyeColor) (Object) baseColor).getDyeDamage());
-        tagCompound.setTag(NbtDataUtil.BLOCK_ENTITY_TAG, blockEntity);
+        blockEntity.setInteger(Constants.TileEntity.Banner.BANNER_BASE, ((EnumDyeColor) (Object) baseColor).getDyeDamage());
+        tagCompound.setTag(Constants.Item.BLOCK_ENTITY_TAG, blockEntity);
         return true;
     }
 
     @Override
     public Map<Key<?>, ?> getValues(ItemStack itemStack) {
-        if (itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_UNBREAKABLE)) {
+        if (itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey(Constants.Item.ITEM_UNBREAKABLE)) {
             return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getItemDamage(),
-                    Keys.UNBREAKABLE, itemStack.getTagCompound().getBoolean(NbtDataUtil.ITEM_UNBREAKABLE));
+                    Keys.UNBREAKABLE, itemStack.getTagCompound().getBoolean(Constants.Item.ITEM_UNBREAKABLE));
         }
         return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getItemDamage(), Keys.UNBREAKABLE, false);
     }

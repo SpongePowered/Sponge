@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -81,9 +81,9 @@ public abstract class MixinGameProfile_API implements org.spongepowered.api.prof
         final DataContainer container = DataContainer.createNew();
 
         container.set(Queries.CONTENT_VERSION, this.getContentVersion());
-        container.set(DataQueries.User.UUID, this.getUniqueId().toString());
+        container.set(Constants.Entity.Player.UUID, this.getUniqueId().toString());
 
-        this.getName().ifPresent(name -> container.set(DataQueries.User.NAME, name));
+        this.getName().ifPresent(name -> container.set(Constants.Entity.Player.NAME, name));
 
         return container;
     }

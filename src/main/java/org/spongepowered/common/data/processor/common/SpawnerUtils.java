@@ -42,8 +42,8 @@ import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -69,9 +69,9 @@ public class SpawnerUtils {
     @SuppressWarnings("unchecked")
     public static void setNextEntity(MobSpawnerBaseLogic logic, WeightedSerializableObject<EntityArchetype> value) {
         NBTTagCompound compound = NbtTranslator.getInstance().translateData(value.get().getEntityData());
-        if (!compound.hasKey(NbtDataUtil.ENTITY_TYPE_ID)) {
+        if (!compound.hasKey(Constants.Entity.ENTITY_TYPE_ID)) {
             final ResourceLocation key = EntityList.getKey((Class<? extends Entity>) value.get().getType().getEntityClass());
-            compound.setString(NbtDataUtil.ENTITY_TYPE_ID, key != null ? key.toString() : "");
+            compound.setString(Constants.Entity.ENTITY_TYPE_ID, key != null ? key.toString() : "");
         }
 
         logic.setNextSpawnData(new WeightedSpawnerEntity((int) value.getWeight(), compound));
@@ -83,7 +83,7 @@ public class SpawnerUtils {
 
             NBTTagCompound nbt = weightedEntity.getNbt();
 
-            EntityType type = EntityUtil.fromNameToType(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID)).orElse(EntityTypes.PIG);
+            EntityType type = EntityUtil.fromNameToType(nbt.getString(Constants.Entity.ENTITY_TYPE_ID)).orElse(EntityTypes.PIG);
 
             EntityArchetype archetype = EntityArchetype.builder()
                     .type(type)
@@ -106,9 +106,9 @@ public class SpawnerUtils {
             WeightedObject<EntityArchetype> object = (WeightedObject<EntityArchetype>) entry;
 
             NBTTagCompound compound = NbtTranslator.getInstance().translateData(object.get().getEntityData());
-            if (!compound.hasKey(NbtDataUtil.ENTITY_TYPE_ID)) {
+            if (!compound.hasKey(Constants.Entity.ENTITY_TYPE_ID)) {
                 final ResourceLocation key = EntityList.getKey((Class<? extends Entity>) object.get().getType().getEntityClass());
-                compound.setString(NbtDataUtil.ENTITY_TYPE_ID, key != null ? key.toString() : "");
+                compound.setString(Constants.Entity.ENTITY_TYPE_ID, key != null ? key.toString() : "");
             }
 
 

@@ -32,7 +32,7 @@ import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public abstract class MixinTileEntityEnchantmentTable_API extends MixinTileEntit
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(DataQueries.BlockEntity.CUSTOM_NAME, this.customName);
+        container.set(Constants.TileEntity.CUSTOM_NAME, this.customName);
         return container;
     }
 

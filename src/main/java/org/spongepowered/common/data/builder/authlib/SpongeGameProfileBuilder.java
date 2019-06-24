@@ -29,7 +29,7 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -42,14 +42,14 @@ public class SpongeGameProfileBuilder extends AbstractDataBuilder<GameProfile> {
 
     @Override
     protected Optional<GameProfile> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQueries.User.UUID)) {
+        if (!container.contains(Constants.Entity.Player.UUID)) {
             return Optional.of(SpongeRepresentedPlayerData.NULL_PROFILE);
         }
-        UUID uuid = this.getUUIDByString(container.getString(DataQueries.User.UUID).get());
-        if (!container.contains(DataQueries.User.NAME)) {
+        UUID uuid = this.getUUIDByString(container.getString(Constants.Entity.Player.UUID).get());
+        if (!container.contains(Constants.Entity.Player.NAME)) {
             return Optional.of(GameProfile.of(uuid));
         }
-        return Optional.of(GameProfile.of(uuid, container.getString(DataQueries.User.NAME).get()));
+        return Optional.of(GameProfile.of(uuid, container.getString(Constants.Entity.Player.NAME).get()));
     }
 
     private UUID getUUIDByString(String uuidString) throws InvalidDataException {

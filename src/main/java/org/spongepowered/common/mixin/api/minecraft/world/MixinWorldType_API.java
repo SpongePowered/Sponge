@@ -41,8 +41,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
 
@@ -70,7 +70,7 @@ public abstract class MixinWorldType_API implements GeneratorType {
         // a serialized JSON string
         if (((WorldType) (Object) this) == WorldType.FLAT) {
             String defaultSettings = FlatGeneratorInfo.getDefaultFlatGenerator().toString();
-            return DataContainer.createNew().set(DataQueries.General.WORLD_CUSTOM_SETTINGS, defaultSettings);
+            return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS, defaultSettings);
         }
         if (((WorldType) (Object) this) == WorldType.CUSTOMIZED) {
             // They easiest way to go from ChunkProviderSettings to DataContainer is via json and NBT

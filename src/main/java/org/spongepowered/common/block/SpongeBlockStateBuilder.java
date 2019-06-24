@@ -37,7 +37,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -95,12 +95,12 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<BlockState> imp
 
     @Override
     protected Optional<BlockState> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQueries.Block.BLOCK_STATE)) {
+        if (!container.contains(Constants.Block.BLOCK_STATE)) {
             return Optional.empty();
         }
-        checkDataExists(container, DataQueries.Block.BLOCK_STATE);
+        checkDataExists(container, Constants.Block.BLOCK_STATE);
         try {
-            return container.getCatalogType(DataQueries.Block.BLOCK_STATE, BlockState.class);
+            return container.getCatalogType(Constants.Block.BLOCK_STATE, BlockState.class);
         } catch (Exception e) {
             throw new InvalidDataException("Could not retrieve a blockstate!", e);
         }

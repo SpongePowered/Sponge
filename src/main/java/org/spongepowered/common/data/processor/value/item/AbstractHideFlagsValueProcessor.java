@@ -33,7 +33,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
 
@@ -58,19 +57,19 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
         if (!container.hasTagCompound()) {
             container.setTagCompound(new NBTTagCompound());
         }
-        if (container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
-            int flag = container.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
+        if (container.getTagCompound().hasKey(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
+            int flag = container.getTagCompound().getInteger(Constants.Item.ITEM_HIDE_FLAGS);
             if (value) {
                 container.getTagCompound()
-                        .setInteger(NbtDataUtil.ITEM_HIDE_FLAGS, flag | this.flag);
+                        .setInteger(Constants.Item.ITEM_HIDE_FLAGS, flag | this.flag);
             } else {
                 container.getTagCompound()
-                        .setInteger(NbtDataUtil.ITEM_HIDE_FLAGS,
+                        .setInteger(Constants.Item.ITEM_HIDE_FLAGS,
                                 flag & ~this.flag);
             }
         } else {
             if (value) {
-                container.getTagCompound().setInteger(NbtDataUtil.ITEM_HIDE_FLAGS, this.flag);
+                container.getTagCompound().setInteger(Constants.Item.ITEM_HIDE_FLAGS, this.flag);
             }
         }
         return true;
@@ -78,8 +77,8 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
 
     @Override
     protected Optional<Boolean> getVal(ItemStack container) {
-        if (container.hasTagCompound() && container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
-            int flag = container.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
+        if (container.hasTagCompound() && container.getTagCompound().hasKey(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
+            int flag = container.getTagCompound().getInteger(Constants.Item.ITEM_HIDE_FLAGS);
             if ((flag & this.flag) != 0) {
                 return OptBool.TRUE;
             }

@@ -31,7 +31,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,15 +45,15 @@ public class SpongeLockableBuilder<T extends TileEntityCarrier> extends Abstract
     @Override
     protected Optional<T> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(lockable -> {
-            if (!container.contains(DataQueries.BlockEntity.ITEM_CONTENTS)) {
+            if (!container.contains(Constants.TileEntity.ITEM_CONTENTS)) {
                 ((TileEntity) lockable).invalidate();
                 return Optional.empty();
             }
-            List<DataView> contents = container.getViewList(DataQueries.BlockEntity.ITEM_CONTENTS).get();
+            List<DataView> contents = container.getViewList(Constants.TileEntity.ITEM_CONTENTS).get();
             for (DataView content: contents) {
                 net.minecraft.item.ItemStack stack = (net.minecraft.item.ItemStack) content
-                        .getSerializable(DataQueries.BlockEntity.SLOT_ITEM, ItemStack.class).get();
-                ((IInventory) lockable).setInventorySlotContents(content.getInt(DataQueries.BlockEntity.SLOT).get(), stack);
+                        .getSerializable(Constants.TileEntity.SLOT_ITEM, ItemStack.class).get();
+                ((IInventory) lockable).setInventorySlotContents(content.getInt(Constants.TileEntity.SLOT).get(), stack);
             }
             if (container.contains(Keys.LOCK_TOKEN.getQuery())) {
                 lockable.offer(Keys.LOCK_TOKEN, container.getString(Keys.LOCK_TOKEN.getQuery()).get());

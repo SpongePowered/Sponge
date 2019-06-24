@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.Constants;
@@ -193,7 +192,7 @@ public class MixinOwnershipTrackedBridge implements OwnershipTrackedBridge {
         NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey.compoundKey);
 
 
-        if (!creatorNbt.hasKey(NbtDataUtil.UUID_MOST) && !creatorNbt.hasKey(NbtDataUtil.UUID_LEAST)) {
+        if (!creatorNbt.hasKey(Constants.UUID_MOST) && !creatorNbt.hasKey(Constants.UUID_LEAST)) {
             return null;
         }
 

@@ -36,7 +36,6 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.type.SpongeSkullType;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.concurrent.CompletableFuture;
@@ -86,12 +85,12 @@ public class SkullUtils {
         if (isValidItemStack(skull) && SkullUtils.getSkullType(skull.getMetadata()).equals(SkullTypes.PLAYER)) {
             if (profile == null || profile.equals(SpongeRepresentedPlayerData.NULL_PROFILE)) {
                 if (skull.getTagCompound() != null) {
-                    skull.getTagCompound().removeTag(NbtDataUtil.ITEM_SKULL_OWNER);
+                    skull.getTagCompound().removeTag(Constants.Item.Skull.ITEM_SKULL_OWNER);
                 }
             } else {
                 final NBTTagCompound nbt = new NBTTagCompound();
                 NBTUtil.writeGameProfile(nbt, (com.mojang.authlib.GameProfile) resolveProfileIfNecessary(profile));
-                skull.setTagInfo(NbtDataUtil.ITEM_SKULL_OWNER, nbt);
+                skull.setTagInfo(Constants.Item.Skull.ITEM_SKULL_OWNER, nbt);
             }
             return true;
         }

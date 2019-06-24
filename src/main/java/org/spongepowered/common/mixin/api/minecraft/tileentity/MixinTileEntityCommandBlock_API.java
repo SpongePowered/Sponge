@@ -32,8 +32,8 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 
@@ -58,12 +58,12 @@ public abstract class MixinTileEntityCommandBlock_API extends MixinTileEntity_AP
     @SuppressWarnings("deprecated")
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(DataQueries.BlockEntity.CommandBlock.STORED_COMMAND, this.getCommandBlockLogic().getCommand());
-        container.set(DataQueries.BlockEntity.CommandBlock.SUCCESS_COUNT, this.getCommandBlockLogic().getSuccessCount());
-        container.set(DataQueries.BlockEntity.CUSTOM_NAME, this.getCommandBlockLogic().getName());
-        container.set(DataQueries.BlockEntity.CommandBlock.DOES_TRACK_OUTPUT, this.getCommandBlockLogic().shouldTrackOutput());
+        container.set(Constants.TileEntity.CommandBlock.STORED_COMMAND, this.getCommandBlockLogic().getCommand());
+        container.set(Constants.TileEntity.CommandBlock.SUCCESS_COUNT, this.getCommandBlockLogic().getSuccessCount());
+        container.set(Constants.TileEntity.CUSTOM_NAME, this.getCommandBlockLogic().getName());
+        container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.getCommandBlockLogic().shouldTrackOutput());
         if (this.getCommandBlockLogic().shouldTrackOutput()) {
-            container.set(DataQueries.BlockEntity.CommandBlock.TRACKED_OUTPUT, SpongeTexts.toLegacy(this.getCommandBlockLogic().getLastOutput()));
+            container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, SpongeTexts.toLegacy(this.getCommandBlockLogic().getLastOutput()));
         }
         return container;
     }

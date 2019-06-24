@@ -36,8 +36,8 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -136,24 +136,24 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     @Override
     protected Optional<TradeOffer> buildContent(DataView container) throws InvalidDataException {
         if (!container.contains(
-            DataQueries.TradeOffer.FIRST_QUERY,
-            DataQueries.TradeOffer.SECOND_QUERY,
-            DataQueries.TradeOffer.EXPERIENCE_QUERY,
-            DataQueries.TradeOffer.MAX_QUERY,
-            DataQueries.TradeOffer.USES_QUERY,
-            DataQueries.TradeOffer.BUYING_QUERY)) {
+            Constants.Item.TradeOffer.FIRST_QUERY,
+            Constants.Item.TradeOffer.SECOND_QUERY,
+            Constants.Item.TradeOffer.EXPERIENCE_QUERY,
+            Constants.Item.TradeOffer.MAX_QUERY,
+            Constants.Item.TradeOffer.USES_QUERY,
+            Constants.Item.TradeOffer.BUYING_QUERY)) {
             return Optional.empty();
         }
-        final ItemStack firstItem = container.getSerializable(DataQueries.TradeOffer.FIRST_QUERY, ItemStack.class).get();
-        final ItemStack buyingItem = container.getSerializable(DataQueries.TradeOffer.BUYING_QUERY, ItemStack.class).get();
+        final ItemStack firstItem = container.getSerializable(Constants.Item.TradeOffer.FIRST_QUERY, ItemStack.class).get();
+        final ItemStack buyingItem = container.getSerializable(Constants.Item.TradeOffer.BUYING_QUERY, ItemStack.class).get();
         final ItemStack secondItem;
         final boolean secondPresent;
-        if (container.getString(DataQueries.TradeOffer.SECOND_QUERY).isPresent() && container.getString(DataQueries.TradeOffer.SECOND_QUERY).get().equals("none")) {
+        if (container.getString(Constants.Item.TradeOffer.SECOND_QUERY).isPresent() && container.getString(Constants.Item.TradeOffer.SECOND_QUERY).get().equals("none")) {
             secondPresent = false;
             secondItem = null;
         } else {
             secondPresent = true;
-            secondItem = container.getSerializable(DataQueries.TradeOffer.SECOND_QUERY, ItemStack.class).get();
+            secondItem = container.getSerializable(Constants.Item.TradeOffer.SECOND_QUERY, ItemStack.class).get();
         }
         TradeOffer.Builder builder = new SpongeTradeOfferBuilder();
         builder.firstBuyingItem(firstItem);
@@ -161,9 +161,9 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
             builder.secondBuyingItem(secondItem);
         }
         builder.sellingItem(buyingItem)
-                .maxUses(container.getInt(DataQueries.TradeOffer.MAX_QUERY).get())
-                .uses(container.getInt(DataQueries.TradeOffer.USES_QUERY).get())
-                .canGrantExperience(container.getBoolean(DataQueries.TradeOffer.EXPERIENCE_QUERY).get());
+                .maxUses(container.getInt(Constants.Item.TradeOffer.MAX_QUERY).get())
+                .uses(container.getInt(Constants.Item.TradeOffer.USES_QUERY).get())
+                .canGrantExperience(container.getBoolean(Constants.Item.TradeOffer.EXPERIENCE_QUERY).get());
         return Optional.of(builder.build());
     }
 }

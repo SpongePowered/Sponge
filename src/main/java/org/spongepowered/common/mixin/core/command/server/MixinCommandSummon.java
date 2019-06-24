@@ -55,8 +55,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.util.Constants;
 
 @Mixin(CommandSummon.class)
 public abstract class MixinCommandSummon extends CommandBase {
@@ -67,12 +67,12 @@ public abstract class MixinCommandSummon extends CommandBase {
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT))
     private Entity onAttemptSpawnEntity(NBTTagCompound nbt, World world, double x, double y, double z, boolean b, MinecraftServer server, ICommandSender sender, String[] args) {
-        if ("Minecart".equals(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
-            nbt.setString(NbtDataUtil.ENTITY_TYPE_ID,
-                    EntityMinecart.Type.values()[nbt.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
-            nbt.removeTag(NbtDataUtil.MINECART_TYPE);
+        if ("Minecart".equals(nbt.getString(Constants.Entity.ENTITY_TYPE_ID))) {
+            nbt.setString(Constants.Entity.ENTITY_TYPE_ID,
+                    EntityMinecart.Type.values()[nbt.getInteger(Constants.Entity.Minecart.MINECART_TYPE)].getName());
+            nbt.removeTag(Constants.Entity.Minecart.MINECART_TYPE);
         }
-        Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID)));
+        Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(nbt.getString(Constants.Entity.ENTITY_TYPE_ID)));
         if (entityClass == null) {
             return null;
         }

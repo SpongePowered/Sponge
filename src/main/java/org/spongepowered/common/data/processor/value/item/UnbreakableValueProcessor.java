@@ -32,8 +32,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -61,14 +61,14 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
         if (!container.hasTagCompound()) {
             container.setTagCompound(new NBTTagCompound());
         }
-        container.getTagCompound().setBoolean(NbtDataUtil.ITEM_UNBREAKABLE, value);
+        container.getTagCompound().setBoolean(Constants.Item.ITEM_UNBREAKABLE, value);
         return true;
     }
 
     @Override
     public Optional<Boolean> getVal(ItemStack container) {
-        if (container.hasTagCompound() && container.getTagCompound().hasKey(NbtDataUtil.ITEM_UNBREAKABLE)) {
-            return Optional.of(container.getTagCompound().getBoolean(NbtDataUtil.ITEM_UNBREAKABLE));
+        if (container.hasTagCompound() && container.getTagCompound().hasKey(Constants.Item.ITEM_UNBREAKABLE)) {
+            return Optional.of(container.getTagCompound().getBoolean(Constants.Item.ITEM_UNBREAKABLE));
         }
         return Optional.of(false);
     }

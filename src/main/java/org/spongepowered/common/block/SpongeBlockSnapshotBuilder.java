@@ -52,9 +52,8 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Iterator;
@@ -119,9 +118,9 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     public SpongeBlockSnapshotBuilder position(final Vector3i position) {
         this.coords = checkNotNull(position);
         if (this.compound != null) {
-            this.compound.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_X, position.getX());
-            this.compound.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_Y, position.getY());
-            this.compound.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_Z, position.getZ());
+            this.compound.setInteger(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X, position.getX());
+            this.compound.setInteger(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y, position.getY());
+            this.compound.setInteger(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Z, position.getZ());
         }
         return this;
     }
@@ -242,10 +241,10 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     protected Optional<BlockSnapshot> buildContent(final DataView container) throws InvalidDataException {
-        if (!container.contains(DataQueries.Block.BLOCK_STATE, Queries.WORLD_ID, DataQueries.Sponge.SNAPSHOT_WORLD_POSITION)) {
+        if (!container.contains(Constants.Block.BLOCK_STATE, Queries.WORLD_ID, Constants.Sponge.SNAPSHOT_WORLD_POSITION)) {
             return Optional.empty();
         }
-        checkDataExists(container, DataQueries.Block.BLOCK_STATE);
+        checkDataExists(container, Constants.Block.BLOCK_STATE);
         checkDataExists(container, Queries.WORLD_ID);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
@@ -254,10 +253,10 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         final Optional<String> notifierUuid = container.getString(Queries.NOTIFIER_ID);
 
         // We now reconstruct the custom data and all extra data.
-        final BlockState blockState = container.getSerializable(DataQueries.Block.BLOCK_STATE, BlockState.class).get();
+        final BlockState blockState = container.getSerializable(Constants.Block.BLOCK_STATE, BlockState.class).get();
         BlockState extendedState = null;
-        if (container.contains(DataQueries.Block.BLOCK_EXTENDED_STATE)) {
-            extendedState = container.getSerializable(DataQueries.Block.BLOCK_EXTENDED_STATE, BlockState.class).get();
+        if (container.contains(Constants.Block.BLOCK_EXTENDED_STATE)) {
+            extendedState = container.getSerializable(Constants.Block.BLOCK_EXTENDED_STATE, BlockState.class).get();
         } else {
             extendedState = blockState;
         }
@@ -272,13 +271,13 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         if (notifierUuid.isPresent()) {
             builder.notifier(UUID.fromString(notifierUuid.get()));
         }
-        final Optional<DataView> unsafeCompound = container.getView(DataQueries.Sponge.UNSAFE_NBT);
+        final Optional<DataView> unsafeCompound = container.getView(Constants.Sponge.UNSAFE_NBT);
         final NBTTagCompound compound = unsafeCompound.isPresent() ? NbtTranslator.getInstance().translateData(unsafeCompound.get()) : null;
         if (compound != null) {
             builder.unsafeNbt(compound);
         }
-        if (container.contains(DataQueries.Sponge.SNAPSHOT_TILE_DATA)) {
-            final List<DataView> dataViews = container.getViewList(DataQueries.Sponge.SNAPSHOT_TILE_DATA).get();
+        if (container.contains(Constants.Sponge.SNAPSHOT_TILE_DATA)) {
+            final List<DataView> dataViews = container.getViewList(Constants.Sponge.SNAPSHOT_TILE_DATA).get();
             DataUtil.deserializeImmutableManipulatorList(dataViews).stream().forEach(builder::add);
         }
         return Optional.of(builder.build());

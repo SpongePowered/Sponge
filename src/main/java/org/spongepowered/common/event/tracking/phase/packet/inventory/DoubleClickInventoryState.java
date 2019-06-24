@@ -37,8 +37,8 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStopState;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +48,7 @@ import javax.annotation.Nullable;
 public final class DoubleClickInventoryState extends BasicInventoryPacketState {
 
     public DoubleClickInventoryState() {
-        super(PacketConstants.MODE_DOUBLE_CLICK | PacketConstants.BUTTON_PRIMARY | PacketConstants.BUTTON_SECONDARY, PacketConstants.MASK_MODE | PacketConstants.MASK_BUTTON);
+        super(Constants.Networking.MODE_DOUBLE_CLICK | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY, Constants.Networking.MASK_MODE | Constants.Networking.MASK_BUTTON);
     }
 
     @Override

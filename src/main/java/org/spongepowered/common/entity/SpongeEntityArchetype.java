@@ -49,7 +49,6 @@ import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
@@ -86,11 +85,11 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         if (this.position != null) {
             return Optional.of(this.position);
         }
-        if (!this.data.hasKey(NbtDataUtil.ENTITY_POSITION, Constants.NBT.TAG_LIST)) {
+        if (!this.data.hasKey(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_LIST)) {
             return Optional.empty();
         }
         try {
-            NBTTagList pos = this.data.getTagList(NbtDataUtil.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+            NBTTagList pos = this.data.getTagList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
             double x = pos.getDoubleAt(0);
             double y = pos.getDoubleAt(1);
             double z = pos.getDoubleAt(2);
@@ -189,8 +188,8 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(DataQueries.EntityArchetype.ENTITY_TYPE, this.type)
-                .set(DataQueries.EntityArchetype.ENTITY_DATA, getEntityData())
+                .set(Constants.Sponge.EntityArchetype.ENTITY_TYPE, this.type)
+                .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, getEntityData())
                 ;
     }
 

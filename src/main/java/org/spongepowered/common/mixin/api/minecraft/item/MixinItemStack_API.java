@@ -48,12 +48,12 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.item.ItemBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.List;
@@ -102,12 +102,12 @@ public abstract class MixinItemStack_API implements DataHolder {       // confli
         if (this.shadow$isEmpty()) {
             throw new IllegalArgumentException("Cannot set data on empty item stacks!");
         }
-        if (!container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
+        if (!container.contains(Constants.Sponge.UNSAFE_NBT)) {
             throw new InvalidDataException("There's no NBT Data set in the provided container");
         }
-        final DataView nbtData = container.getView(DataQueries.Sponge.UNSAFE_NBT).get();
+        final DataView nbtData = container.getView(Constants.Sponge.UNSAFE_NBT).get();
         try {
-            final int integer = container.getInt(DataQueries.ItemStack.DAMAGE_VALUE).orElse(this.getItemDamage());
+            final int integer = container.getInt(Constants.ItemStack.DAMAGE_VALUE).orElse(this.getItemDamage());
             this.setItemDamage(integer);
             final NBTTagCompound stackCompound = NbtTranslator.getInstance().translate(nbtData);
             this.setTagCompound(stackCompound);
@@ -134,27 +134,27 @@ public abstract class MixinItemStack_API implements DataHolder {       // confli
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.ItemStack.TYPE, this.apiStack$getType().getId())
-                .set(DataQueries.ItemStack.COUNT, this.apiStack$getQuantity())
-                .set(DataQueries.ItemStack.DAMAGE_VALUE, this.getItemDamage());
+                .set(Constants.ItemStack.TYPE, this.apiStack$getType().getId())
+                .set(Constants.ItemStack.COUNT, this.apiStack$getQuantity())
+                .set(Constants.ItemStack.DAMAGE_VALUE, this.getItemDamage());
         if (hasTagCompound()) { // no tag? no data, simple as that.
             final NBTTagCompound compound = getTagCompound().copy();
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-                if (spongeCompound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {
-                    spongeCompound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+            if (compound.hasKey(Constants.Sponge.SPONGE_DATA)) {
+                final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Sponge.SPONGE_DATA);
+                if (spongeCompound.hasKey(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
+                    spongeCompound.removeTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
             NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
             if (!compound.isEmpty()) {
                 final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
-                container.set(DataQueries.Sponge.UNSAFE_NBT, unsafeNbt);
+                container.set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
             }
         }
         // We only need to include the custom data, not vanilla manipulators supported by sponge implementation
         final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
-            container.set(DataQueries.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
+            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
         try {
             SpongeImplHooks.writeItemStackCapabilitiesToDataView(container, (net.minecraft.item.ItemStack) (Object) this);

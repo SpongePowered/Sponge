@@ -46,8 +46,8 @@ import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeObjective;
-import org.spongepowered.common.scoreboard.SpongeScoreboardConstants;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -140,7 +140,7 @@ public abstract class MixinServerScoreboard_API extends Scoreboard {
             }
         }
 
-        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SPacketScoreboardObjective(scoreObjective, SpongeScoreboardConstants.OBJECTIVE_PACKET_REMOVE));
+        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SPacketScoreboardObjective(scoreObjective, Constants.Scoreboards.OBJECTIVE_PACKET_REMOVE));
 
         final List list = this.scoreObjectiveCriterias.get(scoreObjective.getCriteria());
 

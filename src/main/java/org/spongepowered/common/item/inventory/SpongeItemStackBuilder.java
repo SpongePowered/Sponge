@@ -56,9 +56,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.util.Constants;
 
@@ -157,29 +155,29 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     @Override
     public ItemStack.Builder fromContainer(DataView container) {
         checkNotNull(container);
-        if (!container.contains(DataQueries.ItemStack.TYPE) || !container.contains(DataQueries.ItemStack.COUNT)
-            || !container.contains(DataQueries.ItemStack.DAMAGE_VALUE)) {
+        if (!container.contains(Constants.ItemStack.TYPE) || !container.contains(Constants.ItemStack.COUNT)
+            || !container.contains(Constants.ItemStack.DAMAGE_VALUE)) {
             return this;
         }
         reset();
 
-        final int count = getData(container, DataQueries.ItemStack.COUNT, Integer.class);
+        final int count = getData(container, Constants.ItemStack.COUNT, Integer.class);
         quantity(count);
 
-        final String itemTypeId = getData(container, DataQueries.ItemStack.TYPE, String.class);
+        final String itemTypeId = getData(container, Constants.ItemStack.TYPE, String.class);
         final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).get();
         itemType(itemType);
 
-        this.damageValue = getData(container, DataQueries.ItemStack.DAMAGE_VALUE, Integer.class);
-        if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
-            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.Sponge.UNSAFE_NBT).get());
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-                compound.removeTag(NbtDataUtil.SPONGE_DATA);
+        this.damageValue = getData(container, Constants.ItemStack.DAMAGE_VALUE, Integer.class);
+        if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
+            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            if (compound.hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+                compound.removeTag(Constants.Sponge.SPONGE_DATA);
             }
             this.compound = compound;
         }
-        if (container.contains(DataQueries.Sponge.DATA_MANIPULATORS)) {
-            final List<DataView> views = container.getViewList(DataQueries.Sponge.DATA_MANIPULATORS).get();
+        if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
+            final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
             final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
             final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
             this.itemDataSet = new HashSet<>();
@@ -223,7 +221,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             final Optional<NBTTagCompound> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
             if (compound.isPresent()) {
                 this.compound = new NBTTagCompound();
-                this.compound.setTag(NbtDataUtil.BLOCK_ENTITY_TAG, compound.get());
+                this.compound.setTag(Constants.Item.BLOCK_ENTITY_TAG, compound.get());
             }
             // todo probably needs more testing, but this'll do donkey...
         } else { // TODO handle through the API specifically handling the rest of the data stuff
@@ -272,21 +270,21 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     @Override
     protected Optional<ItemStack> buildContent(DataView container) throws InvalidDataException {
         checkNotNull(container);
-        if (!container.contains(DataQueries.ItemStack.TYPE) || !container.contains(DataQueries.ItemStack.COUNT) || !container.contains(
-            DataQueries.ItemStack.DAMAGE_VALUE)) {
+        if (!container.contains(Constants.ItemStack.TYPE) || !container.contains(Constants.ItemStack.COUNT) || !container.contains(
+            Constants.ItemStack.DAMAGE_VALUE)) {
             return Optional.empty();
         }
-        final String itemTypeId = getData(container, DataQueries.ItemStack.TYPE, String.class);
-        final int count = getData(container, DataQueries.ItemStack.COUNT, Integer.class);
+        final String itemTypeId = getData(container, Constants.ItemStack.TYPE, String.class);
+        final int count = getData(container, Constants.ItemStack.COUNT, Integer.class);
         final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).orElseThrow(() -> new IllegalStateException("Unable to find item with id: " + itemTypeId));
-        final int damage = getData(container, DataQueries.ItemStack.DAMAGE_VALUE, Integer.class);
+        final int damage = getData(container, Constants.ItemStack.DAMAGE_VALUE, Integer.class);
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count, damage);
-        if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
-            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.Sponge.UNSAFE_NBT).get());
+        if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
+            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             itemStack.setTagCompound(compound);
         }
-        if (container.contains(DataQueries.Sponge.DATA_MANIPULATORS)) {
-            final List<DataView> views = container.getViewList(DataQueries.Sponge.DATA_MANIPULATORS).get();
+        if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
+            final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
             final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
             final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
             for (DataManipulator<?, ?> manipulator : manipulators) {

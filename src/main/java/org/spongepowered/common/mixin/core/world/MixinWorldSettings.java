@@ -52,8 +52,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
+import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -138,7 +138,7 @@ public abstract class MixinWorldSettings implements WorldSettingsBridge {
         }
         // If null, assume custom
         if (settings == null) {
-            settings = DataContainer.createNew().set(DataQueries.General.WORLD_CUSTOM_SETTINGS, generatorOptions);
+            settings = DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS, generatorOptions);
         }
         this.generatorSettings = settings;
     }
@@ -258,7 +258,7 @@ public abstract class MixinWorldSettings implements WorldSettingsBridge {
     @Override
     public void bridge$setGeneratorSettings(DataContainer generatorSettings) {
         // Update the generatorOptions string
-        Optional<String> optCustomSettings = generatorSettings.getString(DataQueries.General.WORLD_CUSTOM_SETTINGS);
+        Optional<String> optCustomSettings = generatorSettings.getString(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS);
         if (optCustomSettings.isPresent()) {
             this.generatorOptions = optCustomSettings.get();
         } else {

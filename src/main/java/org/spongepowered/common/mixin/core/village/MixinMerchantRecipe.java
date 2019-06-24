@@ -25,18 +25,10 @@
 package org.spongepowered.common.mixin.core.village;
 
 import net.minecraft.village.MerchantRecipe;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
-
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 

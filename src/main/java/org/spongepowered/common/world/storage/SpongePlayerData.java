@@ -31,7 +31,7 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -83,9 +83,9 @@ public class SpongePlayerData implements DataSerializable {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.User.UUID, this.uuid.toString())
-                .set(DataQueries.Sponge.PlayerData.PLAYER_DATA_JOIN, this.firstJoined)
-                .set(DataQueries.Sponge.PlayerData.PLAYER_DATA_LAST, this.lastJoined);
+                .set(Constants.Entity.Player.UUID, this.uuid.toString())
+                .set(Constants.Sponge.PlayerData.PLAYER_DATA_JOIN, this.firstJoined)
+                .set(Constants.Sponge.PlayerData.PLAYER_DATA_LAST, this.lastJoined);
     }
 
     public static final class Builder extends AbstractDataBuilder<SpongePlayerData> implements DataBuilder<SpongePlayerData> {
@@ -96,11 +96,11 @@ public class SpongePlayerData implements DataSerializable {
 
         @Override
         protected Optional<SpongePlayerData> buildContent(DataView container) throws InvalidDataException {
-            if (container.contains(DataQueries.User.UUID, DataQueries.Sponge.PlayerData.PLAYER_DATA_JOIN, DataQueries.Sponge.PlayerData.PLAYER_DATA_LAST)) {
-                final String idString = container.getString(DataQueries.User.UUID).get();
+            if (container.contains(Constants.Entity.Player.UUID, Constants.Sponge.PlayerData.PLAYER_DATA_JOIN, Constants.Sponge.PlayerData.PLAYER_DATA_LAST)) {
+                final String idString = container.getString(Constants.Entity.Player.UUID).get();
                 final UUID uuid = UUID.fromString(idString);
-                final long firstJoin = container.getLong(DataQueries.Sponge.PlayerData.PLAYER_DATA_JOIN).get();
-                final long lastJoin = container.getLong(DataQueries.Sponge.PlayerData.PLAYER_DATA_LAST).get();
+                final long firstJoin = container.getLong(Constants.Sponge.PlayerData.PLAYER_DATA_JOIN).get();
+                final long lastJoin = container.getLong(Constants.Sponge.PlayerData.PLAYER_DATA_LAST).get();
                 final SpongePlayerData data = new SpongePlayerData();
                 data.uuid = uuid;
                 data.firstJoined = firstJoin;

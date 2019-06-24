@@ -65,13 +65,13 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
             return Optional.empty();
         }
         final NBTTagCompound mainCompound = itemStack.getTagCompound();
-        if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, Constants.NBT.TAG_COMPOUND)
-                || !mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG).hasKey(NbtDataUtil.BLOCK_ENTITY_ID)) {
+        if (!mainCompound.hasKey(Constants.Item.BLOCK_ENTITY_TAG, Constants.NBT.TAG_COMPOUND)
+                || !mainCompound.getCompoundTag(Constants.Item.BLOCK_ENTITY_TAG).hasKey(Constants.Item.BLOCK_ENTITY_ID)) {
             return Optional.empty();
         }
-        final NBTTagCompound tileCompound = mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
-        final String id = tileCompound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
-        if (!id.equalsIgnoreCase(NbtDataUtil.SIGN)) {
+        final NBTTagCompound tileCompound = mainCompound.getCompoundTag(Constants.Item.BLOCK_ENTITY_TAG);
+        final String id = tileCompound.getString(Constants.Item.BLOCK_ENTITY_ID);
+        if (!id.equalsIgnoreCase(Constants.TileEntity.SIGN)) {
             return Optional.empty();
         }
         final List<Text> texts = Lists.newArrayListWithCapacity(4);
@@ -114,8 +114,8 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
     @Override
     protected boolean set(ItemStack itemStack, List<Text> lines) {
         final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(itemStack);
-        final NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.BLOCK_ENTITY_TAG);
-        tileCompound.setString(NbtDataUtil.BLOCK_ENTITY_ID, NbtDataUtil.SIGN);
+        final NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, Constants.Item.BLOCK_ENTITY_TAG);
+        tileCompound.setString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
         for (int i = 0; i < 4; i++) {
             Text line = lines.size() > i ? lines.get(i) : Text.EMPTY;
             if (line == null) {
@@ -137,7 +137,7 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
             return DataTransactionResult.successNoData();
         }
         try {
-            NbtDataUtil.getItemCompound(itemStack).get().removeTag(NbtDataUtil.BLOCK_ENTITY_TAG);
+            NbtDataUtil.getItemCompound(itemStack).get().removeTag(Constants.Item.BLOCK_ENTITY_TAG);
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         } catch (Exception e) {
             return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();

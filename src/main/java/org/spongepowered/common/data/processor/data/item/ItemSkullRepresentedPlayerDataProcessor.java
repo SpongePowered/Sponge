@@ -39,9 +39,9 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.SkullUtils;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -80,7 +80,7 @@ public class ItemSkullRepresentedPlayerDataProcessor
     @Override
     protected Optional<GameProfile> getVal(ItemStack itemStack) {
         if (SkullUtils.isValidItemStack(itemStack) && SkullUtils.getSkullType(itemStack.getMetadata()).equals(SkullTypes.PLAYER)) {
-            final NBTTagCompound nbt = itemStack.getSubCompound(NbtDataUtil.ITEM_SKULL_OWNER);
+            final NBTTagCompound nbt = itemStack.getSubCompound(Constants.Item.Skull.ITEM_SKULL_OWNER);
             final com.mojang.authlib.GameProfile mcProfile = nbt == null ? null : NBTUtil.readGameProfileFromNBT(nbt);
             return Optional.ofNullable((GameProfile) mcProfile);
         }

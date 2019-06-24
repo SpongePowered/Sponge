@@ -60,7 +60,7 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
 import java.util.Optional;
@@ -83,16 +83,16 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
     @Override
     protected Optional<T> buildContent(DataView container) throws InvalidDataException {
         checkNotNull(container);
-        if (!container.contains(DataQueries.BlockEntity.TILE_TYPE, DataQueries.BlockEntity.WORLD, Queries.POSITION_X, Queries.POSITION_Y, Queries.POSITION_Z)) {
+        if (!container.contains(Constants.TileEntity.TILE_TYPE, Constants.TileEntity.WORLD, Queries.POSITION_X, Queries.POSITION_Y, Queries.POSITION_Z)) {
             return Optional.empty();
         }
-        String worldName = container.getString(DataQueries.BlockEntity.WORLD).get();
+        String worldName = container.getString(Constants.TileEntity.WORLD).get();
         Optional<World> worldOptional = Sponge.getGame().getServer().getWorld(worldName);
         if (!worldOptional.isPresent()) {
             throw new InvalidDataException("The provided container references a world that does not exist!");
         }
 
-        Class<? extends TileEntity> clazz = TileEntity.REGISTRY.getObject(new ResourceLocation(container.getString(DataQueries.BlockEntity.TILE_TYPE).get()));
+        Class<? extends TileEntity> clazz = TileEntity.REGISTRY.getObject(new ResourceLocation(container.getString(Constants.TileEntity.TILE_TYPE).get()));
         if (clazz == null) {
             // TODO do we want to throw an InvalidDataException since the class is not registered?
             return Optional.empty(); // basically we didn't manage to find the class and the class isn't even registered with MC
@@ -104,9 +104,9 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         }
         // Now we should be ready to actually translate the TileEntity with the right block.
 
-        final int x = container.getInt(DataQueries.DataSerializers.X_POS).get();
-        final int y = container.getInt(DataQueries.DataSerializers.Y_POS).get();
-        final int z = container.getInt(DataQueries.DataSerializers.Z_POS).get();
+        final int x = container.getInt(Constants.DataSerializers.X_POS).get();
+        final int y = container.getInt(Constants.DataSerializers.Y_POS).get();
+        final int z = container.getInt(Constants.DataSerializers.Z_POS).get();
 
         worldOptional.get().getLocation(x, y, z).setBlockType(type);
         BlockPos pos = new BlockPos(x, y, z);

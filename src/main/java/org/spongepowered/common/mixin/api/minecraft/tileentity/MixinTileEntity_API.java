@@ -47,9 +47,9 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
@@ -91,14 +91,14 @@ public abstract class MixinTileEntity_API implements TileEntity {
             .set(Queries.POSITION_X, this.getPos().getX())
             .set(Queries.POSITION_Y, this.getPos().getY())
             .set(Queries.POSITION_Z, this.getPos().getZ())
-            .set(DataQueries.BlockEntity.TILE_TYPE, this.api$TileEntityType.getId());
+            .set(Constants.TileEntity.TILE_TYPE, this.api$TileEntityType.getId());
         final NBTTagCompound compound = new NBTTagCompound();
         this.writeToNBT(compound);
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
-        container.set(DataQueries.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
+        container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
         final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
-            container.set(DataQueries.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
+            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
         return container;
     }
@@ -109,8 +109,8 @@ public abstract class MixinTileEntity_API implements TileEntity {
             && container.contains(Queries.POSITION_X)
             && container.contains(Queries.POSITION_Y)
             && container.contains(Queries.POSITION_Z)
-            && container.contains(DataQueries.BlockEntity.TILE_TYPE)
-            && container.contains(DataQueries.Sponge.UNSAFE_NBT);
+            && container.contains(Constants.TileEntity.TILE_TYPE)
+            && container.contains(Constants.Sponge.UNSAFE_NBT);
     }
 
     @Override

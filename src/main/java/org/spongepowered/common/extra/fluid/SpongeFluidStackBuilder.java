@@ -36,7 +36,7 @@ import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -71,8 +71,8 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
         this.fluidType = fluidStackSnapshot.getFluid();
         this.volume = fluidStackSnapshot.getVolume();
         final DataContainer container = fluidStackSnapshot.toContainer();
-        if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
-            this.extra = container.getView(DataQueries.Sponge.UNSAFE_NBT).get().copy();
+        if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
+            this.extra = container.getView(Constants.Sponge.UNSAFE_NBT).get().copy();
         }
         return this;
     }
@@ -89,27 +89,27 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
         this.fluidType = value.getFluid();
         this.volume = value.getVolume();
         final DataContainer container = value.toContainer();
-        if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
-            this.extra = container.getView(DataQueries.Sponge.UNSAFE_NBT).get().copy();
+        if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
+            this.extra = container.getView(Constants.Sponge.UNSAFE_NBT).get().copy();
         }
         return this;
     }
 
     @Override
     protected Optional<FluidStack> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQueries.Fluids.FLUID_TYPE, DataQueries.Fluids.FLUID_VOLUME)) {
+        if (!container.contains(Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME)) {
             return Optional.empty();
         }
         reset();
-        final String fluidId = container.getString(DataQueries.Fluids.FLUID_TYPE).get();
+        final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
         final Optional<FluidType> fluidType = Sponge.getRegistry().getType(FluidType.class, fluidId);
         if (!fluidType.isPresent()) {
             throw new InvalidDataException("Invalid fluid id found: " + fluidId);
         }
         this.fluidType = fluidType.get();
-        this.volume = container.getInt(DataQueries.Fluids.FLUID_VOLUME).get();
-        if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
-            this.extra = container.getView(DataQueries.Sponge.UNSAFE_NBT).get().copy();
+        this.volume = container.getInt(Constants.Fluids.FLUID_VOLUME).get();
+        if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
+            this.extra = container.getView(Constants.Sponge.UNSAFE_NBT).get().copy();
         } else {
             this.extra = null;
         }

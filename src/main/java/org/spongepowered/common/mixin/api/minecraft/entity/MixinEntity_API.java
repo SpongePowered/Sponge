@@ -79,7 +79,6 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
@@ -555,28 +554,28 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.Entity.CLASS, this.getClass().getName())
+            .set(Constants.Entity.CLASS, this.getClass().getName())
             .set(Queries.WORLD_ID, transform.getExtent().getUniqueId().toString())
-            .createView(DataQueries.Sponge.SNAPSHOT_WORLD_POSITION)
+            .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, transform.getPosition().getX())
                 .set(Queries.POSITION_Y, transform.getPosition().getY())
                 .set(Queries.POSITION_Z, transform.getPosition().getZ())
             .getContainer()
-            .createView(DataQueries.Entity.ROTATION)
+            .createView(Constants.Entity.ROTATION)
                 .set(Queries.POSITION_X, transform.getRotation().getX())
                 .set(Queries.POSITION_Y, transform.getRotation().getY())
                 .set(Queries.POSITION_Z, transform.getRotation().getZ())
             .getContainer()
-            .createView(DataQueries.Entity.SCALE)
+            .createView(Constants.Entity.SCALE)
                 .set(Queries.POSITION_X, transform.getScale().getX())
                 .set(Queries.POSITION_Y, transform.getScale().getY())
                 .set(Queries.POSITION_Z, transform.getScale().getZ())
             .getContainer()
-            .set(DataQueries.Entity.TYPE, this.entityType.getId())
-            .set(DataQueries.Sponge.UNSAFE_NBT, unsafeNbt);
+            .set(Constants.Entity.TYPE, this.entityType.getId())
+            .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
         final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
-            container.set(DataQueries.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
+            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
         return container;
     }

@@ -29,7 +29,7 @@ import org.spongepowered.api.block.tileentity.carrier.Hopper;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -42,8 +42,8 @@ public class SpongeHopperBuilder extends SpongeLockableBuilder<Hopper> {
     @Override
     protected Optional<Hopper> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(hopper -> {
-            if (container.contains(DataQueries.BlockEntity.CUSTOM_NAME)) {
-                ((TileEntityHopper) hopper).setCustomName(container.getString(DataQueries.BlockEntity.CUSTOM_NAME).get());
+            if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
+                ((TileEntityHopper) hopper).setCustomName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
             if (!container.contains(Keys.COOLDOWN.getQuery())) {
                 ((TileEntityHopper) hopper).invalidate();

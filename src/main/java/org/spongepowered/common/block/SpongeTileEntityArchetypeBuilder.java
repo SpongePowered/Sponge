@@ -47,10 +47,9 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.DataVersions;
-import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -120,7 +119,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
         nbttagcompound.removeTag("z");
         String tileId = nbttagcompound.getString("id");
         nbttagcompound.removeTag("id");
-        nbttagcompound.setString(NbtDataUtil.Schematic.TILE_ENTITY_ID, tileId);
+        nbttagcompound.setString(Constants.Sponge.TileEntityArchetype.TILE_ENTITY_ID, tileId);
         this.tileData = NbtTranslator.getInstance().translate(nbttagcompound);
         this.blockState = tileEntity.getBlock();
         this.tileEntityType = tileEntity.getType();
@@ -182,16 +181,16 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     @Override
     protected Optional<TileEntityArchetype> buildContent(DataView container) throws InvalidDataException {
         final SpongeTileEntityArchetypeBuilder builder = new SpongeTileEntityArchetypeBuilder();
-        if (container.contains(DataQueries.TileEntityArchetype.TILE_TYPE, DataQueries.TileEntityArchetype.BLOCK_STATE)) {
-            builder.tile(container.getCatalogType(DataQueries.TileEntityArchetype.TILE_TYPE, TileEntityType.class)
+        if (container.contains(Constants.Sponge.TileEntityArchetype.TILE_TYPE, Constants.Sponge.TileEntityArchetype.BLOCK_STATE)) {
+            builder.tile(container.getCatalogType(Constants.Sponge.TileEntityArchetype.TILE_TYPE, TileEntityType.class)
                     .orElseThrow(() -> new InvalidDataException("Could not deserialize a TileEntityType!")));
-            builder.state(container.getCatalogType(DataQueries.TileEntityArchetype.BLOCK_STATE, BlockState.class)
+            builder.state(container.getCatalogType(Constants.Sponge.TileEntityArchetype.BLOCK_STATE, BlockState.class)
                     .orElseThrow(() -> new InvalidDataException("Could not deserialize a BlockState!")));
         } else {
             throw new InvalidDataException("Missing the TileEntityType and BlockState! Cannot re-construct a TileEntityArchetype!");
         }
-        if (container.contains(DataQueries.TileEntityArchetype.TILE_DATA)) {
-            builder.tileData(container.getView(DataQueries.TileEntityArchetype.TILE_DATA)
+        if (container.contains(Constants.Sponge.TileEntityArchetype.TILE_DATA)) {
+            builder.tileData(container.getView(Constants.Sponge.TileEntityArchetype.TILE_DATA)
                     .orElseThrow(() -> new InvalidDataException("No DataView found for the TileEntity data tag!")));
         }
         return Optional.of(builder.build());

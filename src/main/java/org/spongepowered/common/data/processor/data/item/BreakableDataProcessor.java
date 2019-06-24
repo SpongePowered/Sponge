@@ -37,9 +37,9 @@ import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.BreakablePlaceableUtils;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 import java.util.Set;
@@ -58,12 +58,12 @@ public class BreakableDataProcessor
 
     @Override
     protected Optional<Set<BlockType>> getVal(ItemStack itemStack) {
-        return BreakablePlaceableUtils.get(itemStack, NbtDataUtil.ITEM_BREAKABLE_BLOCKS);
+        return BreakablePlaceableUtils.get(itemStack, Constants.Item.ITEM_BREAKABLE_BLOCKS);
     }
 
     @Override
     protected boolean set(ItemStack itemStack, Set<BlockType> value) {
-        return BreakablePlaceableUtils.set(itemStack, NbtDataUtil.ITEM_BREAKABLE_BLOCKS, value);
+        return BreakablePlaceableUtils.set(itemStack, Constants.Item.ITEM_BREAKABLE_BLOCKS, value);
     }
 
     @Override

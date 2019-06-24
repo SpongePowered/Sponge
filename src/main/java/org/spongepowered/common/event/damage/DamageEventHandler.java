@@ -67,8 +67,8 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -249,8 +249,8 @@ public class DamageEventHandler {
                 }
 
                 for (int i = 0; i < enchantmentList.tagCount(); ++i) {
-                    final short enchantmentId = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
-                    final short level = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
+                    final short enchantmentId = enchantmentList.getCompoundTagAt(i).getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
+                    final short level = enchantmentList.getCompoundTagAt(i).getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
 
                     if (Enchantment.getEnchantmentByID(enchantmentId) != null) {
                         // Ok, we have an enchantment!

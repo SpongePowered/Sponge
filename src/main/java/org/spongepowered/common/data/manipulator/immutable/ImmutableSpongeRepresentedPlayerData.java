@@ -32,8 +32,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.util.Constants;
 
 public class ImmutableSpongeRepresentedPlayerData
         extends AbstractImmutableSingleData<GameProfile, ImmutableRepresentedPlayerData, RepresentedPlayerData>
@@ -58,10 +58,10 @@ public class ImmutableSpongeRepresentedPlayerData
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
         if (this.value.getUniqueId() != null) {
-            container.set(this.usedKey.getQuery().then(DataQueries.GameProfile.GAME_PROFILE_ID), this.value.getUniqueId().toString());
+            container.set(this.usedKey.getQuery().then(Constants.GameProfile.GAME_PROFILE_ID), this.value.getUniqueId().toString());
         }
         if (this.value.getName().isPresent()) {
-            container.set(this.usedKey.getQuery().then(DataQueries.GameProfile.GAME_PROFILE_NAME), this.value.getName().get());
+            container.set(this.usedKey.getQuery().then(Constants.GameProfile.GAME_PROFILE_NAME), this.value.getName().get());
         }
         return container;
     }

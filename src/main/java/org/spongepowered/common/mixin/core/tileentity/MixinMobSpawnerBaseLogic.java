@@ -48,7 +48,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -86,7 +85,7 @@ public abstract class MixinMobSpawnerBaseLogic {
         )
     )
     private Entity impl$ThrowEventAndConstruct(NBTTagCompound compound, World world, double x, double y, double z, boolean doesNotForceSpawn) {
-        final String entityTypeString = compound.getString(NbtDataUtil.ENTITY_TYPE_ID);
+        final String entityTypeString = compound.getString(Constants.Entity.ENTITY_TYPE_ID);
         final Class<? extends Entity> clazz = SpongeImplHooks.getEntityClass(new ResourceLocation(entityTypeString));
         if (clazz == null) {
             final PrettyPrinter printer = new PrettyPrinter(60).add("Unknown Entity for MobSpawners").centre().hr()
@@ -134,8 +133,8 @@ public abstract class MixinMobSpawnerBaseLogic {
         }
 
 
-        if (compound.hasKey(NbtDataUtil.Minecraft.PASSENGERS, Constants.NBT.TAG_LIST)) {
-            final NBTTagList passengerList = compound.getTagList(NbtDataUtil.Minecraft.PASSENGERS, Constants.NBT.TAG_COMPOUND);
+        if (compound.hasKey(Constants.Entity.PASSENGERS, Constants.NBT.TAG_LIST)) {
+            final NBTTagList passengerList = compound.getTagList(Constants.Entity.PASSENGERS, Constants.NBT.TAG_COMPOUND);
 
             for (int i = 0; i < passengerList.tagCount(); i++) {
                 final Entity passenger = impl$ThrowEventAndConstruct(passengerList.getCompoundTagAt(i), world, x, y, z, doesNotForceSpawn);

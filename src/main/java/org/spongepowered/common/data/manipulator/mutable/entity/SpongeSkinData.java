@@ -31,8 +31,8 @@ import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSkinData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.UUID;
 
@@ -59,7 +59,7 @@ public class SpongeSkinData extends AbstractSingleData<UUID, SkinData, Immutable
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(DataQueries.GameProfile.SKIN_UUID, getValue());
+            .set(Constants.GameProfile.SKIN_UUID, getValue());
     }
 
     @Override

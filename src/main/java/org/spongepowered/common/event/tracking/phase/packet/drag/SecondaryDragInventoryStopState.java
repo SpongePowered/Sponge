@@ -34,7 +34,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 public final class SecondaryDragInventoryStopState extends DragInventoryStopState {
 
     public SecondaryDragInventoryStopState() {
-        super("SECONDARY_DRAG_INVENTORY_START", PacketConstants.DRAG_MODE_SECONDARY_BUTTON);
+        super("SECONDARY_DRAG_INVENTORY_START", Constants.Networking.DRAG_MODE_SECONDARY_BUTTON);
     }
 
     @Override

@@ -143,6 +143,7 @@ import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
 import java.lang.ref.WeakReference;
@@ -362,8 +363,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             boolean clickedOutside = packetIn.getSlotId() < 0;
             ItemStack itemstack = packetIn.getStack();
 
-            if (!itemstack.isEmpty() && itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey(NbtDataUtil.Minecraft.BLOCK_ENTITY_TAG, 10)) {
-                NBTTagCompound nbttagcompound = itemstack.getTagCompound().getCompoundTag(NbtDataUtil.Minecraft.BLOCK_ENTITY_TAG);
+            if (!itemstack.isEmpty() && itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey(Constants.Item.BLOCK_ENTITY_TAG, 10)) {
+                NBTTagCompound nbttagcompound = itemstack.getTagCompound().getCompoundTag(Constants.Item.BLOCK_ENTITY_TAG);
 
                 if (nbttagcompound.hasKey("x") && nbttagcompound.hasKey("y") && nbttagcompound.hasKey("z")) {
                     BlockPos blockpos = new BlockPos(nbttagcompound.getInteger("x"), nbttagcompound.getInteger("y"), nbttagcompound.getInteger("z"));
@@ -375,7 +376,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         nbttagcompound1.removeTag("x");
                         nbttagcompound1.removeTag("y");
                         nbttagcompound1.removeTag("z");
-                        itemstack.setTagInfo(NbtDataUtil.Minecraft.BLOCK_ENTITY_TAG, nbttagcompound1);
+                        itemstack.setTagInfo(Constants.Item.BLOCK_ENTITY_TAG, nbttagcompound1);
                     }
                 }
             }

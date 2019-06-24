@@ -58,7 +58,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     protected boolean set(ItemStack container, Text value) {
         final String legacy = SpongeTexts.toLegacy(value);
         if (container.getItem() == Items.WRITTEN_BOOK) {
-            NbtDataUtil.getOrCreateCompound(container).setString(NbtDataUtil.ITEM_BOOK_TITLE, legacy);
+            NbtDataUtil.getOrCreateCompound(container).setString(Constants.Item.Book.ITEM_BOOK_TITLE, legacy);
         } else {
             container.setStackDisplayName(legacy);
         }
@@ -72,12 +72,12 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
             if (mainCompound == null) {
                 return Optional.empty(); // Basically, this book wasn't initialized properly.
             }
-            final String titleString = mainCompound.getString(NbtDataUtil.ITEM_BOOK_TITLE);
+            final String titleString = mainCompound.getString(Constants.Item.Book.ITEM_BOOK_TITLE);
             return Optional.of(SpongeTexts.fromLegacy(titleString));
         }
-        final NBTTagCompound mainCompound = container.getSubCompound(NbtDataUtil.ITEM_DISPLAY);
-        if (mainCompound != null && mainCompound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
-            final String displayString = mainCompound.getString(NbtDataUtil.ITEM_DISPLAY_NAME);
+        final NBTTagCompound mainCompound = container.getSubCompound(Constants.Item.ITEM_DISPLAY);
+        if (mainCompound != null && mainCompound.hasKey(Constants.Item.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
+            final String displayString = mainCompound.getString(Constants.Item.ITEM_DISPLAY_NAME);
             return Optional.of(SpongeTexts.fromLegacy(displayString));
         }
         return Optional.empty();

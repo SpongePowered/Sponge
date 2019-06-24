@@ -27,7 +27,7 @@ package org.spongepowered.common.event.inventory;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.item.inventory.AnvilCost;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 public class UpdateAnvilEventCost implements AnvilCost {
 
@@ -63,7 +63,7 @@ public class UpdateAnvilEventCost implements AnvilCost {
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew().set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(DataQueries.Anvils.MATERIALCOST, this.getMaterialCost())
-                .set(DataQueries.Anvils.LEVELCOST, this.getLevelCost());
+                .set(Constants.TileEntity.Anvils.MATERIALCOST, this.getMaterialCost())
+                .set(Constants.TileEntity.Anvils.LEVELCOST, this.getLevelCost());
     }
 }

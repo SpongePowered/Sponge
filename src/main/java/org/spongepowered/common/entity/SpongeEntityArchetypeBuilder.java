@@ -42,10 +42,8 @@ import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.DataVersions;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -77,16 +75,16 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     @Override
     protected Optional<EntityArchetype> buildContent(DataView container) throws InvalidDataException {
         final SpongeEntityArchetypeBuilder builder = new SpongeEntityArchetypeBuilder();
-        if (container.contains(DataQueries.EntityArchetype.ENTITY_TYPE)) {
-            builder.type(container.getCatalogType(DataQueries.EntityArchetype.ENTITY_TYPE, EntityType.class)
+        if (container.contains(Constants.Sponge.EntityArchetype.ENTITY_TYPE)) {
+            builder.type(container.getCatalogType(Constants.Sponge.EntityArchetype.ENTITY_TYPE, EntityType.class)
                     .orElseThrow(() -> new InvalidDataException("Could not deserialize a TileEntityType!"))
             );
         } else {
             throw new InvalidDataException("Missing the TileEntityType and BlockState! Cannot re-construct a TileEntityArchetype!");
         }
 
-        if (container.contains(DataQueries.EntityArchetype.ENTITY_DATA)) {
-            builder.entityData(container.getView(DataQueries.EntityArchetype.ENTITY_DATA)
+        if (container.contains(Constants.Sponge.EntityArchetype.ENTITY_DATA)) {
+            builder.entityData(container.getView(Constants.Sponge.EntityArchetype.ENTITY_DATA)
                     .orElseThrow(() -> new InvalidDataException("No DataView found for the TileEntity data tag!"))
             );
         }
@@ -111,10 +109,10 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final NBTTagCompound compound = new NBTTagCompound();
         minecraftEntity.writeToNBT(compound);
-        compound.setString(NbtDataUtil.Schematic.ENTITY_ID, entity.getType().getId());
+        compound.setString(Constants.Sponge.EntityArchetype.ENTITY_ID, entity.getType().getId());
         compound.removeTag(Constants.UUID);
-        compound.removeTag(NbtDataUtil.UUID_MOST);
-        compound.removeTag(NbtDataUtil.UUID_LEAST);
+        compound.removeTag(Constants.UUID_MOST);
+        compound.removeTag(Constants.UUID_LEAST);
         compound.setBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN, true);
         this.compound = compound;
         return this;
@@ -172,7 +170,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         checkNotNull(this.entityType);
         checkState(this.entityType != UNKNOWN);
         if (this.entityData != null) {
-            this.entityData.remove(DataQueries.User.UUID);
+            this.entityData.remove(Constants.Entity.Player.UUID);
         }
         return new SpongeEntityArchetype(this);
     }

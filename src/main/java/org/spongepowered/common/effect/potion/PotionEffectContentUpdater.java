@@ -28,9 +28,9 @@ import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
+import org.spongepowered.common.util.Constants;
 
 import java.util.stream.Collectors;
 
@@ -51,11 +51,11 @@ public class PotionEffectContentUpdater implements DataContentUpdater {
 
     @Override
     public DataView update(DataView content) {
-        final String oldId = content.getString(DataQueries.Potions.POTION_TYPE).get();
+        final String oldId = content.getString(Constants.Item.Potions.POTION_TYPE).get();
         final String newId = map.get(oldId);
 
-        content.remove(DataQueries.Potions.POTION_TYPE);
-        content.set(DataQueries.Potions.POTION_TYPE, newId);
+        content.remove(Constants.Item.Potions.POTION_TYPE);
+        content.set(Constants.Item.Potions.POTION_TYPE, newId);
 
         return content;
     }

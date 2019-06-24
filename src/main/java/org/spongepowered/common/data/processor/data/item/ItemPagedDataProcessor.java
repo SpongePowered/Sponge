@@ -45,6 +45,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -89,7 +90,7 @@ public class ItemPagedDataProcessor extends AbstractItemSingleDataProcessor<List
 
     @Override
     protected Optional<List<Text>> getVal(ItemStack itemStack) {
-        if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_PAGES)) {
+        if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(Constants.Item.Book.ITEM_BOOK_PAGES)) {
             return Optional.empty();
         }
         return Optional.of(NbtDataUtil.getPagesFromNBT(getTagCompound(itemStack)));

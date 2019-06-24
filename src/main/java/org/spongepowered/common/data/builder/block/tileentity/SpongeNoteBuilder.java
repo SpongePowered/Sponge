@@ -29,7 +29,7 @@ import net.minecraft.tileentity.TileEntityNote;
 import org.spongepowered.api.block.tileentity.Note;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -42,11 +42,11 @@ public class SpongeNoteBuilder extends AbstractTileBuilder<Note> {
     @Override
     protected Optional<Note> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(note1 -> {
-            if (!container.contains(DataQueries.BlockEntity.NOTE_ID)) {
+            if (!container.contains(Constants.TileEntity.NOTE_ID)) {
                 ((TileEntity) note1).invalidate();
                 return Optional.empty();
             }
-            ((TileEntityNote) note1).note = container.getInt(DataQueries.BlockEntity.NOTE_ID).get().byteValue();
+            ((TileEntityNote) note1).note = container.getInt(Constants.TileEntity.NOTE_ID).get().byteValue();
             ((TileEntityNote) note1).validate();
             return Optional.of(note1);
         });
