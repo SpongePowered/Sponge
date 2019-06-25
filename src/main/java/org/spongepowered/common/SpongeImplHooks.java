@@ -666,8 +666,8 @@ public final class SpongeImplHooks {
      */
     @SuppressWarnings("ConstantConditions")
     @Nullable
-    public static Entity getCustomEntityIfItem(Entity entity) {
-        return entity;
+    public static Entity getCustomEntityIfItem(final Entity entity) {
+        return null;
     }
 
     /**
