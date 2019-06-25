@@ -325,7 +325,7 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
             return BlockSnapshot.NONE;
         }
         if (!isChunkLoaded(x >> 4, z >> 4, false)) {
-            throw new IllegalStateException("Chunk not loaded");
+            return BlockSnapshot.NONE;
         }
         BlockPos pos = new BlockPos(x, y, z);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
