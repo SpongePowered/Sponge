@@ -74,10 +74,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             }
         });
 
-    private String name;
-
-    EntityTickPhaseState(String name) {
-        this.name = name;
+    EntityTickPhaseState() {
     }
 
     @Override
@@ -353,10 +350,5 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     @Override
     public boolean doesBlockEventTracking(EntityTickContext context) {
         return context.allowsBlockEvents();
-    }
-
-    @Override
-    public String toString() {
-        return this.name;
     }
 }

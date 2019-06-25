@@ -36,7 +36,6 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
@@ -55,10 +54,7 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
                 }
             });
 
-    private final String name;
-
-    NeighborNotificationState(String name) {
-        this.name = name;
+    NeighborNotificationState() {
     }
 
     @Override
@@ -153,12 +149,4 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
     public boolean doesCaptureEntityDrops(NeighborNotificationContext context) {
         return false; // Maybe make this configurable as well.
     }
-
-
-
-    @Override
-    public String toString() {
-        return this.name;
-    }
-
 }

@@ -45,7 +45,6 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
@@ -83,9 +82,9 @@ import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -883,6 +882,25 @@ public final class TrackingUtil {
         }
         catch(Throwable t) {
             // ignore
+        }
+    }
+
+    public static String phaseStateToString(String type, IPhaseState<?> state) {
+        return phaseStateToString(type, null, state);
+    }
+
+    public static String phaseStateToString(String type, @Nullable String extra, IPhaseState<?> state) {
+        String name = state.getClass().getSimpleName();
+        name = name.replace("Phase", "");
+        name = name.replace("State", "");
+        name = name.replace(type, "");
+
+        if (extra == null) {
+            return type + "{" + name + "}";
+        } else if (name.isEmpty()) {
+            return type + "{" + extra + "}";
+        } else {
+            return type + "{" + name + ":" + extra + "}";
         }
     }
 }

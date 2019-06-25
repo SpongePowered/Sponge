@@ -45,8 +45,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
@@ -84,11 +82,6 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     @Override
     public BiConsumer<CauseStackManager.StackFrame, P> getFrameModifier() {
         return this.BASIC_PACKET_MODIFIER;
-    }
-
-    @Override
-    public final TrackingPhase getPhase() {
-        return TrackingPhases.PACKET;
     }
 
     @Override
@@ -203,12 +196,11 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         return SpawnTypes.PLACEMENT;
     }
 
-
-    private final String className = this.getClass().getSimpleName();
+    private final String desc = TrackingUtil.phaseStateToString("Packet", this);
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.desc;
     }
 
 }

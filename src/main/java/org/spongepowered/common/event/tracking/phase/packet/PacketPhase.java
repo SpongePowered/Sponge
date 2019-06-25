@@ -61,7 +61,6 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryAddSlotState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStartState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.MiddleDragInventoryStopState;
@@ -106,7 +105,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public final class PacketPhase extends TrackingPhase {
+public final class PacketPhase {
 
 
     public static final class General {

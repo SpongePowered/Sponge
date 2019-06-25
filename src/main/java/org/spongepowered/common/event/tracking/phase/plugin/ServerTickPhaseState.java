@@ -37,10 +37,10 @@ import java.util.stream.Collectors;
 
 final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
 
-    private final String name;
+    private final String desc;
 
     ServerTickPhaseState(String name) {
-        this.name = name;
+        this.desc = TrackingUtil.phaseStateToString("Plugin", name, this);
     }
 
     @Override
@@ -92,6 +92,6 @@ final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.name + "}";
+        return this.desc;
     }
 }

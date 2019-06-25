@@ -40,10 +40,10 @@ import java.util.stream.Collectors;
 
 final class WorldTickPhaseState extends ListenerPhaseState<WorldTickContext> {
 
-    private final String name;
+    private final String desc;
 
     WorldTickPhaseState(String name) {
-        this.name = name;
+        this.desc = TrackingUtil.phaseStateToString("Plugin", name, this);
     }
 
     @Override
@@ -76,6 +76,6 @@ final class WorldTickPhaseState extends ListenerPhaseState<WorldTickContext> {
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.name + "}";
+        return this.desc;
     }
 }

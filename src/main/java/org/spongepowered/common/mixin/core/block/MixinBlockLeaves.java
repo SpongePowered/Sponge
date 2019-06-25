@@ -57,7 +57,6 @@ import org.spongepowered.common.data.util.TreeTypeResolver;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
@@ -77,16 +76,12 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     private boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState<?> currentState = currentContext.state;
-        final boolean isBlockAlready = currentState.getPhase() != TrackingPhases.BLOCK;
-        final boolean isWorldGen = currentState.isWorldGeneration();
-        try (PhaseContext<?> context = isBlockAlready && !isWorldGen
-                                       ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
+        try (PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                                            .source(new SpongeLocatableBlockBuilder()
                                                .world((World) worldIn)
                                                .position(pos.getX(), pos.getY(), pos.getZ())
                                                .state((BlockState) state)
-                                               .build())
-                                       : null) {
+                                               .build())) {
             if (context != null) {
                 context.buildAndSwitch();
             }
@@ -113,14 +108,12 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         if (!((WorldBridge) worldIn).isFake()) {
             final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
             final IPhaseState<?> currentState = peek.state;
-            final boolean isWorldGen = currentState.isWorldGeneration();
-            final boolean isBlockAlready = currentState.getPhase() != TrackingPhases.BLOCK;
-            try (PhaseContext<?> context = isBlockAlready && !isWorldGen ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
+            try (PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                 .source(new SpongeLocatableBlockBuilder()
                     .world((World) worldIn)
                     .position(pos.getX(), pos.getY(), pos.getZ())
                     .state((BlockState) state)
-                    .build()) : null) {
+                    .build())) {
                 if (context != null) {
                     context.buildAndSwitch();
                 }

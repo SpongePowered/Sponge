@@ -72,9 +72,4 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
     public boolean doesCaptureEntitySpawns() {
         return false;
     }
-
-    @Override
-    public String toString() {
-        return "WeatherTickPhase";
-    }
 }

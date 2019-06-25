@@ -35,8 +35,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
@@ -47,11 +46,6 @@ import javax.annotation.Nullable;
 abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C> {
 
     TickPhaseState() {
-    }
-
-    @Override
-    public final TrackingPhase getPhase() {
-        return TrackingPhases.TICK;
     }
 
     @Override
@@ -108,10 +102,10 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
         return true;
     }
 
-    private final String className = this.getClass().getSimpleName();
+    private final String desc = TrackingUtil.phaseStateToString("Tick", this);
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.desc;
     }
 }

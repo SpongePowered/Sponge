@@ -25,18 +25,10 @@
 package org.spongepowered.common.event.tracking.phase.world.dragon;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 public class GeneralDragonPhaseState implements IPhaseState<GeneralizedContext> {
-
-    @Override
-    public final TrackingPhase getPhase() {
-        return TrackingPhases.DRAGON;
-    }
 
     @Override
     public GeneralizedContext createPhaseContext() {
@@ -48,10 +40,10 @@ public class GeneralDragonPhaseState implements IPhaseState<GeneralizedContext> 
         TrackingUtil.processBlockCaptures(this, phaseContext);
     }
 
-    private final String className = this.getClass().getSimpleName();
+    private final String desc = TrackingUtil.phaseStateToString("Dragon", this);
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.desc;
     }
 }

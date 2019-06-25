@@ -203,9 +203,4 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     public boolean doesCaptureNeighborNotifications(BlockEventTickContext context) {
         return true;
     }
-
-    @Override
-    public String toString() {
-        return "BlockEventTickPhase";
-    }
 }

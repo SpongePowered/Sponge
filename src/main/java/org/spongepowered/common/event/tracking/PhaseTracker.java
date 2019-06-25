@@ -71,8 +71,8 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
@@ -80,7 +80,6 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -240,7 +239,6 @@ public final class PhaseTracker {
             return;
         }
         checkNotNull(state, "State cannot be null!");
-        checkNotNull(state.getPhase(), "Phase cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
         final IPhaseState<?> currentState = this.stack.peek().state;
@@ -298,7 +296,6 @@ public final class PhaseTracker {
             }
         }
 
-        final TrackingPhase phase = state.getPhase();
         final boolean hasCaptures = currentContext.hasCaptures();
         try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, currentContext, hasCaptures) ) {
             // With UnwindingPhaseContext#unwind checking for post, if it is null, the try
@@ -430,7 +427,6 @@ public final class PhaseTracker {
         final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add("Switching Phase").centre().hr();
         printer.addWrapped(60, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
-        printer.add("  %s : %s", "Entering Phase", state.getPhase());
         printer.add("  %s : %s", "Entering State", state);
         CONTEXT_PRINTER.accept(printer, context);
         printer.addWrapped(60, "%s :", "Phases remaining");

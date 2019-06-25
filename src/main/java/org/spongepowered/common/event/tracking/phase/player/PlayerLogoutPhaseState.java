@@ -33,8 +33,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,11 +40,6 @@ import java.util.stream.Collectors;
 final class PlayerLogoutPhaseState implements IPhaseState<GeneralizedContext> {
 
     PlayerLogoutPhaseState() {
-    }
-
-    @Override
-    public TrackingPhase getPhase() {
-        return TrackingPhases.PLAYER;
     }
 
     @Override
@@ -78,10 +71,11 @@ final class PlayerLogoutPhaseState implements IPhaseState<GeneralizedContext> {
             TrackingUtil.processBlockCaptures(this, phaseContext);
         }
     }
-    private final String className = this.getClass().getSimpleName();
+
+    private final String desc = TrackingUtil.phaseStateToString("Player", this);
 
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + "}";
+        return this.desc;
     }
 }

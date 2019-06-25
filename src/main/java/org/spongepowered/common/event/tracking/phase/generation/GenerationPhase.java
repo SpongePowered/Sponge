@@ -25,13 +25,11 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
 /**
- * A specific {@link TrackingPhase} to handle any point in which world or chunk
+ * A specific tracking phase to handle any point in which world or chunk
  * terrain generation/population is taking place. Note that while {@link State#CHUNK_LOADING}
  * is included here, it is still treated as terrain generation due to the fact that
  * a chunk load should not capture any block changes and populators may be re-ran.
@@ -45,7 +43,7 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
  * a neighboring chunk to be generated/populated, which requires a re-entrance of the
  * very same state, with different chunk coordinates.
  */
-public final class GenerationPhase extends TrackingPhase {
+public final class GenerationPhase {
 
     @SuppressWarnings("unchecked")
     public static final class State {
@@ -90,15 +88,7 @@ public final class GenerationPhase extends TrackingPhase {
         }
     }
 
-    public static GenerationPhase getInstance() {
-        return Holder.INSTANCE;
-    }
-
     private GenerationPhase() {
-    }
-
-    private static final class Holder {
-        static final GenerationPhase INSTANCE = new GenerationPhase();
     }
 
 

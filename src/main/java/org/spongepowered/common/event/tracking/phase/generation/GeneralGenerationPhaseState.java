@@ -32,18 +32,16 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 /**
  * A generalized generation phase state. Used for entering populator world generation,
@@ -56,9 +54,11 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     private Set<IPhaseState<?>> compatibleStates = new HashSet<>();
     private boolean isBaked = false;
     private final String id;
+    private final String desc;
 
     GeneralGenerationPhaseState(String id) {
         this.id = id;
+        this.desc = TrackingUtil.phaseStateToString("Generation", id, this);
     }
 
     final GeneralGenerationPhaseState addCompatibleState(IPhaseState<?> state) {
@@ -76,11 +76,6 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
         this.compatibleStates = ImmutableSet.copyOf(this.compatibleStates);
         this.isBaked = true;
         return this;
-    }
-
-    @Override
-    public final TrackingPhase getPhase() {
-        return TrackingPhases.GENERATION;
     }
 
 
@@ -121,6 +116,11 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
 
     @Override
     public boolean isWorldGeneration() {
+        return true;
+    }
+
+    @Override
+    public boolean includesDecays() {
         return true;
     }
 
@@ -196,10 +196,8 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
         return Objects.hashCode(this.id);
     }
 
-    private final String className = this.getClass().getSimpleName();
-
     @Override
     public String toString() {
-        return this.getPhase() + "{" + this.className + ":" + this.id +  "}";
+        return this.desc;
     }
 }
