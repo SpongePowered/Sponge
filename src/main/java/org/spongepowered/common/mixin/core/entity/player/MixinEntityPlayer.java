@@ -260,18 +260,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
 
         if (((WorldBridge) this.world).isFake()) {
-            return;
+            this.experience += (float)amount / (float)this.xpBarCap();
+
+            for(this.experienceTotal += amount; this.experience >= 1.0F; this.experience /= (float)this.xpBarCap()) {
+                this.experience = (this.experience - 1.0F) * (float)this.xpBarCap();
+                this.addExperienceLevel(1);
+            }
+        } else {
+            this.postEventAndUpdateExperience(this.experienceTotal + amount);
         }
-
-        // Sponge start - completely rewritten for integer-based calculations
-        // this.experience += (float)amount / (float)this.xpBarCap();
-
-        // for (this.experienceTotal += amount; this.experience >= 1.0F; this.experience /= (float)this.xpBarCap()) {
-            // this.experience = (this.experience - 1.0F) * (float)this.xpBarCap();
-            // this.addExperienceLevel(1);
-        // }
-        postEventAndUpdateExperience(this.experienceTotal + amount);
-        // Sponge end
     }
 
     private void postEventAndUpdateExperience(final int finalExperience) {
