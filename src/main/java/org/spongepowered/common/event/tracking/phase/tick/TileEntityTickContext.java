@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 
 public class TileEntityTickContext extends LocationBasedTickContext<TileEntityTickContext> {
     public TileEntityTickContext(IPhaseState<TileEntityTickContext> phaseState) {

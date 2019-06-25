@@ -25,10 +25,10 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
-import org.spongepowered.common.bridge.inventory.ContainerBridge;
 
 public class InventoryPacketContext extends PacketContext<InventoryPacketContext> {
 

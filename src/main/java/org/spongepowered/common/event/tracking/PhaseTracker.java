@@ -1035,8 +1035,8 @@ public final class PhaseTracker {
                     }
                 }
             }
-        final net.minecraft.entity.Entity customEntity = SpongeImplHooks.getCustomEntityIfItem(entity);
-        final net.minecraft.entity.Entity finalEntityToSpawn = customEntity == null ? entity : customEntity;
+            final net.minecraft.entity.Entity customEntity = SpongeImplHooks.getCustomEntityIfItem(entity);
+            final net.minecraft.entity.Entity finalEntityToSpawn = customEntity == null ? entity : customEntity;
             // Sponge end - continue on with the checks.
             world.getChunk(chunkX, chunkZ).addEntity(finalEntityToSpawn);
             world.loadedEntityList.add(finalEntityToSpawn);

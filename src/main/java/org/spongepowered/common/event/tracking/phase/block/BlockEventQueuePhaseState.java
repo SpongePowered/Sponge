@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import java.util.function.BiConsumer;
-
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+
+import java.util.function.BiConsumer;
 
 public class BlockEventQueuePhaseState extends BlockPhaseState {
 

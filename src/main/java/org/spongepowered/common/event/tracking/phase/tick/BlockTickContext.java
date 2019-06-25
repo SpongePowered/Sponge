@@ -30,8 +30,8 @@ import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.event.tracking.IPhaseState;
 
 public class BlockTickContext extends LocationBasedTickContext<BlockTickContext> {
 
