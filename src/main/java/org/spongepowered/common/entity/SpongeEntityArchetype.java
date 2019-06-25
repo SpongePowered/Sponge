@@ -153,7 +153,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         if (!event.isCancelled()) {
             final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
             entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
-            mixinWorldServer.bridge$forceSpawnEntity((org.spongepowered.api.entity.Entity) entity);
+            mixinWorldServer.bridge$forceSpawnEntity(entity);
             if (entity instanceof EntityLiving) {
                 // This is ok to force spawn since we aren't considering custom items.
                 if (requiresInitialSpawn) {

@@ -1839,14 +1839,13 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     }
 
     @Override
-    public boolean bridge$forceSpawnEntity(final Entity entity) {
-        final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
-        final int x = minecraftEntity.getPosition().getX();
-        final int z = minecraftEntity.getPosition().getZ();
-        return forceSpawnEntity(minecraftEntity, x >> 4, z >> 4);
+    public boolean bridge$forceSpawnEntity(final net.minecraft.entity.Entity entity) {
+        final int x = entity.getPosition().getX();
+        final int z = entity.getPosition().getZ();
+        return impl$forceSpawnEntity(entity, x >> 4, z >> 4);
     }
 
-    private boolean forceSpawnEntity(final net.minecraft.entity.Entity entity, final int chunkX, final int chunkZ) {
+    private boolean impl$forceSpawnEntity(final net.minecraft.entity.Entity entity, final int chunkX, final int chunkZ) {
         if (!this.isFake() && SpongeImplHooks.isMainThread()) {
             SpongeHooks.logEntitySpawn(entity);
         }

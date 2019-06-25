@@ -735,7 +735,7 @@ public final class EntityUtil {
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
-                    ((ServerWorldBridge) entityToSpawn.world).bridge$forceSpawnEntity(entity);
+                    ((ServerWorldBridge) entityToSpawn.world).bridge$forceSpawnEntity(entityToSpawn);
                     return true;
                 }
             }
@@ -748,7 +748,7 @@ public final class EntityUtil {
                 }
             });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        ((ServerWorldBridge) entity.getWorld()).bridge$forceSpawnEntity(entity);
+        ((ServerWorldBridge) entity.getWorld()).bridge$forceSpawnEntity((Entity) entity);
         return true;
     }
 

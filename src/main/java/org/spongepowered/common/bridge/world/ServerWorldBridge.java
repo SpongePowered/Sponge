@@ -72,7 +72,7 @@ public interface ServerWorldBridge extends WorldBridge {
 
     boolean bridge$setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag);
 
-    boolean bridge$forceSpawnEntity(org.spongepowered.api.entity.Entity entity);
+    boolean bridge$forceSpawnEntity(Entity entity);
 
     void bridge$onSpongeEntityAdded(Entity entity);
 
