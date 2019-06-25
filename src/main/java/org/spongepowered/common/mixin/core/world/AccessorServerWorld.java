@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(WorldServer.class)
 public interface AccessorServerWorld extends AccessorWorld {
@@ -36,5 +37,7 @@ public interface AccessorServerWorld extends AccessorWorld {
 
     @Accessor("blockEventCacheIndex")
     int getBlockEventCacheIndexForSponge();
+
+    @Invoker("isChunkLoaded") boolean accessor$isChunkLoaded(int chunkX, int chunkZ, boolean allowEmpty);
 
 }

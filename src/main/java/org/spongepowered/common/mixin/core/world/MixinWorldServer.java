@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
@@ -94,6 +95,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -346,11 +348,6 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     @Redirect(method = "createSpawnPosition", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldSettings;isBonusChestEnabled()Z"))
     private boolean onIsBonusChestEnabled(final WorldSettings settings) {
         return ((org.spongepowered.api.world.World) this).getProperties().doesGenerateBonusChest();
-    }
-
-    @Override
-    public boolean bridge$isMinecraftChunkLoaded(final int x, final int z, final boolean allowEmpty) {
-        return this.isChunkLoaded(x, z, allowEmpty);
     }
 
     @Override
@@ -1870,6 +1867,41 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         return true;
     }
 
+    @Override
+    public SpongeBlockSnapshot bridge$createSnapshot(BlockPos pos, BlockChangeFlag flag) {
+        if (!this.isBlockLoaded(pos)) {
+            return (SpongeBlockSnapshot) BlockSnapshot.NONE;
+        }
+        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        final int chunkX = pos.getX() >> 4;
+        final int chunkZ = pos.getZ() >> 4;
+        final Chunk chunk = ((ChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
+        if (chunk == null) {
+            return (SpongeBlockSnapshot) BlockSnapshot.NONE;
+        }
+        final IBlockState blockState = chunk.getBlockState(pos);
+        builder.worldId(((org.spongepowered.api.world.World) this).getUniqueId());
+        builder.position(new Vector3i(pos.getX(), pos.getY(), pos.getZ()));
+        builder.blockState(blockState);
+        try {
+            builder.extendedState(blockState.getActualState((WorldServer) (Object) this, pos));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        final net.minecraft.tileentity.TileEntity existing = chunk.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
+        if (existing != null) {
+            try {
+                final NBTTagCompound tileData = new NBTTagCompound();
+                existing.writeToNBT(tileData);
+                builder.unsafeNbt(tileData);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        ((ChunkBridge) chunk).getBlockNotifier(pos).map(User::getUniqueId).ifPresent(builder::notifier);
+        ((ChunkBridge) chunk).getBlockOwner(pos).map(User::getUniqueId).ifPresent(builder::creator);
+        return builder.build();
+    }
 
     @Override
     public SpongeBlockSnapshot bridge$createSnapshot(final IBlockState state, final IBlockState extended, final BlockPos pos, final BlockChangeFlag updateFlag) {

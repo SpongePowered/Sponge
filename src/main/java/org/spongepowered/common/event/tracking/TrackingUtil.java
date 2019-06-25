@@ -45,6 +45,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
@@ -139,27 +140,9 @@ public final class TrackingUtil {
             ;
     static final Function<SpongeBlockSnapshot, Optional<Transaction<BlockSnapshot>>> TRANSACTION_CREATION =
         (blockSnapshot) -> blockSnapshot.getWorldServer().map(worldServer -> {
-            final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-            builder.worldId(blockSnapshot.getWorldUniqueId());
-            final BlockPos blockPos = blockSnapshot.getBlockPos();
-            final Chunk chunk = worldServer.getChunk(blockPos);
-            final IBlockState newState = chunk.getBlockState(blockPos);
-            builder.position(blockSnapshot.getPosition());
-            builder.blockState(newState);
-            try {
-                builder.extendedState((BlockState) newState.getActualState(worldServer, blockPos));
-            } catch (Throwable e) {
-                // ignore
-            }
-            ((ChunkBridge) chunk).getBlockOwnerUUID(blockPos).ifPresent(builder::creator);
-            ((ChunkBridge) chunk).getBlockNotifierUUID(blockPos).ifPresent(builder::notifier);
-            final net.minecraft.tileentity.TileEntity tileEntity = chunk.getTileEntity(blockPos, Chunk.EnumCreateEntityType.CHECK);
-            if (tileEntity != null) {
-                // We MUST only check to see if a TE exists to avoid creating a new one.
-                addTileEntityToBuilder(tileEntity, builder);
-            }
-
-            return new Transaction<>(blockSnapshot, builder.build());
+            final BlockPos targetPos = blockSnapshot.getBlockPos();
+            final SpongeBlockSnapshot replacement = ((ServerWorldBridge) worldServer).bridge$createSnapshot(targetPos, BlockChangeFlags.NONE);
+            return new Transaction<>(blockSnapshot, replacement);
         });
     public static final int WIDTH = 40;
 

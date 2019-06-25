@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -52,6 +53,7 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -103,35 +105,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         if (!playerMP.world.isBlockLoaded(target)) {
             context.targetBlock(BlockSnapshot.NONE);
         } else {
-            final int chunkX = target.getX() >> 4;
-            final int chunkZ = target.getZ() >> 4;
-            final Chunk chunk = ((ChunkProviderBridge) playerMP.world.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
-            if (chunk == null) {
-                context.targetBlock(BlockSnapshot.NONE);
-            } else {
-                final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-                final IBlockState blockState = chunk.getBlockState(target);
-                builder.worldId(((World) playerMP.world).getUniqueId());
-                builder.blockState(blockState);
-                try {
-                    builder.extendedState(blockState.getActualState(playerMP.world, target));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                final TileEntity existing = chunk.getTileEntity(target, Chunk.EnumCreateEntityType.CHECK);
-                if (existing != null) {
-                    try {
-                        final NBTTagCompound tileData = new NBTTagCompound();
-                        existing.writeToNBT(tileData);
-                        builder.unsafeNbt(tileData);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                ((ChunkBridge) chunk).getBlockNotifier(target).map(User::getUniqueId).ifPresent(builder::notifier);
-                ((ChunkBridge) chunk).getBlockOwner(target).map(User::getUniqueId).ifPresent(builder::creator);
-                context.targetBlock(builder.build());
-            }
+            context.targetBlock(((ServerWorldBridge) playerMP.world).bridge$createSnapshot(target, BlockChangeFlags.NONE));
         }
         context.handUsed(HandTypes.MAIN_HAND);
     }

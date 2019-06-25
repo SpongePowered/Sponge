@@ -84,6 +84,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.mixin.core.world.AccessorServerWorld;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
@@ -973,7 +974,7 @@ public final class PhaseTracker {
         final int chunkX = MathHelper.floor(entity.posX / 16.0D);
         final int chunkZ = MathHelper.floor(entity.posZ / 16.0D);
 
-        if (!isForced && !mixinWorldServer.bridge$isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
+        if (!isForced && !((AccessorServerWorld) world).accessor$isChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         }
             if (entity instanceof EntityPlayer) {
@@ -1072,7 +1073,7 @@ public final class PhaseTracker {
         final int chunkZ = MathHelper.floor(minecraftEntity.posZ / 16.0D);
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
-        if (!isForced && !mixinWorldServer.bridge$isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
+        if (!isForced && !((AccessorServerWorld) world).accessor$isChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         }
         // Sponge Start - throw an event
