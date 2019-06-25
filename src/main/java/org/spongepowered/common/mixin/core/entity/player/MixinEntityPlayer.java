@@ -228,6 +228,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Inject(method = "addExperienceLevel", at = @At("HEAD"), cancellable = true)
     private void onAddExperienceLevels(final int levels, final CallbackInfo ci) {
+        if (((WorldBridge) this.world).isFake()) {
+            return;
+        }
         if (!this.dontRecalculateExperience) {
             final int newLevel = Math.max(this.experienceLevel + levels, 0);
             postEventAndUpdateExperience(ExperienceHolderUtils.xpAtLevel(newLevel)
@@ -254,6 +257,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
         if (amount > i) {
             amount = i;
+        }
+
+        if (((WorldBridge) this.world).isFake()) {
+            return;
         }
 
         // Sponge start - completely rewritten for integer-based calculations
