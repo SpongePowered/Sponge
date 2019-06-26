@@ -43,6 +43,9 @@ import org.spongepowered.common.config.SpongeConfigManager;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.DriverManager;
@@ -175,6 +178,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
     public static class ConnectionInfo {
 
         private static final Pattern URL_REGEX = Pattern.compile("(?:jdbc:)?([^:]+):(//)?(?:([^:]+)(?::([^@]+))?@)?(.*)");
+        private static final String UTF_8 = StandardCharsets.UTF_8.name();
         @Nullable private final String user;
         @Nullable private final String password;
         private final String driverClassName;
@@ -258,8 +262,8 @@ public class SqlServiceImpl implements SqlService, Closeable {
 
             final String protocol = match.group(1);
             final boolean hasSlashes = match.group(2) != null;
-            final String user = match.group(3);
-            final String pass = match.group(4);
+            final String user = urlDecode(match.group(3));
+            final String pass = urlDecode(match.group(4));
             String serverDatabaseSpecifier = match.group(5);
             BiFunction<PluginContainer, String, String> derelativizer = PATH_CANONICALIZERS.get(protocol);
             if (container != null && derelativizer != null) {
@@ -268,6 +272,15 @@ public class SqlServiceImpl implements SqlService, Closeable {
             final String unauthedUrl = "jdbc:" + protocol + (hasSlashes ? "://" : ":") + serverDatabaseSpecifier;
             final String driverClass = DriverManager.getDriver(unauthedUrl).getClass().getCanonicalName();
             return new ConnectionInfo(user, pass, driverClass, unauthedUrl, fullUrl);
+        }
+
+        private static String urlDecode(String str) {
+            try {
+                return str == null ? null : URLDecoder.decode(str, UTF_8);
+            } catch (UnsupportedEncodingException e) {
+                // If UTF-8 is not supported, we have bigger problems...
+                throw new RuntimeException("UTF-8 is not supported on this system", e);
+            }
         }
     }
 

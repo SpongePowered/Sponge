@@ -64,4 +64,15 @@ public class SqlServiceImplTest {
         assertEquals(jdbcUrl, subject.getAuthlessUrl());
         assertEquals("org.sqlite.JDBC", subject.getDriverClassName());
     }
+
+    @Test
+    public void testUrlEncodedInfo() throws SQLException {
+        final String jdbcUrl = "jdbc:mysql://test%40%3A%C3%A4%C3%B6%C3%BC%26%3F+%40test:pw%40%3A%C3%A4%C3%B6%C3%BC%26%3F+%40pw@localhost/sponge";
+        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
+
+        assertEquals("test@:äöü&? @test", subject.getUser());
+        assertEquals("pw@:äöü&? @pw", subject.getPassword());
+        assertEquals("jdbc:mysql://localhost/sponge", subject.getAuthlessUrl());
+        assertEquals("org.mariadb.jdbc.Driver", subject.getDriverClassName());
+    }
 }
