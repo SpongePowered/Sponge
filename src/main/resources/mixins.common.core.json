@@ -340,6 +340,7 @@
         "scoreboard.MixinScorePlayerTeam",
         "scoreboard.MixinServerScoreboard",
         "server.AccessorPlayerList",
+        "server.MinecraftServerAccessor",
         "server.MixinMinecraftServer",
         "server.MixinPlayerList",
         "server.MixinServerCommandManager",

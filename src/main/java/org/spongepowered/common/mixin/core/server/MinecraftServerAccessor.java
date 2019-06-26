@@ -22,24 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.server;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixer;
-import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface IMixinMinecraftServer {
+@Mixin(MinecraftServer.class)
+public interface MinecraftServerAccessor {
 
-    DataFixer getDataFixer();
-
-    long[] getWorldTickTimes(int dimensionId);
-
-    void putWorldTickTimes(int dimensionId, long[] tickTimes);
-
-    void removeWorldTickTimes(int dimensionId);
-
-    void prepareSpawnArea(WorldServer worldServer);
-
-    void setSaveEnabled(boolean enabled);
-
-    void spongeStopServer();
+    @Accessor("dataFixer") DataFixer accessor$getDataFixer();
 }

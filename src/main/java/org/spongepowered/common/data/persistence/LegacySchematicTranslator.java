@@ -55,7 +55,9 @@ import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
+import org.spongepowered.common.mixin.core.server.MinecraftServerAccessor;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
@@ -102,7 +104,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
     @Override
     public Schematic translate(DataView view) throws InvalidDataException {
         if (VANILLA_FIXER == null) {
-            VANILLA_FIXER = SpongeImpl.getDataFixer();
+            VANILLA_FIXER = ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer();
         }
         // We default to sponge as the assumption should be that if this tag
         // (which is not in the sponge schematic specification) is not present

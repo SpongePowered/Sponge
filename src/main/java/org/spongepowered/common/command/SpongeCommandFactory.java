@@ -85,6 +85,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -99,7 +100,6 @@ import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.util.SpongeHooks;
@@ -843,8 +843,7 @@ public class SpongeCommandFactory {
     }
 
     private static void printWorldTickTime(CommandSource src, World world) {
-        final long[] worldTickTimes = ((IMixinMinecraftServer) SpongeImpl.getServer()).
-            getWorldTickTimes(((ServerWorldBridge) world).bridge$getDimensionId());
+        final long[] worldTickTimes = ((MinecraftServerBridge) SpongeImpl.getServer()).bridge$getWorldTickTimes(((ServerWorldBridge) world).bridge$getDimensionId());
         final double worldMeanTickTime = mean(worldTickTimes) * 1.0e-6d;
         final double worldTps = Math.min(1000.0 / worldMeanTickTime, 20);
         src.sendMessage(Text.of("World [", TextColors.DARK_GREEN, world.getName(), TextColors.RESET, "] (",

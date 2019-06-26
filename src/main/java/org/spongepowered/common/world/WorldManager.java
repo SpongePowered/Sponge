@@ -67,6 +67,7 @@ import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
@@ -75,13 +76,13 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinIntegratedServer;
-import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.mixin.core.server.MinecraftServerAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -424,8 +425,7 @@ public final class WorldManager {
             return optWorldProperties.get();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true, SpongeImpl
-                .getDataFixer());
+        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
         WorldInfo worldInfo = saveHandler.loadWorldInfo();
 
         if (worldInfo == null) {
@@ -472,8 +472,7 @@ public final class WorldManager {
             worldServer.getSaveHandler().saveWorldInfo((WorldInfo) properties);
             worldServer.getSaveHandler().loadWorldInfo();
         } else {
-            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, SpongeImpl
-                    .getDataFixer()).saveWorldInfo((WorldInfo) properties);
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer()).saveWorldInfo((WorldInfo) properties);
         }
         ((WorldInfoBridge) properties).getConfigAdapter().save();
         // No return values or exceptions so can only assume true.
@@ -557,7 +556,7 @@ public final class WorldManager {
                     ((org.spongepowered.api.world.World) worldServer).getDimension().getType().getId(), dimensionId);
                 worldByDimensionId.remove(dimensionId);
                 weakWorldByWorld.remove(worldServer);
-                ((IMixinMinecraftServer) server).removeWorldTickTimes(dimensionId);
+                ((MinecraftServerBridge) server).bridge$removeWorldTickTimes(dimensionId);
                 reorderWorldsVanillaFirst();
             }
         }
@@ -622,7 +621,7 @@ public final class WorldManager {
             return Optional.empty();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true, SpongeImpl.getDataFixer());
+        final ISaveHandler saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
 
         // We weren't given a properties, see if one is cached
         if (properties == null) {
@@ -733,8 +732,7 @@ public final class WorldManager {
             if (dimensionId == 0) {
                 saveHandler = server.getActiveAnvilConverter().getSaveLoader(server.getFolderName(), true);
             } else {
-                saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true,
-                        SpongeImpl.getDataFixer());
+                saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
             }
 
             WorldInfo worldInfo = saveHandler.loadWorldInfo();
@@ -848,7 +846,7 @@ public final class WorldManager {
 
         WorldManager.reorderWorldsVanillaFirst();
 
-        ((IMixinMinecraftServer) server).putWorldTickTimes(dimensionId, new long[100]);
+        ((MinecraftServerBridge) server).bridge$putWorldTickTimes(dimensionId, new long[100]);
 
         worldServer.init();
 
@@ -870,7 +868,7 @@ public final class WorldManager {
             }
 
             if (((DimensionTypeBridge) ((org.spongepowered.api.world.World) worldServer).getDimension().getType()).shouldLoadSpawn()) {
-                ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
+                ((MinecraftServerBridge) server).bridge$prepareSpawnArea(worldServer);
             }
 
             // While we try to prevnt mods from changing a worlds' WorldInfo, we aren't always
@@ -893,7 +891,7 @@ public final class WorldManager {
         worldByDimensionId.put(dimensionId, worldServer);
         weakWorldByWorld.put(worldServer, worldServer);
 
-        ((IMixinMinecraftServer) SpongeImpl.getServer()).putWorldTickTimes(dimensionId, new long[100]);
+        ((MinecraftServerBridge) SpongeImpl.getServer()).bridge$putWorldTickTimes(dimensionId, new long[100]);
     }
 
     public static void reorderWorldsVanillaFirst() {
@@ -1076,12 +1074,12 @@ public final class WorldManager {
                 throw new RuntimeException(e);
             }
 
-            ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(false);
+            ((MinecraftServerBridge) SpongeImpl.getServer()).bridge$setSaveEnabled(false);
         }
 
         final CompletableFuture<Optional<WorldProperties>> future = SpongeImpl.getScheduler().submitAsyncTask(new CopyWorldTask(info, copyName));
         if (worldServer != null) { // World was loaded
-            future.thenRun(() -> ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(true));
+            future.thenRun(() -> ((MinecraftServerBridge) SpongeImpl.getServer()).bridge$setSaveEnabled(true));
         }
         return future;
     }
@@ -1116,7 +1114,7 @@ public final class WorldManager {
         }
 
         ((WorldInfoBridge) info).createWorldConfig();
-        new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getDataFixer())
+        new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer())
                 .saveWorldInfo(info);
         registerWorldProperties((WorldProperties) info);
         return Optional.of((WorldProperties) info);
@@ -1212,7 +1210,7 @@ public final class WorldManager {
             ((WorldInfoBridge) info).setUniqueId(UUID.randomUUID());
             ((WorldInfoBridge) info).createWorldConfig();
             registerWorldProperties((WorldProperties) info);
-            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), this.newName, true, SpongeImpl.getDataFixer())
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), this.newName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer())
                     .saveWorldInfo(info);
             return Optional.of((WorldProperties) info);
         }

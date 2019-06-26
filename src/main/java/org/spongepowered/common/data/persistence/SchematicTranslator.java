@@ -51,11 +51,13 @@ import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.data.persistence.schematic.SchematicUpdater1_to_2;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.mixin.core.server.MinecraftServerAccessor;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
@@ -118,7 +120,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     @Override
     public Schematic translate(DataView unprocessed) throws InvalidDataException {
         if (VANILLA_FIXER == null) {
-            VANILLA_FIXER = SpongeImpl.getDataFixer();
+            VANILLA_FIXER = ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer();
         }
         int version = unprocessed.getInt(Constants.Sponge.Schematic.VERSION).get();
         // TODO version conversions

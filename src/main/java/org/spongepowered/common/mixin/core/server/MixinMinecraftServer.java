@@ -37,7 +37,6 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -48,7 +47,6 @@ import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.storage.ISaveHandler;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -88,6 +86,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfig;
@@ -104,7 +103,6 @@ import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
-import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -134,26 +132,21 @@ import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
-        IMixinMinecraftServer {
+    MinecraftServerBridge {
 
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public Profiler profiler;
     @Shadow @Final public long[] tickTimeArray;
-    @Shadow private boolean enableBonusChest;
     @Shadow private boolean serverStopped;
     @Shadow private int tickCounter;
     @Shadow private String motd;
     @Shadow public WorldServer[] worlds;
     @Shadow private Thread serverThread;
-    @Shadow @Final private DataFixer dataFixer;
 
     @Shadow public abstract void sendMessage(ITextComponent message);
     @Shadow public abstract void initiateShutdown();
     @Shadow public abstract boolean isServerInOnlineMode();
     @Shadow public abstract boolean isServerRunning();
-    @Shadow public abstract boolean canStructuresSpawn();
-    @Shadow public abstract boolean isHardcore();
-    @Shadow public abstract boolean isSinglePlayer();
     @Shadow public abstract String getFolderName();
     @Shadow public abstract PlayerList getPlayerList();
     @Shadow public abstract EnumDifficulty getDifficulty();
@@ -162,8 +155,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void outputPercentRemaining(String message, int percent);
     @Shadow protected abstract void clearCurrentTask();
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
-    @Shadow public abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
-    @Shadow public abstract boolean getAllowNether();
     @Shadow public abstract int getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
     @Shadow public abstract boolean isDedicatedServer();
@@ -355,13 +346,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Overwrite
     public void initialWorldChunkLoad() {
         for (WorldServer worldServer: this.worlds) {
-            this.prepareSpawnArea(worldServer);
+            this.bridge$prepareSpawnArea(worldServer);
         }
         this.clearCurrentTask();
     }
 
     @Override
-    public void prepareSpawnArea(WorldServer worldServer) {
+    public void bridge$prepareSpawnArea(WorldServer worldServer) {
         WorldProperties worldProperties = (WorldProperties) worldServer.getWorldInfo();
         if (!((WorldInfoBridge) worldProperties).isValid() || !worldProperties.doesGenerateSpawnOnLoad()) {
             return;
@@ -519,7 +510,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public void setSaveEnabled(boolean enabled) {
+    public void bridge$setSaveEnabled(boolean enabled) {
         this.enableSaving = enabled;
     }
 
@@ -767,11 +758,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;runTask(Ljava/util/concurrent/FutureTask;Lorg/apache/logging/log4j/Logger;)Ljava/lang/Object;"))
     private Object onRun(FutureTask<?> task, Logger logger) {
         return SpongeImplHooks.onUtilRunTask(task, logger);
-    }
-
-    @Override
-    public DataFixer getDataFixer() {
-        return this.dataFixer;
     }
 
     @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)

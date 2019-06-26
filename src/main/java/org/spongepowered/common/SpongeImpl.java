@@ -54,7 +54,6 @@ import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventHooks;
 import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.SpongeScheduler;
@@ -139,10 +138,6 @@ public final class SpongeImpl {
 
     public static MinecraftServer getServer() {
         return (MinecraftServer) Sponge.getServer();
-    }
-
-    public static DataFixer getDataFixer() {
-        return ((IMixinMinecraftServer) Sponge.getServer()).getDataFixer();
     }
 
     public static SpongeGameRegistry getRegistry() {
