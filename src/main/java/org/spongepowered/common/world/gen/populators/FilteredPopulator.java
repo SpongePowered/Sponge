@@ -30,13 +30,13 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
-import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
+import org.spongepowered.common.bridge.world.gen.FlaggedPopulatorBridge;
 
 import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
 
-public class FilteredPopulator implements IFlaggedPopulator {
+public class FilteredPopulator implements FlaggedPopulatorBridge, Populator {
 
     private final Populator wrapped;
     private final List<String> requiredFlags = Lists.newArrayList();

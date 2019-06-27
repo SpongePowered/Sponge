@@ -25,33 +25,25 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeSavanna;
 import org.spongepowered.api.data.type.DoublePlantTypes;
-import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
-import org.spongepowered.api.world.gen.populator.Forest;
-import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
+import org.spongepowered.common.world.gen.WorldGenConstants;
 
 @Mixin(BiomeSavanna.class)
 public abstract class BiomeSavannaMixin extends BiomeMixin {
 
     @Override
-    public void bridge$buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        DoublePlant grass = DoublePlant.builder()
+    public void bridge$buildPopulators(final World world, final SpongeBiomeGenerationSettings gensettings) {
+        final DoublePlant grass = DoublePlant.builder()
                 .type(DoublePlantTypes.GRASS, 1)
                 .perChunk(7 * 5)
                 .build();
         gensettings.getPopulators().add(grass);
         super.bridge$buildPopulators(world, gensettings);
-        BiomeDecorator theBiomeDecorator = this.decorator;
-        gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
-        Forest.Builder forest = Forest.builder();
-        forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
-        forest.type(BiomeTreeTypes.OAK.getPopulatorObject(), 1);
-        forest.type(BiomeTreeTypes.SAVANNA.getPopulatorObject(), 4);
-        gensettings.getPopulators().add(0, forest.build());
+        WorldGenConstants.buildSavanaPopulators(gensettings, this.decorator);
     }
+
 }

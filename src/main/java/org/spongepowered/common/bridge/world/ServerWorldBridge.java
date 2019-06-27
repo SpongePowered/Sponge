@@ -50,7 +50,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public interface ServerWorldBridge extends WorldBridge {
+public interface ServerWorldBridge {
 
     int bridge$getDimensionId();
 

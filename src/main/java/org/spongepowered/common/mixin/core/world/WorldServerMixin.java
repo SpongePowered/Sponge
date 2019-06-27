@@ -140,6 +140,7 @@ import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
@@ -147,6 +148,7 @@ import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.gen.PopulatorProviderBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.WorldCategory;
@@ -162,9 +164,7 @@ import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -394,17 +394,17 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
 
         final SpongeWorldGenerator newGenerator = this.bridge$createWorldGenerator(generatorSettings);
         // If the base generator is an IChunkProvider which implements
-        // IPopulatorProvider we request that it add its populators not covered
+        // PopulatorProviderBridge we request that it add its populators not covered
         // by the base generation populator
         if (newGenerator.getBaseGenerationPopulator() instanceof IChunkGenerator) {
-            // We check here to ensure that the IPopulatorProvider is one of our mixed in ones and not
+            // We check here to ensure that the PopulatorProviderBridge is one of our mixed in ones and not
             // from a mod chunk provider extending a provider that we mixed into
-            if (WorldGenConstants.isValid((IChunkGenerator) newGenerator.getBaseGenerationPopulator(), IPopulatorProvider.class)) {
-                ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
+            if (WorldGenConstants.isValid((IChunkGenerator) newGenerator.getBaseGenerationPopulator(), PopulatorProviderBridge.class)) {
+                ((PopulatorProviderBridge) newGenerator.getBaseGenerationPopulator()).bridge$addPopulators(newGenerator);
             }
-        } else if (newGenerator.getBaseGenerationPopulator() instanceof IPopulatorProvider) {
+        } else if (newGenerator.getBaseGenerationPopulator() instanceof PopulatorProviderBridge) {
             // If its not a chunk provider but is a populator provider then we call it as well
-            ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
+            ((PopulatorProviderBridge) newGenerator.getBaseGenerationPopulator()).bridge$addPopulators(newGenerator);
         }
 
         for (final WorldGeneratorModifier modifier : ((org.spongepowered.api.world.World) this).getProperties().getGeneratorModifiers()) {
@@ -2448,16 +2448,6 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
                 }
             }
         }
-    }
-
-    @Override
-    public long bridge$getWeatherStartTime() {
-        return this.weatherStartTime;
-    }
-
-    @Override
-    public void setWeatherStartTime(final long weatherStartTime) {
-        this.weatherStartTime = weatherStartTime;
     }
 
     @Override

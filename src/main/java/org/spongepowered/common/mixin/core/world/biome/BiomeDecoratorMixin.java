@@ -41,7 +41,7 @@ public abstract class BiomeDecoratorMixin {
      *      are handled already by populators.
      */
     @Overwrite
-    protected void genDecorations(Biome biomeGenBaseIn, World worldIn, Random random) {
+    protected void genDecorations(final Biome biomeGenBaseIn, final World worldIn, final Random random) {
         // Cancel genDecorations just in case this does get called as all of these
         // are handled already by populators.
     }

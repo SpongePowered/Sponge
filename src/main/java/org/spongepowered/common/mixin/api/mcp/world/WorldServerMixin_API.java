@@ -87,6 +87,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
@@ -606,7 +607,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public long getRunningDuration() {
-        return this.worldInfo.getWorldTotalTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime();
+        return this.worldInfo.getWorldTotalTime() - ((WorldBridge) this).bridge$getWeatherStartTime();
     }
 
     @Override

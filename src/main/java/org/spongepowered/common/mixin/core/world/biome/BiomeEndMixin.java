@@ -41,7 +41,7 @@ public abstract class BiomeEndMixin extends BiomeMixin {
      * generation with end stone.
      */
     @Override
-    public void bridge$buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
+    public void bridge$buildPopulators(final World world, final SpongeBiomeGenerationSettings gensettings) {
         gensettings.getGenerationPopulators().add(new EndBiomeGenerationPopulator());
         gensettings.getPopulators().add(new EndSpikePopulator());
         gensettings.getPopulators().add(EndIsland.builder().build());

@@ -36,9 +36,9 @@ import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 public abstract class BiomeDesertMixin extends BiomeMixin {
 
     @Override
-    public void bridge$buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
+    public void bridge$buildPopulators(final World world, final SpongeBiomeGenerationSettings gensettings) {
         super.bridge$buildPopulators(world, gensettings);
-        DesertWell well = DesertWell.builder()
+        final DesertWell well = DesertWell.builder()
                 .probability(1 / 1000f)
                 .wellObject(PopulatorObjects.DESERT_WELL)
                 .build();

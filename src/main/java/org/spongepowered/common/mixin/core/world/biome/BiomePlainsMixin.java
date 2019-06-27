@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomePlains;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
+import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.PlainsGrassPopulator;
 
 @Mixin(BiomePlains.class)
@@ -38,13 +38,9 @@ public abstract class BiomePlainsMixin extends BiomeMixin {
     @Shadow protected boolean sunflowers;
 
     @Override
-    public void bridge$buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
+    public void bridge$buildPopulators(final World world, final SpongeBiomeGenerationSettings gensettings) {
         gensettings.getPopulators().add(new PlainsGrassPopulator(this.sunflowers));
-        BiomeDecorator theBiomeDecorator = this.decorator;
-        // set flowers and grass to zero as they are handles by the plains grass
-        // populator
-        theBiomeDecorator.flowersPerChunk = 0;
-        theBiomeDecorator.grassPerChunk = 0;
+        WorldGenConstants.resetGrassAndFlowers(this.decorator);
         super.bridge$buildPopulators(world, gensettings);
     }
 

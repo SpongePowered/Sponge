@@ -130,7 +130,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     private long impl$cacheKey;
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
-    private void impl$onConstruct(World worldIn, int x, int z, CallbackInfo ci) {
+    private void impl$onConstruct(final World worldIn, final int x, final int z, final CallbackInfo ci) {
         this.impl$cacheKey = ChunkPos.asLong(x, z);
     }
 

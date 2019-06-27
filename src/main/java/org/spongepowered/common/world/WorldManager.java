@@ -876,7 +876,7 @@ public final class WorldManager {
             // While we try to prevnt mods from changing a worlds' WorldInfo, we aren't always
             // successful. We re-do the fake world check to catch any changes made to WorldInfo
             // that would make it invalid
-            ((WorldBridge) worldServer).clearFakeCheck();
+            ((WorldBridge) worldServer).bridge$clearFakeCheck();
 
             return worldServer;
         } finally {

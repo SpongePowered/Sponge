@@ -335,7 +335,7 @@ public abstract class WorldMixin implements WorldBridge {
     }
 
     @Override
-    public void clearFakeCheck() {
+    public void bridge$clearFakeCheck() {
         this.hasChecked = false;
     }
 
@@ -430,12 +430,6 @@ public abstract class WorldMixin implements WorldBridge {
         }
     }
 
-
-
-    @Override
-    public int getRawBlockLight(BlockPos pos, EnumSkyBlock lightType) {
-        return this.getRawLight(pos, lightType);
-    }
 
     /**
      * @author gabizou - July 25th, 2016

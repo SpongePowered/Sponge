@@ -50,6 +50,8 @@ public interface WorldBridge {
      */
     boolean isFake();
 
+    void bridge$clearFakeCheck();
+
     long bridge$getWeatherStartTime();
 
     void setWeatherStartTime(long weatherStartTime);
@@ -62,9 +64,4 @@ public interface WorldBridge {
     @Nullable
     EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
 
-    int getRawBlockLight(BlockPos pos, EnumSkyBlock lightType);
-
-    void clearFakeCheck();
-
-    Dimension bridge$getDimensionWrapper();
 }
