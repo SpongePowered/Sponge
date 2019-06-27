@@ -102,7 +102,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
             return;
         }
         this.impl$EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
-        final WorldCategory worldCategory = ((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getWorld();
+        final WorldCategory worldCategory = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld();
 
         ((ServerWorldBridge) worldObjIn).bridge$updateConfigCache();
 

@@ -278,7 +278,7 @@ public class SpongeCommandFactory {
                     if (!world.isPresent() && this.requireWorldLoaded) {
                         throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
-                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((WorldInfoBridge) properties).getConfigAdapter(),
+                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((WorldInfoBridge) properties).bridge$getConfigAdapter(),
                         world.orElse(null), src, args)));
                     ++successes;
                 }

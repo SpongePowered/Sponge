@@ -542,7 +542,7 @@ public final class EntityUtil {
         toWorld = mcServer.getWorld(toDimensionId);
 
         final Map<String, String> portalAgents =
-            ((WorldInfoBridge) fromWorld.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getPortalAgents();
+            ((WorldInfoBridge) fromWorld.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getPortalAgents();
         String worldName;
 
         // Check if we're to use a different teleporter for this world

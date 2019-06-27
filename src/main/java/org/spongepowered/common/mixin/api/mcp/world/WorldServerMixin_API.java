@@ -647,7 +647,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     @Override
     public void setViewDistance(final int viewDistance) {
         this.playerChunkMap.setPlayerViewRadius(viewDistance);
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.getWorldInfo()).bridge$getConfigAdapter();
         // don't use the parameter, use the field that has been clamped
         configAdapter.getConfig().getWorld().setViewDistance(this.playerChunkMap.playerViewRadius);
         configAdapter.save();

@@ -111,7 +111,7 @@ public abstract class WorldEntitySpawnerMixin {
             spongeWorld.bridge$getTimingsHandler().mobSpawn.startTiming();
 
             int chunkSpawnCandidates = 0;
-            final int mobSpawnRange = Math.min(((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getMobSpawnRange(),
+            final int mobSpawnRange = Math.min(((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getMobSpawnRange(),
                     ((org.spongepowered.api.world.World) world).getViewDistance());
             // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
             // Since we allow for custom ranges, we need to adjust the div count based on the
@@ -162,7 +162,7 @@ public abstract class WorldEntitySpawnerMixin {
 
             int totalSpawned = 0;
             final long worldTotalTime = world.getTotalWorldTime();
-            final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
+            final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
 
             labelOuterLoop:
             for (final EnumCreatureType enumCreatureType : EnumCreatureType.values()) {

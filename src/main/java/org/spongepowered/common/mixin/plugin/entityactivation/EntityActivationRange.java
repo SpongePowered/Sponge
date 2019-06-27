@@ -149,7 +149,7 @@ public class EntityActivationRange {
         }
 
         final EntityActivationRangeCategory config =
-            ((WorldInfoBridge) entity.world.getWorldInfo()).getConfigAdapter().getConfig().getEntityActivationRange();
+            ((WorldInfoBridge) entity.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntityActivationRange();
         EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
         if (type == EntityTypes.UNKNOWN || !(type instanceof SpongeEntityType)) {
             spongeEntity.activation$setDefaultActivationState(true);
@@ -435,7 +435,7 @@ public class EntityActivationRange {
         checkNotNull(world, "world");
         checkNotNull(type, "type");
 
-        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
 
         final boolean autoPopulate = worldConfigAdapter.getConfig().getEntityActivationRange().autoPopulateData();

@@ -55,7 +55,7 @@ public class MixinChunk_TileEntityActivation {
             return;
         }
 
-        if (((WorldInfoBridge) this.world.getWorldInfo()).isValid()) {
+        if (((WorldInfoBridge) this.world.getWorldInfo()).bridge$isValid()) {
             final ActivationCapability spongeTile = (ActivationCapability) tileEntityIn;
             final ChunkBridge spongeChunk = (ChunkBridge) this;
             if (spongeChunk.isPersistedChunk()) {

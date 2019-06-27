@@ -161,7 +161,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(final double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
         }
         return value;
     }
@@ -170,7 +170,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(final double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
         }
         return value;
     }
@@ -178,7 +178,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     @ModifyConstant(method = "despawnEntity", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(final int value) {
         if (!this.world.isRemote) {
-            return ((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
+            return ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
         }
         return value;
     }

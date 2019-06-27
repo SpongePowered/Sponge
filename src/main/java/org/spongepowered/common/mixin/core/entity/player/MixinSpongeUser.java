@@ -131,7 +131,7 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, Invulnerab
             return playerOpt.get().setLocation(position, world);
         }
         WorldProperties prop = WorldManager.getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
-        Integer dimensionId = ((WorldInfoBridge) prop).getDimensionId();
+        Integer dimensionId = ((WorldInfoBridge) prop).bridge$getDimensionId();
         if (dimensionId == null) {
             throw new IllegalArgumentException("Invalid World: missing dimensionID)");
         }

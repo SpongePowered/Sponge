@@ -131,7 +131,7 @@ public final class SpongeImplHooks {
         return true;
     }
 
-    public static String getModIdFromClass(Class<?> clazz) {
+    public static String getModIdFromClass(final Class<?> clazz) {
         final String className = clazz.getName();
         if (className.startsWith("net.minecraft.")) {
             return "minecraft";
@@ -144,115 +144,115 @@ public final class SpongeImplHooks {
 
     // Entity
 
-    public static boolean isCreatureOfType(Entity entity, EnumCreatureType type) {
+    public static boolean isCreatureOfType(final Entity entity, final EnumCreatureType type) {
         return type.getCreatureClass().isAssignableFrom(entity.getClass());
     }
 
-    public static boolean isFakePlayer(Entity entity) {
+    public static boolean isFakePlayer(final Entity entity) {
         return false;
     }
 
-    public static void fireServerConnectionEvent(NetworkManager netManager) {
+    public static void fireServerConnectionEvent(final NetworkManager netManager) {
         // Implemented in SF
     }
 
-    public static void firePlayerJoinSpawnEvent(EntityPlayerMP playerMP) {
+    public static void firePlayerJoinSpawnEvent(final EntityPlayerMP playerMP) {
         // Overwritten in SpongeForge
     }
 
-    public static void handlePostChangeDimensionEvent(EntityPlayerMP playerIn, WorldServer fromWorld, WorldServer toWorld) {
+    public static void handlePostChangeDimensionEvent(final EntityPlayerMP playerIn, final WorldServer fromWorld, final WorldServer toWorld) {
         // Overwritten in SpongeForge
     }
 
-    public static boolean checkAttackEntity(EntityPlayer entityPlayer, Entity targetEntity) {
+    public static boolean checkAttackEntity(final EntityPlayer entityPlayer, final Entity targetEntity) {
         return true;
     }
 
-    public static double getBlockReachDistance(EntityPlayerMP player) {
+    public static double getBlockReachDistance(final EntityPlayerMP player) {
         return 5.0d;
     }
 
     // Entity registry
 
     @Nullable
-    public static Class<? extends Entity> getEntityClass(ResourceLocation name) {
+    public static Class<? extends Entity> getEntityClass(final ResourceLocation name) {
         return EntityList.REGISTRY.getObject(name);
     }
 
     @Nullable
-    public static String getEntityTranslation(ResourceLocation name) {
+    public static String getEntityTranslation(final ResourceLocation name) {
         return EntityList.getTranslationName(name);
     }
 
-    public static int getEntityId(Class<? extends Entity> entityClass) {
+    public static int getEntityId(final Class<? extends Entity> entityClass) {
         return EntityList.REGISTRY.getIDForObject(entityClass);
     }
 
     // Block
 
-    public static boolean isBlockFlammable(Block block, IBlockAccess world, BlockPos pos, EnumFacing face) {
+    public static boolean isBlockFlammable(final Block block, final IBlockAccess world, final BlockPos pos, final EnumFacing face) {
         return ((AccessorBlockFire) Blocks.FIRE).accessor$getBlockFlamability(block) > 0;
     }
 
-    public static int getBlockLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
+    public static int getBlockLightOpacity(final IBlockState state, final IBlockAccess world, final BlockPos pos) {
         return state.getLightOpacity();
     }
 
-	public static int getChunkPosLight(IBlockState blockState, World world, BlockPos pos) {
+	public static int getChunkPosLight(final IBlockState blockState, final World world, final BlockPos pos) {
 		return blockState.getLightValue();
 	}
     // Tile entity
 
     @Nullable
-    public static TileEntity createTileEntity(Block block, net.minecraft.world.World world, IBlockState state) {
+    public static TileEntity createTileEntity(final Block block, final net.minecraft.world.World world, final IBlockState state) {
         if (block instanceof ITileEntityProvider) {
             return ((ITileEntityProvider) block).createNewTileEntity(world, block.getMetaFromState(state));
         }
         return null;
     }
 
-    public static boolean hasBlockTileEntity(Block block, IBlockState state) {
+    public static boolean hasBlockTileEntity(final Block block, final IBlockState state) {
         return block instanceof ITileEntityProvider;
     }
 
-    public static boolean shouldRefresh(TileEntity tile, net.minecraft.world.World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+    public static boolean shouldRefresh(final TileEntity tile, final net.minecraft.world.World world, final BlockPos pos, final IBlockState oldState, final IBlockState newState) {
         return oldState.getBlock() != newState.getBlock();
     }
 
-    public static void onTileChunkUnload(TileEntity te) {
+    public static void onTileChunkUnload(final TileEntity te) {
         // Overwritten in SpongeForge
     }
 
     // World
 
-    public static Iterator<Chunk> getChunkIterator(WorldServer world) {
+    public static Iterator<Chunk> getChunkIterator(final WorldServer world) {
         return world.getPlayerChunkMap().getChunkIterator();
     }
 
-    public static void registerPortalAgentType(@Nullable ForgeITeleporterBridge teleporter) {
+    public static void registerPortalAgentType(@Nullable final ForgeITeleporterBridge teleporter) {
         // Overwritten in SpongeForge
     }
 
     // World provider
 
-    public static boolean canDoLightning(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
+    public static boolean canDoLightning(final WorldProvider provider, final net.minecraft.world.chunk.Chunk chunk) {
         return true;
     }
 
-    public static boolean canDoRainSnowIce(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
+    public static boolean canDoRainSnowIce(final WorldProvider provider, final net.minecraft.world.chunk.Chunk chunk) {
         return true;
     }
 
-    public static int getRespawnDimension(WorldProvider targetDimension, EntityPlayerMP player) {
+    public static int getRespawnDimension(final WorldProvider targetDimension, final EntityPlayerMP player) {
         return 0;
     }
 
-    public static BlockPos getRandomizedSpawnPoint(WorldServer world) {
+    public static BlockPos getRandomizedSpawnPoint(final WorldServer world) {
         BlockPos ret = world.getSpawnPoint();
 
-        boolean isAdventure = world.getWorldInfo().getGameType() == GameType.ADVENTURE;
+        final boolean isAdventure = world.getWorldInfo().getGameType() == GameType.ADVENTURE;
         int spawnFuzz = Math.max(0, world.getMinecraftServer().getSpawnRadius(world));
-        int border = MathHelper.floor(world.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
+        final int border = MathHelper.floor(world.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
         if (border < spawnFuzz) {
             spawnFuzz = border;
         }
@@ -262,7 +262,7 @@ public final class SpongeImplHooks {
             if (spawnFuzz < 2) {
                 spawnFuzz = 2;
             }
-            int spawnFuzzHalf = spawnFuzz / 2;
+            final int spawnFuzzHalf = spawnFuzz / 2;
             ret = world.getTopSolidOrLiquidBlock(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
         }
 
@@ -271,26 +271,26 @@ public final class SpongeImplHooks {
 
     // Item stack merging
 
-    public static void addItemStackToListForSpawning(Collection<ItemDropData> itemStacks, @Nullable ItemDropData itemStack) {
+    public static void addItemStackToListForSpawning(final Collection<ItemDropData> itemStacks, @Nullable final ItemDropData itemStack) {
         // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
         if (itemStack != null) {
             itemStacks.add(itemStack);
         }
     }
 
-    public static MapStorage getWorldMapStorage(World world) {
+    public static MapStorage getWorldMapStorage(final World world) {
         return world.getMapStorage();
     }
 
-    public static int countEntities(WorldServer worldServer, net.minecraft.entity.EnumCreatureType type, boolean forSpawnCount) {
+    public static int countEntities(final WorldServer worldServer, final net.minecraft.entity.EnumCreatureType type, final boolean forSpawnCount) {
         return worldServer.countEntities(type.getCreatureClass());
     }
 
-    public static int getMaxSpawnPackSize(EntityLiving entityLiving) {
+    public static int getMaxSpawnPackSize(final EntityLiving entityLiving) {
         return entityLiving.getMaxSpawnedInChunk();
     }
 
-    public static SpawnerSpawnType canEntitySpawnHere(EntityLiving entityLiving, boolean entityNotColliding) {
+    public static SpawnerSpawnType canEntitySpawnHere(final EntityLiving entityLiving, final boolean entityNotColliding) {
         if (entityLiving.getCanSpawnHere() && entityNotColliding) {
             return SpawnerSpawnType.NORMAL;
         }
@@ -298,7 +298,7 @@ public final class SpongeImplHooks {
     }
 
     @Nullable
-    public static Object onUtilRunTask(FutureTask<?> task, Logger logger) {
+    public static Object onUtilRunTask(final FutureTask<?> task, final Logger logger) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
                 .source(task))  {
@@ -313,15 +313,15 @@ public final class SpongeImplHooks {
         }
     }
 
-    public static void onEntityError(Entity entity, CrashReport crashReport) {
+    public static void onEntityError(final Entity entity, final CrashReport crashReport) {
         throw new ReportedException(crashReport);
     }
 
-    public static void onTileEntityError(TileEntity tileEntity, CrashReport crashReport) {
+    public static void onTileEntityError(final TileEntity tileEntity, final CrashReport crashReport) {
         throw new ReportedException(crashReport);
     }
 
-    public static void blockExploded(Block block, World world, BlockPos blockpos, Explosion explosion) {
+    public static void blockExploded(final Block block, final World world, final BlockPos blockpos, final Explosion explosion) {
         world.setBlockToAir(blockpos);
         block.onExplosionDestroy(world, blockpos, explosion);
     }
@@ -335,35 +335,36 @@ public final class SpongeImplHooks {
      * @return True if the current phase state is restoring, or the world is restoring in forge.
      */
     @SuppressWarnings("unused") // overridden to be used in MixinSpongeImplHooks.
-    public static boolean isRestoringBlocks(World world) {
+    public static boolean isRestoringBlocks(final World world) {
         return PhaseTracker.getInstance().getCurrentState().isRestoring();
 
     }
 
-    public static void onTileEntityChunkUnload(net.minecraft.tileentity.TileEntity tileEntity) {
+    public static void onTileEntityChunkUnload(final net.minecraft.tileentity.TileEntity tileEntity) {
         // forge only method
     }
 
-    public static boolean canConnectRedstone(Block block, IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
+    public static boolean canConnectRedstone(
+        final Block block, final IBlockState state, final IBlockAccess world, final BlockPos pos, @Nullable final EnumFacing side) {
         return state.canProvidePower() && side != null;
     }
     // Crafting
 
-    public static Optional<ItemStack> getContainerItem(ItemStack itemStack) {
+    public static Optional<ItemStack> getContainerItem(final ItemStack itemStack) {
         checkNotNull(itemStack, "The itemStack must not be null");
 
-        net.minecraft.item.ItemStack nmsStack = ItemStackUtil.toNative(itemStack);
+        final net.minecraft.item.ItemStack nmsStack = ItemStackUtil.toNative(itemStack);
 
         if (nmsStack.isEmpty()) {
             return Optional.empty();
         }
 
-        Item nmsItem = nmsStack.getItem();
+        final Item nmsItem = nmsStack.getItem();
 
         if (nmsItem.hasContainerItem()) {
-            Item nmsContainerItem = nmsItem.getContainerItem();
-            net.minecraft.item.ItemStack nmsContainerStack = new net.minecraft.item.ItemStack(nmsContainerItem);
-            ItemStack containerStack = ItemStackUtil.fromNative(nmsContainerStack);
+            final Item nmsContainerItem = nmsItem.getContainerItem();
+            final net.minecraft.item.ItemStack nmsContainerStack = new net.minecraft.item.ItemStack(nmsContainerItem);
+            final ItemStack containerStack = ItemStackUtil.fromNative(nmsContainerStack);
 
             return Optional.of(containerStack);
         } else {
@@ -371,8 +372,8 @@ public final class SpongeImplHooks {
         }
     }
 
-    public static Optional<CraftingRecipe> findMatchingRecipe(CraftingGridInventory inventory, org.spongepowered.api.world.World world) {
-        IRecipe recipe = CraftingManager.findMatchingRecipe(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
+    public static Optional<CraftingRecipe> findMatchingRecipe(final CraftingGridInventory inventory, final org.spongepowered.api.world.World world) {
+        final IRecipe recipe = CraftingManager.findMatchingRecipe(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
         return Optional.ofNullable(((CraftingRecipe) recipe));
     }
 
@@ -380,15 +381,15 @@ public final class SpongeImplHooks {
         return Streams.stream(CraftingManager.REGISTRY.iterator()).map(CraftingRecipe.class::cast).collect(ImmutableList.toImmutableList());
     }
 
-    public static Optional<CraftingRecipe> getRecipeById(String id) {
-        IRecipe recipe = CraftingManager.REGISTRY.getObject(new ResourceLocation(id));
+    public static Optional<CraftingRecipe> getRecipeById(final String id) {
+        final IRecipe recipe = CraftingManager.REGISTRY.getObject(new ResourceLocation(id));
         if (recipe == null) {
             return Optional.empty();
         }
         return Optional.of(((CraftingRecipe) recipe));
     }
 
-    public static void register(ResourceLocation name, IRecipe recipe) {
+    public static void register(final ResourceLocation name, final IRecipe recipe) {
         CraftingManager.register(name, recipe);
     }
 
@@ -401,7 +402,7 @@ public final class SpongeImplHooks {
         return Text.EMPTY;
     }
 
-    public static void registerAdditionalCommands(ChildCommandElementExecutor flagChildren, ChildCommandElementExecutor nonFlagChildren) {
+    public static void registerAdditionalCommands(final ChildCommandElementExecutor flagChildren, final ChildCommandElementExecutor nonFlagChildren) {
         // Overwritten in SpongeForge
     }
 
@@ -412,41 +413,41 @@ public final class SpongeImplHooks {
     // Borrowed from Forge, with adjustments by us
 
     @Nullable
-    public static RayTraceResult rayTraceEyes(EntityLivingBase entity, double length) {
+    public static RayTraceResult rayTraceEyes(final EntityLivingBase entity, final double length) {
         final Vec3d startPos = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
         final Vec3d endPos = startPos.add(entity.getLookVec().scale(length));
         return entity.world.rayTraceBlocks(startPos, endPos);
     }
 
-    public static boolean shouldKeepSpawnLoaded(net.minecraft.world.DimensionType dimensionType, int dimensionId) {
+    public static boolean shouldKeepSpawnLoaded(final net.minecraft.world.DimensionType dimensionType, final int dimensionId) {
         final WorldServer worldServer = WorldManager.getWorldByDimensionId(dimensionId).orElse(null);
         return worldServer != null && ((WorldProperties) worldServer.getWorldInfo()).doesKeepSpawnLoaded();
 
     }
 
-    public static void setShouldLoadSpawn(net.minecraft.world.DimensionType dimensionType, boolean keepSpawnLoaded) {
+    public static void setShouldLoadSpawn(final net.minecraft.world.DimensionType dimensionType, final boolean keepSpawnLoaded) {
         // This is only used in SpongeForge
     }
 
-    public static BlockPos getBedLocation(EntityPlayer playerIn, int dimension) {
+    public static BlockPos getBedLocation(final EntityPlayer playerIn, final int dimension) {
         return ((PlayerEntityBridge) playerIn).getBedLocation(dimension);
     }
 
-    public static boolean isSpawnForced(EntityPlayer playerIn, int dimension) {
+    public static boolean isSpawnForced(final EntityPlayer playerIn, final int dimension) {
         return ((PlayerEntityBridge) playerIn).isSpawnForced(dimension);
     }
 
-    public static Inventory toInventory(Object inventory, @Nullable Object forgeItemHandler) {
+    public static Inventory toInventory(final Object inventory, @Nullable final Object forgeItemHandler) {
         SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         return null;
     }
 
-    public static void onTileEntityInvalidate(TileEntity te) {
+    public static void onTileEntityInvalidate(final TileEntity te) {
         te.invalidate();
     }
 
-    public static void capturePerEntityItemDrop(PhaseContext<?> phaseContext, Entity owner,
-        EntityItem entityitem) {
+    public static void capturePerEntityItemDrop(final PhaseContext<?> phaseContext, final Entity owner,
+        final EntityItem entityitem) {
         phaseContext.getPerEntityItemEntityDropSupplier().get().put(owner.getUniqueID(), entityitem);
     }
 
@@ -459,11 +460,11 @@ public final class SpongeImplHooks {
      * @param cause
      * @return
      */
-    public static int getLootingEnchantmentModifier(EntityLivingBase target, EntityLivingBase entity, DamageSource cause) {
+    public static int getLootingEnchantmentModifier(final EntityLivingBase target, final EntityLivingBase entity, final DamageSource cause) {
         return EnchantmentHelper.getLootingModifier(entity);
     }
 
-    public static double getWorldMaxEntityRadius(WorldServer worldServer) {
+    public static double getWorldMaxEntityRadius(final WorldServer worldServer) {
         return 2.0D;
     }
 
@@ -474,9 +475,9 @@ public final class SpongeImplHooks {
      * @param professionId
      * @return
      */
-    public static Profession validateProfession(int professionId) {
-        List<Profession> professions = (List<Profession>) ProfessionRegistryModule.getInstance().getAll();
-        for (Profession profession : professions) {
+    public static Profession validateProfession(final int professionId) {
+        final List<Profession> professions = (List<Profession>) ProfessionRegistryModule.getInstance().getAll();
+        for (final Profession profession : professions) {
             if (profession instanceof SpongeProfession) {
                 if (professionId == ((SpongeProfession) profession).type) {
                     return profession;
@@ -488,22 +489,22 @@ public final class SpongeImplHooks {
 
     }
 
-    public static void onUseItemTick(EntityLivingBase entity, net.minecraft.item.ItemStack stack, int activeItemStackUseCount) {
+    public static void onUseItemTick(final EntityLivingBase entity, final net.minecraft.item.ItemStack stack, final int activeItemStackUseCount) {
     }
 
-    public static void onTETickStart(TileEntity te) {
-
-    }
-
-    public static void onTETickEnd(TileEntity te) {
+    public static void onTETickStart(final TileEntity te) {
 
     }
 
-    public static void onEntityTickStart(Entity entity) {
+    public static void onTETickEnd(final TileEntity te) {
 
     }
 
-    public static void onEntityTickEnd(Entity entity) {
+    public static void onEntityTickStart(final Entity entity) {
+
+    }
+
+    public static void onEntityTickEnd(final Entity entity) {
 
     }
 
@@ -515,7 +516,7 @@ public final class SpongeImplHooks {
     }
 
     // Overridden by MixinSpongeImplHooks_ItemNameOverflowPrevention for exploit check
-    public static boolean creativeExploitCheck(Packet<?> packetIn, EntityPlayerMP playerMP) {
+    public static boolean creativeExploitCheck(final Packet<?> packetIn, final EntityPlayerMP playerMP) {
         return false;
     }
 
@@ -523,7 +524,7 @@ public final class SpongeImplHooks {
         throw new UnsupportedOperationException("SpongeCommon does not have it's own ecosystem, this needs to be mixed into for implementations depending on SpongeCommon");
     }
 
-    public static TileEntityType getTileEntityType(Class<? extends TileEntity> aClass) {
+    public static TileEntityType getTileEntityType(final Class<? extends TileEntity> aClass) {
         return SpongeImpl.getRegistry().getTranslated(aClass, TileEntityType.class);
     }
 
@@ -535,7 +536,7 @@ public final class SpongeImplHooks {
      * @return The forge event
      */
     @Nullable
-    public static Object postForgeEventDataCompatForSponge(InteractBlockEvent.Secondary spongeEvent) {
+    public static Object postForgeEventDataCompatForSponge(final InteractBlockEvent.Secondary spongeEvent) {
         SpongeImpl.postEvent(spongeEvent);
         return null;
     }
@@ -572,7 +573,7 @@ public final class SpongeImplHooks {
      * @param eventData The event data, if it was created
      * @param player The player
      */
-    public static void shouldCloseScreen(World worldIn, BlockPos pos, @Nullable Object eventData, EntityPlayerMP player) {
+    public static void shouldCloseScreen(final World worldIn, final BlockPos pos, @Nullable final Object eventData, final EntityPlayerMP player) {
     }
 
     /**
@@ -582,7 +583,7 @@ public final class SpongeImplHooks {
      * @param forgeEventObject The forge event object, if it was created
      * @return The result as a result of the event data
      */
-    public static EnumActionResult getInteractionCancellationResult(@Nullable Object forgeEventObject) {
+    public static EnumActionResult getInteractionCancellationResult(@Nullable final Object forgeEventObject) {
         return EnumActionResult.FAIL;
     }
 
@@ -597,8 +598,8 @@ public final class SpongeImplHooks {
      * @param heldItemOffhand The offhand item
      * @return Whether to bypass sneaking state, forge has an extra hook on the item class
      */
-    public static boolean doesItemSneakBypass(World worldIn, BlockPos pos, EntityPlayer player, net.minecraft.item.ItemStack heldItemMainhand,
-        net.minecraft.item.ItemStack heldItemOffhand) {
+    public static boolean doesItemSneakBypass(final World worldIn, final BlockPos pos, final EntityPlayer player, final net.minecraft.item.ItemStack heldItemMainhand,
+        final net.minecraft.item.ItemStack heldItemOffhand) {
         return heldItemMainhand.isEmpty() && heldItemOffhand.isEmpty();
     }
 
@@ -615,9 +616,9 @@ public final class SpongeImplHooks {
      * @return Null so that the rest of the method continues processing? TODO - Zidane and Morph, please check this...
      */
     @Nullable
-    public static EnumActionResult getEnumResultForProcessRightClickBlock(EntityPlayerMP player,
-        InteractBlockEvent.Secondary event, EnumActionResult result, World worldIn, BlockPos pos,
-        EnumHand hand) {
+    public static EnumActionResult getEnumResultForProcessRightClickBlock(final EntityPlayerMP player,
+        final InteractBlockEvent.Secondary event, final EnumActionResult result, final World worldIn, final BlockPos pos,
+        final EnumHand hand) {
         return EnumActionResult.FAIL;
     }
 
@@ -636,9 +637,10 @@ public final class SpongeImplHooks {
      * @param hitZ hit z pos
      * @return The result of the item stack's hook method
      */
-    public static EnumActionResult onForgeItemUseFirst(EntityPlayer player, net.minecraft.item.ItemStack stack, World worldIn, BlockPos pos,
-        EnumHand hand, EnumFacing facing, float hitX,
-        float hitY, float hitZ) {
+    public static EnumActionResult onForgeItemUseFirst(
+        final EntityPlayer player, final net.minecraft.item.ItemStack stack, final World worldIn, final BlockPos pos,
+        final EnumHand hand, final EnumFacing facing, final float hitX,
+        final float hitY, final float hitZ) {
         return EnumActionResult.PASS;
     }
 
@@ -648,7 +650,7 @@ public final class SpongeImplHooks {
      * @param object The event
      * @return False by default, means all server sided events or common events are allowed otherwise.
      */
-    public static boolean isEventClientEvent(Object object) {
+    public static boolean isEventClientEvent(final Object object) {
         return false;
     }
 
@@ -666,7 +668,7 @@ public final class SpongeImplHooks {
      */
     @SuppressWarnings("ConstantConditions")
     @Nullable
-    public static Entity getCustomEntityIfItem(Entity entity) {
+    public static Entity getCustomEntityIfItem(final Entity entity) {
         return entity;
     }
 
@@ -676,7 +678,7 @@ public final class SpongeImplHooks {
      * @param tile The tile to tick
      * @return True whether to tick or false, not to
      */
-    public static boolean shouldTickTile(ITickable tile) {
+    public static boolean shouldTickTile(final ITickable tile) {
         return true;
     }
 
@@ -688,23 +690,23 @@ public final class SpongeImplHooks {
      * @return The resource location id
      */
     @Nullable
-    public static ResourceLocation getItemResourceLocation(Item mixinItem_api) {
+    public static ResourceLocation getItemResourceLocation(final Item mixinItem_api) {
         return Item.REGISTRY.getNameForObject(mixinItem_api);
     }
 
-    public static void registerItemForSpongeRegistry(int id, ResourceLocation textualID, Item itemIn) {
+    public static void registerItemForSpongeRegistry(final int id, final ResourceLocation textualID, final Item itemIn) {
         ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) itemIn);
     }
 
-    public static void writeItemStackCapabilitiesToDataView(DataContainer container, net.minecraft.item.ItemStack stack) {
+    public static void writeItemStackCapabilitiesToDataView(final DataContainer container, final net.minecraft.item.ItemStack stack) {
 
     }
 
-    public static boolean canEnchantmentBeAppliedToItem(Enchantment enchantment, net.minecraft.item.ItemStack stack) {
+    public static boolean canEnchantmentBeAppliedToItem(final Enchantment enchantment, final net.minecraft.item.ItemStack stack) {
         return enchantment.canApply(stack);
     }
 
-    public static void setCapabilitiesFromSpongeBuilder(ItemStack stack, NBTTagCompound compoundTag) {
+    public static void setCapabilitiesFromSpongeBuilder(final ItemStack stack, final NBTTagCompound compoundTag) {
 
     }
 }

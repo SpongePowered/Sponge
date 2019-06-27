@@ -53,7 +53,7 @@ public abstract class MixinEntity_Activation implements ActivationCapability {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void activation$InitActivationRanges(World world, CallbackInfo ci) {
-        if (world != null && !((WorldBridge) world).isFake() && ((WorldInfoBridge) world.getWorldInfo()).isValid()) {
+        if (world != null && !((WorldBridge) world).isFake() && ((WorldInfoBridge) world.getWorldInfo()).bridge$isValid()) {
             EntityActivationRange.initializeEntityActivationState((net.minecraft.entity.Entity) (Object) this);
         }
     }

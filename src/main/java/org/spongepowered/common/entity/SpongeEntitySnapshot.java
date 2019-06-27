@@ -384,7 +384,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         builder.position = location.getPosition();
         builder.worldId = location.getExtent().getUniqueId();
         NBTTagCompound newCompound = this.compound.copy();
-        newCompound.setInteger("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).getDimensionId());
+        newCompound.setInteger("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());
         builder.compound = newCompound;
         return builder.build();
     }

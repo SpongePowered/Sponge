@@ -77,7 +77,7 @@ public abstract class EntityItemMixin extends EntityMixin implements ItemEntityB
             return originalRadius;
         }
         if (this.cachedRadius == -1) {
-            final double configRadius = ((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getItemMergeRadius();
+            final double configRadius = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getItemMergeRadius();
             this.cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
         return this.cachedRadius;

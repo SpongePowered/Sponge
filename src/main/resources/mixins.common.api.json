@@ -269,6 +269,7 @@
         "mcp.world.gen.feature.WorldGenWaterLilyMixin_API",
         "mcp.world.gen.structure.MapGenStructureMixin_API",
         "mcp.world.gen.structure.MapGenVillageMixin_API",
+        "mcp.world.storage.WorldInfoMixin_API",
         "world.extent.ExtentMixin_API"
     ]
 }

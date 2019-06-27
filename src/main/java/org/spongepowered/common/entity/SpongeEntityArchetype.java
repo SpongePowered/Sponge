@@ -132,7 +132,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         }
 
         this.data.setTag("Pos", NbtDataUtil.newDoubleNBTList(x, y, z));
-        this.data.setInteger("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).getDimensionId());
+        this.data.setInteger("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());
         final boolean requiresInitialSpawn;
         if (this.data.hasKey(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
             requiresInitialSpawn = !this.data.getBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
@@ -173,7 +173,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         NBTTagCompound newCompound = this.data.copy();
         newCompound.setTag("Pos", NbtDataUtil
                 .newDoubleNBTList(new double[] { location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ() }));
-        newCompound.setInteger("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).getDimensionId());
+        newCompound.setInteger("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());
         builder.compound = newCompound;
         builder.worldId = location.getExtent().getUniqueId();
         builder.position = location.getPosition();

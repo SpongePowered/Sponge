@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.interfaces.IMixinSaveHandler;
+import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
@@ -65,46 +65,40 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(SaveHandler.class)
-public abstract class MixinSaveHandler implements IMixinSaveHandler {
+public abstract class MixinSaveHandler implements SaveHandlerBridge {
 
-    private static final String COMPRESSED_READ_FILE = "Lnet/minecraft/nbt/CompressedStreamTools;readCompressed(Ljava/io/InputStream;)"
-                                                       + "Lnet/minecraft/nbt/NBTTagCompound;";
-    private static final String COMPRESSED_WRITE_FILE = "Lnet/minecraft/nbt/CompressedStreamTools;writeCompressed"
-                                                        + "(Lnet/minecraft/nbt/NBTTagCompound;Ljava/io/OutputStream;)V";
-    private static final String READ_PLAYER_DATA = "readPlayerData(Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/nbt/NBTTagCompound;";
-    private static final String NBT_COMPOUND_SET = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
-                                                   + "Lnet/minecraft/nbt/NBTBase;)V";
     @Shadow @Final private File worldDirectory;
     @Shadow @Final private long initializationTime;
 
     private Exception capturedException;
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 0, remap = false))
-    private String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
+    @ModifyArg(method = "checkSessionLock",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V", ordinal = 0, remap = false))
+    private String modifyMinecraftExceptionOutputIfNotInitializationTime(final String message) {
         return "The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting";
     }
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 1, remap = false))
-    private String modifyMinecraftExceptionOutputIfIOException(String message) {
+    @ModifyArg(method = "checkSessionLock",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V", ordinal = 1, remap = false))
+    private String modifyMinecraftExceptionOutputIfIOException(final String message) {
         return "Failed to check session lock for world " + this.worldDirectory + ", aborting";
     }
 
-    @Inject(method = "saveWorldInfoWithPlayer", at = @At(value = "INVOKE", target = NBT_COMPOUND_SET, shift = At.Shift.AFTER),
+    @Inject(method = "saveWorldInfoWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
+                                                                                    + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onSaveWorldInfoWithPlayerAfterTagSet(WorldInfo worldInformation, NBTTagCompound tagCompound, CallbackInfo ci,
-      NBTTagCompound nbttagcompound1, NBTTagCompound nbttagcompound2) {
+    private void onSaveWorldInfoWithPlayerAfterTagSet(final WorldInfo worldInformation, final NBTTagCompound tagCompound, final CallbackInfo ci,
+      final NBTTagCompound nbttagcompound1, final NBTTagCompound nbttagcompound2) {
         this.saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbttagcompound2);
     }
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
-    private void onSaveWorldInfoWithPlayerEnd(WorldInfo worldInformation, NBTTagCompound tagCompound, CallbackInfo ci) {
+    private void onSaveWorldInfoWithPlayerEnd(final WorldInfo worldInformation, final NBTTagCompound tagCompound, final CallbackInfo ci) {
         this.saveSpongeDatData(worldInformation);
     }
 
     @Override
-    public void loadSpongeDatData(WorldInfo info) throws IOException {
+    public void bridge$loadSpongeDatData(final WorldInfo info) throws IOException {
         final File spongeFile = new File(this.worldDirectory, "level_sponge.dat");
         final File spongeOldFile = new File(this.worldDirectory, "level_sponge.dat_old");
 
@@ -117,22 +111,22 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
                 throw new RuntimeException("Attempt failed when reading Sponge level data for [" + info.getWorldName() + "] from file [" +
                         actualFile.getName() + "]!", ex);
             }
-            ((WorldInfoBridge) info).setSpongeRootLevelNBT(compound);
+            ((WorldInfoBridge) info).bridge$setSpongeRootLevelNBT(compound);
             if (compound.hasKey(Constants.Sponge.SPONGE_DATA)) {
                 final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Sponge.SPONGE_DATA);
                 DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
-                ((WorldInfoBridge) info).readSpongeNbt(spongeCompound);
+                ((WorldInfoBridge) info).bridge$readSpongeNbt(spongeCompound);
             }
         }
     }
 
-    private void saveSpongeDatData(WorldInfo info) {
+    private void saveSpongeDatData(final WorldInfo info) {
         try {
             final File spongeFile1 = new File(this.worldDirectory, "level_sponge.dat_new");
             final File spongeFile2 = new File(this.worldDirectory, "level_sponge.dat_old");
             final File spongeFile3 = new File(this.worldDirectory, "level_sponge.dat");
             try (final FileOutputStream stream = new FileOutputStream(spongeFile1)) {
-                CompressedStreamTools.writeCompressed(((WorldInfoBridge) info).getSpongeRootLevelNbt(), stream);
+                CompressedStreamTools.writeCompressed(((WorldInfoBridge) info).bridge$getSpongeRootLevelNbt(), stream);
             }
             if (spongeFile2.exists()) {
                 spongeFile2.delete();
@@ -155,7 +149,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     }
 
     @Override
-    public void loadDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound) {
+    public void bridge$loadDimensionAndOtherData(final SaveHandler handler, final WorldInfo info, final NBTTagCompound compound) {
         // Preserve dimension data from Sponge
         final NBTTagCompound customWorldDataCompound = compound.getCompoundTag("Forge");
         if (customWorldDataCompound.hasKey("DimensionData")) {
@@ -163,7 +157,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         }
     }
 
-    private void saveDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound) {
+    private void saveDimensionAndOtherData(final SaveHandler handler, final WorldInfo info, final NBTTagCompound compound) {
         // Only save dimension data to root world
         if (this.worldDirectory.getParentFile() == null
                 || (SpongeImpl.getGame().getPlatform().getType().isClient() && this.worldDirectory.getParentFile().equals(
@@ -186,8 +180,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
      * @param localfile The local file
      * @return True if the file exists
      */
-    @Redirect(method = READ_PLAYER_DATA, at = @At(value = "INVOKE", target = "Ljava/io/File;isFile()Z", remap = false))
-    private boolean grabfile(File localfile) {
+    @Redirect(method = "readPlayerData(Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At(value = "INVOKE", target = "Ljava/io/File;isFile()Z", remap = false))
+    private boolean grabfile(final File localfile) {
         final boolean isFile = localfile.isFile();
         this.file = isFile ? localfile.toPath() : null;
         return isFile;
@@ -202,10 +196,12 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
      * @return The compound that may be modified
      * @throws IOException for reasons
      */
-    @Redirect(method = READ_PLAYER_DATA, at = @At(value = "INVOKE", target = COMPRESSED_READ_FILE))
-    private NBTTagCompound spongeReadPlayerData(InputStream inputStream) throws IOException {
+    @Redirect(method = "readPlayerData(Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At(value = "INVOKE", target =
+        "Lnet/minecraft/nbt/CompressedStreamTools;readCompressed(Ljava/io/InputStream;)"
+            + "Lnet/minecraft/nbt/NBTTagCompound;"))
+    private NBTTagCompound spongeReadPlayerData(final InputStream inputStream) throws IOException {
         Instant creation = this.file == null ? Instant.now() : Files.readAttributes(this.file, BasicFileAttributes.class).creationTime().toInstant();
-        NBTTagCompound compound = CompressedStreamTools.readCompressed(inputStream);
+        final NBTTagCompound compound = CompressedStreamTools.readCompressed(inputStream);
         Instant lastPlayed = Instant.now();
         // first try to migrate bukkit join data stuff
         if (compound.hasKey(Constants.Bukkit.BUKKIT, Constants.NBT.TAG_COMPOUND)) {
@@ -218,11 +214,11 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
             playerId = compound.getUniqueId(Constants.UUID);
         }
         if (playerId != null) {
-            Optional<Instant> savedFirst = SpongePlayerDataHandler.getFirstJoined(playerId);
+            final Optional<Instant> savedFirst = SpongePlayerDataHandler.getFirstJoined(playerId);
             if (savedFirst.isPresent()) {
                 creation = savedFirst.get();
             }
-            Optional<Instant> savedJoined = SpongePlayerDataHandler.getLastPlayed(playerId);
+            final Optional<Instant> savedJoined = SpongePlayerDataHandler.getLastPlayed(playerId);
             if (savedJoined.isPresent()) {
                 lastPlayed = savedJoined.get();
             }
@@ -232,8 +228,9 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         return compound;
     }
 
-    @Inject(method = "writePlayerData", at = @At(value = "INVOKE", target = COMPRESSED_WRITE_FILE, shift = At.Shift.AFTER))
-    private void onSpongeWrite(EntityPlayer player, CallbackInfo callbackInfo) {
+    @Inject(method = "writePlayerData", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompressedStreamTools;writeCompressed"
+                                                                            + "(Lnet/minecraft/nbt/NBTTagCompound;Ljava/io/OutputStream;)V", shift = At.Shift.AFTER))
+    private void onSpongeWrite(final EntityPlayer player, final CallbackInfo callbackInfo) {
         SpongePlayerDataHandler.savePlayer(player.getUniqueID());
     }
 
@@ -246,7 +243,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         ),
         locals = LocalCapture.CAPTURE_FAILHARD
     )
-    private void beforeLogWarning(EntityPlayer player, CallbackInfo ci, Exception exception) {
+    private void beforeLogWarning(final EntityPlayer player, final CallbackInfo ci, final Exception exception) {
         this.capturedException = exception;
     }
 
@@ -258,7 +255,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
             remap = false
         )
     )
-    private void onWarn(Logger logger, String message, Object param) {
+    private void onWarn(final Logger logger, final String message, final Object param) {
         logger.warn(message, param, this.capturedException);
         this.capturedException = null;
     }
@@ -268,7 +265,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     // the sponge world directory is returned for the corresponding save handler.
     // AnvilSaveHandlerMixin#getChunkLoader is one example where we must use this method.
     @Override
-    public File getSpongeWorldDirectory() {
+    public File bridge$getSpongeWorldDirectory() {
         return this.worldDirectory;
     }
 }

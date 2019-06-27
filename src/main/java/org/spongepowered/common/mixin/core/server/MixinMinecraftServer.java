@@ -363,7 +363,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public void prepareSpawnArea(WorldServer worldServer) {
         WorldProperties worldProperties = (WorldProperties) worldServer.getWorldInfo();
-        if (!((WorldInfoBridge) worldProperties).isValid() || !worldProperties.doesGenerateSpawnOnLoad()) {
+        if (!((WorldInfoBridge) worldProperties).bridge$isValid() || !worldProperties.doesGenerateSpawnOnLoad()) {
             return;
         }
 
@@ -666,7 +666,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             if (save) {
                 // Sponge start - check auto save interval in world config
                 if (this.isDedicatedServer() && this.isServerRunning()) {
-                    final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
+                    final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
                     final int autoSaveInterval = configAdapter.getConfig().getWorld().getAutoSaveInterval();
                     if (log) {
                         log = configAdapter.getConfig().getLogging().logWorldAutomaticSaving();

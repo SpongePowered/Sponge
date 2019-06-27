@@ -89,7 +89,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
     private void impl$reAssignValuesFromIncomingInfo(WorldInfo info, CallbackInfo ci) {
         final WorldProperties properties = (WorldProperties) info;
-        if (((WorldInfoBridge) info).getConfigAdapter() != null) {
+        if (((WorldInfoBridge) info).bridge$getConfigAdapter() != null) {
             this.dimensionType = properties.getDimensionType();
             this.difficulty = properties.getDifficulty();
             this.serializationBehavior = properties.getSerializationBehavior();

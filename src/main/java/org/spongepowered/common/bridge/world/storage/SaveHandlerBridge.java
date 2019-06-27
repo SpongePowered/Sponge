@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.bridge.world.storage;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.storage.SaveHandler;
@@ -31,10 +31,11 @@ import net.minecraft.world.storage.WorldInfo;
 import java.io.File;
 import java.io.IOException;
 
-public interface IMixinSaveHandler {
-    void loadSpongeDatData(WorldInfo info) throws IOException;
+public interface SaveHandlerBridge {
 
-    void loadDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound);
+    void bridge$loadSpongeDatData(WorldInfo info) throws IOException;
 
-    File getSpongeWorldDirectory();
+    void bridge$loadDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound);
+
+    File bridge$getSpongeWorldDirectory();
 }

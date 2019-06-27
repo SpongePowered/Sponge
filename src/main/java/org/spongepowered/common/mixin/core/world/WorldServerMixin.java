@@ -274,7 +274,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
 
         this.bridge$updateWorldGenerator();
 
-        final WorldCategory worldCategory = ((WorldInfoBridge) this.getWorldInfo()).getConfigAdapter().getConfig().getWorld();
+        final WorldCategory worldCategory = ((WorldInfoBridge) this.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld();
         this.chunkGCLoadThreshold = worldCategory.getChunkLoadThreshold();
         this.chunkGCTickInterval = worldCategory.getTickInterval();
         this.weatherIceAndSnowEnabled = worldCategory.getWeatherIceAndSnow();
@@ -355,7 +355,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
 
     @Override
     public void bridge$updateConfigCache() {
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.worldInfo).getConfigAdapter();
+        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.worldInfo).bridge$getConfigAdapter();
 
         // update cached settings
         final WorldCategory worldCategory = configAdapter.getConfig().getWorld();

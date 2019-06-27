@@ -216,7 +216,7 @@ public abstract class WorldMixin_API implements World {
             // Specifically fixes https://github.com/SpongePowered/SpongeForge/issues/1527
             // and https://github.com/BuildCraft/BuildCraft/issues/3594
             final WorldInfoBridge mixinWorldInfo = (WorldInfoBridge) properties;
-            mixinWorldInfo.setUniqueId(UUID.randomUUID());
+            mixinWorldInfo.bridge$setUniqueId(UUID.randomUUID());
             return properties.getUniqueId();
         }
         return worldId;

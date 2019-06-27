@@ -63,7 +63,7 @@ public class TileEntityActivation {
             return;
         }
 
-        final TileEntityActivationCategory tileEntityActCat = ((WorldInfoBridge) tileEntity.getWorld().getWorldInfo()).getConfigAdapter().getConfig().getTileEntityActivationRange();
+        final TileEntityActivationCategory tileEntityActCat = ((WorldInfoBridge) tileEntity.getWorld().getWorldInfo()).bridge$getConfigAdapter().getConfig().getTileEntityActivationRange();
         final TileEntityType type = ((org.spongepowered.api.block.tileentity.TileEntity) tileEntity).getType();
 
         final ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
@@ -226,7 +226,7 @@ public class TileEntityActivation {
     }
 
     public static void addTileEntityToConfig(World world, SpongeTileEntityType type) {
-        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
         if (!worldConfigAdapter.getConfig().getTileEntityActivationRange().autoPopulateData()) {
             return;
