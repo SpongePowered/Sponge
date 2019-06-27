@@ -290,7 +290,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
 
         try (final PhaseContext<?> context = phaseContext;
-             final Timing timing = ((BlockBridge) state.getBlock()).getTimingsHandler()) {
+             final Timing timing = ((TimingBridge) state.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             context.buildAndSwitch();
             block.updateTick(world, pos, state, random);

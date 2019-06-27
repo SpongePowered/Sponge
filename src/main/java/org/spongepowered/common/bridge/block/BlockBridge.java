@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.bridge.block;
 
-import co.aikar.timings.Timing;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -36,7 +35,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import java.util.List;
@@ -67,7 +65,7 @@ public interface BlockBridge {
      * @param blockState The block state being passed in
      * @return The list of immutable manipulators
      */
-    List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState);
+    List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(IBlockState blockState);
 
     /**
      * A simple check whether the class is supported by the block or not.
@@ -75,7 +73,7 @@ public interface BlockBridge {
      * @param immutable The immutable class
      * @return True if the data possibly represented by an instance of the class is supported
      */
-    boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable);
+    boolean bridge$supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable);
 
     /**
      * Instead of delegating to a block processor, we can delegate to the block
@@ -92,7 +90,7 @@ public interface BlockBridge {
      * @param <E> The type of value, for type checking
      * @return The blockstate with the new value, if available and compatible
      */
-    <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value);
+    <E> Optional<BlockState> bridge$getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value);
 
     /**
      * Again, another delegate method directly to the block, usually not all
@@ -109,17 +107,17 @@ public interface BlockBridge {
      * @param manipulator The manipulator being offered
      * @return The block state with the requested data, if available
      */
-    Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator);
+    Optional<BlockState> bridge$getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator);
 
     // Normal API methods
 
-    boolean isVanilla();
+    boolean bridge$isVanilla();
 
-    boolean hasCollideLogic();
+    boolean bridge$hasCollideLogic();
 
-    boolean hasCollideWithStateLogic();
+    boolean bridge$hasCollideWithStateLogic();
 
-    boolean hasNeighborChangedLogic();
+    boolean bridge$hasNeighborChangedLogic();
 
     /**
      * Used to determine if this block should fire 
@@ -127,10 +125,7 @@ public interface BlockBridge {
      * 
      * @return Whether this block should fire events
      */
-    boolean shouldFireBlockEvents();
-
-    // Timings
-    Timing getTimingsHandler();
+    boolean bridge$shouldFireBlockEvents();
 
     /**
      * Used only for Forge's dummy air block that is acting as a surrogate block for missing
@@ -138,14 +133,14 @@ public interface BlockBridge {
      *
      * @return True if this block is a surrogate dummy block. Should only be used for forge blocks.
      */
-    default boolean isDummy() {
+    default boolean bridge$isDummy() {
         return false;
     }
 
-    ImmutableMap<Class<? extends Property<?,?>>,Property<?,?>> getProperties(IBlockState mixinStateImplementation);
+    ImmutableMap<Class<? extends Property<?,?>>,Property<?,?>> bridge$getProperties(IBlockState mixinStateImplementation);
 
-    void initializeTrackerState();
-    default BiConsumer<CauseStackManager.StackFrame, ServerWorldBridge> getTickFrameModifier() {
+    void bridge$initializeTrackerState();
+    default BiConsumer<CauseStackManager.StackFrame, ServerWorldBridge> bridge$getTickFrameModifier() {
         return (frame, world) -> {};
     }
 }

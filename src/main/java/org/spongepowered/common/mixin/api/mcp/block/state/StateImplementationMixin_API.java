@@ -145,7 +145,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     private ImmutableList<ImmutableDataManipulator<?, ?>> lazyLoadManipulatorsAndKeys() {
         if (this.manipulators == null) {
-            this.manipulators = ImmutableList.copyOf(((BlockBridge) this.block).getManipulators(this));
+            this.manipulators = ImmutableList.copyOf(((BlockBridge) this.block).bridge$getManipulators(this));
         }
         if (this.keyMap == null) {
             ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
@@ -189,7 +189,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
-        return ((BlockBridge) this.block).supports(containerClass);
+        return ((BlockBridge) this.block).bridge$supports(containerClass);
     }
 
     @Override
@@ -204,7 +204,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
         if (!supports(key)) {
             return Optional.empty();
         }
-        return ((BlockBridge) this.block).getStateWithValue(this, key, value);
+        return ((BlockBridge) this.block).bridge$getStateWithValue(this, key, value);
     }
 
     @SuppressWarnings("unchecked")
@@ -217,7 +217,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     @Override
     public Optional<BlockState> with(ImmutableDataManipulator<?, ?> valueContainer) {
         if (supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
-            return ((BlockBridge) this.block).getStateWithData(this, valueContainer);
+            return ((BlockBridge) this.block).bridge$getStateWithData(this, valueContainer);
         }
         return Optional.empty();
     }
@@ -289,7 +289,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     private ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> getSpongeInternalProperties() {
         if (this.dataProperties == null) {
-            this.dataProperties = ((BlockBridge) this.block).getProperties(this);
+            this.dataProperties = ((BlockBridge) this.block).bridge$getProperties(this);
         }
         return this.dataProperties;
     }

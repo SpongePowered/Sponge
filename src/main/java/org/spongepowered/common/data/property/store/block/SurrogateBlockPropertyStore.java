@@ -42,6 +42,6 @@ public class SurrogateBlockPropertyStore extends AbstractBlockPropertyStore<Surr
 
     @Override
     protected Optional<SurrogateBlockProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        return Optional.of(new SurrogateBlockProperty(((BlockBridge) block.getBlock()).isDummy()));
+        return Optional.of(new SurrogateBlockProperty(((BlockBridge) block.getBlock()).bridge$isDummy()));
     }
 }

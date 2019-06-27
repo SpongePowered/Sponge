@@ -353,7 +353,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Optional<BlockSnapshot> with(ImmutableDataManipulator<?, ?> valueContainer) {
-        if (((BlockBridge) this.blockState.getType()).supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
+        if (((BlockBridge) this.blockState.getType()).bridge$supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
             final BlockState newState;
             boolean changeState = false;
             if (this.blockState.supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {

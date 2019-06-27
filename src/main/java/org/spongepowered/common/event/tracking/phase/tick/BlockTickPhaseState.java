@@ -63,7 +63,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         super.getFrameModifier().andThen((frame, context) ->
             {
                 frame.pushCause(this.getLocatableBlockSourceFromContext(context));
-                context.tickingBlock.getTickFrameModifier().accept(frame, (ServerWorldBridge) context.world);
+                context.tickingBlock.bridge$getTickFrameModifier().accept(frame, (ServerWorldBridge) context.world);
             }
         );
     private final String name;

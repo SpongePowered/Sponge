@@ -472,7 +472,7 @@ public class SpongeHooks {
                 ((CollisionsCapability) blockType).collision$requiresCollisionsCacheRefresh(true);
             }
             if (blockType instanceof TrackableBridge) {
-                ((BlockBridge) blockType).initializeTrackerState();
+                ((BlockBridge) blockType).bridge$initializeTrackerState();
             }
         }
         for (TileEntityType tileEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {

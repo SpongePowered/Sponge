@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
@@ -700,15 +701,16 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
 
                                 final BlockPos pos = new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k);
                                 final BlockBridge spongeBlock = (BlockBridge) block;
-                                spongeBlock.getTimingsHandler().startTiming();
-                                final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
-                                final IPhaseState phaseState = context.state;
-                                if (phaseState.alreadyCapturingBlockTicks(context)) {
-                                    block.randomTick(world, pos, iblockstate, this.rand);
-                                } else {
-                                    TrackingUtil.randomTickBlock(this, block, pos, iblockstate, this.rand);
+                                try (Timing timing = ((TimingBridge) block).bridge$getTimingsHandler()) {
+                                    timing.startTiming();
+                                    final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+                                    final IPhaseState phaseState = context.state;
+                                    if (phaseState.alreadyCapturingBlockTicks(context)) {
+                                        block.randomTick(world, pos, iblockstate, this.rand);
+                                    } else {
+                                        TrackingUtil.randomTickBlock(this, block, pos, iblockstate, this.rand);
+                                    }
                                 }
-                                spongeBlock.getTimingsHandler().stopTiming();
                                 // Sponge end
                             }
 
@@ -878,7 +880,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
             return list.add(blockEventData);
         }
 
-        if (((BlockBridge) blockIn).shouldFireBlockEvents()) {
+        if (((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
             blockEvent.setBridge$sourceUser(currentContext.getActiveUser());
             if (SpongeImplHooks.hasBlockTileEntity(blockIn, getBlockState(pos))) {
                 blockEvent.setBridge$TileEntity((TileEntity) getTileEntity(pos));
@@ -895,7 +897,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
 
         // Short circuit any additional handling. We've associated enough with the BlockEvent to
         // allow tracking to take place for other/future phases
-        if (!((BlockBridge) blockIn).shouldFireBlockEvents()) {
+        if (!((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
             return list.add((BlockEventData) obj);
         }
         // Occasionally, we have a phase state that will want to just capture the block events
@@ -921,7 +923,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
 
                 } else {
                     BlockSnapshot notifySource = null;
-                    if (!((BlockBridge) blockIn).isVanilla() && currentContext.getNeighborNotificationSource() != null) {
+                    if (!((BlockBridge) blockIn).bridge$isVanilla() && currentContext.getNeighborNotificationSource() != null) {
                         notifySource = currentContext.getNeighborNotificationSource();
                     }
                     final BlockPos notificationPos = notifySource != null ? VecHelper.toBlockPos(notifySource.getLocation().get()) : pos;

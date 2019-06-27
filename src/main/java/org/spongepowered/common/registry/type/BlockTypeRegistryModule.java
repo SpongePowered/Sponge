@@ -119,7 +119,7 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
     private void registerCustomBlock(String id, BlockType blockType) {
         this.blockTypeMappings.put(id.toLowerCase(Locale.ENGLISH), blockType);
         registerBlockTrait(id, blockType);
-        ((BlockBridge) blockType).initializeTrackerState();
+        ((BlockBridge) blockType).bridge$initializeTrackerState();
     }
 
 

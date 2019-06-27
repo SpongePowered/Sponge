@@ -694,7 +694,7 @@ public final class PhaseTracker {
             // Sponge start - prepare notification
             final PhaseContext<?> peek = this.stack.peek();
             final IPhaseState state = peek.state;
-            if (!((BlockBridge) notifyState.getBlock()).hasNeighborChangedLogic()) {
+            if (!((BlockBridge) notifyState.getBlock()).bridge$hasNeighborChangedLogic()) {
                 // A little short-circuit so we do not waste expense to call neighbor notifications on blocks that do
                 // not override the method neighborChanged
                 return;

@@ -552,7 +552,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
                                                                         + "onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     private void spongeImpl$onEntityCollideWithBlockThrowEventSponge(final Block block, final net.minecraft.world.World world, final BlockPos pos, final Entity entity) {
         // if block can't collide, return
-        if (!((BlockBridge) block).hasCollideLogic()) {
+        if (!((BlockBridge) block).bridge$hasCollideLogic()) {
             return;
         }
 
@@ -575,7 +575,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     private void spongeImpl$onEntityCollideWithBlockState(
         final Block block, final net.minecraft.world.World world, final BlockPos pos, final IBlockState state, final Entity entity) {
         // if block can't collide, return
-        if (!((BlockBridge) block).hasCollideWithStateLogic()) {
+        if (!((BlockBridge) block).bridge$hasCollideWithStateLogic()) {
             return;
         }
 
