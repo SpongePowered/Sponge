@@ -26,23 +26,41 @@ package org.spongepowered.common.event.damage;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
+import org.spongepowered.common.bridge.util.DamageSourceBridge;
+import org.spongepowered.common.mixin.core.util.DamageSourceAccessor;
+
+import java.util.function.Function;
 
 public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<DamageSource, DamageSource.Builder> implements DamageSource.Builder {
 
+    private static final Function<String, net.minecraft.util.DamageSource> DAMAGE_SOURCE_CTOR;
+
+    static {
+        DAMAGE_SOURCE_CTOR = (id) -> {
+            final net.minecraft.util.DamageSource source = net.minecraft.util.DamageSource.causeExplosionDamage((EntityLivingBase) null);
+            ((DamageSourceAccessor) source).accessor$setId(id);
+            ((DamageSourceBridge) source).bridge$resetDamageType();
+            return source;
+        };
+    }
+
+    @SuppressWarnings("ConstantConditions")
     @Override
     public DamageSource build() throws IllegalStateException {
         checkState(this.damageType != null, "DamageType was null!");
-        net.minecraft.util.DamageSource source = new net.minecraft.util.DamageSource(this.damageType.getId());
+        final net.minecraft.util.DamageSource source = DAMAGE_SOURCE_CTOR.apply(this.damageType.toString());
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) source;
         if (this.absolute) {
-            source.setDamageIsAbsolute();
+            accessor.accessor$setDamageIsAbsolute();
         }
         if (this.bypasses) {
-            source.setDamageBypassesArmor();
+            accessor.accessor$setDamageBypassesArmor();
         }
         if (this.creative) {
-            source.setDamageAllowedInCreativeMode();
+            accessor.accessor$setDamageAllowedInCreativeMode();
         }
         if (this.magical) {
             source.setMagicDamage();
@@ -54,7 +72,7 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
             source.setExplosion();
         }
         if (this.exhaustion != null) {
-            source.hungerDamage = this.exhaustion.floatValue();
+            accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
         }
         return (DamageSource) source;
     }

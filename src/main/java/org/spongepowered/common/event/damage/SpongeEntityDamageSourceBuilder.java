@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
+import org.spongepowered.common.mixin.core.util.DamageSourceAccessor;
 
 import java.lang.ref.WeakReference;
 
@@ -38,19 +39,21 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
     protected WeakReference<Entity> reference = null;
 
     @Override
-    public SpongeEntityDamageSourceBuilder entity(Entity entity) {
+    public SpongeEntityDamageSourceBuilder entity(final Entity entity) {
         this.reference = new WeakReference<>(entity);
         return this;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public EntityDamageSource build() throws IllegalStateException {
         checkState(this.damageType != null, "Damage type cannot be null!");
         checkState(this.reference.get() != null);
-        net.minecraft.util.EntityDamageSource damageSource =
+        final net.minecraft.util.EntityDamageSource damageSource =
             new net.minecraft.util.EntityDamageSource(this.damageType.getId(), (net.minecraft.entity.Entity) this.reference.get());
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
         if (this.creative) {
-            damageSource.setDamageAllowedInCreativeMode();
+            accessor.accessor$setDamageAllowedInCreativeMode();
         }
         if (this.scales) {
             damageSource.setDifficultyScaled();
@@ -59,22 +62,22 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
             damageSource.setMagicDamage();
         }
         if (this.bypasses) {
-            damageSource.setDamageBypassesArmor();
+            accessor.accessor$setDamageBypassesArmor();
         }
         if (this.absolute) {
-            damageSource.setDamageIsAbsolute();
+            accessor.accessor$setDamageIsAbsolute();
         }
         if (this.explosion) {
             damageSource.setExplosion();
         }
         if (this.exhaustion != null) {
-            damageSource.hungerDamage = this.exhaustion.floatValue();
+            accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
         }
         return (EntityDamageSource) damageSource;
     }
 
     @Override
-    public EntityDamageSource.Builder from(EntityDamageSource value) {
+    public EntityDamageSource.Builder from(final EntityDamageSource value) {
         super.from(value);
         this.reference = new WeakReference<>(value.getSource());
         return this;

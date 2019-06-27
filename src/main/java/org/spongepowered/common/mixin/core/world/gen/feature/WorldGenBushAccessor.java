@@ -24,14 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.WorldGenDungeons;
+import net.minecraft.block.BlockBush;
+import net.minecraft.world.gen.feature.WorldGenBush;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(WorldGenDungeons.class)
-public interface WorldGenDungeonsAccessor {
+@Mixin(WorldGenBush.class)
+public interface WorldGenBushAccessor {
 
-    @Accessor("SPAWNERTYPES") ResourceLocation[] accessor$getSpawnerTypes();
+    @Accessor("block") BlockBush accessor$getBushBlock();
+
+    @Accessor("block") void accessor$setBushBlock(BlockBush bush);
 
 }

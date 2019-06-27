@@ -22,16 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.gen.feature;
+package org.spongepowered.common.mixin.api.mcp.util.text;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.WorldGenDungeons;
+import net.minecraft.util.text.ChatType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(WorldGenDungeons.class)
-public interface WorldGenDungeonsAccessor {
+import java.util.Locale;
 
-    @Accessor("SPAWNERTYPES") ResourceLocation[] accessor$getSpawnerTypes();
+@Mixin(ChatType.class)
+public class ChatTypeMixin_API implements org.spongepowered.api.text.chat.ChatType {
+
+    @Override
+    public String getId() {
+        if ((Object) this == ChatType.GAME_INFO) {
+            return "minecraft:action_bar";
+        }
+        return "minecraft:" + ((ChatType) (Object) this).name().toLowerCase(Locale.ENGLISH);
+    }
+
+    @Override
+    public String getName() {
+        return ((ChatType) (Object) this).name();
+    }
 
 }

@@ -35,7 +35,7 @@ public class SpongeDamageType implements DamageType {
     private String id; // TODO: figure out how to handle mods
     private String name;
 
-    public SpongeDamageType(String id, String name) {
+    public SpongeDamageType(final String id, final String name) {
         this.name = name;
         this.id = id.toLowerCase(Locale.ENGLISH);
     }
@@ -51,7 +51,7 @@ public class SpongeDamageType implements DamageType {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (obj == null) {
             return false;
         }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.BossInfo;
@@ -44,8 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 @Implements(@Interface(iface = BossBar.class, prefix = "bar$"))
 @Mixin(BossInfo.class)
-@SuppressWarnings("WeakerAccess")
-public abstract class MixinBossInfo {
+public abstract class BossInfoMixin_API implements BossBar {
 
     @SuppressWarnings("NullableProblems")
     @Shadow protected ITextComponent name;
@@ -54,90 +53,104 @@ public abstract class MixinBossInfo {
     @Shadow protected BossInfo.Color color;
     @SuppressWarnings("NullableProblems")
     @Shadow protected BossInfo.Overlay overlay;
-    @Shadow public abstract UUID getUniqueId();
-    @Shadow public abstract ITextComponent getName();
-    @Shadow public abstract float getPercent();
-    @Shadow public abstract void setPercent(float percentIn);
-    @Shadow public abstract BossInfo.Color getColor();
-    @Shadow public abstract BossInfo.Overlay getOverlay();
-    @Shadow public abstract boolean shouldDarkenSky();
-    @Shadow public abstract BossInfo setDarkenSky(boolean darkenSkyIn);
-    @Shadow public abstract boolean shouldPlayEndBossMusic();
-    @Shadow public abstract BossInfo setPlayEndBossMusic(boolean playEndBossMusicIn);
-    @Shadow public abstract BossInfo setCreateFog(boolean createFogIn);
-    @Shadow public abstract boolean shouldCreateFog();
+    @Shadow public abstract UUID shadow$getUniqueId();
+    @Shadow public abstract ITextComponent shadow$getName();
+    @Shadow public abstract float shadow$getPercent();
+    @Shadow public abstract void shadow$setPercent(float percentIn);
+    @Shadow public abstract BossInfo.Color shadow$getColor();
+    @Shadow public abstract BossInfo.Overlay shadow$getOverlay();
+    @Shadow public abstract boolean shadow$shouldDarkenSky();
+    @Shadow public abstract BossInfo shadow$setDarkenSky(boolean darkenSkyIn);
+    @Shadow public abstract boolean shadow$shouldPlayEndBossMusic();
+    @Shadow public abstract BossInfo shadow$setPlayEndBossMusic(boolean playEndBossMusicIn);
+    @Shadow public abstract BossInfo shadow$setCreateFog(boolean createFogIn);
+    @Shadow public abstract boolean shadow$shouldCreateFog();
 
     @Intrinsic
     public UUID bar$getUniqueId() {
-        return this.getUniqueId();
+        return this.shadow$getUniqueId();
     }
 
-    public Text bar$getName() {
-        return SpongeTexts.toText(this.getName());
+    @Override
+    public Text getName() {
+        return SpongeTexts.toText(this.shadow$getName());
     }
 
-    public BossBar bar$setName(Text name) {
+    @Override
+    public BossBar setName(final Text name) {
         this.name = SpongeTexts.toComponent(checkNotNull(name, "name"));
-        return (BossBar) this;
+        return this;
     }
 
     @Intrinsic
     public float bar$getPercent() {
-        return this.getPercent();
+        return this.shadow$getPercent();
     }
 
-    public BossBar bar$setPercent(float percent) {
+    @Override
+    public BossBar setPercent(final float percent) {
         checkArgument(percent >= 0.0 && percent <= 1.0, "percent must be between 0.0f and 1.0f (was %s)", percent);
-        this.setPercent(percent);
-        return (BossBar) this;
+        this.shadow$setPercent(percent);
+        return this;
     }
 
-    public BossBarColor bar$getColor() {
-        return (BossBarColor) (Object) this.getColor();
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public BossBarColor getColor() {
+        return (BossBarColor) (Object) this.shadow$getColor();
     }
 
-    public BossBar bar$setColor(BossBarColor color) {
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public BossBar setColor(final BossBarColor color) {
         this.color = (BossInfo.Color) (Object) checkNotNull(color, "color");
-        return (BossBar) this;
+        return this;
     }
 
-    public BossBarOverlay bar$getOverlay() {
-        return (BossBarOverlay) (Object) this.getOverlay();
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public BossBarOverlay getOverlay() {
+        return (BossBarOverlay) (Object) this.shadow$getOverlay();
     }
 
-    public BossBar bar$setOverlay(BossBarOverlay overlay) {
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public BossBar setOverlay(final BossBarOverlay overlay) {
         this.overlay = (BossInfo.Overlay) (Object) checkNotNull(overlay, "overlay");
-        return (BossBar) this;
+        return this;
     }
 
     @Intrinsic
     public boolean bar$shouldDarkenSky() {
-        return this.shouldDarkenSky();
+        return this.shadow$shouldDarkenSky();
     }
 
-    public BossBar bar$setDarkenSky(boolean darkenSky) {
-        this.setDarkenSky(darkenSky);
-        return (BossBar) this;
+    @Override
+    public BossBar setDarkenSky(final boolean darkenSky) {
+        this.shadow$setDarkenSky(darkenSky);
+        return this;
     }
 
     @Intrinsic
     public boolean bar$shouldPlayEndBossMusic() {
-        return this.shouldPlayEndBossMusic();
+        return this.shadow$shouldPlayEndBossMusic();
     }
 
-    public BossBar bar$setPlayEndBossMusic(boolean playEndBossMusic) {
-        this.setPlayEndBossMusic(playEndBossMusic);
-        return (BossBar) this;
+    @Override
+    public BossBar setPlayEndBossMusic(final boolean playEndBossMusic) {
+        this.shadow$setPlayEndBossMusic(playEndBossMusic);
+        return this;
     }
 
     @Intrinsic
     public boolean bar$shouldCreateFog() {
-        return this.shouldCreateFog();
+        return this.shadow$shouldCreateFog();
     }
 
-    public BossBar bar$setCreateFog(boolean createFog) {
-        this.setCreateFog(createFog);
-        return (BossBar) this;
+    @Override
+    public BossBar setCreateFog(final boolean createFog) {
+        this.shadow$setCreateFog(createFog);
+        return this;
     }
 
 }

@@ -45,28 +45,30 @@ import org.spongepowered.common.event.damage.SpongeCommonIndirectEntityDamageSou
 @Mixin(AbstractIndirectEntityDamageSource.class)
 public abstract class MixinAbstractIndirectEntityDamageSource implements IndirectEntityDamageSource {
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstruct(CallbackInfo callbackInfo) {
-        ((SpongeCommonIndirectEntityDamageSource) (Object) this).setDamageType(getType().getId());
-        ((SpongeCommonIndirectEntityDamageSource) (Object) this).setEntitySource((Entity) getSource());
-        ((SpongeCommonIndirectEntityDamageSource) (Object) this).setIndirectSource((Entity) getIndirectSource());
+    private void api$setUpBridges(final CallbackInfo callbackInfo) {
+        final SpongeCommonIndirectEntityDamageSource commonIndirect = (SpongeCommonIndirectEntityDamageSource) (Object) this;
+        commonIndirect.setDamageType(getType().getId());
+        commonIndirect.setEntitySource((Entity) getSource());
+        commonIndirect.setIndirectSource((Entity) getIndirectSource());
         if (isAbsolute()) {
-            ((SpongeCommonIndirectEntityDamageSource) (Object) this).setDamageIsAbsolute();
+            commonIndirect.bridge$setDamageIsAbsolute();
         }
         if (isBypassingArmor()) {
-            ((SpongeCommonIndirectEntityDamageSource) (Object) this).setDamageBypassesArmor();
+            commonIndirect.bridge$setDamageBypassesArmor();
         }
         if (isExplosive()) {
-            ((SpongeCommonIndirectEntityDamageSource) (Object) this).setExplosion();
+            commonIndirect.setExplosion();
         }
         if (isMagic()) {
-            ((SpongeCommonIndirectEntityDamageSource) (Object) this).setMagicDamage();
+            commonIndirect.setMagicDamage();
         }
         if (isScaledByDifficulty()) {
-            ((SpongeCommonIndirectEntityDamageSource) (Object) this).setDifficultyScaled();
+            commonIndirect.setDifficultyScaled();
         }
         if (doesAffectCreative()) {
-            ((SpongeCommonIndirectEntityDamageSource) (Object) this).canHarmInCreative();
+            commonIndirect.canHarmInCreative();
         }
     }
 

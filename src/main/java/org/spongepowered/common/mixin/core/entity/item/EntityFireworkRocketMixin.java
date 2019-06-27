@@ -44,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
@@ -64,13 +65,13 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
 
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, (Firework) this);
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.impl$projectileSource, null);
     }
@@ -81,7 +82,7 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
     }
 
     @Override
-    public void bridge$setFuseDuration(int fuseTicks) {
+    public void bridge$setFuseDuration(final int fuseTicks) {
         this.lifetime = fuseTicks;
     }
 
@@ -91,7 +92,7 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
     }
 
     @Override
-    public void bridge$setFuseTicksRemaining(int fuseTicks) {
+    public void bridge$setFuseTicksRemaining(final int fuseTicks) {
         this.fireworkAge = 0;
         this.lifetime = fuseTicks;
     }
@@ -102,15 +103,15 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
     }
 
     @Override
-    public void bridge$setExplosionRadius(Optional<Integer> radius) {
+    public void bridge$setExplosionRadius(final Optional<Integer> radius) {
         this.impl$explosionRadius = radius.orElse(Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS);
     }
 
     @SuppressWarnings("deprecation")
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setEntityState"
                                                                        + "(Lnet/minecraft/entity/Entity;B)V"))
-    private void onExplode(World world, Entity self, byte state) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    private void onExplode(final World world, final Entity self, final byte state) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             // Fireworks don't typically explode like other explosives, but we'll
             // post an event regardless and if the radius is zero the explosion
             // won't be triggered (the default behavior).
@@ -127,7 +128,7 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
 
     @SuppressWarnings("deprecation")
     @Inject(method = "onUpdate", at = @At("RETURN"))
-    private void onUpdate(CallbackInfo ci) {
+    private void onUpdate(final CallbackInfo ci) {
         if (this.fireworkAge == 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
@@ -140,12 +141,13 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
 
     @Redirect(method = "dealExplosionDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;attackEntityFrom"
             + "(Lnet/minecraft/util/DamageSource;F)Z"))
-    private boolean useEntitySource(EntityLivingBase entityLivingBase, DamageSource source, float amount) {
+    private boolean useEntitySource(final EntityLivingBase entityLivingBase, final DamageSource source, final float amount) {
         try {
-            DamageSource.FIREWORKS = new EntityDamageSource(DamageSource.FIREWORKS.damageType, (Entity) (Object) this).setExplosion();
+            final DamageSource fireworks = new EntityDamageSource(DamageSource.FIREWORKS.damageType, (Entity) (Object) this).setExplosion();
+            ((DamageSourceBridge) fireworks).bridge$setFireworksSource();
             return entityLivingBase.attackEntityFrom(DamageSource.FIREWORKS, amount);
         } finally {
-            DamageSource.FIREWORKS = source;
+            ((DamageSourceBridge) source).bridge$setFireworksSource();
         }
     }
 }

@@ -25,12 +25,14 @@
 package org.spongepowered.common.mixin.core.api.event.cause.damage;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.event.damage.SpongeCommonEntityDamageSource;
 
 /*
@@ -45,27 +47,29 @@ import org.spongepowered.common.event.damage.SpongeCommonEntityDamageSource;
 @Mixin(AbstractEntityDamageSource.class)
 public abstract class MixinAbstractEntityDamageSource implements EntityDamageSource {
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstruct(CallbackInfo callbackInfo) {
-        ((SpongeCommonEntityDamageSource) (Object) this).setDamageType(getType().getId());
-        ((SpongeCommonEntityDamageSource) (Object) this).setEntitySource((Entity) getSource());
+    private void impl$bridgeApiToImplConstruction(final CallbackInfo callbackInfo) {
+        final SpongeCommonEntityDamageSource commonSource = (SpongeCommonEntityDamageSource) (Object) this;
+        commonSource.setDamageType(getType().getId());
+        commonSource.setEntitySource((Entity) getSource());
         if (isAbsolute()) {
-            ((SpongeCommonEntityDamageSource) (Object) this).setDamageIsAbsolute();
+            commonSource.bridge$setDamageIsAbsolute();
         }
         if (isBypassingArmor()) {
-            ((SpongeCommonEntityDamageSource) (Object) this).setDamageBypassesArmor();
+            commonSource.bridge$setDamageBypassesArmor();
         }
         if (isExplosive()) {
-            ((SpongeCommonEntityDamageSource) (Object) this).setExplosion();
+            commonSource.setExplosion();
         }
         if (isMagic()) {
-            ((SpongeCommonEntityDamageSource) (Object) this).setMagicDamage();
+            commonSource.setMagicDamage();
         }
         if (isScaledByDifficulty()) {
-            ((SpongeCommonEntityDamageSource) (Object) this).setDifficultyScaled();
+            commonSource.setDifficultyScaled();
         }
         if (doesAffectCreative()) {
-            ((SpongeCommonEntityDamageSource) (Object) this).canHarmInCreative();
+            commonSource.canHarmInCreative();
         }
     }
 

@@ -45,7 +45,7 @@ public final class DamageTypeRegistryModule extends AbstractPrefixAlternateCatal
     }
 
     @Override
-    public void registerAdditionalCatalog(DamageType extraCatalog) {
+    public void registerAdditionalCatalog(final DamageType extraCatalog) {
         final String id = checkNotNull(extraCatalog).getId();
         final String key = id.toLowerCase(Locale.ENGLISH);
         checkArgument(!key.contains("sponge:"), "Cannot register spoofed Damage Type!");

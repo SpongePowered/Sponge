@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketUpdateBossInfo;
@@ -37,43 +37,46 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.api.mcp.world.BossInfoMixin_API;
 
 import java.util.Collection;
 
 @Implements(@Interface(iface = ServerBossBar.class, prefix = "sbar$"))
 @Mixin(BossInfoServer.class)
-@SuppressWarnings("WeakerAccess")
-public abstract class MixinBossInfoServer extends MixinBossInfo {
+public abstract class BossInfoServerMixin_API extends BossInfoMixin_API implements ServerBossBar {
 
     @Shadow private boolean visible;
-    @Shadow public abstract void addPlayer(EntityPlayerMP player);
+    @Shadow public abstract void shadow$addPlayer(EntityPlayerMP player);
     @Shadow public abstract void removePlayer(EntityPlayerMP player);
-    @Shadow public abstract void setVisible(boolean visibleIn);
-    @Shadow public abstract Collection<EntityPlayerMP> getPlayers();
-    @Shadow private void sendUpdate(SPacketUpdateBossInfo.Operation operation) { }
+    @Shadow public abstract void shadow$setVisible(boolean visibleIn);
+    @Shadow public abstract Collection<EntityPlayerMP> shadow$getPlayers();
+    @Shadow private void sendUpdate(final SPacketUpdateBossInfo.Operation operation) { }
 
-    public ServerBossBar sbar$setName(Text name) {
+    @Override
+    public ServerBossBar setName(final Text name) {
         if (this.name != name) {
-            super.bar$setName(name);
+            super.setName(name);
             this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_NAME);
         }
 
-        return (ServerBossBar) this;
+        return this;
     }
 
-    public ServerBossBar sbar$setPercent(float percent) {
+    @Override
+    public ServerBossBar setPercent(final float percent) {
         if (this.percent != percent) {
-            super.bar$setPercent(percent);
+            super.setPercent(percent);
             this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_PCT);
         }
 
-        return (ServerBossBar) this;
+        return this;
     }
 
     @SuppressWarnings("RedundantCast")
-    public ServerBossBar sbar$setColor(BossBarColor color) {
+    @Override
+    public ServerBossBar setColor(final BossBarColor color) {
         if ((Object) this.color != color) {
-            super.bar$setColor(color);
+            super.setColor(color);
             this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_STYLE);
         }
 
@@ -81,53 +84,61 @@ public abstract class MixinBossInfoServer extends MixinBossInfo {
     }
 
     @SuppressWarnings("RedundantCast")
-    public ServerBossBar sbar$setOverlay(BossBarOverlay overlay) {
+    @Override
+    public ServerBossBar setOverlay(final BossBarOverlay overlay) {
         if ((Object) this.overlay != overlay) {
-            super.bar$setOverlay(overlay);
+            super.setOverlay(overlay);
             this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_STYLE);
         }
 
         return (ServerBossBar) this;
     }
 
-    public ServerBossBar sbar$setDarkenSky(boolean darkenSky) {
-        this.setDarkenSky(darkenSky);
-        return (ServerBossBar) this;
+    @Override
+    public ServerBossBar setDarkenSky(final boolean darkenSky) {
+        super.setDarkenSky(darkenSky);
+        return this;
     }
 
-    public ServerBossBar sbar$setPlayEndBossMusic(boolean playEndBossMusic) {
-        this.setPlayEndBossMusic(playEndBossMusic);
-        return (ServerBossBar) this;
+    @Override
+    public ServerBossBar setPlayEndBossMusic(final boolean playEndBossMusic) {
+        super.setPlayEndBossMusic(playEndBossMusic);
+        return this;
     }
 
-    public ServerBossBar sbar$setCreateFog(boolean createFog) {
+    @Override
+    public ServerBossBar setCreateFog(final boolean createFog) {
         this.setCreateFog(createFog);
-        return (ServerBossBar) this;
+        return this;
     }
 
     @Intrinsic
     @SuppressWarnings("unchecked")
     public Collection<Player> sbar$getPlayers() {
-        return (Collection<Player>) (Object) this.getPlayers();
+        return (Collection<Player>) (Object) this.shadow$getPlayers();
     }
 
-    public ServerBossBar sbar$addPlayer(Player player) {
-        this.addPlayer((EntityPlayerMP) player);
-        return (ServerBossBar) this;
+    @Override
+    public ServerBossBar addPlayer(final Player player) {
+        this.shadow$addPlayer((EntityPlayerMP) player);
+        return this;
     }
 
-    public ServerBossBar sbar$removePlayer(Player player) {
+    @Override
+    public ServerBossBar removePlayer(final Player player) {
         this.removePlayer((EntityPlayerMP) player);
-        return (ServerBossBar) this;
+        return this;
     }
 
-    public boolean sbar$isVisible() {
+    @Override
+    public boolean isVisible() {
         return this.visible;
     }
 
-    public ServerBossBar sbar$setVisible(boolean visible) {
-        this.setVisible(visible);
-        return (ServerBossBar) this;
+    @Override
+    public ServerBossBar setVisible(final boolean visible) {
+        this.shadow$setVisible(visible);
+        return this;
     }
 
 }

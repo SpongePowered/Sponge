@@ -32,6 +32,7 @@ import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.mixin.core.util.DamageSourceAccessor;
 
 public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<BlockDamageSource, BlockDamageSource.Builder> implements BlockDamageSource.Builder {
 
@@ -39,28 +40,30 @@ public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<
     private BlockSnapshot blockSnapshot;
 
     @Override
-    public BlockDamageSource.Builder block(Location<World> location) {
+    public BlockDamageSource.Builder block(final Location<World> location) {
         this.location = location;
         return this;
     }
 
     @Override
-    public BlockDamageSource.Builder block(BlockSnapshot blockState) {
+    public BlockDamageSource.Builder block(final BlockSnapshot blockState) {
         this.blockSnapshot = checkNotNull(blockState);
         return this;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public BlockDamageSource build() throws IllegalStateException {
         checkState(this.location != null);
         checkState(this.blockSnapshot != null);
         checkState(this.damageType != null);
-        MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getId(), this.location);
+        final MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getId(), this.location);
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
         if (this.absolute) {
-            damageSource.setDamageIsAbsolute();
+            accessor.accessor$setDamageIsAbsolute();
         }
         if (this.bypasses) {
-            damageSource.setDamageBypassesArmor();
+            accessor.accessor$setDamageBypassesArmor();
         }
         if (this.scales) {
             damageSource.setDifficultyScaled();
@@ -72,10 +75,10 @@ public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<
             damageSource.setMagicDamage();
         }
         if (this.creative) {
-            damageSource.setDamageAllowedInCreativeMode();
+            accessor.accessor$setDamageAllowedInCreativeMode();
         }
         if (this.exhaustion != null) {
-            damageSource.hungerDamage = this.exhaustion.floatValue();
+            accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
         }
         return (BlockDamageSource) damageSource;
     }

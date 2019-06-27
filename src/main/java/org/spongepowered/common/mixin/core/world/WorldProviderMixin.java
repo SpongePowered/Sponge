@@ -53,6 +53,7 @@ public abstract class WorldProviderMixin implements Dimension, WorldProviderBrid
     @Shadow public abstract boolean isNether();
     @Shadow private String generatorSettings;
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public DimensionType getType() {
         return (DimensionType) (Object) this.getDimensionType();
@@ -84,7 +85,7 @@ public abstract class WorldProviderMixin implements Dimension, WorldProviderBrid
     }
 
     @Override
-    public void bridge$setGeneratorSettings(String generatorSettings) {
+    public void bridge$setGeneratorSettings(final String generatorSettings) {
         this.generatorSettings = generatorSettings;
     }
 
@@ -93,6 +94,7 @@ public abstract class WorldProviderMixin implements Dimension, WorldProviderBrid
         return 1.0f;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Context getContext() {
         return ((DimensionTypeBridge) (Object) getDimensionType()).bridge$getContext();
@@ -108,7 +110,7 @@ public abstract class WorldProviderMixin implements Dimension, WorldProviderBrid
      * @reason Check configs when dropping a chunk to see if we should keep the spawn loaded
      */
     @Overwrite
-    public boolean canDropChunk(int x, int z) {
+    public boolean canDropChunk(final int x, final int z) {
         final boolean isSpawnChunk = this.world.isSpawnChunk(x, z);
 
         return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.provider.getDimensionType(), ((ServerWorldBridge) this.world)

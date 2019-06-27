@@ -28,7 +28,6 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,38 +38,36 @@ import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import javax.annotation.Nullable;
 
 @Mixin(value = EntityDamageSourceIndirect.class, priority = 992)
-public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageSource implements IndirectEntityDamageSource {
+public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSourceMixin {
 
     @Shadow @Nullable protected Entity indirectEntity;
 
-    @Nullable private User owner;
+    @Shadow @Nullable public abstract Entity getTrueSource();
+    @Shadow @Nullable public abstract Entity getImmediateSource();
+
+    @Nullable private User impl$owner;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onConstruct(CallbackInfo callbackInfo) {
+    private void onConstruct(final CallbackInfo callbackInfo) {
         if (!(this.indirectEntity instanceof User) && this.damageSourceEntity != null) { // sources can be null
-            this.owner = super.getSource() instanceof OwnershipTrackedBridge
-                         ? ((OwnershipTrackedBridge) super.getSource()).tracked$getOwnerReference().orElse(null)
+            this.impl$owner = this.getTrueSource() instanceof OwnershipTrackedBridge
+                         ? ((OwnershipTrackedBridge) this.getTrueSource()).tracked$getOwnerReference().orElse(null)
                          : null;
-            if (this.indirectEntity == null && this.owner instanceof Entity) {
-                this.indirectEntity = (Entity) this.owner;
+            if (this.indirectEntity == null && this.impl$owner instanceof Entity) {
+                this.indirectEntity = (Entity) this.impl$owner;
             }
         }
     }
 
     @Override
-    public org.spongepowered.api.entity.Entity getIndirectSource() {
-        return (org.spongepowered.api.entity.Entity) this.indirectEntity;
-    }
-
-    @Override
     public String toString() {
-        MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper("IndirectEntityDamageSource")
+        final MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper("IndirectEntityDamageSource")
             .add("Name", this.damageType)
-            .add("Type", this.getType().getId())
-            .add("Source", this.getSource())
-            .add("IndirectSource", this.getIndirectSource());
-        if (this.owner != null) {
-            helper.add("SourceOwner", this.owner);
+            .add("Type", this.impl$damageType.getId())
+            .add("Source", this.getImmediateSource())
+            .add("IndirectSource", this.getTrueSource());
+        if (this.impl$owner != null) {
+            helper.add("SourceOwner", this.impl$owner);
         }
         return helper.toString();
     }

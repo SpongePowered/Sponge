@@ -68,7 +68,7 @@ public abstract class DragonFlightManagerMixin {
     @Shadow private void updatePlayers() { }
     @Shadow private void findAliveCrystals() { }
     @Shadow private void loadChunks() { }
-    @Shadow private void generatePortal(boolean flag) { }
+    @Shadow private void generatePortal(final boolean flag) { }
     @Shadow private EntityDragon createNewDragon() {
         return null; // Shadowed
     }
@@ -91,7 +91,7 @@ public abstract class DragonFlightManagerMixin {
                 LOGGER.info("Scanning for legacy world dragon fight...");
                 this.loadChunks();
                 this.scanForLegacyFight = false;
-                boolean flag = this.hasDragonBeenKilled();
+                final boolean flag = this.hasDragonBeenKilled();
 
                 if (flag) {
                     LOGGER.info("Found that the dragon has been killed in this world already.");
@@ -102,12 +102,12 @@ public abstract class DragonFlightManagerMixin {
                     this.generatePortal(false);
                 }
 
-                List<EntityDragon> list = this.world.getEntities(EntityDragon.class, EntitySelectors.IS_ALIVE);
+                final List<EntityDragon> list = this.world.getEntities(EntityDragon.class, EntitySelectors.IS_ALIVE);
 
                 if (list.isEmpty()) {
                     this.dragonKilled = true;
                 } else {
-                    EntityDragon entitydragon = list.get(0);
+                    final EntityDragon entitydragon = list.get(0);
                     this.dragonUniqueId = entitydragon.getUniqueID();
                     LOGGER.info("Found that there\'s a dragon still alive ({})", entitydragon);
                     this.dragonKilled = false;
@@ -131,7 +131,7 @@ public abstract class DragonFlightManagerMixin {
                 }
 
                 // Sponge Start - Cause tracker - todo: do more logistical configuration of how this all works.
-                try (GeneralizedContext context = DragonPhase.State.RESPAWN_DRAGON.createPhaseContext()) {
+                try (final GeneralizedContext context = DragonPhase.State.RESPAWN_DRAGON.createPhaseContext()) {
                     context.buildAndSwitch();
                     // Sponge End
                     this.respawnState
@@ -142,7 +142,7 @@ public abstract class DragonFlightManagerMixin {
             if (!this.dragonKilled) {
                 if (this.dragonUniqueId == null || ++this.ticksSinceDragonSeen >= 1200) {
                     this.loadChunks();
-                    List<EntityDragon> list1 = this.world.getEntities(EntityDragon.class, EntitySelectors.IS_ALIVE);
+                    final List<EntityDragon> list1 = this.world.getEntities(EntityDragon.class, EntitySelectors.IS_ALIVE);
 
                     if (list1.isEmpty()) {
                         LOGGER.debug("Haven\'t seen the dragon, respawning it");

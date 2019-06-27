@@ -32,10 +32,11 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.damage.MinecraftFallingBlockDamageSource;
-import org.spongepowered.common.mixin.core.util.MixinEntityDamageSource;
+import org.spongepowered.common.mixin.api.mcp.util.EntityDamageSourceMixin_API;
+import org.spongepowered.common.mixin.core.util.EntityDamageSourceMixin;
 
 @Mixin(value = MinecraftFallingBlockDamageSource.class, priority = 992)
-public abstract class MinecraftFallingBlockDamageSourceMixin_API extends MixinEntityDamageSource implements FallingBlockDamageSource {
+public abstract class MinecraftFallingBlockDamageSourceMixin_API extends EntityDamageSourceMixin_API implements FallingBlockDamageSource {
 
     @Shadow(remap = false) @Final private ImmutableFallingBlockData fallingBlockData;
 
@@ -52,7 +53,7 @@ public abstract class MinecraftFallingBlockDamageSourceMixin_API extends MixinEn
     @Override
     public String toString() {
         return MoreObjects.toStringHelper("FallingBlockDamageSource")
-            .add("Name", this.damageType)
+            .add("Name", this.getDamageType())
             .add("Type", this.getType().getId())
             .add("FallingBlock", getSource().toString())
             .add("Data", getFallingBlockData())

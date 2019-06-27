@@ -26,6 +26,7 @@ package org.spongepowered.common.event.damage;
 
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
+import org.spongepowered.common.mixin.core.util.DamageSourceAccessor;
 
 /*
 To summarize, the way this works is that DamageSource isn't directly created, but
@@ -49,7 +50,7 @@ public abstract class SpongeCommonDamageSource extends DamageSource implements o
      *
      * @param type The damage type id
      */
-    public void setDamageType(String type) {
+    public void setDamageType(final String type) {
         this.damageType = type;
     }
 
@@ -88,4 +89,16 @@ public abstract class SpongeCommonDamageSource extends DamageSource implements o
         return (float) this.getExhaustion();
     }
 
+
+    public void bridge$setDamageIsAbsolute() {
+        this.setDamageIsAbsolute();
+    }
+    public void bridge$setDamageBypassesArmor() {
+        this.setDamageBypassesArmor();
+    }
+
+
+    public void bridge$setHungerDamage(final float exhaustion) {
+        ((DamageSourceAccessor) this).accessor$setHungerDamage(exhaustion);
+    }
 }

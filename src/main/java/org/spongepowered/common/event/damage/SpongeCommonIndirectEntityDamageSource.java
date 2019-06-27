@@ -51,17 +51,26 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends EntityDamag
      *
      * @param type The damage type id
      */
-    public void setDamageType(String type) {
+    public void setDamageType(final String type) {
         this.damageType = type;
     }
 
-    public void setEntitySource(Entity entitySource) {
+    public void setEntitySource(final Entity entitySource) {
         this.damageSourceEntity = entitySource;
     }
 
-    public void setIndirectSource(Entity entity) {
+    public void setIndirectSource(final Entity entity) {
         this.indirectEntity = entity;
     }
+
+
+    public void bridge$setDamageIsAbsolute() {
+        this.setDamageIsAbsolute();
+    }
+    public void bridge$setDamageBypassesArmor() {
+        this.setDamageBypassesArmor();
+    }
+
 
     @Override
     public Entity getTrueSource() {

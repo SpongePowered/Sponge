@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import javax.annotation.Nullable;
 
 @Mixin(MerchantRecipe.class)
-public abstract class MixinMerchantRecipe  {
+public abstract class MerchantRecipeMixin {
 
     @Shadow public abstract net.minecraft.item.ItemStack getItemToBuy();
     @Shadow @Nullable public abstract net.minecraft.item.ItemStack getSecondItemToBuy();

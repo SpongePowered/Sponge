@@ -48,36 +48,36 @@ import javax.annotation.Nullable;
 public abstract class EquippableMixin_API extends EntityLivingBaseMixin_API implements Equipable {
 
     @Override
-    public boolean canEquip(EquipmentType type) {
+    public boolean canEquip(final EquipmentType type) {
         return true;
     }
 
     @Override
-    public boolean canEquip(EquipmentType type, @Nullable ItemStack equipment) {
+    public boolean canEquip(final EquipmentType type, @Nullable final ItemStack equipment) {
         return true;
     }
 
     @Override
-    public Optional<ItemStack> getEquipped(EquipmentType type) {
+    public Optional<ItemStack> getEquipped(final EquipmentType type) {
         if (type instanceof SpongeEquipmentType) {
-            EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
+            final EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
             if (slots.length != 1) {
                 throw new IllegalArgumentException("Only EquipmentTypes for a single Slot are possible");
             }
-            net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
+            final net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
             return Optional.of(ItemStackUtil.fromNative(nmsItem));
         }
         return Optional.empty();
     }
 
     @Override
-    public boolean equip(EquipmentType type, @Nullable ItemStack equipment) {
+    public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
         if (type instanceof SpongeEquipmentType) {
             EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
             if (slots.length == 0) {
                 slots = EntityEquipmentSlot.values();
             }
-            for (EntityEquipmentSlot slot : slots) {
+            for (final EntityEquipmentSlot slot : slots) {
                 // TODO check if canEquip
                 this.setItemStackToSlot(slot, ItemStackUtil.toNative(equipment));
                 return true;

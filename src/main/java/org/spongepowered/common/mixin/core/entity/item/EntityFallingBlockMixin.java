@@ -36,6 +36,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.damage.MinecraftFallingBlockDamageSource;
@@ -80,7 +81,7 @@ public abstract class EntityFallingBlockMixin extends EntityMixin {
         ),
         cancellable = true
     )
-    private void onWorldSetBlockToAir(CallbackInfo ci) {
+    private void onWorldSetBlockToAir(final CallbackInfo ci) {
         final BlockPos pos = new BlockPos((EntityFallingBlock) (Object) this);
         // So, there's two cases here: either the world is not cared for, or the
         // ChangeBlockEvent is not being listened to. If it's not being listened to,
@@ -116,30 +117,36 @@ public abstract class EntityFallingBlockMixin extends EntityMixin {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Redirect(method = "fall",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
         )
     )
-    private boolean spongeAttackFallingOrAnvil(Entity entity, DamageSource source, float damage) {
+    private boolean spongeAttackFallingOrAnvil(final Entity entity, final DamageSource source, final float damage) {
         if (entity.world.isRemote) {
             return entity.attackEntityFrom(source, damage);
         }
-        boolean isAnvil = this.fallTile.getBlock() == Blocks.ANVIL;
+        final boolean isAnvil = this.fallTile.getBlock() == Blocks.ANVIL;
         try {
             if (isAnvil) {
-                DamageSource.ANVIL = new MinecraftFallingBlockDamageSource("anvil", (EntityFallingBlock) (Object) this);
+                final MinecraftFallingBlockDamageSource anvil = new MinecraftFallingBlockDamageSource("anvil", (EntityFallingBlock) (Object) this);
+                ((DamageSourceBridge) anvil).bridge$setAnvilSource();
+
                 return entity.attackEntityFrom(DamageSource.ANVIL, damage);
             } else {
-                DamageSource.FALLING_BLOCK = new MinecraftFallingBlockDamageSource("fallingblock", (EntityFallingBlock) (Object) this);
+                final MinecraftFallingBlockDamageSource
+                    fallingblock =
+                    new MinecraftFallingBlockDamageSource("fallingblock", (EntityFallingBlock) (Object) this);
+                ((DamageSourceBridge) fallingblock).bridge$setFallingBlockSource();
                 return entity.attackEntityFrom(DamageSource.FALLING_BLOCK, damage);
             }
         } finally {
             if (isAnvil) {
-                DamageSource.ANVIL = source;
+                ((DamageSourceBridge) source).bridge$setAnvilSource();
             } else {
-                DamageSource.FALLING_BLOCK = source;
+                ((DamageSourceBridge) source).bridge$setFallingBlockSource();
             }
         }
     }

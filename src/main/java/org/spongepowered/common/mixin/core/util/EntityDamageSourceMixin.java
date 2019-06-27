@@ -22,34 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.village;
+package org.spongepowered.common.mixin.core.util;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.village.Village;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+import com.google.common.base.MoreObjects;
+import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 
-@Mixin(Village.class)
-public abstract class MixinVillage {
+import javax.annotation.Nullable;
 
-    @Shadow private World world;
+@Mixin(value = net.minecraft.util.EntityDamageSource.class)
+public abstract class EntityDamageSourceMixin extends DamageSourceMixin {
 
-    @Inject(method = "isWoodDoor", at = @At("HEAD"), cancellable = true)
-    private void impl$IgnoreEmptyChunks(final BlockPos pos, final CallbackInfoReturnable<Boolean> cir) {
-        if (((WorldBridge) this.world).isFake()) {
-            return;
-        }
-        final Chunk chunk = ((ChunkProviderBridge) this.world.getChunkProvider())
-            .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
-        if (chunk == null || chunk.isEmpty()) {
-            cir.setReturnValue(false);
-        }
+    @Shadow @Nullable protected net.minecraft.entity.Entity damageSourceEntity;
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper("EntityDamageSource")
+            .add("Name", this.damageType)
+            .add("Type", this.impl$damageType.getId())
+            .add("Source", this.damageSourceEntity)
+            .toString();
     }
 }

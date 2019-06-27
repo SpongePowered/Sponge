@@ -89,6 +89,7 @@ import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
@@ -318,11 +319,13 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             final AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             final Location<World> location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
                 block.getMaterial() == Material.LAVA);
-            DamageSource.LAVA = new MinecraftBlockDamageSource("lava", location).setFireDamage();
+            final MinecraftBlockDamageSource lava = new MinecraftBlockDamageSource("lava", location);
+            lava.impl$setFireDamage();
+            ((DamageSourceBridge) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins
             return entity.attackEntityFrom(DamageSource.LAVA, damage);
         } finally {
             // Since "source" is already the DamageSource.LAVA object, we can simply re-use it here.
-            DamageSource.LAVA = source;
+            ((DamageSourceBridge) source).bridge$setLava();
         }
 
     }
@@ -341,11 +344,14 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             final AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.001D, -0.001D, -0.001D);
             final Location<World> location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
                 block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
-            DamageSource.IN_FIRE = new MinecraftBlockDamageSource("inFire", location).setFireDamage();
+
+            final MinecraftBlockDamageSource fire = new MinecraftBlockDamageSource("inFire", location);
+            fire.impl$setFireDamage();
+            ((DamageSourceBridge) fire).bridge$setFireSource();
             return entity.attackEntityFrom(DamageSource.IN_FIRE, damage);
         } finally {
             // Since "source" is already the DamageSource.IN_FIRE object, we can re-use it to re-assign.
-            DamageSource.IN_FIRE = source;
+            ((DamageSourceBridge) source).bridge$setFireSource();
         }
 
     }
@@ -848,10 +854,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             return entity.attackEntityFrom(source, damage);
         }
         try {
-            DamageSource.LIGHTNING_BOLT = new EntityDamageSource("lightningBolt", lightningBolt);
+            final EntityDamageSource lightning = new EntityDamageSource("lightningBolt", lightningBolt);
+            ((DamageSourceBridge) lightning).bridge$setLightningSource();
             return entity.attackEntityFrom(DamageSource.LIGHTNING_BOLT, damage);
         } finally {
-            DamageSource.LIGHTNING_BOLT = source;
+            ((DamageSourceBridge) source).bridge$setLightningSource();
         }
     }
 

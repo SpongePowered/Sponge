@@ -22,27 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.mixin.api.mcp.util;
 
-import net.minecraft.util.text.ChatType;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Locale;
+import javax.annotation.Nullable;
 
-@Mixin(ChatType.class)
-public class MixinChatType implements org.spongepowered.api.text.chat.ChatType {
+@Mixin(value = net.minecraft.util.EntityDamageSource.class)
+public abstract class EntityDamageSourceMixin_API extends DamageSourceMixin_API implements EntityDamageSource {
 
-    @Override
-    public String getId() {
-        if ((Object) this == ChatType.GAME_INFO) {
-            return "minecraft:action_bar";
-        }
-        return "minecraft:" + ((ChatType) (Object) this).name().toLowerCase(Locale.ENGLISH);
-    }
+    @Shadow @Nullable protected net.minecraft.entity.Entity damageSourceEntity;
 
     @Override
-    public String getName() {
-        return ((ChatType) (Object) this).name();
+    public Entity getSource() {
+        return ((Entity) this.damageSourceEntity);
     }
 
 }

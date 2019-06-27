@@ -22,16 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.gen.feature;
+package org.spongepowered.common.mixin.api.mcp.util;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.WorldGenDungeons;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.EntityDamageSourceIndirect;
+import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(WorldGenDungeons.class)
-public interface WorldGenDungeonsAccessor {
+import javax.annotation.Nullable;
 
-    @Accessor("SPAWNERTYPES") ResourceLocation[] accessor$getSpawnerTypes();
+@Mixin(value = EntityDamageSourceIndirect.class)
+public abstract class EntityDamageSourceIndirectMixin_API extends EntityDamageSourceMixin_API implements IndirectEntityDamageSource {
+
+    @Shadow @Nullable protected Entity indirectEntity;
+
+    @Override
+    public org.spongepowered.api.entity.Entity getIndirectSource() {
+        return (org.spongepowered.api.entity.Entity) this.indirectEntity;
+    }
 
 }

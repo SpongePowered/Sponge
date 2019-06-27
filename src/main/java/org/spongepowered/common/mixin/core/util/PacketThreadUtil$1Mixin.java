@@ -22,16 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.gen.feature;
+package org.spongepowered.common.mixin.core.util;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.WorldGenDungeons;
+import net.minecraft.network.INetHandler;
+import net.minecraft.network.Packet;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
-@Mixin(WorldGenDungeons.class)
-public interface WorldGenDungeonsAccessor {
+@Mixin(targets = "net/minecraft/network/PacketThreadUtil$1")
+public class PacketThreadUtil$1Mixin {
 
-    @Accessor("SPAWNERTYPES") ResourceLocation[] accessor$getSpawnerTypes();
+    @Redirect(method = "run()V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") )
+    private void impl$redirectToPhaseTracker(final Packet<?> packetIn, final INetHandler netHandler) {
+        PacketPhaseUtil.onProcessPacket(packetIn, netHandler);
+    }
 
 }

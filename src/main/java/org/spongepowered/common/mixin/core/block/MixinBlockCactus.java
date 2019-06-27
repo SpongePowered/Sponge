@@ -41,6 +41,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
@@ -50,49 +51,52 @@ import java.util.Optional;
 @Mixin(BlockCactus.class)
 public abstract class MixinBlockCactus extends MixinBlock {
 
+    @SuppressWarnings("ConstantConditions")
     @Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    private boolean onSpongeCactusDamage(Entity entity, DamageSource source, float damage, net.minecraft.world.World world, BlockPos pos, IBlockState state, Entity entityIn) {
+    private boolean impl$reAssignForBlockDamageSource(final Entity entity, final DamageSource source, final float damage, final net.minecraft.world.World world, final BlockPos pos, final IBlockState state, final Entity entityIn) {
         if (world.isRemote) {
             return entity.attackEntityFrom(source, damage);
         }
         try {
-            Location<World> location = new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ());
-            DamageSource.CACTUS = new MinecraftBlockDamageSource("cactus", location);
+            final Location<World> location = new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ());
+            final MinecraftBlockDamageSource cactus = new MinecraftBlockDamageSource("cactus", location);
+            ((DamageSourceBridge) cactus).bridge$setCactusSource();
             return entity.attackEntityFrom(DamageSource.CACTUS, damage);
         } finally {
-            DamageSource.CACTUS = source;
+            ((DamageSourceBridge) source).bridge$setCactusSource();
         }
     }
 
+    @SuppressWarnings("RedundantTypeArguments")
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(final IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getGrowthData(blockState));
     }
 
     @Override
-    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+    public boolean supports(final Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
         return ImmutableGrowthData.class.isAssignableFrom(immutable);
     }
 
     @Override
-    public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
-            int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
+            final int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
             return Optional.of((BlockState) blockState.withProperty(BlockCactus.AGE, growth));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+    public <E> Optional<BlockState> getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
-            int growth = (Integer) value;
+            final int growth = (Integer) value;
             return Optional.of((BlockState) blockState.withProperty(BlockCactus.AGE, growth));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableGrowthData getGrowthData(IBlockState blockState) {
+    private ImmutableGrowthData getGrowthData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockCactus.AGE), 0, 15);
     }
 

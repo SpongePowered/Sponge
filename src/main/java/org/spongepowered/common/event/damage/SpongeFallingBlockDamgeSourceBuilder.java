@@ -33,6 +33,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
+import org.spongepowered.common.mixin.core.util.DamageSourceAccessor;
 
 import java.lang.ref.WeakReference;
 
@@ -43,29 +44,31 @@ public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBu
     private ImmutableFallingBlockData blockData = null;
 
     @Override
-    public SpongeFallingBlockDamgeSourceBuilder fallingBlock(ImmutableFallingBlockData fallingBlock) {
+    public SpongeFallingBlockDamgeSourceBuilder fallingBlock(final ImmutableFallingBlockData fallingBlock) {
         this.blockData = fallingBlock;
         return this;
     }
 
     @Override
-    public SpongeFallingBlockDamgeSourceBuilder entity(Entity entity) {
+    public SpongeFallingBlockDamgeSourceBuilder entity(final Entity entity) {
         checkArgument(entity instanceof FallingBlock);
         this.reference = new WeakReference<>(entity);
         return this;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public FallingBlockDamageSource build() throws IllegalStateException {
         checkState(this.reference.get() != null);
         checkState(this.blockData != null);
         checkState(this.damageType != null);
-        MinecraftFallingBlockDamageSource damageSource =
+        final MinecraftFallingBlockDamageSource damageSource =
             new MinecraftFallingBlockDamageSource(this.damageType.getId(),
                 (EntityFallingBlock) this.reference.get(),
                 this.blockData);
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
         if (this.creative) {
-            damageSource.setDamageAllowedInCreativeMode();
+            accessor.accessor$setDamageAllowedInCreativeMode();
         }
         if (this.scales) {
             damageSource.setDifficultyScaled();
@@ -74,22 +77,22 @@ public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBu
             damageSource.setMagicDamage();
         }
         if (this.bypasses) {
-            damageSource.setDamageBypassesArmor();
+            accessor.accessor$setDamageBypassesArmor();
         }
         if (this.absolute) {
-            damageSource.setDamageIsAbsolute();
+            accessor.accessor$setDamageIsAbsolute();
         }
         if (this.explosion) {
             damageSource.setExplosion();
         }
         if (this.exhaustion != null) {
-            damageSource.hungerDamage = this.exhaustion.floatValue();
+            accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
         }
         return (FallingBlockDamageSource) damageSource;
     }
 
     @Override
-    public FallingBlockDamageSource.Builder from(FallingBlockDamageSource value) {
+    public FallingBlockDamageSource.Builder from(final FallingBlockDamageSource value) {
         super.from(value);
         this.reference = new WeakReference<>(value.getSource());
         this.blockData = value.getFallingBlockData();

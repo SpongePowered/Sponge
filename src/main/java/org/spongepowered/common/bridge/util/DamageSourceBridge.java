@@ -22,16 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.gen.feature;
+package org.spongepowered.common.bridge.util;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.WorldGenDungeons;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 
-@Mixin(WorldGenDungeons.class)
-public interface WorldGenDungeonsAccessor {
+public interface DamageSourceBridge {
 
-    @Accessor("SPAWNERTYPES") ResourceLocation[] accessor$getSpawnerTypes();
+    DamageType bridge$getDamageType();
 
+    void bridge$resetDamageType();
+
+    void bridge$setLava();
+    void bridge$setFireSource();
+    void bridge$setLightningSource();
+    void bridge$setHotFloorSource();
+    void bridge$setFireworksSource();
+    void bridge$setFallingBlockSource();
+    void bridge$setAnvilSource();
+    void bridge$setCactusSource();
 }

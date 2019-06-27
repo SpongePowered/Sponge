@@ -34,12 +34,14 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.VecHelper;
 
 @Mixin(BlockMagma.class)
 public abstract class MixinBlockMagma extends MixinBlock {
 
+    @SuppressWarnings("ConstantConditions")
     @Redirect(
         method = "onEntityWalk",
         at = @At(
@@ -47,16 +49,18 @@ public abstract class MixinBlockMagma extends MixinBlock {
             target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
         )
     )
-    private boolean impl$SwapDamageSourceForMagma(Entity entity, DamageSource source, float damage, World world,
-            BlockPos pos, Entity original) {
+    private boolean impl$SwapDamageSourceForMagma(final Entity entity, final DamageSource source, final float damage, final World world,
+            final BlockPos pos, final Entity original) {
         if (!world.isRemote) {
             try {
                 final Vector3i blockPosition = VecHelper.toVector3i(pos);
                 final Location<org.spongepowered.api.world.World> location = new Location<>((org.spongepowered.api.world.World) world, blockPosition);
-                DamageSource.HOT_FLOOR = new MinecraftBlockDamageSource("hotFloor", location).setFireDamage();
+                final MinecraftBlockDamageSource hotFloor = new MinecraftBlockDamageSource("hotFloor", location);
+                hotFloor.impl$setFireDamage();
+                ((DamageSourceBridge) hotFloor).bridge$setHotFloorSource();
                 return entity.attackEntityFrom(DamageSource.HOT_FLOOR, damage);
             } finally {
-                DamageSource.HOT_FLOOR = source;
+                ((DamageSourceBridge) source).bridge$setHotFloorSource();
             }
         }
         return entity.attackEntityFrom(source, damage);

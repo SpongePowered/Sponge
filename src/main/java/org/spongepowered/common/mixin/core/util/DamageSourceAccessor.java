@@ -24,30 +24,25 @@
  */
 package org.spongepowered.common.mixin.core.util;
 
-import com.google.common.base.MoreObjects;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-import javax.annotation.Nullable;
+@SuppressWarnings("UnusedReturnValue")
+@Mixin(DamageSource.class)
+public interface DamageSourceAccessor {
 
-@Mixin(value = net.minecraft.util.EntityDamageSource.class, priority = 991)
-public abstract class MixinEntityDamageSource extends MixinDamageSource implements EntityDamageSource {
+    @Invoker("setDamageAllowedInCreativeMode") DamageSource accessor$setDamageAllowedInCreativeMode();
 
-    @Shadow @Nullable protected net.minecraft.entity.Entity damageSourceEntity;
+    @Invoker("setDamageBypassesArmor") DamageSource accessor$setDamageBypassesArmor();
 
-    @Override
-    public Entity getSource() {
-        return ((Entity) this.damageSourceEntity);
-    }
+    @Invoker("setDamageIsAbsolute") DamageSource accessor$setDamageIsAbsolute();
 
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper("EntityDamageSource")
-            .add("Name", this.damageType)
-            .add("Type", this.getType().getId())
-            .add("Source", getSource())
-            .toString();
-    }
+    @Invoker("setFireDamage") DamageSource accessor$setFireDamage();
+
+    @Accessor("hungerDamage") void accessor$setHungerDamage(float damage);
+
+    @Accessor("damageType") void accessor$setId(String id);
+
 }

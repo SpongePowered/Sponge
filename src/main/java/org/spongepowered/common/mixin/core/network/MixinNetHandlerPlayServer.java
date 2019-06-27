@@ -926,7 +926,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Inject(method = "handleResourcePackStatus(Lnet/minecraft/network/play/client/CPacketResourcePackStatus;)V", at = @At("HEAD"))
     private void onProcessResourcePackStatus(CPacketResourcePackStatus packet, CallbackInfo ci) {
         // Propagate the packet to the main thread so the cause tracker picks
-        // it up. See MixinPacketThreadUtil.
+        // it up. See PacketThreadUtil$1Mixin.
         PacketThreadUtil.checkThreadAndEnqueue(packet, (INetHandlerPlayServer) this, this.player.getServerWorld());
     }
 

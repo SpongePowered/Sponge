@@ -33,10 +33,11 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
-import org.spongepowered.common.mixin.core.util.MixinDamageSource;
+import org.spongepowered.common.mixin.api.mcp.util.DamageSourceMixin_API;
+import org.spongepowered.common.mixin.core.util.DamageSourceMixin;
 
 @Mixin(value = MinecraftBlockDamageSource.class, priority = 991)
-public abstract class MinecraftBlockDamageSourceMixin_API extends MixinDamageSource implements BlockDamageSource {
+public abstract class MinecraftBlockDamageSourceMixin_API extends DamageSourceMixin_API implements BlockDamageSource {
 
     @Shadow(remap = false) @Final private BlockSnapshot blockSnapshot;
     @Shadow(remap = false) @Final private Location<World> location;
