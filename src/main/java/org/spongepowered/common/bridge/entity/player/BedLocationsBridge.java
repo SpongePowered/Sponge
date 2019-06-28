@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.player;
+package org.spongepowered.common.bridge.entity.player;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.util.RespawnLocation;
@@ -30,12 +30,12 @@ import org.spongepowered.api.util.RespawnLocation;
 import java.util.Map;
 import java.util.UUID;
 
-public interface ISpongeUser {
+public interface BedLocationsBridge {
 
-    boolean setBedLocations(Map<UUID, RespawnLocation> value);
+    boolean bridge$setBedLocations(Map<UUID, RespawnLocation> value);
 
-    Map<UUID, RespawnLocation> getBedlocations();
+    Map<UUID, RespawnLocation> bridge$getBedlocations();
 
-    ImmutableMap<UUID, RespawnLocation> removeAllBeds();
+    ImmutableMap<UUID, RespawnLocation> bridge$removeAllBeds();
 
 }

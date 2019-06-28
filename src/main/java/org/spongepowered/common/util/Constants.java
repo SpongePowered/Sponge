@@ -129,6 +129,7 @@ public final class Constants {
             public static final String MAX_AIR = "maxAir";
             public static final int DEFAULT_MAX_AIR = 300;
             public static final String CAN_GRIEF = "CanGrief";
+
             public static final class Item {
 
                 // These are used by pickup/despawn delay for ItemEntity
@@ -254,6 +255,7 @@ public final class Constants {
 
         public static final String FORCE_GAMEMODE_OVERRIDE = "minecraft.force-gamemode.override";
 
+        public static final String SELECTOR_PERMISSION = "minecraft.selector";
     }
     public static final class WorldEvents {
 
@@ -700,6 +702,11 @@ public final class Constants {
             public static final double DEFAULT_AIRBORNE_MOD = 0.94999998807907104D;
             public static final double DEFAULT_DERAILED_MOD = 0.5D;
             public static final String MINECART_TYPE = "Type";
+            public static final double DEFAULT_MAX_SPEED = 0.4D;
+            public static final String MAX_SPEED = "maxSpeed";
+            public static final String SLOW_WHEN_EMPTY = "slowWhenEmpty";
+            public static final String AIRBORNE_MODIFIER = "airborneModifier";
+            public static final String DERAILED_MODIFIER = "derailedModifier";
         }
 
         public static final class Ocelot {

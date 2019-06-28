@@ -51,6 +51,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.entity.player.BedLocationsBridge;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -83,7 +84,7 @@ import javax.annotation.Nullable;
  * TODO Future note about data: The following data manipulators are always
  * applicable to User: BanData, WhitelistData, JoinData
  */
-public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carrier, ISpongeUser {
+public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carrier, BedLocationsBridge {
 
     public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
 
@@ -496,19 +497,19 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public Map<UUID, RespawnLocation> getBedlocations() {
+    public Map<UUID, RespawnLocation> bridge$getBedlocations() {
         Optional<Player> player = this.self.getPlayer();
         if (player.isPresent()) {
-            return ((ISpongeUser) player.get()).getBedlocations();
+            return ((BedLocationsBridge) player.get()).bridge$getBedlocations();
         }
         return this.spawnLocations;
     }
 
     @Override
-    public boolean setBedLocations(Map<UUID, RespawnLocation> value) {
+    public boolean bridge$setBedLocations(Map<UUID, RespawnLocation> value) {
         Optional<Player> player = this.self.getPlayer();
         if (player.isPresent()) {
-            return ((ISpongeUser) player.get()).setBedLocations(value);
+            return ((BedLocationsBridge) player.get()).bridge$setBedLocations(value);
         }
         this.spawnLocations.clear();
         this.spawnLocations.putAll(value);
@@ -517,10 +518,10 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public ImmutableMap<UUID, RespawnLocation> removeAllBeds() {
+    public ImmutableMap<UUID, RespawnLocation> bridge$removeAllBeds() {
         Optional<Player> player = this.self.getPlayer();
         if (player.isPresent()) {
-            return ((ISpongeUser) player.get()).removeAllBeds();
+            return ((BedLocationsBridge) player.get()).bridge$removeAllBeds();
         }
         ImmutableMap<UUID, RespawnLocation> locations = ImmutableMap.copyOf(this.spawnLocations);
         this.spawnLocations.clear();

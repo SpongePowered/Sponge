@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.entity.item.MinecartEntityBridge;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VectorSerializer;
@@ -49,12 +50,17 @@ import org.spongepowered.common.util.VectorSerializer;
 import java.util.ArrayList;
 
 @Mixin(EntityMinecart.class)
-public abstract class EntityMinecartMixin extends EntityMixin {
+public abstract class EntityMinecartMixin extends EntityMixin implements MinecartEntityBridge {
 
-    private double maxSpeed = 0.4D;
-    private boolean slowWhenEmpty = true;
-    private Vector3d airborneMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD);
-    private Vector3d derailedMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, Constants.Entity.Minecart.DEFAULT_DERAILED_MOD);
+    private double impl$maxSpeed = Constants.Entity.Minecart.DEFAULT_MAX_SPEED;
+    private boolean impl$slowWhenEmpty = true;
+    private Vector3d impl$airborneMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
+        Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
+        Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD);
+    private Vector3d
+        impl$derailedMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_DERAILED_MOD,
+        Constants.Entity.Minecart.DEFAULT_DERAILED_MOD,
+        Constants.Entity.Minecart.DEFAULT_DERAILED_MOD);
 
     /**
      * @author Minecrell - December 5th, 2016
@@ -62,35 +68,35 @@ public abstract class EntityMinecartMixin extends EntityMixin {
      */
     @Overwrite
     protected double getMaximumSpeed() {
-        return this.maxSpeed;
+        return this.impl$maxSpeed;
     }
 
     @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 0))
-    private double onDecelerateX(double defaultValue) {
-        return this.derailedMod.getX();
+    private double onDecelerateX(final double defaultValue) {
+        return this.impl$derailedMod.getX();
     }
 
     @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 1))
-    private double onDecelerateY(double defaultValue) {
-        return this.derailedMod.getY();
+    private double onDecelerateY(final double defaultValue) {
+        return this.impl$derailedMod.getY();
     }
 
     @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 2))
-    private double onDecelerateZ(double defaultValue) {
-        return this.derailedMod.getZ();
+    private double onDecelerateZ(final double defaultValue) {
+        return this.impl$derailedMod.getZ();
     }
 
     @Redirect(method = "applyDrag", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;isBeingRidden()Z"))
-    private boolean onIsRidden(EntityMinecart self) {
-        return !this.slowWhenEmpty || isBeingRidden();
+    private boolean onIsRidden(final EntityMinecart self) {
+        return !this.impl$slowWhenEmpty || isBeingRidden();
     }
 
     @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;removePassengers()V"),
       cancellable = true)
-    private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    private void onAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), (Minecart) this, 0, amount);
+            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), (Minecart) this, 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
@@ -99,29 +105,33 @@ public abstract class EntityMinecartMixin extends EntityMixin {
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.hasKey("maxSpeed")) {
-            this.maxSpeed = compound.getDouble("maxSpeed");
+        if (compound.hasKey(Constants.Entity.Minecart.MAX_SPEED)) {
+            this.impl$maxSpeed = compound.getDouble(Constants.Entity.Minecart.MAX_SPEED);
         }
-        if (compound.hasKey("slowWhenEmpty")) {
-            this.slowWhenEmpty = compound.getBoolean("slowWhenEmpty");
+        if (compound.hasKey(Constants.Entity.Minecart.SLOW_WHEN_EMPTY)) {
+            this.impl$slowWhenEmpty = compound.getBoolean(Constants.Entity.Minecart.SLOW_WHEN_EMPTY);
         }
-        if (compound.hasKey("airborneModifier")) {
-            this.airborneMod = VectorSerializer.fromNbt(compound.getCompoundTag("airborneModifier"));
+        if (compound.hasKey(Constants.Entity.Minecart.AIRBORNE_MODIFIER)) {
+            this.impl$airborneMod = VectorSerializer.fromNbt(compound.getCompoundTag(Constants.Entity.Minecart.AIRBORNE_MODIFIER));
         }
-        if (compound.hasKey("derailedModifier")) {
-            this.derailedMod = VectorSerializer.fromNbt(compound.getCompoundTag("derailedModifier"));
+        if (compound.hasKey(Constants.Entity.Minecart.DERAILED_MODIFIER)) {
+            this.impl$derailedMod = VectorSerializer.fromNbt(compound.getCompoundTag(Constants.Entity.Minecart.DERAILED_MODIFIER));
         }
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        compound.setDouble("maxSpeed", this.maxSpeed);
-        compound.setBoolean("slowWhenEmpty", this.slowWhenEmpty);
-        compound.setTag("airborneModifier", VectorSerializer.toNbt(this.airborneMod));
-        compound.setTag("derailedModifier", VectorSerializer.toNbt(this.derailedMod));
+        compound.setDouble(Constants.Entity.Minecart.MAX_SPEED, this.impl$maxSpeed);
+        compound.setBoolean(Constants.Entity.Minecart.SLOW_WHEN_EMPTY, this.impl$slowWhenEmpty);
+        compound.setTag(Constants.Entity.Minecart.AIRBORNE_MODIFIER, VectorSerializer.toNbt(this.impl$airborneMod));
+        compound.setTag(Constants.Entity.Minecart.DERAILED_MODIFIER, VectorSerializer.toNbt(this.impl$derailedMod));
     }
 
+    @Override
+    public Vector3d bridge$getAirboneVelocityModifier() {
+        return this.impl$airborneMod;
+    }
 }

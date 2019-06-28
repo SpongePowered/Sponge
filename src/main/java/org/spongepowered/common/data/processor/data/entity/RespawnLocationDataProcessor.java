@@ -38,7 +38,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRespawnLoc
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
-import org.spongepowered.common.entity.player.ISpongeUser;
+import org.spongepowered.common.bridge.entity.player.BedLocationsBridge;
 
 import java.util.Map;
 import java.util.Optional;
@@ -53,8 +53,8 @@ public class RespawnLocationDataProcessor extends
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (container instanceof ISpongeUser) {
-            ImmutableMap<UUID, RespawnLocation> removed = ((ISpongeUser) container).removeAllBeds();
+        if (container instanceof BedLocationsBridge) {
+            ImmutableMap<UUID, RespawnLocation> removed = ((BedLocationsBridge) container).bridge$removeAllBeds();
             if (!removed.isEmpty()) {
                 return DataTransactionResult.successRemove(constructImmutableValue(removed));
             }
@@ -65,16 +65,16 @@ public class RespawnLocationDataProcessor extends
 
     @Override
     protected boolean set(User user, Map<UUID, RespawnLocation> value) {
-        if (user instanceof ISpongeUser) {
-            return ((ISpongeUser) user).setBedLocations(value);
+        if (user instanceof BedLocationsBridge) {
+            return ((BedLocationsBridge) user).bridge$setBedLocations(value);
         }
         return false;
     }
 
     @Override
     protected Optional<Map<UUID, RespawnLocation>> getVal(User user) {
-        if (user instanceof ISpongeUser) {
-            return Optional.of(((ISpongeUser) user).getBedlocations());
+        if (user instanceof BedLocationsBridge) {
+            return Optional.of(((BedLocationsBridge) user).bridge$getBedlocations());
         }
         return Optional.empty();
     }
