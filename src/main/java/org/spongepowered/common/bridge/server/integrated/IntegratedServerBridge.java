@@ -22,15 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.bridge.server.integrated;
 
 import net.minecraft.world.WorldSettings;
 
-public interface IMixinIntegratedServer {
+public interface IntegratedServerBridge {
 
-    WorldSettings getSettings();
+    WorldSettings bridge$getSettings();
 
-    void markNewSave();
+    void bridge$markNewSave();
 
-    boolean isNewSave();
+    boolean bridge$isNewSave();
 }

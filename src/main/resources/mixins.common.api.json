@@ -82,7 +82,7 @@
         "mcp.entity.item.EntityMinecartMobSpawnerMixin_API",
         "mcp.entity.item.EntityMinecartTNTMixin_API",
         "mcp.entity.item.EntityPaintingMixin_API",
-        "mcp.entity.item.EntityMinecartTNTMixin_API",
+        "mcp.entity.item.EntityTNTPrimedMixin_API",
         "mcp.entity.item.EntityXPOrbMixin_API",
         "mcp.entity.monster.AbstractSkeletonMixin_API",
         "mcp.entity.monster.EntityBlazeMixin_API",

@@ -81,7 +81,7 @@ import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.interfaces.IMixinIntegratedServer;
+import org.spongepowered.common.bridge.server.integrated.IntegratedServerBridge;
 import org.spongepowered.common.mixin.core.server.MinecraftServerAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
@@ -742,11 +742,11 @@ public final class WorldManager {
             final WorldSettings worldSettings;
 
             // If this is integrated server, we need to use the WorldSettings from the client's Single Player menu to construct the worlds
-            if (server instanceof IMixinIntegratedServer) {
-                worldSettings = ((IMixinIntegratedServer) server).getSettings();
+            if (server instanceof IntegratedServerBridge) {
+                worldSettings = ((IntegratedServerBridge) server).bridge$getSettings();
 
                 // If this is overworld and a new save, the WorldInfo has already been made but we want to still fire the construct event.
-                if (dimensionId == 0 && ((IMixinIntegratedServer) server).isNewSave()) {
+                if (dimensionId == 0 && ((IntegratedServerBridge) server).bridge$isNewSave()) {
                     SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Sponge.getCauseStackManager().getCurrentCause(), (WorldArchetype)
                             (Object) worldSettings, (WorldProperties) worldInfo));
                 }
