@@ -509,5 +509,4 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         }
         buffer.write(id);
     }
-
 }

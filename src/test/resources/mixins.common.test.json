@@ -8,7 +8,7 @@
     "mixins": [
         "MixinAdvancement",
         "MixinItem",
-        "MixinSchematicTranslator_test",
+        "MixinSchematicTranslator_Test",
         "MixinSpongeImplHooks_test"
     ],
     "injectors": {

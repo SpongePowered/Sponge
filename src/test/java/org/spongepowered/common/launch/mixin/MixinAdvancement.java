@@ -24,14 +24,8 @@
  */
 package org.spongepowered.common.launch.mixin;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import net.minecraft.advancements.Advancement;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 
 @Mixin(value = Advancement.class, priority = 2000)
 public abstract class MixinAdvancement {

@@ -26,26 +26,22 @@ package org.spongepowered.common.launch.mixin;
 
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.DataFixesManager;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.persistence.SchematicTranslator;
 
 @Mixin(value = SchematicTranslator.class, remap = false)
-public class MixinSchematicTranslator_test {
+public class MixinSchematicTranslator_Test {
 
-    private final DataFixer fixer = DataFixesManager.createFixer();
+    @Shadow private static DataFixer VANILLA_FIXER;
 
-    @Redirect(
-        method = "translate(Lorg/spongepowered/api/data/DataView;)Lorg/spongepowered/api/world/schematic/Schematic;",
-        at = @At(
-            value = "INVOKE",
-            target = "Lorg/spongepowered/common/SpongeImpl;getDataFixer()Lnet/minecraft/util/datafix/DataFixer;"
-        )
-    )
-    private DataFixer getFixerForUnitTests() {
-        return this.fixer;
+    @Inject(method = "translate(Lorg/spongepowered/api/data/DataView;)Lorg/spongepowered/api/world/schematic/Schematic;", at = @At("HEAD"))
+    private void setDummyDataFixer(DataView unprocessed, CallbackInfoReturnable<Schematic> cir) {
+        VANILLA_FIXER = DataFixesManager.createFixer();
     }
-
-
 }
