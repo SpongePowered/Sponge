@@ -41,7 +41,7 @@ import java.util.Optional;
 @Mixin(UserListEntryBan.class)
 public abstract class MixinUserListEntryBan_API<T> extends UserListEntry<T> implements Ban {
 
-    MixinUserListEntryBan_API(T p_i1146_1_) {
+    public MixinUserListEntryBan_API(T p_i1146_1_) {
         super(p_i1146_1_);
     }
 
