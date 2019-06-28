@@ -25,22 +25,16 @@
 package org.spongepowered.common.mixin.api.minecraft.server.management;
 
 import net.minecraft.server.management.UserListBansEntry;
-import net.minecraft.server.management.UserListEntryBan;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
-
-import java.util.Date;
 
 @Mixin(UserListBansEntry.class)
 public abstract class MixinUserListBansEntry_API extends MixinUserListEntryBan_API<com.mojang.authlib.GameProfile> implements Ban.Profile {
 
-    MixinUserListBansEntry_API(com.mojang.authlib.GameProfile p_i1146_1_) {
+    public MixinUserListBansEntry_API(com.mojang.authlib.GameProfile p_i1146_1_) {
         super(p_i1146_1_);
     }
 
