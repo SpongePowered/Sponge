@@ -123,8 +123,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.bridge.packet.ResourcePackBridge;
+import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -134,13 +138,8 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
-import org.spongepowered.common.bridge.packet.ResourcePackBridge;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
@@ -847,7 +846,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                             entity, hand, VecHelper.toVector3d(entity.getPositionVector().add(packetIn.getHitVec()))).isCancelled()) {
 
                             // Restore held item in hand
-                            int index = ((IMixinInventoryPlayer) this.player.inventory).getHeldItemIndex(hand);
+                            int index = ((InventoryPlayerBridge) this.player.inventory).getHeldItemIndex(hand);
 
                             if (hand == EnumHand.OFF_HAND) {
                                 // A window id of -2 can be used to set the off hand, even if a container is open.
@@ -927,7 +926,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Inject(method = "handleResourcePackStatus(Lnet/minecraft/network/play/client/CPacketResourcePackStatus;)V", at = @At("HEAD"))
     private void onProcessResourcePackStatus(CPacketResourcePackStatus packet, CallbackInfo ci) {
         // Propagate the packet to the main thread so the cause tracker picks
-        // it up. See MixinPacketThreadUtil.
+        // it up. See PacketThreadUtil$1Mixin.
         PacketThreadUtil.checkThreadAndEnqueue(packet, (INetHandlerPlayServer) this, this.player.getServerWorld());
     }
 

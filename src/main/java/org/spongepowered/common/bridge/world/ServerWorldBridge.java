@@ -42,7 +42,6 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
@@ -56,7 +55,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public interface ServerWorldBridge extends WorldBridge {
+public interface ServerWorldBridge {
 
     int bridge$getDimensionId();
 

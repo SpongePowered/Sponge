@@ -34,6 +34,7 @@ import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.mixin.core.world.gen.feature.WorldGenDungeonsAccessor;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.Arrays;
@@ -54,12 +55,14 @@ public class DungeonMobRegistryModule implements RegistryModule {
         return Holder.INSTANCE;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void registerDefaults() {
-        Map<String, Long> types = Arrays.stream(WorldGenDungeons.SPAWNERTYPES)
+        final WorldGenDungeons worldGenDungeons = new WorldGenDungeons();
+        final Map<String, Long> types = Arrays.stream(((WorldGenDungeonsAccessor) worldGenDungeons).accessor$getSpawnerTypes())
                 .collect(Collectors.groupingBy(ResourceLocation::toString, Collectors.counting()));
 
-        for(String mob : types.keySet()) {
+        for(final String mob : types.keySet()) {
             put(EntityUtil.fromNameToType(mob).get(),
                     types.get(mob).intValue() * 100); // times 100 to fit with forge's format
         }
@@ -73,7 +76,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
      * @param type Type to add
      * @param weight Weight of the type
      */
-    public void put(EntityType type, int weight) {
+    public void put(final EntityType type, final int weight) {
         remove(type);
 
         this.dungeonMobs.add(new WeightedSerializableObject<>(EntityUtil.archetype(type), weight));
@@ -85,7 +88,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
      *
      * @param type Type to remove
      */
-    public void remove(EntityType type) {
+    public void remove(final EntityType type) {
         get(type).ifPresent(this.dungeonMobs::remove);
         this.presentTypes.remove(type);
     }
@@ -96,7 +99,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
      * @param type Type to find
      * @return Weighed archetype, if one exists
      */
-    public Optional<WeightedSerializableObject<EntityArchetype>> get(EntityType type) {
+    public Optional<WeightedSerializableObject<EntityArchetype>> get(final EntityType type) {
         return this.dungeonMobs
                 .getEntries()
                 .stream()

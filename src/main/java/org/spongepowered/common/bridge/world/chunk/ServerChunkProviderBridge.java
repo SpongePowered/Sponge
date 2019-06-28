@@ -28,8 +28,6 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
-import org.spongepowered.common.mixin.core.world.gen.MixinChunkProviderServer;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -61,7 +59,7 @@ public interface ServerChunkProviderBridge {
      * @param x
      * @param z
      * @return The chunk loaded forcefully
-     * look at MixinChunkProviderServer#impl$ProvideChunkForced(Chunk, int, int)
+     * look at ChunkProviderServerMixin#impl$ProvideChunkForced(Chunk, int, int)
      */
     Chunk impl$loadChunkForce(final int x, final int z);
 

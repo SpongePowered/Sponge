@@ -77,7 +77,6 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.TimingBridge;
-import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
@@ -272,7 +271,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
 
         try (final PhaseContext<?> context = phaseContext;
-             final Timing timing = ((BlockBridge) state.getBlock()).getTimingsHandler()) {
+             final Timing timing = ((TimingBridge) state.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             context.buildAndSwitch();
             block.updateTick(world, pos, state, random);
@@ -661,7 +660,7 @@ public final class TrackingUtil {
         // flags, we have to abide by the changes accordingly. Likewise, this interacts with neighbor notifications being performed.
         if (transaction.getIntermediary().isEmpty()) {
             // We call onBlockAdded here for blocks without a TileEntity.
-            // MixinChunk#setBlockState will call onBlockAdded for blocks
+            // ChunkMixin#setBlockState will call onBlockAdded for blocks
             // with a TileEntity or when capturing is not being done.
             performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, originalChangeFlag, originalState, newState);
 

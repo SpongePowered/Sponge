@@ -5,7 +5,7 @@
     "plugin": "org.spongepowered.common.mixin.plugin.TrackingPlugin",
     "mixinPriority" : 1111,
     "mixins": [
-        "bridge.MixinOwnershipTrackedBridge",
+        "bridge.OwnershipTrackedBridgeMixin",
         "entity.MixinEntity_Tracker",
         "world.MixinChunk_Tracker",
         "world.MixinWorld_Tracker"

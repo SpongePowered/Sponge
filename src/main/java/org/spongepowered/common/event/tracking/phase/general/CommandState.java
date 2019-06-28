@@ -45,6 +45,7 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -52,7 +53,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldManager;
 
@@ -115,8 +115,8 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         final CauseStackManager csm = Sponge.getCauseStackManager();
         if (playerSource.isPresent()) {
             // Post event for inventory changes
-            ((IMixinInventoryPlayer) playerSource.get().inventory).setCapture(false);
-            List<SlotTransaction> list = ((IMixinInventoryPlayer) playerSource.get().inventory).getCapturedTransactions();
+            ((InventoryPlayerBridge) playerSource.get().inventory).setCapture(false);
+            List<SlotTransaction> list = ((InventoryPlayerBridge) playerSource.get().inventory).getCapturedTransactions();
             if (!list.isEmpty()) {
                 ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.getCurrentCause(),
                         ((Inventory) playerSource.get().inventory), list);

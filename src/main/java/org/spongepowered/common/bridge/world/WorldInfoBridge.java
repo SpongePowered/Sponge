@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.world;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.world.EnumDifficulty;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.PortalAgentType;
@@ -39,50 +38,54 @@ import javax.annotation.Nullable;
 
 public interface WorldInfoBridge {
 
-    NBTTagCompound getSpongeRootLevelNbt();
+    NBTTagCompound bridge$getSpongeRootLevelNbt();
 
-    void setSpongeRootLevelNBT(NBTTagCompound nbt);
+    boolean bridge$getSpawnsBonusChest();
 
-    NBTTagCompound getSpongeNbt();
+    void bridge$setSpongeRootLevelNBT(NBTTagCompound nbt);
 
-    void readSpongeNbt(NBTTagCompound spongeNbt);
+    void bridge$readSpongeNbt(NBTTagCompound spongeNbt);
 
-    int getIndexForUniqueId(UUID uuid);
+    int bridge$getIndexForUniqueId(UUID uuid);
 
-    Optional<UUID> getUniqueIdForIndex(int index);
+    Optional<UUID> bridge$getUniqueIdForIndex(int index);
+
+    UUID bridge$getAssignedId();
 
     @Nullable
-    Integer getDimensionId();
+    Integer bridge$getDimensionId();
 
-    void setDimensionId(int id);
+    void bridge$setDimensionId(int id);
 
-    boolean getIsMod();
+    boolean bridge$getIsMod();
 
-    void setIsMod(boolean isMod);
+    void bridge$setIsMod(boolean isMod);
 
-    SpongeConfig<WorldConfig> getConfigAdapter();
+    SpongeConfig<WorldConfig> bridge$getConfigAdapter();
+
+    PortalAgentType bridge$getPortalAgent();
+
+    DimensionType bridge$getDimensionType();
 
     /**
      * Creates the world config.
      *
      * @return True if the config was wrote to disk, false otherwise
      */
-    boolean createWorldConfig();
+    boolean bridge$createWorldConfig();
 
-    void setUniqueId(UUID uniqueId);
+    void bridge$setUniqueId(UUID uniqueId);
 
-    void setDimensionType(DimensionType type);
+    void bridge$setDimensionType(DimensionType type);
 
-    void setPortalAgentType(PortalAgentType type);
+    boolean bridge$isValid();
 
-    void setScoreboard(ServerScoreboard scoreboard);
-
-    boolean isValid();
-
-    boolean hasCustomDifficulty();
+    boolean bridge$hasCustomDifficulty();
 
     /**
      * Sets the difficulty without marking it as custom
      */
-    void forceSetDifficulty(EnumDifficulty difficulty);
+    void bridge$forceSetDifficulty(EnumDifficulty difficulty);
+
+    void bridge$saveConfig();
 }

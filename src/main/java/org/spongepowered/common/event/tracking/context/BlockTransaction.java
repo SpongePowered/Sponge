@@ -456,7 +456,7 @@ public abstract class BlockTransaction {
             }
 
             // We call onBlockAdded here for blocks without a TileEntity.
-            // MixinChunk#setBlockState will call onBlockAdded for blocks
+            // ChunkMixin#setBlockState will call onBlockAdded for blocks
             // with a TileEntity or when capturing is not being done.
             if (this.queueOnAdd) {
                 this.newState.getBlock().onBlockAdded(worldServer, targetPosition, this.newState);

@@ -87,7 +87,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -104,10 +107,7 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
-import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
+import org.spongepowered.common.mixin.core.world.storage.WorldInfoMixin;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
@@ -318,7 +318,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      *
      * @reason Sponge rewrites the method to use the Sponge {@link WorldManager} to load worlds,
      * migrating old worlds, upgrading worlds to our standard, and configuration loading. Also
-     * validates that the {@link MixinWorldInfo onConstruction} will not be doing anything
+     * validates that the {@link WorldInfoMixin onConstruction} will not be doing anything
      * silly during map conversions.
      */
     @Overwrite
@@ -354,7 +354,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public void bridge$prepareSpawnArea(WorldServer worldServer) {
         WorldProperties worldProperties = (WorldProperties) worldServer.getWorldInfo();
-        if (!((WorldInfoBridge) worldProperties).isValid() || !worldProperties.doesGenerateSpawnOnLoad()) {
+        if (!((WorldInfoBridge) worldProperties).bridge$isValid() || !worldProperties.doesGenerateSpawnOnLoad()) {
             return;
         }
 
@@ -657,7 +657,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             if (save) {
                 // Sponge start - check auto save interval in world config
                 if (this.isDedicatedServer() && this.isServerRunning()) {
-                    final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
+                    final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
                     final int autoSaveInterval = configAdapter.getConfig().getWorld().getAutoSaveInterval();
                     if (log) {
                         log = configAdapter.getConfig().getLogging().logWorldAutomaticSaving();

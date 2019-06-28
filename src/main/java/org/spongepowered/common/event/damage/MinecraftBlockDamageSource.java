@@ -35,10 +35,14 @@ public class MinecraftBlockDamageSource extends DamageSource {
     private final BlockSnapshot blockSnapshot;
     private final Location<World> location;
 
-    public MinecraftBlockDamageSource(String damageTypeIn, Location<World> location) {
+    public MinecraftBlockDamageSource(final String damageTypeIn, final Location<World> location) {
         super(damageTypeIn);
         this.blockSnapshot = location.createSnapshot();
         this.location = location;
+    }
+
+    public void impl$setFireDamage() {
+        this.setFireDamage();
     }
 
     @Override

@@ -40,7 +40,7 @@ import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -192,7 +192,7 @@ public class SpongeScheduler implements Scheduler {
             for (Player player : Sponge.getServer().getOnlinePlayers()) {
                 if (player instanceof EntityPlayer) {
                     // Detect Changes on PlayerInventories marked as dirty.
-                    ((IMixinInventoryPlayer) ((EntityPlayer) player).inventory).cleanupDirty();
+                    ((InventoryPlayerBridge) ((EntityPlayer) player).inventory).cleanupDirty();
                 }
             }
         }

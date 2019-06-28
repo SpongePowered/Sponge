@@ -44,29 +44,32 @@ import org.spongepowered.common.event.damage.SpongeCommonDamageSource;
 @Mixin(AbstractDamageSource.class)
 public abstract class MixinAbstractDamageSource implements DamageSource {
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstruct(CallbackInfo callbackInfo) {
-        ((SpongeCommonDamageSource) (Object) this).setDamageType(getType().getId());
+    private void api$setUpBridges(final CallbackInfo callbackInfo) {
+        final SpongeCommonDamageSource commonSource = (SpongeCommonDamageSource) (Object) this;
+        commonSource.setDamageType(getType().getId());
         if (isAbsolute()) {
-            ((SpongeCommonDamageSource) (Object) this).setDamageIsAbsolute();
+            commonSource.bridge$setDamageIsAbsolute();
         }
         if (isBypassingArmor()) {
-            ((SpongeCommonDamageSource) (Object) this).setDamageBypassesArmor();
+            commonSource.bridge$setDamageBypassesArmor();
         }
         if (isExplosive()) {
-            ((SpongeCommonDamageSource) (Object) this).setExplosion();
+            commonSource.setExplosion();
         }
         if (isMagic()) {
-            ((SpongeCommonDamageSource) (Object) this).setMagicDamage();
+            commonSource.setMagicDamage();
         }
         if (isScaledByDifficulty()) {
-            ((SpongeCommonDamageSource) (Object) this).setDifficultyScaled();
+            commonSource.setDifficultyScaled();
         }
         if (doesAffectCreative()) {
-            ((SpongeCommonDamageSource) (Object) this).canHarmInCreative();
+            commonSource.canHarmInCreative();
         }
         // Sets exhaustion last as to allow control if the builder specified a custom exhaustion value
-        ((SpongeCommonDamageSource) (Object) this).hungerDamage = (float) getExhaustion();
+
+        commonSource.bridge$setHungerDamage((float) getExhaustion());
     }
 
 }

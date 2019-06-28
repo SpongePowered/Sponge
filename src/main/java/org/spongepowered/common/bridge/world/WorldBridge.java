@@ -25,11 +25,8 @@
 package org.spongepowered.common.bridge.world;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.api.world.Dimension;
 
 import javax.annotation.Nullable;
 
@@ -50,6 +47,8 @@ public interface WorldBridge {
      */
     boolean isFake();
 
+    void bridge$clearFakeCheck();
+
     long bridge$getWeatherStartTime();
 
     void setWeatherStartTime(long weatherStartTime);
@@ -62,9 +61,4 @@ public interface WorldBridge {
     @Nullable
     EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
 
-    int getRawBlockLight(BlockPos pos, EnumSkyBlock lightType);
-
-    void clearFakeCheck();
-
-    Dimension bridge$getDimensionWrapper();
 }

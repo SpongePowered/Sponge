@@ -40,7 +40,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAreaEffectData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
-import org.spongepowered.common.mixin.core.entity.AccessorEntityAreaEffectCloud;
+import org.spongepowered.common.mixin.core.entity.EntityAreaEffectCloudAccessor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,7 +82,7 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
         dataHolder.setRadius((float) radius);
         dataHolder.setRadiusOnUse((float) radiusOnUse);
         dataHolder.setDuration(duration);
-        ((AccessorEntityAreaEffectCloud) dataHolder).setDurationOnUse(durationOnUse);
+        ((EntityAreaEffectCloudAccessor) dataHolder).setDurationOnUse(durationOnUse);
         dataHolder.setWaitTime(waitTime);
         final EnumParticleTypes internalType = ((SpongeParticleType) particleType).getInternalType();
         dataHolder.setParticle(internalType == null ? EnumParticleTypes.SPELL_MOB : internalType);
@@ -91,8 +91,8 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
         for (PotionEffect effect : potionEffects) {
             effects.add((net.minecraft.potion.PotionEffect) effect);
         }
-        ((AccessorEntityAreaEffectCloud) dataHolder).setPotionEffects(effects);
-        ((AccessorEntityAreaEffectCloud) dataHolder).setReapplicationDelay(reapplicationDelay);
+        ((EntityAreaEffectCloudAccessor) dataHolder).setPotionEffects(effects);
+        ((EntityAreaEffectCloudAccessor) dataHolder).setReapplicationDelay(reapplicationDelay);
         return true;
     }
 
@@ -102,7 +102,7 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
         map.put(Keys.AREA_EFFECT_CLOUD_AGE, dataHolder.ticksExisted);
         map.put(Keys.AREA_EFFECT_CLOUD_COLOR, Color.ofRgb(dataHolder.getColor()));
         map.put(Keys.AREA_EFFECT_CLOUD_RADIUS, dataHolder.getRadius());
-        final AccessorEntityAreaEffectCloud mixinAreaEffect = (AccessorEntityAreaEffectCloud) dataHolder;
+        final EntityAreaEffectCloudAccessor mixinAreaEffect = (EntityAreaEffectCloudAccessor) dataHolder;
         final List<net.minecraft.potion.PotionEffect> potionEffects = mixinAreaEffect.getPotionEffects();
         final List<PotionEffect> effects = new ArrayList<>(potionEffects.size());
         for (net.minecraft.potion.PotionEffect potionEffect : potionEffects) {

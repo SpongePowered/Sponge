@@ -43,6 +43,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.event.tracking.context.BlockItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.BlockItemEntityDropsSupplier;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
@@ -59,7 +60,6 @@ import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.Collections;
@@ -536,7 +536,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             return true;
         }
         if (this.source != null && this.source instanceof EntityPlayer) {
-            if (((IMixinInventoryPlayer) ((EntityPlayer) this.source).inventory).getCapturedTransactions().size() > 0) {
+            if (((InventoryPlayerBridge) ((EntityPlayer) this.source).inventory).getCapturedTransactions().size() > 0) {
                 return true;
             }
         }

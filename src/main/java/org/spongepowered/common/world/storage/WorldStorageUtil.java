@@ -35,8 +35,8 @@ import net.minecraft.world.chunk.storage.RegionFileCache;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.chunk.storage.AnvilChunkLoaderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.util.Constants;
 
 import java.io.DataInputStream;
@@ -65,20 +65,20 @@ public class WorldStorageUtil {
             Function<Callable<Boolean>, CompletableFuture<Boolean>> completableFutureProvider) {
         int x = chunkCoords.getX();
         int z = chunkCoords.getZ();
-        if (!(chunkLoader instanceof IMixinAnvilChunkLoader) || !SpongeChunkLayout.instance.isValidChunk(x, chunkCoords.getY(), z)) {
+        if (!(chunkLoader instanceof AnvilChunkLoaderBridge) || !SpongeChunkLayout.instance.isValidChunk(x, chunkCoords.getY(), z)) {
             return CompletableFuture.completedFuture(false);
         }
-        return completableFutureProvider.apply(() -> ((IMixinAnvilChunkLoader) chunkLoader).chunkExists(world, x, z));
+        return completableFutureProvider.apply(() -> ((AnvilChunkLoaderBridge) chunkLoader).bridge$chunkExists(world, x, z));
     }
 
     public static CompletableFuture<Optional<DataContainer>> getChunkData(WorldServer world, IChunkLoader chunkLoader, Vector3i chunkCoords) {
         int x = chunkCoords.getX();
         int y = chunkCoords.getY();
         int z = chunkCoords.getZ();
-        if (!(chunkLoader instanceof IMixinAnvilChunkLoader) || !SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
+        if (!(chunkLoader instanceof AnvilChunkLoaderBridge) || !SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
             return CompletableFuture.completedFuture(Optional.empty());
         }
-        File worldDir = ((IMixinAnvilChunkLoader) chunkLoader).getWorldDir().toFile();
+        File worldDir = ((AnvilChunkLoaderBridge) chunkLoader).bridge$getWorldDir().toFile();
         return SpongeImpl.getScheduler().submitAsyncTask(() -> {
             DataInputStream stream = RegionFileCache.getChunkInputStream(worldDir, x, z);
             return Optional.ofNullable(readDataFromRegion(stream));

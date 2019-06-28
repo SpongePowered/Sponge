@@ -38,19 +38,19 @@ import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTa
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.projectile.AccessorShulkerBulletEntity;
+import org.spongepowered.common.mixin.core.entity.projectile.ShulkerBulletEntityAccessor;
 
 import java.util.Optional;
 
-public class ShulkerBulletDirectionalDataProcessor extends AbstractSingleDataSingleTargetProcessor<AccessorShulkerBulletEntity, Direction, Value<Direction>,
+public class ShulkerBulletDirectionalDataProcessor extends AbstractSingleDataSingleTargetProcessor<ShulkerBulletEntityAccessor, Direction, Value<Direction>,
         DirectionalData, ImmutableDirectionalData> {
 
     public ShulkerBulletDirectionalDataProcessor() {
-        super(Keys.DIRECTION, AccessorShulkerBulletEntity.class);
+        super(Keys.DIRECTION, ShulkerBulletEntityAccessor.class);
     }
 
     @Override
-    protected boolean set(AccessorShulkerBulletEntity dataHolder, Direction value) {
+    protected boolean set(ShulkerBulletEntityAccessor dataHolder, Direction value) {
         if (value == Direction.NONE) {
             dataHolder.accessor$setDirection(null);
         } else {
@@ -60,7 +60,7 @@ public class ShulkerBulletDirectionalDataProcessor extends AbstractSingleDataSin
     }
 
     @Override
-    protected Optional<Direction> getVal(AccessorShulkerBulletEntity dataHolder) {
+    protected Optional<Direction> getVal(ShulkerBulletEntityAccessor dataHolder) {
         final EnumFacing direction = dataHolder.accessor$getDirection();
         return Optional.of(direction != null ? DirectionResolver.getFor(direction) : Direction.NONE);
     }
@@ -71,7 +71,7 @@ public class ShulkerBulletDirectionalDataProcessor extends AbstractSingleDataSin
     }
 
     @Override
-    public boolean supports(AccessorShulkerBulletEntity dataHolder) {
+    public boolean supports(ShulkerBulletEntityAccessor dataHolder) {
         return true;
     }
 

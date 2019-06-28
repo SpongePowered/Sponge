@@ -86,10 +86,11 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.command.args.FilteredPluginsCommandElement;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.MetricsCategory;
@@ -100,7 +101,6 @@ import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -268,7 +268,7 @@ public class SpongeCommandFactory {
             if (args.hasAny("dimension")) {
                 for (DimensionType dimensionType : args.<DimensionType>getAll("dimension")) {
                     src.sendMessage(Text.of("Dimension ", dimensionType.getName(), ": ", processDimension(((DimensionTypeBridge) dimensionType).
-                        getDimensionConfig(), dimensionType, src, args)));
+                        bridge$getDimensionConfig(), dimensionType, src, args)));
                     ++successes;
                 }
             }
@@ -278,7 +278,7 @@ public class SpongeCommandFactory {
                     if (!world.isPresent() && this.requireWorldLoaded) {
                         throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
-                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((WorldInfoBridge) properties).getConfigAdapter(),
+                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((WorldInfoBridge) properties).bridge$getConfigAdapter(),
                         world.orElse(null), src, args)));
                     ++successes;
                 }

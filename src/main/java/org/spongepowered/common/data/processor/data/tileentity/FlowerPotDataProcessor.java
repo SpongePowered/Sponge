@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import net.minecraft.block.BlockFlowerPot;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFlowerPot;
@@ -40,7 +39,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemDa
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.block.AccessorBlockFlowerPot;
+import org.spongepowered.common.mixin.core.block.BlockFlowerPotAccessor;
 
 import java.util.Optional;
 
@@ -72,7 +71,7 @@ public class FlowerPotDataProcessor extends
             flowerPot.setItemStack(ItemStack.EMPTY);
         } else {
             ItemStack stack = (ItemStack) stackSnapshot.createStack();
-            if (!((AccessorBlockFlowerPot) Blocks.FLOWER_POT).accessor$canItemBePotted(stack)) {
+            if (!((BlockFlowerPotAccessor) Blocks.FLOWER_POT).accessor$canItemBePotted(stack)) {
                 return false;
             }
             flowerPot.setItemStack(stack);

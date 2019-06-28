@@ -26,8 +26,6 @@ package org.spongepowered.common.world.gen;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.WorldServer;
-import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
 import com.flowpowered.math.vector.Vector3i;
@@ -42,6 +40,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biome.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
@@ -74,17 +73,18 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
+import org.spongepowered.common.bridge.world.gen.FlaggedPopulatorBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.generation.PopulatorPhaseContext;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
-import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
@@ -139,8 +139,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         this.stoneNoise = new double[256];
 
         this.world.provider.biomeProvider = CustomBiomeProvider.of(this.biomeGenerator);
-        if (this.baseGenerator instanceof IChunkProviderOverworld) {
-            ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(this.biomeGenerator);
+        if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
+            ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(this.biomeGenerator);
         }
 
         if (!this.getClass().getSimpleName().equalsIgnoreCase("SpongeChunkProviderForge")) {
@@ -164,8 +164,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public void setBaseGenerationPopulator(GenerationPopulator baseGenerationPopulator) {
         this.baseGenerator = baseGenerationPopulator;
-        if (this.baseGenerator instanceof IChunkProviderOverworld) {
-            ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(this.biomeGenerator);
+        if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
+            ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(this.biomeGenerator);
         }
     }
 
@@ -204,8 +204,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     public void setBiomeGenerator(BiomeGenerator biomeGenerator) {
         this.biomeGenerator = biomeGenerator;
         this.world.provider.biomeProvider = CustomBiomeProvider.of(biomeGenerator);
-        if (this.baseGenerator instanceof IChunkProviderOverworld) {
-            ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(biomeGenerator);
+        if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
+            ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
         }
     }
 
@@ -361,8 +361,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                     .populator(type)) {
                     context.buildAndSwitch();
 
-                    if (populator instanceof IFlaggedPopulator) {
-                        ((IFlaggedPopulator) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
+                    if (populator instanceof FlaggedPopulatorBridge) {
+                        ((FlaggedPopulatorBridge) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
                     } else {
                         populator.populate(spongeWorld, volume, this.rand, biomeBuffer);
                     }

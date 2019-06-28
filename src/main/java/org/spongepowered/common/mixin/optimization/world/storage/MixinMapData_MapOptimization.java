@@ -151,7 +151,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
      * no longer be set before bridge$tickMap() runs.
      *
      * MixinMapData#bridge$updateItemFrameDecoration is run from
-     * MixinEntityTrackerEntry - once per Itemframe, not once
+     * EntityTrackerEntryMixin - once per Itemframe, not once
      * per player per itemframe. bridge$updateItemFrameDecoration just
      * updates the frame's position (in case it teleported) in our
      * decorations. We skip running all of the unecessary logic that

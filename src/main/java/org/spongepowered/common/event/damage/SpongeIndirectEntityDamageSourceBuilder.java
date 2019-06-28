@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
+import org.spongepowered.common.mixin.core.util.DamageSourceAccessor;
 
 import java.lang.ref.WeakReference;
 
@@ -39,13 +40,13 @@ public class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourc
     private WeakReference<Entity> proxy = null;
 
     @Override
-    public IndirectEntityDamageSource.Builder proxySource(Entity projectile) {
+    public IndirectEntityDamageSource.Builder proxySource(final Entity projectile) {
         this.proxy = new WeakReference<>(projectile);
         return this;
     }
 
     @Override
-    public IndirectEntityDamageSource.Builder entity(Entity entity) {
+    public IndirectEntityDamageSource.Builder entity(final Entity entity) {
         this.reference = new WeakReference<>(entity);
         return this;
     }
@@ -55,12 +56,13 @@ public class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourc
         checkState(this.reference.get() != null);
         checkState(this.proxy.get() != null);
         checkState(this.damageType != null);
-        net.minecraft.util.EntityDamageSourceIndirect damageSource =
+        final net.minecraft.util.EntityDamageSourceIndirect damageSource =
             new net.minecraft.util.EntityDamageSourceIndirect(this.damageType.getId(),
                 (net.minecraft.entity.Entity) this.reference.get(),
                 (net.minecraft.entity.Entity) this.proxy.get());
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
         if (this.creative) {
-            damageSource.setDamageAllowedInCreativeMode();
+            accessor.accessor$setDamageAllowedInCreativeMode();
         }
         if (this.scales) {
             damageSource.setDifficultyScaled();
@@ -69,22 +71,22 @@ public class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourc
             damageSource.setMagicDamage();
         }
         if (this.bypasses) {
-            damageSource.setDamageBypassesArmor();
+            accessor.accessor$setDamageBypassesArmor();
         }
         if (this.absolute) {
-            damageSource.setDamageIsAbsolute();
+            accessor.accessor$setDamageIsAbsolute();
         }
         if (this.explosion) {
             damageSource.setExplosion();
         }
         if (this.exhaustion != null) {
-            damageSource.hungerDamage = this.exhaustion.floatValue();
+            accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
         }
         return (IndirectEntityDamageSource) damageSource;
     }
 
     @Override
-    public IndirectEntityDamageSource.Builder from(IndirectEntityDamageSource value) {
+    public IndirectEntityDamageSource.Builder from(final IndirectEntityDamageSource value) {
         super.from(value);
         this.reference = new WeakReference<>(value.getSource());
         this.proxy = new WeakReference<>(value.getIndirectSource());

@@ -47,7 +47,7 @@ public abstract class MixinEntityItem_Activation extends MixinEntity_Activation 
             --this.pickupDelay;
         }
 
-        if (!this.world.isRemote && this.age >= ((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getItemDespawnRate()) {
+        if (!this.world.isRemote && this.age >= ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getItemDespawnRate()) {
             this.setDead();
         }
     }

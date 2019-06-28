@@ -33,7 +33,7 @@ public class SpongeDamageModifierType implements DamageModifierType {
     private final String id;
     private final String name;
 
-    public SpongeDamageModifierType(String name, String id) {
+    public SpongeDamageModifierType(final String name, final String id) {
         this.name = name;
         this.id = id;
     }
@@ -49,14 +49,14 @@ public class SpongeDamageModifierType implements DamageModifierType {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        SpongeDamageModifierType that = (SpongeDamageModifierType) o;
+        final SpongeDamageModifierType that = (SpongeDamageModifierType) o;
         return Objects.equal(this.id, that.id) &&
                Objects.equal(this.name, that.name);
     }

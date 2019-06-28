@@ -36,8 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElytraFlyi
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
-import org.spongepowered.common.mixin.core.entity.AccessorEntity;
+import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -50,7 +49,7 @@ public class ElytraFlyingDataProcessor extends AbstractEntitySingleDataProcessor
 
     @Override
     protected boolean set(final EntityLivingBase dataHolder, final Boolean value) {
-        ((AccessorEntity) dataHolder).accessor$setEntityFlag(Constants.Entity.ELYTRA_FLYING_FLAG, value);
+        ((EntityAccessor) dataHolder).accessor$setEntityFlag(Constants.Entity.ELYTRA_FLYING_FLAG, value);
         return true;
     }
 

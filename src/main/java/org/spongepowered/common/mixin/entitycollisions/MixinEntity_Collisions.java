@@ -58,7 +58,7 @@ public class MixinEntity_Collisions implements CollisionsCapability {
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void collisions$InjectActivationInformation(World world, CallbackInfo ci) {
-        if (world != null && !((WorldBridge) world).isFake() && ((WorldInfoBridge) world.getWorldInfo()).isValid()) {
+        if (world != null && !((WorldBridge) world).isFake() && ((WorldInfoBridge) world.getWorldInfo()).bridge$isValid()) {
             EntityType entityType = ((Entity) this).getType();
             if (entityType == EntityTypes.UNKNOWN || !(entityType instanceof SpongeEntityType)) {
                 return;
@@ -115,7 +115,7 @@ public class MixinEntity_Collisions implements CollisionsCapability {
     @SuppressWarnings({"ConstantConditions", "Duplicates"})
     @Override
     public void collision$initializeCollisionState(World world) {
-        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
         final EntityCollisionCategory worldCollCat = worldConfigAdapter.getConfig().getEntityCollisionCategory();
         final EntityCollisionCategory globalCollCat = globalConfigAdapter.getConfig().getEntityCollisionCategory();

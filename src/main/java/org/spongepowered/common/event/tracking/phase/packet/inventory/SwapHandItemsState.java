@@ -34,8 +34,8 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 
 import java.util.List;
 
@@ -47,7 +47,7 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
-        ((IMixinInventoryPlayer) playerMP.inventory).setCapture(true);
+        ((InventoryPlayerBridge) playerMP.inventory).setCapture(true);
     }
 
     @Override
@@ -56,7 +56,7 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
         final Entity spongePlayer = (Entity) player;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
-            final IMixinInventoryPlayer mixinInventory = ((IMixinInventoryPlayer) player.inventory);
+            final InventoryPlayerBridge mixinInventory = ((InventoryPlayerBridge) player.inventory);
             List<SlotTransaction> trans = mixinInventory.getCapturedTransactions();
             ChangeInventoryEvent.SwapHand swapItemEvent = this.createInventoryEvent(((Inventory) player.inventory), trans);
             SpongeImpl.postEvent(swapItemEvent);

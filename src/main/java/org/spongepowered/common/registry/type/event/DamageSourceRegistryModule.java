@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.registry.type.event;
 
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSources;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
+import org.spongepowered.common.bridge.util.DamageSourceBridge;
+import org.spongepowered.common.mixin.core.util.DamageSourceAccessor;
 
 @RegistrationDependency(DamageTypeRegistryModule.class)
 public final class DamageSourceRegistryModule implements RegistryModule {
@@ -41,9 +44,27 @@ public final class DamageSourceRegistryModule implements RegistryModule {
         try {
             // These need to be instantiated after the DamageTypeRegistryModule has had a chance to register
             // the damage types, otherwise it will fail and have invalid types.
-            DAMAGESOURCE_POISON = (new DamageSource("poison")).setDamageBypassesArmor().setMagicDamage();
-            DAMAGESOURCE_MELTING = (new DamageSource("melting")).setDamageBypassesArmor().setFireDamage();
-            IGNORED_DAMAGE_SOURCE = new DamageSource("spongespecific").setDamageBypassesArmor().setDamageAllowedInCreativeMode();
+            {
+                DAMAGESOURCE_POISON = net.minecraft.util.DamageSource.causeExplosionDamage((EntityLivingBase) null);
+                ((DamageSourceAccessor) DAMAGESOURCE_POISON).accessor$setId("poison");
+                ((DamageSourceBridge) DAMAGESOURCE_POISON).bridge$resetDamageType();
+                ((DamageSourceAccessor) DAMAGESOURCE_POISON).accessor$setDamageBypassesArmor();
+                DAMAGESOURCE_POISON.setMagicDamage();
+            }
+            {
+                DAMAGESOURCE_MELTING = net.minecraft.util.DamageSource.causeExplosionDamage((EntityLivingBase) null);
+                ((DamageSourceAccessor) DAMAGESOURCE_MELTING).accessor$setId("melting");
+                ((DamageSourceBridge) DAMAGESOURCE_MELTING).bridge$resetDamageType();
+                ((DamageSourceAccessor) DAMAGESOURCE_MELTING).accessor$setDamageBypassesArmor();
+                ((DamageSourceAccessor) DAMAGESOURCE_MELTING).accessor$setFireDamage();
+            }
+            {
+                IGNORED_DAMAGE_SOURCE = net.minecraft.util.DamageSource.causeExplosionDamage((EntityLivingBase) null);
+                ((DamageSourceAccessor) IGNORED_DAMAGE_SOURCE).accessor$setId("spongespecific");
+                ((DamageSourceBridge) IGNORED_DAMAGE_SOURCE).bridge$resetDamageType();
+                ((DamageSourceAccessor) IGNORED_DAMAGE_SOURCE).accessor$setDamageAllowedInCreativeMode();
+                ((DamageSourceAccessor) IGNORED_DAMAGE_SOURCE).accessor$setDamageBypassesArmor();
+            }
             DamageSources.class.getDeclaredField("DRAGON_BREATH").set(null, DamageSource.DRAGON_BREATH);
             DamageSources.class.getDeclaredField("DROWNING").set(null, DamageSource.DROWN);
             DamageSources.class.getDeclaredField("FALLING").set(null, DamageSource.FALL);

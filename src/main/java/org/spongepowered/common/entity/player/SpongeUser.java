@@ -78,7 +78,7 @@ import javax.annotation.Nullable;
  * class is concrete in order to create instances of User.</p>
  *
  * <p>List of mixins mixing into this class: <ul>
- * <li>MixinSpongeUser</li><li>MixinDataHolder</li><li>MixinSubject</li> </ul>
+ * <li>MixinSpongeUser</li><li>DataHolderMixin_API</li><li>MixinSubject</li> </ul>
  *
  * TODO Future note about data: The following data manipulators are always
  * applicable to User: BanData, WhitelistData, JoinData
@@ -285,7 +285,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         //}
 
 
-        // org.spongepowered.common.mixin.core.entity.MixinEntity#readSpongeNBT
+        // org.spongepowered.common.mixin.core.entity.EntityMixin#readSpongeNBT
 
 
         final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Forge.FORGE_DATA).getCompoundTag(Constants.Sponge.SPONGE_DATA);
@@ -295,7 +295,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         //}
 
 
-        // org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase#readSpongeNBT
+        // org.spongepowered.common.mixin.core.entity.EntityLivingBaseMixin#readSpongeNBT
 
 
         //if (compound.hasKey("maxAir")) {
@@ -303,7 +303,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         //}
 
 
-        // org.spongepowered.common.mixin.core.entity.player.MixinEntityPlayerMP#readSpongeNBT
+        // org.spongepowered.common.mixin.core.entity.player.EntityPlayerMPMixin#readSpongeNBT
 
 
         //if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, NbtDataUtil.TAG_DOUBLE)) {

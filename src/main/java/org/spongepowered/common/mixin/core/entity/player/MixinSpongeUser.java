@@ -29,15 +29,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
 import net.minecraft.inventory.InventoryEnderChest;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,11 +45,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishingBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.world.WorldInfoBridge;
-import org.spongepowered.common.mixin.api.minecraft.entity.player.MixinEntityPlayerMP_API;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Optional;
@@ -133,7 +131,7 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, Invulnerab
             return playerOpt.get().setLocation(position, world);
         }
         WorldProperties prop = WorldManager.getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
-        Integer dimensionId = ((WorldInfoBridge) prop).getDimensionId();
+        Integer dimensionId = ((WorldInfoBridge) prop).bridge$getDimensionId();
         if (dimensionId == null) {
             throw new IllegalArgumentException("Invalid World: missing dimensionID)");
         }

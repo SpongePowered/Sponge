@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.interfaces.IMixinBlockStateContainer;
+import org.spongepowered.common.bridge.world.chunk.BlockStateContainerBridge;
 
 @Mixin(SPacketChunkData.class)
 public abstract class MixinSPacketChunkData {
@@ -105,10 +105,12 @@ public abstract class MixinSPacketChunkData {
             {
                 final BlockStateContainer data = extendedblockstorage.getData();
                 printer.add(" - %s : %s", j, "ExtendedArrayIndex");
-                final IMixinBlockStateContainer mixinData = (IMixinBlockStateContainer) data;
-                printer.add("  - %s : %s", "ContainerBits", mixinData.getBits())
-                    .add("  - %s : %s", "Palette Size", mixinData.getPalette().getSerializedSize())
-                    .add("  - %s : %s", "BackingArray", mixinData.getStorage().getBackingLongArray())
+                // TODO - Eventually can be moved to using BlockStateContainerAccessor once mixins allows referencing accessors
+                // within mixin classes
+                final BlockStateContainerBridge mixinData = (BlockStateContainerBridge) data;
+                printer.add("  - %s : %s", "ContainerBits", mixinData.bridge$getBits())
+                    .add("  - %s : %s", "Palette Size", mixinData.bridge$getPalette().getSerializedSize())
+                    .add("  - %s : %s", "BackingArray", mixinData.bridge$getStorage().getBackingLongArray())
                     .add("  - %s : %s", "BlockLight", extendedblockstorage.getBlockLight().getData());
 
 

@@ -38,6 +38,7 @@ import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Mushroom;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
+import org.spongepowered.common.mixin.core.world.gen.feature.WorldGenBushAccessor;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
@@ -55,6 +56,7 @@ public class HellMushroomPopulator implements Mushroom {
     private final WorldGenBush feature;
     private final Mushroom featureM;
 
+    @SuppressWarnings("ConstantConditions")
     public HellMushroomPopulator() {
         this.feature = new WorldGenBush(null);
         this.featureM = (Mushroom) this.feature;
@@ -66,14 +68,14 @@ public class HellMushroomPopulator implements Mushroom {
     }
 
     @Override
-    public void populate(org.spongepowered.api.world.World world, Extent extent, Random random) {
-        Vector3i min = extent.getBlockMin();
-        Vector3i size = extent.getBlockSize();
-        BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
+    public void populate(final org.spongepowered.api.world.World world, final Extent extent, final Random random) {
+        final Vector3i min = extent.getBlockMin();
+        final Vector3i size = extent.getBlockSize();
+        final BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         int x;
         int y;
         int z;
-        int n = this.featureM.getMushroomsPerChunk().getFlooredAmount(random);
+        final int n = this.featureM.getMushroomsPerChunk().getFlooredAmount(random);
 
         MushroomType type;
         List<MushroomType> result;
@@ -81,9 +83,9 @@ public class HellMushroomPopulator implements Mushroom {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
             y = random.nextInt(128);
-            BlockPos height = chunkPos.add(x, y, z);
+            final BlockPos height = chunkPos.add(x, y, z);
             if (this.featureM.getSupplierOverride().isPresent()) {
-                Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(height));
+                final Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(height));
                 type = this.featureM.getSupplierOverride().get().apply(pos2);
             } else {
                 result = this.featureM.getTypes().get(random);
@@ -93,9 +95,9 @@ public class HellMushroomPopulator implements Mushroom {
                 type = result.get(0);
             }
             if (type == MushroomTypes.BROWN) {
-                this.feature.block = Blocks.BROWN_MUSHROOM;
+                ((WorldGenBushAccessor) this.feature).accessor$setBushBlock(Blocks.BROWN_MUSHROOM);
             } else {
-                this.feature.block = Blocks.RED_MUSHROOM;
+                ((WorldGenBushAccessor) this.feature).accessor$setBushBlock(Blocks.RED_MUSHROOM);
             }
             this.feature.generate((World) world, random, height);
 
@@ -113,7 +115,7 @@ public class HellMushroomPopulator implements Mushroom {
     }
 
     @Override
-    public void setMushroomsPerChunk(VariableAmount count) {
+    public void setMushroomsPerChunk(final VariableAmount count) {
         this.featureM.setMushroomsPerChunk(count);
     }
 
@@ -123,7 +125,7 @@ public class HellMushroomPopulator implements Mushroom {
     }
 
     @Override
-    public void setSupplierOverride(Function<Location<Extent>, MushroomType> override) {
+    public void setSupplierOverride(final Function<Location<Extent>, MushroomType> override) {
         this.featureM.setSupplierOverride(override);
     }
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.monster.EntityVindicator;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableJohnnyData;
@@ -33,28 +32,29 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJohnnyData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.monster.IMixinVindicator;
+import org.spongepowered.common.mixin.core.entity.monster.EntityVindicatorAccessor;
 
 import java.util.Optional;
 
-public class JohnnyDataProcessor extends AbstractEntitySingleDataProcessor<EntityVindicator, Boolean, Value<Boolean>, JohnnyData, ImmutableJohnnyData> {
+public class JohnnyDataProcessor extends
+    AbstractSingleDataSingleTargetProcessor<EntityVindicatorAccessor, Boolean, Value<Boolean>, JohnnyData, ImmutableJohnnyData> {
 
     public JohnnyDataProcessor() {
-        super(EntityVindicator.class, Keys.IS_JOHNNY);
+        super(Keys.IS_JOHNNY, EntityVindicatorAccessor.class);
     }
 
     @Override
-    protected boolean set(EntityVindicator dataHolder, Boolean value) {
-        ((IMixinVindicator) dataHolder).setJohnny(value);
+    protected boolean set(EntityVindicatorAccessor dataHolder, Boolean value) {
+        dataHolder.accessor$setIsJohnny(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityVindicator dataHolder) {
-        return Optional.of(((IMixinVindicator) dataHolder).isJohnny());
+    protected Optional<Boolean> getVal(EntityVindicatorAccessor dataHolder) {
+        return Optional.of(dataHolder.accessor$getIsJohnny());
     }
 
     @Override

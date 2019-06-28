@@ -98,19 +98,19 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
             .put("org.spongepowered.common.mixin.optimization.block.MixinBlockRedstoneWire_PandaRedstone", (optimization) -> {
                 return optimization.usePandaRedstone() && !optimization.useEigenRedstone();
                 })
-            .put("org.spongepowered.common.mixin.optimization.entity.MixinEntityTameable_Cached_Owner",
+            .put("org.spongepowered.common.mixin.optimization.entity.EntityMixinTameable_Cached_Owner",
                     OptimizationCategory::useCacheTameableOwners)
             .put("org.spongepowered.common.mixin.optimization.network.play.server.MixinSPacketChunkData_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
             .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
-            .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Async_Lighting",
+            .put("org.spongepowered.common.mixin.optimization.world.WorldServerMixin_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
             .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
             .put("org.spongepowered.common.mixin.optimization.world.gen.structure.MixinMapGenStructure_Structure_Saving",
                     OptimizationCategory::useStructureSave)
-            .put("org.spongepowered.common.mixin.optimization.entity.item.MixinEntityItemFrame_MapOptimization",
+            .put("org.spongepowered.common.mixin.optimization.entity.item.EntityItemFrameMixin_MapOptimization",
                     OptimizationCategory::useMapOptimization)
             .put("org.spongepowered.common.mixin.optimization.entity.MixinEntityTrackerEntry_MapOptimization",
                     OptimizationCategory::useMapOptimization)

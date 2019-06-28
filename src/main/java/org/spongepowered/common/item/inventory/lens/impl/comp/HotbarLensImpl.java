@@ -25,9 +25,8 @@
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.HotbarAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -70,8 +69,8 @@ public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens {
 
     @Override
     public void setSelectedSlotIndex(Fabric inv, int index) {
-        inv.allInventories().stream().filter(inner -> inner instanceof IMixinInventoryPlayer).forEach(inner -> {
-            ((IMixinInventoryPlayer) inner).setSelectedItem(index, true);
+        inv.allInventories().stream().filter(inner -> inner instanceof InventoryPlayerBridge).forEach(inner -> {
+            ((InventoryPlayerBridge) inner).setSelectedItem(index, true);
         });
     }
 
