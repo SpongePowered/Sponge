@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.util;
 
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntity;
@@ -108,6 +109,10 @@ public final class InventoryUtil {
     }
 
     // Utility
+    public static Inventory toInventory(IInventory inventory) {
+        return toInventory(inventory, null);
+    }
+
     public static Inventory toInventory(Object inventory, @Nullable Object forgeItemHandler) {
         if (forgeItemHandler == null) {
             if (inventory instanceof TileEntityChest) {
