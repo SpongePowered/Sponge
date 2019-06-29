@@ -67,19 +67,22 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot {
 
     @Shadow public abstract void checkForAdjacentChests();
 
+    @Shadow public abstract int getSizeInventory();
+
     @Override
     public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(GridInventoryLens.class, this, this::generateSlotProvider, this::generateRootLens);
     }
 
     private SlotProvider generateSlotProvider() {
-        return new SlotCollection.Builder().add(27).build();
+        return new SlotCollection.Builder().add(this.getSizeInventory()).build();
     }
 
     @SuppressWarnings("unchecked")
     private GridInventoryLens generateRootLens(SlotProvider slots) {
         Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
-        return new GridInventoryLensImpl(0, 9, 3, 9, thisClass, slots);
+        int size = this.getSizeInventory();
+        return new GridInventoryLensImpl(0, 9, size / 9, 9, thisClass, slots);
     }
 
     /**
