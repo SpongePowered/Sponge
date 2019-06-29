@@ -1498,7 +1498,11 @@ public class SpongeCommonEventFactory {
             final Transaction<ItemStackSnapshot> transaction = new Transaction<>(before, after);
             if (entity instanceof EntityPlayerMP) {
                 final Player player = (Player) (EntityPlayerMP) entity;
-                event = SpongeEventFactory.createChangeEntityEquipmentEventTargetPlayer(cause, player, slot, transaction);
+                if (after.isEmpty()) {
+                    event = SpongeEventFactory.createChangeEntityEquipmentEventBreak(cause, player, slot, transaction);
+                } else {
+                    event = SpongeEventFactory.createChangeEntityEquipmentEventTargetPlayer(cause, player, slot, transaction);
+                }
             } else if (entity instanceof Human) {
                 final Human humanoid = (Human) entity;
                 event = SpongeEventFactory.createChangeEntityEquipmentEventTargetHumanoid(cause, humanoid, slot, transaction);
