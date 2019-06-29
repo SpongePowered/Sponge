@@ -333,6 +333,9 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
 
     @Override
     public PortalAgentType bridge$getPortalAgent() {
+        if (this.impl$portalAgentType == null) {
+            this.impl$portalAgentType = PortalAgentTypes.DEFAULT;
+        }
         return this.impl$portalAgentType;
     }
 
