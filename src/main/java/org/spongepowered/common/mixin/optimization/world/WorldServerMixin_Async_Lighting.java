@@ -38,7 +38,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
-import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
+import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
 
 import java.util.List;
@@ -297,7 +297,7 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
         if (pos.getY() < 0) {
             pos = new BlockPos(pos.getX(), 0, pos.getZ());
         }
-        if (!((IMixinBlockPos) pos).isValidPosition()) {
+        if (!((BlockPosBridge) pos).bridge$isValidPosition()) {
             return lightType.defaultLightValue;
         }
 
@@ -360,7 +360,7 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
     }
 
     public void setLightForAsync(EnumSkyBlock type, BlockPos pos, int lightValue, Chunk currentChunk, List<Chunk> neighbors) {
-        if (((IMixinBlockPos) pos).isValidPosition()) {
+        if (((BlockPosBridge) pos).bridge$isValidPosition()) {
             final Chunk chunk = this.getLightChunk(pos, currentChunk, neighbors);
             if (chunk != null && !chunk.unloadQueued) {
                 chunk.setLightFor(type, pos, lightValue);

@@ -43,7 +43,7 @@ public abstract class MixinLocation_Impl implements LocationBridge {
     private BlockPos blockPos;
 
     @Override
-    public BlockPos getBlockPos() {
+    public BlockPos bridge$getBlockPos() {
         if (this.blockPos == null) {
             this.blockPos = VecHelper.toBlockPos(this.getBlockPosition());
         }

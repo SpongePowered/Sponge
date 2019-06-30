@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(EntityMinecartContainer.class)
 public abstract class EntityMinecartContainerMixin_API<M extends ContainerMinecart<M>> extends EntityMinecartMixin_API implements ContainerMinecart<M> {
 
+    @Override
     public CarriedInventory<M> getInventory() {
         return this;
     }

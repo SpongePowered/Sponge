@@ -28,5 +28,5 @@ import net.minecraft.util.math.BlockPos;
 
 public interface LocationBridge {
 
-    BlockPos getBlockPos();
+    BlockPos bridge$getBlockPos();
 }

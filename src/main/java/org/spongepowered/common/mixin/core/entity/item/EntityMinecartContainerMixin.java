@@ -60,15 +60,15 @@ public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin i
                : new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
     }
 
-    public SlotProvider inventory$getSlotProvider() {
+    public SlotProvider inventory$bridge$getSlotProvider() {
         return this.slots;
     }
 
-    public Lens inventory$getRootLens() {
+    public Lens inventory$bridge$getRootLens() {
         return this.lens;
     }
 
-    public Fabric inventory$getFabric() {
+    public Fabric inventory$bridge$getFabric() {
         return this.fabric;
     }
 

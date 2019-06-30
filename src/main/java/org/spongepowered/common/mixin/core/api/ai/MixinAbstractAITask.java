@@ -47,7 +47,7 @@ public abstract class MixinAbstractAITask<O extends Agent> implements AITask<O> 
     @Override
     @Overwrite
     public final Optional<Goal<O>> getGoal() {
-        return (Optional<Goal<O>>) (Optional<?>) ((EntityGoalBridge) this).getAIGoal();
+        return (Optional<Goal<O>>) (Optional<?>) ((EntityGoalBridge) this).bridge$getAIGoal();
     }
 
 }

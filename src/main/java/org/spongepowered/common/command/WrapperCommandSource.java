@@ -38,8 +38,7 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.IMixinCommandSender;
-import org.spongepowered.common.service.permission.SpongePermissionService;
+import org.spongepowered.common.bridge.command.CommandSenderBridge;
 import org.spongepowered.common.service.permission.base.SpongeSubject;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -56,7 +55,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
         this.sender = sender;
         this.service = SpongeImpl.getGame().getServiceManager().provideUnchecked(PermissionService.class);
         this.data = new MemorySubjectData(this.service);
-        CommandPermissions.populateMinecraftPermissions(sender, data);
+        CommandPermissions.populateMinecraftPermissions(sender, this.data);
     }
 
     @Override
@@ -106,8 +105,8 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
     }
 
     public static CommandSource of(ICommandSender sender) {
-        if (sender instanceof IMixinCommandSender) {
-            return ((IMixinCommandSender) sender).asCommandSource();
+        if (sender instanceof CommandSenderBridge) {
+            return ((CommandSenderBridge) sender).bridge$asCommandSource();
         }
         if (sender instanceof WrapperICommandSender) {
             return ((WrapperICommandSender) sender).source;

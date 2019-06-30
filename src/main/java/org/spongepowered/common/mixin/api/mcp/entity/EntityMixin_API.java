@@ -87,7 +87,7 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
@@ -265,7 +265,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                     player.connection
                         .setPlayerLocation(location.getX(), location.getY(), location.getZ(), ((Entity) (Object) this).rotationYaw,
                             ((Entity) (Object) this).rotationPitch);
-                    ((IMixinNetHandlerPlayServer) player.connection).setLastMoveLocation(null); // Set last move to teleport target
+                    ((NetHandlerPlayServerBridge) player.connection).bridge$setLastMoveLocation(null); // Set last move to teleport target
                 } else {
                     setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
                 }

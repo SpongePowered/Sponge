@@ -46,7 +46,7 @@ public abstract class EntityPlayerMixin_API extends EntityLivingBaseMixin_API {
     @Shadow public PlayerCapabilities capabilities;
     @Shadow public InventoryPlayer inventory;
     @Shadow public InventoryEnderChest enderChest;
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 

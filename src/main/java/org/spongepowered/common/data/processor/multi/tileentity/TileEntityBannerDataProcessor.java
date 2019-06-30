@@ -38,7 +38,7 @@ import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
-import org.spongepowered.common.interfaces.block.tile.IMixinBanner;
+import org.spongepowered.common.bridge.block.tile.TileEntityBannerBridge;
 
 import java.util.List;
 import java.util.Map;
@@ -61,8 +61,8 @@ public class TileEntityBannerDataProcessor extends AbstractTileEntityDataProcess
         if (!entity.getWorld().isRemote) {
             List<PatternLayer> layers = (List<PatternLayer>) keyValues.get(Keys.BANNER_PATTERNS);
             DyeColor baseColor = (DyeColor) keyValues.get(Keys.BANNER_BASE_COLOR);
-            ((IMixinBanner) entity).setLayers(layers);
-            ((IMixinBanner) entity).setBaseColor(baseColor);
+            ((TileEntityBannerBridge) entity).bridge$setLayers(layers);
+            ((TileEntityBannerBridge) entity).bridge$setBaseColor(baseColor);
             return true;
         }
         return false;
@@ -70,8 +70,8 @@ public class TileEntityBannerDataProcessor extends AbstractTileEntityDataProcess
 
     @Override
     protected Map<Key<?>, ?> getValues(TileEntityBanner entity) {
-        List<PatternLayer> layers = ((IMixinBanner) entity).getLayers();
-        DyeColor color = ((IMixinBanner) entity).getBaseColor();
+        List<PatternLayer> layers = ((TileEntityBannerBridge) entity).bridge$getLayers();
+        DyeColor color = ((TileEntityBannerBridge) entity).bridge$getBaseColor();
         return ImmutableMap.of(Keys.BANNER_BASE_COLOR, color, Keys.BANNER_PATTERNS, layers);
     }
 

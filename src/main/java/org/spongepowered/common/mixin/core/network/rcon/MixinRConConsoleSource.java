@@ -24,84 +24,77 @@
  */
 package org.spongepowered.common.mixin.core.network.rcon;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.command.ICommandSender;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThreadClient;
 import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.api.network.RemoteConnection;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.IMixinCommandSender;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
-import org.spongepowered.common.interfaces.IMixinRConConsoleSource;
-import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.bridge.command.CommandSenderBridge;
+import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.bridge.network.rcon.RConConsoleSourceBridge;
+import org.spongepowered.common.bridge.permissions.SubjectBridge;
+
+import javax.annotation.Nullable;
 
 @Mixin(RConConsoleSource.class)
-public abstract class MixinRConConsoleSource implements ICommandSender, IMixinCommandSource, IMixinCommandSender, IMixinRConConsoleSource, RconSource, IMixinSubject {
+public abstract class MixinRConConsoleSource implements ICommandSender, CommandSourceBridge, CommandSenderBridge, RConConsoleSourceBridge,
+    SubjectBridge {
 
     @Shadow @Final private StringBuffer buffer;
 
-    private RConThreadClient clientThread;
+    @Nullable private RConThreadClient impl$clientThread;
 
     @Override
-    public RemoteConnection getConnection() {
-        return (RemoteConnection) this.clientThread;
+    public void bridge$setConnection(final RConThreadClient conn) {
+        this.impl$clientThread = conn;
     }
 
     @Override
-    public void setConnection(RConThreadClient conn) {
-        this.clientThread = conn;
-    }
-
-    @Override
-    public void setLoggedIn(boolean loggedIn) {
-        this.clientThread.loggedIn = loggedIn;
-    }
-
-    @Override
-    public boolean getLoggedIn() {
-        return this.clientThread.loggedIn;
+    public RConThreadClient bridge$getClient() {
+        return checkNotNull(this.impl$clientThread, "RCon Client is null");
     }
 
     /**
      * Add newlines between output lines for a command
-     * @param component
+     * @param component text coming in
      */
     @Inject(method = "sendMessage", at = @At("RETURN"))
-    public void addNewlines(ITextComponent component, CallbackInfo ci) {
+    private void impl$addNewlines(final ITextComponent component, final CallbackInfo ci) {
         this.buffer.append('\n');
     }
 
     @Override
-    public String getIdentifier() {
+    public String bridge$getIdentifier() {
         return getName();
     }
 
     @Override
-    public String getSubjectCollectionIdentifier() {
+    public String bridge$getSubjectCollectionIdentifier() {
         return PermissionService.SUBJECTS_SYSTEM;
     }
 
     @Override
-    public Tristate permDefault(String permission) {
+    public Tristate bridge$permDefault(final String permission) {
         return Tristate.TRUE;
     }
 
     @Override
-    public ICommandSender asICommandSender() {
+    public ICommandSender bridge$asICommandSender() {
         return this;
     }
 
     @Override
-    public CommandSource asCommandSource() {
-        return this;
+    public CommandSource bridge$asCommandSource() {
+        return (CommandSource) this;
     }
 }

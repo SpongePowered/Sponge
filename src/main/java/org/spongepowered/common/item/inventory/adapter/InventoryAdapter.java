@@ -56,20 +56,20 @@ import javax.annotation.Nullable;
  */
 public interface InventoryAdapter extends Inventory {
     
-    SlotProvider getSlotProvider();
+    SlotProvider bridge$getSlotProvider();
 
-    Lens getRootLens();
+    Lens bridge$getRootLens();
 
-    Fabric getFabric();
+    Fabric bridge$getFabric();
 
-    Inventory getChild(int index);
+    Inventory bridge$getChild(int index);
 
     @Nullable
-    Inventory getChild(Lens lens);
+    Inventory bridge$getChild(Lens lens);
 
-    default Optional<Slot> getSlot(int ordinal) {
-        SlotLens slotLens = this.getRootLens().getSlotLens(ordinal);
-        return VanillaAdapter.forSlot(this.getFabric(), slotLens, this);
+    default Optional<Slot> getSlot(final int ordinal) {
+        final SlotLens slotLens = this.bridge$getRootLens().getSlotLens(ordinal);
+        return VanillaAdapter.forSlot(this.bridge$getFabric(), slotLens, this);
     }
 
 }

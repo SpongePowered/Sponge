@@ -63,7 +63,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
+import org.spongepowered.common.bridge.entity.ai.EntityAITasksBridge;
 
 import java.util.Iterator;
 
@@ -87,15 +87,15 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     }
 
     private void initSpongeAI() {
-        if (!((IMixinEntityAITasks) this.tasks).initialized()) {
-            ((IMixinEntityAITasks) this.tasks).setOwner((EntityLiving) (Object) this);
-            ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
-            ((IMixinEntityAITasks) this.tasks).setInitialized(true);
+        if (!((EntityAITasksBridge) this.tasks).bridge$initialized()) {
+            ((EntityAITasksBridge) this.tasks).bridge$setOwner((EntityLiving) (Object) this);
+            ((EntityAITasksBridge) this.tasks).bridge$setType(GoalTypes.NORMAL);
+            ((EntityAITasksBridge) this.tasks).bridge$setInitialized(true);
         }
-        if (!((IMixinEntityAITasks) this.targetTasks).initialized()) {
-            ((IMixinEntityAITasks) this.targetTasks).setOwner((EntityLiving) (Object) this);
-            ((IMixinEntityAITasks) this.targetTasks).setType(GoalTypes.TARGET);
-            ((IMixinEntityAITasks) this.targetTasks).setInitialized(true);
+        if (!((EntityAITasksBridge) this.targetTasks).bridge$initialized()) {
+            ((EntityAITasksBridge) this.targetTasks).bridge$setOwner((EntityLiving) (Object) this);
+            ((EntityAITasksBridge) this.targetTasks).bridge$setType(GoalTypes.TARGET);
+            ((EntityAITasksBridge) this.targetTasks).bridge$setInitialized(true);
         }
     }
 
@@ -103,21 +103,21 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     public void bridge$fireConstructors() {
         super.bridge$fireConstructors();
         if (ShouldFire.A_I_TASK_EVENT_ADD) {
-            handleDelayedTaskEventFiring((IMixinEntityAITasks) this.tasks);
-            handleDelayedTaskEventFiring((IMixinEntityAITasks) this.targetTasks);
+            handleDelayedTaskEventFiring((EntityAITasksBridge) this.tasks);
+            handleDelayedTaskEventFiring((EntityAITasksBridge) this.targetTasks);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void handleDelayedTaskEventFiring(final IMixinEntityAITasks tasks) {
-        final Iterator<EntityAITasks.EntityAITaskEntry> taskItr = tasks.getTasksUnsafe().iterator();
+    private void handleDelayedTaskEventFiring(final EntityAITasksBridge tasks) {
+        final Iterator<EntityAITasks.EntityAITaskEntry> taskItr = tasks.bridge$getTasksUnsafe().iterator();
         while (taskItr.hasNext()) {
             final EntityAITasks.EntityAITaskEntry task = taskItr.next();
             final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(),
                     task.priority, task.priority, (Goal<? extends Agent>) tasks, (Agent) this, (AITask<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
-                ((EntityGoalBridge) task.action).setGoal(null);
+                ((EntityGoalBridge) task.action).bridge$setGoal(null);
                 taskItr.remove();
             }
         }

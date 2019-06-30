@@ -40,6 +40,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(net.minecraft.enchantment.Enchantment.class)
 @Implements(@Interface(iface = EnchantmentType.class, prefix = "enchantment$"))
@@ -47,7 +49,6 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Shadow protected String name;
     @Shadow @Final private net.minecraft.enchantment.Enchantment.Rarity rarity;
-
     @Shadow public abstract int getMinLevel();
     @Shadow public abstract int getMaxLevel();
     @Shadow public abstract int getMinEnchantability(int level);
@@ -59,10 +60,17 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Shadow @Final public static RegistryNamespaced<ResourceLocation, Enchantment> REGISTRY;
 
+    @Nullable private String api$id;
+
     @Override
     public String getId() {
-        final ResourceLocation registeredId = REGISTRY.getNameForObject((Enchantment) (Object) this);
-        return registeredId == null ? "unknown" : registeredId.toString();
+        if (this.api$id == null || this.api$id.isEmpty()) {
+            final ResourceLocation id = REGISTRY.getNameForObject((Enchantment) (Object) this);
+            if (id != null) {
+                this.api$id = id.toString();
+            }
+        }
+        return this.api$id;
     }
 
     @Override

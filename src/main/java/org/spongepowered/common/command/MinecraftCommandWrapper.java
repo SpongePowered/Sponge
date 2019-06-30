@@ -46,8 +46,8 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.command.IMixinCommandBase;
-import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
+import org.spongepowered.common.bridge.command.ICommandBridge;
+import org.spongepowered.common.bridge.command.CommandHandlerBridge;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
 
@@ -85,8 +85,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
         this.command = command;
 
         // Add the namespaced alias to the wrapped command so permission checks are sent to the right command.
-        if (this.command instanceof IMixinCommandBase) {
-            ((IMixinCommandBase) this.command).updateNamespacedAlias(this.owner.getId());
+        if (this.command instanceof ICommandBridge) {
+            ((ICommandBridge) this.command).bridge$updateNamespacedAlias(this.owner.getId());
         }
     }
 
@@ -129,7 +129,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
             String previousNameVal = splitArgs[usernameIndex];
             affectedEntities = list.size();
 
-            ((IMixinCommandHandler) handler).setExpandedSelector(true);
+            ((CommandHandlerBridge) handler).bridge$setExpandedSelector(true);
 
             for (Entity entity : list) {
                 splitArgs[usernameIndex] = entity.getCachedUniqueIdString();
@@ -140,7 +140,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
             }
             splitArgs[usernameIndex] = previousNameVal;
 
-            ((IMixinCommandHandler) handler).setExpandedSelector(false);
+            ((CommandHandlerBridge) handler).bridge$setExpandedSelector(false);
         } else {
             if (tryExecute(handler, mcSender, splitArgs, arguments)) {
                 ++successCount;

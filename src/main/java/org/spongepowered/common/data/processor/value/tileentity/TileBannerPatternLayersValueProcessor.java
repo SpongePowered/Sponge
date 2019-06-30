@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongePatternListValue;
 import org.spongepowered.common.data.value.mutable.SpongePatternListValue;
-import org.spongepowered.common.interfaces.block.tile.IMixinBanner;
+import org.spongepowered.common.bridge.block.tile.TileEntityBannerBridge;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +53,7 @@ public class TileBannerPatternLayersValueProcessor extends AbstractSpongeValuePr
     @Override
     protected boolean set(TileEntityBanner container, List<PatternLayer> value) {
         if (!container.getWorld().isRemote) { // This avoids a client crash because clientside.
-            ((IMixinBanner) container).setLayers(value);
+            ((TileEntityBannerBridge) container).bridge$setLayers(value);
             return true;
         }
         return false;
@@ -61,7 +61,7 @@ public class TileBannerPatternLayersValueProcessor extends AbstractSpongeValuePr
 
     @Override
     protected Optional<List<PatternLayer>> getVal(TileEntityBanner container) {
-        return Optional.of(((IMixinBanner) container).getLayers());
+        return Optional.of(((TileEntityBannerBridge) container).bridge$getLayers());
     }
 
     @Override

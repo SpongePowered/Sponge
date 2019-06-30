@@ -71,12 +71,12 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter,
     }
 
     @Override
-    public Lens getRootLens() {
+    public Lens bridge$getRootLens() {
         return this.lens;
     }
 
     @Override
-    public Inventory getChild(Lens lens) {
+    public Inventory bridge$getChild(Lens lens) {
         return null; // TODO ?
     }
 
@@ -97,7 +97,7 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter,
 
     @SuppressWarnings("unchecked")
     @Override
-    public SlotProvider getSlotProvider() {
+    public SlotProvider bridge$getSlotProvider() {
         return this.slots;
     }
 }

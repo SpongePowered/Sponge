@@ -1266,7 +1266,7 @@ public class SpongeCommonEventFactory {
             // This overwrites the normal container behaviour and allows viewing
             // inventories that are more than 8 blocks away
             // This currently actually only works for the Containers mixed into
-            // by MixinContainerCanInteract ; but throws no errors for other
+            // by InteractableContainerMixin ; but throws no errors for other
             // containers
 
             // Allow viewing inventory; except when dead

@@ -78,7 +78,7 @@ import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
+import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.mixin.tileentityactivation.WorldServerMixin_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -451,7 +451,7 @@ public abstract class WorldMixin implements WorldBridge {
 
     /**
      * @author gabizou - August 4th, 2016
-     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     * @reason Rewrites the check to be inlined to {@link BlockPosBridge}.
      *
      * @param pos The position
      * @return The block state at the desired position
@@ -460,7 +460,7 @@ public abstract class WorldMixin implements WorldBridge {
     public IBlockState getBlockState(BlockPos pos) {
         // Sponge - Replace with inlined method
         // if (this.isOutsideBuildHeight(pos)) // Vanilla
-        if (((IMixinBlockPos) pos).isInvalidYPosition()) {
+        if (((BlockPosBridge) pos).bridge$isInvalidYPosition()) {
             // Sponge end
             return Blocks.AIR.getDefaultState();
         }
@@ -471,7 +471,7 @@ public abstract class WorldMixin implements WorldBridge {
     /**
      * @author gabizou - August 4th, 2016
      * @author bloodmc - May 10th, 2017 - Added async check
-     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     * @reason Rewrites the check to be inlined to {@link BlockPosBridge}.
      *
      * @param pos The position
      * @return The tile entity at the desired position, or else null
@@ -481,7 +481,7 @@ public abstract class WorldMixin implements WorldBridge {
     public net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos) {
         // Sponge - Replace with inlined method
         //  if (this.isOutsideBuildHeight(pos)) // Vanilla
-        if (((IMixinBlockPos) pos).isInvalidYPosition()) {
+        if (((BlockPosBridge) pos).bridge$isInvalidYPosition()) {
             return null;
             // Sponge End
         } else {
@@ -563,31 +563,31 @@ public abstract class WorldMixin implements WorldBridge {
 
     /**
      * @author gabizou - August 4th, 2016
-     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     * @reason Rewrites the check to be inlined to {@link BlockPosBridge}.
      *
      * @param pos The position
      * @return True if the block position is valid
      */
     @Overwrite
     public boolean isValid(BlockPos pos) { // isValid
-        return ((IMixinBlockPos) pos).isValidPosition();
+        return ((BlockPosBridge) pos).bridge$isValidPosition();
     }
 
     /**
      * @author gabizou - August 4th, 2016
-     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     * @reason Rewrites the check to be inlined to {@link BlockPosBridge}.
      *
      * @param pos The position
      * @return True if the block position is outside build height
      */
     @Overwrite
     public boolean isOutsideBuildHeight(BlockPos pos) { // isOutsideBuildHeight
-        return ((IMixinBlockPos) pos).isInvalidYPosition();
+        return ((BlockPosBridge) pos).bridge$isInvalidYPosition();
     }
 
     /**
      * @author gabizou - August 4th, 2016
-     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     * @reason Rewrites the check to be inlined to {@link BlockPosBridge}.
      *
      * @param type The type of sky lighting
      * @param pos The position
@@ -601,7 +601,7 @@ public abstract class WorldMixin implements WorldBridge {
 
         // Sponge Start - Replace with inlined method to check
         // if (!this.isValid(pos)) // vanilla
-        if (!((IMixinBlockPos) pos).isValidPosition()) {
+        if (!((BlockPosBridge) pos).bridge$isValidPosition()) {
             // Sponge End
             return type.defaultLightValue;
         } else {
@@ -622,7 +622,7 @@ public abstract class WorldMixin implements WorldBridge {
     public void setLightFor(EnumSkyBlock type, BlockPos pos, int lightValue) {
         // Sponge Start - Replace with inlined Valid position check
         // if (this.isValid(pos)) // Vanilla
-        if (((IMixinBlockPos) pos).isValidPosition()) { // Sponge - Replace with inlined method to check
+        if (((BlockPosBridge) pos).bridge$isValidPosition()) { // Sponge - Replace with inlined method to check
             // Sponge End
             if (this.isBlockLoaded(pos)) {
                 net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
@@ -635,7 +635,7 @@ public abstract class WorldMixin implements WorldBridge {
 
     /**
      * @author gabizou - August 4th, 2016
-     * @reason Inlines the isValidXZPosition check to BlockPos.
+     * @reason Inlines the bridge$isValidXZPosition check to BlockPos.
      *
      * @param bbox The AABB to check
      * @return True if the AABB collides with a block
@@ -663,7 +663,7 @@ public abstract class WorldMixin implements WorldBridge {
 
                                 // Sponge - Replace with inlined method
                                 // if (k1 < -30000000 || k1 >= 30000000 || l1 < -30000000 || l1 >= 30000000) // Vanilla
-                                if (!((IMixinBlockPos) (Object) blockpos$pooledmutableblockpos).isValidXZPosition()) {
+                                if (!((BlockPosBridge) (Object) blockpos$pooledmutableblockpos).bridge$isValidXZPosition()) {
                                     // Sponge End
                                     boolean flag1 = true;
                                     return flag1;

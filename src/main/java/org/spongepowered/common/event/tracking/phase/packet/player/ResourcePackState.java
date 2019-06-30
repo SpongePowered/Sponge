@@ -35,7 +35,7 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
-import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 
 public final class ResourcePackState extends BasicPacketState {
 
@@ -44,25 +44,25 @@ public final class ResourcePackState extends BasicPacketState {
         final EntityPlayerMP player = phaseContext.getPacketPlayer();
 
         final NetHandlerPlayServer connection = player.connection;
-        final IMixinNetHandlerPlayServer mixinHandler = (IMixinNetHandlerPlayServer) connection;
+        final NetHandlerPlayServerBridge mixinHandler = (NetHandlerPlayServerBridge) connection;
         final CPacketResourcePackStatus resource = phaseContext.getPacket();
         final ResourcePackStatusEvent.ResourcePackStatus status;
         ResourcePack pack;
         switch (resource.action) {
             case ACCEPTED:
-                pack = mixinHandler.popReceivedResourcePack(true);
+                pack = mixinHandler.bridge$popReceivedResourcePack(true);
                 status = ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED;
                 break;
             case DECLINED:
-                pack = mixinHandler.popReceivedResourcePack(false);
+                pack = mixinHandler.bridge$popReceivedResourcePack(false);
                 status = ResourcePackStatusEvent.ResourcePackStatus.DECLINED;
                 break;
             case SUCCESSFULLY_LOADED:
-                pack = mixinHandler.popAcceptedResourcePack();
+                pack = mixinHandler.bridge$popAcceptedResourcePack();
                 status = ResourcePackStatusEvent.ResourcePackStatus.SUCCESSFULLY_LOADED;
                 break;
             case FAILED_DOWNLOAD:
-                pack = mixinHandler.popAcceptedResourcePack();
+                pack = mixinHandler.bridge$popAcceptedResourcePack();
                 status = ResourcePackStatusEvent.ResourcePackStatus.FAILED;
                 break;
             default:

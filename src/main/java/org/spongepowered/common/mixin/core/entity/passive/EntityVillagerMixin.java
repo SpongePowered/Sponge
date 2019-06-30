@@ -90,17 +90,17 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
 
 
     @Override
-    public SlotProvider getSlotProvider() {
+    public SlotProvider bridge$getSlotProvider() {
         return this.slots;
     }
 
     @Override
-    public Lens getRootLens() {
+    public Lens bridge$getRootLens() {
         return this.lens;
     }
 
     @Override
-    public Fabric getFabric() {
+    public Fabric bridge$getFabric() {
         return this.fabric;
     }
 

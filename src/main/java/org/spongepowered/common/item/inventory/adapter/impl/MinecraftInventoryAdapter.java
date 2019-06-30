@@ -54,10 +54,10 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
 
     @Override
     default Translation getName() {
-        if (this.getRootLens() == null) {
-            return this.getFabric().getDisplayName();
+        if (this.bridge$getRootLens() == null) {
+            return this.bridge$getFabric().getDisplayName();
         }
-        return this.getRootLens().getName(this.getFabric());
+        return this.bridge$getRootLens().getName(this.bridge$getFabric());
     }
 
     @Override
@@ -71,7 +71,7 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     }
 
     @Override
-    default Optional<ItemStack> poll(int limit) {
+    default Optional<ItemStack> poll(final int limit) {
         return AdapterLogic.pollSequential(this, limit);
     }
 
@@ -81,12 +81,12 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     }
 
     @Override
-    default Optional<ItemStack> peek(int limit) {
+    default Optional<ItemStack> peek(final int limit) {
         return AdapterLogic.peekSequential(this, limit);
     }
 
     @Override
-    default InventoryTransactionResult offer(ItemStack stack) {
+    default InventoryTransactionResult offer(final ItemStack stack) {
         //        try {
         return AdapterLogic.appendSequential(this, stack);
         //        } catch (Exception ex) {
@@ -95,12 +95,12 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     }
 
     @Override
-    default boolean canFit(ItemStack stack) {
+    default boolean canFit(final ItemStack stack) {
         return AdapterLogic.canFit(this, stack);
     }
 
     @Override
-    default InventoryTransactionResult set(ItemStack stack) {
+    default InventoryTransactionResult set(final ItemStack stack) {
         return AdapterLogic.insertSequential(this, stack);
     }
 
@@ -121,42 +121,42 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
 
     @Override
     default boolean hasChildren() {
-        return this.getRootLens().getChildren().size() != 0;
+        return this.bridge$getRootLens().getChildren().size() != 0;
     }
 
     @Override
-    default boolean contains(ItemStack stack) {
+    default boolean contains(final ItemStack stack) {
         return AdapterLogic.contains(this, stack);
     }
 
     @Override
-    default boolean containsAny(ItemStack stack) {
+    default boolean containsAny(final ItemStack stack) {
         return AdapterLogic.contains(this, stack, 1);
     }
 
     @Override
-    default boolean contains(ItemType type) {
+    default boolean contains(final ItemType type) {
         return AdapterLogic.contains(this, type);
     }
 
     @Override
     default int getMaxStackSize() {
-        return this.getRootLens().getMaxStackSize(this.getFabric());
+        return this.bridge$getRootLens().getMaxStackSize(this.bridge$getFabric());
     }
 
     @Override
-    default void setMaxStackSize(int size) {
+    default void setMaxStackSize(final int size) {
         throw new UnsupportedOperationException("This inventory does not support stack limit adjustment");
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Inventory child, Class<T> property) {
+    default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(final Inventory child, final Class<T> property) {
         return (Collection<T>) AdapterLogic.getProperties(this, child, property);
     }
 
     @Override
-    default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Class<T> property) {
+    default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(final Class<T> property) {
         if (this.parent() == this) {
             return AdapterLogic.getRootProperties(this, property);
         }
@@ -165,8 +165,8 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
 
     @SuppressWarnings("unchecked")
     @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property, Object key) {
-        for (InventoryProperty<?, ?> prop : AdapterLogic.getProperties(this, child, property)) {
+    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(final Inventory child, final Class<T> property, final Object key) {
+        for (final InventoryProperty<?, ?> prop : AdapterLogic.getProperties(this, child, property)) {
             if (key.equals(prop.getKey())) {
                 return Optional.of((T)prop);
             }
@@ -175,7 +175,7 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     }
 
     @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property, Object key) {
+    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(final Class<T> property, final Object key) {
         if (this.parent() == this) {
             return AdapterLogic.getRootProperty(this, property, key);
         }
@@ -183,20 +183,20 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     }
 
     @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Inventory child, Class<T> property) {
-        Object key = AbstractInventoryProperty.getDefaultKey(property);
+    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(final Inventory child, final Class<T> property) {
+        final Object key = AbstractInventoryProperty.getDefaultKey(property);
         return this.getProperty(child, property, key);
     }
 
     @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Class<T> property) {
-        Object key = AbstractInventoryProperty.getDefaultKey(property);
+    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(final Class<T> property) {
+        final Object key = AbstractInventoryProperty.getDefaultKey(property);
         return this.getProperty(property, key);
     }
 
     @Override
     default Iterator<Inventory> iterator() {
-        return new InventoryIterator(this.getRootLens(), this.getFabric(), this);
+        return new InventoryIterator(this.bridge$getRootLens(), this.bridge$getFabric(), this);
     }
 
     @SuppressWarnings("unchecked")
@@ -215,36 +215,34 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
 
     @SuppressWarnings("unchecked")
     @Override
-    default <T extends Inventory> T query(QueryOperation<?>... queries) {
+    default <T extends Inventory> T query(final QueryOperation<?>... queries) {
         return (T) Query.compile(this, queries).execute();
     }
 
     @Override
-    default Inventory intersect(Inventory inventory) {
+    default Inventory intersect(final Inventory inventory) {
         return Query.compile(this, new SlotLensQueryOperation(ImmutableSet.of(inventory))).execute();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    default Inventory union(Inventory inventory) {
-        CompoundLens.Builder lensBuilder = CompoundLens.builder().add(getRootLens());
-        CompoundFabric fabric = new CompoundFabric((MinecraftFabric) getFabric(), (MinecraftFabric) ((InventoryAdapter) inventory).getFabric());
-        CompoundSlotProvider provider = new CompoundSlotProvider().add(this);
-        for (Object inv : inventory) {
-            lensBuilder.add(((InventoryAdapter) inv).getRootLens());
+    default Inventory union(final Inventory inventory) {
+        final CompoundLens.Builder lensBuilder = CompoundLens.builder().add(bridge$getRootLens());
+        final CompoundFabric fabric = new CompoundFabric((MinecraftFabric) bridge$getFabric(), (MinecraftFabric) ((InventoryAdapter) inventory).bridge$getFabric());
+        final CompoundSlotProvider provider = new CompoundSlotProvider().add(this);
+        for (final Object inv : inventory) {
+            lensBuilder.add(((InventoryAdapter) inv).bridge$getRootLens());
             provider.add((InventoryAdapter) inv);
         }
-        CompoundLens lens = lensBuilder.build(provider);
-        InventoryAdapter compoundAdapter = lens.getAdapter(fabric, this);
+        final CompoundLens lens = lensBuilder.build(provider);
+        final InventoryAdapter compoundAdapter = lens.getAdapter(fabric, this);
 
         return Query.compile(compoundAdapter, new SlotLensQueryOperation(ImmutableSet.of(compoundAdapter))).execute();
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
-    default boolean containsInventory(Inventory inventory) {
-        Inventory result = Query.compile(this, new LensQueryOperation(((InventoryAdapter) inventory).getRootLens())).execute();
-        return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).getRootLens() == ((InventoryAdapter) inventory).getRootLens();
+    default boolean containsInventory(final Inventory inventory) {
+        final Inventory result = Query.compile(this, new LensQueryOperation(((InventoryAdapter) inventory).bridge$getRootLens())).execute();
+        return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).bridge$getRootLens() == ((InventoryAdapter) inventory).bridge$getRootLens();
     }
 
     @Override

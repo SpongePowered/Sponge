@@ -61,7 +61,7 @@ public class ReusableLens<T extends Lens> {
         Map<Class<? extends Lens>, Int2ObjectMap<ReusableLens>>
                 adapterLenses = reusableLenses.computeIfAbsent(adapter.getClass(), k -> new HashMap<>());
         Int2ObjectMap<ReusableLens> lenses = adapterLenses.computeIfAbsent(lensType, k -> new Int2ObjectOpenHashMap<>());
-        return lenses.computeIfAbsent(adapter.getFabric().getSize(), k -> {
+        return lenses.computeIfAbsent(adapter.bridge$getFabric().getSize(), k -> {
             SlotProvider sl = slots.get();
             return new ReusableLens(sl, lens);
         });

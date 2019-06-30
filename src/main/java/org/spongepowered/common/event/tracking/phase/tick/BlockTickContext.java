@@ -54,10 +54,10 @@ public class BlockTickContext extends LocationBasedTickContext<BlockTickContext>
             this.world = locatableBlock.getWorld();
             if (block instanceof TrackableBridge) {
                 final TrackableBridge trackable = (TrackableBridge) block;
-                this.setBlockEvents(trackable.allowsBlockEventCreation())
-                    .setBulkBlockCaptures(trackable.allowsBlockBulkCapture())
-                    .setEntitySpawnEvents(trackable.allowsEntityEventCreation())
-                    .setBulkEntityCaptures(trackable.allowsEntityBulkCapture());
+                this.setBlockEvents(trackable.bridge$allowsBlockEventCreation())
+                    .setBulkBlockCaptures(trackable.bridge$allowsBlockBulkCapture())
+                    .setEntitySpawnEvents(trackable.bridge$allowsEntityEventCreation())
+                    .setBulkEntityCaptures(trackable.bridge$allowsEntityBulkCapture());
             }
         }
         return this;

@@ -47,7 +47,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
+import org.spongepowered.common.bridge.tileentity.SingleBlockCarrierBridge;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.util.Constants;
 
@@ -110,7 +110,7 @@ public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier
 
     @Override
     public Inventory getInventory(Direction from) {
-        return IMixinSingleBlockCarrier.getInventory(from, this);
+        return SingleBlockCarrierBridge.getInventory(from, this);
     }
 
     @SuppressWarnings("unchecked")

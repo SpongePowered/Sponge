@@ -96,6 +96,9 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -121,8 +124,8 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
-import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.interfaces.text.IMixinTitle;
+import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
+import org.spongepowered.common.bridge.text.TitleBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
@@ -145,6 +148,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayerMP.class)
+@Implements(@Interface(iface = Player.class, prefix = "api$"))
 public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API implements Player {
 
     @Shadow @Final public MinecraftServer server;
@@ -165,6 +169,11 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     @Override
     public GameProfile getProfile() {
         return ((ServerPlayerEntityBridge) this).bridge$getUser().getProfile();
+    }
+
+    @Intrinsic
+    public String api$getName() {
+        return shadow$getName();
     }
 
     @Override
@@ -234,7 +243,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
             // Don't bother sending messages to fake players
             return;
         }
-        ((IMixinTitle) (Object) title).send((EntityPlayerMP) (Object) this);
+        ((TitleBridge) (Object) title).send((EntityPlayerMP) (Object) this);
     }
 
     @Override
@@ -356,7 +365,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public Text getTeamRepresentation() {
-        return Text.of(this.getName());
+        return Text.of(this.shadow$getName());
     }
 
     @Override
@@ -450,7 +459,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
     private void onPlayerActive(final CallbackInfo ci) {
-        ((IMixinNetHandlerPlayServer) this.connection).resendLatestResourcePackRequest();
+        ((NetHandlerPlayServerBridge) this.connection).bridge$resendLatestResourcePackRequest();
     }
 
     @Override

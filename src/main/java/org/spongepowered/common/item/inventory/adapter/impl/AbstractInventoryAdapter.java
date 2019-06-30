@@ -94,7 +94,7 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private SlotCollection initSlots(Fabric inventory, @Nullable Inventory parent) {
         if (parent instanceof MinecraftInventoryAdapter) {
-            SlotProvider sp = ((MinecraftInventoryAdapter) parent).getSlotProvider();
+            SlotProvider sp = ((MinecraftInventoryAdapter) parent).bridge$getSlotProvider();
             if (sp instanceof SlotCollection) {
                 return ((SlotCollection) sp);
             }
@@ -110,7 +110,7 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
     @SuppressWarnings("unchecked")
     protected Lens initRootLens() {
         if (this instanceof LensProvider) {
-            return ((LensProvider) this).rootLens(this.inventory, this);
+            return ((LensProvider) this).bridge$rootLens(this.inventory, this);
         }
         int size = this.inventory.getSize();
         if (size == 0) {
@@ -120,22 +120,22 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
     }
 
     @Override
-    public SlotProvider getSlotProvider() {
+    public SlotProvider bridge$getSlotProvider() {
         return this.slots;
     }
 
     @Override
-    public Lens getRootLens() {
+    public Lens bridge$getRootLens() {
         return this.lens;
     }
 
     @Override
-    public Fabric getFabric() {
+    public Fabric bridge$getFabric() {
         return this.inventory;
     }
 
     @Override
-    public Inventory getChild(int index) {
+    public Inventory bridge$getChild(int index) {
         if (index < 0 || index >= this.lens.getChildren().size()) {
             throw new IndexOutOfBoundsException("No child at index: " + index);
         }
@@ -151,7 +151,7 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
     }
 
     @Override
-    public Inventory getChild(Lens lens) {
+    public Inventory bridge$getChild(Lens lens) {
         // TODO Auto-generated method stub
         return null;
     }

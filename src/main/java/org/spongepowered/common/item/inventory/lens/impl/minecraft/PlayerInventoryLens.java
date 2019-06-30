@@ -57,7 +57,7 @@ public class PlayerInventoryLens extends RealLens {
     private final boolean isContainer;
 
     public PlayerInventoryLens(InventoryAdapter adapter, SlotProvider slots) {
-        super(0, adapter.getFabric().getSize(), adapter, slots);
+        super(0, adapter.bridge$getFabric().getSize(), adapter, slots);
         this.isContainer = false;
         this.init(slots);
     }

@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.tileentity.AccessorTileEntityEndGateway;
+import org.spongepowered.common.mixin.core.tileentity.TileEntityEndGatewayAccessor;
 
 import java.util.Optional;
 
@@ -50,13 +50,13 @@ public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValu
 
     @Override
     protected boolean set(TileEntityEndGateway container, Integer value) {
-        ((AccessorTileEntityEndGateway) container).impl$setTeleportCooldown(value);
+        ((TileEntityEndGatewayAccessor) container).accessor$setTeleportCooldown(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(TileEntityEndGateway container) {
-        return Optional.of(((AccessorTileEntityEndGateway) container).impl$getTeleportCooldown());
+        return Optional.of(((TileEntityEndGatewayAccessor) container).accessor$getTeleportCooldown());
     }
 
     @Override

@@ -31,15 +31,15 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.tileentity.AccessorTileEntityMobSpawner;
+import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProcessor<AccessorTileEntityMobSpawner, Short, MutableBoundedValue<Short>> {
+public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProcessor<TileEntityMobSpawnerAccessor, Short, MutableBoundedValue<Short>> {
 
     public SpawnerMinimumDelayValueProcessor() {
-        super(AccessorTileEntityMobSpawner.class, Keys.SPAWNER_MINIMUM_DELAY);
+        super(TileEntityMobSpawnerAccessor.class, Keys.SPAWNER_MINIMUM_DELAY);
     }
 
     @Override
@@ -53,13 +53,13 @@ public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProces
     }
 
     @Override
-    protected boolean set(AccessorTileEntityMobSpawner container, Short value) {
+    protected boolean set(TileEntityMobSpawnerAccessor container, Short value) {
         container.accessor$getSpawnerLogic().minSpawnDelay = value;
         return true;
     }
 
     @Override
-    protected Optional<Short> getVal(AccessorTileEntityMobSpawner container) {
+    protected Optional<Short> getVal(TileEntityMobSpawnerAccessor container) {
         return Optional.of((short) container.accessor$getSpawnerLogic().minSpawnDelay);
     }
 

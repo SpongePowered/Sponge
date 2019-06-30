@@ -29,32 +29,32 @@ import com.google.common.base.Objects;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.network.status.StatusClient;
-import org.spongepowered.common.interfaces.IMixinNetworkManager;
+import org.spongepowered.common.bridge.network.NetworkManagerBridge;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
 
 public class SpongeStatusClient implements StatusClient {
 
-    private final IMixinNetworkManager connection;
+    private final NetworkManagerBridge connection;
 
     public SpongeStatusClient(NetworkManager networkManager) {
-        this.connection = (IMixinNetworkManager) networkManager;
+        this.connection = (NetworkManagerBridge) networkManager;
     }
 
     @Override
     public InetSocketAddress getAddress() {
-        return this.connection.getAddress();
+        return this.connection.bridge$getAddress();
     }
 
     @Override
     public MinecraftVersion getVersion() {
-        return this.connection.getVersion();
+        return this.connection.bridge$getVersion();
     }
 
     @Override
     public Optional<InetSocketAddress> getVirtualHost() {
-        return Optional.ofNullable(this.connection.getVirtualHost());
+        return Optional.ofNullable(this.connection.bridge$getVirtualHost());
     }
 
     @Override

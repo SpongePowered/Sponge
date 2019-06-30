@@ -24,41 +24,33 @@
  */
 package org.spongepowered.common.statistic;
 
-import com.google.common.base.CaseFormat;
+import net.minecraft.stats.StatBase;
+import net.minecraft.stats.StatCrafting;
 import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.common.interfaces.statistic.IMixinStatBase;
+import org.spongepowered.common.bridge.stats.StatBaseBridge;
+import org.spongepowered.common.mixin.core.stats.StatBaseMixin;
 
 import java.text.NumberFormat;
 
-import javax.annotation.Nullable;
-
+/**
+ * Specifically a default implemented bridge for Sponge added statistics
+ * base classes that extend {@link StatBase} and {@link StatCrafting} but
+ * cannot specifically reference the implementation provided by
+ * {@link StatBaseBridge} and therefor, {@link StatBaseMixin}. It is the
+ * premise that the bridge methods are implemented appropriately, and
+ * handled the same way as if the statistics were implemented on the
+ * classes themselves.
+ */
 public interface SpongeStatistic extends Statistic {
 
     @Override
     default String getId() {
-        String spongeId = getSpongeId();
-        if (spongeId == null) {
-            spongeId = getMinecraftId();
-            int prefixStop = spongeId.indexOf(".");
-            if (prefixStop != -1) {
-                spongeId = spongeId.substring(prefixStop + 1);
-            }
-            spongeId = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, spongeId);
-            setSpongeId(spongeId);
-        }
-        return spongeId;
+        return ((StatBaseBridge) this).bridge$getUnderlyingId();
     }
-
-    @Nullable
-    String getSpongeId();
-
-    void setSpongeId(String id);
-
-    String getMinecraftId();
 
     @Override
     default NumberFormat getFormat() {
-        return ((IMixinStatBase) this).format();
+        return ((StatBaseBridge) this).bridge$getFormat();
     }
 
 }

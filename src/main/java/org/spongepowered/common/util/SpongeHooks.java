@@ -495,7 +495,7 @@ public class SpongeHooks {
                     ((CollisionsCapability) entity).collision$requiresCollisionsCacheRefresh(true);
                 }
                 if (entity instanceof TrackableBridge) {
-                    ((TrackableBridge) entity).refreshTrackerStates();
+                    ((TrackableBridge) entity).bridge$refreshTrackerStates();
                 }
             }
             for (TileEntity tileEntity : world.loadedTileEntityList) {
@@ -503,7 +503,7 @@ public class SpongeHooks {
                     ((ActivationCapability) tileEntity).activation$requiresActivationCacheRefresh(true);
                 }
                 if (tileEntity instanceof TrackableBridge) {
-                    ((TrackableBridge) tileEntity).refreshTrackerStates();
+                    ((TrackableBridge) tileEntity).bridge$refreshTrackerStates();
                 }
             }
         }

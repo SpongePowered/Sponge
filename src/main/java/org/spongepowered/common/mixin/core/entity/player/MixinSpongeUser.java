@@ -47,14 +47,14 @@ import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(value = SpongeUser.class, remap = false)
-public abstract class MixinSpongeUser implements User, IMixinSubject, InvulnerableTrackedBridge, VanishingBridge {
+public abstract class MixinSpongeUser implements User, SubjectBridge, InvulnerableTrackedBridge, VanishingBridge {
 
     @Shadow @Final private com.mojang.authlib.GameProfile profile;
 
@@ -253,12 +253,12 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, Invulnerab
     }
 
     @Override
-    public String getSubjectCollectionIdentifier() {
+    public String bridge$getSubjectCollectionIdentifier() {
         return PermissionService.SUBJECTS_USER;
     }
 
     @Override
-    public Tristate permDefault(String permission) {
+    public Tristate bridge$permDefault(String permission) {
         return Tristate.FALSE;
     }
 

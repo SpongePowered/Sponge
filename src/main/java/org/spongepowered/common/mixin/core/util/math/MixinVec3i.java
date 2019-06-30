@@ -30,29 +30,29 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
+import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 
 
 @Mixin(Vec3i.class)
-@Implements(@Interface(iface = IMixinBlockPos.class, prefix = "inline$", unique = true))
-public abstract class MixinVec3i implements IMixinBlockPos {
+@Implements(@Interface(iface = BlockPosBridge.class, prefix = "inline$", unique = true))
+public abstract class MixinVec3i implements BlockPosBridge {
 
     @Shadow @Final private int x;
     @Shadow @Final private int y;
     @Shadow @Final private int z;
 
     @Override
-    public boolean isValidPosition() {
+    public boolean bridge$isValidPosition() {
         return this.x >= -30000000 && this.z >= -30000000 && this.x < 30000000 && this.z < 30000000 && this.y >= 0 && this.y < 256;
     }
 
     @Override
-    public boolean isValidXZPosition() {
+    public boolean bridge$isValidXZPosition() {
         return this.x >= -30000000 && this.z >= -30000000 && this.x < 30000000 && this.z < 30000000;
     }
 
     @Override
-    public boolean isInvalidYPosition() {
+    public boolean bridge$isInvalidYPosition() {
         return this.y < 0 || this.y >= 256;
     }
 }

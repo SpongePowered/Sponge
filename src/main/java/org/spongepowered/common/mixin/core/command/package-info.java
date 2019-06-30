@@ -27,13 +27,13 @@
  *
  * <dl>
  * <dt>{@link org.spongepowered.api.command.CommandSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandSource}
+ * <dd>{@link org.spongepowered.common.mixin.api.command.CommandSourceMixin_API}
  * <dt>{@link org.spongepowered.api.command.source.CommandBlockSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandBlockSource}
+ * <dd>{@link org.spongepowered.common.mixin.core.command.BlockCommandSourceMixin}
  * <dt>{@link org.spongepowered.api.command.source.RconSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.network.rcon.MixinRConConsoleSource}
  * <dt>{@link org.spongepowered.api.command.source.SignSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.command.MixinSignCommandSender}
+ * <dd>{@link org.spongepowered.common.mixin.core.command.TileEntitySign$1Mixin}
  * <dt>{@link org.spongepowered.api.command.source.ProxySource} via /execute
  * and /function
  * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandSenderWrapper}

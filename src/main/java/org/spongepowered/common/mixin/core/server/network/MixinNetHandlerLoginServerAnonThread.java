@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.IMixinNetHandlerLoginServer;
+import org.spongepowered.common.bridge.network.NetHandlerLoginServerBridge;
 
 @Mixin(targets = "net/minecraft/server/network/NetHandlerLoginServer$2")
 public class MixinNetHandlerLoginServerAnonThread extends Thread {
@@ -44,7 +44,7 @@ public class MixinNetHandlerLoginServerAnonThread extends Thread {
     @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
             remap = false, cancellable = true)
     private void fireAuthEvent(CallbackInfo ci) {
-        if (((IMixinNetHandlerLoginServer) this.handler).fireAuthEvent()) {
+        if (((NetHandlerLoginServerBridge) this.handler).bridge$fireAuthEvent()) {
             ci.cancel();
         }
     }

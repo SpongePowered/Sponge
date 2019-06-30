@@ -63,7 +63,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
+    public <T extends DataManipulator<?, ?>> Optional<T> get(final Class<T> containerClass) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         ;
         SpongeTimings.dataGetManipulator.startTimingIfSync();
@@ -86,29 +86,29 @@ public abstract class DataHolderMixin_API implements DataHolder {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
+    public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataGetOrCreateManipulator.startTimingIfSync();
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(containerClass);
         if (optional.isPresent()) {
-            Optional<T> created = (Optional<T>) optional.get().createFrom(this);
+            final Optional<T> created = (Optional<T>) optional.get().createFrom(this);
             SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return created;
         } else if (this instanceof CustomDataHolderBridge) {
-            Optional<T> custom = ((CustomDataHolderBridge) this).getCustom(containerClass);
+            final Optional<T> custom = ((CustomDataHolderBridge) this).getCustom(containerClass);
             if (custom.isPresent()) {
                 SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
                 TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
                 return custom;
             }
             // Try to construct it from the DataManipulatorBuilder
-            Optional<DataManipulatorBuilder<?, ?>> builder = SpongeDataManager.getInstance().getWildManipulatorBuilder(containerClass);
+            final Optional<DataManipulatorBuilder<?, ?>> builder = SpongeDataManager.getInstance().getWildManipulatorBuilder(containerClass);
             checkState(builder.isPresent(), "A DataManipulatorBuilder is not registered for the manipulator class: "
                     + containerClass.getName());
-            T manipulator = (T) builder.get().create();
+            final T manipulator = (T) builder.get().create();
             // Basically at this point, it's up to plugins to validate whether it's supported
-            Optional<T> other = manipulator.fill(this).map(customManipulator -> (T) customManipulator);
+            final Optional<T> other = manipulator.fill(this).map(customManipulator -> (T) customManipulator);
             if ((Object) this instanceof SpongeUser) {
                 ((SpongeUser) (Object) this).markDirty();
             }
@@ -122,31 +122,31 @@ public abstract class DataHolderMixin_API implements DataHolder {
     }
 
     @Override
-    public boolean supports(Class<? extends DataManipulator<?, ?>> holderClass) {
+    public boolean supports(final Class<? extends DataManipulator<?, ?>> holderClass) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataSupportsManipulator.startTimingIfSync();
 
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(holderClass);
         if (optional.isPresent()) {
-            boolean supports = optional.get().supports(this);
+            final boolean supports = optional.get().supports(this);
             SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return supports;
         }
         if (this instanceof CustomDataHolderBridge) {
-            Optional<?> custom = ((CustomDataHolderBridge) this).getCustom(holderClass);
+            final Optional<?> custom = ((CustomDataHolderBridge) this).getCustom(holderClass);
             if (custom.isPresent()) {
                 SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
                 TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
                 return true;
             }
             // Try to construct it from the DataManipulatorBuilder
-            Optional<DataManipulatorBuilder<?, ?>> builder = SpongeDataManager.getInstance().getWildManipulatorBuilder(holderClass);
+            final Optional<DataManipulatorBuilder<?, ?>> builder = SpongeDataManager.getInstance().getWildManipulatorBuilder(holderClass);
             checkState(builder.isPresent(), "A DataManipulatorBuilder is not registered for the manipulator class: "
                     + holderClass.getName());
-            DataManipulator<?, ?> manipulator = builder.get().create();
+            final DataManipulator<?, ?> manipulator = builder.get().create();
             // Basically at this point, it's up to plugins to validate whether it's supported
-            boolean present = manipulator.fill(this).isPresent();
+            final boolean present = manipulator.fill(this).isPresent();
             SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return present;
@@ -157,8 +157,9 @@ public abstract class DataHolderMixin_API implements DataHolder {
 
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public <E> DataTransactionResult offer(Key<? extends BaseValue<E>> key, E value) {
+    public <E> DataTransactionResult offer(final Key<? extends BaseValue<E>> key, final E value) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataOfferKey.startTimingIfSync();
         final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = DataUtil.getBaseValueProcessor(key);
@@ -181,9 +182,9 @@ public abstract class DataHolderMixin_API implements DataHolder {
         return DataTransactionResult.failNoData();
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked", "ConstantConditions"})
     @Override
-    public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
+    public DataTransactionResult offer(final DataManipulator<?, ?> valueContainer, final MergeFunction function) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataOfferManipulator.startTimingIfSync();
         final Optional<DataProcessor> optional = DataUtil.getWildDataProcessor(valueContainer.getClass());
@@ -207,11 +208,11 @@ public abstract class DataHolderMixin_API implements DataHolder {
     }
 
     @Override
-    public DataTransactionResult offer(Iterable<DataManipulator<?, ?>> valueContainers) {
+    public DataTransactionResult offer(final Iterable<DataManipulator<?, ?>> valueContainers) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataOfferMultiManipulators.startTimingIfSync();
-        DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        for (DataManipulator<?, ?> manipulator : valueContainers) {
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        for (final DataManipulator<?, ?> manipulator : valueContainers) {
             final DataTransactionResult result = offer(manipulator);
             if (!result.getRejectedData().isEmpty()) {
                 builder.reject(result.getRejectedData());
@@ -241,8 +242,9 @@ public abstract class DataHolderMixin_API implements DataHolder {
 
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public DataTransactionResult remove(Class<? extends DataManipulator<?, ?>> containerClass) {
+    public DataTransactionResult remove(final Class<? extends DataManipulator<?, ?>> containerClass) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataRemoveManipulator.startTimingIfSync();
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(containerClass);
@@ -266,8 +268,9 @@ public abstract class DataHolderMixin_API implements DataHolder {
         return DataTransactionResult.failNoData();
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public DataTransactionResult remove(Key<?> key) {
+    public DataTransactionResult remove(final Key<?> key) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataRemoveKey.startTimingIfSync();
         final Optional<ValueProcessor<?, ?>> optional = DataUtil.getWildValueProcessor(checkNotNull(key));
@@ -292,7 +295,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
     }
 
     @Override
-    public DataTransactionResult undo(DataTransactionResult result) {
+    public DataTransactionResult undo(final DataTransactionResult result) {
         SpongeTimings.dataOfferManipulator.startTimingIfSync();
         TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
         if (result.getReplacedData().isEmpty() && result.getSuccessfulData().isEmpty()) {
@@ -301,10 +304,10 @@ public abstract class DataHolderMixin_API implements DataHolder {
             return DataTransactionResult.successNoData();
         }
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        for (ImmutableValue<?> replaced : result.getReplacedData()) {
+        for (final ImmutableValue<?> replaced : result.getReplacedData()) {
             builder.absorbResult(offer(replaced));
         }
-        for (ImmutableValue<?> successful : result.getSuccessfulData()) {
+        for (final ImmutableValue<?> successful : result.getSuccessfulData()) {
             builder.absorbResult(remove(successful));
         }
         SpongeTimings.dataOfferManipulator.stopTimingIfSync();
@@ -313,12 +316,12 @@ public abstract class DataHolderMixin_API implements DataHolder {
     }
 
     @Override
-    public DataTransactionResult copyFrom(DataHolder that, MergeFunction function) {
+    public DataTransactionResult copyFrom(final DataHolder that, final MergeFunction function) {
         return offer(that.getContainers(), function);
     }
 
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> get(final Key<? extends BaseValue<E>> key) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataGetByKey.startTimingIfSync();
         final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = DataUtil.getBaseValueProcessor(checkNotNull(key));
@@ -339,7 +342,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+    public <E, V extends BaseValue<E>> Optional<V> getValue(final Key<V> key) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataGetValue.startTimingIfSync();
         final Optional<ValueProcessor<E, V>> optional = DataUtil.getValueProcessor(checkNotNull(key));
@@ -360,7 +363,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
     }
 
     @Override
-    public boolean supports(Key<?> key) {
+    public boolean supports(final Key<?> key) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataSupportsKey.startTimingIfSync();
         final Optional<ValueProcessor<?, ?>> optional = DataUtil.getWildValueProcessor(checkNotNull(key));
@@ -394,12 +397,12 @@ public abstract class DataHolderMixin_API implements DataHolder {
     // The rest of these are default implemented in the event some implementation fails.
 
     @Override
-    public boolean validateRawData(DataView container) {
+    public boolean validateRawData(final DataView container) {
         return false;
     }
 
     @Override
-    public void setRawData(DataView container) throws InvalidDataException {
+    public void setRawData(final DataView container) throws InvalidDataException {
 
     }
 
@@ -419,7 +422,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
     }
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
+    public <T extends Property<?, ?>> Optional<T> getProperty(final Class<T> propertyClass) {
         return Optional.empty();
     }
 

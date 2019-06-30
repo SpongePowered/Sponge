@@ -38,10 +38,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.interfaces.IMixinEntityTracker;
 
 @Mixin(EntityTracker.class)
-public abstract class EntityTrackerMixin implements IMixinEntityTracker {
+public abstract class EntityTrackerMixin {
 
     @Shadow @Final private WorldServer world;
 
@@ -49,7 +48,7 @@ public abstract class EntityTrackerMixin implements IMixinEntityTracker {
     public abstract void track(Entity entityIn, int trackingRange, int updateFrequency);
 
     @Inject(method = "track(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"), cancellable = true)
-    private void onTrackEntity(Entity entityIn, CallbackInfo ci) {
+    private void impl$onTrackEntity(final Entity entityIn, final CallbackInfo ci) {
         if (entityIn instanceof EntityHuman) {
             this.track(entityIn, 512, 2);
             ci.cancel();
@@ -57,9 +56,11 @@ public abstract class EntityTrackerMixin implements IMixinEntityTracker {
     }
 
 
-    @Redirect(method = "track(Lnet/minecraft/entity/Entity;IIZ)V", at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
-    private IllegalStateException reportEntityAlreadyTrackedWithWorld(String string, Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates) {
-        IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, ((World) this.world).getName()));;
+    @Redirect(method = "track(Lnet/minecraft/entity/Entity;IIZ)V",
+        at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
+    private IllegalStateException impl$reportEntityAlreadyTrackedWithWorld(final String string, final Entity entityIn, final int trackingRange
+        , final int updateFrequency, final boolean sendVelocityUpdates) {
+        final IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, ((World) this.world).getName()));;
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().verboseErrors()) {
             PhaseTracker.getInstance().printMessageWithCaughtException("Exception tracking entity", "An entity that was already tracked was added to the tracker!", exception);
         }
@@ -67,7 +68,8 @@ public abstract class EntityTrackerMixin implements IMixinEntityTracker {
     }
 
     @Inject(method = "track(Lnet/minecraft/entity/Entity;IIZ)V", at = @At("HEAD"), cancellable = true)
-    private void onAddEntityToTracker(Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates, CallbackInfo ci) {
+    private void onAddEntityToTracker(final Entity entityIn, final int trackingRange, final int updateFrequency, final boolean sendVelocityUpdates,
+        final CallbackInfo ci) {
         if (!SpongeImpl.getServer().isServerStopped() && !SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
             Thread.dumpStack();
             SpongeImpl.getLogger().error("Detected attempt to add entity '" + entityIn + "' to tracker asynchronously.\n"
@@ -78,7 +80,7 @@ public abstract class EntityTrackerMixin implements IMixinEntityTracker {
     }
 
     @Inject(method = "untrack", at = @At("HEAD"), cancellable = true)
-    private void onUntrackEntity(Entity entityIn, CallbackInfo ci) {
+    private void impl$onUntrackEntity(final Entity entityIn, final CallbackInfo ci) {
         if (!SpongeImpl.getServer().isServerStopped() && !SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
             Thread.dumpStack();
             SpongeImpl.getLogger().error("Detected attempt to untrack entity '" + entityIn + "' asynchronously.\n"
@@ -88,8 +90,4 @@ public abstract class EntityTrackerMixin implements IMixinEntityTracker {
         }
     }
 
-    @Override
-    public net.minecraft.world.World getWorld() {
-        return this.world;
-    }
 }

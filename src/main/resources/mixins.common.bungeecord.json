@@ -8,10 +8,10 @@
     "mixins": [
     ],
     "server": [
-        "network.MixinNetHandlerHandshakeTCP",
-        "network.MixinNetHandlerLoginServer",
-        "network.MixinNetworkManager",
-        "network.packet.MixinC00Handshake"
+        "network.NetHandlerHandshakeTCPMixin_Bungee",
+        "network.NetHandlerLoginServerMixin_Bungee",
+        "network.NetworkManagerMixin_Bungee",
+        "network.packet.C00HandshakeMixin_Bungee"
     ],
     "injectors": {
         "defaultRequire": 1

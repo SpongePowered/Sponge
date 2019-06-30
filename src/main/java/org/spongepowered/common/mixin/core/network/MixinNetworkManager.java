@@ -36,7 +36,7 @@ import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeMinecraftVersion;
-import org.spongepowered.common.interfaces.IMixinNetworkManager;
+import org.spongepowered.common.bridge.network.NetworkManagerBridge;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -45,7 +45,7 @@ import java.net.UnknownHostException;
 
 @SuppressWarnings("rawtypes")
 @Mixin(NetworkManager.class)
-public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements PlayerConnection, IMixinNetworkManager {
+public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements PlayerConnection, NetworkManagerBridge {
 
     @Shadow private Channel channel;
     @Shadow private INetHandler packetListener;
@@ -58,7 +58,7 @@ public abstract class MixinNetworkManager extends SimpleChannelInboundHandler im
     private static final InetSocketAddress localhost = InetSocketAddress.createUnresolved("127.0.0.1", 0);
 
     @Override
-    public InetSocketAddress getAddress() {
+    public InetSocketAddress bridge$getAddress() {
         SocketAddress remoteAddress = getRemoteAddress();
         if (remoteAddress instanceof LocalAddress) { // Single player
             return localhost;
@@ -67,7 +67,7 @@ public abstract class MixinNetworkManager extends SimpleChannelInboundHandler im
     }
 
     @Override
-    public InetSocketAddress getVirtualHost() {
+    public InetSocketAddress bridge$getVirtualHost() {
         if (this.virtualHost != null) {
             return this.virtualHost;
         }
@@ -79,7 +79,7 @@ public abstract class MixinNetworkManager extends SimpleChannelInboundHandler im
     }
 
     @Override
-    public void setVirtualHost(String host, int port) {
+    public void bridge$setVirtualHost(String host, int port) {
         try {
             this.virtualHost = new InetSocketAddress(InetAddress.getByAddress(host,
                     ((InetSocketAddress) this.channel.localAddress()).getAddress().getAddress()), port);
@@ -89,12 +89,12 @@ public abstract class MixinNetworkManager extends SimpleChannelInboundHandler im
     }
 
     @Override
-    public MinecraftVersion getVersion() {
+    public MinecraftVersion bridge$getVersion() {
         return this.version;
     }
 
     @Override
-    public void setVersion(int version) {
+    public void bridge$setVersion(int version) {
         this.version = new SpongeMinecraftVersion(String.valueOf(version), version);
     }
 

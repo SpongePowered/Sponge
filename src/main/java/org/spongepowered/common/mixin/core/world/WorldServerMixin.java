@@ -167,7 +167,7 @@ import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
+import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -1257,7 +1257,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         final List<Entity> entityList = new ArrayList<>();
         for (final net.minecraft.entity.Entity entity : entities) {
             // Make sure no entities load in invalid positions
-            if (((IMixinBlockPos) entity.getPosition()).isInvalidYPosition()) {
+            if (((BlockPosBridge) entity.getPosition()).bridge$isInvalidYPosition()) {
                 entity.setDead();
                 continue;
             }
@@ -2010,7 +2010,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
     /**
      * @author gabizou - August 4th, 2016
      * @author blood - May 11th, 2017 - Forces chunk requests if TE is ticking.
-     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     * @reason Rewrites the check to be inlined to {@link BlockPosBridge}.
      *
      * @param pos The position
      * @return The block state at the desired position
@@ -2019,7 +2019,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
     public IBlockState getBlockState(final BlockPos pos) {
         // Sponge - Replace with inlined method
         // if (this.isOutsideBuildHeight(pos)) // Vanilla
-        if (((IMixinBlockPos) pos).isInvalidYPosition()) {
+        if (((BlockPosBridge) pos).bridge$isInvalidYPosition()) {
             // Sponge end
             return Blocks.AIR.getDefaultState();
         } else {
@@ -2114,7 +2114,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
      */
     @Override
     public int getLight(BlockPos pos, final boolean checkNeighbors) {
-        if (((IMixinBlockPos) pos).isValidXZPosition()) { // Sponge - Replace with inlined method
+        if (((BlockPosBridge) pos).bridge$isValidXZPosition()) { // Sponge - Replace with inlined method
             if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
                 int i1 = this.getLight(pos.up(), false);
                 final int i = this.getLight(pos.east(), false);
@@ -2160,7 +2160,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
 
     /**
      * @author gabizou - August 4th, 2016
-     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     * @reason Rewrites the check to be inlined to {@link BlockPosBridge}.
      *
      * @param type The type of sky lighting
      * @param pos The position
@@ -2174,7 +2174,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
 
         // Sponge Start - Replace with inlined method to check
         // if (!this.isValid(pos)) // vanilla
-        if (!((IMixinBlockPos) pos).isValidPosition()) {
+        if (!((BlockPosBridge) pos).bridge$isValidPosition()) {
             // Sponge End
             return type.defaultLightValue;
         } else {
@@ -2190,7 +2190,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
 
     @Override
     public boolean bridge$isLightLevel(final Chunk chunk, BlockPos pos, final int level) {
-        if (((IMixinBlockPos) pos).isValidPosition()) {
+        if (((BlockPosBridge) pos).bridge$isValidPosition()) {
             if (this.getBlockState(pos).useNeighborBrightness()) {
                 if (this.getLight(pos.up(), false) >= level) {
                     return true;

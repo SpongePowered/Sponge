@@ -39,7 +39,7 @@ import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableEndG
 import org.spongepowered.api.data.manipulator.mutable.tileentity.EndGatewayData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeEndGatewayData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
-import org.spongepowered.common.mixin.core.tileentity.AccessorTileEntityEndGateway;
+import org.spongepowered.common.mixin.core.tileentity.TileEntityEndGatewayAccessor;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Map;
@@ -62,19 +62,19 @@ public final class EndGatewayDataProcessor extends AbstractTileEntityDataProcess
     protected boolean set(final TileEntityEndGateway container, final Map<Key<?>, Object> map) {
         @Nullable final Vector3i exitPortal = (Vector3i) map.get(Keys.EXIT_POSITION);
         if (exitPortal != null) {
-            ((AccessorTileEntityEndGateway) container).impl$SetExit(new BlockPos(exitPortal.getX(), exitPortal.getY(), exitPortal.getZ()));
+            ((TileEntityEndGatewayAccessor) container).accessor$SetExit(new BlockPos(exitPortal.getX(), exitPortal.getY(), exitPortal.getZ()));
         }
 
-        ((AccessorTileEntityEndGateway) container).impl$setExactTeleport((Boolean) map.get(Keys.EXACT_TELEPORT));
+        ((TileEntityEndGatewayAccessor) container).accessor$setExactTeleport((Boolean) map.get(Keys.EXACT_TELEPORT));
 
         @Nullable final Long age = (Long) map.get(Keys.END_GATEWAY_AGE);
         if (age != null) {
-            ((AccessorTileEntityEndGateway) container).impl$setAge(age);
+            ((TileEntityEndGatewayAccessor) container).accessor$setAge(age);
         }
 
         @Nullable final Integer teleportCooldown = (Integer) map.get(Keys.END_GATEWAY_TELEPORT_COOLDOWN);
         if (teleportCooldown != null) {
-            ((AccessorTileEntityEndGateway) container).impl$setTeleportCooldown(teleportCooldown);
+            ((TileEntityEndGatewayAccessor) container).accessor$setTeleportCooldown(teleportCooldown);
         }
 
         return true;
@@ -83,10 +83,10 @@ public final class EndGatewayDataProcessor extends AbstractTileEntityDataProcess
     @Override
     protected Map<Key<?>, ?> getValues(final TileEntityEndGateway container) {
         final ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
-        builder.put(Keys.EXIT_POSITION, VecHelper.toVector3i(((AccessorTileEntityEndGateway) container).getExitPortal()));
-        builder.put(Keys.EXACT_TELEPORT, ((AccessorTileEntityEndGateway) container).impl$getExactTeleport());
-        builder.put(Keys.END_GATEWAY_AGE, ((AccessorTileEntityEndGateway) container).impl$getAge());
-        builder.put(Keys.END_GATEWAY_TELEPORT_COOLDOWN, ((AccessorTileEntityEndGateway) container).impl$getTeleportCooldown());
+        builder.put(Keys.EXIT_POSITION, VecHelper.toVector3i(((TileEntityEndGatewayAccessor) container).accessor$getExitPortal()));
+        builder.put(Keys.EXACT_TELEPORT, ((TileEntityEndGatewayAccessor) container).accessor$getExactTeleport());
+        builder.put(Keys.END_GATEWAY_AGE, ((TileEntityEndGatewayAccessor) container).accessor$getAge());
+        builder.put(Keys.END_GATEWAY_TELEPORT_COOLDOWN, ((TileEntityEndGatewayAccessor) container).accessor$getTeleportCooldown());
         return builder.build();
     }
 

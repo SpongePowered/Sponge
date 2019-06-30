@@ -29,15 +29,15 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.bridge.command.CommandSenderBridge;
 
-@Mixin(targets = IMixinCommandSender.COMMAND_BLOCK_SENDER)
-public abstract class MixinBlockCommandBlockSender implements IMixinCommandSender {
+@Mixin(targets = CommandSenderBridge.COMMAND_BLOCK_SENDER)
+public abstract class MixinBlockCommandBlockSender implements CommandSenderBridge {
 
     @Shadow(aliases = {"field_145767_a", "this$0"}) @Final private TileEntityCommandBlock field_145767_a;
 
     @Override
-    public CommandSource asCommandSource() {
+    public CommandSource bridge$asCommandSource() {
         return (CommandSource) this.field_145767_a;
     }
 }

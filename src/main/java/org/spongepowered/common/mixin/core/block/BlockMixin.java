@@ -298,27 +298,27 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     }
 
     @Override
-    public boolean allowsBlockBulkCapture() {
+    public boolean bridge$allowsBlockBulkCapture() {
         return this.impl$allowsBlockBulkCapture;
     }
 
     @Override
-    public boolean allowsEntityBulkCapture() {
+    public boolean bridge$allowsEntityBulkCapture() {
         return this.impl$allowsEntityBulkCapture;
     }
 
     @Override
-    public boolean allowsBlockEventCreation() {
+    public boolean bridge$allowsBlockEventCreation() {
         return this.impl$allowsBlockEventCreation;
     }
 
     @Override
-    public boolean allowsEntityEventCreation() {
+    public boolean bridge$allowsEntityEventCreation() {
         return this.impl$allowsEntityEventCreation;
     }
 
     @Override
-    public void refreshTrackerStates() {
+    public void bridge$refreshTrackerStates() {
         // not needed
     }
 

@@ -46,7 +46,7 @@ public final class SlotLensQueryOperation extends SpongeQueryOperation<Immutable
     public boolean matches(Lens lens, Lens parent, Fabric inventory) {
         for (Inventory inv : this.inventories) {
             for (Inventory slot : inv.slots()) {
-                if (((SlotAdapter) slot).getRootLens().equals(lens)) {
+                if (((SlotAdapter) slot).bridge$getRootLens().equals(lens)) {
                     return true;
                 }
             }

@@ -33,8 +33,8 @@ import net.minecraft.util.text.TextComponentTranslation;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextParseException;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.common.interfaces.text.IMixinTextComponent;
-import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.bridge.api.text.TextBridge;
 
 import java.util.List;
 
@@ -76,15 +76,15 @@ public final class SpongeTexts {
     }
 
     public static ITextComponent toComponent(Text text) {
-        return ((IMixinText) text).toComponent();
+        return ((TextBridge) text).bridge$toComponent();
     }
 
     public static Text toText(ITextComponent component) {
-        return ((IMixinTextComponent) component).toText();
+        return ((ITextComponentBridge) component).bridge$toText();
     }
 
     public static String toPlain(ITextComponent component) {
-        return ((IMixinTextComponent) component).toPlain();
+        return ((ITextComponentBridge) component).bridge$toPlain();
     }
 
     @SuppressWarnings("deprecation")
@@ -98,7 +98,7 @@ public final class SpongeTexts {
     }
 
     public static String toLegacy(ITextComponent component) {
-        return ((IMixinTextComponent) component).toLegacy(COLOR_CHAR);
+        return ((ITextComponentBridge) component).bridge$toLegacy(COLOR_CHAR);
     }
 
     public static ITextComponent fixActionBarFormatting(ITextComponent component) {
@@ -109,7 +109,7 @@ public final class SpongeTexts {
             }
         }
 
-        TextComponentString result = new TextComponentString(((IMixinTextComponent) component).getLegacyFormatting());
+        TextComponentString result = new TextComponentString(((ITextComponentBridge) component).bridge$getLegacyFormatting());
         result.appendSibling(component);
         return result;
     }

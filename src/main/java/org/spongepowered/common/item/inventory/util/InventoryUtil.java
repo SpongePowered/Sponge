@@ -63,7 +63,7 @@ public final class InventoryUtil {
     }
 
     public static InventoryCrafting toNativeInventory(CraftingGridInventory inv) {
-        Fabric fabric = ((CraftingGridInventoryAdapter) inv).getFabric();
+        Fabric fabric = ((CraftingGridInventoryAdapter) inv).bridge$getFabric();
         for (Object inventory : fabric.allInventories()) {
             if (inventory instanceof InventoryCrafting) {
                 return ((InventoryCrafting) inventory);

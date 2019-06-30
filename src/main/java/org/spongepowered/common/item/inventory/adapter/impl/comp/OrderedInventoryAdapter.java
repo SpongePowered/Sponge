@@ -70,7 +70,7 @@ public class OrderedInventoryAdapter extends VanillaAdapter implements OrderedIn
                 // TODO getting OrderedInventoryLensImpl here instead of SlotLens
                 //return (SlotLens<IInventory, net.minecraft.item.ItemStack>) lens;
                 /*SlotAdapter adapter = lens.getAdapter(this.inventory, this).query(SlotAdapter.class).first();
-                return (SlotLens<IInventory, net.minecraft.item.ItemStack>) adapter.getRootLens();
+                return (SlotLens<IInventory, net.minecraft.item.ItemStack>) adapter.bridge$getRootLens();
             }
         }
         return null;*/

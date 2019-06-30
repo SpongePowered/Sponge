@@ -40,7 +40,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.interfaces.command.IMixinCommandSourceName;
+import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
@@ -49,7 +49,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
-public class SpongeProxySource implements ProxySource, IMixinCommandSourceName {
+public class SpongeProxySource implements ProxySource, CommandSourceBridge {
 
     final ICommandSender minecraft;
     private final CommandSource messageSource;
@@ -68,13 +68,18 @@ public class SpongeProxySource implements ProxySource, IMixinCommandSourceName {
     }
 
     @Override
-    public String getIdentifier() {
+    public String bridge$getIdentifier() {
         return this.subjectDelegate.getIdentifier();
     }
 
     @Override
-    public ICommandSender asICommandSender() {
+    public ICommandSender bridge$asICommandSender() {
         return this.minecraft;
+    }
+
+    @Override
+    public String getIdentifier() {
+        return bridge$getIdentifier();
     }
 
     @Override
@@ -97,6 +102,11 @@ public class SpongeProxySource implements ProxySource, IMixinCommandSourceName {
     public void setMessageChannel(MessageChannel channel) {
         checkNotNull(channel, "channel");
         this.channel = channel;
+    }
+
+    @Override
+    public String getName() {
+        return bridge$asICommandSender().getName();
     }
 
     @Override

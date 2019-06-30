@@ -31,7 +31,6 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
-import org.spongepowered.common.interfaces.inventory.IMixinSlot;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -41,6 +40,7 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.FakeSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.inventory.SlotAccessor;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -64,12 +64,12 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
 
     @SuppressWarnings("rawtypes")
     private static SlotLens getLens(final net.minecraft.inventory.Slot slot) {
-        if (((IMixinSlot) slot).getSlotIndex() >= 0) { // Normal Slot?
+        if (((SlotAccessor) slot).accessor$getIndex() >= 0) { // Normal Slot?
             if (slot.inventory instanceof InventoryAdapter) { // If the inventory is an adapter we can get the existing SlotLens
-                return ((InventoryAdapter) slot.inventory).getSlotProvider().getSlot(((IMixinSlot) slot).getSlotIndex());
+                return ((InventoryAdapter) slot.inventory).bridge$getSlotProvider().getSlot(((SlotAccessor) slot).accessor$getIndex());
             }
             // otherwise fallback to a new SlotLens
-            return new SlotLensImpl(((IMixinSlot) slot).getSlotIndex());
+            return new SlotLensImpl(((SlotAccessor) slot).accessor$getIndex());
         }
         return new FakeSlotLensImpl(slot);
     }

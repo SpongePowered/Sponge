@@ -34,7 +34,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.common.entity.SpongeEntityType;
-import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
+import org.spongepowered.common.bridge.util.text.event.HoverEventBridge;
 import org.spongepowered.common.text.SpongeTexts;
 
 public class SpongeHoverAction {
@@ -88,7 +88,7 @@ public class SpongeHoverAction {
         }
 
         HoverEvent event = new HoverEvent(type, component);
-        ((IMixinHoverEvent) event).setHandle(action);
+        ((HoverEventBridge) event).setHandle(action);
         return event;
     }
 

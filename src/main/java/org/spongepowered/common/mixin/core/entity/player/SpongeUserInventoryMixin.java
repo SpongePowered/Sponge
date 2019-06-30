@@ -96,17 +96,17 @@ public abstract class SpongeUserInventoryMixin implements MinecraftInventoryAdap
     }
 
     @Override
-    public Lens getRootLens() {
+    public Lens bridge$getRootLens() {
         return this.lens;
     }
 
     @Override
-    public Fabric getFabric() {
+    public Fabric bridge$getFabric() {
         return this.inventory;
     }
 
     @Override
-    public Inventory getChild(Lens lens) {
+    public Inventory bridge$getChild(Lens lens) {
         return null;
     }
 
@@ -141,7 +141,7 @@ public abstract class SpongeUserInventoryMixin implements MinecraftInventoryAdap
 
     @SuppressWarnings("unchecked")
     @Override
-    public SlotProvider getSlotProvider() {
+    public SlotProvider bridge$getSlotProvider() {
         return this.slots;
     }
 

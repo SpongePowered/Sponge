@@ -43,7 +43,7 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLe
 import javax.annotation.Nullable;
 
 /**
- * Implement {@link InventoryAdapter#getSlotProvider()} and {@link InventoryAdapter#getRootLens()} using a {@link ReusableLensProvider} or {@link LensProvider}
+ * Implement {@link InventoryAdapter#bridge$getSlotProvider()} and {@link InventoryAdapter#bridge$getRootLens()} using a {@link ReusableLensProvider} or {@link LensProvider}
  */
 @Mixin(value = {
         TileEntityLockable.class,
@@ -57,7 +57,7 @@ public abstract class InventoryTraitAdapterMixin implements MinecraftInventoryAd
     @Nullable private SlotProvider slots = null;
 
     @Override
-    public SlotProvider getSlotProvider() {
+    public SlotProvider bridge$getSlotProvider() {
         if (this.slots != null) {
             return this.slots;
         }
@@ -65,7 +65,7 @@ public abstract class InventoryTraitAdapterMixin implements MinecraftInventoryAd
     }
 
     @Override
-    public Lens getRootLens() {
+    public Lens bridge$getRootLens() {
         return this.getReusableLens().getLens();
     }
 
@@ -76,21 +76,21 @@ public abstract class InventoryTraitAdapterMixin implements MinecraftInventoryAd
             return this.reusableLens;
         }
         if (this instanceof ReusableLensProvider) {
-            this.reusableLens = ((ReusableLensProvider) this).generateLens(this.getFabric(), this);
+            this.reusableLens = ((ReusableLensProvider) this).generateLens(this.bridge$getFabric(), this);
             return this.reusableLens;
         }
         if (this instanceof LensProvider) {
-            this.slots = ((LensProvider) this).slotProvider(this.getFabric(), this);
-            Lens lens = ((LensProvider) this).rootLens(this.getFabric(), this);
+            this.slots = ((LensProvider) this).bridge$slotProvider(this.bridge$getFabric(), this);
+            Lens lens = ((LensProvider) this).bridge$rootLens(this.bridge$getFabric(), this);
             this.reusableLens = new ReusableLens<>(this.slots, lens);
             return this.reusableLens;
         }
-        SlotCollection slots = new SlotCollection.Builder().add(this.getFabric().getSize()).build();
+        SlotCollection slots = new SlotCollection.Builder().add(this.bridge$getFabric().getSize()).build();
         Lens lens;
-        if (this.getFabric().getSize() == 0) {
+        if (this.bridge$getFabric().getSize() == 0) {
             lens = new DefaultEmptyLens(this);
         } else {
-            lens = new OrderedInventoryLensImpl(0, this.getFabric().getSize(), 1, slots);
+            lens = new OrderedInventoryLensImpl(0, this.bridge$getFabric().getSize(), 1, slots);
         }
         this.reusableLens = new ReusableLens<>(slots, lens);
         return this.reusableLens;

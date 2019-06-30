@@ -60,8 +60,8 @@ public class Query {
 
     private Query(InventoryAdapter adapter, QueryOperation<?>[] queries) {
         this.adapter = adapter;
-        this.inventory = adapter.getFabric();
-        this.lens = adapter.getRootLens();
+        this.inventory = adapter.bridge$getFabric();
+        this.lens = adapter.bridge$getRootLens();
         this.queries = queries;
     }
 

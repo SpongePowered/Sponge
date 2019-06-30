@@ -34,14 +34,14 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
-import org.spongepowered.common.mixin.core.tileentity.AccessorTileEntityMobSpawner;
+import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
 
 import java.util.Optional;
 
-public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<AccessorTileEntityMobSpawner, WeightedTable<EntityArchetype>, WeightedCollectionValue<EntityArchetype>> {
+public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<TileEntityMobSpawnerAccessor, WeightedTable<EntityArchetype>, WeightedCollectionValue<EntityArchetype>> {
 
     public SpawnerEntitiesValueProcessor() {
-        super(AccessorTileEntityMobSpawner.class, Keys.SPAWNER_ENTITIES);
+        super(TileEntityMobSpawnerAccessor.class, Keys.SPAWNER_ENTITIES);
     }
 
     @Override
@@ -50,13 +50,13 @@ public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected boolean set(AccessorTileEntityMobSpawner container, WeightedTable<EntityArchetype> value) {
+    protected boolean set(TileEntityMobSpawnerAccessor container, WeightedTable<EntityArchetype> value) {
         SpawnerUtils.setEntities(container.accessor$getSpawnerLogic(), value);
         return true;
     }
 
     @Override
-    protected Optional<WeightedTable<EntityArchetype>> getVal(AccessorTileEntityMobSpawner container) {
+    protected Optional<WeightedTable<EntityArchetype>> getVal(TileEntityMobSpawnerAccessor container) {
         return Optional.of(SpawnerUtils.getEntities(container.accessor$getSpawnerLogic()));
     }
 

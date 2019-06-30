@@ -45,7 +45,7 @@ public class LargeChestInventoryLens extends RealLens {
     private int lowerChest;
 
     public LargeChestInventoryLens(InventoryAdapter adapter, SlotProvider slots) {
-        super(0, adapter.getFabric().getSize(), OrderedInventoryAdapter.class, slots);
+        super(0, adapter.bridge$getFabric().getSize(), OrderedInventoryAdapter.class, slots);
         InventoryLargeChest inventory = (InventoryLargeChest) adapter;
         this.upperChest = inventory.upperChest.getSizeInventory();
         this.lowerChest = inventory.lowerChest.getSizeInventory();
@@ -53,8 +53,8 @@ public class LargeChestInventoryLens extends RealLens {
     }
 
     public LargeChestInventoryLens(int base, InventoryAdapter adapter, SlotProvider slots) {
-        super(base, adapter.getFabric().getSize(), OrderedInventoryAdapter.class, slots);
-        InventoryLargeChest inventory = (InventoryLargeChest) adapter.getFabric().get(0);
+        super(base, adapter.bridge$getFabric().getSize(), OrderedInventoryAdapter.class, slots);
+        InventoryLargeChest inventory = (InventoryLargeChest) adapter.bridge$getFabric().get(0);
         this.upperChest = inventory.upperChest.getSizeInventory();
         this.lowerChest = inventory.lowerChest.getSizeInventory();
         this.initLargeChest(slots);

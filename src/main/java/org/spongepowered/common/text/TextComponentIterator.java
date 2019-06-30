@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.UnmodifiableIterator;
 import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.common.interfaces.text.IMixinTextComponent;
+import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -37,15 +37,15 @@ import javax.annotation.Nullable;
 
 public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> {
 
-    private IMixinTextComponent component;
+    private ITextComponentBridge component;
     private Iterator<ITextComponent> children;
     @Nullable private Iterator<ITextComponent> currentChildIterator;
 
-    public TextComponentIterator(IMixinTextComponent component) {
+    public TextComponentIterator(final ITextComponentBridge component) {
         this.component = checkNotNull(component, "component");
     }
 
-    public TextComponentIterator(Iterator<ITextComponent> children) {
+    public TextComponentIterator(final Iterator<ITextComponent> children) {
         this.children = checkNotNull(children, "children");
         if (this.children.hasNext()) {
             this.setCurrentChildIterator();
@@ -70,7 +70,7 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
             return this.init();
         }
 
-        ITextComponent result = this.currentChildIterator.next();
+        final ITextComponent result = this.currentChildIterator.next();
 
         if (!this.currentChildIterator.hasNext() && this.children.hasNext()) {
             this.setCurrentChildIterator();
@@ -80,9 +80,9 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
     }
 
     private ITextComponent init() {
-        this.children = this.component.childrenIterator();
+        this.children = this.component.bridge$childrenIterator();
 
-        ITextComponent result = this.component;
+        final ITextComponent result = (ITextComponent) this.component;
         this.component = null;
 
         // An iterator of an empty TextComponentTranslation doesn't have children. Thus, calling 'this.currentChildIterator.next()'
@@ -96,7 +96,7 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
     }
 
     private void setCurrentChildIterator() {
-        this.currentChildIterator = ((IMixinTextComponent) this.children.next()).withChildren().iterator();
+        this.currentChildIterator = ((ITextComponentBridge) this.children.next()).bridge$withChildren().iterator();
     }
 
 }

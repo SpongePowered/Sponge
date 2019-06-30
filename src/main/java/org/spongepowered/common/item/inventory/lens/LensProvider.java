@@ -28,8 +28,8 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 
 public interface LensProvider {
 
-    Lens rootLens(Fabric fabric, InventoryAdapter adapter);
+    Lens bridge$rootLens(Fabric fabric, InventoryAdapter adapter);
 
-    SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter);
+    SlotProvider bridge$slotProvider(Fabric fabric, InventoryAdapter adapter);
     
 }

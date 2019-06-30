@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.entity.ai;
 
+import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 
@@ -33,9 +34,12 @@ import javax.annotation.Nullable;
 
 public interface EntityGoalBridge {
 
-    void setType(AITaskType type);
+    void bridge$setType(AITaskType type);
 
-    Optional<Goal<?>> getAIGoal();
+    Optional<Goal<?>> bridge$getAIGoal();
 
-    void setGoal(@Nullable Goal<?> owner);
+    void bridge$setGoal(@Nullable Goal<?> owner);
+
+    AITaskType bridge$getType();
+
 }

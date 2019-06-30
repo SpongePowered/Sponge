@@ -29,13 +29,13 @@ import org.spongepowered.common.entity.SpongeEntityType;
 
 public interface TrackableBridge {
 
-    boolean allowsBlockBulkCapture();
+    boolean bridge$allowsBlockBulkCapture();
 
-    boolean allowsEntityBulkCapture();
+    boolean bridge$allowsEntityBulkCapture();
 
-    boolean allowsBlockEventCreation();
+    boolean bridge$allowsBlockEventCreation();
 
-    boolean allowsEntityEventCreation();
+    boolean bridge$allowsEntityEventCreation();
 
     /**
      * Tells this trackable to refresh it's tracker states.
@@ -44,5 +44,5 @@ public interface TrackableBridge {
      * trackable types have that information tracked through
      * their parent type (such as {@link SpongeEntityType}.
      */
-    default void refreshTrackerStates() { }
+    default void bridge$refreshTrackerStates() { }
 }

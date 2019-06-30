@@ -27,7 +27,7 @@ package org.spongepowered.common.text.action;
 import net.minecraft.util.text.event.ClickEvent;
 
 import org.spongepowered.api.text.action.ClickAction;
-import org.spongepowered.common.interfaces.text.IMixinClickEvent;
+import org.spongepowered.common.bridge.util.text.event.ClickEventBridge;
 
 import java.util.UUID;
 
@@ -59,7 +59,7 @@ public final class SpongeClickAction {
         }
 
         ClickEvent event = new ClickEvent(getType(action), text);
-        ((IMixinClickEvent) event).setHandle(action);
+        ((ClickEventBridge) event).setHandle(action);
         return event;
     }
 

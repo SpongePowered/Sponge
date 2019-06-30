@@ -101,7 +101,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
-import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
@@ -207,7 +207,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onSpongeConstruction(final net.minecraft.world.World worldIn, final CallbackInfo ci) {
         if (this.entityType.isKnown()) {
-            this.refreshTrackerStates();
+            this.bridge$refreshTrackerStates();
             if (this.entityType.getEnumCreatureType() == null) {
                 for (final EnumCreatureType type : EnumCreatureType.values()) {
                     if (SpongeImplHooks.isCreatureOfType((Entity) (Object) this, type)) {
@@ -362,7 +362,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if ((Entity) (Object) this instanceof EntityPlayerMP) {
             final EntityPlayerMP player = (EntityPlayerMP) (Object) this;
             if (player.connection != null) {
-                ((IMixinNetHandlerPlayServer) player.connection).captureCurrentPlayerPosition();
+                ((NetHandlerPlayServerBridge) player.connection).bridge$captureCurrentPlayerPosition();
             }
         }
     }
@@ -792,22 +792,22 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     }
 
     @Override
-    public boolean allowsBlockBulkCapture() {
+    public boolean bridge$allowsBlockBulkCapture() {
         return this.entityType.allowsBlockBulkCapture;
     }
 
     @Override
-    public boolean allowsEntityBulkCapture() {
+    public boolean bridge$allowsEntityBulkCapture() {
         return this.entityType.allowsEntityBulkCapture;
     }
 
     @Override
-    public boolean allowsBlockEventCreation() {
+    public boolean bridge$allowsBlockEventCreation() {
         return this.entityType.allowsBlockEventCreation;
     }
 
     @Override
-    public boolean allowsEntityEventCreation() {
+    public boolean bridge$allowsEntityEventCreation() {
         return this.entityType.allowsEntityEventCreation;
     }
 

@@ -44,7 +44,7 @@ public class FurnaceInventoryLens extends RealLens {
     }
 
     public FurnaceInventoryLens(int base, InventoryAdapter adapter, SlotProvider slots) {
-        super(base, adapter.getFabric().getSize(), adapter.getClass(), slots);
+        super(base, adapter.bridge$getFabric().getSize(), adapter.getClass(), slots);
         this.init(slots);
     }
 

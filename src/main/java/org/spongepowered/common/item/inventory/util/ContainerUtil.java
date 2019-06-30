@@ -69,7 +69,7 @@ import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
+import org.spongepowered.common.bridge.tileentity.SingleBlockCarrierBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
@@ -97,7 +97,7 @@ import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInvento
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
-import org.spongepowered.common.mixin.core.inventory.MixinInventoryHelper;
+import org.spongepowered.common.mixin.core.inventory.InventoryHelperMixin;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -137,7 +137,7 @@ public final class ContainerUtil {
     }
 
     /**
-     * Replacement helper method for {@link MixinInventoryHelper#spongeDropInventoryItems(World, double, double, double, IInventory)}
+     * Replacement helper method for {@link InventoryHelperMixin#spongeDropInventoryItems(World, double, double, double, IInventory)}
      * to perform cause tracking related drops. This is specific for blocks, not for any other cases.
      *
      * @param worldServer The world server
@@ -194,7 +194,7 @@ public final class ContainerUtil {
     public static Lens getLens(Fabric fabric, net.minecraft.inventory.Container container, SlotProvider slots) {
         // Container is Adapter?
         if (container instanceof InventoryAdapter) {
-            Lens lens = ((InventoryAdapter) container).getRootLens();
+            Lens lens = ((InventoryAdapter) container).bridge$getRootLens();
             if (lens != null) {
                 return lens;
             }
@@ -205,7 +205,7 @@ public final class ContainerUtil {
         if (container instanceof LensProvider) {
             // TODO LensProviders for all Vanilla Containers
             InventoryAdapter adapter = ((InventoryAdapter) container);
-            return ((LensProvider) container).rootLens(fabric, adapter);
+            return ((LensProvider) container).bridge$rootLens(fabric, adapter);
         }
 
         // For those Sheep-Crafting inventories
@@ -248,7 +248,7 @@ public final class ContainerUtil {
             // Check if sub-inventory is LensProvider
             if (lens == null && subInventory instanceof LensProvider) {
                 Fabric keyFabric = MinecraftFabric.of(subInventory);
-                lens = ((LensProvider) subInventory).rootLens(keyFabric, new VanillaAdapter(keyFabric, container));
+                lens = ((LensProvider) subInventory).bridge$rootLens(keyFabric, new VanillaAdapter(keyFabric, container));
             }
             // Unknown Inventory or Inventory size <> Lens size
             if (lens == null || lens.slotCount() != slotCount) {
@@ -305,7 +305,7 @@ public final class ContainerUtil {
         if (!(subInventory instanceof InventoryAdapter)) {
             return null;
         }
-        Lens adapterLens = ((InventoryAdapter) subInventory).getRootLens();
+        Lens adapterLens = ((InventoryAdapter) subInventory).bridge$getRootLens();
         if (adapterLens == null) {
             return null;
         }
@@ -383,7 +383,7 @@ public final class ContainerUtil {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static SlotProvider countSlots(net.minecraft.inventory.Container container, Fabric fabric) {
         if (container instanceof LensProvider) {
-            return ((LensProvider) container).slotProvider(fabric, ((InventoryAdapter) container));
+            return ((LensProvider) container).bridge$slotProvider(fabric, ((InventoryAdapter) container));
         }
 
         SlotCollection.Builder builder = new SlotCollection.Builder();
@@ -485,7 +485,7 @@ public final class ContainerUtil {
                 }
                 // Slot Inventory is a TileEntity
                 if (slot.inventory instanceof TileEntity) {
-                    return new IMixinSingleBlockCarrier() {
+                    return new SingleBlockCarrierBridge() {
                         @Override
                         public Location<org.spongepowered.api.world.World> getLocation() {
                             BlockPos pos = ((TileEntity) slot.inventory).getPos();
@@ -503,7 +503,7 @@ public final class ContainerUtil {
         }
         Location<org.spongepowered.api.world.World> loc = ((ContainerBridge) container).getOpenLocation();
         if (loc != null) {
-            return new IMixinSingleBlockCarrier() {
+            return new SingleBlockCarrierBridge() {
                 @Override
                 public Location<org.spongepowered.api.world.World> getLocation() {
                     return loc;

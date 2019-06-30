@@ -36,7 +36,7 @@ import net.minecraft.world.World;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
+import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
@@ -120,8 +120,8 @@ public class WrapperICommandSender implements ICommandSender {
     }
 
     public static ICommandSender of(CommandSource source) {
-        if (source instanceof IMixinCommandSource) {
-            return ((IMixinCommandSource) source).asICommandSender();
+        if (source instanceof CommandSourceBridge) {
+            return ((CommandSourceBridge) source).bridge$asICommandSender();
         }
         if (source instanceof WrapperCommandSource) {
             return ((WrapperCommandSource) source).sender;

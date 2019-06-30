@@ -25,16 +25,16 @@
 package org.spongepowered.common.text;
 
 import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.common.interfaces.text.IMixinTextComponent;
+import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
 
 import java.util.Iterator;
 
 public class TextComponentIterable implements Iterable<ITextComponent> {
 
-    private final IMixinTextComponent component;
+    private final ITextComponentBridge component;
     private final boolean includeSelf;
 
-    public TextComponentIterable(IMixinTextComponent component, boolean includeSelf) {
+    public TextComponentIterable(ITextComponentBridge component, boolean includeSelf) {
         this.component = component;
         this.includeSelf = includeSelf;
     }
@@ -44,7 +44,7 @@ public class TextComponentIterable implements Iterable<ITextComponent> {
         if (this.includeSelf) {
             return new TextComponentIterator(this.component);
         }
-        return new TextComponentIterator(this.component.childrenIterator());
+        return new TextComponentIterator(this.component.bridge$childrenIterator());
     }
 
 }

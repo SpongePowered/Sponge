@@ -26,7 +26,7 @@ package org.spongepowered.common.text.serializer;
 
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.FormattingCodeTextSerializer;
-import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.bridge.api.text.TextBridge;
 
 public final class SpongeFormattingCodeTextSerializer implements FormattingCodeTextSerializer {
 
@@ -61,12 +61,12 @@ public final class SpongeFormattingCodeTextSerializer implements FormattingCodeT
 
     @Override
     public String serialize(Text text) {
-        return ((IMixinText) text).toLegacy(this.formattingChar);
+        return ((TextBridge) text).bridge$toLegacy(this.formattingChar);
     }
 
     @Override
     public String serializeSingle(Text text) {
-        return ((IMixinText) text).toLegacy(this.formattingChar);
+        return ((TextBridge) text).bridge$toLegacy(this.formattingChar);
     }
 
     @Override

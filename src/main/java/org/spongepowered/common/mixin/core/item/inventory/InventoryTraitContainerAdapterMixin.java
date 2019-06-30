@@ -58,7 +58,7 @@ import javax.annotation.Nullable;
 /**
  * Mixin into all known vanilla {@link IInventory} and {@link Container}
  *
- * <p>To work {@link InventoryAdapter#getSlotProvider()} and {@link InventoryAdapter#getRootLens()} need to be implemented</p>
+ * <p>To work {@link InventoryAdapter#bridge$getSlotProvider()} and {@link InventoryAdapter#bridge$getRootLens()} need to be implemented</p>
  */
 @Mixin(value = {
         net.minecraft.inventory.Slot.class,
@@ -92,8 +92,8 @@ public abstract class InventoryTraitContainerAdapterMixin implements MinecraftIn
     }
 
     @Override
-    public Inventory getChild(int index) {
-        if (index < 0 || index >= this.getRootLens().getChildren().size()) {
+    public Inventory bridge$getChild(int index) {
+        if (index < 0 || index >= this.bridge$getRootLens().getChildren().size()) {
             throw new IndexOutOfBoundsException("No child at index: " + index);
         }
         while (index >= this.children.size()) {
@@ -101,7 +101,7 @@ public abstract class InventoryTraitContainerAdapterMixin implements MinecraftIn
         }
         Inventory child = this.children.get(index);
         if (child == null) {
-            child = this.getRootLens().getChildren().get(index).getAdapter(this.getFabric(), this);
+            child = this.bridge$getRootLens().getChildren().get(index).getAdapter(this.bridge$getFabric(), this);
             this.children.set(index, child);
         }
         return child;
@@ -111,18 +111,18 @@ public abstract class InventoryTraitContainerAdapterMixin implements MinecraftIn
     @Override
     public <T extends Inventory> Iterable<T> slots() {
         if (this.slotIterator == null) {
-            this.slotIterator = new SlotCollectionIterator(this, this.getFabric(), this.getRootLens(), this.getSlotProvider());
+            this.slotIterator = new SlotCollectionIterator(this, this.bridge$getFabric(), this.bridge$getRootLens(), this.bridge$getSlotProvider());
         }
         return (Iterable<T>) this.slotIterator;
     }
 
     @Intrinsic
     public void inventory$clear() {
-        this.getFabric().clear();
+        this.bridge$getFabric().clear();
     }
 
     @Override
-    public Fabric getFabric() {
+    public Fabric bridge$getFabric() {
         if (this.fabric == null) {
             this.fabric = MinecraftFabric.of(this);
         }

@@ -44,9 +44,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeInternalListeners;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.interfaces.IMixinCommandSender;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
-import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.bridge.command.CommandSenderBridge;
+import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
 import java.util.Collections;
@@ -63,8 +63,8 @@ import javax.annotation.Nullable;
  */
 @NonnullByDefault
 @Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class,
-        SpongeUser.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
-public abstract class MixinSubject implements Subject, IMixinCommandSource, IMixinSubject {
+        SpongeUser.class}, targets = CommandSenderBridge.SIGN_CLICK_SENDER)
+public abstract class MixinSubject implements Subject, CommandSourceBridge, SubjectBridge {
 
     @Nullable
     private SubjectReference thisSubject;
@@ -77,12 +77,12 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     }
 
     @Override
-    public void setSubject(SubjectReference subj) {
+    public void bridge$setSubject(SubjectReference subj) {
         this.thisSubject = subj;
     }
 
     @Override
-    public CompletableFuture<Subject> loadInternalSubject() {
+    public CompletableFuture<Subject> bridge$loadInternalSubject() {
         return asSubjectReference().resolve();
     }
 
@@ -159,7 +159,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     public Tristate getPermissionValue(Set<Context> contexts, String permission) {
         Subject subj = resolveNullable();
         if (subj == null) {
-            return permDefault(permission);
+            return bridge$permDefault(permission);
         } else {
             return subj.getPermissionValue(contexts, permission);
         }
@@ -169,7 +169,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     public boolean hasPermission(Set<Context> contexts, String permission) {
         Subject subj = resolveNullable();
         if (subj == null) {
-            return permDefault(permission).asBoolean();
+            return bridge$permDefault(permission).asBoolean();
         }
 
         // these calls are not directly forwarded to the subject, so we can
@@ -177,7 +177,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
         Tristate ret = getPermissionValue(contexts, permission);
         switch (ret) {
             case UNDEFINED:
-                return permDefault(permission).asBoolean();
+                return bridge$permDefault(permission).asBoolean();
             default:
                 return ret.asBoolean();
         }

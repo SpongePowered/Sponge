@@ -57,9 +57,9 @@ public class ReverseTransformation implements InventoryTransformation {
 
         MinecraftInventoryAdapter adapter = (MinecraftInventoryAdapter) inventory;
 
-        CompoundLens lens = CompoundLens.builder().add(adapter.getRootLens()).build(slotProvider);
+        CompoundLens lens = CompoundLens.builder().add(adapter.bridge$getRootLens()).build(slotProvider);
 
-        InventoryAdapter newAdapter = lens.getAdapter(adapter.getFabric(), inventory);
+        InventoryAdapter newAdapter = lens.getAdapter(adapter.bridge$getFabric(), inventory);
 
         return Query.compile(newAdapter,
                 new SlotLensQueryOperation(ImmutableSet.of(newAdapter))).execute();

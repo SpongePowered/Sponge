@@ -47,7 +47,7 @@ public class CustomLens extends RealLens {
 
     public CustomLens(InventoryAdapter adapter, SlotProvider slots, InventoryArchetype archetype,
             Map<String, InventoryProperty<?, ?>> properties) {
-        super(0, adapter.getFabric().getSize(), adapter, slots);
+        super(0, adapter.bridge$getFabric().getSize(), adapter, slots);
         this.archetype = archetype;
         this.properties = properties;
         this.init(slots);

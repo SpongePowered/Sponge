@@ -43,7 +43,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeStatisticD
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
-import org.spongepowered.common.interfaces.statistic.IMixinStatisticsManager;
+import org.spongepowered.common.bridge.stats.StatisticsManagerBridge;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,14 +61,14 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
     }
 
     @Override
-    protected boolean set(EntityPlayerMP player, Map<Statistic, Long> statMap) {
+    protected boolean set(final EntityPlayerMP player, final Map<Statistic, Long> statMap) {
         checkNotNull(player, "null player");
         checkNotNull(statMap, "null stat map");
-        StatisticsManagerServer stats = player.getStatFile();
-        for (Entry<Statistic, Long> statEntry : statMap.entrySet()) {
-            Long value = statEntry.getValue();
-            StatBase stat = (StatBase) statEntry.getKey();
-            int currentValue = stats.readStat(stat);
+        final StatisticsManagerServer stats = player.getStatFile();
+        for (final Entry<Statistic, Long> statEntry : statMap.entrySet()) {
+            final Long value = statEntry.getValue();
+            final StatBase stat = (StatBase) statEntry.getKey();
+            final int currentValue = stats.readStat(stat);
             if (value != null) {
                 stats.increaseStat(player, (StatBase) statEntry.getKey(), (int) (value - currentValue));
             }
@@ -77,29 +77,29 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
     }
 
     @Override
-    protected Optional<Map<Statistic, Long>> getVal(EntityPlayerMP player) {
+    protected Optional<Map<Statistic, Long>> getVal(final EntityPlayerMP player) {
         checkNotNull(player, "null player");
-        StatisticsManagerServer stats = player.getStatFile();
-        Map<StatBase, TupleIntJsonSerializable> data = ((IMixinStatisticsManager) stats).getStatsData();
-        Map<Statistic, Long> statMap = Maps.newHashMap();
-        for (Entry<StatBase, TupleIntJsonSerializable> statEntry : data.entrySet()) {
+        final StatisticsManagerServer stats = player.getStatFile();
+        final Map<StatBase, TupleIntJsonSerializable> data = ((StatisticsManagerBridge) stats).getStatsData();
+        final Map<Statistic, Long> statMap = Maps.newHashMap();
+        for (final Entry<StatBase, TupleIntJsonSerializable> statEntry : data.entrySet()) {
             statMap.put((Statistic) statEntry.getKey(), (long) statEntry.getValue().getIntegerValue());
         }
         return Optional.of(statMap);
     }
 
     @Override
-    protected ImmutableValue<Map<Statistic, Long>> constructImmutableValue(Map<Statistic, Long> value) {
+    protected ImmutableValue<Map<Statistic, Long>> constructImmutableValue(final Map<Statistic, Long> value) {
         return new ImmutableSpongeMapValue<>(Keys.STATISTICS, checkNotNull(value, "null value"));
     }
 
     @Override
-    protected MapValue<Statistic, Long> constructValue(Map<Statistic, Long> actualValue) {
+    protected MapValue<Statistic, Long> constructValue(final Map<Statistic, Long> actualValue) {
         return new SpongeMapValue<>(Keys.STATISTICS, checkNotNull(actualValue, "null value"));
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

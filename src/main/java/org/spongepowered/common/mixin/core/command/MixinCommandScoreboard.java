@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.interfaces.command.IMixinCommandBase;
+import org.spongepowered.common.bridge.command.ICommandBridge;
 
 import java.util.Iterator;
 import java.util.UUID;
@@ -44,7 +44,7 @@ import java.util.UUID;
  * the '/scoreboard' command. Without it, Humans will be added by their UUID,
  */
 @Mixin(CommandScoreboard.class)
-public abstract class MixinCommandScoreboard extends CommandBase implements IMixinCommandBase {
+public abstract class MixinCommandScoreboard extends CommandBase implements ICommandBridge {
 
     // The static method's owner is CommandScoreboard for some odd reason, despite it coming from CommandBase
     private static final String GET_ENTITY_NAME = "Lnet/minecraft/command/server/CommandScoreboard;getEntityName"
@@ -96,7 +96,7 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
     @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 1))
     public String onGetEntityNameLeaveSecond(MinecraftServer server, ICommandSender sender, String string) throws CommandException {
         String entityName = CommandBase.getEntityName(server, sender, string);
-        if (this.isExpandedSelector()) {
+        if (this.bridge$isExpandedSelector()) {
             try {
                 UUID uuid = UUID.fromString(entityName);
                 Entity entity = sender.getServer().getEntityFromUuid(uuid);

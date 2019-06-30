@@ -55,6 +55,11 @@ public abstract class TileEntityCommandBlockMixin_API extends TileEntityMixin_AP
     }
 
     @Override
+    public String getName() {
+        return getCommandBlockLogic().getName();
+    }
+
+    @Override
     @SuppressWarnings("deprecated")
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();

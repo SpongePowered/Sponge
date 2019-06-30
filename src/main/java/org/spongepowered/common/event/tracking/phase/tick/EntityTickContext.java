@@ -47,10 +47,10 @@ public class EntityTickContext extends TickContext<EntityTickContext> {
         super.source(owner);
         if (owner instanceof TrackableBridge) {
             final TrackableBridge mixinEntity = (TrackableBridge) owner;
-            setBulkBlockCaptures(mixinEntity.allowsBlockBulkCapture());
-            setBlockEvents(mixinEntity.allowsBlockEventCreation());
-            setBulkEntityCaptures(mixinEntity.allowsEntityBulkCapture());
-            setEntitySpawnEvents(mixinEntity.allowsEntityEventCreation());
+            setBulkBlockCaptures(mixinEntity.bridge$allowsBlockBulkCapture());
+            setBlockEvents(mixinEntity.bridge$allowsBlockEventCreation());
+            setBulkEntityCaptures(mixinEntity.bridge$allowsEntityBulkCapture());
+            setEntitySpawnEvents(mixinEntity.bridge$allowsEntityEventCreation());
         }
         this.populateEntityPosition((Entity) owner);
         return super.source(owner);

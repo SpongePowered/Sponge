@@ -136,11 +136,11 @@ public class SlotCollection extends DynamicLensCollectionImpl implements SlotPro
     }
 
     public Iterable<Slot> getIterator(InventoryAdapter adapter) {
-        return this.getIterator(adapter, adapter.getFabric(), adapter.getRootLens());
+        return this.getIterator(adapter, adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
     public Iterable<Slot> getIterator(Inventory parent, InventoryAdapter adapter) {
-        return this.getIterator(parent, adapter.getFabric(), adapter.getRootLens());
+        return this.getIterator(parent, adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

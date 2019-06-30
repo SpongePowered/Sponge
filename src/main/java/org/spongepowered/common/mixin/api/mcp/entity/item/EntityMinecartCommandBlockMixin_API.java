@@ -25,10 +25,18 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.EntityMinecartCommandBlock;
+import net.minecraft.tileentity.CommandBlockBaseLogic;
 import org.spongepowered.api.entity.vehicle.minecart.CommandBlockMinecart;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(EntityMinecartCommandBlock.class)
 public abstract class EntityMinecartCommandBlockMixin_API extends EntityMinecartMixin_API implements CommandBlockMinecart {
 
+    @Shadow public abstract CommandBlockBaseLogic getCommandBlockLogic();
+
+    @Override
+    public String getName() {
+        return getCommandBlockLogic().getName();
+    }
 }

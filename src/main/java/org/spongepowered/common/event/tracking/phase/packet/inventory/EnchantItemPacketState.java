@@ -66,7 +66,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
         // To detect when this happens, we turn off capturing so we can avoid
         // firing
         // invalid events.
-        // See MixinNetHandlerPlayServer processClickWindow redirect for rest of
+        // See NetHandlerPlayServerMixin processClickWindow redirect for rest of
         // fix.
         // --bloodmc
         final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);

@@ -53,7 +53,7 @@ public abstract class AdapterLogic{
     private AdapterLogic() {}
 
     public static Optional<ItemStack> pollSequential(InventoryAdapter adapter) {
-        return AdapterLogic.pollSequential(adapter.getFabric(), adapter.getRootLens());
+        return AdapterLogic.pollSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
     public static Optional<ItemStack> pollSequential(Fabric inv, Lens lens) {
@@ -61,7 +61,7 @@ public abstract class AdapterLogic{
     }
 
     public static Optional<ItemStack> pollSequential(InventoryAdapter adapter, int limit) {
-        return AdapterLogic.pollSequential(adapter.getFabric(), adapter.getRootLens(), limit);
+        return AdapterLogic.pollSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), limit);
     }
 
     public static Optional<ItemStack> pollSequential(Fabric inv, Lens lens, int limit) {
@@ -69,7 +69,7 @@ public abstract class AdapterLogic{
     }
 
     public static Optional<ItemStack> peekSequential(InventoryAdapter adapter) {
-        return AdapterLogic.peekSequential(adapter.getFabric(), adapter.getRootLens());
+        return AdapterLogic.peekSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
     public static Optional<ItemStack> peekSequential(Fabric inv, Lens lens) {
@@ -77,7 +77,7 @@ public abstract class AdapterLogic{
     }
 
     public static Optional<ItemStack> peekSequential(InventoryAdapter adapter, int limit) {
-        return AdapterLogic.peekSequential(adapter.getFabric(), adapter.getRootLens(), limit);
+        return AdapterLogic.peekSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), limit);
     }
 
     public static Optional<ItemStack> peekSequential(Fabric inv, Lens lens, int limit) {
@@ -140,7 +140,7 @@ public abstract class AdapterLogic{
     }
 
     public static InventoryTransactionResult insertSequential(InventoryAdapter adapter, ItemStack stack) {
-        return AdapterLogic.insertSequential(adapter.getFabric(), adapter.getRootLens(), stack);
+        return AdapterLogic.insertSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), stack);
     }
 
     public static InventoryTransactionResult insertSequential(Fabric inv, Lens lens, ItemStack stack) {
@@ -180,7 +180,7 @@ public abstract class AdapterLogic{
     }
 
     public static InventoryTransactionResult appendSequential(InventoryAdapter adapter, ItemStack stack) {
-        return AdapterLogic.appendSequential(adapter.getFabric(), adapter.getRootLens(), stack);
+        return AdapterLogic.appendSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), stack);
     }
 
     public static InventoryTransactionResult appendSequential(Fabric inv, Lens lens, ItemStack stack) {
@@ -214,7 +214,7 @@ public abstract class AdapterLogic{
     }
 
     public static int countStacks(InventoryAdapter adapter) {
-        return AdapterLogic.countStacks(adapter.getFabric(), adapter.getRootLens());
+        return AdapterLogic.countStacks(adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
     public static int countStacks(Fabric inv, Lens lens) {
@@ -228,7 +228,7 @@ public abstract class AdapterLogic{
     }
 
     public static int countItems(InventoryAdapter adapter) {
-        return AdapterLogic.countItems(adapter.getFabric(), adapter.getRootLens());
+        return AdapterLogic.countItems(adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
     public static int countItems(Fabric inv, Lens lens) {
@@ -243,7 +243,7 @@ public abstract class AdapterLogic{
     }
 
     public static int getCapacity(InventoryAdapter adapter) {
-        return AdapterLogic.getCapacity(adapter.getFabric(), adapter.getRootLens());
+        return AdapterLogic.getCapacity(adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
     public static int getCapacity(Fabric inv, Lens lens) {
@@ -252,7 +252,7 @@ public abstract class AdapterLogic{
 
     public static Collection<InventoryProperty<?, ?>> getProperties(InventoryAdapter adapter,
             Inventory child, Class<? extends InventoryProperty<?, ?>> property) {
-        return AdapterLogic.getProperties(adapter.getFabric(), adapter.getRootLens(), child, property);
+        return AdapterLogic.getProperties(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), child, property);
     }
 
     public static Collection<InventoryProperty<?, ?>> getProperties(Fabric inv, Lens lens,
@@ -260,7 +260,7 @@ public abstract class AdapterLogic{
 
         if (child instanceof InventoryAdapter) {
             checkNotNull(property, "property");
-            int index = lens.getChildren().indexOf(((InventoryAdapter) child).getRootLens());
+            int index = lens.getChildren().indexOf(((InventoryAdapter) child).bridge$getRootLens());
             if (index > -1) {
                 return lens.getProperties(index).stream().filter(prop -> property.equals(prop.getClass()))
                         .collect(Collectors.toCollection(ArrayList::new));
@@ -294,7 +294,7 @@ public abstract class AdapterLogic{
     @SuppressWarnings("unchecked")
     private static <T extends InventoryProperty<?, ?>> Optional<T> findRootProperty(InventoryAdapter adapter, Class<T> property) {
         if (property == InventoryTitle.class) {
-            Text text = Text.of(adapter.getFabric().getDisplayName());
+            Text text = Text.of(adapter.bridge$getFabric().getDisplayName());
             return (Optional<T>) Optional.of(InventoryTitle.of(text));
         }
         // TODO more properties of top level inventory
@@ -307,7 +307,7 @@ public abstract class AdapterLogic{
         adapter = ((InventoryAdapter) adapter.root());
         if (adapter instanceof Container) {
             // If Root is a Container get the viewed inventory
-            Object first = adapter.getFabric().get(0);
+            Object first = adapter.bridge$getFabric().get(0);
             if (first instanceof CustomInventory) {
                 // if viewed inventory is a custom inventory get it instead
                 adapter = ((InventoryAdapter) first);
@@ -317,11 +317,11 @@ public abstract class AdapterLogic{
     }
 
     public static boolean contains(InventoryAdapter adapter, ItemStack stack) {
-        return AdapterLogic.contains(adapter.getFabric(), adapter.getRootLens(), stack, stack.getQuantity());
+        return AdapterLogic.contains(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), stack, stack.getQuantity());
     }
 
     public static boolean contains(InventoryAdapter adapter, ItemStack stack, int quantity) {
-        return AdapterLogic.contains(adapter.getFabric(), adapter.getRootLens(), stack, quantity);
+        return AdapterLogic.contains(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), stack, quantity);
     }
 
     /**
@@ -358,7 +358,7 @@ public abstract class AdapterLogic{
     }
 
     public static boolean contains(InventoryAdapter adapter, ItemType type) {
-        return AdapterLogic.contains(adapter.getFabric(), adapter.getRootLens(), type);
+        return AdapterLogic.contains(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), type);
     }
 
     public static boolean contains(Fabric inv, Lens lens, ItemType type) {
@@ -379,8 +379,8 @@ public abstract class AdapterLogic{
 
     public static boolean canFit(InventoryAdapter adapter, ItemStack stack) {
 
-        Fabric inv = adapter.getFabric();
-        Lens lens = adapter.getRootLens();
+        Fabric inv = adapter.bridge$getFabric();
+        Lens lens = adapter.bridge$getRootLens();
 
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 

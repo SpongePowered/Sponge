@@ -29,8 +29,8 @@ import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextParseException;
 import org.spongepowered.api.text.serializer.TextSerializer;
-import org.spongepowered.common.interfaces.text.IMixinTextComponent;
-import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.bridge.api.text.TextBridge;
 
 /**
  * TextSerializer implementation for the json format.
@@ -49,7 +49,7 @@ public final class JsonTextSerializer implements TextSerializer {
 
     @Override
     public String serialize(Text text) {
-        return ((IMixinText) text).toJson();
+        return ((TextBridge) text).bridge$toJson();
     }
 
     @Override
@@ -60,7 +60,7 @@ public final class JsonTextSerializer implements TextSerializer {
                 return Text.EMPTY;
             }
 
-            return ((IMixinTextComponent) component).toText();
+            return ((ITextComponentBridge) component).bridge$toText();
         } catch (JsonParseException e) {
             throw new TextParseException("Failed to parse JSON", e);
         }

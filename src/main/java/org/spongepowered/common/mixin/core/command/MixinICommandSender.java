@@ -34,15 +34,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.command.CommandPermissions;
-import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.bridge.command.CommandSenderBridge;
 
-@Mixin(value = {EntityPlayerMP.class, MinecraftServer.class, RConConsoleSource.class, CommandBlockBaseLogic.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
+@Mixin(value = {EntityPlayerMP.class, MinecraftServer.class, RConConsoleSource.class, CommandBlockBaseLogic.class}, targets = CommandSenderBridge.SIGN_CLICK_SENDER)
 public abstract class MixinICommandSender implements ICommandSender {
 
     @Inject(method = "canUseCommand(ILjava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
     private void onCanUseCommand(int permissionLevel, String commandName, CallbackInfoReturnable<Boolean> cir) {
-        if (this instanceof IMixinCommandSender) {
-            cir.setReturnValue(CommandPermissions.testPermission(((IMixinCommandSender) this).asCommandSource(), commandName));
+        if (this instanceof CommandSenderBridge) {
+            cir.setReturnValue(CommandPermissions.testPermission(((CommandSenderBridge) this).bridge$asCommandSource(), commandName));
         }
     }
 }

@@ -29,7 +29,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
-import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.mixin.core.command.MixinSubject;
 import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
 
@@ -44,15 +44,15 @@ import javax.annotation.Nullable;
  */
 public class SubjectSettingCallback implements Predicate<PermissionService> {
 
-    private final WeakReference<IMixinSubject> ref;
+    private final WeakReference<SubjectBridge> ref;
 
-    public SubjectSettingCallback(IMixinSubject ref) {
+    public SubjectSettingCallback(SubjectBridge ref) {
         this.ref = new WeakReference<>(ref);
     }
 
     @Override
     public boolean test(@Nullable PermissionService input) {
-        IMixinSubject ref = this.ref.get();
+        SubjectBridge ref = this.ref.get();
         if (ref == null) {
             // returning false from this predicate means this setting callback will be removed
             // as a listener, and will not be tested again.
@@ -70,7 +70,7 @@ public class SubjectSettingCallback implements Predicate<PermissionService> {
         // we can skip some unnecessary instance creation this way.
         if (input instanceof SpongePermissionService) {
             SpongePermissionService serv = (SpongePermissionService) input;
-            SpongeSubjectCollection collection = serv.get(ref.getSubjectCollectionIdentifier());
+            SpongeSubjectCollection collection = serv.get(ref.bridge$getSubjectCollectionIdentifier());
 
             if (ref instanceof User && collection instanceof UserCollection) {
                 // GameProfile is already resolved, use it directly
@@ -81,10 +81,10 @@ public class SubjectSettingCallback implements Predicate<PermissionService> {
         } else {
             // build a new subject reference using the permission service
             // this doesn't actually load the subject, so it will be lazily init'd when needed.
-            subject = input.newSubjectReference(ref.getSubjectCollectionIdentifier(), ((Subject) ref).getIdentifier());
+            subject = input.newSubjectReference(ref.bridge$getSubjectCollectionIdentifier(), ((Subject) ref).getIdentifier());
         }
 
-        ref.setSubject(subject);
+        ref.bridge$setSubject(subject);
         return true;
     }
 

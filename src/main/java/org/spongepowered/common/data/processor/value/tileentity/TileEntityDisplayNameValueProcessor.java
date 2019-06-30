@@ -35,7 +35,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
+import org.spongepowered.common.bridge.data.CustomNameableBridge;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
@@ -53,10 +53,10 @@ public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProc
 
     @Override
     protected boolean set(IWorldNameable container, Text value) {
-        if (container instanceof IMixinCustomNameable) {
+        if (container instanceof CustomNameableBridge) {
             final String legacy = SpongeTexts.toLegacy(value);
             try {
-                ((IMixinCustomNameable) container).setCustomDisplayName(legacy);
+                ((CustomNameableBridge) container).bridge$setCustomDisplayName(legacy);
             } catch (Exception e) {
                 SpongeImpl.getLogger().error("There was an issue trying to replace the display name of an tile entity!", e);
             }

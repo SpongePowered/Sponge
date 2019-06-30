@@ -131,10 +131,10 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
-import org.spongepowered.common.interfaces.IMixinCommandSender;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
-import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.bridge.command.CommandSenderBridge;
+import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.bridge.permissions.SubjectBridge;
+import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.text.SpongeTexts;
@@ -155,8 +155,8 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayerMP.class)
-public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements IMixinSubject, ServerPlayerEntityBridge, IMixinCommandSender,
-        IMixinCommandSource {
+public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements SubjectBridge, ServerPlayerEntityBridge, CommandSenderBridge,
+    CommandSourceBridge {
 
     @Shadow @Final public MinecraftServer server;
     @Shadow @Final public PlayerInteractionManager interactionManager;
@@ -473,18 +473,18 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements I
     }
 
     @Override
-    public String getSubjectCollectionIdentifier() {
-        return ((IMixinSubject) this.impl$user).getSubjectCollectionIdentifier();
+    public String bridge$getSubjectCollectionIdentifier() {
+        return ((SubjectBridge) this.impl$user).bridge$getSubjectCollectionIdentifier();
     }
 
     @Override
-    public String getIdentifier() {
+    public String bridge$getIdentifier() {
         return this.impl$user.getIdentifier();
     }
 
     @Override
-    public Tristate permDefault(final String permission) {
-        return ((IMixinSubject) this.impl$user).permDefault(permission);
+    public Tristate bridge$permDefault(final String permission) {
+        return ((SubjectBridge) this.impl$user).bridge$permDefault(permission);
     }
 
     @Override
@@ -577,16 +577,16 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements I
 
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
     private void onPlayerActive(final CallbackInfo ci) {
-        ((IMixinNetHandlerPlayServer) this.connection).resendLatestResourcePackRequest();
+        ((NetHandlerPlayServerBridge) this.connection).bridge$resendLatestResourcePackRequest();
     }
 
     @Override
-    public CommandSource asCommandSource() {
+    public CommandSource bridge$asCommandSource() {
         return (CommandSource) this;
     }
 
     @Override
-    public ICommandSender asICommandSender() {
+    public ICommandSender bridge$asICommandSender() {
         return (ICommandSender) this;
     }
 
@@ -659,9 +659,9 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements I
     }
 
     @Override
-    public void setTargetedLocation(@Nullable final Vector3d vec) {
-        super.setTargetedLocation(vec);
-        this.connection.sendPacket(new SPacketSpawnPosition(VecHelper.toBlockPos(this.getTargetedLocation())));
+    public void bridge$setTargetedLocation(@Nullable final Vector3d vec) {
+        super.bridge$setTargetedLocation(vec);
+        this.connection.sendPacket(new SPacketSpawnPosition(VecHelper.toBlockPos(this.bridge$getTargetedLocation())));
     }
 
     @Override

@@ -29,28 +29,28 @@ import net.minecraft.command.ICommand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.command.IMixinCommandBase;
+import org.spongepowered.common.bridge.command.ICommandBridge;
 
 import javax.annotation.Nullable;
 
 @Mixin(CommandBase.class)
-public abstract class MixinCommandBase implements IMixinCommandBase, ICommand {
+public abstract class MixinCommandBase implements ICommandBridge, ICommand {
 
     private boolean expandedSelector;
     @Nullable private String namespacedAlias = null;
 
     @Override
-    public boolean isExpandedSelector() {
+    public boolean bridge$isExpandedSelector() {
         return this.expandedSelector;
     }
 
     @Override
-    public void setExpandedSelector(boolean expandedSelector) {
+    public void bridge$setExpandedSelector(boolean expandedSelector) {
         this.expandedSelector = expandedSelector;
     }
 
     @Override
-    public void updateNamespacedAlias(String ownerId) {
+    public void bridge$updateNamespacedAlias(String ownerId) {
         this.namespacedAlias = ownerId + ":" + getName();
     }
 

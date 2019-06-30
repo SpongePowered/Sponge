@@ -26,23 +26,23 @@ package org.spongepowered.common.statistic;
 
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.statistic.EntityStatistic;
+import org.spongepowered.api.statistic.StatisticType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
-public final class SpongeEntityStatistic extends StatBase implements EntityStatistic, TypedSpongeStatistic {
+public final class SpongeEntityStatistic extends StatBase implements EntityStatistic, SpongeStatistic {
 
     private final String entityId;
-    private String spongeId;
+    private StatisticType statisticType;
 
-    public SpongeEntityStatistic(String statIdIn, ITextComponent statNameIn, String entityId) {
+    public SpongeEntityStatistic(final String statIdIn, final ITextComponent statNameIn, final String entityId) {
         super(statIdIn, statNameIn);
         this.entityId = entityId;
     }
@@ -67,20 +67,12 @@ public final class SpongeEntityStatistic extends StatBase implements EntityStati
         return getStatName().getUnformattedText();
     }
 
-    @Nullable
     @Override
-    public String getSpongeId() {
-        return this.spongeId;
-    }
-
-    @Override
-    public void setSpongeId(String id) {
-        this.spongeId = id;
-    }
-
-    @Override
-    public String getMinecraftId() {
-        return this.statId;
+    public StatisticType getType() {
+        if (this.statisticType == null) {
+            this.statisticType = Sponge.getRegistry().getType(StatisticType.class, getId().substring(0, getId().indexOf("."))).get();
+        }
+        return this.statisticType;
     }
 
 }

@@ -30,10 +30,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.inventory.custom.CustomContainer;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
-import org.spongepowered.common.mixin.core.inventory.MixinContainer;
+import org.spongepowered.common.mixin.core.inventory.ContainerMixin;
 
 @Mixin(CustomContainer.class)
-public abstract class MixinCustomContainer extends MixinContainer {
+public abstract class MixinCustomContainer extends ContainerMixin {
 
     @Shadow(remap = false) public CustomInventory inv;
 

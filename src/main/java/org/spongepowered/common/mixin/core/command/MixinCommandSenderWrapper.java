@@ -42,13 +42,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.command.AndPermissionLevelSubject;
 import org.spongepowered.common.command.SpongeProxySource;
 import org.spongepowered.common.command.WrapperCommandSource;
-import org.spongepowered.common.interfaces.IMixinCommandSender;
+import org.spongepowered.common.bridge.command.CommandSenderBridge;
 
 import javax.annotation.Nullable;
 
 @Mixin(CommandSenderWrapper.class)
 @NonnullByDefault
-public abstract class MixinCommandSenderWrapper implements ICommandSender, IMixinCommandSender {
+public abstract class MixinCommandSenderWrapper implements ICommandSender, CommandSenderBridge {
 
     @Shadow @Final private ICommandSender delegate;
     @Shadow @Final @Nullable private Vec3d positionVector;
@@ -76,7 +76,7 @@ public abstract class MixinCommandSenderWrapper implements ICommandSender, IMixi
     }
 
     @Override
-    public CommandSource asCommandSource() {
+    public CommandSource bridge$asCommandSource() {
         return this.sponge;
     }
 }

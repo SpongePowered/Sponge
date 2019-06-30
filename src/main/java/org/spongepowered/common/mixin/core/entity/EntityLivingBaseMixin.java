@@ -897,19 +897,19 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
             if (entity instanceof EntityPlayerMP) {
                 final SlotLens slotLens;
                 final InventoryPlayerBridge inventory = (InventoryPlayerBridge) ((EntityPlayerMP) entity).inventory;
-                final PlayerInventoryLens inventoryLens = (PlayerInventoryLens) inventory.getRootLens();
+                final PlayerInventoryLens inventoryLens = (PlayerInventoryLens) inventory.bridge$getRootLens();
                 switch (entityEquipmentSlot) {
                     case OFFHAND:
                         slotLens = inventoryLens.getOffhandLens();
                         break;
                     case MAINHAND:
                         final HotbarLens hotbarLens = inventoryLens.getMainLens().getHotbar();
-                        slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(inventory.getFabric()));
+                        slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(inventory.bridge$getFabric()));
                         break;
                     default:
                         slotLens = inventoryLens.getEquipmentLens().getSlot(entityEquipmentSlot.getIndex());
                 }
-                slotAdapter = slotLens.getAdapter(inventory.getFabric(), inventory);
+                slotAdapter = slotLens.getAdapter(inventory.bridge$getFabric(), inventory);
             } else {
                 if (this.slotLens.isEmpty()) {
                     for (final EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {

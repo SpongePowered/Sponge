@@ -32,18 +32,18 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.inventory.IMixinCarriedInventory;
+import org.spongepowered.common.bridge.inventory.ContainerHorseChestBridge;
 import org.spongepowered.common.mixin.core.entity.EntityAgeableMixin;
 
 @Mixin(AbstractHorse.class)
-public abstract class AbstractHorseMixin extends EntityAgeableMixin implements Horse {
+public abstract class AbstractHorseMixin extends EntityAgeableMixin {
 
     @Shadow protected ContainerHorseChest horseChest;
 
     @Inject(method = "initHorseChest", at = @At("RETURN"))
     private void onInitHorseChest(final CallbackInfo ci) {
-        if (this.horseChest instanceof IMixinCarriedInventory) {
-            ((IMixinCarriedInventory) this.horseChest).setCarrier(this);
+        if (this.horseChest instanceof ContainerHorseChestBridge) {
+            ((ContainerHorseChestBridge) this.horseChest).bridge$setCarrier((Horse) this);
         }
     }
 }

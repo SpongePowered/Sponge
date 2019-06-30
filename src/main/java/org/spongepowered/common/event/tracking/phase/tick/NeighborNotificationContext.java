@@ -56,10 +56,10 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
             final Block block = ((IBlockState) ((LocatableBlock) owner).getBlockState()).getBlock();
             if (block instanceof TrackableBridge) {
                 final TrackableBridge mixinBlock = (TrackableBridge) block;
-                this.setBlockEvents(mixinBlock.allowsBlockEventCreation())
-                    .setBulkBlockCaptures(mixinBlock.allowsBlockBulkCapture())
-                    .setEntitySpawnEvents(mixinBlock.allowsEntityEventCreation())
-                    .setBulkEntityCaptures(mixinBlock.allowsEntityBulkCapture());
+                this.setBlockEvents(mixinBlock.bridge$allowsBlockEventCreation())
+                    .setBulkBlockCaptures(mixinBlock.bridge$allowsBlockBulkCapture())
+                    .setEntitySpawnEvents(mixinBlock.bridge$allowsEntityEventCreation())
+                    .setBulkEntityCaptures(mixinBlock.bridge$allowsEntityBulkCapture());
 
             }
         }

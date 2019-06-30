@@ -27,9 +27,11 @@ package org.spongepowered.common.statistic;
 import net.minecraft.item.Item;
 import net.minecraft.stats.StatCrafting;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.statistic.BlockStatistic;
+import org.spongepowered.api.statistic.StatisticType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -38,9 +40,9 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public final class SpongeBlockStatistic extends StatCrafting implements BlockStatistic, TypedSpongeStatistic {
+public final class SpongeBlockStatistic extends StatCrafting implements BlockStatistic, SpongeStatistic {
 
-    private String spongeId;
+    @Nullable private StatisticType statisticType;
 
     public SpongeBlockStatistic(String statId, String itemName, ITextComponent statName, Item item) {
         super(statId, itemName, statName, item);
@@ -67,20 +69,11 @@ public final class SpongeBlockStatistic extends StatCrafting implements BlockSta
         return getStatName().getUnformattedText();
     }
 
-    @Nullable
     @Override
-    public String getSpongeId() {
-        return this.spongeId;
+    public StatisticType getType() {
+        if (this.statisticType == null) {
+            this.statisticType = Sponge.getRegistry().getType(StatisticType.class, getId().substring(0, getId().indexOf("."))).get();
+        }
+        return this.statisticType;
     }
-
-    @Override
-    public void setSpongeId(String id) {
-        this.spongeId = id;
-    }
-
-    @Override
-    public String getMinecraftId() {
-        return this.statId;
-    }
-
 }

@@ -37,7 +37,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeTargetedLocationD
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.ITargetedLocation;
+import org.spongepowered.common.bridge.LocationTargetingBridge;
 
 import java.util.Optional;
 
@@ -50,8 +50,8 @@ public final class EntityTargetedLocationDataProcessor extends AbstractEntitySin
 
     @Override
     protected boolean set(Entity entity, Vector3d value) {
-        if (entity instanceof ITargetedLocation) {
-            ((ITargetedLocation) entity).setTargetedLocation(value);
+        if (entity instanceof LocationTargetingBridge) {
+            ((LocationTargetingBridge) entity).bridge$setTargetedLocation(value);
             return true;
         }
 
@@ -60,8 +60,8 @@ public final class EntityTargetedLocationDataProcessor extends AbstractEntitySin
 
     @Override
     protected Optional<Vector3d> getVal(Entity entity) {
-        if (entity instanceof ITargetedLocation) {
-            return Optional.of(((ITargetedLocation) entity).getTargetedLocation());
+        if (entity instanceof LocationTargetingBridge) {
+            return Optional.of(((LocationTargetingBridge) entity).bridge$getTargetedLocation());
         }
 
         return Optional.empty();
@@ -89,7 +89,7 @@ public final class EntityTargetedLocationDataProcessor extends AbstractEntitySin
 
     @Override
     protected boolean supports(Entity entity) {
-        return entity instanceof ITargetedLocation;
+        return entity instanceof LocationTargetingBridge;
     }
 
 }

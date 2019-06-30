@@ -154,7 +154,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         // client acknowledged the denied transaction.
         // To detect when this happens, we turn off capturing so we can avoid
         // firing invalid events.
-        // See MixinNetHandlerPlayServer processClickWindow redirect for rest of fix.
+        // See NetHandlerPlayServerMixin processClickWindow redirect for rest of fix.
         // --bloodmc
         final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
         if (!mixinContainer.capturingInventory() && !context.hasCaptures()) {

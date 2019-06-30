@@ -25,6 +25,9 @@
 package org.spongepowered.common.bridge.server;
 
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.resourcepack.ResourcePack;
+
+import javax.annotation.Nullable;
 
 public interface MinecraftServerBridge {
 
@@ -37,4 +40,7 @@ public interface MinecraftServerBridge {
     void bridge$prepareSpawnArea(WorldServer worldServer);
 
     void bridge$setSaveEnabled(boolean enabled);
+
+    @Nullable
+    ResourcePack bridge$getResourcePack();
 }

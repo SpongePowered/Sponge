@@ -116,7 +116,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.interfaces.ITargetedLocation;
+import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.EntityLivingBaseMixin;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
@@ -132,7 +132,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayer.class)
-public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements PlayerEntityBridge, ITargetedLocation {
+public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements PlayerEntityBridge, LocationTargetingBridge {
 
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
@@ -393,12 +393,12 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     }
 
     @Override
-    public Vector3d getTargetedLocation() {
+    public Vector3d bridge$getTargetedLocation() {
         return this.targetedLocation;
     }
 
     @Override
-    public void setTargetedLocation(@Nullable final Vector3d vec) {
+    public void bridge$setTargetedLocation(@Nullable final Vector3d vec) {
         this.targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.world.getSpawnPoint());
         //noinspection ConstantConditions
         if (!((EntityPlayer) (Object) this instanceof EntityPlayerMP)) {

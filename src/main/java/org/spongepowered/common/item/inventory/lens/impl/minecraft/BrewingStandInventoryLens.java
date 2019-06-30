@@ -41,12 +41,12 @@ public class BrewingStandInventoryLens extends RealLens {
     private InputSlotLensImpl fuel;
 
     public BrewingStandInventoryLens(InventoryAdapter adapter, SlotProvider slots) {
-        super(0, adapter.getFabric().getSize(), adapter.getClass(), slots);
+        super(0, adapter.bridge$getFabric().getSize(), adapter.getClass(), slots);
         this.init(slots);
     }
 
     public BrewingStandInventoryLens(int base, InventoryAdapter adapter, SlotProvider slots) {
-        super(base, adapter.getFabric().getSize(), adapter.getClass(), slots);
+        super(base, adapter.bridge$getFabric().getSize(), adapter.getClass(), slots);
         this.init(slots);
     }
 
