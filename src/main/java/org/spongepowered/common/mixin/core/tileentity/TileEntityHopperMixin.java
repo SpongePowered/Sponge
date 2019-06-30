@@ -55,6 +55,7 @@ import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.item.inventory.util.InventoryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,7 +123,7 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
         if (result || !ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
             return result;
         }
-        return SpongeCommonEventFactory.callTransferPre(((Inventory) inventory), ((Inventory) hopper)).isCancelled();
+        return SpongeCommonEventFactory.callTransferPre(InventoryUtil.toInventory(inventory), InventoryUtil.toInventory(hopper)).isCancelled();
     }
 
     @Redirect(
@@ -137,7 +138,7 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
         if (result || !ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
             return result;
         }
-        return SpongeCommonEventFactory.callTransferPre(((Inventory) hopper), ((Inventory) inventory)).isCancelled();
+        return SpongeCommonEventFactory.callTransferPre(InventoryUtil.toInventory(hopper), InventoryUtil.toInventory(inventory)).isCancelled();
     }
 
     // Capture Transactions
@@ -162,7 +163,7 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
         if (captureIn == null) {
             captureIn = impl$forCapture(destination);
         }
-        return SpongeCommonEventFactory.captureTransaction(captureIn, ((Inventory) destination), index,
+        return SpongeCommonEventFactory.captureTransaction(captureIn, InventoryUtil.toInventory(destination), index,
             () -> insertStack(source, destination, stack, index, direction));
     }
 
@@ -182,7 +183,7 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
             TrackedInventoryBridge capture = impl$forCapture(this);
             SpongeCommonEventFactory.captureTransaction(capture, this, i, itemStack);
             // Call event
-            if (SpongeCommonEventFactory.callTransferPost(capture, this, ((Inventory) iInventory))) {
+            if (SpongeCommonEventFactory.callTransferPost(capture, this, InventoryUtil.toInventory(iInventory))) {
                 // Set remainder when cancelled
                 // TODO - figure out what was intended to happen here....
                 itemStack1 = itemStack;
@@ -204,9 +205,9 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
         if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack2.isEmpty()) {
             // Capture Insert in Origin
             TrackedInventoryBridge capture = impl$forCapture(hopper);
-            SpongeCommonEventFactory.captureTransaction(capture, ((Inventory) iInventory), index, itemStack1);
+            SpongeCommonEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
             // Call event
-            if (SpongeCommonEventFactory.callTransferPost(capture, ((Inventory) iInventory), ((Inventory) hopper))) {
+            if (SpongeCommonEventFactory.callTransferPost(capture, InventoryUtil.toInventory(iInventory), InventoryUtil.toInventory(hopper))) {
                 // Set remainder when cancelled
                 // TODO - figure out what was intended to happen here....
                 itemStack1 = itemStack;
