@@ -252,6 +252,12 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
         }
     }
 
+    @Nullable
+    @Override
+    public ResourcePack bridge$getResourcePack() {
+        return this.resourcePack;
+    }
+
     @Override
     public void bridge$setSaveEnabled(final boolean enabled) {
         this.enableSaving = enabled;
