@@ -39,9 +39,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.entity.player.SpongeUserInventory;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.MainPlayerInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
@@ -59,90 +60,77 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
 @Mixin(SpongeUserInventory.class)
-public abstract class SpongeUserInventoryMixin implements MinecraftInventoryAdapter, UserInventory<User> {
+public abstract class SpongeUserInventoryMixin implements InventoryAdapter, UserInventory<User>, InventoryAdapterBridge {
 
     @Shadow(remap = false) @Final NonNullList<ItemStack> mainInventory;
     @Shadow(remap = false) @Final NonNullList<ItemStack> armorInventory;
     @Shadow(remap = false) @Final NonNullList<ItemStack> offHandInventory;
 
-    @Shadow public abstract int getInventoryStackLimit();
-
     @Shadow public abstract int getSizeInventory();
 
-    protected SlotCollection slots;
-    protected Fabric inventory;
-    protected PlayerInventoryLens lens;
-
-    @Nullable private User carrier;
-    @Nullable private MainPlayerInventoryAdapter main;
-    @Nullable private EquipmentInventoryAdapter equipment;
+    @Nullable private User impl$carrier;
+    @Nullable private MainPlayerInventoryAdapter impl$main;
+    @Nullable private EquipmentInventoryAdapter impl$equipment;
     @Nullable private SlotAdapter offhand;
 
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
-    private void onConstructed(SpongeUser playerIn, CallbackInfo ci) {
-        // We only care about Server inventories
-        this.inventory = new IInventoryFabric((IInventory) this);
-
-        this.slots = new SlotCollection.Builder()
-                .add(this.mainInventory.size())
-                .add(this.offHandInventory.size())
-                .add(this.armorInventory.size(), EquipmentSlotAdapter.class)
-                .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
-                .build();
-
-        this.carrier = ((User) playerIn);
-        this.lens = new PlayerInventoryLens(this, this.slots);
+    private void onConstructed(final SpongeUser playerIn, final CallbackInfo ci) {
+        this.impl$carrier = ((User) playerIn);
     }
 
     @Override
-    public Lens bridge$getRootLens() {
-        return this.lens;
+    public SlotProvider bridge$generateSlotProvider() {
+        return new SlotCollection.Builder()
+            .add(this.mainInventory.size())
+            .add(this.offHandInventory.size())
+            .add(this.armorInventory.size(), EquipmentSlotAdapter.class)
+            .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
+            .build();
     }
 
     @Override
-    public Fabric bridge$getFabric() {
-        return this.inventory;
+    public Lens bridge$generateLens() {
+        return new PlayerInventoryLens(this, this.bridge$getSlotProvider());
     }
 
     @Override
-    public Inventory bridge$getChild(Lens lens) {
+    public Fabric bridge$generateFabric() {
+        return new IInventoryFabric((IInventory) this);
+    }
+
+    @Override
+    public Inventory bridge$getChild(final Lens lens) {
         return null;
     }
 
     @Override
     public Optional<User> getCarrier() {
-        return Optional.ofNullable(this.carrier);
+        return Optional.ofNullable(this.impl$carrier);
     }
 
     @Override
     public MainPlayerInventory getMain() {
-        if (this.main == null) {
-            this.main = (MainPlayerInventoryAdapter) this.lens.getMainLens().getAdapter(this.inventory, this);
+        if (this.impl$main == null) {
+            this.impl$main = (MainPlayerInventoryAdapter) ((PlayerInventoryLens) this.bridge$getRootLens()).getMainLens().getAdapter(this.bridge$getFabric(), this);
         }
-        return this.main;
+        return this.impl$main;
     }
 
     @Override
     public EquipmentInventory getEquipment() {
-        if (this.equipment == null) {
-            this.equipment = (EquipmentInventoryAdapter) this.lens.getEquipmentLens().getAdapter(this.inventory, this);
+        if (this.impl$equipment == null) {
+            this.impl$equipment = (EquipmentInventoryAdapter) ((PlayerInventoryLens) this.bridge$getRootLens()).getEquipmentLens().getAdapter(this.bridge$getFabric(), this);
         }
-        return this.equipment;
+        return this.impl$equipment;
     }
 
     @Override
     public Slot getOffhand() {
         if (this.offhand == null) {
-            this.offhand = (SlotAdapter) this.lens.getOffhandLens().getAdapter(this.inventory, this);
+            this.offhand = (SlotAdapter) ((PlayerInventoryLens) this.bridge$getRootLens()).getOffhandLens().getAdapter(this.bridge$getFabric(), this);
         }
         return this.offhand;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public SlotProvider bridge$getSlotProvider() {
-        return this.slots;
     }
 
 }

@@ -31,6 +31,11 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.CooldownTracker;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
@@ -39,6 +44,7 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayer.class)
+@Implements(@Interface(iface = User.class, prefix = "api$"))
 public abstract class EntityPlayerMixin_API extends EntityLivingBaseMixin_API {
 
     @Shadow public Container openContainer;
@@ -51,6 +57,11 @@ public abstract class EntityPlayerMixin_API extends EntityLivingBaseMixin_API {
     @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 
     protected final boolean isFake = SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this);
+
+    @Intrinsic
+    public String api$getName() {
+        return shadow$getName();
+    }
 
 
 }

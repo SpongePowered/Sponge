@@ -363,7 +363,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
         // Vanilla doesn't call detectAndSendChanges for 'invalid' clicks, since it restores the entire inventory
         // Passing 'captureOnly' as 'true' allows capturing to happen for event firing, but doesn't send any pointless packets
-        ((ContainerBridge) this.player.openContainer).detectAndSendChanges(true);
+        ((ContainerBridge) this.player.openContainer).bridge$detectAndSendChanges(true);
     }
 
     @Redirect(method = "processChatMessage",
@@ -789,11 +789,11 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                             entity, hand, VecHelper.toVector3d(entity.getPositionVector().add(packetIn.getHitVec()))).isCancelled()) {
 
                             // Restore held item in hand
-                            final int index = ((InventoryPlayerBridge) this.player.inventory).getHeldItemIndex(hand);
+                            final int index = ((InventoryPlayerBridge) this.player.inventory).bridge$getHeldItemIndex(hand);
 
                             if (hand == EnumHand.OFF_HAND) {
                                 // A window id of -2 can be used to set the off hand, even if a container is open.
-                                sendPacket(new SPacketSetSlot(-2, ((ContainerPlayerBridge) this.player.inventoryContainer).getOffHandSlot(), itemstack));
+                                sendPacket(new SPacketSetSlot(-2, ((ContainerPlayerBridge) this.player.inventoryContainer).bridge$getOffHandSlot(), itemstack));
                             } else {
                                 final Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
                                 sendPacket(new SPacketSetSlot(this.player.openContainer.windowId, slot.slotNumber, itemstack));

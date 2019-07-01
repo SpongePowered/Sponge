@@ -65,7 +65,7 @@ public class OrderedInventoryAdapter extends VanillaAdapter implements OrderedIn
             if (lens.getSlots().contains(index)) {*/
                 /*
                 if (lens instanceof OrderedInventoryLens) {
-                    ((OrderedInventoryLens) lens).getSlot(orderedLens.)
+                    ((OrderedInventoryLens) lens).bridge$getSlot(orderedLens.)
                 }*/
                 // TODO getting OrderedInventoryLensImpl here instead of SlotLens
                 //return (SlotLens<IInventory, net.minecraft.item.ItemStack>) lens;

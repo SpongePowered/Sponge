@@ -46,6 +46,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -90,7 +91,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     }
 
     @Override
-    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> transaction, CommandPhaseContext context) {
+    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<BlockSnapshot> transaction, final CommandPhaseContext context) {
         // We want to investigate if there is a user on the cause stack
         // and if possible, associate the notiifer/owner based on the change flag
         // We have to check if there is a player, because command blocks can be triggered
@@ -102,23 +103,23 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
    }
 
     @Override
-    public void associateNeighborStateNotifier(CommandPhaseContext context, BlockPos sourcePos, Block block, BlockPos notifyPos,
-        WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(final CommandPhaseContext context, final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
+        final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
         context.getSource(Player.class)
             .ifPresent(player -> ((ChunkBridge) minecraftWorld.getChunk(notifyPos))
                 .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER));
     }
 
     @Override
-    public void unwind(CommandPhaseContext phaseContext) {
-        Optional<EntityPlayer> playerSource = phaseContext.getSource(EntityPlayer.class);
+    public void unwind(final CommandPhaseContext phaseContext) {
+        final Optional<EntityPlayer> playerSource = phaseContext.getSource(EntityPlayer.class);
         final CauseStackManager csm = Sponge.getCauseStackManager();
         if (playerSource.isPresent()) {
             // Post event for inventory changes
-            ((InventoryPlayerBridge) playerSource.get().inventory).setCapture(false);
-            List<SlotTransaction> list = ((InventoryPlayerBridge) playerSource.get().inventory).getCapturedTransactions();
+            ((TrackedInventoryBridge) playerSource.get().inventory).bridge$setCaptureInventory(false);
+            final List<SlotTransaction> list = ((TrackedInventoryBridge) playerSource.get().inventory).bridge$getCapturedSlotTransactions();
             if (!list.isEmpty()) {
-                ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.getCurrentCause(),
+                final ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.getCurrentCause(),
                         ((Inventory) playerSource.get().inventory), list);
                 SpongeImpl.postEvent(event);
                 PacketPhaseUtil.handleSlotRestore(playerSource.get(), null, list, event.isCancelled());
@@ -142,12 +143,12 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         phaseContext.getPerEntityItemDropSupplier()
             .acceptAndClearIfNotEmpty(uuidItemStackMultimap ->
             {
-                for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet())
+                for (final Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet())
                 {
                     final UUID key = entry.getKey();
                     @Nullable
                     net.minecraft.entity.Entity foundEntity = null;
-                    for (WorldServer worldServer : WorldManager.getWorlds())
+                    for (final WorldServer worldServer : WorldManager.getWorlds())
                     {
                         final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
                         if (entityFromUuid != null)
@@ -197,9 +198,9 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CommandPhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final CommandPhaseContext context, final Entity entity, final int chunkX, final int chunkZ) {
         // Instead of bulk capturing entities that are spawned in a command, some commands could potentially
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
 
             final List<Entity> entities = new ArrayList<>(1);

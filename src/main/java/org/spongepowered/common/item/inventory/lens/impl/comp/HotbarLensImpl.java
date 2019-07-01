@@ -70,7 +70,7 @@ public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens {
     @Override
     public void setSelectedSlotIndex(Fabric inv, int index) {
         inv.allInventories().stream().filter(inner -> inner instanceof InventoryPlayerBridge).forEach(inner -> {
-            ((InventoryPlayerBridge) inner).setSelectedItem(index, true);
+            ((InventoryPlayerBridge) inner).bridge$setSelectedItem(index, true);
         });
     }
 

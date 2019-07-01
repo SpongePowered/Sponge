@@ -27,13 +27,14 @@ package org.spongepowered.common.bridge.entity.player;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.item.inventory.adapter.impl.DefaultImplementedInventoryAdapter;
 
 import java.util.List;
 
-public interface InventoryPlayerBridge extends MinecraftInventoryAdapter {
+public interface InventoryPlayerBridge {
 
-    int getHeldItemIndex(EnumHand hand);
+    int bridge$getHeldItemIndex(EnumHand hand);
 
     /**
      * Set the current hotbar item and optionally notify the client
@@ -42,7 +43,7 @@ public interface InventoryPlayerBridge extends MinecraftInventoryAdapter {
      * @param notify True to send an update packet to the client if this is a
      *      server
      */
-    void setSelectedItem(int itemIndex, boolean notify);
+    void bridge$setSelectedItem(int itemIndex, boolean notify);
 
     /**
      * Gets the first available slot id for itemstack.
@@ -50,23 +51,7 @@ public interface InventoryPlayerBridge extends MinecraftInventoryAdapter {
      * @param itemstack The itemstack attempting to be stored
      * @return The slot id or -1 if no slot found.
      */
-    int getFirstAvailableSlot(ItemStack itemstack);
-
-    /**
-     * Gets the captured transactions.
-     *
-     * @return The captured transactions.
-     */
-    List<SlotTransaction> getCapturedTransactions();
-
-    /**
-     * Sets whether to capture transactions.
-     *
-     * @param enable whether to capture transactions.
-     */
-    void setCapture(boolean enable);
-
-    boolean capturesTransactions();
+    int bridge$getFirstAvailableSlot(ItemStack itemstack);
 
     /**
      * Cleanup dirty Inventory State. E.g. after changes made through a scheduled task.

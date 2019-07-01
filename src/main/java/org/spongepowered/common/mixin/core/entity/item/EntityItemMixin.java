@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.entity.ItemEntityBridge;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -72,7 +73,7 @@ public abstract class EntityItemMixin extends EntityMixin implements ItemEntityB
     }
 
     @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
-    private double impl$changeSearchRadiusFromConfig(double originalRadius) {
+    private double impl$changeSearchRadiusFromConfig(final double originalRadius) {
         if (this.world.isRemote || ((WorldBridge) this.world).isFake()) {
             return originalRadius;
         }
@@ -89,9 +90,9 @@ public abstract class EntityItemMixin extends EntityMixin implements ItemEntityB
     }
 
     @Override
-    public void bridge$setPickupDelay(int delay, boolean infinite) {
+    public void bridge$setPickupDelay(final int delay, final boolean infinite) {
         this.pickupDelay = delay;
-        boolean previous = this.infinitePickupDelay;
+        final boolean previous = this.infinitePickupDelay;
         this.infinitePickupDelay = infinite;
         if (infinite && !previous) {
             this.previousPickupDelay = this.pickupDelay;
@@ -112,14 +113,14 @@ public abstract class EntityItemMixin extends EntityMixin implements ItemEntityB
     }
 
     @Override
-    public void bridge$setDespawnDelay(int delay) {
+    public void bridge$setDespawnDelay(final int delay) {
         this.age = 6000 - delay;
     }
 
     @Override
-    public void bridge$setDespawnDelay(int delay, boolean infinite) {
+    public void bridge$setDespawnDelay(final int delay, final boolean infinite) {
         this.age = 6000 - delay;
-        boolean previous = this.infiniteDespawnDelay;
+        final boolean previous = this.infiniteDespawnDelay;
         this.infiniteDespawnDelay = infinite;
         if (infinite && !previous) {
             this.previousDespawnDelay = this.age;
@@ -130,7 +131,7 @@ public abstract class EntityItemMixin extends EntityMixin implements ItemEntityB
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
 
         this.infinitePickupDelay = compound.getBoolean(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY);
@@ -170,7 +171,7 @@ public abstract class EntityItemMixin extends EntityMixin implements ItemEntityB
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
 
         compound.setBoolean(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
@@ -187,19 +188,19 @@ public abstract class EntityItemMixin extends EntityMixin implements ItemEntityB
             target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"),
         cancellable = true
     )
-    private void spongeImpl$ThrowPickupEvent(EntityPlayer entityIn, CallbackInfo ci) {
+    private void spongeImpl$ThrowPickupEvent(final EntityPlayer entityIn, final CallbackInfo ci) {
         if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay)) {
             ci.cancel();
         }
     }
 
     @Redirect(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addItemStackToInventory(Lnet/minecraft/item/ItemStack;)Z"))
-    private boolean spongeImpl$throwPikcupEventForAddItem(InventoryPlayer inventory, ItemStack itemStack, EntityPlayer player) {
-        InventoryPlayerBridge inv = (InventoryPlayerBridge) inventory;
-        inv.setCapture(true);
-        boolean added = inventory.addItemStackToInventory(itemStack);
-        inv.setCapture(false);
-        inv.getCapturedTransactions();
+    private boolean spongeImpl$throwPikcupEventForAddItem(final InventoryPlayer inventory, final ItemStack itemStack, final EntityPlayer player) {
+        final TrackedInventoryBridge inv = (TrackedInventoryBridge) inventory;
+        inv.bridge$setCaptureInventory(true);
+        final boolean added = inventory.addItemStackToInventory(itemStack);
+        inv.bridge$setCaptureInventory(false);
+        inv.bridge$getCapturedSlotTransactions();
         if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(player, inv)) {
             return false;
         }

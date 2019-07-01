@@ -340,7 +340,7 @@ public abstract class MixinPlayerInteractionManager implements PlayerInteraction
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         frame.pushCause(player);
                         frame.addContext(EventContextKeys.BLOCK_HIT, currentSnapshot);
-                        ((ContainerBridge) player.openContainer).setOpenLocation(currentSnapshot.getLocation().orElse(null));
+                        ((ContainerBridge) player.openContainer).bridge$setOpenLocation(currentSnapshot.getLocation().orElse(null));
                         if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(this.player)) {
                             result = EnumActionResult.FAIL;
                             this.interactBlockRightClickEventCancelled = true;

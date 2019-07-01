@@ -30,7 +30,7 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.LensProvider;
+import org.spongepowered.common.bridge.inventory.LensProviderBridge;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
@@ -42,7 +42,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(ContainerWorkbench.class)
-public abstract class ContainerWorkbenchMixin extends ContainerMixin implements LensProvider {
+public abstract class ContainerWorkbenchMixin extends ContainerMixin implements LensProviderBridge {
+
+    @Override
+    public Lens bridge$generateLens() {
+        return super.bridge$generateLens();
+    }
 
     @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
@@ -52,7 +57,6 @@ public abstract class ContainerWorkbenchMixin extends ContainerMixin implements 
         return new ContainerLens(adapter, bridge$getSlotProvider(), lenses);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider bridge$slotProvider(final Fabric fabric, final InventoryAdapter adapter) {
         final SlotCollection.Builder builder = new SlotCollection.Builder()

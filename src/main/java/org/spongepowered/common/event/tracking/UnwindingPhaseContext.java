@@ -166,6 +166,7 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
      * @return
      * @throws IllegalStateException
      */
+    @Override
     public MultiBlockCaptureSupplier getCapturedBlockSupplier() throws IllegalStateException {
         if (!this.usesMulti) {
             return super.getCapturedBlockSupplier();

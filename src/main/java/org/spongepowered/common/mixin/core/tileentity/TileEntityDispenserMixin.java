@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.TileEntityDispenser;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -35,26 +35,21 @@ import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
-@SuppressWarnings("rawtypes")
-@NonnullByDefault
 @Mixin(TileEntityDispenser.class)
 public abstract class TileEntityDispenserMixin extends TileEntityLockableLootMixin {
 
-    @SuppressWarnings("unchecked")
     @Override
-    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
-        return ReusableLens.getLens(GridInventoryLens.class, this, this::generateSlotProvider, this::generateRootLens);
+    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
+        return ReusableLens.getLens(GridInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
     }
 
-    @SuppressWarnings("unchecked")
-    private SlotProvider generateSlotProvider() {
+    private SlotProvider impl$generateSlotProvider() {
         return new SlotCollection.Builder().add(9).build();
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens generateRootLens(SlotProvider slots) {
-        Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
-        return new GridInventoryLensImpl(0, 3, 3, 3, thisClass, slots);
+    private GridInventoryLens impl$generateRootLens(final SlotProvider slots) {
+        return new GridInventoryLensImpl(0, 3, 3, 3, (Class<? extends Inventory>) this.getClass(), slots);
     }
 
 }

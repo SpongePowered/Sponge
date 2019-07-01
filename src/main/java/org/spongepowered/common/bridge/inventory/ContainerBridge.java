@@ -25,7 +25,10 @@
 package org.spongepowered.common.bridge.inventory;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -33,44 +36,52 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-public interface ContainerBridge extends TrackedInventoryBridge {
+public interface ContainerBridge {
 
-    boolean capturingInventory();
+    InventoryArchetype bridge$getArchetype();
 
-    void setCaptureInventory(boolean flag);
+    Optional<Carrier> bridge$getCarrier();
 
-    void detectAndSendChanges(boolean captureOnly);
+    LinkedHashMap<IInventory, Set<net.minecraft.inventory.Slot>> bridge$getInventories();
 
-    void setCanInteractWith(@Nullable Predicate<EntityPlayer> predicate);
+    void bridge$detectAndSendChanges(boolean captureOnly);
+
+    void bridge$setCanInteractWith(@Nullable Predicate<EntityPlayer> predicate);
     
-    void setSpectatorChest(boolean spectatorChest);
+    void bridge$setSpectatorChest(boolean spectatorChest);
 
-    Slot getContainerSlot(int slot);
+    Slot bridge$getContainerSlot(int slot);
 
-    void setPlugin(PluginContainer plugin);
+    void bridge$setPlugin(PluginContainer plugin);
 
-    void setShiftCrafting(boolean flag);
-    boolean isShiftCrafting();
+    void bridge$setShiftCrafting(boolean flag);
 
-    void setLastCraft(CraftItemEvent.Craft event);
+    boolean bridge$isShiftCrafting();
 
-    net.minecraft.item.ItemStack getPreviousCursor();
+    void bridge$setLastCraft(CraftItemEvent.Craft event);
 
-    void setFirePreview(boolean firePreview);
+    net.minecraft.item.ItemStack bridge$getPreviousCursor();
 
-    List<SlotTransaction> getPreviewTransactions();
+    void bridge$setFirePreview(boolean firePreview);
 
-    @Nullable Location<World> getOpenLocation();
-    void setOpenLocation(@Nullable Location<World> loc);
+    List<SlotTransaction> bridge$getPreviewTransactions();
 
-    void setInUse(boolean inUse);
-    boolean isInUse();
+    @Nullable Location<World> bridge$getOpenLocation();
 
-    boolean capturePossible();
+    void bridge$setOpenLocation(@Nullable Location<World> loc);
+
+    void bridge$setInUse(boolean inUse);
+
+    boolean bridge$isInUse();
+
+    boolean bridge$capturePossible();
 
 }

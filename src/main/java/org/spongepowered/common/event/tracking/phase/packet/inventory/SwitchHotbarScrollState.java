@@ -44,6 +44,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -105,7 +106,7 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
                 inventory.currentItem = itemChange.getSlotId();
                 player.markPlayerActive();
             }
-            ((ContainerBridge) openContainer).setCaptureInventory(false);
+            ((TrackedInventoryBridge) openContainer).bridge$setCaptureInventory(false);
         }
     }
 }

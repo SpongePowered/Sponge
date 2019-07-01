@@ -60,7 +60,7 @@ public class InventoryIterator implements Iterator<Inventory> {
     @Override
     public Inventory next() {
         try {
-            return this.children.get(this.next++).getAdapter(this.inventory, this.parent);
+            return (Inventory) this.children.get(this.next++).getAdapter(this.inventory, this.parent);
         } catch (IndexOutOfBoundsException e) {
             throw new NoSuchElementException();
         }

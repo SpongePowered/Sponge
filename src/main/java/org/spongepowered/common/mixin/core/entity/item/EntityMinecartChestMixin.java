@@ -38,7 +38,7 @@ public abstract class EntityMinecartChestMixin extends EntityMinecartContainerMi
 
     @Override
     protected Lens createLensOnConstruct() {
-        return new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
+        return new GridInventoryLensImpl(0, 9, 3, 9, this.bridge$getSlotProvider());
     }
 
 }

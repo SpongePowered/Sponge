@@ -46,7 +46,7 @@ public class InventoryHelperMixin {
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/inventory/InventoryHelper;dropInventoryItems(Lnet/minecraft/world/World;DDDLnet/minecraft/inventory/IInventory;)V"))
-    private static void spongeDropInventoryItems(final World world, final double x, final double y, final double z, final IInventory inventory) {
+    private static void impl$dropItemsAndThrowEvents(final World world, final double x, final double y, final double z, final IInventory inventory) {
         if (world instanceof WorldServer) {
             // Don't drop items if we are restoring blocks
             if (SpongeImplHooks.isRestoringBlocks(world)) {

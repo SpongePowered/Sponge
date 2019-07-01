@@ -65,37 +65,38 @@ public abstract class InventoryPlayerMixin_API implements PlayerInventory {
     protected Fabric inventory;
     protected Lens lens;
 
-    private Player carrier;
-    private MainPlayerInventoryAdapter main;
-    @Nullable private EquipmentInventoryAdapter equipment;
-    private SlotAdapter offhand;
+    private Player api$carrier;
+    private MainPlayerInventoryAdapter api$main;
+    @Nullable private EquipmentInventoryAdapter api$equipment;
+    private SlotAdapter api$offhand;
 
+    @Override
     public Optional<Player> getCarrier() {
-        return Optional.ofNullable(this.carrier);
+        return Optional.ofNullable(this.api$carrier);
     }
 
     @Override
     public MainPlayerInventory getMain() {
-        if (this.main == null && this.lens instanceof PlayerInventoryLens) {
-            this.main = (MainPlayerInventoryAdapter) ((PlayerInventoryLens) this.lens).getMainLens().getAdapter(this.inventory, this);
+        if (this.api$main == null && this.lens instanceof PlayerInventoryLens) {
+            this.api$main = (MainPlayerInventoryAdapter) ((PlayerInventoryLens) this.lens).getMainLens().getAdapter(this.inventory, this);
         }
-        return this.main;
+        return this.api$main;
     }
 
     @Override
     public EquipmentInventory getEquipment() {
-        if (this.equipment == null) {
-            this.equipment = (EquipmentInventoryAdapter) ((PlayerInventoryLens) this.lens).getEquipmentLens().getAdapter(this.inventory, this);
+        if (this.api$equipment == null) {
+            this.api$equipment = (EquipmentInventoryAdapter) ((PlayerInventoryLens) this.lens).getEquipmentLens().getAdapter(this.inventory, this);
         }
-        return this.equipment;
+        return this.api$equipment;
     }
 
     @Override
     public Slot getOffhand() {
-        if (this.offhand == null && this.lens instanceof PlayerInventoryLens) {
-            this.offhand = (SlotAdapter) ((PlayerInventoryLens) this.lens).getOffhandLens().getAdapter(this.inventory, this);
+        if (this.api$offhand == null && this.lens instanceof PlayerInventoryLens) {
+            this.api$offhand = (SlotAdapter) ((PlayerInventoryLens) this.lens).getOffhandLens().getAdapter(this.inventory, this);
         }
-        return this.offhand;
+        return this.api$offhand;
     }
 
 }

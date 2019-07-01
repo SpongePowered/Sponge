@@ -69,6 +69,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
     @Shadow public abstract BlockPos getPos();
     @Shadow public abstract Block getBlockType();
     @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
+    @Shadow public abstract void shadow$markDirty();
 
     private final TileEntityType api$TileEntityType = SpongeImplHooks.getTileEntityType(((net.minecraft.tileentity.TileEntity) (Object) this).getClass());
     @Nullable private LocatableBlock api$LocatableBlock;

@@ -33,8 +33,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.DefaultImplementedInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.OrderedInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
@@ -47,66 +48,26 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import javax.annotation.Nullable;
 
 @Mixin(Slot.class)
-public abstract class SlotMixin implements org.spongepowered.api.item.inventory.Slot, MinecraftInventoryAdapter {
+public abstract class SlotMixin implements InventoryAdapter, InventoryAdapterBridge {
 
     @Shadow @Final public int slotIndex;
     @Shadow @Final public IInventory inventory;
 
-    protected Fabric impl$fabric;
-    protected SlotCollection impl$slots;
-    protected Lens impl$lens;
+    @Override
+    public SlotProvider bridge$generateSlotProvider() {
+        return new SlotCollection.Builder().add(1).build();
+    }
 
-    @Nullable private InventoryAdapter parentAdapter;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setUpFabric(final CallbackInfo ci) {
-        this.impl$fabric = MinecraftFabric.of(this);
-        this.impl$slots = new SlotCollection.Builder().add(1).build();
+    @Override
+    public Lens bridge$generateLens() {
         try {
             final Lens rootLens = ((InventoryAdapter) this.inventory).bridge$getRootLens();
-            this.impl$lens = rootLens.getSlotLens(this.slotIndex);
+            return rootLens.getSlotLens(this.slotIndex);
         } catch (Exception ignored) {
             // TODO figure out how to make it always work with existing lenses
             // this works as a fallback but removes Inventory Property Support completely
-            this.impl$lens = new SlotLensImpl(0);
+            return new SlotLensImpl(0);
         }
     }
 
-    @Override
-    public Inventory parent() {
-        if (this.inventory instanceof Inventory) {
-            return ((Inventory) this.inventory);
-        }
-        if (this.parentAdapter == null) {
-            final OrderedInventoryLensImpl lens = new OrderedInventoryLensImpl(0, this.impl$fabric
-                .getSize(), 1, new SlotCollection.Builder().add(this.impl$fabric.getSize()).build());
-            this.parentAdapter = new OrderedInventoryAdapter(this.impl$fabric, lens);
-        }
-        return this.parentAdapter;
-    }
-
-    @Override
-    public org.spongepowered.api.item.inventory.Slot transform(final Type type) {
-        return this;
-    }
-
-    @Override
-    public org.spongepowered.api.item.inventory.Slot transform() {
-        return this.transform(Type.INVENTORY);
-    }
-
-    @Override
-    public SlotProvider bridge$getSlotProvider() {
-        return this.impl$slots;
-    }
-
-    @Override
-    public Lens bridge$getRootLens() {
-        return this.impl$lens;
-    }
-
-    @Override
-    public Fabric bridge$getFabric() {
-        return this.impl$fabric;
-    }
 }

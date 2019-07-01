@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.query.result;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.MutableLensSet;
@@ -33,7 +34,7 @@ import org.spongepowered.common.item.inventory.query.Result;
 
 import java.util.Collection;
 
-public interface QueryResult extends Result {
+public interface QueryResult extends Result, Inventory {
     
     abstract class QueryLens extends AbstractLens {
         

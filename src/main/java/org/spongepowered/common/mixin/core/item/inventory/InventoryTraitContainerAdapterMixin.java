@@ -33,21 +33,20 @@ import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.InventoryCraftResult;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryLargeChest;
+import net.minecraft.inventory.Slot;
 import net.minecraft.tileentity.TileEntityLockable;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.entity.player.SpongeUserInventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionIterator;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 
 import java.util.ArrayList;
@@ -61,7 +60,7 @@ import javax.annotation.Nullable;
  * <p>To work {@link InventoryAdapter#bridge$getSlotProvider()} and {@link InventoryAdapter#bridge$getRootLens()} need to be implemented</p>
  */
 @Mixin(value = {
-        net.minecraft.inventory.Slot.class,
+        Slot.class,
         Container.class,
         InventoryPlayer.class,
         EntityVillager.class,
@@ -75,66 +74,82 @@ import javax.annotation.Nullable;
         EntityMinecartContainer.class
 }, priority = 999)
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
-public abstract class InventoryTraitContainerAdapterMixin implements MinecraftInventoryAdapter {
+public abstract class InventoryTraitContainerAdapterMixin implements InventoryAdapter, InventoryAdapterBridge {
 
-    @Nullable protected Inventory parent;
-    protected Inventory next;
-    protected List<Inventory> children = new ArrayList<Inventory>();
-    protected Iterable<Slot> slotIterator;
-
-    private PluginContainer plugin = null;
-
-    protected Fabric fabric;
+    private List<Inventory> impl$children = new ArrayList<Inventory>();
+    @Nullable private SlotProvider impl$provider;
+    @Nullable private Lens impl$lens;
+    @Nullable private Fabric impl$fabric;
+    @Nullable private PluginContainer impl$PluginParent;
 
     @Override
-    public Inventory parent() {
-        return this.parent == null ? this : this.parent();
-    }
-
-    @Override
-    public Inventory bridge$getChild(int index) {
+    public Inventory bridge$getChild(final int index) {
         if (index < 0 || index >= this.bridge$getRootLens().getChildren().size()) {
             throw new IndexOutOfBoundsException("No child at index: " + index);
         }
-        while (index >= this.children.size()) {
-            this.children.add(null);
+        while (index >= this.impl$children.size()) {
+            this.impl$children.add(null);
         }
-        Inventory child = this.children.get(index);
+        Inventory child = this.impl$children.get(index);
         if (child == null) {
-            child = this.bridge$getRootLens().getChildren().get(index).getAdapter(this.bridge$getFabric(), this);
-            this.children.set(index, child);
+            child = (Inventory) this.bridge$getRootLens().getChildren().get(index).getAdapter(this.bridge$getFabric(), (Inventory) this);
+            this.impl$children.set(index, child);
         }
         return child;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> Iterable<T> slots() {
-        if (this.slotIterator == null) {
-            this.slotIterator = new SlotCollectionIterator(this, this.bridge$getFabric(), this.bridge$getRootLens(), this.bridge$getSlotProvider());
-        }
-        return (Iterable<T>) this.slotIterator;
-    }
-
-    @Intrinsic
-    public void inventory$clear() {
-        this.bridge$getFabric().clear();
-    }
 
     @Override
     public Fabric bridge$getFabric() {
-        if (this.fabric == null) {
-            this.fabric = MinecraftFabric.of(this);
+        if (this.impl$fabric == null) {
+            this.impl$fabric = bridge$generateFabric();
         }
-        return this.fabric;
+        return this.impl$fabric;
     }
 
     @Override
-    public PluginContainer getPlugin() {
-        if (this.plugin == null) {
-            this.plugin = InventoryUtil.getPluginContainer(this);
+    public SlotProvider bridge$getSlotProvider() {
+        if (this.impl$provider == null) {
+            this.impl$provider = this.bridge$generateSlotProvider();
+            return this.impl$provider;
         }
-        return this.plugin;
+        return this.impl$provider;
+    }
+
+    @Override
+    public void bridge$setSlotProvider(final SlotProvider provider) {
+        this.impl$provider = provider;
+    }
+
+    @Override
+    public Lens bridge$getRootLens() {
+        if (this.impl$lens == null) {
+            this.impl$lens = this.bridge$generateLens();
+        }
+        return this.impl$lens;
+    }
+
+    @Override
+    public void bridge$setLens(final Lens lens) {
+        this.impl$lens = lens;
+    }
+
+    @Override
+    public void bridge$setFabric(final Fabric fabric) {
+        this.impl$fabric = fabric;
+    }
+
+    @Override
+    public PluginContainer bridge$getPlugin() {
+        if (this.impl$PluginParent == null) {
+            this.impl$PluginParent = InventoryUtil.getPluginContainer(this);
+        }
+        return this.impl$PluginParent;
+    }
+
+    @Override
+    public void bridge$setPlugin(final PluginContainer container) {
+        this.impl$PluginParent = container;
     }
 
 }

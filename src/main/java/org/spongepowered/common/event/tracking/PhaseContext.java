@@ -44,6 +44,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.context.BlockItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.BlockItemEntityDropsSupplier;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
@@ -536,7 +537,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             return true;
         }
         if (this.source != null && this.source instanceof EntityPlayer) {
-            if (((InventoryPlayerBridge) ((EntityPlayer) this.source).inventory).getCapturedTransactions().size() > 0) {
+            if (((TrackedInventoryBridge) ((EntityPlayer) this.source).inventory).bridge$getCapturedSlotTransactions().size() > 0) {
                 return true;
             }
         }

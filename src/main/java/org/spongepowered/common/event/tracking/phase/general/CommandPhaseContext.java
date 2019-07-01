@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
 import javax.annotation.Nullable;
@@ -33,34 +34,34 @@ import javax.annotation.Nullable;
 public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext> {
 
     @Nullable String command;
-    @Nullable private InventoryPlayerBridge inventory;
+    @Nullable private TrackedInventoryBridge inventory;
 
-    CommandPhaseContext(IPhaseState<CommandPhaseContext> state) {
+    CommandPhaseContext(final IPhaseState<CommandPhaseContext> state) {
         super(state);
     }
 
     @Override
     public boolean hasCaptures() {
-        return (this.inventory != null && !this.inventory.getCapturedTransactions().isEmpty()) || super.hasCaptures();
+        return (this.inventory != null && !this.inventory.bridge$getCapturedSlotTransactions().isEmpty()) || super.hasCaptures();
     }
 
-    public CommandPhaseContext command(String command) {
+    public CommandPhaseContext command(final String command) {
         this.command = command;
         return this;
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent)
             .add(s + "- %s: %s", "Command", this.command == null ? "empty command" : this.command);
         if (this.inventory != null) {
-            printer.add(s + "-%s: %s", "Inventory", this.inventory.getCapturedTransactions());
+            printer.add(s + "-%s: %s", "Inventory", this.inventory.bridge$getCapturedSlotTransactions());
         }
         return printer;
     }
 
-    public CommandPhaseContext inventory(InventoryPlayerBridge inventory) {
+    public CommandPhaseContext inventory(final TrackedInventoryBridge inventory) {
         this.inventory = inventory;
         return this;
     }

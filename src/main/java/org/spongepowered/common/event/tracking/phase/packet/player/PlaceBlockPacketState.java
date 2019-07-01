@@ -46,6 +46,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -145,9 +146,9 @@ public final class PlaceBlockPacketState extends BasicPacketState {
 
         });
 
-        final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
-        mixinContainer.setCaptureInventory(false);
-        mixinContainer.bridge$getCapturedSlotTransactions().clear();
+        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
+        trackedInventory.bridge$setCaptureInventory(false);
+        trackedInventory.bridge$getCapturedSlotTransactions().clear();
     }
 
     @Override

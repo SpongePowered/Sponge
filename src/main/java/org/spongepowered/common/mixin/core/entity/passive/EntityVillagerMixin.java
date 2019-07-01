@@ -46,9 +46,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.EntityVillagerBridge;
+import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -66,9 +67,8 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
 @Mixin(EntityVillager.class)
-public abstract class EntityVillagerMixin extends EntityAgeableMixin implements EntityVillagerBridge, MinecraftInventoryAdapter {
+public abstract class EntityVillagerMixin extends EntityAgeableMixin implements EntityVillagerBridge, InventoryAdapter, InventoryAdapterBridge {
 
-    @Shadow private boolean isPlaying; // isPlaying
     @Shadow private int careerId; // careerId
     @Shadow private int careerLevel; // careerLevel
     @Shadow @Nullable public MerchantRecipeList buyingList; // buyingList
@@ -77,36 +77,31 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
     @Shadow public abstract void setProfession(int professionId); // setProfession
     @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
 
-    private Fabric fabric = new IInventoryFabric(this.villagerInventory);
-    private SlotCollection slots = new SlotCollection.Builder().add(8).build();
-    private Lens lens = new OrderedInventoryLensImpl(0, 8, 1, this.slots);
-
-    @Nullable private Profession profession;
+    @Nullable private Profession impl$profession;
 
     @Inject(method = "setProfession(I)V", at = @At("RETURN"))
-    private void onSetProfession(int professionId, CallbackInfo ci) {
-        this.profession = SpongeImplHooks.validateProfession(professionId);
-    }
-
-
-    @Override
-    public SlotProvider bridge$getSlotProvider() {
-        return this.slots;
+    private void onSetProfession(final int professionId, final CallbackInfo ci) {
+        this.impl$profession = SpongeImplHooks.validateProfession(professionId);
     }
 
     @Override
-    public Lens bridge$getRootLens() {
-        return this.lens;
+    public SlotProvider bridge$generateSlotProvider() {
+        return new SlotCollection.Builder().add(8).build();
     }
 
     @Override
-    public Fabric bridge$getFabric() {
-        return this.fabric;
+    public Lens bridge$generateLens() {
+        return new OrderedInventoryLensImpl(0, 8, 1, this.bridge$getSlotProvider());
+    }
+
+    @Override
+    public Fabric bridge$generateFabric() {
+        return new IInventoryFabric(this.villagerInventory);
     }
 
     @Override
     public Career bridge$getCareer() {
-        List<Career> careers = (List<Career>) this.profession.getCareers();
+        final List<Career> careers = (List<Career>) this.impl$profession.getCareers();
         if (this.careerId == 0 || this.careerId > careers.size()) {
             this.careerId = new Random().nextInt(careers.size()) + 1;
         }
@@ -116,22 +111,22 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
 
     @Override
     public Optional<Profession> bridge$getProfessionOptional() {
-        return Optional.ofNullable(this.profession);
+        return Optional.ofNullable(this.impl$profession);
     }
 
     @Nullable
     @Override
     public Profession bridge$getProfession() {
-        return this.profession;
+        return this.impl$profession;
     }
 
     @Override
-    public void bridge$setProfession(Profession profession) {
-        this.profession = checkNotNull(profession, "VillagerProfession cannot be null!");
+    public void bridge$setProfession(final Profession profession) {
+        this.impl$profession = checkNotNull(profession, "VillagerProfession cannot be null!");
     }
 
     @Override
-    public void bridge$setCareer(Career career) {
+    public void bridge$setCareer(final Career career) {
         setProfession(((SpongeEntityMeta) career.getProfession()).type);
         this.buyingList = null;
         this.careerId = ((SpongeCareer) career).type + 1;
@@ -151,7 +146,7 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
     @Overwrite
     public void populateBuyingList() { // populateBuyingList
         // Sponge
-        List<Career> careers = (List<Career>) this.profession.getCareers();
+        final List<Career> careers = (List<Career>) this.impl$profession.getCareers();
 
         // EntityVillager.ITradeList[][][] aentityvillager$itradelist = DEFAULT_TRADE_LIST_MAP[this.getProfession()];
 

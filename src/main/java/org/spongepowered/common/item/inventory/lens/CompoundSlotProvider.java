@@ -38,7 +38,7 @@ public class CompoundSlotProvider implements SlotProvider {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public CompoundSlotProvider add(InventoryAdapter adapter) {
-        for (Inventory slot : adapter.slots()) {
+        for (Inventory slot : ((Inventory) adapter).slots()) {
             SlotLens slotLens = ((SlotLens) ((SlotAdapter) slot).bridge$getRootLens());
             if (!this.slotList.contains(slotLens)) {
                 this.slotList.add(slotLens);

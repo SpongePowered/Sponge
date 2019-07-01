@@ -58,7 +58,7 @@ public class Query {
 
     private final QueryOperation<?>[] queries;
 
-    private Query(InventoryAdapter adapter, QueryOperation<?>[] queries) {
+    private Query(final InventoryAdapter adapter, final QueryOperation<?>[] queries) {
         this.adapter = adapter;
         this.inventory = adapter.bridge$getFabric();
         this.lens = adapter.bridge$getRootLens();
@@ -70,34 +70,34 @@ public class Query {
         return this.execute(Query.defaultResultProvider);
     }
 
-    public Inventory execute(ResultAdapterProvider resultProvider) {
+    public Inventory execute(final ResultAdapterProvider resultProvider) {
         if (this.matches(this.lens, null, this.inventory)) {
-            return this.lens.getAdapter(this.inventory, this.adapter);
+            return (Inventory) this.lens.getAdapter(this.inventory, (Inventory) this.adapter);
         }
 
         return this.toResult(resultProvider, this.reduce(this.lens, this.depthFirstSearch(this.lens)));
     }
 
     @SuppressWarnings("unchecked")
-    private Inventory toResult(ResultAdapterProvider resultProvider, MutableLensSet matches) {
+    private Inventory toResult(final ResultAdapterProvider resultProvider, final MutableLensSet matches) {
         if (matches.isEmpty()) {
-            return new EmptyInventoryImpl(this.adapter);
+            return new EmptyInventoryImpl((Inventory) this.adapter);
         }
         if (matches.size() == 1) {
-            return matches.getLens(0).getAdapter(this.inventory, this.adapter);
+            return (Inventory) matches.getLens(0).getAdapter(this.inventory, (Inventory) this.adapter);
         }
 
         if (resultProvider != null) {
-            return resultProvider.getResultAdapter(this.inventory, matches, this.adapter);
+            return (Inventory) resultProvider.getResultAdapter(this.inventory, matches, (Inventory) this.adapter);
         }
 
-        return Query.defaultResultProvider.getResultAdapter(this.inventory, matches, this.adapter);
+        return (Inventory) Query.defaultResultProvider.getResultAdapter(this.inventory, matches, (Inventory) this.adapter);
     }
 
-    private MutableLensSet depthFirstSearch(Lens lens) {
-        MutableLensSet matches = new MutableLensSetImpl(true);
+    private MutableLensSet depthFirstSearch(final Lens lens) {
+        final MutableLensSet matches = new MutableLensSetImpl(true);
 
-        for (Lens child : lens.getChildren()) {
+        for (final Lens child : lens.getChildren()) {
             if (child == null) {
                 continue;
             }
@@ -117,9 +117,9 @@ public class Query {
         return matches;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        for (QueryOperation<?> operation : this.queries) {
+    @SuppressWarnings({"rawtypes"})
+    private boolean matches(final Lens lens, final Lens parent, final Fabric inventory) {
+        for (final QueryOperation<?> operation : this.queries) {
             if (((SpongeQueryOperation) operation).matches(lens, parent, inventory)) {
                 return true;
             }
@@ -127,7 +127,7 @@ public class Query {
         return false;
     }
 
-    private MutableLensSet reduce(Lens lens, MutableLensSet matches) {
+    private MutableLensSet reduce(final Lens lens, final MutableLensSet matches) {
         if (matches.isEmpty()) {
             return matches;
         }
@@ -138,7 +138,7 @@ public class Query {
             return matches;
         }
 
-        for (Lens child : lens.getChildren()) {
+        for (final Lens child : lens.getChildren()) {
             if (child == null || !child.isSubsetOf(matches)) {
                 continue;
             }
@@ -149,8 +149,8 @@ public class Query {
         return matches;
     }
 
-    private boolean allLensesAreSlots(MutableLensSet lenses) {
-        for (Lens lens : lenses) {
+    private boolean allLensesAreSlots(final MutableLensSet lenses) {
+        for (final Lens lens : lenses) {
             if (!(lens instanceof SlotLens)) {
                 return false;
             }
@@ -158,19 +158,19 @@ public class Query {
         return true;
     }
 
-    private IntSet getSlots(Collection<Lens> lenses) {
-        IntSet slots = new IntOpenHashSet();
-        for (Lens lens : lenses) {
+    private IntSet getSlots(final Collection<Lens> lenses) {
+        final IntSet slots = new IntOpenHashSet();
+        for (final Lens lens : lenses) {
             slots.addAll(lens.getSlots());
         }
         return slots;
     }
 
-    public static Query compile(InventoryAdapter adapter, QueryOperation<?>... queries) {
+    public static Query compile(final InventoryAdapter adapter, final QueryOperation<?>... queries) {
         return new Query(adapter, queries);
     }
 
-    public static void setDefaultResultProvider(ResultAdapterProvider defaultResultProvider) {
+    public static void setDefaultResultProvider(final ResultAdapterProvider defaultResultProvider) {
         Query.defaultResultProvider = defaultResultProvider;
     }
 

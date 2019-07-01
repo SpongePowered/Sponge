@@ -29,7 +29,6 @@ import net.minecraft.tileentity.TileEntityBrewingStand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.data.CustomNameableBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.FilteringSlotAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -41,15 +40,13 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.FilteringSlotLens
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 
 @Mixin(TileEntityBrewingStand.class)
-public abstract class TileEntityBrewingStandMixin extends TileEntityLockableMixin implements MinecraftInventoryAdapter, CustomNameableBridge {
+public abstract class TileEntityBrewingStandMixin extends TileEntityLockableMixin implements CustomNameableBridge {
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
+    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
         return ReusableLens.getLens(BrewingStandInventoryLens.class, this, this::impl$generateBrewingSlotProvider, this::impl$generateBrewingRootLens);
     }
 
-    @SuppressWarnings("unchecked")
     private SlotProvider impl$generateBrewingSlotProvider() {
         return new SlotCollection.Builder().add(5)
                 .add(InputSlotAdapter.class, (i) -> new InputSlotLensImpl(i, (s) -> ((TileEntityBrewingStand) (Object) this).isItemValidForSlot(i, (ItemStack) s), t
@@ -65,13 +62,12 @@ public abstract class TileEntityBrewingStandMixin extends TileEntityLockableMixi
                 .build();
     }
 
-    @SuppressWarnings("unchecked")
-    private BrewingStandInventoryLens impl$generateBrewingRootLens(SlotProvider slots) {
+    private BrewingStandInventoryLens impl$generateBrewingRootLens(final SlotProvider slots) {
         return new BrewingStandInventoryLens(this, slots);
     }
 
     @Override
-    public void bridge$setCustomDisplayName(String customName) {
+    public void bridge$setCustomDisplayName(final String customName) {
         ((TileEntityBrewingStand) (Object) this).setName(customName);
     }
 }

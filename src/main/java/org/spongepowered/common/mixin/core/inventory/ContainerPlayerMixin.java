@@ -37,7 +37,7 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutput
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.LensProvider;
+import org.spongepowered.common.bridge.inventory.LensProviderBridge;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerPlayerInventoryLens;
@@ -45,20 +45,20 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlo
 import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
 
 @Mixin(ContainerPlayer.class)
-public abstract class ContainerPlayerMixin extends ContainerMixin implements ContainerPlayerBridge, LensProvider {
+public abstract class ContainerPlayerMixin extends ContainerMixin implements ContainerPlayerBridge, LensProviderBridge {
 
     @Shadow @Final public EntityPlayer player;
+
+    private int impl$offHandSlot = -1;
 
     @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
         return new ContainerPlayerInventoryLens(adapter, bridge$getSlotProvider());
     }
 
-    private int offHandSlot = -1;
-
     @Override
-    public int getOffHandSlot() {
-        return this.offHandSlot;
+    public int bridge$getOffHandSlot() {
+        return this.impl$offHandSlot;
     }
 
     @Override
@@ -75,8 +75,8 @@ public abstract class ContainerPlayerMixin extends ContainerMixin implements Con
                 .add(36)
                 .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.OFF_HAND));
 
-        if (this.offHandSlot == -1) {
-            this.offHandSlot = builder.size() - 1;
+        if (this.impl$offHandSlot == -1) {
+            this.impl$offHandSlot = builder.size() - 1;
         }
 
         builder.add(this.inventorySlots.size() - 46); // Add additional slots (e.g. from mods)
@@ -84,7 +84,7 @@ public abstract class ContainerPlayerMixin extends ContainerMixin implements Con
     }
 
     @Override
-    protected void markClean() {
+    protected void impl$markClean() {
         ((InventoryPlayerBridge) this.player.inventory).markClean();
     }
 }

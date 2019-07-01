@@ -42,40 +42,34 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.tileentity.SingleBlockCarrierBridge;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.bridge.tileentity.DefaultSingleBlockCarrier;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
 
-@SuppressWarnings("rawtypes")
-@NonnullByDefault
+import javax.annotation.Nullable;
+
 @Mixin(TileEntityLockable.class)
-@Implements({@Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$"),
-             @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),})
 public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier> extends TileEntityMixin_API
     implements TileEntityCarrier, TileEntityInventory<T> {
 
-    @Shadow private LockCode code;
+    @Shadow @Nullable private LockCode code;
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
+        final DataContainer container = super.toContainer();
         if (this.code != null) {
             container.set(Constants.TileEntity.LOCK_CODE, this.code.getLock());
         }
-        List<DataView> items = Lists.newArrayList();
+        final List<DataView> items = Lists.newArrayList();
         for (int i = 0; i < ((IInventory) this).getSizeInventory(); i++) {
-            ItemStack stack = ((IInventory) this).getStackInSlot(i);
+            final ItemStack stack = ((IInventory) this).getStackInSlot(i);
             if (!stack.isEmpty()) {
                 // todo make a helper object for this
-                DataContainer stackView = DataContainer.createNew()
+                final DataContainer stackView = DataContainer.createNew()
                     .set(Queries.CONTENT_VERSION, 1)
                     .set(Constants.TileEntity.SLOT, i)
                     .set(Constants.TileEntity.SLOT_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).toContainer());
@@ -87,16 +81,12 @@ public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(final List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        Optional<LockableData> lockData = get(LockableData.class);
-        if (lockData.isPresent()) {
-            manipulators.add(lockData.get());
-        }
-        Optional<InventoryItemData> inventoryData = get(InventoryItemData.class);
-        if (inventoryData.isPresent()) {
-            manipulators.add(inventoryData.get());
-        }
+        final Optional<LockableData> lockData = get(LockableData.class);
+        lockData.ifPresent(manipulators::add);
+        final Optional<InventoryItemData> inventoryData = get(InventoryItemData.class);
+        inventoryData.ifPresent(manipulators::add);
         if (((TileEntityLockable) (Object) this).hasCustomName()) {
             manipulators.add(get(DisplayNameData.class).get());
         }
@@ -109,15 +99,17 @@ public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier
     }
 
     @Override
-    public Inventory getInventory(Direction from) {
-        return SingleBlockCarrierBridge.getInventory(from, this);
+    public Inventory getInventory(final Direction from) {
+        return DefaultSingleBlockCarrier.getInventory(from, this);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public Optional<T> getTileEntity() {
         return Optional.of((T) this);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public Optional<T> getCarrier() {
         return Optional.of((T) this);

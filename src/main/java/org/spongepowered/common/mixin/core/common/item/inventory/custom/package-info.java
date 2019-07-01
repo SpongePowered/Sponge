@@ -22,24 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+/**
+ * A majority of these interfaces are to aid in manipulating block states and blocks
+ * for a specific {@link org.spongepowered.api.data.manipulator.DataManipulator}. The one
+ * requirement is that all block mixins extend {@link org.spongepowered.common.bridge.block.BlockBridge}
+ * for the benefit of being able to "reset" the block to a "default state".
+ */
+@org.spongepowered.api.util.annotation.NonnullByDefault
 package org.spongepowered.common.mixin.core.common.item.inventory.custom;
-
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.item.inventory.custom.CustomContainer;
-import org.spongepowered.common.item.inventory.custom.CustomInventory;
-import org.spongepowered.common.mixin.core.inventory.ContainerMixin;
-
-@Mixin(CustomContainer.class)
-public abstract class MixinCustomContainer extends ContainerMixin {
-
-    @Shadow(remap = false) public CustomInventory inv;
-
-    @Override
-    public PluginContainer getPlugin() {
-        // Fail fast to the base inventory
-        return ((Inventory) this.inv).getPlugin();
-    }
-}

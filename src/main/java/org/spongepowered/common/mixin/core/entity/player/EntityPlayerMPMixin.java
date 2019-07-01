@@ -121,6 +121,7 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.scoreboard.TeamBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -275,7 +276,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             }
 
             for (final ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
-                final Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
+                final Score score = this.getWorldScoreboard().getOrCreateScore(this.shadow$getName(), scoreobjective);
                 score.incrementScore();
             }
 
@@ -391,7 +392,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     public void forceRecreateUser() {
         final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
         if (!(service instanceof SpongeUserStorageService)) {
-            SpongeImpl.getLogger().error("Not re-creating User object for player {}, as UserStorageServer has been replaced with {}", this.getName(), service);
+            SpongeImpl.getLogger().error("Not re-creating User object for player {}, as UserStorageServer has been replaced with {}", this.shadow$getName(), service);
         } else {
             this.impl$user = ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.getGameProfile());
         }
@@ -667,7 +668,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Override
     @Nullable
     public Text getDisplayNameText() {
-        return Text.of(getName());
+        return Text.of(shadow$getName());
     }
 
     @Override
@@ -704,7 +705,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
                 .query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(this.inventory.currentItem)));
         final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(currentItem);
         final ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1);
-        ((ContainerBridge) this.inventoryContainer).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, originalItem, ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));
+        ((TrackedInventoryBridge) this.inventoryContainer).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, originalItem, ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));
 
         return this.dropItem(itemToDrop, false, true);
     }
@@ -722,10 +723,10 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @Inject(method = "closeContainer", at = @At("RETURN"))
     private void onCloseContainer(final CallbackInfo ci) {
-        final ContainerBridge mixinContainer = (ContainerBridge) this.openContainer;
+        final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) this.openContainer;
         // Safety measure to avoid memory leaks as mods may call this directly
-        if (mixinContainer.capturingInventory()) {
-            mixinContainer.setCaptureInventory(false);
+        if (mixinContainer.bridge$capturingInventory()) {
+            mixinContainer.bridge$setCaptureInventory(false);
             mixinContainer.bridge$getCapturedSlotTransactions().clear();
         }
     }
@@ -734,7 +735,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     private void onSetContainer(final IInventory chestInventory, final CallbackInfo ci) {
         if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ContainerChest && this.isSpectator()) {
             SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
-            ((ContainerBridge) this.openContainer).setSpectatorChest(true);
+            ((ContainerBridge) this.openContainer).bridge$setSpectatorChest(true);
         }
     }
 
@@ -973,6 +974,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         cir.setReturnValue(teamPVP);
     }
 
+    @Override
     public int bridge$getViewDistance() {
         return this.impl$viewDistance;
     }

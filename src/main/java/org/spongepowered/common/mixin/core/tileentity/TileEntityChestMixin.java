@@ -28,6 +28,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.SoundCategory;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -55,23 +56,21 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
     @Shadow public TileEntityChest adjacentChestZPos;
 
     @Shadow public abstract void checkForAdjacentChests();
-
     @Shadow public abstract int getSizeInventory();
 
     @Override
-    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
-        return ReusableLens.getLens(GridInventoryLens.class, this, this::generateSlotProvider, this::generateRootLens);
+    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
+        return ReusableLens.getLens(GridInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
     }
 
-    private SlotProvider generateSlotProvider() {
+    private SlotProvider impl$generateSlotProvider() {
         return new SlotCollection.Builder().add(this.getSizeInventory()).build();
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens generateRootLens(SlotProvider slots) {
-        Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
-        int size = this.getSizeInventory();
-        return new GridInventoryLensImpl(0, 9, size / 9, 9, thisClass, slots);
+    private GridInventoryLens impl$generateRootLens(final SlotProvider slots) {
+        final int size = this.getSizeInventory();
+        return new GridInventoryLensImpl(0, 9, size / 9, 9, (Class<? extends Inventory>) this.getClass(), slots);
     }
 
     /**
@@ -80,7 +79,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
      * @reason Overwritten in case chests ever attempt to tick
      */
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
-    private void impl$DisableTickingChestsOnServer(CallbackInfo ci) {
+    private void impl$DisableTickingChestsOnServer(final CallbackInfo ci) {
         if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server
             ci.cancel();
@@ -92,7 +91,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"),
         cancellable = true)
-    private void impl$Moved(EntityPlayer player, CallbackInfo ci) {
+    private void impl$Moved(final EntityPlayer player, final CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();
@@ -106,7 +105,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
         if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null) {
             this.lidAngle = 0.7F;
             double posX = this.pos.getX() + 0.5D;
-            double posY = this.pos.getY() + 0.5D;
+            final double posY = this.pos.getY() + 0.5D;
             double posZ = this.pos.getZ() + 0.5D;
 
             if (this.adjacentChestXPos != null) {
@@ -127,7 +126,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"),
         cancellable = true)
-    private void impl$MovedSoundOutofTickLoop(EntityPlayer player, CallbackInfo ci) {
+    private void impl$MovedSoundOutofTickLoop(final EntityPlayer player, final CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();
@@ -138,7 +137,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
         }
 
         if (this.numPlayersUsing == 0 && this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F) {
-            float f = 0.1F;
+            final float f = 0.1F;
 
             if (this.numPlayersUsing > 0) {
                 this.lidAngle += f;
@@ -147,7 +146,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
             }
 
             double posX = this.pos.getX() + 0.5D;
-            double posY = this.pos.getY() + 0.5D;
+            final double posY = this.pos.getY() + 0.5D;
             double posZ = this.pos.getZ() + 0.5D;
 
             if (this.adjacentChestXPos != null) {

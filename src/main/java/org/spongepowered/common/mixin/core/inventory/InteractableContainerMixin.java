@@ -55,12 +55,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
         ContainerMerchant.class,
         ContainerPlayer.class,
         ContainerWorkbench.class
-}, priority = 1001)
+})
 public abstract class InteractableContainerMixin extends ContainerMixin {
 
     @Inject(method = "canInteractWith", at = @At("HEAD"), cancellable = true)
     private void impl$canInteractWith(final EntityPlayer playerIn, final CallbackInfoReturnable<Boolean> cir) {
-        this.impl$canInteractWithPredicate.ifPresent(p -> cir.setReturnValue(p.test(playerIn)));
+        if (this.impl$canInteractWithPredicate != null) {
+            cir.setReturnValue(this.impl$canInteractWithPredicate.test(playerIn));
+        }
     }
 
 }

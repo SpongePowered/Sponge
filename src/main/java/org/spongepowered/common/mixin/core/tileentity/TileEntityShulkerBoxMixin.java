@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.TileEntityShulkerBox;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -38,17 +39,17 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensI
 public abstract class TileEntityShulkerBoxMixin extends TileEntityLockableLootMixin {
 
     @Override
-    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
-        return ReusableLens.getLens(GridInventoryLens.class, this, this::generateSlotProvider, this::generateRootLens);
+    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
+        return ReusableLens.getLens(GridInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
     }
 
-    private SlotProvider generateSlotProvider() {
+    private SlotProvider impl$generateSlotProvider() {
         return new SlotCollection.Builder().add(27).build();
     }
 
-    private GridInventoryLens generateRootLens(SlotProvider slots) {
-        Class<? extends InventoryAdapter> thisClass = this.getClass();
-        return new GridInventoryLensImpl(0, 9, 3, 9, thisClass, slots);
+    @SuppressWarnings("unchecked")
+    private GridInventoryLens impl$generateRootLens(final SlotProvider slots) {
+        return new GridInventoryLensImpl(0, 9, 3, 9, (Class<? extends Inventory>) this.getClass(), slots);
     }
 
 }

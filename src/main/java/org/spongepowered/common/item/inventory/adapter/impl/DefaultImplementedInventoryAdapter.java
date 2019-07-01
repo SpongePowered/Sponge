@@ -50,7 +50,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 
-public interface MinecraftInventoryAdapter extends InventoryAdapter {
+public interface DefaultImplementedInventoryAdapter extends InventoryAdapter, Inventory {
 
     @Override
     default Translation getName() {
@@ -224,10 +224,11 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
         return Query.compile(this, new SlotLensQueryOperation(ImmutableSet.of(inventory))).execute();
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     default Inventory union(final Inventory inventory) {
-        final CompoundLens.Builder lensBuilder = CompoundLens.builder().add(bridge$getRootLens());
-        final CompoundFabric fabric = new CompoundFabric((MinecraftFabric) bridge$getFabric(), (MinecraftFabric) ((InventoryAdapter) inventory).bridge$getFabric());
+        final CompoundLens.Builder lensBuilder = CompoundLens.builder().add(this.bridge$getRootLens());
+        final CompoundFabric fabric = new CompoundFabric((MinecraftFabric) this.bridge$getFabric(), (MinecraftFabric) ((InventoryAdapter) inventory).bridge$getFabric());
         final CompoundSlotProvider provider = new CompoundSlotProvider().add(this);
         for (final Object inv : inventory) {
             lensBuilder.add(((InventoryAdapter) inv).bridge$getRootLens());
@@ -236,7 +237,7 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
         final CompoundLens lens = lensBuilder.build(provider);
         final InventoryAdapter compoundAdapter = lens.getAdapter(fabric, this);
 
-        return Query.compile(compoundAdapter, new SlotLensQueryOperation(ImmutableSet.of(compoundAdapter))).execute();
+        return Query.compile(compoundAdapter, new SlotLensQueryOperation(ImmutableSet.of((Inventory) compoundAdapter))).execute();
     }
 
     @Override

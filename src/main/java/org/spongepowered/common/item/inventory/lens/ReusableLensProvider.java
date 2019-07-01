@@ -29,6 +29,6 @@ import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 
 public interface ReusableLensProvider {
 
-    ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter);
+    ReusableLens<?> bridge$generateReusableLens(Fabric fabric, InventoryAdapter adapter);
     
 }

@@ -39,7 +39,7 @@ public class SlotFabric extends MinecraftFabric {
 
     private final Slot slot;
 
-    public SlotFabric(Slot inventory) {
+    public SlotFabric(final Slot inventory) {
         this.slot = inventory;
     }
 
@@ -49,7 +49,7 @@ public class SlotFabric extends MinecraftFabric {
     }
 
     @Override
-    public IInventory get(int index) {
+    public IInventory get(final int index) {
         if (this.slot.inventory != null) {
             return this.slot.inventory;
         }
@@ -58,12 +58,12 @@ public class SlotFabric extends MinecraftFabric {
     }
 
     @Override
-    public ItemStack getStack(int index) {
+    public ItemStack getStack(final int index) {
         return this.slot.getStack();
     }
 
     @Override
-    public void setStack(int index, ItemStack stack) {
+    public void setStack(final int index, final ItemStack stack) {
         this.slot.putStack(stack);
     }
 

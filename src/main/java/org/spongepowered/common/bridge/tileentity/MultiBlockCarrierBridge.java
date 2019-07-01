@@ -54,6 +54,6 @@ public interface MultiBlockCarrierBridge extends MultiBlockCarrier {
 
     @Override
     default Inventory getInventory(final Direction from) {
-        return SingleBlockCarrierBridge.getInventory(from, this);
+        return DefaultSingleBlockCarrier.getInventory(from, this);
     }
 }

@@ -33,7 +33,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.LensProvider;
+import org.spongepowered.common.bridge.inventory.LensProviderBridge;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
@@ -51,10 +51,9 @@ import javax.annotation.Nullable;
 /**
  * Base Adapter implementation for {@link ItemStack} based Inventories.
  */
-public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
+public class AbstractInventoryAdapter implements DefaultImplementedInventoryAdapter, Inventory {
 
     public static final Translation DEFAULT_NAME = new SpongeTranslation("inventory.default.title");
-
 
     protected final Fabric inventory;
     protected final SlotCollection slots;
@@ -65,36 +64,40 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
     @Nullable protected Inventory next;
     @Nullable private Iterable<Slot> slotIterator;
 
-    public AbstractInventoryAdapter(Fabric inventory) {
+    public AbstractInventoryAdapter(final Fabric inventory) {
         this(inventory, null, null);
     }
 
+    @Override
+    public Inventory root() {
+        return this.parent() == this ? this : this.parent().root();
+    }
+
     @SuppressWarnings("unchecked")
-    public <T extends Lens> AbstractInventoryAdapter(Fabric inventory, Class<T> lensType) {
+    public <T extends Lens> AbstractInventoryAdapter(final Fabric inventory, final Class<T> lensType) {
         this.inventory = inventory;
         this.parent = this;
         if (inventory.getSize() == 0) {
             this.slots = new SlotCollection(0);
             this.lens = new DefaultEmptyLens(this);
         } else {
-            ReusableLens<T> lens = ReusableLens.getLens(lensType, this, () -> this.initSlots(inventory, parent),
+            final ReusableLens<T> lens = ReusableLens.getLens(lensType, this, () -> this.initSlots(inventory, this.parent),
                     (slots) -> (T) new DefaultIndexedLens(0, inventory.getSize(), this, ((SlotCollection) slots)));
             this.slots = ((SlotCollection) lens.getSlots());
             this.lens = lens.getLens();
         }
     }
 
-    public AbstractInventoryAdapter(Fabric inventory, @Nullable Lens root, @Nullable Inventory parent) {
+    public AbstractInventoryAdapter(final Fabric inventory, @Nullable final Lens root, @Nullable final Inventory parent) {
         this.inventory = inventory;
         this.parent = parent == null ? this : parent;
         this.slots = this.initSlots(inventory, parent);
         this.lens = root != null ? root : checkNotNull(this.initRootLens(), "root lens");
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private SlotCollection initSlots(Fabric inventory, @Nullable Inventory parent) {
-        if (parent instanceof MinecraftInventoryAdapter) {
-            SlotProvider sp = ((MinecraftInventoryAdapter) parent).bridge$getSlotProvider();
+    private SlotCollection initSlots(final Fabric inventory, @Nullable final Inventory parent) {
+        if (parent instanceof DefaultImplementedInventoryAdapter) {
+            final SlotProvider sp = ((DefaultImplementedInventoryAdapter) parent).bridge$getSlotProvider();
             if (sp instanceof SlotCollection) {
                 return ((SlotCollection) sp);
             }
@@ -107,12 +110,11 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
         return this.parent;
     }
 
-    @SuppressWarnings("unchecked")
     protected Lens initRootLens() {
-        if (this instanceof LensProvider) {
-            return ((LensProvider) this).bridge$rootLens(this.inventory, this);
+        if (this instanceof LensProviderBridge) {
+            return ((LensProviderBridge) this).bridge$rootLens(this.inventory, this);
         }
-        int size = this.inventory.getSize();
+        final int size = this.inventory.getSize();
         if (size == 0) {
             return new DefaultEmptyLens(this);
         }
@@ -144,14 +146,14 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
         }
         Inventory child = this.children.get(index);
         if (child == null) {
-            child = this.lens.getChildren().get(index).getAdapter(this.inventory, this);
+            child = (Inventory) this.lens.getChildren().get(index).getAdapter(this.inventory, this);
             this.children.set(index, child);
         }
         return child;
     }
 
     @Override
-    public Inventory bridge$getChild(Lens lens) {
+    public Inventory bridge$getChild(final Lens lens) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -170,7 +172,7 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
         this.slots().forEach(Inventory::clear);
     }
 
-    public static Optional<Slot> forSlot(Fabric inv, SlotLens slotLens, Inventory parent) {
+    public static Optional<Slot> forSlot(final Fabric inv, final SlotLens slotLens, final Inventory parent) {
         return slotLens == null ? Optional.<Slot>empty() : Optional.<Slot>ofNullable((Slot) slotLens.getAdapter(inv, parent));
     }
 

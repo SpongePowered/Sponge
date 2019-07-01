@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.DefaultImplementedInventoryAdapter;
 
-public interface Result extends InventoryAdapter {
+public interface Result extends DefaultImplementedInventoryAdapter, Inventory {
 
 }

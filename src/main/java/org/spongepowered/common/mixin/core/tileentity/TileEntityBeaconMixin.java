@@ -54,13 +54,13 @@ public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin impl
 
     @SuppressWarnings({"rawtypes"})
     @Override
-    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
+    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
         return ReusableLens.getLens(InputSlotLens.class, this, this::impl$generateBeaconSlotProvider, this::impl$generateBeaconRootLens);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private SlotProvider impl$generateBeaconSlotProvider() {
-        InputSlotLensImpl lens = new InputSlotLensImpl(0, ((Class) TileEntityBeacon.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
+        final InputSlotLensImpl lens = new InputSlotLensImpl(0, ((Class) TileEntityBeacon.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
                 itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)));
         return new SlotCollection.Builder()
                 .add(InputSlotAdapter.class, i -> lens)
@@ -68,7 +68,7 @@ public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin impl
     }
 
     @SuppressWarnings({"rawtypes"})
-    private InputSlotLens impl$generateBeaconRootLens(SlotProvider slots) {
+    private InputSlotLens impl$generateBeaconRootLens(final SlotProvider slots) {
         return ((InputSlotLens) slots.getSlot(0));
     }
 
@@ -85,22 +85,22 @@ public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin impl
         at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;")
     )
     @Nullable
-    private Potion impl$UsePotionUtilInsteadOfCheckingValidPotions(int id) {
+    private Potion impl$UsePotionUtilInsteadOfCheckingValidPotions(final int id) {
         return Potion.getPotionById(id);
     }
 
     @Override
-    public void bridge$setCustomDisplayName(String customName) {
+    public void bridge$setCustomDisplayName(final String customName) {
         this.customName = customName;
     }
 
     @Override
-    public void bridge$forceSetPrimaryEffect(Potion potion) {
+    public void bridge$forceSetPrimaryEffect(final Potion potion) {
         this.primaryEffect = potion;
     }
 
     @Override
-    public void bridge$forceSetSecondaryEffect(Potion potion) {
+    public void bridge$forceSetSecondaryEffect(final Potion potion) {
         this.secondaryEffect = potion;
     }
 }

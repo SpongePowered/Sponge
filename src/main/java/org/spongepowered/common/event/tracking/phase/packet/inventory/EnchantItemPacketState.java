@@ -41,6 +41,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
@@ -69,9 +70,9 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
         // See NetHandlerPlayServerMixin processClickWindow redirect for rest of
         // fix.
         // --bloodmc
-        final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
-        if (!mixinContainer.capturingInventory()) {
-            mixinContainer.bridge$getCapturedSlotTransactions().clear();
+        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
+        if (!trackedInventory.bridge$capturingInventory()) {
+            trackedInventory.bridge$getCapturedSlotTransactions().clear();
             return;
         }
 
@@ -82,7 +83,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(lastCursor, newCursor);
 
         final net.minecraft.inventory.Container openContainer = player.openContainer;
-        final List<SlotTransaction> slotTransactions = mixinContainer.bridge$getCapturedSlotTransactions();
+        final List<SlotTransaction> slotTransactions = trackedInventory.bridge$getCapturedSlotTransactions();
 
         final int usedButton = packetIn.getButton();
         final List<Entity> capturedItems = new ArrayList<>();
@@ -101,14 +102,14 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
 
             // Some mods may override container detectAndSendChanges method and prevent captures
             // If this happens and we captured no entities, avoid firing events
-            if (mixinContainer.bridge$getCapturedSlotTransactions().isEmpty() && capturedItems.isEmpty()) {
-                mixinContainer.setCaptureInventory(false);
+            if (trackedInventory.bridge$getCapturedSlotTransactions().isEmpty() && capturedItems.isEmpty()) {
+                trackedInventory.bridge$setCaptureInventory(false);
                 return;
             }if (inventoryEvent != null) {
                 // Don't fire inventory drop events when there are no entities
                 if (inventoryEvent instanceof AffectEntityEvent && ((AffectEntityEvent) inventoryEvent).getEntities().isEmpty()) {
                     slotTransactions.clear();
-                    mixinContainer.setCaptureInventory(false);
+                    trackedInventory.bridge$setCaptureInventory(false);
                     return;
                 }
 
@@ -151,7 +152,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
             }
         }
         slotTransactions.clear();
-        mixinContainer.setCaptureInventory(false);
+        trackedInventory.bridge$setCaptureInventory(false);
     }
 
     // TODO EnchantItemEvent

@@ -49,7 +49,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -69,17 +69,17 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(InventoryPacketContext context) {
+    public boolean doesCaptureEntityDrops(final InventoryPacketContext context) {
         return true;
     }
 
     @Override
-    public void unwind(InventoryPacketContext context) {
+    public void unwind(final InventoryPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
         //final ItemStack usedStack = context.getItemUsed();
         //final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = (Entity) player;
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
@@ -90,12 +90,12 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                 .acceptAndClearIfNotEmpty(items -> {
 
                     final ArrayList<Entity> entities = new ArrayList<>();
-                    for (EntityItem item : items) {
+                    for (final EntityItem item : items) {
                         entities.add((Entity) item);
                     }
 
-                    int usedButton;
-                    Slot slot;
+                    final int usedButton;
+                    final Slot slot;
                     if (context.getPacket() instanceof CPacketPlayerDigging) {
                         final CPacketPlayerDigging packetIn = context.getPacket();
                         usedButton = packetIn.getAction() == CPacketPlayerDigging.Action.DROP_ITEM ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID : 1;
@@ -103,13 +103,13 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     } else {
                         final CPacketClickWindow packetIn = context.getPacket();
                         usedButton = packetIn.getUsedButton();
-                        slot = ((InventoryAdapter) player.inventory).getSlot(packetIn.getSlotId()).orElse(null);
+                        slot = ((InventoryAdapter) player.inventory).bridge$getSlot(packetIn.getSlotId()).orElse(null);
                     }
 
-                    Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
-                    final ContainerBridge mixinContainer = ContainerUtil.toMixin( player.openContainer);
-                    List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
-                    ClickInventoryEvent.Drop dropItemEvent = this.createInventoryEvent(player, ContainerUtil.fromNative(player.openContainer),
+                    final Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+                    final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
+                    final List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
+                    final ClickInventoryEvent.Drop dropItemEvent = this.createInventoryEvent(player, ContainerUtil.fromNative(player.openContainer),
                             cursorTrans, Lists.newArrayList(slotTrans), entities,  usedButton, slot);
 
                     SpongeImpl.postEvent(dropItemEvent);
@@ -120,24 +120,24 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                         processSpawnedEntities(player, dropItemEvent);
                     }
                     slotTrans.clear();
-                    mixinContainer.setCaptureInventory(false);
+                    mixinContainer.bridge$setCaptureInventory(false);
                 });
             context.getPerEntityItemDropSupplier()
                 .acceptAndClearIfNotEmpty(itemMapping -> {
 
                 });
-            final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
-            mixinContainer.setCaptureInventory(false);
+            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
+            mixinContainer.bridge$setCaptureInventory(false);
             mixinContainer.bridge$getCapturedSlotTransactions().clear();
         }
     }
 
     @Override
-    public ClickInventoryEvent.Drop createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    public ClickInventoryEvent.Drop createInventoryEvent(final EntityPlayerMP playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
+            final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable final Slot slot) {
+        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            for (Entity currentEntity : capturedEntities) {
+            for (final Entity currentEntity : capturedEntities) {
                 if (currentEntity instanceof OwnershipTrackedBridge) {
                     ((OwnershipTrackedBridge) currentEntity).tracked$setOwnerReference((Player) playerMP);
                 } else {
@@ -145,7 +145,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                 }            }
 
             // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')
-            ClickInventoryEvent.Drop event;
+            final ClickInventoryEvent.Drop event;
             if (usedButton == Constants.Networking.PACKET_BUTTON_PRIMARY_ID) {
                 event = SpongeEventFactory.createClickInventoryEventDropSingle(Sponge.getCauseStackManager().getCurrentCause(),
                         transaction, capturedEntities, Optional.ofNullable(slot), openContainer, slotTransactions);

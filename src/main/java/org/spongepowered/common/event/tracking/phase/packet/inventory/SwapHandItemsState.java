@@ -35,34 +35,35 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
 import java.util.List;
 
 public final class SwapHandItemsState extends BasicInventoryPacketState {
 
-    public ChangeInventoryEvent.SwapHand createInventoryEvent(Inventory inventory, List<SlotTransaction> slotTransactions) {
+    public ChangeInventoryEvent.SwapHand createInventoryEvent(final Inventory inventory, final List<SlotTransaction> slotTransactions) {
         return SpongeEventFactory.createChangeInventoryEventSwapHand(Sponge.getCauseStackManager().getCurrentCause(), inventory, slotTransactions);
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
-        ((InventoryPlayerBridge) playerMP.inventory).setCapture(true);
+    public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final InventoryPacketContext context) {
+        ((TrackedInventoryBridge) playerMP.inventory).bridge$setCaptureInventory(true);
     }
 
     @Override
-    public void unwind(InventoryPacketContext context) {
+    public void unwind(final InventoryPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
         final Entity spongePlayer = (Entity) player;
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
-            final InventoryPlayerBridge mixinInventory = ((InventoryPlayerBridge) player.inventory);
-            List<SlotTransaction> trans = mixinInventory.getCapturedTransactions();
-            ChangeInventoryEvent.SwapHand swapItemEvent = this.createInventoryEvent(((Inventory) player.inventory), trans);
+            final TrackedInventoryBridge mixinInventory = ((TrackedInventoryBridge) player.inventory);
+            final List<SlotTransaction> trans = mixinInventory.bridge$getCapturedSlotTransactions();
+            final ChangeInventoryEvent.SwapHand swapItemEvent = this.createInventoryEvent(((Inventory) player.inventory), trans);
             SpongeImpl.postEvent(swapItemEvent);
             PacketPhaseUtil.handleSlotRestore(player, null, swapItemEvent.getTransactions(), swapItemEvent.isCancelled());
-            mixinInventory.setCapture(false);
-            mixinInventory.getCapturedTransactions().clear();
+            mixinInventory.bridge$setCaptureInventory(false);
+            mixinInventory.bridge$getCapturedSlotTransactions().clear();
         }
     }
 }

@@ -29,12 +29,12 @@ import net.minecraft.inventory.InventoryCraftResult;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntityLockable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.ReusableLensInventoryAdapaterBridge;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.LensProvider;
+import org.spongepowered.common.bridge.inventory.LensProviderBridge;
 import org.spongepowered.common.item.inventory.lens.ReusableLensProvider;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
@@ -43,7 +43,9 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLe
 import javax.annotation.Nullable;
 
 /**
- * Implement {@link InventoryAdapter#bridge$getSlotProvider()} and {@link InventoryAdapter#bridge$getRootLens()} using a {@link ReusableLensProvider} or {@link LensProvider}
+ * Implement {@link InventoryAdapter#bridge$getSlotProvider()}
+ * and {@link InventoryAdapter#bridge$getRootLens()}
+ * using a {@link ReusableLensProvider} or {@link LensProviderBridge}
  */
 @Mixin(value = {
         TileEntityLockable.class,
@@ -51,49 +53,38 @@ import javax.annotation.Nullable;
         InventoryCraftResult.class,
         InventoryLargeChest.class
 }, priority = 999)
-public abstract class InventoryTraitAdapterMixin implements MinecraftInventoryAdapter {
+public abstract class ReusableLensInventoryAdapterMixin implements ReusableLensInventoryAdapaterBridge, InventoryAdapterBridge {
 
-    @Nullable private ReusableLens<?> reusableLens = null;
-    @Nullable private SlotProvider slots = null;
-
-    @Override
-    public SlotProvider bridge$getSlotProvider() {
-        if (this.slots != null) {
-            return this.slots;
-        }
-        return this.getReusableLens().getSlots();
-    }
+    @Nullable private ReusableLens<?> impl$reusableLens = null;
 
     @Override
-    public Lens bridge$getRootLens() {
-        return this.getReusableLens().getLens();
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private ReusableLens<?> getReusableLens()
-    {
-        if (this.reusableLens != null) {
-            return this.reusableLens;
+    public ReusableLens<?> bridge$getReusableLens() {
+        if (this.impl$reusableLens != null) {
+            return this.impl$reusableLens;
         }
         if (this instanceof ReusableLensProvider) {
-            this.reusableLens = ((ReusableLensProvider) this).generateLens(this.bridge$getFabric(), this);
-            return this.reusableLens;
+            this.impl$reusableLens = ((ReusableLensProvider) this).bridge$generateReusableLens(this.bridge$getFabric(), this);
+            return this.impl$reusableLens;
         }
-        if (this instanceof LensProvider) {
-            this.slots = ((LensProvider) this).bridge$slotProvider(this.bridge$getFabric(), this);
-            Lens lens = ((LensProvider) this).bridge$rootLens(this.bridge$getFabric(), this);
-            this.reusableLens = new ReusableLens<>(this.slots, lens);
-            return this.reusableLens;
+        if (this instanceof LensProviderBridge) {
+            // We can set the slot provider onto itself for recycling the field usage in InventoryTraitContainerAdapterMixin
+            this.bridge$setSlotProvider(((LensProviderBridge) this).bridge$slotProvider(this.bridge$getFabric(), this));
+            final Lens lens = ((LensProviderBridge) this).bridge$rootLens(this.bridge$getFabric(), this);
+            this.impl$reusableLens = new ReusableLens<>(this.bridge$getSlotProvider(), lens);
+            this.bridge$setLens(lens);
+            return this.impl$reusableLens;
         }
-        SlotCollection slots = new SlotCollection.Builder().add(this.bridge$getFabric().getSize()).build();
-        Lens lens;
+        final SlotCollection slots = new SlotCollection.Builder().add(this.bridge$getFabric().getSize()).build();
+        final Lens lens;
         if (this.bridge$getFabric().getSize() == 0) {
             lens = new DefaultEmptyLens(this);
         } else {
             lens = new OrderedInventoryLensImpl(0, this.bridge$getFabric().getSize(), 1, slots);
         }
-        this.reusableLens = new ReusableLens<>(slots, lens);
-        return this.reusableLens;
+        this.impl$reusableLens = new ReusableLens<>(slots, lens);
+        this.bridge$setSlotProvider(slots);
+        this.bridge$setLens(this.impl$reusableLens.getLens());
+        return this.impl$reusableLens;
     }
 
 }

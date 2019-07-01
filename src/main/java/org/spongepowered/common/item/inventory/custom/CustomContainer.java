@@ -33,7 +33,7 @@ public class CustomContainer extends Container {
 
     public CustomInventory inv;
 
-    public CustomContainer(EntityPlayer player, CustomInventory inventory) {
+    public CustomContainer(final EntityPlayer player, final CustomInventory inventory) {
         this.inv = inventory;
 
         // TODO what significance has the x/y coord on the Slots?
@@ -52,24 +52,24 @@ public class CustomContainer extends Container {
     }
 
     @Override
-    public boolean canInteractWith(EntityPlayer playerIn) {
+    public boolean canInteractWith(final EntityPlayer playerIn) {
         return true;
     }
 
     @Override
-    public void onContainerClosed(EntityPlayer playerIn) {
+    public void onContainerClosed(final EntityPlayer playerIn) {
         super.onContainerClosed(playerIn);
         this.inv.closeInventory(playerIn);
     }
 
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
+    public ItemStack transferStackInSlot(final EntityPlayer playerIn, final int index) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(index);
+        final Slot slot = this.inventorySlots.get(index);
 
         if (slot != null && slot.getHasStack())
         {
-            ItemStack itemstack1 = slot.getStack();
+            final ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
 
             if (index < this.inv.getSizeInventory())

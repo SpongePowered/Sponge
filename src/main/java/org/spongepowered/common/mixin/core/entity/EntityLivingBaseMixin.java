@@ -68,6 +68,7 @@ import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -116,7 +117,6 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(value = EntityLivingBase.class, priority = 999)
 public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseLivingEntityBridge {
@@ -127,7 +127,6 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
     @Shadow public float attackedAtYaw;
     @Shadow public float limbSwingAmount;
     @Shadow public boolean dead;
-    @Shadow @Nullable public EntityLivingBase revengeTarget;
     @Shadow protected int idleTime;
     @Shadow protected int scoreValue;
     @Shadow protected int recentlyHit;
@@ -141,8 +140,6 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
     @Shadow public void stopActiveHand() { }
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void setLastAttackedEntity(Entity entity);
-    @Shadow public abstract void setRotationYawHead(float rotation);
-    @Shadow public abstract void setRenderYawOffset(float offset);
     @Shadow public abstract void knockBack(Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);
     @Shadow public abstract void shadow$setRevengeTarget(EntityLivingBase livingBase);
     @Shadow public abstract void setAbsorptionAmount(float amount);
@@ -153,7 +150,6 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
     @Shadow public abstract float getAbsorptionAmount();
     @Shadow public abstract float getHealth();
     @Shadow public abstract float getMaxHealth();
-    @Shadow public abstract float getRotationYawHead();
     @Shadow public abstract boolean isPotionActive(Potion potion);
     @Shadow public abstract boolean isOnLadder();
     @Shadow public abstract boolean canBlockDamageSource(DamageSource p_184583_1_);
@@ -318,7 +314,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
 
     @Nullable
     private EntityDeathContext createOrNullDeathPhase(final boolean isMainThread, final DamageSource source) {
-        boolean tracksEntityDeaths = false;
+        final boolean tracksEntityDeaths;
         if (((WorldBridge) this.world).isFake() || !isMainThread) { // Short circuit to avoid erroring on handling
             return null;
         }
@@ -897,19 +893,19 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
             if (entity instanceof EntityPlayerMP) {
                 final SlotLens slotLens;
                 final InventoryPlayerBridge inventory = (InventoryPlayerBridge) ((EntityPlayerMP) entity).inventory;
-                final PlayerInventoryLens inventoryLens = (PlayerInventoryLens) inventory.bridge$getRootLens();
+                final PlayerInventoryLens inventoryLens = (PlayerInventoryLens) ((InventoryAdapter) inventory).bridge$getRootLens();
                 switch (entityEquipmentSlot) {
                     case OFFHAND:
                         slotLens = inventoryLens.getOffhandLens();
                         break;
                     case MAINHAND:
                         final HotbarLens hotbarLens = inventoryLens.getMainLens().getHotbar();
-                        slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(inventory.bridge$getFabric()));
+                        slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(((InventoryAdapter) inventory).bridge$getFabric()));
                         break;
                     default:
                         slotLens = inventoryLens.getEquipmentLens().getSlot(entityEquipmentSlot.getIndex());
                 }
-                slotAdapter = slotLens.getAdapter(inventory.bridge$getFabric(), inventory);
+                slotAdapter = slotLens.getAdapter(((InventoryAdapter) inventory).bridge$getFabric(), (Inventory) inventory);
             } else {
                 if (this.slotLens.isEmpty()) {
                     for (final EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {

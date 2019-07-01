@@ -171,11 +171,6 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         return ((ServerPlayerEntityBridge) this).bridge$getUser().getProfile();
     }
 
-    @Intrinsic
-    public String api$getName() {
-        return shadow$getName();
-    }
-
     @Override
     public boolean isOnline() {
         return ((ServerPlayerEntityBridge) this).bridge$getUser().isOnline();
@@ -309,7 +304,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
     @Override
     public Optional<Container> openInventory(final Inventory inventory, final Text displayName) {
-        if (((ContainerBridge) this.openContainer).isInUse()) {
+        if (((ContainerBridge) this.openContainer).bridge$isInUse()) {
             final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
@@ -328,7 +323,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
-        if (((ContainerBridge) this.openContainer).isInUse()) {
+        if (((ContainerBridge) this.openContainer).bridge$isInUse()) {
             final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {

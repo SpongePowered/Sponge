@@ -42,7 +42,7 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapt
 import org.spongepowered.common.item.inventory.adapter.impl.slots.OutputSlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.LensProvider;
+import org.spongepowered.common.bridge.inventory.LensProviderBridge;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.MainPlayerInventoryLensImpl;
@@ -56,7 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(ContainerRepair.class)
-public abstract class ContainerRepairMixin extends ContainerMixin implements LensProvider {
+public abstract class ContainerRepairMixin extends ContainerMixin implements LensProviderBridge {
 
     @Shadow private String repairedItemName;
     @Shadow @Final private IInventory outputSlot;
@@ -72,7 +72,6 @@ public abstract class ContainerRepairMixin extends ContainerMixin implements Len
         return new ContainerLens(adapter, bridge$getSlotProvider(), lenses);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider bridge$slotProvider(final Fabric fabric, final InventoryAdapter adapter) {
         final SlotCollection.Builder builder = new SlotCollection.Builder()

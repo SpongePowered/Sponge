@@ -22,14 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens;
-
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-
-public interface LensProvider {
-
-    Lens bridge$rootLens(Fabric fabric, InventoryAdapter adapter);
-
-    SlotProvider bridge$slotProvider(Fabric fabric, InventoryAdapter adapter);
-    
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.mixin.api.item.inventory;

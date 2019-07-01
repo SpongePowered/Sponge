@@ -46,6 +46,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -59,14 +60,14 @@ import javax.annotation.Nullable;
 public final class PacketPhaseUtil {
 
     @SuppressWarnings("rawtypes")
-    public static void handleSlotRestore(EntityPlayer player, @Nullable Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled) {
-        for (SlotTransaction slotTransaction : slotTransactions) {
+    public static void handleSlotRestore(final EntityPlayer player, @Nullable final Container openContainer, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
+        for (final SlotTransaction slotTransaction : slotTransactions) {
 
             if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
                 continue;
             }
             final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
-            ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
+            final ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
             final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
             if (openContainer == null) {
                 slot.set(((org.spongepowered.api.item.inventory.ItemStack) originalStack));
@@ -79,10 +80,10 @@ public final class PacketPhaseUtil {
             }
         }
         if (openContainer != null) {
-            boolean capture = ((ContainerBridge) openContainer).capturingInventory();
-            ((ContainerBridge) openContainer).setCaptureInventory(false);
+            final boolean capture = ((TrackedInventoryBridge) openContainer).bridge$capturingInventory();
+            ((TrackedInventoryBridge) openContainer).bridge$setCaptureInventory(false);
             openContainer.detectAndSendChanges();
-            ((ContainerBridge) openContainer).setCaptureInventory(capture);
+            ((TrackedInventoryBridge) openContainer).bridge$setCaptureInventory(capture);
             // If event is cancelled, always resync with player
             // we must also validate the player still has the same container open after the event has been processed
             if (eventCancelled && player.openContainer == openContainer && player instanceof EntityPlayerMP) {
@@ -91,24 +92,24 @@ public final class PacketPhaseUtil {
         }
     }
 
-    public static void handleCustomCursor(EntityPlayerMP player, ItemStackSnapshot customCursor) {
-        ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
+    public static void handleCustomCursor(final EntityPlayerMP player, final ItemStackSnapshot customCursor) {
+        final ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
         player.inventory.setItemStack(cursor);
         player.connection.sendPacket(new SPacketSetSlot(-1, -1, cursor));
     }
 
-    public static void validateCapturedTransactions(int slotId, Container openContainer, List<SlotTransaction> capturedTransactions) {
+    public static void validateCapturedTransactions(final int slotId, final Container openContainer, final List<SlotTransaction> capturedTransactions) {
         if (capturedTransactions.size() == 0 && slotId >= 0 && slotId < openContainer.inventorySlots.size()) {
             final Slot slot = openContainer.getSlot(slotId);
             if (slot != null) {
-                ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
+                final ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
                 final SlotTransaction slotTransaction = new SlotTransaction(ContainerUtil.getSlot(openContainer, slotId), snapshot, snapshot);
                 capturedTransactions.add(slotTransaction);
             }
         }
     }
 
-    public static void handlePlayerSlotRestore(EntityPlayerMP player, ItemStack itemStack, EnumHand hand) {
+    public static void handlePlayerSlotRestore(final EntityPlayerMP player, final ItemStack itemStack, final EnumHand hand) {
         if (itemStack.isEmpty()) { // No need to check if it's NONE, NONE is checked by isEmpty.
             return;
         }
@@ -130,12 +131,12 @@ public final class PacketPhaseUtil {
     }
 
     // Check if all transactions are invalid
-    public static boolean allTransactionsInvalid(List<SlotTransaction> slotTransactions) {
+    public static boolean allTransactionsInvalid(final List<SlotTransaction> slotTransactions) {
         if (slotTransactions.size() == 0) {
             return false;
         }
 
-        for (SlotTransaction slotTransaction : slotTransactions) {
+        for (final SlotTransaction slotTransaction : slotTransactions) {
             if (slotTransaction.isValid()) {
                 return false;
             }
@@ -145,9 +146,9 @@ public final class PacketPhaseUtil {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
+    public static void onProcessPacket(final Packet packetIn, final INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
                 frame.pushCause(packetPlayer);
                 if (SpongeImplHooks.creativeExploitCheck(packetIn, packetPlayer)) {
@@ -157,7 +158,7 @@ public final class PacketPhaseUtil {
                 // Don't process movement capture logic if player hasn't moved
                 final boolean ignoreMovementCapture;
                 if (packetIn instanceof CPacketPlayer) {
-                    CPacketPlayer movingPacket = ((CPacketPlayer) packetIn);
+                    final CPacketPlayer movingPacket = ((CPacketPlayer) packetIn);
                     if (movingPacket instanceof CPacketPlayer.Rotation) {
                         ignoreMovementCapture = true;
                     } else if (packetPlayer.posX == movingPacket.x && packetPlayer.posY == movingPacket.y && packetPlayer.posZ == movingPacket.z) {
@@ -172,7 +173,7 @@ public final class PacketPhaseUtil {
                     packetIn.processPacket(netHandler);
                 } else {
                     final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
-                    IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
+                    final IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
                     // At the very least make an unknown packet state case.
                     final PacketContext<?> context = packetState.createPhaseContext();
                     if (!PacketPhase.getInstance().isPacketInvalid(packetIn, packetPlayer, packetState)) {
@@ -186,7 +187,7 @@ public final class PacketPhaseUtil {
                         context.owner((Player) packetPlayer);
                         context.notifier((Player) packetPlayer);
                     }
-                    try (PhaseContext<?> packetContext = context) {
+                    try (final PhaseContext<?> packetContext = context) {
                         packetContext.buildAndSwitch();
                         packetIn.processPacket(netHandler);
 

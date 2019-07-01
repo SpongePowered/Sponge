@@ -32,7 +32,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -50,6 +49,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.HotbarAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.MainPlayerInventoryAdapter;
@@ -70,9 +72,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("rawtypes")
 @Mixin(InventoryPlayer.class)
-public abstract class InventoryPlayerMixin implements InventoryPlayerBridge {
+public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, InventoryAdapter, InventoryAdapterBridge, TrackedInventoryBridge {
 
     @Shadow public int currentItem;
     @Shadow public EntityPlayer player;
@@ -81,37 +82,20 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge {
     @Shadow @Final public NonNullList<ItemStack> offHandInventory;
     @Shadow @Final public List<NonNullList<ItemStack>> allInventories;
 
-    private int lastTimesChanged = this.timesChanged;
-
     @Shadow public abstract int getInventoryStackLimit();
-
     @Shadow public abstract int getSizeInventory();
-
     @Shadow public abstract ItemStack getStackInSlot(int index);
-
     @Shadow protected abstract int addResource(int p_191973_1_, ItemStack p_191973_2_);
-
     @Shadow public static int getHotbarSize() {
         throw new AbstractMethodError("Shadow");
     }
-
     @Shadow private int timesChanged;
-    private List<SlotTransaction> capturedTransactions = new ArrayList<>();
-    private boolean doCapture = false;
 
-    protected SlotCollection slots;
-    protected Fabric inventory;
-    protected Lens lens;
+    private List<SlotTransaction> impl$capturedTransactions = new ArrayList<>();
+    private int impl$lastTimesChanged = this.timesChanged;
+    private boolean impl$doCapture = false;
+    private int impl$offhandIndex;
 
-    private Player carrier;
-    private HotbarAdapter hotbar;
-    private MainPlayerInventoryAdapter main;
-    @Nullable private EquipmentInventoryAdapter equipment;
-    private SlotAdapter offhand;
-
-    private int offhandIndex;
-
-    @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(final EntityPlayer playerIn, final CallbackInfo ci) {
         // Find offhand slot
@@ -119,57 +103,57 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge {
             if (inventory == this.offHandInventory) {
                 break;
             }
-            this.offhandIndex += inventory.size();
-        }
-
-        // Set Carrier if we got a real Player
-        if (playerIn instanceof EntityPlayerMP) {
-            this.carrier = (Player) playerIn;
-
-            this.inventory = new IInventoryFabric((IInventory) this);
-            final Class clazz = this.getClass();
-            if (clazz == InventoryPlayer.class) { // Build Player Lens
-                // We only care about Server inventories
-                this.slots = new SlotCollection.Builder()
-                        .add(this.mainInventory.size())
-                        .add(this.offHandInventory.size())
-                        // TODO predicates for ItemStack/ItemType?
-                        .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS))
-                        .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS))
-                        .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.CHESTPLATE))
-                        .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.HEADWEAR))
-                        // for mods providing bigger inventories
-                        .add(this.armorInventory.size() - 4, EquipmentSlotAdapter.class)
-                        .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
-                        .build();
-                this.lens = new PlayerInventoryLens(this, this.slots);
-            } else if (this.getSizeInventory() != 0) { // Fallback OrderedLens when not 0 sized inventory
-                this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
-                this.lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
-            }
+            this.impl$offhandIndex += inventory.size();
         }
     }
 
+    @SuppressWarnings("RedundantCast")
     @Override
-    public int getHeldItemIndex(final EnumHand hand) {
+    public SlotProvider bridge$generateSlotProvider() {
+        if ((Class<?>) this.getClass() == InventoryPlayer.class) { // Build Player Lens
+            return new SlotCollection.Builder()
+                .add(this.mainInventory.size())
+                .add(this.offHandInventory.size())
+                // TODO predicates for ItemStack/ItemType?
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.CHESTPLATE))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.HEADWEAR))
+                // for mods providing bigger inventories
+                .add(this.armorInventory.size() - 4, EquipmentSlotAdapter.class)
+                .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
+                .build();
+        } else if (this.getSizeInventory() != 0) { // Fallback OrderedLens when not 0 sized inventory
+            return new SlotCollection.Builder().add(this.getSizeInventory()).build();
+        } else {
+            return new SlotCollection.Builder().build();
+        }
+    }
+
+    @SuppressWarnings("RedundantCast")
+    @Override
+    public Lens bridge$generateLens() {
+        if ((Class<?>) this.getClass() == InventoryPlayer.class) { // Build Player Lens
+            return new PlayerInventoryLens(this, this.bridge$getSlotProvider());
+        }
+        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.bridge$getSlotProvider());
+    }
+
+    @Override
+    public Fabric bridge$generateFabric() {
+        return new IInventoryFabric((IInventory) this);
+    }
+
+    @Override
+    public int bridge$getHeldItemIndex(final EnumHand hand) {
         switch (hand) {
             case MAIN_HAND:
                 return this.currentItem;
             case OFF_HAND:
-                return this.offhandIndex;
+                return this.impl$offhandIndex;
             default:
                 throw new AssertionError(hand);
         }
-    }
-
-    @Override
-    public Lens bridge$getRootLens() {
-        return this.lens;
-    }
-
-    @Override
-    public Fabric bridge$getFabric() {
-        return this.inventory;
     }
 
     @Override
@@ -177,14 +161,8 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public SlotProvider bridge$getSlotProvider() {
-        return this.slots;
-    }
-
-    @Override
-    public void setSelectedItem(int itemIndex, final boolean notify) {
+    public void bridge$setSelectedItem(int itemIndex, final boolean notify) {
         itemIndex = itemIndex % 9;
         if (notify && this.player instanceof EntityPlayerMP) {
             final SPacketHeldItemChange packet = new SPacketHeldItemChange(itemIndex);
@@ -213,7 +191,7 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge {
     }
 
     @Override
-    public int getFirstAvailableSlot(final ItemStack itemstack) {
+    public int bridge$getFirstAvailableSlot(final ItemStack itemstack) {
         for (int i = 0; i < this.mainInventory.size(); ++i) {
             int stackSize = itemstack.getCount();
 
@@ -240,21 +218,21 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge {
     }
 
     @Override
-    public List<SlotTransaction> getCapturedTransactions() {
-        return this.capturedTransactions;
+    public List<SlotTransaction> bridge$getCapturedSlotTransactions() {
+        return this.impl$capturedTransactions;
     }
 
     @Override
-    public void setCapture(final boolean doCapture) {
-        this.doCapture = doCapture;
+    public void bridge$setCaptureInventory(final boolean doCapture) {
+        this.impl$doCapture = doCapture;
     }
 
     @Override
-    public boolean capturesTransactions() {
-        return this.doCapture;
+    public boolean bridge$capturingInventory() {
+        return this.impl$doCapture;
     }
 
-    public Slot getSpongeSlot(int index) {
+    private Slot impl$getSpongeSlotByIndex(int index) {
         if (index < getHotbarSize()) {
             return ((PlayerInventory) this).getMain().getHotbar().getSlot(SlotIndex.of(index)).get();
         }
@@ -263,23 +241,23 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge {
     }
 
     @Inject(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
-    public void onAdd(final int index, final ItemStack stack, final CallbackInfoReturnable<Boolean> cir) {
-        if (this.doCapture) {
+    private void impl$ifCaptureDoTransactions(final int index, final ItemStack stack, final CallbackInfoReturnable<Boolean> cir) {
+        if (this.impl$doCapture) {
             // Capture "damaged" items picked up
-            final Slot slot = getSpongeSlot(index);
-            this.capturedTransactions.add(new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(stack)));
+            final Slot slot = impl$getSpongeSlotByIndex(index);
+            this.impl$capturedTransactions.add(new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(stack)));
         }
     }
 
     @Redirect(method = "storePartialItemStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addResource(ILnet/minecraft/item/ItemStack;)I"))
-    public int onAdd(final InventoryPlayer inv, final int index, final ItemStack stack) {
-        if (this.doCapture) {
+    private int impl$ifCaptureDoTransactions(final InventoryPlayer inv, final int index, final ItemStack stack) {
+        if (this.impl$doCapture) {
             // Capture items getting picked up
-            final Slot slot = index == 40 ? ((PlayerInventory) this).getOffhand() : getSpongeSlot(index);
+            final Slot slot = index == 40 ? ((PlayerInventory) this).getOffhand() : impl$getSpongeSlotByIndex(index);
             final ItemStackSnapshot original = ItemStackUtil.snapshotOf(this.getStackInSlot(index));
             final int result = this.addResource(index, stack);
             final ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(this.getStackInSlot(index));
-            this.capturedTransactions.add(new SlotTransaction(slot, original, replacement));
+            this.impl$capturedTransactions.add(new SlotTransaction(slot, original, replacement));
             return result;
         }
         return this.addResource(index, stack);
@@ -288,13 +266,13 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge {
 
     @Override
     public void cleanupDirty() {
-        if (this.timesChanged != this.lastTimesChanged) {
+        if (this.timesChanged != this.impl$lastTimesChanged) {
             this.player.openContainer.detectAndSendChanges();
         }
     }
 
     @Override
     public void markClean() {
-        this.lastTimesChanged = this.timesChanged;
+        this.impl$lastTimesChanged = this.timesChanged;
     }
 }

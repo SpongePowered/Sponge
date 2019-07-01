@@ -31,6 +31,7 @@ import net.minecraft.tileentity.IHopper;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.NonNullList;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -66,11 +67,12 @@ import javax.annotation.Nullable;
 @Mixin(TileEntityHopper.class)
 public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin implements TrackedInventoryBridge {
 
-    @Shadow private static ItemStack insertStack(IInventory source, IInventory destination, ItemStack stack, int index, EnumFacing direction) {
+    @Shadow private static ItemStack insertStack(
+        final IInventory source, final IInventory destination, final ItemStack stack, final int index, final EnumFacing direction) {
         throw new AbstractMethodError("Shadow");
     }
 
-    @Shadow private static boolean isInventoryEmpty(IInventory inventoryIn, EnumFacing side) {
+    @Shadow private static boolean isInventoryEmpty(final IInventory inventoryIn, final EnumFacing side) {
         throw new AbstractMethodError("Shadow");
     }
     @Shadow protected abstract boolean isInventoryFull(IInventory inventoryIn, EnumFacing side);
@@ -83,26 +85,28 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
     }
 
     @Override
-    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
-        return ReusableLens.getLens(GridInventoryLens.class, this, this::generateSlotProvider, this::generateRootLens);
+    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
+        return ReusableLens.getLens(GridInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
     }
 
-    private SlotProvider generateSlotProvider() {
+    private SlotProvider impl$generateSlotProvider() {
         return new SlotCollection.Builder().add(5).build();
     }
 
-    private GridInventoryLens generateRootLens(SlotProvider slots) {
-        return new GridInventoryLensImpl(0, 5, 1, 5, this.getClass(), slots);
+    @SuppressWarnings("unchecked")
+    private GridInventoryLens impl$generateRootLens(final SlotProvider slots) {
+        return new GridInventoryLensImpl(0, 5, 1, 5, (Class<? extends Inventory>) this.getClass(), slots);
     }
 
-    @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"))
-    private static void impl$trackNotifierWhenTransferring(IInventory inventory, IInventory hopper, EntityItem entityItem,
-        CallbackInfoReturnable<Boolean> callbackInfo) {
+    @Inject(method = "putDropInInventoryAllSlots",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"))
+    private static void impl$trackNotifierWhenTransferring(final IInventory inventory, final IInventory hopper, final EntityItem entityItem,
+        final CallbackInfoReturnable<Boolean> callbackInfo) {
         if (entityItem instanceof OwnershipTrackedBridge) {
             ((OwnershipTrackedBridge) entityItem).tracked$getOwnerReference().ifPresent(owner -> {
-                if (inventory instanceof TileEntity) {
-                    TileEntity te = (TileEntity) inventory;
-                    ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) te).bridge$getActiveChunk();
+                if (inventory instanceof ActiveChunkReferantBridge && inventory instanceof TileEntity) {
+                    final TileEntity te = (TileEntity) inventory;
+                    final ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) inventory).bridge$getActiveChunk();
                     spongeChunk.addTrackedBlockPosition(te.getBlockType(), te.getPos(), owner, PlayerTracker.Type.NOTIFIER);
                 }
             });
@@ -118,8 +122,8 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
             target = "Lnet/minecraft/tileentity/TileEntityHopper;isInventoryEmpty(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/EnumFacing;)Z"
         )
     )
-    private static boolean impl$throwTransferPreIfNotEmpty(IInventory inventory, EnumFacing facing, IHopper hopper) {
-        boolean result = isInventoryEmpty(inventory, facing);
+    private static boolean impl$throwTransferPreIfNotEmpty(final IInventory inventory, final EnumFacing facing, final IHopper hopper) {
+        final boolean result = isInventoryEmpty(inventory, facing);
         if (result || !ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
             return result;
         }
@@ -133,8 +137,8 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
             target = "Lnet/minecraft/tileentity/TileEntityHopper;isInventoryFull(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/EnumFacing;)Z"
         )
     )
-    private boolean impl$throwTransferPreIfNotFull(TileEntityHopper hopper, IInventory inventory, EnumFacing enumfacing) {
-        boolean result = this.isInventoryFull(inventory, enumfacing);
+    private boolean impl$throwTransferPreIfNotFull(final TileEntityHopper hopper, final IInventory inventory, final EnumFacing enumfacing) {
+        final boolean result = this.isInventoryFull(inventory, enumfacing);
         if (result || !ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
             return result;
         }
@@ -150,8 +154,8 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
             target = "Lnet/minecraft/tileentity/TileEntityHopper;insertStack(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/inventory/IInventory;Lnet/minecraft/item/ItemStack;ILnet/minecraft/util/EnumFacing;)Lnet/minecraft/item/ItemStack;"
         )
     )
-    private static ItemStack impl$throwEventsForInsertion(IInventory source, IInventory destination, ItemStack stack, int index,
-        EnumFacing direction) {
+    private static ItemStack impl$throwEventsForInsertion(final IInventory source, final IInventory destination, final ItemStack stack,
+        final int index, final EnumFacing direction) {
         // capture Transaction
         if (!((source instanceof TrackedInventoryBridge || destination instanceof TrackedInventoryBridge) && destination instanceof InventoryAdapter)) {
             return insertStack(source, destination, stack, index, direction);
@@ -176,14 +180,15 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
             value = "INVOKE",
             target = "Lnet/minecraft/item/ItemStack;isEmpty()Z",
             ordinal = 1))
-    private void afterPutStackInSlots(CallbackInfoReturnable<Boolean> cir, IInventory iInventory, EnumFacing enumFacing, int i, ItemStack itemStack, ItemStack itemStack1) {
+    private void impl$afterPutStackInSlots(final CallbackInfoReturnable<Boolean> cir, final IInventory iInventory, final EnumFacing enumFacing,
+        final int i, final ItemStack itemStack, ItemStack itemStack1) {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack1.isEmpty()) {
             // Capture Insert in Origin
-            TrackedInventoryBridge capture = impl$forCapture(this);
-            SpongeCommonEventFactory.captureTransaction(capture, this, i, itemStack);
+            final TrackedInventoryBridge capture = impl$forCapture(this);
+            SpongeCommonEventFactory.captureTransaction(capture, (Inventory) this, i, itemStack);
             // Call event
-            if (SpongeCommonEventFactory.callTransferPost(capture, this, InventoryUtil.toInventory(iInventory))) {
+            if (SpongeCommonEventFactory.callTransferPost(capture, (Inventory) this, InventoryUtil.toInventory(iInventory))) {
                 // Set remainder when cancelled
                 // TODO - figure out what was intended to happen here....
                 itemStack1 = itemStack;
@@ -199,12 +204,13 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
             value = "INVOKE",
             target = "Lnet/minecraft/item/ItemStack;isEmpty()Z",
             ordinal = 1))
-    private static void imlp$throwTransferEventsWhenPullingItems(IHopper hopper, IInventory iInventory, int index, EnumFacing direction,
-        CallbackInfoReturnable<Boolean> cir, ItemStack itemStack, ItemStack itemStack1, ItemStack itemStack2) {
+    private static void imlp$throwTransferEventsWhenPullingItems(final IHopper hopper, final IInventory iInventory, final int index,
+        final EnumFacing direction,
+        final CallbackInfoReturnable<Boolean> cir, final ItemStack itemStack, ItemStack itemStack1, final ItemStack itemStack2) {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack2.isEmpty()) {
             // Capture Insert in Origin
-            TrackedInventoryBridge capture = impl$forCapture(hopper);
+            final TrackedInventoryBridge capture = impl$forCapture(hopper);
             SpongeCommonEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
             // Call event
             if (SpongeCommonEventFactory.callTransferPost(capture, InventoryUtil.toInventory(iInventory), InventoryUtil.toInventory(hopper))) {
@@ -223,13 +229,14 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
             target = "Lnet/minecraft/tileentity/TileEntityHopper;putStackInInventoryAllSlots(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/inventory/IInventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;)Lnet/minecraft/item/ItemStack;"
         )
     )
-    private static ItemStack impl$onPutStackInInventoryAllSlots(IInventory source, IInventory destination, ItemStack stack, EnumFacing direction,
-        IInventory s2, IInventory d2, EntityItem entity) {
+    private static ItemStack impl$onPutStackInInventoryAllSlots(
+        final IInventory source, final IInventory destination, final ItemStack stack, final EnumFacing direction,
+        final IInventory s2, final IInventory d2, final EntityItem entity) {
         return SpongeCommonEventFactory.callInventoryPickupEvent(destination, entity, stack);
     }
 
     @Nullable
-    private static TrackedInventoryBridge impl$forCapture(Object toCapture) {
+    private static TrackedInventoryBridge impl$forCapture(final Object toCapture) {
         if (toCapture instanceof TrackedInventoryBridge) {
             return ((TrackedInventoryBridge) toCapture);
         }

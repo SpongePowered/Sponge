@@ -52,44 +52,44 @@ public abstract class AdapterLogic{
 
     private AdapterLogic() {}
 
-    public static Optional<ItemStack> pollSequential(InventoryAdapter adapter) {
+    public static Optional<ItemStack> pollSequential(final InventoryAdapter adapter) {
         return AdapterLogic.pollSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
-    public static Optional<ItemStack> pollSequential(Fabric inv, Lens lens) {
+    public static Optional<ItemStack> pollSequential(final Fabric inv, final Lens lens) {
         return AdapterLogic.findStack(inv, lens, true);
     }
 
-    public static Optional<ItemStack> pollSequential(InventoryAdapter adapter, int limit) {
+    public static Optional<ItemStack> pollSequential(final InventoryAdapter adapter, final int limit) {
         return AdapterLogic.pollSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), limit);
     }
 
-    public static Optional<ItemStack> pollSequential(Fabric inv, Lens lens, int limit) {
+    public static Optional<ItemStack> pollSequential(final Fabric inv, final Lens lens, final int limit) {
         return AdapterLogic.findStacks(inv, lens, limit, true);
     }
 
-    public static Optional<ItemStack> peekSequential(InventoryAdapter adapter) {
+    public static Optional<ItemStack> peekSequential(final InventoryAdapter adapter) {
         return AdapterLogic.peekSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
-    public static Optional<ItemStack> peekSequential(Fabric inv, Lens lens) {
+    public static Optional<ItemStack> peekSequential(final Fabric inv, final Lens lens) {
         return AdapterLogic.findStack(inv, lens, false);
     }
 
-    public static Optional<ItemStack> peekSequential(InventoryAdapter adapter, int limit) {
+    public static Optional<ItemStack> peekSequential(final InventoryAdapter adapter, final int limit) {
         return AdapterLogic.peekSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), limit);
     }
 
-    public static Optional<ItemStack> peekSequential(Fabric inv, Lens lens, int limit) {
+    public static Optional<ItemStack> peekSequential(final Fabric inv, final Lens lens, final int limit) {
         return AdapterLogic.findStacks(inv, lens, limit, false);
     }
 
-    private static Optional<ItemStack> findStack(Fabric inv, Lens lens, boolean remove) {
+    private static Optional<ItemStack> findStack(final Fabric inv, final Lens lens, final boolean remove) {
         if (lens == null) {
             return Optional.empty();
         }
         for (int ord = 0; ord < lens.slotCount(); ord++) {
-            net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
+            final net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
             if (stack.isEmpty() || (remove && !lens.setStack(inv, ord, net.minecraft.item.ItemStack.EMPTY))) {
                 continue;
             }
@@ -99,7 +99,7 @@ public abstract class AdapterLogic{
         return Optional.empty();
     }
 
-    private static Optional<ItemStack> findStacks(Fabric inv, Lens lens, int limit, boolean remove) {
+    private static Optional<ItemStack> findStacks(final Fabric inv, final Lens lens, int limit, final boolean remove) {
 
         if (lens == null) {
             return Optional.empty();
@@ -108,7 +108,7 @@ public abstract class AdapterLogic{
         ItemStack result = null;
 
         for (int ord = 0; ord < lens.slotCount(); ord++) {
-            net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
+            final net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
             if (stack.isEmpty() || stack.getCount() < 1 || (result != null && !result.getType().equals(stack.getItem()))) {
                 continue;
             }
@@ -117,7 +117,7 @@ public abstract class AdapterLogic{
                 result = ItemStackUtil.cloneDefensive(stack, 0);
             }
 
-            int pull = Math.min(stack.getCount(), limit);
+            final int pull = Math.min(stack.getCount(), limit);
             result.setQuantity(result.getQuantity() + pull);
             limit -= pull;
 
@@ -139,11 +139,11 @@ public abstract class AdapterLogic{
         return Optional.ofNullable(result);
     }
 
-    public static InventoryTransactionResult insertSequential(InventoryAdapter adapter, ItemStack stack) {
+    public static InventoryTransactionResult insertSequential(final InventoryAdapter adapter, final ItemStack stack) {
         return AdapterLogic.insertSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), stack);
     }
 
-    public static InventoryTransactionResult insertSequential(Fabric inv, Lens lens, ItemStack stack) {
+    public static InventoryTransactionResult insertSequential(final Fabric inv, final Lens lens, final ItemStack stack) {
         if (lens == null) {
             return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE).reject(ItemStackUtil.cloneDefensive(stack)).build();
         }
@@ -154,16 +154,16 @@ public abstract class AdapterLogic{
         }
     }
 
-    private static InventoryTransactionResult insertStack(Fabric inv, Lens lens, ItemStack stack) {
-        InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
-        net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+    private static InventoryTransactionResult insertStack(final Fabric inv, final Lens lens, final ItemStack stack) {
+        final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
+        final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
+        final int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
         int remaining = stack.getQuantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
-            net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
-            int push = Math.min(remaining, maxStackSize);
+            final net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
+            final int push = Math.min(remaining, maxStackSize);
             if (lens.setStack(inv, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
                 result.replace(ItemStackUtil.fromNative(old));
                 remaining -= push;
@@ -179,19 +179,19 @@ public abstract class AdapterLogic{
         return result.build();
     }
 
-    public static InventoryTransactionResult appendSequential(InventoryAdapter adapter, ItemStack stack) {
+    public static InventoryTransactionResult appendSequential(final InventoryAdapter adapter, final ItemStack stack) {
         return AdapterLogic.appendSequential(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), stack);
     }
 
-    public static InventoryTransactionResult appendSequential(Fabric inv, Lens lens, ItemStack stack) {
-        InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
-        net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+    public static InventoryTransactionResult appendSequential(final Fabric inv, final Lens lens, final ItemStack stack) {
+        final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
+        final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
+        final int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
         int remaining = stack.getQuantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
-            net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
+            final net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
             int push = Math.min(remaining, maxStackSize);
             if (old.isEmpty() && lens.setStack(inv, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
                 remaining -= push;
@@ -213,11 +213,11 @@ public abstract class AdapterLogic{
         return result.build();
     }
 
-    public static int countStacks(InventoryAdapter adapter) {
+    public static int countStacks(final InventoryAdapter adapter) {
         return AdapterLogic.countStacks(adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
-    public static int countStacks(Fabric inv, Lens lens) {
+    public static int countStacks(final Fabric inv, final Lens lens) {
         int stacks = 0;
 
         for (int ord = 0; ord < lens.slotCount(); ord++) {
@@ -227,40 +227,40 @@ public abstract class AdapterLogic{
         return stacks;
     }
 
-    public static int countItems(InventoryAdapter adapter) {
+    public static int countItems(final InventoryAdapter adapter) {
         return AdapterLogic.countItems(adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
-    public static int countItems(Fabric inv, Lens lens) {
+    public static int countItems(final Fabric inv, final Lens lens) {
         int items = 0;
 
         for (int ord = 0; ord < lens.slotCount(); ord++) {
-            net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
+            final net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
             items += stack.getCount();
         }
 
         return items;
     }
 
-    public static int getCapacity(InventoryAdapter adapter) {
+    public static int getCapacity(final InventoryAdapter adapter) {
         return AdapterLogic.getCapacity(adapter.bridge$getFabric(), adapter.bridge$getRootLens());
     }
 
-    public static int getCapacity(Fabric inv, Lens lens) {
+    public static int getCapacity(final Fabric inv, final Lens lens) {
         return lens.getSlots().size();
     }
 
-    public static Collection<InventoryProperty<?, ?>> getProperties(InventoryAdapter adapter,
-            Inventory child, Class<? extends InventoryProperty<?, ?>> property) {
+    public static Collection<InventoryProperty<?, ?>> getProperties(final InventoryAdapter adapter,
+            final Inventory child, final Class<? extends InventoryProperty<?, ?>> property) {
         return AdapterLogic.getProperties(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), child, property);
     }
 
-    public static Collection<InventoryProperty<?, ?>> getProperties(Fabric inv, Lens lens,
-            Inventory child, Class<? extends InventoryProperty<?, ?>> property) {
+    public static Collection<InventoryProperty<?, ?>> getProperties(final Fabric inv, final Lens lens,
+            final Inventory child, final Class<? extends InventoryProperty<?, ?>> property) {
 
         if (child instanceof InventoryAdapter) {
             checkNotNull(property, "property");
-            int index = lens.getChildren().indexOf(((InventoryAdapter) child).bridge$getRootLens());
+            final int index = lens.getChildren().indexOf(((InventoryAdapter) child).bridge$getRootLens());
             if (index > -1) {
                 return lens.getProperties(index).stream().filter(prop -> property.equals(prop.getClass()))
                         .collect(Collectors.toCollection(ArrayList::new));
@@ -270,7 +270,7 @@ public abstract class AdapterLogic{
         return Collections.emptyList();
     }
 
-    static <T extends InventoryProperty<?, ?>> Collection<T> getRootProperties(InventoryAdapter adapter, Class<T> property) {
+    public static <T extends InventoryProperty<?, ?>> Collection<T> getRootProperties(InventoryAdapter adapter, final Class<T> property) {
         adapter = inventoryRoot(adapter);
         if (adapter instanceof CustomInventory) {
             return ((CustomInventory) adapter).getProperties().values().stream().filter(p -> property.equals(p.getClass()))
@@ -280,10 +280,10 @@ public abstract class AdapterLogic{
     }
 
     @SuppressWarnings("unchecked")
-    static <T extends InventoryProperty<?, ?>> Optional<T> getRootProperty(InventoryAdapter adapter, Class<T> property, Object key) {
+    public static <T extends InventoryProperty<?, ?>> Optional<T> getRootProperty(InventoryAdapter adapter, final Class<T> property, final Object key) {
         adapter = inventoryRoot(adapter);
         if (adapter instanceof CustomInventory) {
-            InventoryProperty<?, ?> forKey = ((CustomInventory) adapter).getProperties().get(key);
+            final InventoryProperty<?, ?> forKey = ((CustomInventory) adapter).getProperties().get(key);
             if (forKey != null && property.equals(forKey.getClass())) {
                 return Optional.of((T) forKey);
             }
@@ -292,9 +292,9 @@ public abstract class AdapterLogic{
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends InventoryProperty<?, ?>> Optional<T> findRootProperty(InventoryAdapter adapter, Class<T> property) {
+    private static <T extends InventoryProperty<?, ?>> Optional<T> findRootProperty(final InventoryAdapter adapter, final Class<T> property) {
         if (property == InventoryTitle.class) {
-            Text text = Text.of(adapter.bridge$getFabric().getDisplayName());
+            final Text text = Text.of(adapter.bridge$getFabric().getDisplayName());
             return (Optional<T>) Optional.of(InventoryTitle.of(text));
         }
         // TODO more properties of top level inventory
@@ -304,10 +304,10 @@ public abstract class AdapterLogic{
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static InventoryAdapter inventoryRoot(InventoryAdapter adapter) {
         // Get Root Inventory
-        adapter = ((InventoryAdapter) adapter.root());
+        adapter = (InventoryAdapter) ((Inventory) adapter).root();
         if (adapter instanceof Container) {
             // If Root is a Container get the viewed inventory
-            Object first = adapter.bridge$getFabric().get(0);
+            final Object first = adapter.bridge$getFabric().get(0);
             if (first instanceof CustomInventory) {
                 // if viewed inventory is a custom inventory get it instead
                 adapter = ((InventoryAdapter) first);
@@ -316,11 +316,11 @@ public abstract class AdapterLogic{
         return adapter;
     }
 
-    public static boolean contains(InventoryAdapter adapter, ItemStack stack) {
+    public static boolean contains(final InventoryAdapter adapter, final ItemStack stack) {
         return AdapterLogic.contains(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), stack, stack.getQuantity());
     }
 
-    public static boolean contains(InventoryAdapter adapter, ItemStack stack, int quantity) {
+    public static boolean contains(final InventoryAdapter adapter, final ItemStack stack, final int quantity) {
         return AdapterLogic.contains(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), stack, quantity);
     }
 
@@ -333,11 +333,11 @@ public abstract class AdapterLogic{
      * @param quantity The quantity to find
      * @return true if at least <code>quantity</code> of given stack has been found in given inventory
      */
-    public static boolean contains(Fabric inv, Lens lens, ItemStack stack, int quantity) {
-        net.minecraft.item.ItemStack nonNullStack = ItemStackUtil.toNative(stack); // Handle null as empty
+    public static boolean contains(final Fabric inv, final Lens lens, final ItemStack stack, final int quantity) {
+        final net.minecraft.item.ItemStack nonNullStack = ItemStackUtil.toNative(stack); // Handle null as empty
         int found = 0;
         for (int ord = 0; ord < lens.slotCount(); ord++) {
-            net.minecraft.item.ItemStack slotStack = lens.getStack(inv, ord);
+            final net.minecraft.item.ItemStack slotStack = lens.getStack(inv, ord);
             if (slotStack.isEmpty()) {
                 if (nonNullStack.isEmpty()) {
                     found++; // Found an empty Slot
@@ -357,13 +357,13 @@ public abstract class AdapterLogic{
         return false;
     }
 
-    public static boolean contains(InventoryAdapter adapter, ItemType type) {
+    public static boolean contains(final InventoryAdapter adapter, final ItemType type) {
         return AdapterLogic.contains(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), type);
     }
 
-    public static boolean contains(Fabric inv, Lens lens, ItemType type) {
+    public static boolean contains(final Fabric inv, final Lens lens, final ItemType type) {
         for (int ord = 0; ord < lens.slotCount(); ord++) {
-            net.minecraft.item.ItemStack slotStack = lens.getStack(inv, ord);
+            final net.minecraft.item.ItemStack slotStack = lens.getStack(inv, ord);
             if (slotStack.isEmpty()) {
                 if (type == null || type == ItemTypes.NONE) {
                     return true; // Found an empty Slot
@@ -377,18 +377,18 @@ public abstract class AdapterLogic{
         return false;
     }
 
-    public static boolean canFit(InventoryAdapter adapter, ItemStack stack) {
+    public static boolean canFit(final InventoryAdapter adapter, final ItemStack stack) {
 
-        Fabric inv = adapter.bridge$getFabric();
-        Lens lens = adapter.bridge$getRootLens();
+        final Fabric inv = adapter.bridge$getFabric();
+        final Lens lens = adapter.bridge$getRootLens();
 
-        net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+        final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
+        final int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
         int remaining = stack.getQuantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
-            net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
+            final net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
             int push = Math.min(remaining, maxStackSize);
             if (old.isEmpty()) {
                 remaining -= push;

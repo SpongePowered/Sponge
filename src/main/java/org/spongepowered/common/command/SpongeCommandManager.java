@@ -59,6 +59,7 @@ import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -326,17 +327,17 @@ public class SpongeCommandManager implements CommandManager {
                     context.owner((User) source);
                     context.notifier((User) source);
                 }
-                final InventoryPlayerBridge
-                    inventory = source instanceof EntityPlayer ? ((InventoryPlayerBridge) ((EntityPlayer) source).inventory) : null;
+                final TrackedInventoryBridge
+                    inventory = source instanceof EntityPlayer ? ((TrackedInventoryBridge) ((EntityPlayer) source).inventory) : null;
                 if (inventory != null) {
                     // Enable player inventory capture
                     context.inventory(inventory);
-                    inventory.setCapture(true);
+                    inventory.bridge$setCaptureInventory(true);
                 }
                 context.buildAndSwitch();
                 final CommandResult result = this.dispatcher.process(source, commandLine);
                 if (inventory != null) {
-                    inventory.setCapture(false);
+                    inventory.bridge$setCaptureInventory(false);
                 }
                 return result;
             } catch (InvocationCommandException ex) {

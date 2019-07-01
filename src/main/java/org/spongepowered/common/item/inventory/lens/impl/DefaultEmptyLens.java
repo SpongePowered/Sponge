@@ -46,22 +46,23 @@ public class DefaultEmptyLens implements Lens {
     
     protected final InventoryAdapter adapter;
     
-    public DefaultEmptyLens(InventoryAdapter adapter) {
+    public DefaultEmptyLens(final InventoryAdapter adapter) {
         this.adapter = adapter;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Class<? extends Inventory> getAdapterType() {
-        return this.adapter.getClass();
+        return (Class<? extends Inventory>) this.adapter.getClass();
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
+    public InventoryAdapter getAdapter(final Fabric inv, final Inventory parent) {
         return this.adapter;
     }
     
     @Override
-    public Translation getName(Fabric inv) {
+    public Translation getName(final Fabric inv) {
         return inv.getDisplayName();
     }
 
@@ -71,22 +72,22 @@ public class DefaultEmptyLens implements Lens {
     }
 
     @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
+    public int getRealIndex(final Fabric inv, final int ordinal) {
         return -1;
     }
 
     @Override
-    public ItemStack getStack(Fabric inv, int ordinal) {
+    public ItemStack getStack(final Fabric inv, final int ordinal) {
         return ItemStack.EMPTY;
     }
     
     @Override
-    public boolean setStack(Fabric inv, int index, ItemStack stack) {
+    public boolean setStack(final Fabric inv, final int index, final ItemStack stack) {
         return false;
     }
 
     @Override
-    public int getMaxStackSize(Fabric inv) {
+    public int getMaxStackSize(final Fabric inv) {
         return 0;
     }
 
@@ -101,27 +102,27 @@ public class DefaultEmptyLens implements Lens {
     }
 
     @Override
-    public Lens getLens(int index) {
+    public Lens getLens(final int index) {
         return null;
     }
 
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(int index) {
+    public Collection<InventoryProperty<?, ?>> getProperties(final int index) {
         return Collections.<InventoryProperty<?, ?>>emptyList();
     }
     
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(Lens child) {
+    public Collection<InventoryProperty<?, ?>> getProperties(final Lens child) {
         return Collections.<InventoryProperty<?, ?>>emptyList();
     }
 
     @Override
-    public boolean has(Lens lens) {
+    public boolean has(final Lens lens) {
         return false;
     }
 
     @Override
-    public boolean isSubsetOf(Collection<Lens> c) {
+    public boolean isSubsetOf(final Collection<Lens> c) {
         return true;
     }
     
@@ -131,7 +132,7 @@ public class DefaultEmptyLens implements Lens {
     }
     
     @Override
-    public boolean hasSlot(int index) {
+    public boolean hasSlot(final int index) {
         return false;
     }
     
@@ -145,7 +146,8 @@ public class DefaultEmptyLens implements Lens {
         return Collections.emptyIterator();
     }
 
-    public SlotLens getSlotLens(int ordinal) {
+    @Override
+    public SlotLens getSlotLens(final int ordinal) {
         return null;
     }
 

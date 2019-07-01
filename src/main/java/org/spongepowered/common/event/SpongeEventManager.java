@@ -58,7 +58,6 @@ import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.plugin.ListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
@@ -458,7 +457,7 @@ public class SpongeEventManager implements EventManager {
     public boolean post(Event event) {
         try {
             if (event instanceof InteractInventoryEvent) { // Track usage of Containers
-                ((ContainerBridge) ((InteractInventoryEvent) event).getTargetInventory()).setInUse(true);
+                ((ContainerBridge) ((InteractInventoryEvent) event).getTargetInventory()).bridge$setInUse(true);
             }
             // Allow the client thread by default so devs can actually
             // call their own events inside the init events. Only allowing
@@ -466,7 +465,7 @@ public class SpongeEventManager implements EventManager {
             return post(event, !Sponge.isServerAvailable());
         } finally {
             if (event instanceof InteractInventoryEvent) { // Finished using Container
-                ((ContainerBridge) ((InteractInventoryEvent) event).getTargetInventory()).setInUse(false);
+                ((ContainerBridge) ((InteractInventoryEvent) event).getTargetInventory()).bridge$setInUse(false);
             }
         }
     }

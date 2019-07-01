@@ -32,4 +32,8 @@ public interface TrackedInventoryBridge {
 
     List<SlotTransaction> bridge$getCapturedSlotTransactions();
 
+    boolean bridge$capturingInventory();
+
+    void bridge$setCaptureInventory(boolean flag);
+
 }

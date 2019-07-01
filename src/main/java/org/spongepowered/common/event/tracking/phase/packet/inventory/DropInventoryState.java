@@ -37,6 +37,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -72,8 +73,8 @@ public final class DropInventoryState extends BasicInventoryPacketState {
                     }
                 });
 
-            final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
-            mixinContainer.setCaptureInventory(false);
+            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
+            mixinContainer.bridge$setCaptureInventory(false);
             mixinContainer.bridge$getCapturedSlotTransactions().clear();
         }
 

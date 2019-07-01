@@ -26,10 +26,14 @@ package org.spongepowered.common.item.inventory.adapter;
 
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.Optional;
@@ -54,7 +58,7 @@ import javax.annotation.Nullable;
  * directly implement the {@link Inventory} interface, "real" inventories should
  * always implement this interface instead.</p>
  */
-public interface InventoryAdapter extends Inventory {
+public interface InventoryAdapter {;
     
     SlotProvider bridge$getSlotProvider();
 
@@ -67,9 +71,9 @@ public interface InventoryAdapter extends Inventory {
     @Nullable
     Inventory bridge$getChild(Lens lens);
 
-    default Optional<Slot> getSlot(final int ordinal) {
+    default Optional<Slot> bridge$getSlot(final int ordinal) {
         final SlotLens slotLens = this.bridge$getRootLens().getSlotLens(ordinal);
-        return VanillaAdapter.forSlot(this.bridge$getFabric(), slotLens, this);
+        return VanillaAdapter.forSlot(this.bridge$getFabric(), slotLens, (Inventory) this);
     }
 
 }

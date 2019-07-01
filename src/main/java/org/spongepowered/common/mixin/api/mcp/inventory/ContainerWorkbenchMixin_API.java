@@ -28,16 +28,16 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.SingleBlockCarrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.tileentity.SingleBlockCarrierBridge;
 
 @Mixin(ContainerWorkbench.class)
-public class ContainerWorkbenchMixin_API implements SingleBlockCarrierBridge {
+public abstract class ContainerWorkbenchMixin_API implements SingleBlockCarrier {
 
 
     @Shadow @Final private net.minecraft.world.World world;
@@ -46,6 +46,11 @@ public class ContainerWorkbenchMixin_API implements SingleBlockCarrierBridge {
     @Override
     public Location<World> getLocation() {
         return new Location<>(((World) this.world), new Vector3d(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
+    }
+
+    @Override
+    public World getWorld() {
+        return (World) this.world;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

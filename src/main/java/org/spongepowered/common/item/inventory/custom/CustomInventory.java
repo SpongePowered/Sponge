@@ -78,26 +78,26 @@ public class CustomInventory implements IInventory, IInteractionObject {
     private boolean registered;
 
     @SuppressWarnings("deprecation")
-    public CustomInventory(InventoryArchetype archetype, Map<String, InventoryProperty<?, ?>> properties, Carrier carrier,
-            Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, PluginContainer plugin) {
+    public CustomInventory(final InventoryArchetype archetype, final Map<String, InventoryProperty<?, ?>> properties, final Carrier carrier,
+            final Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, final PluginContainer plugin) {
         this.archetype = archetype;
         this.properties = properties;
         this.carrier = carrier;
         this.listeners = listeners;
         this.plugin = plugin;
 
-        int count;
-        InventoryDimension size = (InventoryDimension)properties.get(INVENTORY_DIMENSION); // TODO INVENTORY_CAPACITY
+        final int count;
+        final InventoryDimension size = (InventoryDimension)properties.get(INVENTORY_DIMENSION); // TODO INVENTORY_CAPACITY
         if (size != null) {
             count = size.getColumns() * size.getRows();
         } else {
             count = getSlotCount(archetype);
         }
 
-        InventoryTitle titleProperty = (InventoryTitle) properties.getOrDefault(TITLE, archetype.getProperty(TITLE).orElse(null));
-        boolean isCustom = !(titleProperty != null && titleProperty.getValue() instanceof TranslatableText);
+        final InventoryTitle titleProperty = (InventoryTitle) properties.getOrDefault(TITLE, archetype.getProperty(TITLE).orElse(null));
+        final boolean isCustom = !(titleProperty != null && titleProperty.getValue() instanceof TranslatableText);
 
-        String title = titleProperty == null ? "" :
+        final String title = titleProperty == null ? "" :
                 isCustom ? TextSerializers.LEGACY_FORMATTING_CODE.serialize(titleProperty.getValue())
                         : ((TranslatableText) titleProperty.getValue()).getTranslation().getId();
         this.inv = new InventoryBasic(title, isCustom, count);
@@ -111,28 +111,28 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     private void doRegistration() {
-        for (Map.Entry<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> entry: this.listeners.entrySet()) {
+        for (final Map.Entry<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> entry: this.listeners.entrySet()) {
             Sponge.getEventManager().registerListener(this.plugin, entry.getKey(), new CustomInventoryListener((Inventory) this, entry.getValue()));
         }
         this.registered = true;
     }
 
-    private static int getSlotCount(InventoryArchetype archetype) {
-        Optional<InventoryDimension> dimension = archetype.getProperty(InventoryDimension.class, INVENTORY_DIMENSION);
+    private static int getSlotCount(final InventoryArchetype archetype) {
+        final Optional<InventoryDimension> dimension = archetype.getProperty(InventoryDimension.class, INVENTORY_DIMENSION);
         if (dimension.isPresent()) {
             return dimension.get().getColumns() * dimension.get().getRows();
         }
-        Optional<InventoryCapacity> capacity = archetype.getProperty(InventoryCapacity.class, INVENTORY_CAPACITY);
+        final Optional<InventoryCapacity> capacity = archetype.getProperty(InventoryCapacity.class, INVENTORY_CAPACITY);
         if (capacity.isPresent()) {
             return capacity.get().getValue();
         }
 
         int count = 0;
-        List<InventoryArchetype> childs = archetype.getChildArchetypes();
+        final List<InventoryArchetype> childs = archetype.getChildArchetypes();
         if (childs.isEmpty()) {
             throw new IllegalArgumentException("Missing dimensions!");
         }
-        for (InventoryArchetype childArchetype : childs) {
+        for (final InventoryArchetype childArchetype : childs) {
             count += getSlotCount(childArchetype);
         }
         return count;
@@ -143,7 +143,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn) {
+    public Container createContainer(final InventoryPlayer playerInventory, final EntityPlayer playerIn) {
 
         // To be viewable the Inventory has to implement IInteractionObject and thus provide a Container
         // displayChest falls back to Chest for IInventory instance
@@ -158,7 +158,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.viewers.add(playerIn);
 
         if (this.archetype instanceof CompositeInventoryArchetype) {
-            CompositeInventoryArchetype.ContainerProvider provider = ((CompositeInventoryArchetype) this.archetype).getContainerProvider();
+            final CompositeInventoryArchetype.ContainerProvider provider = ((CompositeInventoryArchetype) this.archetype).getContainerProvider();
             if (provider != null) {
                 return provider.provide(this, playerIn);
             }
@@ -168,15 +168,15 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     @Override
     public String getGuiID() {
-        String key = AbstractInventoryProperty.getDefaultKey(GuiIdProperty.class).toString();
-        InventoryProperty<?, ?> property = this.properties.get(key);
+        final String key = AbstractInventoryProperty.getDefaultKey(GuiIdProperty.class).toString();
+        final InventoryProperty<?, ?> property = this.properties.get(key);
         if (property instanceof GuiIdProperty) {
             if (property.getValue() instanceof SpongeGuiId) {
                 return ((SpongeGuiId) property.getValue()).getInternalId(); // Handle Vanilla EntityHorse GuiId
             }
             return ((GuiIdProperty) property).getValue().getId();
         }
-        GuiId guiId = this.archetype.getProperty(GuiIdProperty.class, key).map(GuiIdProperty::getValue).orElse(GuiIds.CHEST);
+        final GuiId guiId = this.archetype.getProperty(GuiIdProperty.class, key).map(GuiIdProperty::getValue).orElse(GuiIds.CHEST);
         if (guiId instanceof SpongeGuiId) {
             return ((SpongeGuiId) guiId).getInternalId(); // Handle Vanilla EntityHorse GuiId
         }
@@ -211,22 +211,22 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public ItemStack getStackInSlot(int index) {
+    public ItemStack getStackInSlot(final int index) {
         return this.inv.getStackInSlot(index);
     }
 
     @Override
-    public ItemStack decrStackSize(int index, int count) {
+    public ItemStack decrStackSize(final int index, final int count) {
         return this.inv.decrStackSize(index, count);
     }
 
     @Override
-    public ItemStack removeStackFromSlot(int index) {
+    public ItemStack removeStackFromSlot(final int index) {
         return this.inv.removeStackFromSlot(index);
     }
 
     @Override
-    public void setInventorySlotContents(int index, ItemStack stack) {
+    public void setInventorySlotContents(final int index, final ItemStack stack) {
         this.inv.setInventorySlotContents(index, stack);
     }
 
@@ -241,19 +241,19 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public boolean isUsableByPlayer(EntityPlayer player) {
+    public boolean isUsableByPlayer(final EntityPlayer player) {
         return this.inv.isUsableByPlayer(player);
     }
 
     @Override
-    public void openInventory(EntityPlayer player) {
+    public void openInventory(final EntityPlayer player) {
         this.viewers.add(player);
         this.inv.openInventory(player);
         this.ensureListenersRegistered();
     }
 
     @Override
-    public void closeInventory(EntityPlayer player) {
+    public void closeInventory(final EntityPlayer player) {
         this.viewers.remove(player);
         this.inv.closeInventory(player);
         if (this.viewers.isEmpty()) {
@@ -267,17 +267,17 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public boolean isItemValidForSlot(int index, ItemStack stack) {
+    public boolean isItemValidForSlot(final int index, final ItemStack stack) {
         return this.inv.isItemValidForSlot(index, stack);
     }
 
     @Override
-    public int getField(int id) {
+    public int getField(final int id) {
         return this.inv.getField(id);
     }
 
     @Override
-    public void setField(int id, int value) {
+    public void setField(final int id, final int value) {
         this.inv.setField(id, value);
     }
 

@@ -28,16 +28,22 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.inventory.ContainerEnchantment;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.SingleBlockCarrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.tileentity.SingleBlockCarrierBridge;
 
+/**
+ * Specifically to implement the {@link #getInventory()} and {@link #getLocation()}
+ * aspects of {@link SingleBlockCarrier} since the remainder of
+ * {@link Inventory} implementation is defaulted in {@link SingleBlockCarrier}
+ */
 @Mixin(ContainerEnchantment.class)
-public class ContainerEnchantmentMixin_API implements SingleBlockCarrierBridge {
+public abstract class ContainerEnchantmentMixin_API implements SingleBlockCarrier {
 
     @Shadow @Final public net.minecraft.world.World world;
     @Shadow @Final public BlockPos position;
@@ -45,6 +51,11 @@ public class ContainerEnchantmentMixin_API implements SingleBlockCarrierBridge {
     @Override
     public Location<World> getLocation() {
         return new Location<>(((World) this.world), new Vector3d(this.position.getX(), this.position.getY(), this.position.getZ()));
+    }
+
+    @Override
+    public World getWorld() {
+        return (World) this.world;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

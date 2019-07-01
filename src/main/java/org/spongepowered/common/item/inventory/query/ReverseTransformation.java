@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryTransformation;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.DefaultImplementedInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOperation;
@@ -44,24 +44,24 @@ public class ReverseTransformation implements InventoryTransformation {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public Inventory transform(Inventory inventory) {
+    public Inventory transform(final Inventory inventory) {
 
-        List<InventoryAdapter> slots = new ArrayList<>();
-        for (Inventory slot : inventory.slots()) {
+        final List<InventoryAdapter> slots = new ArrayList<>();
+        for (final Inventory slot : inventory.slots()) {
             slots.add(((InventoryAdapter) slot));
         }
         Collections.reverse(slots);
 
-        CompoundSlotProvider slotProvider = new CompoundSlotProvider();
+        final CompoundSlotProvider slotProvider = new CompoundSlotProvider();
         slots.forEach(slotProvider::add);
 
-        MinecraftInventoryAdapter adapter = (MinecraftInventoryAdapter) inventory;
+        final DefaultImplementedInventoryAdapter adapter = (DefaultImplementedInventoryAdapter) inventory;
 
-        CompoundLens lens = CompoundLens.builder().add(adapter.bridge$getRootLens()).build(slotProvider);
+        final CompoundLens lens = CompoundLens.builder().add(adapter.bridge$getRootLens()).build(slotProvider);
 
-        InventoryAdapter newAdapter = lens.getAdapter(adapter.bridge$getFabric(), inventory);
+        final InventoryAdapter newAdapter = lens.getAdapter(adapter.bridge$getFabric(), inventory);
 
         return Query.compile(newAdapter,
-                new SlotLensQueryOperation(ImmutableSet.of(newAdapter))).execute();
+                new SlotLensQueryOperation(ImmutableSet.of((Inventory) newAdapter))).execute();
     }
 }

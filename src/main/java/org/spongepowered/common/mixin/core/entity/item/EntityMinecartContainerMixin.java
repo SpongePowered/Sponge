@@ -28,12 +28,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecartContainer;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.storage.loot.ILootContainer;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -45,31 +43,15 @@ import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric
 import javax.annotation.Nullable;
 
 @Mixin(EntityMinecartContainer.class)
-@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
-public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin implements ILockableContainer, ILootContainer {
+public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin implements ILockableContainer, ILootContainer, InventoryAdapter,
+    InventoryAdapterBridge {
 
     @Shadow private boolean dropContentsWhenDead;
 
-    protected Fabric fabric = new IInventoryFabric(this);
-    protected SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
-    protected Lens lens = createLensOnConstruct();
-
     protected Lens createLensOnConstruct() {
         return this.getSizeInventory() == 0
-               ? new DefaultEmptyLens((InventoryAdapter) this)
-               : new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
-    }
-
-    public SlotProvider inventory$bridge$getSlotProvider() {
-        return this.slots;
-    }
-
-    public Lens inventory$bridge$getRootLens() {
-        return this.lens;
-    }
-
-    public Fabric inventory$bridge$getFabric() {
-        return this.fabric;
+               ? new DefaultEmptyLens(this)
+               : new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.bridge$getSlotProvider());
     }
 
     /**
@@ -87,5 +69,20 @@ public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin i
         }
 
         return entity;
+    }
+
+    @Override
+    public SlotProvider bridge$generateSlotProvider() {
+        return new SlotCollection.Builder().add(this.getSizeInventory()).build();
+    }
+
+    @Override
+    public Lens bridge$generateLens() {
+        return createLensOnConstruct();
+    }
+
+    @Override
+    public Fabric bridge$generateFabric() {
+        return new IInventoryFabric(this);
     }
 }

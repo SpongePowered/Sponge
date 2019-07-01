@@ -44,6 +44,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -125,7 +126,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
-        ((ContainerBridge) playerMP.openContainer).setCaptureInventory(true);
+        ((TrackedInventoryBridge) playerMP.openContainer).bridge$setCaptureInventory(true);
         context.addEntityDropCaptures();
     }
 
@@ -156,9 +157,9 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         // firing invalid events.
         // See NetHandlerPlayServerMixin processClickWindow redirect for rest of fix.
         // --bloodmc
-        final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
-        if (!mixinContainer.capturingInventory() && !context.hasCaptures()) {
-            mixinContainer.bridge$getCapturedSlotTransactions().clear();
+        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
+        if (!trackedInventory.bridge$capturingInventory() && !context.hasCaptures()) {
+            trackedInventory.bridge$getCapturedSlotTransactions().clear();
             return;
         }
 
@@ -166,7 +167,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         final Transaction<ItemStackSnapshot> cursorTransaction = this.getCursorTransaction(context, player);
 
         final net.minecraft.inventory.Container openContainer = player.openContainer;
-        final List<SlotTransaction> slotTransactions = mixinContainer.bridge$getCapturedSlotTransactions();
+        final List<SlotTransaction> slotTransactions = trackedInventory.bridge$getCapturedSlotTransactions();
 
         final int usedButton = packetIn.getUsedButton();
         final List<Entity> capturedItems = new ArrayList<>();
@@ -197,13 +198,13 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 }
             }
             slotTransactions.clear();
-            mixinContainer.setCaptureInventory(false);
+            trackedInventory.bridge$setCaptureInventory(false);
             return;
         }
 
         Slot slot = null;
         if (packetIn.getSlotId() >= 0) {
-            slot = mixinContainer.getContainerSlot(packetIn.getSlotId());
+            slot = ((ContainerBridge) trackedInventory).bridge$getContainerSlot(packetIn.getSlotId());
         }
         // else TODO slot for ClickInventoryEvent.Drag
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -218,11 +219,11 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 if (player.openContainer.windowId != packetIn.getWindowId()) {
                     return; // Container mismatch - ignore this.
                 }
-                if (!mixinContainer.capturePossible()) {
+                if (!((ContainerBridge) trackedInventory).bridge$capturePossible()) {
                     // TODO When this happens a mod probably overrides Container#detectAndSendChanges
                     // We are currently unable to detect changes in this case.
-                    if (!containersFailedCapture.contains(mixinContainer.getClass())) {
-                        containersFailedCapture.add(mixinContainer.getClass());
+                    if (!containersFailedCapture.contains(trackedInventory.getClass())) {
+                        containersFailedCapture.add(trackedInventory.getClass());
                         SpongeImpl.getLogger().warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + openContainer.getClass());
                     }
                     return;
@@ -273,7 +274,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             }
         } finally { // cleanup
             slotTransactions.clear();
-            mixinContainer.setCaptureInventory(false);
+            trackedInventory.bridge$setCaptureInventory(false);
         }
     }
 

@@ -102,8 +102,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
@@ -162,7 +162,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     @Shadow public abstract FoodStats getFoodStats();
     @Shadow public abstract GameProfile getGameProfile();
     @Shadow public abstract Scoreboard getWorldScoreboard();
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract void addExperienceLevel(int levels);
     @Shadow public abstract void addScore(int scoreIn);
@@ -332,7 +332,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         this.setPosition(this.posX, this.posY, this.posZ);
         this.motionY = 0.10000000149011612D;
 
-        if (this.getName().equals("Notch")) {
+        if (this.shadow$getName().equals("Notch")) {
             this.dropItem(new ItemStack(Items.APPLE, 1), true, false);
         }
 
@@ -496,7 +496,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         entityitem.setPickupDelay(40);
 
         if (traceItem) {
-            entityitem.setThrower(this.getName());
+            entityitem.setThrower(this.shadow$getName());
         }
 
         if (dropAround) {
@@ -869,19 +869,19 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     @Inject(method = "setItemStackToSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
     private void onSetItemStackToSlot(final EntityEquipmentSlot slotIn, final ItemStack stack, final CallbackInfo ci)
     {
-        if (((InventoryPlayerBridge) this.inventory).capturesTransactions()) {
+        if (((TrackedInventoryBridge) this.inventory).bridge$capturingInventory()) {
             if (slotIn == EntityEquipmentSlot.MAINHAND) {
                 final ItemStack orig = this.inventory.mainInventory.get(this.inventory.currentItem);
                 final Slot slot = ((PlayerInventory) this.inventory).getMain().getHotbar().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
-                ((InventoryPlayerBridge) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
+                ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn == EntityEquipmentSlot.OFFHAND) {
                 final ItemStack orig = this.inventory.offHandInventory.get(0);
                 final Slot slot = ((PlayerInventory) this.inventory).getOffhand();
-                ((InventoryPlayerBridge) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
+                ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn.getSlotType() == EntityEquipmentSlot.Type.ARMOR) {
                 final ItemStack orig = this.inventory.armorInventory.get(slotIn.getIndex());
                 final Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(SlotIndex.of(slotIn.getIndex())).get();
-                ((InventoryPlayerBridge) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
+                ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             }
         }
     }

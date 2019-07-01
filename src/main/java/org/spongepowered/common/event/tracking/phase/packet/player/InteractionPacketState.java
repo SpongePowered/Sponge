@@ -51,6 +51,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -83,7 +84,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InteractionPacketContext context) {
+    public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final InteractionPacketContext context) {
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
         if (stack != null) {
             context.itemUsed(stack);
@@ -98,7 +99,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public boolean spawnEntityOrCapture(InteractionPacketContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final InteractionPacketContext context, final Entity entity, final int chunkX, final int chunkZ) {
         return context.captureEntity(entity);
     }
 
@@ -108,27 +109,27 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(InteractionPacketContext context) {
+    public boolean doesCaptureEntityDrops(final InteractionPacketContext context) {
         return true;
     }
 
     @Override
-    public boolean tracksTileEntityChanges(InteractionPacketContext currentContext) {
+    public boolean tracksTileEntityChanges(final InteractionPacketContext currentContext) {
         return true;
     }
 
     @Override
-    public boolean hasSpecificBlockProcess(InteractionPacketContext context) {
+    public boolean hasSpecificBlockProcess(final InteractionPacketContext context) {
         return true;
     }
 
     @Override
-    public boolean doesCaptureNeighborNotifications(InteractionPacketContext context) {
+    public boolean doesCaptureNeighborNotifications(final InteractionPacketContext context) {
         return true;
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(InteractionPacketContext context) {
+    public boolean tracksBlockSpecificDrops(final InteractionPacketContext context) {
         return true;
     }
 
@@ -139,7 +140,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
     @SuppressWarnings("unchecked")
     @Override
-    public void unwind(InteractionPacketContext phaseContext) {
+    public void unwind(final InteractionPacketContext phaseContext) {
 
         final EntityPlayerMP player = phaseContext.getPacketPlayer();
         final ItemStack usedStack = phaseContext.getItemUsed();
@@ -148,7 +149,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         final Entity spongePlayer = (Entity) player;
         final BlockSnapshot targetBlock = phaseContext.getTargetBlock();
 
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             frame.addContext(EventContextKeys.USED_ITEM, usedSnapshot);
@@ -169,7 +170,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             }
             phaseContext.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
                 if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
-                    for (Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                    for (final Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                         if (!entry.getValue().isEmpty()) {
                             final List<Entity> items = entry.getValue().stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                             final DropItemEvent.Destruct event =
@@ -181,7 +182,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                         }
                     }
                 } else {
-                    for (Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                    for (final Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                         if (!entry.getValue().isEmpty()) {
                             processEntities(player, (Collection<Entity>) (Collection<?>) entry.getValue());
                         }
@@ -193,7 +194,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             phaseContext.getCapturedItemsSupplier()
                 .acceptAndClearIfNotEmpty(items -> {
                     final ArrayList<Entity> entities = new ArrayList<>();
-                    for (EntityItem item : items) {
+                    for (final EntityItem item : items) {
                         entities.add((Entity) item);
                     }
                     final DropItemEvent.Dispense dispense =
@@ -211,9 +212,9 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                     final PrettyPrinter printer = new PrettyPrinter(80);
                     printer.add("Processing Interaction").centre().hr();
                     printer.add("The item stacks captured are: ");
-                    for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
+                    for (final Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                         printer.add("  - Entity with UUID: %s", entry.getKey());
-                        for (ItemDropData stack : entry.getValue()) {
+                        for (final ItemDropData stack : entry.getValue()) {
                             printer.add("    - %s", stack);
                         }
                     }
@@ -224,13 +225,13 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             });
 
             phaseContext.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty((multimap -> {
-                for (Map.Entry<UUID, Collection<EntityItem>> entry : multimap.asMap().entrySet()) {
+                for (final Map.Entry<UUID, Collection<EntityItem>> entry : multimap.asMap().entrySet()) {
                     if (entry.getKey().equals(player.getUniqueID())) {
                         throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
                     } else {
                         final net.minecraft.entity.Entity spawnedEntity = ((WorldServer) player.world).getEntityFromUuid(entry.getKey());
                         if (spawnedEntity != null) {
-                            try (CauseStackManager.StackFrame entityFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            try (final CauseStackManager.StackFrame entityFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 entityFrame.pushCause(spawnedEntity);
                                 throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
                             }
@@ -239,20 +240,20 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                 }
             }));
 
-            final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
-            mixinContainer.setCaptureInventory(false);
-            mixinContainer.bridge$getCapturedSlotTransactions().clear();
+            final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
+            trackedInventory.bridge$setCaptureInventory(false);
+            trackedInventory.bridge$getCapturedSlotTransactions().clear();
         }
     }
 
-    private void throwEntitySpawnEvents(InteractionPacketContext phaseContext, EntityPlayerMP player, ItemStackSnapshot usedSnapshot,
-        BlockSnapshot firstBlockChange, Collection<Entity> entities) {
+    private void throwEntitySpawnEvents(final InteractionPacketContext phaseContext, final EntityPlayerMP player, final ItemStackSnapshot usedSnapshot,
+        final BlockSnapshot firstBlockChange, final Collection<Entity> entities) {
         final List<Entity> projectiles = new ArrayList<>(entities.size());
         final List<Entity> spawnEggs = new ArrayList<>(entities.size());
         final List<Entity> xpOrbs = new ArrayList<>(entities.size());
         final List<Entity> normalPlacement = new ArrayList<>(entities.size());
         final List<Entity> items = new ArrayList<>(entities.size());
-        for (Entity entity : entities) {
+        for (final Entity entity : entities) {
             if (entity instanceof Projectile || entity instanceof EntityThrowable) {
                 projectiles.add(entity);
             } else if (usedSnapshot.getType() == ItemTypes.SPAWN_EGG) {
@@ -267,7 +268,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         }
         if (!projectiles.isEmpty()) {
             if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
                     frame2.pushCause(usedSnapshot);
                     SpongeCommonEventFactory.callSpawnEntity(projectiles, phaseContext);
@@ -278,7 +279,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         }
         if (!spawnEggs.isEmpty()) {
             if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
                     frame2.pushCause(usedSnapshot);
                     SpongeCommonEventFactory.callSpawnEntity(spawnEggs, phaseContext);
