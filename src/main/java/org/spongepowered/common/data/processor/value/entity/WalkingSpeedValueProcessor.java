@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.player.PlayerCapabilitiesAccessor;
 
 import java.util.Optional;
 
@@ -44,34 +45,34 @@ public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected Value<Double> constructValue(Double defaultValue) {
+    protected Value<Double> constructValue(final Double defaultValue) {
         return new SpongeValue<>(Keys.WALKING_SPEED, 0.7D);
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
+    protected ImmutableValue<Double> constructImmutableValue(final Double value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    protected boolean set(EntityPlayer container, Double value) {
+    protected boolean set(final EntityPlayer container, final Double value) {
         setWalkSpeed(container, value);
         container.sendPlayerAbilities();
         return true;
     }
 
     @Override
-    protected Optional<Double> getVal(EntityPlayer container) {
+    protected Optional<Double> getVal(final EntityPlayer container) {
         return Optional.of(((double) container.capabilities.getWalkSpeed()));
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
-    public static void setWalkSpeed(EntityPlayer container, double value) {
-        container.capabilities.walkSpeed = (float) value;
+    public static void setWalkSpeed(final EntityPlayer container, final double value) {
+        ((PlayerCapabilitiesAccessor) container.capabilities).accessor$setWalkSpeed((float) value);
         final IAttributeInstance attribute = container.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
         attribute.setBaseValue(value);
     }

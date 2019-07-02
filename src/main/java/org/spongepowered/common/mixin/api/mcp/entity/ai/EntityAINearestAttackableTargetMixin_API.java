@@ -30,7 +30,9 @@ import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.util.Functional;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @SuppressWarnings("rawtypes")
@@ -38,9 +40,9 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class EntityAINearestAttackableTargetMixin_API extends EntityAITargetMixin_API<FindNearestAttackableTargetAITask>
         implements FindNearestAttackableTargetAITask {
 
-    @Shadow protected Class targetClass;
-    @Shadow protected int targetChance;
-    @Shadow public Predicate targetEntitySelector;
+    @Shadow @Final @Mutable protected Class targetClass;
+    @Shadow @Final @Mutable private int targetChance;
+    @Shadow @Final @Mutable protected Predicate targetEntitySelector;
 
     @SuppressWarnings("unchecked")
     @Override

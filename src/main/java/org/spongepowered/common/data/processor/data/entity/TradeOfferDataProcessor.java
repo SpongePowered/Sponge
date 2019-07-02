@@ -39,6 +39,7 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.common.data.manipulator.mutable.SpongeTradeOfferData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.entity.passive.EntityVillagerAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,43 +51,45 @@ public class TradeOfferDataProcessor
         super(EntityVillager.class, Keys.TRADE_OFFERS);
     }
 
-    public static List<TradeOffer> toTradeOfferList(MerchantRecipeList list) {
-        List<TradeOffer> offers = Lists.newArrayList();
+    private static List<TradeOffer> toTradeOfferList(final MerchantRecipeList list) {
+        final List<TradeOffer> offers = Lists.newArrayList();
         for (int i = 0; i < list.size(); i++) {
             offers.add((TradeOffer) list.get(i));
         }
         return offers;
     }
 
-    public static MerchantRecipeList toMerchantRecipeList(List<TradeOffer> offers) {
-        MerchantRecipeList list = new MerchantRecipeList();
-        for (TradeOffer offer : offers) {
+    private static MerchantRecipeList toMerchantRecipeList(final List<TradeOffer> offers) {
+        final MerchantRecipeList list = new MerchantRecipeList();
+        for (final TradeOffer offer : offers) {
             list.add((MerchantRecipe) offer);
         }
         return list;
     }
 
     @Override
-    protected ListValue<TradeOffer> constructValue(List<TradeOffer> actualValue) {
+    protected ListValue<TradeOffer> constructValue(final List<TradeOffer> actualValue) {
         return SpongeValueFactory.getInstance().createListValue(Keys.TRADE_OFFERS, actualValue);
     }
 
     @Override
-    protected boolean set(EntityVillager entity, List<TradeOffer> value) {
-        entity.buyingList = toMerchantRecipeList(value);
+    protected boolean set(final EntityVillager entity, final List<TradeOffer> value) {
+        ((EntityVillagerAccessor) entity).accessor$setBuyingList(toMerchantRecipeList(value));
         return true;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    protected Optional<List<TradeOffer>> getVal(EntityVillager entity) {
-        if (entity.buyingList == null) {
-            entity.populateBuyingList();
+    protected Optional<List<TradeOffer>> getVal(final EntityVillager entity) {
+        final MerchantRecipeList recipes = ((EntityVillagerAccessor) entity).accessor$getBuyingList();
+        if (recipes == null) {
+            ((EntityVillagerAccessor) entity).accessor$PopulateBuyingList();
         }
-        return Optional.of(toTradeOfferList(entity.buyingList));
+        return Optional.of(toTradeOfferList(((EntityVillagerAccessor) entity).accessor$getBuyingList()));
     }
 
     @Override
-    protected ImmutableValue<List<TradeOffer>> constructImmutableValue(List<TradeOffer> value) {
+    protected ImmutableValue<List<TradeOffer>> constructImmutableValue(final List<TradeOffer> value) {
         return constructValue(value).asImmutable();
     }
 
@@ -96,7 +99,7 @@ public class TradeOfferDataProcessor
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

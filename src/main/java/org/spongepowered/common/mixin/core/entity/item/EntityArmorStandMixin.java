@@ -55,10 +55,10 @@ public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
      * The return value is set to false if the entity should not be completely
      * destroyed.
      */
-    private void fireDestroyDamageEvent(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    private void fireDestroyDamageEvent(final DamageSource source, final CallbackInfoReturnable<Boolean> cir) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
-            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), new ArrayList<>(),
+            final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), new ArrayList<>(),
                 (Entity) this, Math.max(1000, this.getHealth()));
             if (SpongeImpl.postEvent(event)) {
                 cir.setReturnValue(false);
@@ -74,7 +74,7 @@ public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/util/DamageSource;OUT_OF_WORLD:Lnet/minecraft/util/DamageSource;")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;setDead()V", ordinal = 0),
             cancellable = true)
-    private void fireDamageEventOutOfWorld(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void fireDamageEventOutOfWorld(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         fireDestroyDamageEvent(source, cir);
     }
 
@@ -82,15 +82,15 @@ public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
             slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/util/DamageSource;isExplosion()Z")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;dropContents()V"),
             cancellable = true)
-    private void fireDamageEventExplosion(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void fireDamageEventExplosion(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         fireDestroyDamageEvent(source, cir);
     }
 
     @Redirect(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;damageArmorStand(F)V"))
-    private void fireDamageEventDamage(EntityArmorStand self, float effectiveAmount, DamageSource source, float originalAmount) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    private void fireDamageEventDamage(final EntityArmorStand self, final float effectiveAmount, final DamageSource source, final float originalAmount) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
-            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), new ArrayList<>(),
+            final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), new ArrayList<>(),
                 (Entity) this, effectiveAmount);
             if (!SpongeImpl.postEvent(event)) {
                 this.damageArmorStand((float) event.getFinalDamage());
@@ -100,7 +100,7 @@ public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
 
     @Inject(method = "attackEntityFrom", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/util/DamageSource;isCreativePlayer()Z")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;playBrokenSound()V"), cancellable = true)
-    private void fireDamageEventCreativePunch(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void fireDamageEventCreativePunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         fireDestroyDamageEvent(source, cir);
     }
 
@@ -109,12 +109,12 @@ public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
                     from = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityArmorStand;punchCooldown:J", opcode = Opcodes.GETFIELD)),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V"),
             cancellable = true)
-    private void fireDamageEventFirstPunch(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void fireDamageEventFirstPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         // While this doesn't technically "damage" the armor stand, it feels
         // like damage in other respects, so fire an event.
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
-            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), new ArrayList<>(),
+            final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), new ArrayList<>(),
                 (Entity) this, 0);
             if (SpongeImpl.postEvent(event)) {
                 cir.setReturnValue(false);
@@ -124,7 +124,7 @@ public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
 
     @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;dropBlock()V"),
             cancellable = true)
-    private void fireDamageEventSecondPunch(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void fireDamageEventSecondPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         fireDestroyDamageEvent(source, cir);
     }
 

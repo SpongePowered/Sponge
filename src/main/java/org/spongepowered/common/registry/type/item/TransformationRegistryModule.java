@@ -36,6 +36,7 @@ import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.query.ReverseTransformation;
 import org.spongepowered.common.item.inventory.query.SpongeQueryTransformation;
+import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,11 +65,7 @@ public class TransformationRegistryModule implements RegistryModule {
     }
 
     private void register(String field, InventoryTransformation transformation) {
-        try {
-            InventoryTransformations.class.getDeclaredField(field).set(null, transformation);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
-        }
+        RegistryHelper.setFinalStatic(InventoryTransformations.class, field, transformation);
     }
 
     private TransformationRegistryModule() {

@@ -51,11 +51,6 @@ compileJava6Java {
     targetCompatibility = '1.6'
 }
 
-// ForgeGradle 2 fails to apply transformer rules for classes it doesn't know of by default
-// We use the access transformer to make the catalogs in the API accessible
-deobfMcMCP { failOnAtError = false }
-deobfMcSRG { failOnAtError = false }
-
 // The access transformers we use
 ext.ats = ['common_at.cfg']
 

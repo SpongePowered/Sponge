@@ -31,6 +31,7 @@ import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.mixin.core.util.DamageSourceAccessor;
+import org.spongepowered.common.registry.RegistryHelper;
 
 @RegistrationDependency(DamageTypeRegistryModule.class)
 public final class DamageSourceRegistryModule implements RegistryModule {
@@ -65,17 +66,17 @@ public final class DamageSourceRegistryModule implements RegistryModule {
                 ((DamageSourceAccessor) IGNORED_DAMAGE_SOURCE).accessor$setDamageAllowedInCreativeMode();
                 ((DamageSourceAccessor) IGNORED_DAMAGE_SOURCE).accessor$setDamageBypassesArmor();
             }
-            DamageSources.class.getDeclaredField("DRAGON_BREATH").set(null, DamageSource.DRAGON_BREATH);
-            DamageSources.class.getDeclaredField("DROWNING").set(null, DamageSource.DROWN);
-            DamageSources.class.getDeclaredField("FALLING").set(null, DamageSource.FALL);
-            DamageSources.class.getDeclaredField("FIRE_TICK").set(null, DamageSource.ON_FIRE);
-            DamageSources.class.getDeclaredField("GENERIC").set(null, DamageSource.GENERIC);
-            DamageSources.class.getDeclaredField("MAGIC").set(null, DamageSource.MAGIC);
-            DamageSources.class.getDeclaredField("MELTING").set(null, DAMAGESOURCE_MELTING);
-            DamageSources.class.getDeclaredField("POISON").set(null, DAMAGESOURCE_POISON);
-            DamageSources.class.getDeclaredField("STARVATION").set(null, DamageSource.STARVE);
-            DamageSources.class.getDeclaredField("WITHER").set(null, DamageSource.WITHER);
-            DamageSources.class.getDeclaredField("VOID").set(null, DamageSource.OUT_OF_WORLD);
+            RegistryHelper.setFinalStatic(DamageSources.class, "DRAGON_BREATH", DamageSource.DRAGON_BREATH);
+            RegistryHelper.setFinalStatic(DamageSources.class, "DROWNING", DamageSource.DROWN);
+            RegistryHelper.setFinalStatic(DamageSources.class, "FALLING", DamageSource.FALL);
+            RegistryHelper.setFinalStatic(DamageSources.class, "FIRE_TICK", DamageSource.ON_FIRE);
+            RegistryHelper.setFinalStatic(DamageSources.class, "GENERIC", DamageSource.GENERIC);
+            RegistryHelper.setFinalStatic(DamageSources.class, "MAGIC", DamageSource.MAGIC);
+            RegistryHelper.setFinalStatic(DamageSources.class, "MELTING", DAMAGESOURCE_MELTING);
+            RegistryHelper.setFinalStatic(DamageSources.class, "POISON", DAMAGESOURCE_POISON);
+            RegistryHelper.setFinalStatic(DamageSources.class, "STARVATION", DamageSource.STARVE);
+            RegistryHelper.setFinalStatic(DamageSources.class, "WITHER", DamageSource.WITHER);
+            RegistryHelper.setFinalStatic(DamageSources.class, "VOID", DamageSource.OUT_OF_WORLD);
         } catch (Exception e) {
             e.printStackTrace();
         }

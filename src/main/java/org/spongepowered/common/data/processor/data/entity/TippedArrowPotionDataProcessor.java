@@ -39,6 +39,7 @@ import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTa
 import org.spongepowered.common.data.util.PotionUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.mixin.core.entity.projectile.EntityTippedArrowAccessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,35 +54,35 @@ public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTarg
     }
 
     @Override
-    protected boolean set(EntityTippedArrow dataHolder, List<PotionEffect> value) {
-        dataHolder.customPotionEffects.clear();
-        for (PotionEffect effect : value) {
-            net.minecraft.potion.PotionEffect mcEffect = PotionUtil.copyToNative(effect);
+    protected boolean set(final EntityTippedArrow dataHolder, final List<PotionEffect> value) {
+        ((EntityTippedArrowAccessor) dataHolder).accessor$getCustomPotionEffects().clear();
+        for (final PotionEffect effect : value) {
+            final net.minecraft.potion.PotionEffect mcEffect = PotionUtil.copyToNative(effect);
             dataHolder.addEffect(mcEffect);
         }
         return false;
     }
 
     @Override
-    protected Optional<List<PotionEffect>> getVal(EntityTippedArrow dataHolder) {
-        Set<net.minecraft.potion.PotionEffect> effects = dataHolder.customPotionEffects;
+    protected Optional<List<PotionEffect>> getVal(final EntityTippedArrow dataHolder) {
+        final Set<net.minecraft.potion.PotionEffect> effects = ((EntityTippedArrowAccessor) dataHolder).accessor$getCustomPotionEffects();
         if (effects.isEmpty()) {
             return Optional.empty();
         }
-        List<PotionEffect> apiEffects = new ArrayList<>();
-        for (net.minecraft.potion.PotionEffect potionEffect : effects) {
+        final List<PotionEffect> apiEffects = new ArrayList<>();
+        for (final net.minecraft.potion.PotionEffect potionEffect : effects) {
             apiEffects.add(PotionUtil.copyToApi(potionEffect));
         }
         return Optional.of(apiEffects);
     }
 
     @Override
-    protected ImmutableValue<List<PotionEffect>> constructImmutableValue(List<PotionEffect> value) {
+    protected ImmutableValue<List<PotionEffect>> constructImmutableValue(final List<PotionEffect> value) {
         return new ImmutableSpongeListValue<>(Keys.POTION_EFFECTS, ImmutableList.copyOf(value));
     }
 
     @Override
-    protected ListValue<PotionEffect> constructValue(List<PotionEffect> actualValue) {
+    protected ListValue<PotionEffect> constructValue(final List<PotionEffect> actualValue) {
         return new SpongeListValue<>(Keys.POTION_EFFECTS, actualValue);
     }
 
@@ -91,13 +92,13 @@ public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTarg
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (!(container instanceof EntityTippedArrow)) {
             return DataTransactionResult.failNoData();
         }
-        Optional<List<PotionEffect>> effects = getVal((EntityTippedArrow) container);
+        final Optional<List<PotionEffect>> effects = getVal((EntityTippedArrow) container);
         if (effects.isPresent()) {
-            ((EntityTippedArrow) container).customPotionEffects.clear();
+            ((EntityTippedArrowAccessor) container).accessor$getCustomPotionEffects().clear();
             return DataTransactionResult.successRemove(constructImmutableValue(effects.get()));
         }
         return DataTransactionResult.successNoData();

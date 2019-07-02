@@ -33,6 +33,7 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.mixin.core.inventory.SlotAccessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,34 +46,34 @@ public class DelegatingLens extends AbstractLens {
 
     private Lens delegate;
 
-    public DelegatingLens(int base, Lens lens, SlotProvider slots) {
+    public DelegatingLens(final int base, final Lens lens, final SlotProvider slots) {
         super(base, lens.slotCount(), VanillaAdapter.class, slots);
         this.delegate = lens;
         this.init(slots);
     }
 
-    public DelegatingLens(int base, List<Slot> containerSlots, Lens lens, SlotProvider slots) {
+    public DelegatingLens(final int base, final List<Slot> containerSlots, final Lens lens, final SlotProvider slots) {
         super(base, containerSlots.size(), VanillaAdapter.class, slots);
         this.delegate = lens;
-        CustomSlotProvider slotProvider = new CustomSlotProvider();
-        for (Slot slot : containerSlots) {
+        final CustomSlotProvider slotProvider = new CustomSlotProvider();
+        for (final Slot slot : containerSlots) {
             // Get slots from original slot provider and add them to custom slot provider in order of actual containerSlots.
-            slotProvider.add(slots.getSlot(this.base + slot.slotIndex));
+            slotProvider.add(slots.getSlot(this.base + ((SlotAccessor) slot).accessor$getIndex()));
         }
         // Provide indexed access over the Container to the slots in the base inventory
         this.addSpanningChild(new OrderedInventoryLensImpl(0, containerSlots.size(), 1, slotProvider));
-        this.addChild(delegate);
+        this.addChild(this.delegate);
     }
 
     @Override
-    protected void init(SlotProvider slots) {
+    protected void init(final SlotProvider slots) {
         this.addSpanningChild(new OrderedInventoryLensImpl(this.base, this.size, 1, slots));
-        this.addChild(delegate);
+        this.addChild(this.delegate);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
+    public InventoryAdapter getAdapter(final Fabric inv, final Inventory parent) {
         return new VanillaAdapter(inv, this, parent);
     }
 
@@ -80,12 +81,12 @@ public class DelegatingLens extends AbstractLens {
 
         private List<SlotLens> lenses = new ArrayList<>();
 
-        public void add(SlotLens toAdd) {
+        public void add(final SlotLens toAdd) {
             this.lenses.add(toAdd);
         }
 
         @Override
-        public SlotLens getSlot(int index) {
+        public SlotLens getSlot(final int index) {
             return this.lenses.get(index);
         }
     }

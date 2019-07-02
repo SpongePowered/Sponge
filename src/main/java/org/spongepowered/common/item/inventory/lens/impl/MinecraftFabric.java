@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.*;
 
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.inventory.Slot;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -38,6 +37,7 @@ import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.SlotFabric;
+import org.spongepowered.common.mixin.core.inventory.InventoryLargeChestAccessor;
 
 public abstract class MinecraftFabric implements Fabric {
 
@@ -54,8 +54,8 @@ public abstract class MinecraftFabric implements Fabric {
             return new IInventoryFabric(slot.inventory);
         } else if (target instanceof Container) {
             return new ContainerFabric((Container) target);
-        } else if (target instanceof InventoryLargeChest) {
-            return new CompoundFabric(new IInventoryFabric(((InventoryLargeChest) target).upperChest), new IInventoryFabric(((InventoryLargeChest) target).lowerChest));
+        } else if (target instanceof InventoryLargeChestAccessor) {
+            return new CompoundFabric(new IInventoryFabric(((InventoryLargeChestAccessor) target).accessor$getUpperChest()), new IInventoryFabric(((InventoryLargeChestAccessor) target).accessor$getLowerChest()));
         } else if (target instanceof IInventory) {
             return new IInventoryFabric((IInventory) target);
         }

@@ -41,7 +41,7 @@ public class EntityCustomNameVisibleConverter extends DataParameterConverter<Boo
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(Boolean currentValue, Boolean value) {
+    public Optional<DataTransactionResult> createTransaction(Entity entity, Boolean currentValue, Boolean value) {
         return Optional.of(DataTransactionResult.builder()
             .replace(ImmutableSpongeValue.cachedOf(Keys.CUSTOM_NAME_VISIBLE, false, currentValue))
             .success(ImmutableSpongeValue.cachedOf(Keys.CUSTOM_NAME_VISIBLE, false, value))

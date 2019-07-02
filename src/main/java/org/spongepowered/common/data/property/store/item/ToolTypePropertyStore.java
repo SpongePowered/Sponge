@@ -32,24 +32,28 @@ import net.minecraft.item.ItemTool;
 import org.spongepowered.api.data.property.item.ToolTypeProperty;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+import org.spongepowered.common.mixin.core.item.ItemHoeAccessor;
+import org.spongepowered.common.mixin.core.item.ItemSwordAccessor;
+import org.spongepowered.common.mixin.core.item.ItemToolAccessor;
 
 import java.util.Optional;
 
 public class ToolTypePropertyStore extends AbstractItemStackPropertyStore<ToolTypeProperty> {
 
+    @SuppressWarnings({"ConstantConditions", "LocalCanBeFinal"})
     @Override
     protected Optional<ToolTypeProperty> getFor(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ItemTool) {
-            final ItemTool tool = (ItemTool) itemStack.getItem();
-            final Item.ToolMaterial toolMaterial = tool.toolMaterial;
+        if (itemStack.getItem() instanceof ItemToolAccessor) {
+            final ItemToolAccessor tool = (ItemToolAccessor) itemStack.getItem();
+            final Item.ToolMaterial toolMaterial = tool.accessor$getToolMaterial();
             return Optional.of(new ToolTypeProperty((ToolType) (Object) toolMaterial));
-        } else if (itemStack.getItem() instanceof ItemSword) {
-            final ItemSword itemSword = (ItemSword) itemStack.getItem();
-            final Item.ToolMaterial swordMaterial = itemSword.material;
+        } else if (itemStack.getItem() instanceof ItemSwordAccessor) {
+            final ItemSwordAccessor itemSword = (ItemSwordAccessor) itemStack.getItem();
+            final Item.ToolMaterial swordMaterial = itemSword.accessor$getToolMaterial();
             return Optional.of(new ToolTypeProperty((ToolType) (Object) swordMaterial));
-        } else if (itemStack.getItem() instanceof ItemHoe) {
-            final ItemHoe itemHoe = (ItemHoe) itemStack.getItem();
-            final Item.ToolMaterial hoeMaterial = itemHoe.toolMaterial;
+        } else if (itemStack.getItem() instanceof ItemHoeAccessor) {
+            final ItemHoeAccessor itemHoe = (ItemHoeAccessor) itemStack.getItem();
+            final Item.ToolMaterial hoeMaterial = itemHoe.accessor$getToolMaterial();
             return Optional.of(new ToolTypeProperty((ToolType) (Object) hoeMaterial));
         }
         return Optional.empty();

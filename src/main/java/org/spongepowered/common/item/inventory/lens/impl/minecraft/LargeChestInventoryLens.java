@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
-import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntityChest;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
@@ -34,6 +33,7 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
+import org.spongepowered.common.mixin.core.inventory.InventoryLargeChestAccessor;
 
 /**
  * This class is only used as an adapter when explicitly requested from the API, trough
@@ -44,29 +44,29 @@ public class LargeChestInventoryLens extends RealLens {
     private int upperChest;
     private int lowerChest;
 
-    public LargeChestInventoryLens(InventoryAdapter adapter, SlotProvider slots) {
+    public LargeChestInventoryLens(final InventoryAdapter adapter, final SlotProvider slots) {
         super(0, adapter.bridge$getFabric().getSize(), OrderedInventoryAdapter.class, slots);
-        InventoryLargeChest inventory = (InventoryLargeChest) adapter;
-        this.upperChest = inventory.upperChest.getSizeInventory();
-        this.lowerChest = inventory.lowerChest.getSizeInventory();
+        final InventoryLargeChestAccessor inventory = (InventoryLargeChestAccessor) adapter;
+        this.upperChest = inventory.accessor$getUpperChest().getSizeInventory();
+        this.lowerChest = inventory.accessor$getLowerChest().getSizeInventory();
         this.initLargeChest(slots);
     }
 
-    public LargeChestInventoryLens(int base, InventoryAdapter adapter, SlotProvider slots) {
+    public LargeChestInventoryLens(final int base, final InventoryAdapter adapter, final SlotProvider slots) {
         super(base, adapter.bridge$getFabric().getSize(), OrderedInventoryAdapter.class, slots);
-        InventoryLargeChest inventory = (InventoryLargeChest) adapter.bridge$getFabric().get(0);
-        this.upperChest = inventory.upperChest.getSizeInventory();
-        this.lowerChest = inventory.lowerChest.getSizeInventory();
+        final InventoryLargeChestAccessor inventory = adapter.bridge$getFabric().get(0);
+        this.upperChest = inventory.accessor$getUpperChest().getSizeInventory();
+        this.lowerChest = inventory.accessor$getLowerChest().getSizeInventory();
         this.initLargeChest(slots);
     }
 
     @Override
-    protected void init(SlotProvider slots) {
+    protected void init(final SlotProvider slots) {
         // we add the indexed slots ourselves
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void initLargeChest(SlotProvider slots) {
+    private void initLargeChest(final SlotProvider slots) {
         // add grids
         int base = 0;
         this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.upperChest / 9, 9, (Class) TileEntityChest.class, slots));

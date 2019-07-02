@@ -41,7 +41,7 @@ public class EntitySilentConverter extends DataParameterConverter<Boolean> {
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(Boolean currentValue, Boolean value) {
+    public Optional<DataTransactionResult> createTransaction(Entity entity, Boolean currentValue, Boolean value) {
         return Optional.of(DataTransactionResult.builder()
             .replace(ImmutableSpongeValue.cachedOf(Keys.IS_SILENT, false, currentValue))
             .success(ImmutableSpongeValue.cachedOf(Keys.IS_SILENT, false, value))

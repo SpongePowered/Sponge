@@ -46,32 +46,32 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
     }
 
     @Override
-    protected Value<BlockState> constructValue(BlockState value) {
+    protected Value<BlockState> constructValue(final BlockState value) {
         return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), value);
     }
 
     @Override
-    protected boolean set(EntityMinecart container, BlockState value) {
+    protected boolean set(final EntityMinecart container, final BlockState value) {
         container.setDisplayTile((IBlockState) value);
         return true;
     }
 
     @Override
-    protected Optional<BlockState> getVal(EntityMinecart container) {
+    protected Optional<BlockState> getVal(final EntityMinecart container) {
         if(!container.hasDisplayTile()) return Optional.empty();
         return Optional.of((BlockState) container.getDisplayTile());
     }
 
     @Override
-    protected ImmutableValue<BlockState> constructImmutableValue(BlockState value) {
+    protected ImmutableValue<BlockState> constructImmutableValue(final BlockState value) {
         return new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), value);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if(container instanceof EntityMinecart) {
-            EntityMinecart cart = (EntityMinecart) container;
-            ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
+            final EntityMinecart cart = (EntityMinecart) container;
+            final ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
             cart.setHasDisplayTile(false);
             return DataTransactionResult.builder().replace(block).build();
         }

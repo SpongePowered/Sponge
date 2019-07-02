@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 
 import java.util.Optional;
 
@@ -69,7 +70,7 @@ public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Optional<Integer> getVal(Entity container) {
-        return Optional.of(container.getFireImmuneTicks());
+        return Optional.of(((EntityAccessor) container).accessor$getFireImmuneTicks());
     }
 
     @Override

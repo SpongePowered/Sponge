@@ -48,37 +48,37 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
     }
 
     @Override
-    protected boolean doesDataExist(net.minecraft.entity.Entity entity) {
-        return entity.ridingEntity != null;
+    protected boolean doesDataExist(final net.minecraft.entity.Entity entity) {
+        return entity.getRidingEntity() != null;
     }
 
     @Override
-    protected boolean set(net.minecraft.entity.Entity entity, Map<Key<?>, Object> keyValues) {
+    protected boolean set(final net.minecraft.entity.Entity entity, final Map<Key<?>, Object> keyValues) {
         return ((Entity) entity).setVehicle(((EntitySnapshot) keyValues.get(Keys.VEHICLE)).restore().orElse(null));
 
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(net.minecraft.entity.Entity entity) {
-        return ImmutableMap.of(Keys.VEHICLE, ((Entity) entity.ridingEntity).createSnapshot(), Keys.BASE_VEHICLE, ((Entity) entity
+    protected Map<Key<?>, ?> getValues(final net.minecraft.entity.Entity entity) {
+        return ImmutableMap.of(Keys.VEHICLE, ((Entity) entity.getRidingEntity()).createSnapshot(), Keys.BASE_VEHICLE, ((Entity) entity
                 .getLowestRidingEntity()).createSnapshot());
     }
 
     @Override
-    public Optional<VehicleData> fill(DataContainer container, final VehicleData vehicleData) {
+    public Optional<VehicleData> fill(final DataContainer container, final VehicleData vehicleData) {
         if (!container.contains(Keys.VEHICLE.getQuery(), Keys.BASE_VEHICLE.getQuery())) {
             return Optional.empty();
         }
-        EntitySnapshot vehicle = container.getSerializable(Keys.VEHICLE.getQuery(), EntitySnapshot.class).get();
-        EntitySnapshot baseVehicle = container.getSerializable(Keys.BASE_VEHICLE.getQuery(), EntitySnapshot.class).get();
+        final EntitySnapshot vehicle = container.getSerializable(Keys.VEHICLE.getQuery(), EntitySnapshot.class).get();
+        final EntitySnapshot baseVehicle = container.getSerializable(Keys.BASE_VEHICLE.getQuery(), EntitySnapshot.class).get();
         return Optional.of(vehicleData.set(Keys.VEHICLE, vehicle).set(Keys.BASE_VEHICLE, baseVehicle));
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult remove(final DataHolder dataHolder) {
         if (supports(dataHolder)) {
-            net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) dataHolder);
-            if (entity.ridingEntity != null) {
+            final net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) dataHolder);
+            if (entity.getRidingEntity() != null) {
                 final EntitySnapshot previousVehicle = ((Entity) entity.getRidingEntity()).createSnapshot();
                 entity.dismountRidingEntity();
                 return DataTransactionResult.successResult(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicle));

@@ -36,6 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongePersisting
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.EntityLivingAccessor;
 
 import java.util.Optional;
 
@@ -47,18 +48,18 @@ public class PersistingDataProcessor
     }
 
     @Override
-    protected boolean set(EntityLiving entity, Boolean value) {
-        entity.persistenceRequired = value;
+    protected boolean set(final EntityLiving entity, final Boolean value) {
+        ((EntityLivingAccessor) entity).accessor$setPersisting(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityLiving entity) {
+    protected Optional<Boolean> getVal(final EntityLiving entity) {
         return Optional.of(entity.isNoDespawnRequired());
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.PERSISTS, false, value);
     }
 
@@ -68,12 +69,12 @@ public class PersistingDataProcessor
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Value<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<>(Keys.PERSISTS, actualValue);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

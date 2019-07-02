@@ -38,17 +38,20 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDisabledSlotsData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
+import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 
 import java.util.*;
 
-public class DisabledSlotsDataProcessor extends AbstractEntityDataProcessor<EntityArmorStand, DisabledSlotsData, ImmutableDisabledSlotsData> {
+public class DisabledSlotsDataProcessor extends
+    AbstractMultiDataSingleTargetProcessor<EntityArmorStandAccessor, DisabledSlotsData, ImmutableDisabledSlotsData> {
 
     public DisabledSlotsDataProcessor() {
-        super(EntityArmorStand.class);
+        super(EntityArmorStandAccessor.class);
     }
 
-    private int populateChunkFromSet(Set<EquipmentType> value) {
+    private int populateChunkFromSet(final Set<EquipmentType> value) {
         int chunk = 0;
 
         if (value.contains(EquipmentTypes.BOOTS)) chunk |= 1 << 1;
@@ -59,48 +62,50 @@ public class DisabledSlotsDataProcessor extends AbstractEntityDataProcessor<Enti
     }
 
     @Override
-    protected boolean doesDataExist(EntityArmorStand dataHolder) {
+    protected boolean doesDataExist(final EntityArmorStandAccessor dataHolder) {
         return true;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected boolean set(EntityArmorStand dataHolder, Map<Key<?>, Object> keyValues) {
+    protected boolean set(final EntityArmorStandAccessor dataHolder, final Map<Key<?>, Object> keyValues) {
         int disabledSlots = 0;
 
         if (keyValues.containsKey(Keys.ARMOR_STAND_TAKING_DISABLED)) {
-            Set<EquipmentType> takingDisabled = (Set<EquipmentType>) keyValues.get(Keys.ARMOR_STAND_TAKING_DISABLED);
+            final Set<EquipmentType> takingDisabled = (Set<EquipmentType>) keyValues.get(Keys.ARMOR_STAND_TAKING_DISABLED);
             disabledSlots |= (populateChunkFromSet(takingDisabled) << 8);
         }
 
         if (keyValues.containsKey(Keys.ARMOR_STAND_PLACING_DISABLED)) {
-            Set<EquipmentType> placingDisabled = (Set<EquipmentType>) keyValues.get(Keys.ARMOR_STAND_PLACING_DISABLED);
+            final Set<EquipmentType> placingDisabled = (Set<EquipmentType>) keyValues.get(Keys.ARMOR_STAND_PLACING_DISABLED);
             disabledSlots |= (populateChunkFromSet(placingDisabled) << 16);
         }
 
-        dataHolder.disabledSlots = disabledSlots;
+        dataHolder.accessor$setDisabledSlots(disabledSlots);
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityArmorStand dataHolder) {
+    protected Map<Key<?>, ?> getValues(final EntityArmorStandAccessor dataHolder) {
         // try and keep the all chunk empty
-        int allChunk = dataHolder.disabledSlots & 0b1111_1111;
+        int disabledSlotsValue = dataHolder.accessor$getDisabledSlots();
+        final int allChunk = disabledSlotsValue & 0b1111_1111;
         if (allChunk != 0) {
-            dataHolder.disabledSlots |= (allChunk << 8);
-            dataHolder.disabledSlots |= (allChunk << 16);
-            dataHolder.disabledSlots ^= 0b1111_1111;
+            disabledSlotsValue |= (allChunk << 8);
+            disabledSlotsValue |= (allChunk << 16);
+            disabledSlotsValue ^= 0b1111_1111;
+            dataHolder.accessor$setDisabledSlots(disabledSlotsValue);
         }
 
-        int disabledSlots = dataHolder.disabledSlots;
+        final int disabledSlots = dataHolder.accessor$getDisabledSlots();
 
-        Set<EquipmentType> takingDisabled = new HashSet<>();
+        final Set<EquipmentType> takingDisabled = new HashSet<>();
         if (((disabledSlots >> 1 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.BOOTS);
         if (((disabledSlots >> 2 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.LEGGINGS);
         if (((disabledSlots >> 3 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.CHESTPLATE);
         if (((disabledSlots >> 4 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.HEADWEAR);
 
-        Set<EquipmentType> placingDisabled = new HashSet<>();
+        final Set<EquipmentType> placingDisabled = new HashSet<>();
         if (((disabledSlots >> 1 + 16) & 1) != 0) placingDisabled.add(EquipmentTypes.BOOTS);
         if (((disabledSlots >> 2 + 16) & 1) != 0) placingDisabled.add(EquipmentTypes.LEGGINGS);
         if (((disabledSlots >> 3 + 16) & 1) != 0) placingDisabled.add(EquipmentTypes.CHESTPLATE);
@@ -119,7 +124,7 @@ public class DisabledSlotsDataProcessor extends AbstractEntityDataProcessor<Enti
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<DisabledSlotsData> fill(DataContainer container, DisabledSlotsData disabledSlotsData) {
+    public Optional<DisabledSlotsData> fill(final DataContainer container, final DisabledSlotsData disabledSlotsData) {
         if (container.contains(Keys.ARMOR_STAND_TAKING_DISABLED)) {
             disabledSlotsData.set(Keys.ARMOR_STAND_TAKING_DISABLED,
                 new HashSet<>((Collection<EquipmentType>) container.get(Keys.ARMOR_STAND_TAKING_DISABLED.getQuery()).get()));
@@ -133,7 +138,7 @@ public class DisabledSlotsDataProcessor extends AbstractEntityDataProcessor<Enti
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult remove(final DataHolder dataHolder) {
         return DataTransactionResult.failNoData();
     }
 }

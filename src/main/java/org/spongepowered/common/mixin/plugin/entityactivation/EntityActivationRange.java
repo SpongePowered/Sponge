@@ -73,6 +73,7 @@ import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 
 import java.util.Map;
@@ -345,7 +346,7 @@ public class EntityActivationRange {
             return true;
         }
         if (!(entity instanceof Projectile)) {
-            if (!entity.getPassengers().isEmpty() || entity.ridingEntity != null) {
+            if (!entity.getPassengers().isEmpty() || entity.getRidingEntity() != null) {
                 return true;
             }
         } else if (!((Projectile) entity).isOnGround()) {
@@ -357,7 +358,7 @@ public class EntityActivationRange {
             if (living.hurtTime > 0 || living.getActivePotionEffects().size() > 0) {
                 return true;
             }
-            if (entity instanceof EntityLiving && (((EntityLiving) entity).getRevengeTarget() != null || ((EntityLiving) entity).getAttackTarget() != null)) {
+            if (entity instanceof EntityLiving && (((EntityLivingBaseAccessor) entity).accessor$getRevengeTarget() != null || ((EntityLiving) entity).getAttackTarget() != null)) {
                 return true;
             }
             if (entity instanceof EntityVillager && ((EntityVillager) entity).isMating()) {

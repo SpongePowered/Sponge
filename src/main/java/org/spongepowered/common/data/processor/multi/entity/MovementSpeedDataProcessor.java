@@ -38,6 +38,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.processor.value.entity.WalkingSpeedValueProcessor;
+import org.spongepowered.common.mixin.core.entity.player.PlayerCapabilitiesAccessor;
 
 import java.util.Map;
 import java.util.Optional;
@@ -49,20 +50,20 @@ public class MovementSpeedDataProcessor extends AbstractEntityDataProcessor<Enti
     }
 
     @Override
-    protected boolean doesDataExist(EntityPlayer entity) {
+    protected boolean doesDataExist(final EntityPlayer entity) {
         return true;
     }
 
     @Override
-    protected boolean set(EntityPlayer entity, Map<Key<?>, Object> keyValues) {
+    protected boolean set(final EntityPlayer entity, final Map<Key<?>, Object> keyValues) {
         WalkingSpeedValueProcessor.setWalkSpeed(entity, (Double) keyValues.get(Keys.WALKING_SPEED));
-        entity.capabilities.flySpeed = ((Double) keyValues.get(Keys.FLYING_SPEED)).floatValue();
+        ((PlayerCapabilitiesAccessor) entity.capabilities).accessor$setFlySpeed(((Double) keyValues.get(Keys.FLYING_SPEED)).floatValue());
         entity.sendPlayerAbilities();
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityPlayer entity) {
+    protected Map<Key<?>, ?> getValues(final EntityPlayer entity) {
         final double walkSpeed = entity.capabilities.getWalkSpeed();
         final double flySpeed = entity.capabilities.getFlySpeed();
         return ImmutableMap.<Key<?>, Object>of(Keys.WALKING_SPEED, walkSpeed,
@@ -75,14 +76,14 @@ public class MovementSpeedDataProcessor extends AbstractEntityDataProcessor<Enti
     }
 
     @Override
-    public Optional<MovementSpeedData> fill(DataContainer container, MovementSpeedData movementSpeedData) {
+    public Optional<MovementSpeedData> fill(final DataContainer container, final MovementSpeedData movementSpeedData) {
         movementSpeedData.set(Keys.WALKING_SPEED, getData(container, Keys.WALKING_SPEED));
         movementSpeedData.set(Keys.FLYING_SPEED, getData(container, Keys.FLYING_SPEED));
         return Optional.of(movementSpeedData);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult remove(final DataHolder dataHolder) {
         return DataTransactionResult.failNoData();
     }
 }

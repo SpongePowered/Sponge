@@ -39,6 +39,7 @@ import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBodyPartRotationalData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -63,7 +64,7 @@ public class ArmorStandBodyPartRotationalDataProcessor
     }
 
     @Override
-    public Optional<BodyPartRotationalData> fill(DataContainer container, BodyPartRotationalData data) {
+    public Optional<BodyPartRotationalData> fill(final DataContainer container, final BodyPartRotationalData data) {
         if (!container.contains(
                 Keys.BODY_ROTATIONS.getQuery(),
                 Keys.HEAD_ROTATION.getQuery(),
@@ -74,14 +75,13 @@ public class ArmorStandBodyPartRotationalDataProcessor
                 Keys.RIGHT_LEG_ROTATION.getQuery())) {
             return Optional.empty();
         }
-        @SuppressWarnings("unchecked")
-        Map<BodyPart, Vector3d> bodyRotations = (Map<BodyPart, Vector3d>) container.getMap(Keys.BODY_ROTATIONS.getQuery()).get();
-        Vector3d headRotation = DataUtil.getPosition3d(container, Keys.HEAD_ROTATION.getQuery());
-        Vector3d chestRotation = DataUtil.getPosition3d(container, Keys.CHEST_ROTATION.getQuery());
-        Vector3d leftArmRotation = DataUtil.getPosition3d(container, Keys.LEFT_ARM_ROTATION.getQuery());
-        Vector3d rightArmRotation = DataUtil.getPosition3d(container, Keys.RIGHT_ARM_ROTATION.getQuery());
-        Vector3d leftLegRotation = DataUtil.getPosition3d(container, Keys.LEFT_LEG_ROTATION.getQuery());
-        Vector3d rightLegRotation = DataUtil.getPosition3d(container, Keys.RIGHT_LEG_ROTATION.getQuery());
+        @SuppressWarnings("unchecked") final Map<BodyPart, Vector3d> bodyRotations = (Map<BodyPart, Vector3d>) container.getMap(Keys.BODY_ROTATIONS.getQuery()).get();
+        final Vector3d headRotation = DataUtil.getPosition3d(container, Keys.HEAD_ROTATION.getQuery());
+        final Vector3d chestRotation = DataUtil.getPosition3d(container, Keys.CHEST_ROTATION.getQuery());
+        final Vector3d leftArmRotation = DataUtil.getPosition3d(container, Keys.LEFT_ARM_ROTATION.getQuery());
+        final Vector3d rightArmRotation = DataUtil.getPosition3d(container, Keys.RIGHT_ARM_ROTATION.getQuery());
+        final Vector3d leftLegRotation = DataUtil.getPosition3d(container, Keys.LEFT_LEG_ROTATION.getQuery());
+        final Vector3d rightLegRotation = DataUtil.getPosition3d(container, Keys.RIGHT_LEG_ROTATION.getQuery());
 
         data.set(Keys.BODY_ROTATIONS, bodyRotations);
         data.set(Keys.HEAD_ROTATION, headRotation);
@@ -94,30 +94,29 @@ public class ArmorStandBodyPartRotationalDataProcessor
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult remove(final DataHolder dataHolder) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected boolean doesDataExist(EntityArmorStand dataHolder) {
+    protected boolean doesDataExist(final EntityArmorStand dataHolder) {
         return true;
     }
 
     @Override
-    protected boolean set(EntityArmorStand dataHolder, Map<Key<?>, Object> keyValues) {
-        @SuppressWarnings("unchecked")
-        Map<BodyPart, Vector3d> bodyRotations = (Map<BodyPart, Vector3d>) keyValues.get(Keys.BODY_ROTATIONS);
-        Vector3d headRotation =
+    protected boolean set(final EntityArmorStand dataHolder, final Map<Key<?>, Object> keyValues) {
+        @SuppressWarnings("unchecked") final Map<BodyPart, Vector3d> bodyRotations = (Map<BodyPart, Vector3d>) keyValues.get(Keys.BODY_ROTATIONS);
+        final Vector3d headRotation =
                 getValueFromTwoMapsOrUseFallback(keyValues, Keys.HEAD_ROTATION, bodyRotations, BodyParts.HEAD, Constants.Entity.ArmorStand.DEFAULT_HEAD_ROTATION);
-        Vector3d chestRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.CHEST_ROTATION, bodyRotations, BodyParts.CHEST,
+        final Vector3d chestRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.CHEST_ROTATION, bodyRotations, BodyParts.CHEST,
                 Constants.Entity.ArmorStand.DEFAULT_CHEST_ROTATION);
-        Vector3d leftArmRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.LEFT_ARM_ROTATION, bodyRotations, BodyParts.LEFT_ARM,
+        final Vector3d leftArmRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.LEFT_ARM_ROTATION, bodyRotations, BodyParts.LEFT_ARM,
                 Constants.Entity.ArmorStand.DEFAULT_LEFT_ARM_ROTATION);
-        Vector3d rightArmRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.RIGHT_ARM_ROTATION, bodyRotations, BodyParts.RIGHT_ARM,
+        final Vector3d rightArmRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.RIGHT_ARM_ROTATION, bodyRotations, BodyParts.RIGHT_ARM,
                 Constants.Entity.ArmorStand.DEFAULT_RIGHT_ARM_ROTATION);
-        Vector3d leftLegRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.LEFT_LEG_ROTATION, bodyRotations, BodyParts.LEFT_LEG,
+        final Vector3d leftLegRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.LEFT_LEG_ROTATION, bodyRotations, BodyParts.LEFT_LEG,
                 Constants.Entity.ArmorStand.DEFAULT_LEFT_LEG_ROTATION);
-        Vector3d rightLegRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.RIGHT_LEG_ROTATION, bodyRotations, BodyParts.RIGHT_LEG,
+        final Vector3d rightLegRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.RIGHT_LEG_ROTATION, bodyRotations, BodyParts.RIGHT_LEG,
                 Constants.Entity.ArmorStand.DEFAULT_RIGHT_LEG_ROTATION);
 
         dataHolder.setHeadRotation(VecHelper.toRotation(headRotation));
@@ -130,16 +129,16 @@ public class ArmorStandBodyPartRotationalDataProcessor
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityArmorStand dataHolder) {
-        Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(6);
+    protected Map<Key<?>, ?> getValues(final EntityArmorStand dataHolder) {
+        final Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(6);
         values.put(Keys.HEAD_ROTATION, VecHelper.toVector3d(dataHolder.getHeadRotation()));
         values.put(Keys.CHEST_ROTATION, VecHelper.toVector3d(dataHolder.getBodyRotation()));
-        values.put(Keys.LEFT_ARM_ROTATION, VecHelper.toVector3d(dataHolder.leftArmRotation));
-        values.put(Keys.RIGHT_ARM_ROTATION, VecHelper.toVector3d(dataHolder.rightArmRotation));
-        values.put(Keys.LEFT_LEG_ROTATION, VecHelper.toVector3d(dataHolder.leftLegRotation));
-        values.put(Keys.RIGHT_LEG_ROTATION, VecHelper.toVector3d(dataHolder.rightLegRotation));
-        Collection<BodyPart> bodyParts = Sponge.getRegistry().getAllOf(BodyPart.class);
-        Collection<Vector3d> rotations = Arrays.asList(values.values().toArray(new Vector3d[values.values().size()]));
+        values.put(Keys.LEFT_ARM_ROTATION, VecHelper.toVector3d(((EntityArmorStandAccessor) dataHolder).accessor$getleftArmRotation()));
+        values.put(Keys.RIGHT_ARM_ROTATION, VecHelper.toVector3d(((EntityArmorStandAccessor) dataHolder).accessor$getrightArmRotation()));
+        values.put(Keys.LEFT_LEG_ROTATION, VecHelper.toVector3d(((EntityArmorStandAccessor) dataHolder).accessor$getleftLegRotation()));
+        values.put(Keys.RIGHT_LEG_ROTATION, VecHelper.toVector3d(((EntityArmorStandAccessor) dataHolder).accessor$getrightLegRotation()));
+        final Collection<BodyPart> bodyParts = Sponge.getRegistry().getAllOf(BodyPart.class);
+        final Collection<Vector3d> rotations = Arrays.asList(values.values().toArray(new Vector3d[values.values().size()]));
         values.put(Keys.BODY_ROTATIONS, zipCollections(bodyParts, rotations));
         return values;
     }
@@ -159,10 +158,10 @@ public class ArmorStandBodyPartRotationalDataProcessor
      * @return A new map containing keys and values created from the two
      *         collections
      */
-    public static <K, V> Map<K, V> zipCollections(Collection<K> keys, Collection<V> values) {
-        Map<K, V> map = Maps.newHashMapWithExpectedSize(Math.min(keys.size(), values.size()));
-        Iterator<K> keyIter = keys.iterator();
-        Iterator<V> valueIter = values.iterator();
+    public static <K, V> Map<K, V> zipCollections(final Collection<K> keys, final Collection<V> values) {
+        final Map<K, V> map = Maps.newHashMapWithExpectedSize(Math.min(keys.size(), values.size()));
+        final Iterator<K> keyIter = keys.iterator();
+        final Iterator<V> valueIter = values.iterator();
 
         while (keyIter.hasNext() || valueIter.hasNext()) {
             map.put(keyIter.next(), valueIter.next());
@@ -179,8 +178,9 @@ public class ArmorStandBodyPartRotationalDataProcessor
      * @return A value using the algorithm above
      */
     @SuppressWarnings("unchecked")
-    private static <T> T getValueFromTwoMapsOrUseFallback(Map<?, ?> firstMap, Object keyForFirst, Map<?, ?> fallbackMap, Object keyForFallback,
-            T fallbackValue) {
+    private static <T> T getValueFromTwoMapsOrUseFallback(
+        final Map<?, ?> firstMap, final Object keyForFirst, final Map<?, ?> fallbackMap, final Object keyForFallback,
+            final T fallbackValue) {
         return Optional
                 .ofNullable((T) firstMap.get(keyForFirst))
                 .orElse(Optional

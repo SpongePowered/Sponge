@@ -46,12 +46,12 @@ public class TicksRemainingValueProcessor extends AbstractSpongeValueProcessor<F
     }
 
     @Override
-    protected Value<Integer> constructValue(Integer actualValue) {
+    protected Value<Integer> constructValue(final Integer actualValue) {
         return new SpongeValue<>(Keys.TICKS_REMAINING, actualValue);
     }
 
     @Override
-    protected boolean set(FusedExplosive container, Integer value) {
+    protected boolean set(final FusedExplosive container, final Integer value) {
         checkArgument(value >= 0, "ticks remaining cannot be less than zero");
         if (container.isPrimed()) {
             ((FusedExplosiveBridge) container).bridge$setFuseTicksRemaining(value);
@@ -61,17 +61,17 @@ public class TicksRemainingValueProcessor extends AbstractSpongeValueProcessor<F
     }
 
     @Override
-    protected Optional<Integer> getVal(FusedExplosive container) {
+    protected Optional<Integer> getVal(final FusedExplosive container) {
         return Optional.of(((FusedExplosiveBridge) container).bridge$getFuseTicksRemaining());
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return new ImmutableSpongeValue<>(Keys.TICKS_REMAINING, value);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

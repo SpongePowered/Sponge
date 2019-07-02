@@ -33,6 +33,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
@@ -45,28 +46,28 @@ public class LeftLegRotationValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected Value<Vector3d> constructValue(Vector3d actualValue) {
+    protected Value<Vector3d> constructValue(final Vector3d actualValue) {
         return new SpongeValue<>(Keys.LEFT_LEG_ROTATION, Constants.Entity.ArmorStand.DEFAULT_LEFT_LEG_ROTATION, actualValue);
     }
 
     @Override
-    protected boolean set(EntityArmorStand container, Vector3d value) {
+    protected boolean set(final EntityArmorStand container, final Vector3d value) {
         container.setLeftLegRotation(VecHelper.toRotation(value));
         return true;
     }
 
     @Override
-    protected Optional<Vector3d> getVal(EntityArmorStand container) {
-        return Optional.of(VecHelper.toVector3d(container.leftLegRotation));
+    protected Optional<Vector3d> getVal(final EntityArmorStand container) {
+        return Optional.of(VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getleftLegRotation()));
     }
 
     @Override
-    protected ImmutableValue<Vector3d> constructImmutableValue(Vector3d value) {
+    protected ImmutableValue<Vector3d> constructImmutableValue(final Vector3d value) {
         return constructValue(value).asImmutable();
     }
 

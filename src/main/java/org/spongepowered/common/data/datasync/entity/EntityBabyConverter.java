@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.datasync.entity;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -41,7 +42,7 @@ public final class EntityBabyConverter extends DataParameterConverter<Boolean> {
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(Boolean currentValue, Boolean value) {
+    public Optional<DataTransactionResult> createTransaction(Entity entity, Boolean currentValue, Boolean value) {
         return Optional.of(DataTransactionResult.builder()
             .replace(ImmutableSpongeValue.cachedOf(Keys.IS_ADULT, false, !currentValue))
             .success(ImmutableSpongeValue.cachedOf(Keys.IS_ADULT, false, !value))

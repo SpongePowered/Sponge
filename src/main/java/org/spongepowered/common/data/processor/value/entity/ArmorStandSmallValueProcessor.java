@@ -33,6 +33,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 
 import java.util.Optional;
 
@@ -43,28 +44,28 @@ public class ArmorStandSmallValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Value<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<>(this.key, false, actualValue);
     }
 
     @Override
-    protected boolean set(EntityArmorStand container, Boolean value) {
-        container.setSmall(value);
+    protected boolean set(final EntityArmorStand container, final Boolean value) {
+        ((EntityArmorStandAccessor) container).accessor$setSmall(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityArmorStand container) {
+    protected Optional<Boolean> getVal(final EntityArmorStand container) {
         return Optional.of(container.isSmall());
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(this.key, false, value);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

@@ -48,6 +48,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.command.ICommandBridge;
 import org.spongepowered.common.bridge.command.CommandHandlerBridge;
+import org.spongepowered.common.mixin.core.command.CommandHandlerAccessor;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
 
@@ -108,7 +109,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         final String[] splitArgs = splitArgs(arguments);
         int usernameIndex = 0;
         try {
-            usernameIndex = handler.getUsernameIndex(this.command, splitArgs);
+            usernameIndex = ((CommandHandlerAccessor) handler).accessor$getUsernameIndex(this.command, splitArgs);
         } catch (net.minecraft.command.CommandException e) {
             throw new RuntimeException(e);
         }
@@ -157,7 +158,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
     private boolean tryExecute(CommandHandler handler, ICommandSender mcSender, String[] splitArgs, String arguments) {
         commandErrors.get().push(noError);
         try {
-            return handler.tryExecute(mcSender, splitArgs, this.command, arguments);
+            return ((CommandHandlerAccessor) handler).accessor$tryExecuteCommand(mcSender, splitArgs, this.command, arguments);
         } finally {
             Throwable error = commandErrors.get().pop();
             if (error != noError) {

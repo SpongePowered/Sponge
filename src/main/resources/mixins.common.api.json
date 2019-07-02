@@ -197,6 +197,7 @@
         "mcp.item.crafting.ShapelessRecipesMixin_API",
         "mcp.network.NetHandlerPlayServerMixin_API",
         "mcp.network.PacketBufferMixin_API",
+        "mcp.network.NetworkManagerMixin_API",
         "mcp.network.rcon.RConConsoleSourceMixin_API",
         "mcp.network.rcon.RConThreadClientMixin_API",
         "mcp.potion.PotionEffectMixin_API",

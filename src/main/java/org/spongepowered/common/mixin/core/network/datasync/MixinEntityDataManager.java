@@ -86,7 +86,7 @@ public abstract class MixinEntityDataManager {
                 // At this point it is changing
                 if (converter.isPresent()) {
                     // Ok, we have a key ready to use the converter
-                    final Optional<DataTransactionResult> optional = converter.get().createTransaction(currentValue, value);
+                    final Optional<DataTransactionResult> optional = converter.get().createTransaction(this.entity, currentValue, value);
                     if (optional.isPresent()) {
                         // Only need to make a transaction if there are actual changes necessary.
                         final DataTransactionResult transaction = optional.get();

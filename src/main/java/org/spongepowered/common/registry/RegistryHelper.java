@@ -79,11 +79,7 @@ public final class RegistryHelper {
                     SpongeImpl.getLogger().warn("Skipping {}.{}", f.getDeclaringClass().getName(), fieldName);
                     continue;
                 }
-                if (custom) {
-                    setFinalStatic(f, value);
-                } else {
-                    f.set(null, value);
-                }
+                setFinalStatic(f, value);
             } catch (Exception e) {
                 SpongeImpl.getLogger().error("Error while mapping {}.{}", f.getDeclaringClass().getName(), fieldName, e);
                 mappingSuccess = false;
@@ -94,7 +90,8 @@ public final class RegistryHelper {
 
     public static boolean setFactory(Class<?> apiClass, Object factory) {
         try {
-            apiClass.getDeclaredField("factory").set(null, factory);
+            final Field factoryField = apiClass.getDeclaredField("factory");
+            setFinalStatic(factoryField, factory);
             return true;
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Error while setting factory on {}", apiClass, e);

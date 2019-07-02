@@ -36,6 +36,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MapValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
+import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Map;
@@ -48,17 +49,17 @@ public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected MapValue<BodyPart, Vector3d> constructValue(Map<BodyPart, Vector3d> actualValue) {
+    protected MapValue<BodyPart, Vector3d> constructValue(final Map<BodyPart, Vector3d> actualValue) {
         return new SpongeMapValue<>(Keys.BODY_ROTATIONS, actualValue);
     }
 
     @Override
-    protected boolean set(EntityArmorStand container, Map<BodyPart, Vector3d> value) {
+    protected boolean set(final EntityArmorStand container, final Map<BodyPart, Vector3d> value) {
         container.setHeadRotation(VecHelper.toRotation(value.get(BodyParts.HEAD)));
         container.setBodyRotation(VecHelper.toRotation(value.get(BodyParts.CHEST)));
         container.setLeftArmRotation(VecHelper.toRotation(value.get(BodyParts.LEFT_ARM)));
@@ -69,20 +70,20 @@ public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    protected Optional<Map<BodyPart, Vector3d>> getVal(EntityArmorStand container) {
-        Map<BodyPart, Vector3d> values = Maps.newHashMap();
+    protected Optional<Map<BodyPart, Vector3d>> getVal(final EntityArmorStand container) {
+        final Map<BodyPart, Vector3d> values = Maps.newHashMap();
         
         values.put(BodyParts.HEAD, VecHelper.toVector3d(container.getHeadRotation()));
         values.put(BodyParts.CHEST, VecHelper.toVector3d(container.getBodyRotation()));
-        values.put(BodyParts.LEFT_ARM, VecHelper.toVector3d(container.leftArmRotation));
-        values.put(BodyParts.RIGHT_ARM, VecHelper.toVector3d(container.rightArmRotation));
-        values.put(BodyParts.LEFT_LEG, VecHelper.toVector3d(container.leftLegRotation));
-        values.put(BodyParts.RIGHT_LEG, VecHelper.toVector3d(container.rightLegRotation));
+        values.put(BodyParts.LEFT_ARM, VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getleftArmRotation()));
+        values.put(BodyParts.RIGHT_ARM, VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getrightArmRotation()));
+        values.put(BodyParts.LEFT_LEG, VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getleftLegRotation()));
+        values.put(BodyParts.RIGHT_LEG, VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getrightLegRotation()));
         return Optional.of(values);
     }
 
     @Override
-    protected ImmutableValue<Map<BodyPart, Vector3d>> constructImmutableValue(Map<BodyPart, Vector3d> value) {
+    protected ImmutableValue<Map<BodyPart, Vector3d>> constructImmutableValue(final Map<BodyPart, Vector3d> value) {
         return constructValue(value).asImmutable();
     }
 

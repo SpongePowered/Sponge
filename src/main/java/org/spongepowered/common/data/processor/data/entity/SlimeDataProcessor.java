@@ -37,6 +37,8 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.entity.monster.EntityMagmaCubeAccessor;
+import org.spongepowered.common.mixin.core.entity.monster.EntitySlimeAccessor;
 
 import java.util.Optional;
 
@@ -48,18 +50,18 @@ public class SlimeDataProcessor
     }
 
     @Override
-    protected boolean set(EntitySlime entity, Integer value) {
-        entity.setSlimeSize(value + 1, false);
+    protected boolean set(final EntitySlime entity, final Integer value) {
+        ((EntitySlimeAccessor) entity).accessor$setSlimeSize(value + 1, false);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntitySlime entity) {
+    protected Optional<Integer> getVal(final EntitySlime entity) {
         return Optional.of(entity.getSlimeSize() - 1);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected MutableBoundedValue<Integer> constructValue(final Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.SLIME_SIZE)
                 .comparator(intComparator())
                 .minimum(0)
@@ -70,7 +72,7 @@ public class SlimeDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 
@@ -80,7 +82,7 @@ public class SlimeDataProcessor
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

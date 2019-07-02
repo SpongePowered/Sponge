@@ -32,18 +32,19 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlock, Double, MutableBoundedValue<Double>> {
+public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, Double, MutableBoundedValue<Double>> {
 
     public FallHurtAmountValueProcessor() {
-        super(EntityFallingBlock.class, Keys.FALL_DAMAGE_PER_BLOCK);
+        super(EntityFallingBlockAccessor.class, Keys.FALL_DAMAGE_PER_BLOCK);
     }
 
     @Override
-    protected MutableBoundedValue<Double> constructValue(Double value) {
+    protected MutableBoundedValue<Double> constructValue(final Double value) {
         return SpongeValueFactory.boundedBuilder(Keys.FALL_DAMAGE_PER_BLOCK)
                 .actualValue(value)
                 .defaultValue(Constants.Entity.FallingBlock.DEFAULT_FALL_DAMAGE_PER_BLOCK)
@@ -53,23 +54,23 @@ public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<E
     }
 
     @Override
-    protected boolean set(EntityFallingBlock container, Double value) {
-        container.fallHurtAmount = value.floatValue();
+    protected boolean set(final EntityFallingBlockAccessor container, final Double value) {
+        container.accessor$setFallHurtAmount(value.floatValue());
         return true;
     }
 
     @Override
-    protected Optional<Double> getVal(EntityFallingBlock container) {
-        return Optional.of((double)container.fallHurtAmount);
+    protected Optional<Double> getVal(final EntityFallingBlockAccessor container) {
+        return Optional.of((double)container.accessor$getFallHurtAmount());
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
+    protected ImmutableValue<Double> constructImmutableValue(final Double value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

@@ -43,7 +43,7 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    public MutableBoundedValue<Integer> constructValue(final Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.REMAINING_AIR)
             .defaultValue(Constants.Sponge.Entity.DEFAULT_MAX_AIR)
             .minimum(-20)
@@ -53,28 +53,28 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected boolean set(EntityLivingBase container, Integer value) {
+    protected boolean set(final EntityLivingBase container, final Integer value) {
         container.setAir(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityLivingBase container) {
+    protected Optional<Integer> getVal(final EntityLivingBase container) {
         return Optional.of(container.getAir());
     }
 
     @Override
-    protected ImmutableBoundedValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableBoundedValue<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    protected boolean supports(EntityLivingBase container) {
+    protected boolean supports(final EntityLivingBase container) {
         return container.isInWater();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

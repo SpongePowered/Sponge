@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.player.PlayerCapabilitiesAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -54,7 +55,7 @@ public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<Enti
 
     @Override
     protected boolean set(EntityPlayer container, Double value) {
-        container.capabilities.flySpeed = value.floatValue();
+        ((PlayerCapabilitiesAccessor) container.capabilities).accessor$setFlySpeed(value.floatValue());
         container.sendPlayerAbilities();
         return true;
     }

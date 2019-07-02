@@ -39,6 +39,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.item.crafting.ShapedRecipesAccessor;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.Collections;
@@ -60,28 +61,28 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
     private String groupName = "";
 
     @Override
-    public EndStep group(@Nullable String name) {
+    public EndStep group(@Nullable final String name) {
         this.groupName = Strings.nullToEmpty(name);
         return this;
     }
 
     @Override
-    public EndStep id(String id) {
+    public EndStep id(final String id) {
         return (EndStep) super.id(id);
     }
 
     @Override
-    public EndStep name(String name) {
+    public EndStep name(final String name) {
         return (EndStep) super.name(name);
     }
 
     @Override
-    public EndStep name(Translation name) {
+    public EndStep name(final Translation name) {
         return (EndStep) super.name(name);
     }
 
     @Override
-    public AisleStep aisle(String... aisle) {
+    public AisleStep aisle(final String... aisle) {
         checkNotNull(aisle, "aisle");
         this.aisle.clear();
         this.ingredientMap.clear();
@@ -90,7 +91,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
     }
 
     @Override
-    public AisleStep.ResultStep where(char symbol, Ingredient ingredient) throws IllegalArgumentException {
+    public AisleStep.ResultStep where(final char symbol, final Ingredient ingredient) throws IllegalArgumentException {
         if (this.aisle.stream().noneMatch(row -> row.indexOf(symbol) >= 0)) {
             throw new IllegalArgumentException("The symbol '" + symbol + "' is not defined in the aisle pattern.");
         }
@@ -99,8 +100,8 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
     }
 
     @Override
-    public AisleStep.ResultStep where(Map<Character, Ingredient> ingredientMap) throws IllegalArgumentException {
-        for (Map.Entry<Character, Ingredient> entry : ingredientMap.entrySet()) {
+    public AisleStep.ResultStep where(final Map<Character, Ingredient> ingredientMap) throws IllegalArgumentException {
+        for (final Map.Entry<Character, Ingredient> entry : ingredientMap.entrySet()) {
             this.where(entry.getKey(), entry.getValue());
         }
         return this;
@@ -114,20 +115,20 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
     }
 
     @Override
-    public RowsStep.ResultStep row(int skip, Ingredient... ingredients) {
-        int columns = ingredients.length + skip;
+    public RowsStep.ResultStep row(final int skip, final Ingredient... ingredients) {
+        final int columns = ingredients.length + skip;
         if (!this.aisle.isEmpty()) {
             checkState(this.aisle.get(0).length() == columns, "The rows have an inconsistent width.");
         }
-        StringBuilder row = new StringBuilder();
+        final StringBuilder row = new StringBuilder();
         for (int i = 0; i < skip; i++) {
             row.append(" ");
         }
 
         int key = 'a' + columns * this.aisle.size();
-        for (Ingredient ingredient : ingredients) {
+        for (final Ingredient ingredient : ingredients) {
             key++;
-            char character = (char) key;
+            final char character = (char) key;
             row.append(character);
             this.ingredientMap.put(character, ingredient);
         }
@@ -136,21 +137,22 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
     }
 
     @Override
-    public EndStep result(ItemStack result) {
+    public EndStep result(final ItemStack result) {
         checkNotNull(result, "result");
         this.result = result.copy();
         return this;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    protected ShapedCraftingRecipe build(PluginContainer plugin, String id, Translation name) {
+    protected ShapedCraftingRecipe build(final PluginContainer plugin, final String id, final Translation name) {
         checkState(!this.aisle.isEmpty(), "aisle has not been set");
         checkState(!this.ingredientMap.isEmpty(), "no ingredients set");
         checkState(!this.result.isEmpty(), "no result set");
 
-        Iterator<String> aisleIterator = this.aisle.iterator();
+        final Iterator<String> aisleIterator = this.aisle.iterator();
         String aisleRow = aisleIterator.next();
-        int width = aisleRow.length();
+        final int width = aisleRow.length();
         int height = 1;
 
         checkState(width > 0, "The aisle cannot be empty.");
@@ -161,15 +163,15 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
             checkState(aisleRow.length() == width, "The aisle has an inconsistent width.");
         }
 
-        String[] keys = this.aisle.toArray(new String[this.aisle.size()]);
-        Map<String, net.minecraft.item.crafting.Ingredient> ingredientsMap = this.ingredientMap.entrySet().stream().collect(
+        final String[] keys = this.aisle.toArray(new String[this.aisle.size()]);
+        final Map<String, net.minecraft.item.crafting.Ingredient> ingredientsMap = this.ingredientMap.entrySet().stream().collect(
                 Collectors.toMap(e -> e.getKey().toString(), e -> IngredientUtil.toNative(e.getValue())));
 
         // Default space to Empty Ingredient
         ingredientsMap.putIfAbsent(" ", net.minecraft.item.crafting.Ingredient.EMPTY);
 
         // Throws JsonException when pattern is not complete or defines unused Ingredients
-        NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipes.deserializeIngredients(keys, ingredientsMap, width, height);
+        final NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipes.deserializeIngredients(keys, ingredientsMap, width, height);
 
         return ((ShapedCraftingRecipe) new SpongeShapedRecipe(plugin.getId() + ':' + id, this.groupName,
                 width, height, ingredients, ItemStackUtil.toNative(this.result)));
@@ -177,12 +179,12 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
 
     @SuppressWarnings("deprecation")
     @Override
-    public ShapedCraftingRecipe.Builder from(ShapedCraftingRecipe value) {
+    public ShapedCraftingRecipe.Builder from(final ShapedCraftingRecipe value) {
         this.aisle.clear();
         this.ingredientMap.clear();
         this.groupName = "";
-        if (value instanceof ShapedRecipes) {
-            this.groupName = ((ShapedRecipes) value).group;
+        if (value instanceof ShapedRecipesAccessor) {
+            this.groupName = ((ShapedRecipesAccessor) value).accessor$getGroup();
         }
 
         if (value != null) {
@@ -190,9 +192,9 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
                 String row = "";
 
                 for (int x = 0; x < value.getWidth(); x++) {
-                    char symbol = (char) ('a' + x + y * value.getWidth());
+                    final char symbol = (char) ('a' + x + y * value.getWidth());
                     row += symbol;
-                    Ingredient ingredient = value.getIngredient(x, y);
+                    final Ingredient ingredient = value.getIngredient(x, y);
 
                     this.ingredientMap.put(symbol, ingredient);
                 }

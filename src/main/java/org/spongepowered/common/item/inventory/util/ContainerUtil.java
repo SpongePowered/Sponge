@@ -96,6 +96,15 @@ import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInvento
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
+import org.spongepowered.common.mixin.core.inventory.ContainerAccessor;
+import org.spongepowered.common.mixin.core.inventory.ContainerBrewingStandAccessor;
+import org.spongepowered.common.mixin.core.inventory.ContainerDispenserAccessor;
+import org.spongepowered.common.mixin.core.inventory.ContainerFurnaceAccessor;
+import org.spongepowered.common.mixin.core.inventory.ContainerHopperAccessor;
+import org.spongepowered.common.mixin.core.inventory.ContainerHorseInventoryAccessor;
+import org.spongepowered.common.mixin.core.inventory.ContainerMerchantAccessor;
+import org.spongepowered.common.mixin.core.inventory.ContainerRepairAccessor;
+import org.spongepowered.common.mixin.core.inventory.SlotCraftingAccessor;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -292,13 +301,13 @@ public final class ContainerUtil {
             final Slot slot = slotList.get(0);
             adapterLens = new CraftingOutputSlotLensImpl(index, item -> slot.isItemValid(((ItemStack) item)),
                     itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
-            if (slot instanceof SlotCrafting) {
+            if (slot instanceof SlotCraftingAccessor) {
                 crafting.out = index;
                 if (crafting.base == null) {
                     // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
                     // e.g. for IC2 ContainerIndustrialWorkbench
                     crafting.base = index + 1;
-                    crafting.grid = ((SlotCrafting) slot).craftMatrix;
+                    crafting.grid = ((SlotCraftingAccessor) slot).accessor$getCraftingMatrix();
                 }
             }
         }
@@ -392,8 +401,8 @@ public final class ContainerUtil {
             return InventoryArchetypes.BREWING_STAND;
         } else if (container instanceof ContainerBeacon) {
             return InventoryArchetypes.BEACON;
-        } else if (container instanceof ContainerHorseInventory) {
-            final AbstractHorse horse = ((ContainerHorseInventory) container).horse;
+        } else if (container instanceof ContainerHorseInventoryAccessor) {
+            final AbstractHorse horse = ((ContainerHorseInventoryAccessor) container).accessor$getHorseCarrier();
             if (horse instanceof AbstractChestHorse && ((AbstractChestHorse) horse).hasChest()) {
                 return InventoryArchetypes.HORSE_WITH_CHEST;
             }
@@ -423,30 +432,30 @@ public final class ContainerUtil {
                 }
             }
             return carrierOrNull(inventory);
-        } else if (container instanceof ContainerHopper) {
-            return carrierOrNull(((ContainerHopper) container).hopperInventory);
-        } else if (container instanceof ContainerDispenser) {
-            return carrierOrNull(((ContainerDispenser) container).dispenserInventory);
-        } else if (container instanceof ContainerFurnace) {
-            return carrierOrNull(((ContainerFurnace) container).tileFurnace);
-        } else if (container instanceof ContainerBrewingStand) {
-            return carrierOrNull(((ContainerBrewingStand) container).tileBrewingStand);
+        } else if (container instanceof ContainerHopperAccessor) {
+            return carrierOrNull(((ContainerHopperAccessor) container).accessor$getHopperInventory());
+        } else if (container instanceof ContainerDispenserAccessor) {
+            return carrierOrNull(((ContainerDispenserAccessor) container).accessor$getDispenserInventory());
+        } else if (container instanceof ContainerFurnaceAccessor) {
+            return carrierOrNull(((ContainerFurnaceAccessor) container).accessor$getFurnaceInventory());
+        } else if (container instanceof ContainerBrewingStandAccessor) {
+            return carrierOrNull(((ContainerBrewingStandAccessor) container).accessor$getBrewingStandInventory());
         } else if (container instanceof ContainerBeacon) {
             return carrierOrNull(((ContainerBeacon) container).getTileEntity());
-        } else if (container instanceof ContainerHorseInventory) {
-            return (Carrier) ((ContainerHorseInventory) container).horse;
-        } else if (container instanceof ContainerMerchant && ((ContainerMerchant) container).merchant instanceof Carrier) {
-            return (Carrier) ((ContainerMerchant) container).merchant;
-        } else if (container instanceof ContainerPlayer) {
-            final EntityPlayer player = ((ContainerPlayer) container).player;
+        } else if (container instanceof ContainerHorseInventoryAccessor) {
+            return (Carrier) ((ContainerHorseInventoryAccessor) container).accessor$getHorseCarrier();
+        } else if (container instanceof ContainerMerchantAccessor && ((ContainerMerchantAccessor) container).accessor$getMerchantCarrier() instanceof Carrier) {
+            return (Carrier) ((ContainerMerchantAccessor) container).accessor$getMerchantCarrier();
+        } else if (container instanceof ContainerRepairAccessor) {
+            final EntityPlayer player = ((ContainerRepairAccessor) container).accessor$getPlayerCarrier();
             if (player instanceof EntityPlayerMP) {
                 return (Carrier) player;
             }
         }
 
         // Fallback: Try to find a Carrier owning the first Slot of the Container
-        if (container instanceof net.minecraft.inventory.Container) {
-            for (final Slot slot : ((net.minecraft.inventory.Container) container).inventorySlots) {
+        if (container instanceof ContainerAccessor) {
+            for (final Slot slot : ((ContainerAccessor) container).accessor$getSlots()) {
                 // Slot Inventory is a Carrier?
                 if (slot.inventory instanceof Carrier) {
                     return ((Carrier) slot.inventory);

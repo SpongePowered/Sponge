@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
+import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,7 +50,7 @@ public class PlacingDisabledValueProcessor
 	}
 
 	@Override
-	public DataTransactionResult offerToStore(ValueContainer<?> container, Set<EquipmentType> value) {
+	public DataTransactionResult offerToStore(final ValueContainer<?> container, final Set<EquipmentType> value) {
 		try {
 			set((EntityArmorStand) container, value);
 			return DataTransactionResult.successNoData();
@@ -59,24 +60,26 @@ public class PlacingDisabledValueProcessor
 	}
 
 	@Override
-	public DataTransactionResult removeFrom(ValueContainer<?> container) {
+	public DataTransactionResult removeFrom(final ValueContainer<?> container) {
 		return DataTransactionResult.failNoData();
 	}
 
 	@Override
-	protected SetValue<EquipmentType> constructValue(Set<EquipmentType> actualValue) {
+	protected SetValue<EquipmentType> constructValue(final Set<EquipmentType> actualValue) {
 		return new SpongeSetValue<EquipmentType>(this.key, actualValue);
 	}
 
 	@Override
-	protected boolean set(EntityArmorStand container, Set<EquipmentType> value) {
+	protected boolean set(final EntityArmorStand container, final Set<EquipmentType> value) {
 		int chunk = 0;
 
+		int disabledSlots = ((EntityArmorStandAccessor) container).accessor$getDisabledSlots();
 		// try and keep the all chunk empty
-		int allChunk = container.disabledSlots & 0b1111_1111;
+		final int allChunk = disabledSlots & 0b1111_1111;
 		if (allChunk != 0) {
-			container.disabledSlots |= (allChunk << 16);
-			container.disabledSlots ^= 0b1111_1111;
+			disabledSlots |= (allChunk << 16);
+			disabledSlots ^= 0b1111_1111;
+
 		}
 		
 		if (value.contains(EquipmentTypes.BOOTS)) chunk |= 1 << 1;
@@ -84,17 +87,20 @@ public class PlacingDisabledValueProcessor
 		if (value.contains(EquipmentTypes.CHESTPLATE)) chunk |= 1 << 3;
 		if (value.contains(EquipmentTypes.HEADWEAR)) chunk |= 1 << 4;
 		
-		container.disabledSlots |= (chunk << 816);
+		disabledSlots |= (chunk << 816);
+
+		((EntityArmorStandAccessor) container).accessor$setDisabledSlots(disabledSlots);
 		
 		return true;
 	}
 
 	@Override
-	protected Optional<Set<EquipmentType>> getVal(EntityArmorStand container) {
+	protected Optional<Set<EquipmentType>> getVal(final EntityArmorStand container) {
 		// include all chunk
-		int resultantChunk = ((container.disabledSlots >> 16) & 0b1111_1111) | (container.disabledSlots & 0b1111_1111);
+		final int disabled = ((EntityArmorStandAccessor) container).accessor$getDisabledSlots();
+		final int resultantChunk = ((disabled >> 16) & 0b1111_1111) | (disabled & 0b1111_1111);
 		
-		HashSet<EquipmentType> val = new HashSet<EquipmentType>();
+		final HashSet<EquipmentType> val = new HashSet<EquipmentType>();
 		
 		if ((resultantChunk & (1 << 1)) != 0) val.add(EquipmentTypes.BOOTS);
 		if ((resultantChunk & (1 << 2)) != 0) val.add(EquipmentTypes.LEGGINGS);
@@ -105,7 +111,7 @@ public class PlacingDisabledValueProcessor
 	}
 
 	@Override
-	protected ImmutableValue<Set<EquipmentType>> constructImmutableValue(Set<EquipmentType> value) {
+	protected ImmutableValue<Set<EquipmentType>> constructImmutableValue(final Set<EquipmentType> value) {
 		return ImmutableSpongeValue.cachedOf(this.key, Collections.emptySet(), value);
 	}
 

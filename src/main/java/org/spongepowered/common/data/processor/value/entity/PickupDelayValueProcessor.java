@@ -44,7 +44,7 @@ public class PickupDelayValueProcessor extends AbstractSpongeValueProcessor<Enti
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    public MutableBoundedValue<Integer> constructValue(final Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.PICKUP_DELAY)
                 .defaultValue(Constants.Entity.Item.DEFAULT_PICKUP_DELAY)
                 .minimum(Constants.Entity.Item.MIN_PICKUP_DELAY)
@@ -54,28 +54,28 @@ public class PickupDelayValueProcessor extends AbstractSpongeValueProcessor<Enti
     }
 
     @Override
-    protected boolean set(EntityItem container, Integer value) {
+    protected boolean set(final EntityItem container, final Integer value) {
         container.setPickupDelay(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityItem container) {
+    protected Optional<Integer> getVal(final EntityItem container) {
         return Optional.of(((ItemEntityBridge) container).bridge$getPickupDelay());
     }
 
     @Override
-    protected ImmutableBoundedValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableBoundedValue<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    protected boolean supports(EntityItem container) {
+    protected boolean supports(final EntityItem container) {
         return true;
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

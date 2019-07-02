@@ -28,7 +28,9 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.ServerStatusResponse;
 import org.spongepowered.api.event.server.ClientPingServerEvent;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -38,10 +40,10 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 @Mixin(ServerStatusResponse.Players.class)
-public abstract class MixinServerStatusResponsePlayers implements ClientPingServerEvent.Response.Players {
+public abstract class ServerStatusResponse$PlayersMixin_API implements ClientPingServerEvent.Response.Players {
 
-    @Shadow private int onlinePlayerCount;
-    @Shadow private int maxPlayers;
+    @Shadow @Final @Mutable private int onlinePlayerCount;
+    @Shadow @Final @Mutable private int maxPlayers;
 
     @Nullable private List<GameProfile> profiles;
 
@@ -51,7 +53,7 @@ public abstract class MixinServerStatusResponsePlayers implements ClientPingServ
     }
 
     @Override
-    public void setOnline(int online) {
+    public void setOnline(final int online) {
         this.onlinePlayerCount = online;
     }
 
@@ -61,7 +63,7 @@ public abstract class MixinServerStatusResponsePlayers implements ClientPingServ
     }
 
     @Override
-    public void setMax(int max) {
+    public void setMax(final int max) {
         this.maxPlayers = max;
     }
 
@@ -100,7 +102,7 @@ public abstract class MixinServerStatusResponsePlayers implements ClientPingServ
      * @param playersIn The players to set
      */
     @Overwrite
-    public void setPlayers(GameProfile[] playersIn) {
+    public void setPlayers(final GameProfile[] playersIn) {
         if (this.profiles == null) {
             this.profiles = Lists.newArrayList(playersIn);
         } else {

@@ -36,6 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeKnockbackD
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.mixin.core.entity.projectile.EntityArrowAccessor;
 
 import java.util.Optional;
 
@@ -47,12 +48,12 @@ public class KnockbackDataProcessor
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected MutableBoundedValue<Integer> constructValue(final Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.KNOCKBACK_STRENGTH)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -62,18 +63,18 @@ public class KnockbackDataProcessor
     }
 
     @Override
-    protected boolean set(EntityArrow entity, Integer value) {
+    protected boolean set(final EntityArrow entity, final Integer value) {
         entity.setKnockbackStrength(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityArrow entity) {
-        return Optional.of(entity.knockbackStrength);
+    protected Optional<Integer> getVal(final EntityArrow entity) {
+        return Optional.of(((EntityArrowAccessor) entity).accessor$getKnockbackStrength());
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return new ImmutableSpongeValue<>(Keys.KNOCKBACK_STRENGTH, value);
     }
 

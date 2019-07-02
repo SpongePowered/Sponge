@@ -44,14 +44,14 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
     }
 
     @Override
-    public boolean supports(ValueContainer<?> container) {
+    public boolean supports(final ValueContainer<?> container) {
         return container instanceof net.minecraft.entity.Entity;
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (container instanceof net.minecraft.entity.Entity) {
-            net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) container);
+            final net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) container);
             if (entity.isRiding()) {
                 final Entity vehicle = (Entity) entity.getRidingEntity();
                 entity.dismountRidingEntity();
@@ -63,18 +63,18 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
     }
 
     @Override
-    protected Value<EntitySnapshot> constructValue(EntitySnapshot defaultValue) {
+    protected Value<EntitySnapshot> constructValue(final EntitySnapshot defaultValue) {
         return new SpongeValue<>(this.getKey(), defaultValue);
     }
 
     @Override
-    protected boolean set(net.minecraft.entity.Entity container, EntitySnapshot value) {
+    protected boolean set(final net.minecraft.entity.Entity container, final EntitySnapshot value) {
         return ((Entity) container).setVehicle(value.restore().orElse(null));
     }
 
     @Override
-    protected Optional<EntitySnapshot> getVal(net.minecraft.entity.Entity container) {
-        Entity entity = (Entity) container.ridingEntity;
+    protected Optional<EntitySnapshot> getVal(final net.minecraft.entity.Entity container) {
+        final Entity entity = (Entity) container.getRidingEntity();
         if (entity == null) {
             return Optional.empty();
         }
@@ -82,7 +82,7 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
     }
 
     @Override
-    protected ImmutableValue<EntitySnapshot> constructImmutableValue(EntitySnapshot value) {
+    protected ImmutableValue<EntitySnapshot> constructImmutableValue(final EntitySnapshot value) {
         return new ImmutableSpongeValue<>(this.getKey(), value);
     }
 

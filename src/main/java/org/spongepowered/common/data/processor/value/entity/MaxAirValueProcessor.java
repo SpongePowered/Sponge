@@ -43,7 +43,7 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<BaseLivin
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    public MutableBoundedValue<Integer> constructValue(final Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_AIR)
             .defaultValue(Constants.Sponge.Entity.DEFAULT_MAX_AIR)
             .minimum(0)
@@ -53,7 +53,7 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<BaseLivin
     }
 
     @Override
-    protected boolean set(BaseLivingEntityBridge container, Integer value) {
+    protected boolean set(final BaseLivingEntityBridge container, final Integer value) {
         if (value < 0) {
             return false;
         }
@@ -62,17 +62,17 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<BaseLivin
     }
 
     @Override
-    protected Optional<Integer> getVal(BaseLivingEntityBridge container) {
+    protected Optional<Integer> getVal(final BaseLivingEntityBridge container) {
         return Optional.of(container.bridge$getMaxAir());
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

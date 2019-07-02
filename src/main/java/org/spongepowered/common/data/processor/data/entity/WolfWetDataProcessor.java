@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.passive.EntityWolf;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
@@ -33,48 +32,50 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.passive.EntityWolfAccessor;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class WolfWetDataProcessor extends AbstractEntitySingleDataProcessor<EntityWolf, Boolean, Value<Boolean>, WetData, ImmutableWetData> {
+public class WolfWetDataProcessor extends
+    AbstractSingleDataSingleTargetProcessor<EntityWolfAccessor, Boolean, Value<Boolean>, WetData, ImmutableWetData> {
 
     public WolfWetDataProcessor() {
-        super(EntityWolf.class, Keys.IS_WET);
+        super(Keys.IS_WET, EntityWolfAccessor.class);
     }
 
     @Override
-    protected boolean set(EntityWolf entity, Boolean value) {
+    protected boolean set(final EntityWolfAccessor entity, final Boolean value) {
         if (value) {
-            entity.isWet = true;
-            entity.isShaking = true;
-            entity.timeWolfIsShaking = 0F;
-            entity.prevTimeWolfIsShaking = 0F;
+            entity.accessor$setIsWet(true);
+            entity.accessor$setIsShaking(true);
+            entity.accessor$setTimeShaking(0F);
+            entity.accessor$setPreviousTimeShaking(0F);
         } else {
-            entity.isWet = false;
-            entity.isShaking = false;
-            entity.timeWolfIsShaking = 0F;
-            entity.prevTimeWolfIsShaking = 0F;
+            entity.accessor$setIsWet(false);
+            entity.accessor$setIsShaking(false);
+            entity.accessor$setTimeShaking(0F);
+            entity.accessor$setPreviousTimeShaking(0F);
         }
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityWolf entity) {
-        final boolean isWet = entity.isWet || entity.isShaking;
+    protected Optional<Boolean> getVal(final EntityWolfAccessor entity) {
+        final boolean isWet = entity.accessor$getIsWet() || entity.accessor$getIsShaking();
         return Optional.of(isWet);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Value<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<>(Keys.IS_WET, Constants.Entity.Wolf.IS_WET_DEFAULT, actualValue);
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.IS_WET, Constants.Entity.Wolf.IS_WET_DEFAULT, value);
     }
 
@@ -84,7 +85,7 @@ public class WolfWetDataProcessor extends AbstractEntitySingleDataProcessor<Enti
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

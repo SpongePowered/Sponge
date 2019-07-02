@@ -25,8 +25,14 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.NonNullList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+
+import javax.annotation.Nullable;
 
 @Mixin(EntityLivingBase.class)
 public interface EntityLivingBaseAccessor {
@@ -37,4 +43,11 @@ public interface EntityLivingBaseAccessor {
 
     @Accessor("recentlyHit") int accessor$getRecentlyHitValue();
 
+    @Accessor("dead") boolean accessor$isLivingDead();
+
+    @Accessor("revengeTarget") @Nullable EntityLivingBase accessor$getRevengeTarget();
+
+    @Invoker("canBlockDamageSource")  boolean accessor$canBlockDamageSource(DamageSource damageSourceIn);
+
+    @Accessor("armorArray") NonNullList<ItemStack> accessor$getArmorArray();
 }

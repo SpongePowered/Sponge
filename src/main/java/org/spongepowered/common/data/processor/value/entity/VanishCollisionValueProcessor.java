@@ -45,12 +45,12 @@ public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Value<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<Boolean>(Keys.VANISH_IGNORES_COLLISION, false, actualValue);
     }
 
     @Override
-    protected boolean set(VanishingBridge container, Boolean value) {
+    protected boolean set(final VanishingBridge container, final Boolean value) {
         if (container instanceof Entity && ((Entity) container).world.isRemote) {
             return false;
         }
@@ -62,17 +62,17 @@ public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected Optional<Boolean> getVal(VanishingBridge container) {
+    protected Optional<Boolean> getVal(final VanishingBridge container) {
         return Optional.of(container.vanish$isUncollideable());
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.VANISH_IGNORES_COLLISION, false, value);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

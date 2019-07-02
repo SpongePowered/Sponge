@@ -41,7 +41,7 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(Byte currentValue, Byte value) {
+    public Optional<DataTransactionResult> createTransaction(Entity entity, Byte currentValue, Byte value) {
         // TODO - on fire and elytra are not represented in the API, maybe we should?
         final boolean onFire = getFlag(currentValue, ON_FIRE_MASK);
         final boolean isSneaking = getFlag(currentValue, CROUCHED_MASK);

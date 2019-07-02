@@ -38,6 +38,7 @@ import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTa
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.EntityHangingAccessor;
 
 import java.util.Optional;
 
@@ -54,7 +55,7 @@ public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcesso
 
     @Override
     protected boolean set(EntityHanging dataHolder, Direction value) {
-        dataHolder.updateFacingWithBoundingBox(DirectionResolver.getFor(value));
+        ((EntityHangingAccessor) dataHolder).accessor$updateFacingWithBoundingBox(DirectionResolver.getFor(value));
         return true;
     }
 

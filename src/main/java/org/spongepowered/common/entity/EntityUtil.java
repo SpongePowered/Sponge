@@ -115,6 +115,10 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.InvokingTeleporterContext;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.EntityAccessor;
+import org.spongepowered.common.mixin.core.entity.EntityHangingAccessor;
+import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
+import org.spongepowered.common.mixin.core.entity.EntityTrackerAccessor;
+import org.spongepowered.common.mixin.core.entity.EntityTrackerEntryAccessor;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
@@ -155,8 +159,8 @@ public final class EntityUtil {
     public static final Function<Humanoid, EntityPlayer> HUMANOID_TO_PLAYER = (humanoid) -> humanoid instanceof EntityPlayer ? (EntityPlayer) humanoid : null;
 
     @Nullable
-    public static Entity transferEntityToWorld(Entity entity, @Nullable MoveEntityEvent.Teleport event,
-        @Nullable WorldServer toWorld,  @Nullable ForgeITeleporterBridge teleporter, boolean recreate) {
+    public static Entity transferEntityToWorld(final Entity entity, @Nullable MoveEntityEvent.Teleport event,
+        @Nullable WorldServer toWorld,  @Nullable final ForgeITeleporterBridge teleporter, final boolean recreate) {
 
         if (entity.world.isRemote || entity.isDead) {
             return null;
@@ -299,7 +303,7 @@ public final class EntityUtil {
 
         try (final PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld).buildAndSwitch()) {
             if (recreate) {
-                boolean flag = toReturn.forceSpawn;
+                final boolean flag = toReturn.forceSpawn;
                 toReturn.forceSpawn = true;
                 toWorld.spawnEntity(toReturn);
                 toReturn.forceSpawn = flag;
@@ -326,8 +330,8 @@ public final class EntityUtil {
         return toReturn;
     }
 
-    public static EntityPlayerMP transferPlayerToWorld(EntityPlayerMP player, @Nullable MoveEntityEvent.Teleport event,
-        @Nullable WorldServer toWorld,  @Nullable ForgeITeleporterBridge teleporter) {
+    public static EntityPlayerMP transferPlayerToWorld(final EntityPlayerMP player, @Nullable MoveEntityEvent.Teleport event,
+        @Nullable WorldServer toWorld,  @Nullable final ForgeITeleporterBridge teleporter) {
 
         if (player.world.isRemote || player.isDead) {
             return player;
@@ -436,7 +440,7 @@ public final class EntityUtil {
         final int toClientDimId = WorldManager.getClientDimensionId(player, toWorld);
 
         if (fromClientDimId == toClientDimId) {
-            int fakeDimId;
+            final int fakeDimId;
             switch (fromClientDimId) {
                 case 1:
                     fakeDimId = -1;
@@ -497,7 +501,7 @@ public final class EntityUtil {
         playerList.updateTimeAndWeatherForPlayer(player, toWorld);
         playerList.syncPlayerInventory(player);
 
-        for (PotionEffect potioneffect : player.getActivePotionEffects()) {
+        for (final PotionEffect potioneffect : player.getActivePotionEffects()) {
             player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), potioneffect));
         }
 
@@ -524,7 +528,7 @@ public final class EntityUtil {
     }
 
     // Teleporter code is extremely stupid
-    private static InvokingTeleporterContext createInvokingTeleporterPhase(Entity entity, WorldServer toWorld, ForgeITeleporterBridge teleporter) {
+    private static InvokingTeleporterContext createInvokingTeleporterPhase(final Entity entity, WorldServer toWorld, ForgeITeleporterBridge teleporter) {
         SpongeImplHooks.registerPortalAgentType(teleporter);
 
         final MinecraftServer mcServer = SpongeImpl.getServer();
@@ -543,7 +547,7 @@ public final class EntityUtil {
 
         final Map<String, String> portalAgents =
             ((WorldInfoBridge) fromWorld.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getPortalAgents();
-        String worldName;
+        final String worldName;
 
         // Check if we're to use a different teleporter for this world
         if (teleporter.getClass().getName().equals("net.minecraft.world.Teleporter")) {
@@ -553,9 +557,9 @@ public final class EntityUtil {
         }
 
         if (worldName != null) {
-            for (WorldProperties properties : Sponge.getServer().getAllWorldProperties()) {
+            for (final WorldProperties properties : Sponge.getServer().getAllWorldProperties()) {
                 if (properties.getWorldName().equalsIgnoreCase(worldName)) {
-                    Optional<World> spongeWorld = Sponge.getServer().loadWorld(properties);
+                    final Optional<World> spongeWorld = Sponge.getServer().loadWorld(properties);
                     if (spongeWorld.isPresent()) {
                         toWorld = (WorldServer) spongeWorld.get();
                         teleporter = (ForgeITeleporterBridge) toWorld.getDefaultTeleporter();
@@ -622,12 +626,12 @@ public final class EntityUtil {
         return context;
     }
 
-    private static Transform<World> getPortalExitTransform(Entity entity, WorldServer fromWorld, WorldServer toWorld) {
+    private static Transform<World> getPortalExitTransform(final Entity entity, final WorldServer fromWorld, final WorldServer toWorld) {
         final WorldProvider fromWorldProvider = fromWorld.provider;
         final WorldProvider toWorldProvider = toWorld.provider;
 
         double x;
-        double y;
+        final double y;
         double z;
 
         final Transform<World> transform;
@@ -662,58 +666,59 @@ public final class EntityUtil {
         return transform;
     }
 
-    public static boolean isEntityDead(net.minecraft.entity.Entity entity) {
+    public static boolean isEntityDead(final net.minecraft.entity.Entity entity) {
         if (entity instanceof EntityLivingBase) {
-            EntityLivingBase base = (EntityLivingBase) entity;
-            return base.getHealth() <= 0 || base.deathTime > 0 || base.dead;
+            final EntityLivingBase base = (EntityLivingBase) entity;
+            return base.getHealth() <= 0 || base.deathTime > 0 || ((EntityLivingBaseAccessor) entity).accessor$isLivingDead();
         }
         return entity.isDead;
     }
 
-    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Location<World> location) {
-        Transform<World> fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
-        Transform<World> toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final Location<World> location) {
+        final Transform<World> fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
+        final Transform<World> toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
     }
 
-    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, double posX, double posY, double posZ, float yaw, float pitch) {
-        Transform<World> fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
-        Transform<World> toTransform = fromTransform.setPosition(new Vector3d(posX, posY, posZ)).setRotation(new Vector3d(pitch, yaw, 0));
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final double posX, final double posY, final double posZ, final float yaw, final float pitch) {
+        final Transform<World> fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
+        final Transform<World> toTransform = fromTransform.setPosition(new Vector3d(posX, posY, posZ)).setRotation(new Vector3d(pitch, yaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
     }
 
-    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Transform<World> fromTransform, Transform<World> toTransform) {
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(
+        final Entity entityIn, final Transform<World> fromTransform, final Transform<World> toTransform) {
 
         // Use origin world to get correct cause
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entityIn);
 
-            MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(),
+            final MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(),
                 fromTransform, toTransform, (org.spongepowered.api.entity.Entity) entityIn, false);
             SpongeImpl.postEvent(event);
             return event;
         }
     }
 
-    public static int getHorseInternalVariant(SpongeHorseColor color, SpongeHorseStyle style) {
+    public static int getHorseInternalVariant(final SpongeHorseColor color, final SpongeHorseStyle style) {
         return color.getBitMask() | style.getBitMask();
     }
 
-    public static boolean processEntitySpawnsFromEvent(SpawnEntityEvent event, Supplier<Optional<User>> entityCreatorSupplier) {
+    public static boolean processEntitySpawnsFromEvent(final SpawnEntityEvent event, final Supplier<Optional<User>> entityCreatorSupplier) {
         boolean spawnedAny = false;
-        for (org.spongepowered.api.entity.Entity entity : event.getEntities()) {
+        for (final org.spongepowered.api.entity.Entity entity : event.getEntities()) {
             // Here is where we need to handle the custom items potentially having custom entities
             spawnedAny = processEntitySpawn(entity, entityCreatorSupplier);
         }
         return spawnedAny;
     }
 
-    public static boolean processEntitySpawnsFromEvent(PhaseContext<?> context, SpawnEntityEvent destruct) {
+    public static boolean processEntitySpawnsFromEvent(final PhaseContext<?> context, final SpawnEntityEvent destruct) {
         return processEntitySpawnsFromEvent(destruct, ENTITY_CREATOR_FUNCTION.apply(context));
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static boolean processEntitySpawn(org.spongepowered.api.entity.Entity entity, Supplier<Optional<User>> supplier) {
+    public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<User>> supplier) {
         final Entity minecraftEntity = (Entity) entity;
         if (minecraftEntity instanceof EntityItem) {
             final ItemStack item = ((EntityItem) minecraftEntity).getItem();
@@ -757,7 +762,7 @@ public final class EntityUtil {
         Vec3d location;
         double distance;
 
-        EntityTrace(double entityDistance) {
+        EntityTrace(final double entityDistance) {
             this.distance = entityDistance;
         }
 
@@ -766,16 +771,16 @@ public final class EntityUtil {
         }
     }
 
-    public static RayTraceResult rayTraceFromEntity(Entity source, double traceDistance, float partialTicks, boolean includeEntities) {
-        RayTraceResult blockRay = EntityUtil.rayTraceFromEntity(source, traceDistance, partialTicks);
+    public static RayTraceResult rayTraceFromEntity(final Entity source, final double traceDistance, final float partialTicks, final boolean includeEntities) {
+        final RayTraceResult blockRay = EntityUtil.rayTraceFromEntity(source, traceDistance, partialTicks);
 
         if (!includeEntities) {
             return blockRay;
         }
 
-        Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
-        double blockDistance = (blockRay != null) ? blockRay.hitVec.distanceTo(traceStart) : traceDistance;
-        EntityUtil.EntityTrace entityRay = EntityUtil.rayTraceEntities(source, traceDistance, partialTicks, blockDistance, traceStart);
+        final Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
+        final double blockDistance = (blockRay != null) ? blockRay.hitVec.distanceTo(traceStart) : traceDistance;
+        final EntityUtil.EntityTrace entityRay = EntityUtil.rayTraceEntities(source, traceDistance, partialTicks, blockDistance, traceStart);
 
         if (entityRay.entity != null && (entityRay.distance < blockDistance || blockRay == null)) {
             return entityRay.asRayTraceResult();
@@ -784,15 +789,15 @@ public final class EntityUtil {
         return blockRay;
     }
 
-    private static EntityUtil.EntityTrace rayTraceEntities(Entity source, double traceDistance, float partialTicks, double blockDistance, Vec3d traceStart) {
-        EntityUtil.EntityTrace trace = new EntityUtil.EntityTrace(blockDistance);
+    private static EntityUtil.EntityTrace rayTraceEntities(final Entity source, final double traceDistance, final float partialTicks, final double blockDistance, final Vec3d traceStart) {
+        final EntityUtil.EntityTrace trace = new EntityUtil.EntityTrace(blockDistance);
 
-        Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
-        Vec3d traceEnd = traceStart.add(lookDir);
+        final Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
+        final Vec3d traceEnd = traceStart.add(lookDir);
 
         for (final Entity entity : EntityUtil.getTraceEntities(source, traceDistance, lookDir, EntityUtil.TRACEABLE)) {
-            AxisAlignedBB entityBB = entity.getEntityBoundingBox().grow(entity.getCollisionBorderSize());
-            RayTraceResult entityRay = entityBB.calculateIntercept(traceStart, traceEnd);
+            final AxisAlignedBB entityBB = entity.getEntityBoundingBox().grow(entity.getCollisionBorderSize());
+            final RayTraceResult entityRay = entityBB.calculateIntercept(traceStart, traceEnd);
 
             if (entityBB.contains(traceStart)) {
                 if (trace.distance >= 0.0D) {
@@ -807,7 +812,7 @@ public final class EntityUtil {
                 continue;
             }
 
-            double distanceToEntity = traceStart.distanceTo(entityRay.hitVec);
+            final double distanceToEntity = traceStart.distanceTo(entityRay.hitVec);
 
             if (distanceToEntity < trace.distance || trace.distance == 0.0D) {
                 if (entity.getLowestRidingEntity() == source.getLowestRidingEntity()) {
@@ -826,53 +831,53 @@ public final class EntityUtil {
         return trace;
     }
 
-    private static List<Entity> getTraceEntities(Entity source, double traceDistance, Vec3d dir, Predicate<Entity> filter) {
-        AxisAlignedBB boundingBox = source.getEntityBoundingBox();
-        AxisAlignedBB traceBox = boundingBox.expand(dir.x, dir.y, dir.z);
-        List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.grow(1.0F, 1.0F, 1.0F), filter);
+    private static List<Entity> getTraceEntities(final Entity source, final double traceDistance, final Vec3d dir, final Predicate<Entity> filter) {
+        final AxisAlignedBB boundingBox = source.getEntityBoundingBox();
+        final AxisAlignedBB traceBox = boundingBox.expand(dir.x, dir.y, dir.z);
+        final List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.grow(1.0F, 1.0F, 1.0F), filter);
         return entities;
     }
 
     @Nullable
-    public static RayTraceResult rayTraceFromEntity(Entity source, double traceDistance, float partialTicks) {
-        Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
-        Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
-        Vec3d traceEnd = traceStart.add(lookDir);
+    public static RayTraceResult rayTraceFromEntity(final Entity source, final double traceDistance, final float partialTicks) {
+        final Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
+        final Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
+        final Vec3d traceEnd = traceStart.add(lookDir);
         return source.world.rayTraceBlocks(traceStart, traceEnd, false, false, true);
     }
 
-    private static Vec3d getPositionEyes(Entity entity, float partialTicks)
+    private static Vec3d getPositionEyes(final Entity entity, final float partialTicks)
     {
         if (partialTicks == 1.0F)
         {
             return new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
         }
 
-        double interpX = entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks;
-        double interpY = entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks + entity.getEyeHeight();
-        double interpZ = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks;
+        final double interpX = entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks;
+        final double interpY = entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks + entity.getEyeHeight();
+        final double interpZ = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks;
         return new Vec3d(interpX, interpY, interpZ);
     }
 
-    public static boolean refreshPainting(EntityPainting painting, EntityPainting.EnumArt art) {
-        EntityPainting.EnumArt oldArt = painting.art;
+    public static boolean refreshPainting(final EntityPainting painting, final EntityPainting.EnumArt art) {
+        final EntityPainting.EnumArt oldArt = painting.art;
         painting.art = art;
-        painting.updateFacingWithBoundingBox(painting.facingDirection);
+        ((EntityHangingAccessor) painting).accessor$updateFacingWithBoundingBox(painting.facingDirection);
         if (!painting.onValidSurface()) {
             painting.art = oldArt;
-            painting.updateFacingWithBoundingBox(painting.facingDirection);
+            ((EntityHangingAccessor) painting).accessor$updateFacingWithBoundingBox(painting.facingDirection);
             return false;
         }
 
         final EntityTracker paintingTracker = ((WorldServer) painting.world).getEntityTracker();
-        EntityTrackerEntry paintingEntry = paintingTracker.trackedEntityHashTable.lookup(painting.getEntityId());
-        List<EntityPlayerMP> playerMPs = new ArrayList<>();
-        for (EntityPlayerMP player : paintingEntry.trackingPlayers) {
-            SPacketDestroyEntities packet = new SPacketDestroyEntities(painting.getEntityId());
+        final EntityTrackerEntry paintingEntry = ((EntityTrackerAccessor) paintingTracker).accessor$getTrackedEntityTable().lookup(painting.getEntityId());
+        final List<EntityPlayerMP> playerMPs = new ArrayList<>();
+        for (final EntityPlayerMP player : ((EntityTrackerEntryAccessor) paintingEntry).accessor$getTrackingPlayers()) {
+            final SPacketDestroyEntities packet = new SPacketDestroyEntities(painting.getEntityId());
             player.connection.sendPacket(packet);
             playerMPs.add(player);
         }
-        for (EntityPlayerMP playerMP : playerMPs) {
+        for (final EntityPlayerMP playerMP : playerMPs) {
             SpongeImpl.getGame().getScheduler().createTaskBuilder()
                     .delayTicks(SpongeImpl.getGlobalConfigAdapter().getConfig().getEntity().getPaintingRespawnDelaly())
                     .execute(() -> {
@@ -884,21 +889,21 @@ public final class EntityUtil {
         return true;
     }
 
-    public static List<EntityHanging> findHangingEntities(WorldServer worldIn, BlockPos pos) {
+    public static List<EntityHanging> findHangingEntities(final WorldServer worldIn, final BlockPos pos) {
         return worldIn.getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(pos, pos).grow(1.1D, 1.1D, 1.1D),
                 entityIn -> {
                     if (entityIn == null) {
                         return false;
                     }
 
-                    BlockPos entityPos = entityIn.getPosition();
+                    final BlockPos entityPos = entityIn.getPosition();
                     // Hanging Neighbor Entity
                     if (entityPos.equals(pos.add(0, 1, 0))) {
                         return true;
                     }
 
                     // Check around source block
-                    EnumFacing entityFacing = entityIn.getHorizontalFacing();
+                    final EnumFacing entityFacing = entityIn.getHorizontalFacing();
 
                     if (entityFacing == EnumFacing.NORTH) {
                         return entityPos.equals(pos.add(Constants.Entity.HANGING_OFFSET_NORTH));
@@ -918,7 +923,7 @@ public final class EntityUtil {
     public static boolean tempIsBedSpawn = false;
 
     // Internal to MixinPlayerList. has side effects
-    public static Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
+    public static Location<World> getPlayerRespawnLocation(final EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
         final Location<World> location = ((World) playerIn.world).getSpawnLocation();
         tempIsBedSpawn = false;
         if (targetWorld == null) { // Target world doesn't exist? Use global
@@ -935,10 +940,10 @@ public final class EntityUtil {
         }
 
         Vector3d targetSpawnVec = VecHelper.toVector3d(targetWorld.getSpawnPoint());
-        BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, toDimensionId);
+        final BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, toDimensionId);
         if (bedPos != null) { // Player has a bed
-            boolean forceBedSpawn = SpongeImplHooks.isSpawnForced(playerIn, toDimensionId);
-            BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(targetWorld, bedPos, forceBedSpawn);
+            final boolean forceBedSpawn = SpongeImplHooks.isSpawnForced(playerIn, toDimensionId);
+            final BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(targetWorld, bedPos, forceBedSpawn);
             if (bedSpawnLoc != null) { // The bed exists and is not obstructed
                 tempIsBedSpawn = true;
                 targetSpawnVec = new Vector3d(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D);
@@ -949,7 +954,7 @@ public final class EntityUtil {
         return new Location<>((World) targetWorld, targetSpawnVec);
     }
 
-    public static Living fromNativeToLiving(Entity entity) {
+    public static Living fromNativeToLiving(final Entity entity) {
         if (!(entity instanceof Living)) {
             throw new IllegalArgumentException("Entity is incompatible with SpongeAPI Living interface: " + entity);
         }
@@ -967,7 +972,7 @@ public final class EntityUtil {
      * @return The item entity
      */
     @Nullable
-    public static EntityItem entityOnDropItem(Entity entity, ItemStack itemStack, float offsetY) {
+    public static EntityItem entityOnDropItem(final Entity entity, final ItemStack itemStack, final float offsetY) {
         return entityOnDropItem(entity, itemStack, offsetY, entity.posX, entity.posZ);
     }
 
@@ -983,7 +988,7 @@ public final class EntityUtil {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Nullable
-    public static EntityItem entityOnDropItem(Entity entity, ItemStack itemStack, float offsetY, double xPos, double zPos) {
+    public static EntityItem entityOnDropItem(final Entity entity, final ItemStack itemStack, final float offsetY, final double xPos, final double zPos) {
         if (itemStack.isEmpty()) {
             // Sanity check, just like vanilla
             return null;
@@ -1004,7 +1009,7 @@ public final class EntityUtil {
         final IPhaseState<?> currentState = phaseContext.state;
 
         // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             // Perform the event throws first, if they return false, return null
             item = throwDropItemAndConstructEvent(entity, posX, posY, posZ, snapshot, original, frame);
 
@@ -1031,7 +1036,7 @@ public final class EntityUtil {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Nullable
-    public static EntityItem playerDropItem(PlayerEntityBridge mixinPlayer, ItemStack droppedItem, boolean dropAround, boolean traceItem) {
+    public static EntityItem playerDropItem(final PlayerEntityBridge mixinPlayer, final ItemStack droppedItem, final boolean dropAround, final boolean traceItem) {
         mixinPlayer.shouldRestoreInventory(false);
         final EntityPlayer player = (EntityPlayer) mixinPlayer;
 
@@ -1047,7 +1052,7 @@ public final class EntityUtil {
         final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
         @SuppressWarnings("RawTypeCanBeGeneric") final IPhaseState currentState = phaseContext.state;
 
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
             item = throwDropItemAndConstructEvent((EntityPlayer) mixinPlayer, posX, posY, posZ, snapshot, original, frame);
 
@@ -1060,7 +1065,7 @@ public final class EntityUtil {
             // and only if those stacks can be stacked (count increased). Otherwise, we'll just continue to throw the entity item.
             // For now, due to refactoring a majority of all of this code, pre-merging is disabled entirely.
 
-            EntityItem entityitem = new EntityItem(player.world, posX, posY, posZ, droppedItem);
+            final EntityItem entityitem = new EntityItem(player.world, posX, posY, posZ, droppedItem);
             entityitem.setPickupDelay(40);
 
             if (traceItem) {
@@ -1069,8 +1074,8 @@ public final class EntityUtil {
 
             final Random random = player.getRNG();
             if (dropAround) {
-                float f = random.nextFloat() * 0.5F;
-                float f1 = random.nextFloat() * ((float) Math.PI * 2F);
+                final float f = random.nextFloat() * 0.5F;
+                final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
                 entityitem.motionX = -MathHelper.sin(f1) * f;
                 entityitem.motionZ = MathHelper.cos(f1) * f;
                 entityitem.motionY = 0.20000000298023224D;
@@ -1079,7 +1084,7 @@ public final class EntityUtil {
                 entityitem.motionX = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
                 entityitem.motionZ = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
                 entityitem.motionY = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
-                float f3 = random.nextFloat() * ((float) Math.PI * 2F);
+                final float f3 = random.nextFloat() * ((float) Math.PI * 2F);
                 f2 = 0.02F * random.nextFloat();
                 entityitem.motionX += Math.cos(f3) * f2;
                 entityitem.motionY += (random.nextFloat() - random.nextFloat()) * 0.1F;
@@ -1090,7 +1095,7 @@ public final class EntityUtil {
                 return entityitem;
             }
             // TODO - Investigate whether player drops are adding to the stat list in captures.
-            ItemStack itemstack = dropItemAndGetStack(player, entityitem);
+            final ItemStack itemstack = dropItemAndGetStack(player, entityitem);
 
             if (traceItem) {
                 if (!itemstack.isEmpty()) {
@@ -1125,15 +1130,15 @@ public final class EntityUtil {
      * @return The item if it is to be spawned, null if to be ignored
      */
     @Nullable
-    public static ItemStack throwDropItemAndConstructEvent(Entity entity, double posX, double posY,
-        double posZ, ItemStackSnapshot snapshot, List<ItemStackSnapshot> original, CauseStackManager.StackFrame frame) {
+    public static ItemStack throwDropItemAndConstructEvent(final Entity entity, final double posX, final double posY,
+        final double posZ, final ItemStackSnapshot snapshot, final List<ItemStackSnapshot> original, final CauseStackManager.StackFrame frame) {
         final PlayerEntityBridge mixinPlayer;
         if (entity instanceof PlayerEntityBridge) {
             mixinPlayer = (PlayerEntityBridge) entity;
         } else {
             mixinPlayer = null;
         }
-        ItemStack item;
+        final ItemStack item;
 
         frame.pushCause(entity);
 
@@ -1152,9 +1157,9 @@ public final class EntityUtil {
         }
 
         // SECOND throw the ConstructEntityEvent
-        Transform<World> suggested = new Transform<>((World) entity.world, new Vector3d(posX, posY, posZ));
+        final Transform<World> suggested = new Transform<>((World) entity.world, new Vector3d(posX, posY, posZ));
         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, suggested);
+        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, suggested);
         frame.removeContext(EventContextKeys.SPAWN_TYPE);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
@@ -1188,13 +1193,13 @@ public final class EntityUtil {
      * @return The motion vector
      */
     @SuppressWarnings("unused")
-    private static Vector3d createDropMotion(boolean dropAround, EntityPlayer player, Random random) {
+    private static Vector3d createDropMotion(final boolean dropAround, final EntityPlayer player, final Random random) {
         double x;
         double y;
         double z;
         if (dropAround) {
-            float f = random.nextFloat() * 0.5F;
-            float f1 = random.nextFloat() * ((float) Math.PI * 2F);
+            final float f = random.nextFloat() * 0.5F;
+            final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
             x = -MathHelper.sin(f1) * f;
             z = MathHelper.cos(f1) * f;
             y = 0.20000000298023224D;
@@ -1203,7 +1208,7 @@ public final class EntityUtil {
             x = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
             z = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
             y = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
-            float f3 = random.nextFloat() * ((float) Math.PI * 2F);
+            final float f3 = random.nextFloat() * ((float) Math.PI * 2F);
             f2 = 0.02F * random.nextFloat();
             x += Math.cos(f3) * f2;
             y += (random.nextFloat() - random.nextFloat()) * 0.1F;
@@ -1212,16 +1217,16 @@ public final class EntityUtil {
         return new Vector3d(x, y, z);
     }
 
-    private static ItemStack dropItemAndGetStack(EntityPlayer player, EntityItem item) {
+    private static ItemStack dropItemAndGetStack(final EntityPlayer player, final EntityItem item) {
         final ItemStack stack = item.getItem();
         player.world.spawnEntity(item);
         return stack;
     }
 
     @SuppressWarnings("unchecked")
-    public static Optional<EntityType> fromNameToType(String name) {
+    public static Optional<EntityType> fromNameToType(final String name) {
         // EntityList includes all forge mods with *unedited* entity names
-        Class<?> clazz = SpongeImplHooks.getEntityClass(new ResourceLocation(name));
+        final Class<?> clazz = SpongeImplHooks.getEntityClass(new ResourceLocation(name));
         if(clazz == null) {
             return Optional.empty();
         }
@@ -1230,8 +1235,8 @@ public final class EntityUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static Optional<EntityType> fromLocationToType(ResourceLocation location) {
-        Class<?> clazz = SpongeImplHooks.getEntityClass(location);
+    public static Optional<EntityType> fromLocationToType(final ResourceLocation location) {
+        final Class<?> clazz = SpongeImplHooks.getEntityClass(location);
         if (clazz == null) {
             return Optional.empty();
         }
@@ -1239,7 +1244,7 @@ public final class EntityUtil {
     }
 
     // I'm lazy, but this is better than using the convenience method
-    public static EntityArchetype archetype(EntityType type) {
+    public static EntityArchetype archetype(final EntityType type) {
         return new SpongeEntityArchetypeBuilder().type(type).build();
     }
 }

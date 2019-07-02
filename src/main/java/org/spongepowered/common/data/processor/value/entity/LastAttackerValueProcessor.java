@@ -35,6 +35,7 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
 
 import java.util.Optional;
 
@@ -73,7 +74,7 @@ public class LastAttackerValueProcessor
 
     @Override
     protected Optional<Optional<EntitySnapshot>> getVal(EntityLivingBase container) {
-        final EntityLivingBase entityLivingBase = container.getRevengeTarget();
+        final EntityLivingBase entityLivingBase = ((EntityLivingBaseAccessor) container).accessor$getRevengeTarget();
         return Optional.of(Optional.ofNullable(entityLivingBase == null ? null : ((Living) entityLivingBase).createSnapshot()));
     }
 

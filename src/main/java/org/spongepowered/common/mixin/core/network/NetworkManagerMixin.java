@@ -27,90 +27,71 @@ package org.spongepowered.common.mixin.core.network;
 import io.netty.channel.Channel;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.api.MinecraftVersion;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeMinecraftVersion;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("rawtypes")
 @Mixin(NetworkManager.class)
-public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements PlayerConnection, NetworkManagerBridge {
+public abstract class NetworkManagerMixin extends SimpleChannelInboundHandler implements NetworkManagerBridge {
 
     @Shadow private Channel channel;
-    @Shadow private INetHandler packetListener;
 
     @Shadow public abstract SocketAddress getRemoteAddress();
 
-    private InetSocketAddress virtualHost;
-    private MinecraftVersion version;
-
-    private static final InetSocketAddress localhost = InetSocketAddress.createUnresolved("127.0.0.1", 0);
+    @Nullable private InetSocketAddress impl$virtualHost;
+    @Nullable private MinecraftVersion impl$version;
 
     @Override
     public InetSocketAddress bridge$getAddress() {
-        SocketAddress remoteAddress = getRemoteAddress();
+        final SocketAddress remoteAddress = getRemoteAddress();
         if (remoteAddress instanceof LocalAddress) { // Single player
-            return localhost;
+            return Constants.Networking.LOCALHOST;
         }
         return (InetSocketAddress) remoteAddress;
     }
 
     @Override
     public InetSocketAddress bridge$getVirtualHost() {
-        if (this.virtualHost != null) {
-            return this.virtualHost;
+        if (this.impl$virtualHost != null) {
+            return this.impl$virtualHost;
         }
-        SocketAddress local = this.channel.localAddress();
+        final SocketAddress local = this.channel.localAddress();
         if (local instanceof LocalAddress) {
-            return localhost;
+            return Constants.Networking.LOCALHOST;
         }
         return (InetSocketAddress) local;
     }
 
     @Override
-    public void bridge$setVirtualHost(String host, int port) {
+    public void bridge$setVirtualHost(final String host, final int port) {
         try {
-            this.virtualHost = new InetSocketAddress(InetAddress.getByAddress(host,
+            this.impl$virtualHost = new InetSocketAddress(InetAddress.getByAddress(host,
                     ((InetSocketAddress) this.channel.localAddress()).getAddress().getAddress()), port);
         } catch (UnknownHostException e) {
-            this.virtualHost = InetSocketAddress.createUnresolved(host, port);
+            this.impl$virtualHost = InetSocketAddress.createUnresolved(host, port);
         }
     }
 
     @Override
     public MinecraftVersion bridge$getVersion() {
-        return this.version;
+        return this.impl$version;
     }
 
     @Override
-    public void bridge$setVersion(int version) {
-        this.version = new SpongeMinecraftVersion(String.valueOf(version), version);
+    public void bridge$setVersion(final int version) {
+        this.impl$version = new SpongeMinecraftVersion(String.valueOf(version), version);
     }
 
-    @Override
-    public Player getPlayer() {
-        if(this.packetListener instanceof NetHandlerPlayServer) {
-            return (Player) ((NetHandlerPlayServer) this.packetListener).player;
-        }
-        throw new IllegalStateException("Player is not currently available");
-    }
-
-    @Override
-    public int getLatency() {
-        if(this.packetListener instanceof NetHandlerPlayServer) {
-            return ((NetHandlerPlayServer) this.packetListener).player.ping;
-        }
-        throw new IllegalStateException("Latency is not currently available");
-    }
 }

@@ -37,6 +37,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgniteab
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteableData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 
 import java.util.Map;
 import java.util.Optional;
@@ -88,7 +89,7 @@ public class IgniteableDataProcessor extends AbstractEntityDataProcessor<Entity,
     @Override
     protected Map<Key<?>, ?> getValues(Entity entity) {
         final int fireTicks = entity.fire;
-        final int fireDamageDelay = entity.getFireImmuneTicks();
+        final int fireDamageDelay = ((EntityAccessor) entity).accessor$getFireImmuneTicks();
         return ImmutableMap.<Key<?>, Object>of(Keys.FIRE_TICKS, fireTicks,
                                                Keys.FIRE_DAMAGE_DELAY, fireDamageDelay);
     }

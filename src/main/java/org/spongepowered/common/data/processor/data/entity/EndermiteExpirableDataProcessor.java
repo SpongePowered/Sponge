@@ -37,6 +37,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.entity.monster.EntityEndermiteAccessor;
 
 import java.util.Optional;
 
@@ -53,28 +54,28 @@ public class EndermiteExpirableDataProcessor extends
     }
 
     @Override
-    protected boolean set(EntityEndermite entity, Integer value) {
+    protected boolean set(final EntityEndermite entity, final Integer value) {
         if (entity.isNoDespawnRequired()) {
             return false;
         }
         checkArgument(value >= 0);
         checkArgument(value <= 2400);
-        entity.lifetime = value;
+        ((EntityEndermiteAccessor) entity).accessor$setLifetime(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityEndermite entity) {
-        return entity.isNoDespawnRequired() ? Optional.empty() : Optional.of(entity.lifetime);
+    protected Optional<Integer> getVal(final EntityEndermite entity) {
+        return entity.isNoDespawnRequired() ? Optional.empty() : Optional.of(((EntityEndermiteAccessor) entity).accessor$getLifetime());
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected MutableBoundedValue<Integer> constructValue(final Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
                 .minimum(0)
                 .maximum(2400)
@@ -84,7 +85,7 @@ public class EndermiteExpirableDataProcessor extends
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

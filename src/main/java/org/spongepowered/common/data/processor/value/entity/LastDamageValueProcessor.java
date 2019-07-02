@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,10 +35,10 @@ import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
 
 import java.util.Optional;
 
-public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<EntityLivingBase, Optional<Double>, OptionalValue<Double>> {
+public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<EntityLivingBaseAccessor, Optional<Double>, OptionalValue<Double>> {
 
     public LastDamageValueProcessor() {
-        super(EntityLivingBase.class, Keys.LAST_DAMAGE);
+        super(EntityLivingBaseAccessor.class, Keys.LAST_DAMAGE);
     }
 
     @Override
@@ -48,18 +47,18 @@ public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<Entit
     }
 
     @Override
-    protected boolean set(final EntityLivingBase container, final Optional<Double> value) {
+    protected boolean set(final EntityLivingBaseAccessor container, final Optional<Double> value) {
         if (value.isPresent()) {
-            ((EntityLivingBaseAccessor) container).accessor$setLastDamage(value.get().floatValue());
+            container.accessor$setLastDamage(value.get().floatValue());
             return true;
         }
         return false;
     }
 
     @Override
-    protected Optional<Optional<Double>> getVal(final EntityLivingBase container) {
-        return Optional.of(Optional.ofNullable(container.getRevengeTarget() == null ?
-                null : new Double(((EntityLivingBaseAccessor) container).accessor$getLastDamage())));
+    protected Optional<Optional<Double>> getVal(final EntityLivingBaseAccessor container) {
+        return Optional.of(Optional.ofNullable(container.accessor$getRevengeTarget() == null ?
+                null : new Double(container.accessor$getLastDamage())));
     }
 
     @Override

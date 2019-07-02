@@ -34,39 +34,40 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class FallingBlockStateValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlock, BlockState, Value<BlockState>> {
+public class FallingBlockStateValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, BlockState, Value<BlockState>> {
 
     public FallingBlockStateValueProcessor() {
-        super(EntityFallingBlock.class, Keys.FALLING_BLOCK_STATE);
+        super(EntityFallingBlockAccessor.class, Keys.FALLING_BLOCK_STATE);
     }
 
     @Override
-    protected Value<BlockState> constructValue(BlockState value) {
+    protected Value<BlockState> constructValue(final BlockState value) {
         return new SpongeValue<>(Keys.FALLING_BLOCK_STATE, Constants.Catalog.DEFAULT_FALLING_BLOCK_BLOCKSTATE, value);
     }
 
     @Override
-    protected boolean set(EntityFallingBlock container, BlockState value) {
-        container.fallTile = (IBlockState) value;
+    protected boolean set(final EntityFallingBlockAccessor container, final BlockState value) {
+        container.accessor$setFallBlockState((IBlockState) value);
         return true;
     }
 
     @Override
-    protected Optional<BlockState> getVal(EntityFallingBlock container) {
-        return Optional.of((BlockState)container.fallTile);
+    protected Optional<BlockState> getVal(final EntityFallingBlockAccessor container) {
+        return Optional.of((BlockState)container.accessor$getFallBlockState());
     }
 
     @Override
-    protected ImmutableValue<BlockState> constructImmutableValue(BlockState value) {
+    protected ImmutableValue<BlockState> constructImmutableValue(final BlockState value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

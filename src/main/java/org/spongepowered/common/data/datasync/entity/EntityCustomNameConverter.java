@@ -43,7 +43,7 @@ public class EntityCustomNameConverter extends DataParameterConverter<String> {
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(String currentValue, String value) {
+    public Optional<DataTransactionResult> createTransaction(Entity entity, String currentValue, String value) {
         Text currentText = SpongeTexts.fromLegacy(currentValue);
         Text newValue = SpongeTexts.fromLegacy(value);
 

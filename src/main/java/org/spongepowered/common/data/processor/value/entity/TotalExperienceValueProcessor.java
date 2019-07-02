@@ -44,12 +44,12 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    public MutableBoundedValue<Integer> constructValue(final Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.TOTAL_EXPERIENCE)
             .defaultValue(0)
             .minimum(0)
@@ -59,7 +59,7 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected boolean set(EntityPlayer container, Integer value) {
+    protected boolean set(final EntityPlayer container, final Integer value) {
         int level = -1;
 
         int experienceForCurrentLevel;
@@ -92,12 +92,12 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityPlayer container) {
+    protected Optional<Integer> getVal(final EntityPlayer container) {
         return Optional.of(container.experienceTotal);
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 

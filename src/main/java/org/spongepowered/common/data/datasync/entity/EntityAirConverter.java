@@ -42,7 +42,7 @@ public class EntityAirConverter extends DataParameterConverter<Integer> {
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(Integer currentValue, Integer value) {
+    public Optional<DataTransactionResult> createTransaction(Entity entity, Integer currentValue, Integer value) {
         return Optional.of(DataTransactionResult.builder()
             .replace(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, Constants.Sponge.Entity.DEFAULT_MAX_AIR, currentValue, Integer::compareTo, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))
             .success(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, Constants.Sponge.Entity.DEFAULT_MAX_AIR, value, Integer::compareTo, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))

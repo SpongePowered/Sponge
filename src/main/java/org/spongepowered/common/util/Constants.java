@@ -47,6 +47,7 @@ import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
+import java.net.InetSocketAddress;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -359,6 +360,8 @@ public final class Constants {
         public final static int PACKET_BUTTON_PRIMARY_ID = 0;
         public final static int PACKET_BUTTON_SECONDARY_ID = 0;
         public final static int PACKET_BUTTON_MIDDLE_ID = 0;
+        public static final InetSocketAddress LOCALHOST = InetSocketAddress.createUnresolved("127.0.0.1", 0);
+
         public static final class Packets {
 
             public static final int CHANGED_SECTION_FILTER_ALL = 65535;

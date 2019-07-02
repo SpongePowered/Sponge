@@ -29,9 +29,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.data.DataQuery.of;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -48,6 +51,9 @@ import org.spongepowered.common.data.datasync.entity.EntityBabyConverter;
 import org.spongepowered.common.data.datasync.entity.EntityCustomNameConverter;
 import org.spongepowered.common.data.datasync.entity.EntityCustomNameVisibleConverter;
 import org.spongepowered.common.data.datasync.entity.EntityFlagsConverter;
+import org.spongepowered.common.data.datasync.entity.EntityLivingAIFlagsConverter;
+import org.spongepowered.common.data.datasync.entity.EntityLivingBaseArrowCountConverter;
+import org.spongepowered.common.data.datasync.entity.EntityLivingBaseHealthConverter;
 import org.spongepowered.common.data.datasync.entity.EntityNoGravityConverter;
 import org.spongepowered.common.data.datasync.entity.EntitySilentConverter;
 
@@ -631,14 +637,14 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         Sponge.getCauseStackManager().popCause();
     }
 
-    private void register(String fieldName, Key<?> key) {
+    private void register(final String fieldName, final Key<?> key) {
         this.fieldMap.put(fieldName, key);
         this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void registerAdditionalCatalog(Key<?> extraCatalog) {
+    public void registerAdditionalCatalog(final Key<?> extraCatalog) {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Cannot this.register new Keys after Data Registration has completed!");
         checkNotNull(extraCatalog, "Key cannot be null!");
         final PluginContainer parent = ((SpongeKey) extraCatalog).getParent();
@@ -651,7 +657,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     }
 
     @Override
-    public Optional<Key<?>> getById(String id) {
+    public Optional<Key<?>> getById(final String id) {
         return Optional.ofNullable(this.keyMap.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
@@ -665,14 +671,14 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
     @SuppressWarnings("rawtypes")
     public void registerKeyListeners() {
-        for (Key<?> key : this.keyMap.values()) {
+        for (final Key<?> key : this.keyMap.values()) {
             ((SpongeKey) key).registerListeners();
         }
     }
 
-    public void registerForEntityClass(Class<? extends Entity> cls) {
+    public void registerForEntityClass(final Class<? extends Entity> cls) {
         try {
-            List<DataParameterConverter<?>> converters = LOADED_CLASSES.computeIfAbsent(cls, k -> new ArrayList<>());
+            final List<DataParameterConverter<?>> converters = LOADED_CLASSES.computeIfAbsent(cls, k -> new ArrayList<>());
             final Callable<List<DataParameterConverter<?>>> callable = DATA_PARAMETER_FUNCTION_GETTERS.get(cls);
             if (callable != null) {
                 final List<DataParameterConverter<?>> call = callable.call();
@@ -682,7 +688,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
             // Then start climbing the hierarchy
             Class<?> clazz = cls.getSuperclass();
             do {
-                List<DataParameterConverter<?>> superConverters = LOADED_CLASSES.computeIfAbsent(clazz, k -> new ArrayList<>());
+                final List<DataParameterConverter<?>> superConverters = LOADED_CLASSES.computeIfAbsent(clazz, k -> new ArrayList<>());
 
                 final Callable<List<DataParameterConverter<?>>> listCallable = DATA_PARAMETER_FUNCTION_GETTERS.get(clazz);
                 if (listCallable != null) {
@@ -704,7 +710,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     private static final ConcurrentHashMap<Class<?>, List<DataParameterConverter<?>>> LOADED_CLASSES = new ConcurrentHashMap<>();
     private static final Map<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>> DATA_PARAMETER_FUNCTION_GETTERS = ImmutableMap.<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>>builder()
         .put(Entity.class, () -> {
-            final ArrayList<DataParameterConverter<?>> objects = new ArrayList<>();
+            final ImmutableList.Builder<DataParameterConverter<?>> objects = ImmutableList.builder();
             objects.add(new EntityFlagsConverter());
             objects.add(new EntityCustomNameVisibleConverter());
             objects.add(new EntitySilentConverter());
@@ -712,7 +718,18 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
             objects.add(new EntityCustomNameConverter());
             objects.add(new EntityNoGravityConverter());
             objects.add(new EntityBabyConverter());
-            return objects;
+            return objects.build();
+        })
+        .put(EntityLivingBase.class, () -> {
+            final ImmutableList.Builder<DataParameterConverter<?>> list = ImmutableList.builder();
+            list.add(new EntityLivingBaseHealthConverter());
+            list.add(new EntityLivingBaseArrowCountConverter());
+            return list.build();
+        })
+        .put(EntityLiving.class, () -> {
+            final ImmutableList.Builder<DataParameterConverter<?>> list = ImmutableList.builder();
+            list.add(new EntityLivingAIFlagsConverter());
+            return list.build();
         })
         .build();
 

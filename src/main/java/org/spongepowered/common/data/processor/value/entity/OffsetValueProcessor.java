@@ -43,29 +43,29 @@ public class OffsetValueProcessor extends AbstractSpongeValueProcessor<EntityMin
     }
 
     @Override
-    protected Value<Integer> constructValue(Integer value) {
+    protected Value<Integer> constructValue(final Integer value) {
         return new SpongeValue<>(Keys.OFFSET, 6, value);
     }
 
     @Override
-    protected boolean set(EntityMinecart container, Integer value) {
+    protected boolean set(final EntityMinecart container, final Integer value) {
         if(!container.hasDisplayTile()) return false;
         container.setDisplayTileOffset(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityMinecart container) {
+    protected Optional<Integer> getVal(final EntityMinecart container) {
         return Optional.of(container.getDisplayTileOffset());
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return new ImmutableSpongeValue<>(Keys.OFFSET, 6, value);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

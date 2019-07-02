@@ -38,14 +38,14 @@ public class CustomIngredient extends Ingredient {
     public final List<Predicate<ItemStack>> predicates;
     public final List<ItemStack> matchItems;
 
-    public CustomIngredient(List<Predicate<ItemStack>> predicates, List<ItemStack> matchItems, List<ItemStack> displayItems) {
+    public CustomIngredient(final List<Predicate<ItemStack>> predicates, final List<ItemStack> matchItems, final List<ItemStack> displayItems) {
         super(ItemStackUtil.toNative(displayItems));
         this.predicates = predicates;
         this.matchItems = matchItems;
     }
 
     @Override
-    public boolean apply(@Nullable net.minecraft.item.ItemStack item) {
+    public boolean apply(@Nullable final net.minecraft.item.ItemStack item) {
 
         // first check for matching predicates
         if (this.predicates.stream().anyMatch(p -> p.test(ItemStackUtil.fromNative(item)))) {
@@ -57,10 +57,10 @@ public class CustomIngredient extends Ingredient {
             return false;
         }
 
-        for (ItemStack itemStack : this.matchItems) {
-            net.minecraft.item.ItemStack nativeItem = ItemStackUtil.toNative(itemStack);
+        for (final ItemStack itemStack : this.matchItems) {
+            final net.minecraft.item.ItemStack nativeItem = ItemStackUtil.toNative(itemStack);
             if (nativeItem.getItem() == item.getItem()) {
-                int i = nativeItem.getMetadata();
+                final int i = nativeItem.getMetadata();
 
                 if (i == 32767 || i == item.getMetadata())
                 {

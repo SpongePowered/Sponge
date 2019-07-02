@@ -40,4 +40,6 @@ public interface EntityAccessor {
 
     @Invoker("setFlag") void accessor$setEntityFlag(int flag, boolean set);
 
+    @Invoker("getFireImmuneTicks") int accessor$getFireImmuneTicks();
+
 }

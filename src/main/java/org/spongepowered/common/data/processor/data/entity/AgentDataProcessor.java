@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.EntityLiving;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAgentData;
@@ -33,32 +32,33 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.EntityLivingAccessor;
 
 import java.util.Optional;
 
 public class AgentDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityLiving, Boolean, Value<Boolean>, AgentData, ImmutableAgentData> {
+        extends AbstractSingleDataSingleTargetProcessor<EntityLivingAccessor, Boolean, Value<Boolean>, AgentData, ImmutableAgentData> {
 
     public AgentDataProcessor() {
-        super(EntityLiving.class, Keys.AI_ENABLED);
+        super(Keys.AI_ENABLED, EntityLivingAccessor.class);
     }
 
     @Override
-    protected boolean set(EntityLiving entity, Boolean value) {
-        entity.setNoAI(!value);
+    protected boolean set(final EntityLivingAccessor entity, final Boolean value) {
+        entity.accessor$setNoAI(!value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityLiving entity) {
-        return Optional.of(!entity.isAIDisabled());
+    protected Optional<Boolean> getVal(final EntityLivingAccessor entity) {
+        return Optional.of(entity.accessor$isAIDisabled());
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.AI_ENABLED, true, value);
     }
 
@@ -68,12 +68,12 @@ public class AgentDataProcessor
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Value<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<>(Keys.AI_ENABLED, true, actualValue);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

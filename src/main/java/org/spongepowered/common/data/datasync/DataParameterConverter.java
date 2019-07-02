@@ -55,10 +55,12 @@ public abstract class DataParameterConverter<E> {
      * certain cases, there can be a "compound" value to represent multiple
      * values, such as the {@link Entity} flags bitmasks 5 "flags" in one value.
      *
+     *
+     * @param entity
      * @param currentValue The current raw value
      * @return The list of immutable values converted
      */
-    public abstract Optional<DataTransactionResult> createTransaction(E currentValue, E value);
+    public abstract Optional<DataTransactionResult> createTransaction(Entity entity, E currentValue, E value);
 
     public abstract E getValueFromEvent(E originalValue, List<ImmutableValue<?>> immutableValues);
 

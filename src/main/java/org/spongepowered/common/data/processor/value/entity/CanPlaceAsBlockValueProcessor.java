@@ -32,39 +32,40 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class CanPlaceAsBlockValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlock, Boolean, Value<Boolean>> {
+public class CanPlaceAsBlockValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, Boolean, Value<Boolean>> {
 
     public CanPlaceAsBlockValueProcessor() {
-        super(EntityFallingBlock.class, Keys.CAN_PLACE_AS_BLOCK);
+        super(EntityFallingBlockAccessor.class, Keys.CAN_PLACE_AS_BLOCK);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean value) {
+    protected Value<Boolean> constructValue(final Boolean value) {
         return new SpongeValue<>(Keys.CAN_PLACE_AS_BLOCK, Constants.Entity.FallingBlock.DEFAULT_CAN_PLACE_AS_BLOCK, value);
     }
 
     @Override
-    protected boolean set(EntityFallingBlock container, Boolean value) {
-        container.dontSetBlock = !value;
+    protected boolean set(final EntityFallingBlockAccessor container, final Boolean value) {
+        container.accessor$setDontSetAsBlock(!value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityFallingBlock container) {
-        return Optional.of(!container.dontSetBlock);
+    protected Optional<Boolean> getVal(final EntityFallingBlockAccessor container) {
+        return Optional.of(!container.accessor$getDontSetAsBlock());
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

@@ -32,39 +32,40 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class FallingBlockCanHurtEntitiesValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlock, Boolean, Value<Boolean>> {
+public class FallingBlockCanHurtEntitiesValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, Boolean, Value<Boolean>> {
 
     public FallingBlockCanHurtEntitiesValueProcessor() {
-        super(EntityFallingBlock.class, Keys.FALLING_BLOCK_CAN_HURT_ENTITIES);
+        super(EntityFallingBlockAccessor.class, Keys.FALLING_BLOCK_CAN_HURT_ENTITIES);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean value) {
+    protected Value<Boolean> constructValue(final Boolean value) {
         return new SpongeValue<>(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, Constants.Entity.FallingBlock.DEFAULT_CAN_HURT_ENTITIES, value);
     }
 
     @Override
-    protected boolean set(EntityFallingBlock container, Boolean value) {
-        container.hurtEntities = value;
+    protected boolean set(final EntityFallingBlockAccessor container, final Boolean value) {
+        container.accessor$setHurtEntities(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityFallingBlock container) {
-        return Optional.of(container.hurtEntities);
+    protected Optional<Boolean> getVal(final EntityFallingBlockAccessor container) {
+        return Optional.of(container.accessor$getHurtEntities());
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

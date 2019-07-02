@@ -43,7 +43,7 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Entity
     }
 
     @Override
-    public MutableBoundedValue<Double> constructValue(Double defaultValue) {
+    public MutableBoundedValue<Double> constructValue(final Double defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_HEALTH)
             .defaultValue(20D)
             .minimum(1D)
@@ -53,23 +53,23 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Entity
     }
 
     @Override
-    protected boolean set(EntityLivingBase container, Double value) {
+    protected boolean set(final EntityLivingBase container, final Double value) {
         container.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(value);
         return true;
     }
 
     @Override
-    protected Optional<Double> getVal(EntityLivingBase container) {
+    protected Optional<Double> getVal(final EntityLivingBase container) {
         return Optional.of((double) container.getMaxHealth());
     }
 
     @Override
-    protected ImmutableBoundedValue<Double> constructImmutableValue(Double value) {
+    protected ImmutableBoundedValue<Double> constructImmutableValue(final Double value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

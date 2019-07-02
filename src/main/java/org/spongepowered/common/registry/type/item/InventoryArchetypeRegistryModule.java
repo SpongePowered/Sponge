@@ -65,6 +65,7 @@ import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.archetype.SlotArchetype;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
+import org.spongepowered.common.mixin.core.inventory.ContainerRepairAccessor;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -118,7 +119,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
         this.mapping.put(id.toLowerCase(Locale.ENGLISH), archetype);
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "ConstantConditions"})
     @Override
     public void registerDefaults() {
         InventoryArchetype SLOT = new SlotArchetype(ImmutableMap.of(CustomInventory.INVENTORY_DIMENSION, new InventoryDimension(1, 1)));
@@ -277,8 +278,8 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .container((i, p) -> {
                 ContainerRepair container = new ContainerRepair(p.inventory, p.getEntityWorld(), p.getPosition(), p);
                 // Pre-Fills the container input with the items from the inventory
-                for (int index = 0; index < container.inputSlots.getSizeInventory(); index++) {
-                    container.inputSlots.setInventorySlotContents(index, i.getStackInSlot(index));
+                for (int index = 0; index < ((ContainerRepairAccessor) container).accessor$getInputSlots().getSizeInventory(); index++) {
+                    ((ContainerRepairAccessor) container).accessor$getInputSlots().setInventorySlotContents(index, i.getStackInSlot(index));
                 }
                 return container;
             })

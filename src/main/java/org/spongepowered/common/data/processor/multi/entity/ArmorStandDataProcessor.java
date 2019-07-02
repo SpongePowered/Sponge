@@ -35,6 +35,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArmorSta
 import org.spongepowered.api.data.manipulator.mutable.entity.ArmorStandData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArmorStandData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 
 import java.util.Map;
 import java.util.Optional;
@@ -46,25 +47,25 @@ public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<EntityA
     }
 
     @Override
-    protected boolean doesDataExist(EntityArmorStand dataHolder) {
+    protected boolean doesDataExist(final EntityArmorStand dataHolder) {
         return true;
     }
 
     @Override
-    protected boolean set(EntityArmorStand dataHolder, Map<Key<?>, Object> keyValues) {
+    protected boolean set(final EntityArmorStand dataHolder, final Map<Key<?>, Object> keyValues) {
         final boolean hasArms = (boolean) keyValues.get(Keys.ARMOR_STAND_HAS_ARMS);
         final boolean hasBasePlate = (boolean) keyValues.get(Keys.ARMOR_STAND_HAS_BASE_PLATE);
         final boolean isSmall = (boolean) keyValues.get(Keys.ARMOR_STAND_IS_SMALL);
         final boolean isMarker = (boolean) keyValues.get(Keys.ARMOR_STAND_MARKER);
-        dataHolder.setSmall(isSmall);
-        dataHolder.setMarker(isMarker);
-        dataHolder.setNoBasePlate(!hasBasePlate);
-        dataHolder.setShowArms(hasArms);
+        ((EntityArmorStandAccessor) dataHolder).accessor$setSmall(isSmall);
+        ((EntityArmorStandAccessor) dataHolder).accessor$setMarker(isMarker);
+        ((EntityArmorStandAccessor) dataHolder).accessor$setNoBasePlate(!hasBasePlate);
+        ((EntityArmorStandAccessor) dataHolder).accessor$setShowArms(hasArms);
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityArmorStand dataHolder) {
+    protected Map<Key<?>, ?> getValues(final EntityArmorStand dataHolder) {
         return ImmutableMap.<Key<?>, Object>builder()
                 .put(Keys.ARMOR_STAND_HAS_ARMS, dataHolder.getShowArms())
                 .put(Keys.ARMOR_STAND_HAS_BASE_PLATE, !dataHolder.hasNoBasePlate())
@@ -79,7 +80,7 @@ public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<EntityA
     }
 
     @Override
-    public Optional<ArmorStandData> fill(DataContainer container, ArmorStandData armorStandData) {
+    public Optional<ArmorStandData> fill(final DataContainer container, final ArmorStandData armorStandData) {
         if (container.contains(Keys.ARMOR_STAND_HAS_ARMS)) {
             armorStandData.set(Keys.ARMOR_STAND_HAS_ARMS, container.getBoolean(Keys.ARMOR_STAND_HAS_ARMS.getQuery()).get());
         }
@@ -96,7 +97,7 @@ public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<EntityA
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult remove(final DataHolder dataHolder) {
         return DataTransactionResult.failNoData();
     }
 }
