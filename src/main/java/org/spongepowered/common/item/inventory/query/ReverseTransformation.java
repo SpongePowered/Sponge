@@ -27,8 +27,8 @@ package org.spongepowered.common.item.inventory.query;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryTransformation;
+import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.DefaultImplementedInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOperation;
@@ -55,7 +55,7 @@ public class ReverseTransformation implements InventoryTransformation {
         final CompoundSlotProvider slotProvider = new CompoundSlotProvider();
         slots.forEach(slotProvider::add);
 
-        final DefaultImplementedInventoryAdapter adapter = (DefaultImplementedInventoryAdapter) inventory;
+        final InventoryAdapter adapter = ((InventoryBridge) inventory).bridge$getAdapter();
 
         final CompoundLens lens = CompoundLens.builder().add(adapter.bridge$getRootLens()).build(slotProvider);
 

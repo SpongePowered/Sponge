@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory.lens;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
 
 import java.util.Collection;
 
@@ -40,28 +41,25 @@ public interface Fabric {
      * Return all inventories which compose this fabric, order is not guaranteed
      * or enforced.
      */
-    Collection<?> allInventories();
+    Collection<InventoryBridge> fabric$allInventories();
 
     /**
      * Return the inventory at the specified index in the fabric.
-     *
-     * @param index
-     * @return
      */
-    <TInventory> TInventory get(int index);
+    InventoryBridge fabric$get(int index);
 
-    ItemStack getStack(int index);
+    ItemStack fabric$getStack(int index);
 
-    void setStack(int index, ItemStack stack);
+    void fabric$setStack(int index, ItemStack stack);
 
-    int getMaxStackSize();
+    int fabric$getMaxStackSize();
 
-    Translation getDisplayName();
+    Translation fabric$getDisplayName();
 
-    int getSize();
+    int fabric$getSize();
 
-    void clear();
+    void fabric$clear();
 
-    void markDirty();
+    void fabric$markDirty();
 
 }

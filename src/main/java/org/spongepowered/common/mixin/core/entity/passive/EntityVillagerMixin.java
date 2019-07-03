@@ -50,12 +50,10 @@ import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.mixin.core.entity.EntityAgeableMixin;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
 
@@ -90,13 +88,8 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
     }
 
     @Override
-    public Lens bridge$generateLens() {
-        return new OrderedInventoryLensImpl(0, 8, 1, this.bridge$getSlotProvider());
-    }
-
-    @Override
-    public Fabric bridge$generateFabric() {
-        return new IInventoryFabric(this.villagerInventory);
+    public Lens bridge$generateLens(SlotProvider slots) {
+        return new OrderedInventoryLensImpl(0, 8, 1, slots);
     }
 
     @Override

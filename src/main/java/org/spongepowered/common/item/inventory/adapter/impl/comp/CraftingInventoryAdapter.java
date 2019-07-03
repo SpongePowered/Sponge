@@ -37,10 +37,6 @@ public class CraftingInventoryAdapter extends OrderedInventoryAdapter implements
     
     private CraftingGridInventory craftingGrid;
     private CraftingOutput result;
-    
-    public CraftingInventoryAdapter(Fabric inventory, CraftingInventoryLens root) {
-        this(inventory, root, null);
-    }
 
     public CraftingInventoryAdapter(Fabric inventory, CraftingInventoryLens root, Inventory parent) {
         super(inventory, root, parent);
@@ -50,7 +46,7 @@ public class CraftingInventoryAdapter extends OrderedInventoryAdapter implements
     @Override
     public CraftingGridInventory getCraftingGrid() {
         if (this.craftingGrid == null) {
-            this.craftingGrid = (CraftingGridInventory) this.craftingLens.getCraftingGrid().getAdapter(this.inventory, this);
+            this.craftingGrid = (CraftingGridInventory) this.craftingLens.getCraftingGrid().getAdapter(this.bridge$getFabric(), this);
         }
         return this.craftingGrid;
     }
@@ -58,7 +54,7 @@ public class CraftingInventoryAdapter extends OrderedInventoryAdapter implements
     @Override
     public CraftingOutput getResult() {
         if (this.result == null) {
-            this.result = (CraftingOutput) this.craftingLens.getOutputSlot().getAdapter(this.inventory, this);
+            this.result = (CraftingOutput) this.craftingLens.getOutputSlot().getAdapter(this.bridge$getFabric(), this);
         }
         return this.result;
     }

@@ -40,27 +40,13 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 
 @Mixin(InventoryCrafting.class)
-public abstract class InventoryCraftingMixin implements IInventory, LensProviderBridge, InventoryAdapter, InventoryAdapterBridge {
+public abstract class InventoryCraftingMixin implements IInventory, InventoryAdapter, InventoryAdapterBridge {
 
     @Shadow @Final private NonNullList<ItemStack> stackList;
     @Shadow @Final private int inventoryWidth;
     @Shadow @Final private int inventoryHeight;
-
-    @Override
-    public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
-        if (this.stackList.size() == 0) {
-            return new DefaultEmptyLens(adapter);
-        }
-        return new CraftingGridInventoryLensImpl(0, this.inventoryWidth, this.inventoryHeight, this.inventoryWidth, this.bridge$getSlotProvider());
-    }
-
-    @Override
-    public Fabric bridge$generateFabric() {
-        return new IInventoryFabric(this);
-    }
 
     @Override
     public SlotProvider bridge$generateSlotProvider() {
@@ -68,8 +54,11 @@ public abstract class InventoryCraftingMixin implements IInventory, LensProvider
     }
 
     @Override
-    public Lens bridge$generateLens() {
-        return bridge$rootLens(this.bridge$getFabric(), this);
+    public Lens bridge$generateLens(SlotProvider slots) {
+        if (this.stackList.size() == 0) {
+            return new DefaultEmptyLens(this);
+        }
+        return new CraftingGridInventoryLensImpl(0, this.inventoryWidth, this.inventoryHeight, this.inventoryWidth, slots);
     }
 
 }

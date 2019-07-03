@@ -42,11 +42,11 @@ public class MainPlayerInventoryAdapter extends GridInventoryAdapter implements 
 
     @Override
     public Hotbar getHotbar() {
-        return ((Hotbar) this.root.getHotbar().getAdapter(this.inventory, this));
+        return ((Hotbar) this.root.getHotbar().getAdapter(this.bridge$getFabric(), this));
     }
 
     @Override
     public GridInventory getGrid() {
-        return ((GridInventory) this.root.getGrid().getAdapter(this.inventory, this));
+        return ((GridInventory) this.root.getGrid().getAdapter(this.bridge$getFabric(), this));
     }
 }

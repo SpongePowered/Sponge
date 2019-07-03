@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
@@ -39,14 +39,12 @@ public class ContainerLens extends RealLens {
     protected List<Lens> viewedInventories;
     private List<Lens> additonal;
 
-    public ContainerLens(InventoryAdapter adapter, SlotProvider slots,
-            List<Lens> lenses) {
-        this(adapter, slots, lenses, Collections.emptyList());
+    public ContainerLens(int size, Class<? extends Inventory> adapter, SlotProvider slots, List<Lens> lenses) {
+        this(size, adapter, slots, lenses, Collections.emptyList());
     }
 
-    public ContainerLens(InventoryAdapter adapter, SlotProvider slots,
-            List<Lens> lenses, List<Lens> additonal) {
-        this(adapter, slots);
+    public ContainerLens(int size, Class<? extends Inventory> adapter, SlotProvider slots, List<Lens> lenses, List<Lens> additonal) {
+        this(size, adapter);
         this.viewedInventories = lenses;
         this.additonal = additonal;
         this.init(slots);
@@ -55,12 +53,11 @@ public class ContainerLens extends RealLens {
     /**
      * Do not forget to call init when using this constructor!
      */
-    public ContainerLens(InventoryAdapter adapter, SlotProvider slots) {
-        super(0, adapter.bridge$getFabric().getSize(), adapter, slots);
+    public ContainerLens(int size, Class<? extends Inventory> adapter) {
+        super(0, size, adapter);
         this.additonal = Collections.emptyList();
     }
 
-    @Override
     protected void init(SlotProvider slots) {
 
         // Adding slots

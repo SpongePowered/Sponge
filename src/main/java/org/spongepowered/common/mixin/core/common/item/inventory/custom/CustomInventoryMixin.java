@@ -25,17 +25,11 @@
 package org.spongepowered.common.mixin.core.common.item.inventory.custom;
 
 import net.minecraft.inventory.InventoryBasic;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
-import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
@@ -44,11 +38,7 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-
-import javax.annotation.Nonnull;
 
 @Mixin(CustomInventory.class)
 public abstract class CustomInventoryMixin implements InventoryAdapter, InventoryAdapterBridge {
@@ -57,19 +47,17 @@ public abstract class CustomInventoryMixin implements InventoryAdapter, Inventor
     @Shadow(remap = false) private InventoryBasic inv;
     @Shadow(remap = false) private Map<String, InventoryProperty<?, ?>> properties;
 
+    @Shadow public abstract int getSizeInventory();
+
     @Override
     public SlotProvider bridge$generateSlotProvider() {
         return new SlotCollection.Builder().add(this.inv.getSizeInventory()).build();
     }
 
+    @SuppressWarnings("Unchecked")
     @Override
-    public Lens bridge$generateLens() {
-        return  new CustomLens(this, this.bridge$getSlotProvider(), this.archetype, this.properties);
-    }
-
-    @Override
-    public Inventory bridge$getChild(@Nonnull final Lens lens) {
-        return null; // TODO ?
+    public Lens bridge$generateLens(SlotProvider slots) {
+        return new CustomLens(this.getSizeInventory(), (Class<? extends Inventory>) this.getClass(), slots, this.archetype, this.properties);
     }
 
 }

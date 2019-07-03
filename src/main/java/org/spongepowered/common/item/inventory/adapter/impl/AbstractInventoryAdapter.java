@@ -31,6 +31,8 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.bridge.inventory.LensProviderBridge;
@@ -51,12 +53,12 @@ import javax.annotation.Nullable;
 /**
  * Base Adapter implementation for {@link ItemStack} based Inventories.
  */
-public class AbstractInventoryAdapter implements DefaultImplementedInventoryAdapter, Inventory {
+public class AbstractInventoryAdapter implements InventoryAdapter, DefaultImplementedAdapterInventory, InventoryBridge, Inventory {
 
     public static final Translation DEFAULT_NAME = new SpongeTranslation("inventory.default.title");
 
-    protected final Fabric inventory;
-    protected final SlotCollection slots;
+    private final Fabric inventory;
+    protected final SlotProvider slots;
     protected final Lens lens;
     protected final List<Inventory> children = new ArrayList<>();
 
@@ -77,13 +79,13 @@ public class AbstractInventoryAdapter implements DefaultImplementedInventoryAdap
     public <T extends Lens> AbstractInventoryAdapter(final Fabric inventory, final Class<T> lensType) {
         this.inventory = inventory;
         this.parent = this;
-        if (inventory.getSize() == 0) {
+        if (inventory.fabric$getSize() == 0) {
             this.slots = new SlotCollection(0);
             this.lens = new DefaultEmptyLens(this);
         } else {
             final ReusableLens<T> lens = ReusableLens.getLens(lensType, this, () -> this.initSlots(inventory, this.parent),
-                    (slots) -> (T) new DefaultIndexedLens(0, inventory.getSize(), this, ((SlotCollection) slots)));
-            this.slots = ((SlotCollection) lens.getSlots());
+                    (slots) -> (T) new DefaultIndexedLens(0, inventory.fabric$getSize(), this.getClass(), slots));
+            this.slots = lens.getSlots();
             this.lens = lens.getLens();
         }
     }
@@ -95,14 +97,11 @@ public class AbstractInventoryAdapter implements DefaultImplementedInventoryAdap
         this.lens = root != null ? root : checkNotNull(this.initRootLens(), "root lens");
     }
 
-    private SlotCollection initSlots(final Fabric inventory, @Nullable final Inventory parent) {
-        if (parent instanceof DefaultImplementedInventoryAdapter) {
-            final SlotProvider sp = ((DefaultImplementedInventoryAdapter) parent).bridge$getSlotProvider();
-            if (sp instanceof SlotCollection) {
-                return ((SlotCollection) sp);
-            }
+    private SlotProvider initSlots(final Fabric inventory, @Nullable final Inventory parent) {
+        if (parent instanceof InventoryAdapter) {
+            return ((InventoryAdapter) parent).bridge$getSlotProvider();
         }
-        return new SlotCollection(inventory.getSize());
+        return new SlotCollection(inventory.fabric$getSize());
     }
 
     @Override
@@ -114,11 +113,11 @@ public class AbstractInventoryAdapter implements DefaultImplementedInventoryAdap
         if (this instanceof LensProviderBridge) {
             return ((LensProviderBridge) this).bridge$rootLens(this.inventory, this);
         }
-        final int size = this.inventory.getSize();
+        final int size = this.inventory.fabric$getSize();
         if (size == 0) {
             return new DefaultEmptyLens(this);
         }
-        return new DefaultIndexedLens(0, size, this, this.slots);
+        return new DefaultIndexedLens(0, size, this.getClass(), this.slots);
     }
 
     @Override
@@ -136,44 +135,23 @@ public class AbstractInventoryAdapter implements DefaultImplementedInventoryAdap
         return this.inventory;
     }
 
-    @Override
-    public Inventory bridge$getChild(int index) {
-        if (index < 0 || index >= this.lens.getChildren().size()) {
-            throw new IndexOutOfBoundsException("No child at index: " + index);
-        }
-        while (index >= this.children.size()) {
-            this.children.add(null);
-        }
-        Inventory child = this.children.get(index);
-        if (child == null) {
-            child = (Inventory) this.lens.getChildren().get(index).getAdapter(this.inventory, this);
-            this.children.set(index, child);
-        }
-        return child;
-    }
-
-    @Override
-    public Inventory bridge$getChild(final Lens lens) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Inventory> Iterable<T> slots() {
         if (this.slotIterator == null) {
-            this.slotIterator = this.slots.getIterator(this);
+            this.slotIterator = SlotCollectionIterator.of(this, this);
         }
         return (Iterable<T>) this.slotIterator;
     }
 
-    @Override
-    public void clear() {
-        this.slots().forEach(Inventory::clear);
+    public static Optional<Slot> forSlot(final Fabric inv, final SlotLens slotLens, final Inventory parent) {
+        return slotLens == null ? Optional.empty() : Optional.ofNullable((Slot) slotLens.getAdapter(inv, parent));
     }
 
-    public static Optional<Slot> forSlot(final Fabric inv, final SlotLens slotLens, final Inventory parent) {
-        return slotLens == null ? Optional.<Slot>empty() : Optional.<Slot>ofNullable((Slot) slotLens.getAdapter(inv, parent));
+    @Override
+    public void clear() {
+        // TODO clear without generating SlotAdapters
+        this.slots().forEach(Inventory::clear);
     }
 
     @Override

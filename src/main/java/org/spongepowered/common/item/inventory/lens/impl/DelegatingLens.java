@@ -27,7 +27,7 @@ package org.spongepowered.common.item.inventory.lens.impl;
 import net.minecraft.inventory.Slot;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -47,13 +47,13 @@ public class DelegatingLens extends AbstractLens {
     private Lens delegate;
 
     public DelegatingLens(final int base, final Lens lens, final SlotProvider slots) {
-        super(base, lens.slotCount(), VanillaAdapter.class, slots);
+        super(base, lens.slotCount(), AbstractInventoryAdapter.class);
         this.delegate = lens;
         this.init(slots);
     }
 
     public DelegatingLens(final int base, final List<Slot> containerSlots, final Lens lens, final SlotProvider slots) {
-        super(base, containerSlots.size(), VanillaAdapter.class, slots);
+        super(base, containerSlots.size(), AbstractInventoryAdapter.class);
         this.delegate = lens;
         final CustomSlotProvider slotProvider = new CustomSlotProvider();
         for (final Slot slot : containerSlots) {
@@ -65,7 +65,6 @@ public class DelegatingLens extends AbstractLens {
         this.addChild(this.delegate);
     }
 
-    @Override
     protected void init(final SlotProvider slots) {
         this.addSpanningChild(new OrderedInventoryLensImpl(this.base, this.size, 1, slots));
         this.addChild(this.delegate);
@@ -74,7 +73,7 @@ public class DelegatingLens extends AbstractLens {
     @SuppressWarnings("unchecked")
     @Override
     public InventoryAdapter getAdapter(final Fabric inv, final Inventory parent) {
-        return new VanillaAdapter(inv, this, parent);
+        return new AbstractInventoryAdapter(inv, this, parent);
     }
 
     public static class CustomSlotProvider implements SlotProvider {

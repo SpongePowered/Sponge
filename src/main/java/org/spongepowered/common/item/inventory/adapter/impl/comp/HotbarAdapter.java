@@ -31,11 +31,7 @@ import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
 
 public class HotbarAdapter extends InventoryRowAdapter implements Hotbar {
 
-    protected HotbarLens hotbarLens;
-
-    public HotbarAdapter(Fabric inventory, HotbarLens root) {
-        this(inventory, root, null);
-    }
+    private HotbarLens hotbarLens;
 
     public HotbarAdapter(Fabric inventory, HotbarLens root, Inventory parent) {
         super(inventory, root, parent);
@@ -44,12 +40,12 @@ public class HotbarAdapter extends InventoryRowAdapter implements Hotbar {
 
     @Override
     public int getSelectedSlotIndex() {
-        return this.hotbarLens.getSelectedSlotIndex(this.inventory);
+        return this.hotbarLens.getSelectedSlotIndex(this.bridge$getFabric());
     }
 
     @Override
     public void setSelectedSlotIndex(int index) {
-        this.hotbarLens.setSelectedSlotIndex(this.inventory, index);
+        this.hotbarLens.setSelectedSlotIndex(this.bridge$getFabric(), index);
     }
 
 }

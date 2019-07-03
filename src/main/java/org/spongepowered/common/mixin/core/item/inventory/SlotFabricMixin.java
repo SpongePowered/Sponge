@@ -22,89 +22,76 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl.fabric;
+package org.spongepowered.common.mixin.core.item.inventory;
 
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
 import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collections;
 
-@SuppressWarnings("unchecked")
-public class CompoundFabric implements Fabric {
-
-    private final Fabric fabric1;
-    private final Fabric fabric2;
-    private Translation displayName;
-
-    public CompoundFabric(Fabric fabric1, Fabric fabric2) {
-        this.fabric1 = fabric1;
-        this.fabric2 = fabric2;
-        this.displayName = fabric1.fabric$getDisplayName();
-    }
+@Mixin(Slot.class)
+public abstract class SlotFabricMixin implements Fabric, InventoryBridge {
+    @Shadow @Final public IInventory inventory;
+    @Shadow public abstract ItemStack getStack();
+    @Shadow public abstract void putStack(ItemStack stack);
+    @Shadow public abstract int getSlotStackLimit();
+    @Shadow public abstract void onSlotChanged();
 
     @Override
     public Collection<InventoryBridge> fabric$allInventories() {
-        Set<InventoryBridge> inv = new HashSet<>();
-        inv.addAll(this.fabric1.fabric$allInventories());
-        inv.addAll(this.fabric2.fabric$allInventories());
-        return inv;
+        return Collections.emptyList();
     }
 
     @Override
-    public InventoryBridge fabric$get(int index) {
-
-        if (index < this.fabric1.fabric$getSize()) {
-            return this.fabric1.fabric$get(index);
+    public InventoryBridge fabric$get(final int index) {
+        if (this.inventory != null) {
+            return (InventoryBridge) this.inventory;
         }
-        return this.fabric2.fabric$get(index - this.fabric1.fabric$getSize());
+
+        throw new UnsupportedOperationException("Unable to access slot at " + index + " for delegating fabric of " + this.getClass());
     }
 
     @Override
-    public ItemStack fabric$getStack(int index) {
-        if (index < this.fabric1.fabric$getSize()) {
-            return this.fabric1.fabric$getStack(index);
-        }
-        return this.fabric2.fabric$getStack(index - this.fabric1.fabric$getSize());
+    public ItemStack fabric$getStack(final int index) {
+        return this.getStack();
     }
 
     @Override
-    public void fabric$setStack(int index, ItemStack stack) {
-        if (index < this.fabric1.fabric$getSize()) {
-            this.fabric1.fabric$setStack(index, stack);
-        } else {
-            this.fabric2.fabric$setStack(index - this.fabric1.fabric$getSize(), stack);
-        }
+    public void fabric$setStack(final int index, final ItemStack stack) {
+        this.putStack(stack);
     }
 
     @Override
     public int fabric$getMaxStackSize() {
-        return Math.max(this.fabric1.fabric$getMaxStackSize(), this.fabric2.fabric$getMaxStackSize());
+        return this.getSlotStackLimit();
     }
 
     @Override
     public Translation fabric$getDisplayName() {
-        return this.displayName;
+        return SlotLensImpl.SLOT_NAME;
     }
 
     @Override
     public int fabric$getSize() {
-        return this.fabric1.fabric$getSize() + this.fabric2.fabric$getSize();
+        return 1;
     }
 
     @Override
     public void fabric$clear() {
-        this.fabric1.fabric$clear();
-        this.fabric2.fabric$clear();
+        this.putStack(ItemStack.EMPTY);
     }
 
     @Override
     public void fabric$markDirty() {
-        this.fabric1.fabric$markDirty();
-        this.fabric2.fabric$markDirty();
+        this.onSlotChanged();
     }
-
 }

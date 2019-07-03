@@ -30,32 +30,19 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.OrderedInventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-
-import javax.annotation.Nullable;
 
 @Mixin(Slot.class)
 public abstract class SlotMixin_API implements org.spongepowered.api.item.inventory.Slot {
 
     @Shadow @Final public IInventory inventory;
 
-    @Nullable private InventoryAdapter api$parentAdapter;
-
     @Override
     public Inventory parent() {
         if (this.inventory instanceof Inventory) {
-            return ((Inventory) this.inventory);
+            return (Inventory) this.inventory;
         }
-        if (this.api$parentAdapter == null) {
-            final int size = ((InventoryAdapter) this).bridge$getFabric().getSize();
-            final SlotCollection slots = new SlotCollection.Builder().add(size).build();
-            final OrderedInventoryLensImpl lens = new OrderedInventoryLensImpl(0, size, 1, slots);
-            this.api$parentAdapter = new OrderedInventoryAdapter(((InventoryAdapter) this).bridge$getFabric(), lens);
-        }
-        return (Inventory) this.api$parentAdapter;
+        // In modded the inventory could be null
+        return this;
     }
 
     @Override

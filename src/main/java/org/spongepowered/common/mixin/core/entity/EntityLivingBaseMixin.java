@@ -55,7 +55,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -101,8 +100,8 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityDeathContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.EquipmentSlotsFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
@@ -876,7 +875,6 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         }
     }
 
-    private EquipmentSlotsFabric inventory = new EquipmentSlotsFabric((Living) this);
     private EnumMap<EntityEquipmentSlot, SlotLens> slotLens = new EnumMap<>(EntityEquipmentSlot.class);
 
     @Surrogate
@@ -919,7 +917,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                         this.slotLens.put(slot, new SlotLensImpl(slot.getSlotIndex()));
                     }
                 }
-                slotAdapter = this.slotLens.get(entityEquipmentSlot).getAdapter(this.inventory, null);
+                slotAdapter = this.slotLens.get(entityEquipmentSlot).getAdapter((Fabric) this, null);
             }
             final ChangeEntityEquipmentEvent event = SpongeCommonEventFactory.callChangeEntityEquipmentEvent(entity,
                     ItemStackUtil.snapshotOf(before), ItemStackUtil.snapshotOf(after), (SlotAdapter) slotAdapter);

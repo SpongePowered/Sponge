@@ -43,12 +43,6 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
     private final ArmorEquipable carrier;
     private final EquipmentInventoryLens lens;
 
-    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric inventory, EquipmentInventoryLens root) {
-        super(inventory, root);
-        this.carrier = carrier;
-        this.lens = root;
-    }
-
     public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric inventory, EquipmentInventoryLens root, Inventory parent) {
         super(inventory, root, parent);
         this.carrier = carrier;

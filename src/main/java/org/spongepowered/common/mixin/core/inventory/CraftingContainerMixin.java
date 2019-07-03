@@ -58,7 +58,7 @@ public abstract class CraftingContainerMixin extends ContainerMixin {
 
         if (slotId == 0) {
             // Clicked the result
-            for (final Object inventory : bridge$getFabric().allInventories()) {
+            for (final Object inventory : bridge$getFabric().fabric$allInventories()) {
                 for (final IContainerListener listener : this.listeners) {
                     //listener.sendAllWindowProperties(this$, inventory);
                     listener.sendAllContents((Container) (Object) this, getInventory());

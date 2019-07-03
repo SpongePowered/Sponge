@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity.player;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.util.EnumHand;
@@ -41,7 +40,6 @@ import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -52,25 +50,17 @@ import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.HotbarAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.MainPlayerInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 @Mixin(InventoryPlayer.class)
 public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, InventoryAdapter, InventoryAdapterBridge, TrackedInventoryBridge {
@@ -130,18 +120,13 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
         }
     }
 
-    @SuppressWarnings("RedundantCast")
+    @SuppressWarnings({"RedundantCast", "Unchecked"})
     @Override
-    public Lens bridge$generateLens() {
+    public Lens bridge$generateLens(SlotProvider slots) {
         if ((Class<?>) this.getClass() == InventoryPlayer.class) { // Build Player Lens
-            return new PlayerInventoryLens(this, this.bridge$getSlotProvider());
+            return new PlayerInventoryLens(this.getSizeInventory(), (Class<? extends Inventory>) this.getClass(), slots);
         }
-        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.bridge$getSlotProvider());
-    }
-
-    @Override
-    public Fabric bridge$generateFabric() {
-        return new IInventoryFabric((IInventory) this);
+        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
     }
 
     @Override
@@ -154,11 +139,6 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
             default:
                 throw new AssertionError(hand);
         }
-    }
-
-    @Override
-    public Inventory bridge$getChild(final Lens lens) {
-        return null;
     }
 
     @Override

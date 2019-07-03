@@ -52,7 +52,7 @@ public class OrderedInventoryLensImpl extends ConceptualLens implements OrderedI
     }
 
     public OrderedInventoryLensImpl(int base, int size, int stride, Class<? extends Inventory> adapterType, SlotProvider slots) {
-        super(base, size, adapterType, slots);
+        super(base, size, adapterType);
         checkArgument(stride > 0, "Invalid stride: %s", stride);
         this.stride = stride;
         this.init(slots);
@@ -88,7 +88,6 @@ public class OrderedInventoryLensImpl extends ConceptualLens implements OrderedI
         return (SlotLens) this.slotCache.get(ordinal).lens;
     }
 
-    @Override
     protected void init(SlotProvider slots) {
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot += this.stride) {
             this.addSpanningChild(slots.getSlot(slot), new SlotIndex(ord));

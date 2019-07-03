@@ -24,32 +24,20 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl;
 
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import javax.annotation.Nullable;
 
-/**
- * Base Adapter based on the vanilla {@link IInventory}
- */
-public class VanillaAdapter extends AbstractInventoryAdapter {
+public class VanillaContainerAdapter extends AbstractInventoryAdapter {
 
     /**
      * Used to calculate {@link #getPlugin()}.
      */
     private final Container rootContainer;
 
-    public VanillaAdapter(Fabric inventory, net.minecraft.inventory.Container container) {
+    public VanillaContainerAdapter(Fabric inventory, net.minecraft.inventory.Container container) {
         super(inventory);
         this.rootContainer = (Container) container;
-    }
-
-    public VanillaAdapter(Fabric inventory, @Nullable Lens root, @Nullable Inventory parent) {
-        super(inventory, root, parent);
-        this.rootContainer = null;
     }
 
     @Override

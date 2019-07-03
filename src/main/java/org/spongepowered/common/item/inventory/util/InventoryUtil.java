@@ -41,10 +41,10 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
 import java.util.Optional;
@@ -57,15 +57,14 @@ public final class InventoryUtil {
 
     @SuppressWarnings("rawtypes")
     public static CraftingGridInventory toSpongeInventory(InventoryCrafting inv) {
-        IInventoryFabric fabric = new IInventoryFabric(inv);
         CraftingGridInventoryLensImpl lens = new CraftingGridInventoryLensImpl(0, inv.getWidth(), inv.getHeight(), inv.getWidth(), SlotLensImpl::new);
 
-        return new CraftingGridInventoryAdapter(fabric, lens);
+        return new CraftingGridInventoryAdapter((Fabric) inv, lens);
     }
 
     public static InventoryCrafting toNativeInventory(CraftingGridInventory inv) {
         Fabric fabric = ((CraftingGridInventoryAdapter) inv).bridge$getFabric();
-        for (Object inventory : fabric.allInventories()) {
+        for (Object inventory : fabric.fabric$allInventories()) {
             if (inventory instanceof InventoryCrafting) {
                 return ((InventoryCrafting) inventory);
             }
@@ -76,9 +75,9 @@ public final class InventoryUtil {
         sb.append("Invalid CraftingGridInventory. Could not find InventoryCrafting.\n")
           .append("Fabric was: ")
           .append(fabric.getClass().getSimpleName()).append(" Name: ")
-          .append(fabric.getDisplayName() == null ? "unknown" : fabric.getDisplayName().get())
+          .append(fabric.fabric$getDisplayName() == null ? "unknown" : fabric.fabric$getDisplayName().get())
           .append("Viewed:");
-        for (Object iInventory : fabric.allInventories()) {
+        for (Object iInventory : fabric.fabric$allInventories()) {
             sb.append("\n").append(iInventory.getClass().getName());
         }
 
@@ -127,6 +126,14 @@ public final class InventoryUtil {
         }
         return SpongeImplHooks.toInventory(inventory, forgeItemHandler);
     }
+
+    public static InventoryAdapter findAdapter(Object inventory) {
+        if (inventory instanceof InventoryAdapter) {
+            return ((InventoryAdapter) inventory);
+        }
+        return SpongeImplHooks.findInventoryAdapter(inventory);
+    }
+
 
     public static TrackedInventoryBridge forCapture(Object toCapture) {
         if (toCapture instanceof TrackedInventoryBridge) {

@@ -84,20 +84,8 @@ public class SlotCollection extends DynamicLensCollectionImpl implements SlotPro
             return this.slotTypes.size();
         }
 
-        Class<? extends Inventory> getType(int index) {
-            return this.slotTypes.get(index).getFirst();
-        }
-
         SlotLensProvider getProvider(int index) {
             return this.slotTypes.get(index).getSecond();
-        }
-
-        protected Class<? extends Inventory> getSlotAdapterType(int slotIndex) {
-            try {
-                return this.getType(slotIndex);
-            } catch (IndexOutOfBoundsException ex) {
-                return SlotAdapter.class;
-            }
         }
 
         public SlotCollection build() {
@@ -134,18 +122,4 @@ public class SlotCollection extends DynamicLensCollectionImpl implements SlotPro
     public SlotLens getSlot(int index) {
         return (SlotLens) this.get(index);
     }
-
-    public Iterable<Slot> getIterator(InventoryAdapter adapter) {
-        return this.getIterator((Inventory) adapter, adapter.bridge$getFabric(), adapter.bridge$getRootLens());
-    }
-
-    public Iterable<Slot> getIterator(Inventory parent, InventoryAdapter adapter) {
-        return this.getIterator(parent, adapter.bridge$getFabric(), adapter.bridge$getRootLens());
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private Iterable<Slot> getIterator(Inventory parent, Fabric inv, Lens lens) {
-        return new SlotCollectionIterator(parent, inv, lens, this);
-    }
-
 }

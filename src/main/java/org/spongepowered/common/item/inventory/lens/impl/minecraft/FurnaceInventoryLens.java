@@ -46,11 +46,10 @@ public class FurnaceInventoryLens extends RealLens {
 
     @SuppressWarnings("unchecked")
     public FurnaceInventoryLens(final int base, final InventoryAdapter adapter, final SlotProvider slots) {
-        super(base, adapter.bridge$getFabric().getSize(), (Class<? extends Inventory>) adapter.getClass(), slots);
+        super(base, adapter.bridge$getFabric().fabric$getSize(), (Class<? extends Inventory>) adapter.getClass());
         this.init(slots);
     }
 
-    @Override
     protected void init(final SlotProvider slots) {
         this.addChild(new OrderedInventoryLensImpl(0, 3, 1, slots));
 

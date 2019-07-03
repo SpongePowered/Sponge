@@ -22,29 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl;
+package org.spongepowered.common.bridge.item.inventory;
 
-import net.minecraft.inventory.Container;
-import net.minecraft.tileentity.TileEntityLockable;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.util.InventoryUtil;
 
-/**
- * Lenses for real Inventories like {@link TileEntityLockable} and {@link Container}.
- *
- * <p>When possible this lens will return the real {@link InventoryAdapter} as opposed to some kind of Wrapper Adapter</p>
- */
-@SuppressWarnings("rawtypes")
-public abstract class RealLens extends AbstractLens {
-
-    public RealLens(int base, int size, Class<? extends Inventory> adapterType) {
-        super(base, size, adapterType);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
-        return fabric.fabric$get(this.base).bridge$getAdapter();
+public interface InventoryBridge {
+    default InventoryAdapter bridge$getAdapter() {
+        return InventoryUtil.findAdapter(this);
     }
 }

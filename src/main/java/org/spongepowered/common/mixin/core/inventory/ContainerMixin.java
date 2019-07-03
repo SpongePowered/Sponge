@@ -78,7 +78,6 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -136,13 +135,12 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Lens bridge$generateLens() {
+    public Lens bridge$generateLens(SlotProvider slots) {
         if (this.impl$isLensInitialized) {
             return null; // Means that we've tried to generate a lens before, but it was null. And because the lens is null,
             // the generate will try again. So, we stop trying to generate it.
         }
         this.impl$isLensInitialized = true;
-        final SlotProvider slots = bridge$getSlotProvider();
         final Fabric fabric = bridge$getFabric();
         final Lens lens;
         if (this.impl$spectatorChest) {
@@ -175,13 +173,6 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
             }
         }
         return this.impl$adapters;
-    }
-
-
-
-    @Override
-    public Fabric bridge$generateFabric() {
-        return MinecraftFabric.of(this);
     }
 
     @Override
@@ -314,7 +305,6 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
         // Reset the lense and slot provider
         bridge$setSlotProvider(null);
         bridge$setLens(null);
-        bridge$setFabric(null);
         this.impl$adapters = null;
     }
 

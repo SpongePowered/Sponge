@@ -22,29 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl;
+package org.spongepowered.common.mixin.api.item.inventory;
 
-import net.minecraft.inventory.Container;
-import net.minecraft.tileentity.TileEntityLockable;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
+import net.minecraft.inventory.Slot;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.item.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 
-/**
- * Lenses for real Inventories like {@link TileEntityLockable} and {@link Container}.
- *
- * <p>When possible this lens will return the real {@link InventoryAdapter} as opposed to some kind of Wrapper Adapter</p>
- */
-@SuppressWarnings("rawtypes")
-public abstract class RealLens extends AbstractLens {
+@Mixin(Slot.class)
+public abstract class SlotMixin_API implements DefaultImplementedAdapterInventory.WithClear {
 
-    public RealLens(int base, int size, Class<? extends Inventory> adapterType) {
-        super(base, size, adapterType);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
-        return fabric.fabric$get(this.base).bridge$getAdapter();
-    }
 }

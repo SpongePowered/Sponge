@@ -58,13 +58,8 @@ public class SlotLensImpl extends AbstractLens implements SlotLens {
     }
 
     public SlotLensImpl(int index, Class<? extends Inventory> adapterType) {
-        super(index, 1, adapterType, null);
+        super(index, 1, adapterType);
         this.availableSlots.add(this.getOrdinal(null));
-    }
-
-    @Override
-    protected final void init(SlotProvider slots) {
-        // No children
     }
 
     @Override
@@ -107,7 +102,7 @@ public class SlotLensImpl extends AbstractLens implements SlotLens {
 
     @Override
     public ItemStack getStack(Fabric inv) {
-        return checkNotNull(inv, "Target inventory").getStack(this.base);
+        return checkNotNull(inv, "Target inventory").fabric$getStack(this.base);
     }
 
     @Override
@@ -120,7 +115,7 @@ public class SlotLensImpl extends AbstractLens implements SlotLens {
 
     @Override
     public boolean setStack(Fabric inv, ItemStack stack) {
-        checkNotNull(inv, "Target inventory").setStack(this.base, stack);
+        checkNotNull(inv, "Target inventory").fabric$setStack(this.base, stack);
         return true;
     }
 

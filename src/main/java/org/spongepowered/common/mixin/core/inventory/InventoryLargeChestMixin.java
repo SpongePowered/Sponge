@@ -45,16 +45,11 @@ public abstract class InventoryLargeChestMixin implements InventoryAdapter, Reus
     }
 
     private SlotProvider impl$generateSlotProvider() {
-        return new SlotCollection.Builder().add(this.bridge$getFabric().getSize()).build();
+        return new SlotCollection.Builder().add(this.bridge$getFabric().fabric$getSize()).build();
     }
 
     private LargeChestInventoryLens impl$generateInventoryLens(final SlotProvider slots) {
         return new LargeChestInventoryLens(this, slots);
-    }
-
-    @Override
-    public Inventory bridge$getChild(final Lens lens) {
-        return null;
     }
 
 }

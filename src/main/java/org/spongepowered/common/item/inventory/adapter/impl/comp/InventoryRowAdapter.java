@@ -31,11 +31,7 @@ import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
 
 public class InventoryRowAdapter extends Inventory2DAdapter implements InventoryRow {
 
-    protected InventoryRowLens rowLens;
-
-    public InventoryRowAdapter(Fabric inventory, InventoryRowLens root) {
-        this(inventory, root, null);
-    }
+    private InventoryRowLens rowLens;
 
     public InventoryRowAdapter(Fabric inventory, InventoryRowLens root, Inventory parent) {
         super(inventory, root, parent);

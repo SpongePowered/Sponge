@@ -31,6 +31,7 @@ import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.ReusableLensProvider;
+import org.spongepowered.common.item.inventory.lens.comp.OrderedInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
@@ -41,9 +42,9 @@ public abstract class TileEntityLockableMixin extends TileEntityMixin implements
 
     @Override
     public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
-        final SlotCollection slots = new SlotCollection.Builder().add(((TileEntityLockable) (Object) this).getSizeInventory()).build();
-        final OrderedInventoryLensImpl lens = new OrderedInventoryLensImpl(0, ((TileEntityLockable) (Object) this).getSizeInventory(), 1, slots);
-        return new ReusableLens<>(slots, lens);
+        return ReusableLens.getLens(OrderedInventoryLens.class, adapter,
+                () -> new SlotCollection.Builder().add(((TileEntityLockable) (Object) this).getSizeInventory()).build(),
+                (slots) -> new OrderedInventoryLensImpl(0, ((TileEntityLockable) (Object) this).getSizeInventory(), 1, slots));
     }
 
 }

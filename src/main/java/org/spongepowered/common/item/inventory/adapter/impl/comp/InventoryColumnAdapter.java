@@ -29,15 +29,10 @@ import org.spongepowered.api.item.inventory.type.InventoryColumn;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
 
-
 public class InventoryColumnAdapter extends Inventory2DAdapter implements InventoryColumn {
 
     protected InventoryColumnLens columnLens;
     
-    public InventoryColumnAdapter(Fabric inventory, InventoryColumnLens root) {
-        this(inventory, root, null);
-    }
-
     public InventoryColumnAdapter(Fabric inventory, InventoryColumnLens root, Inventory parent) {
         super(inventory, root, parent);
         this.columnLens = root;

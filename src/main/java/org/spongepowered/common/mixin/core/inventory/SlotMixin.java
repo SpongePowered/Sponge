@@ -26,26 +26,16 @@ package org.spongepowered.common.mixin.core.inventory;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.DefaultImplementedInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.OrderedInventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
-
-import javax.annotation.Nullable;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 @Mixin(Slot.class)
 public abstract class SlotMixin implements InventoryAdapter, InventoryAdapterBridge {
@@ -59,15 +49,18 @@ public abstract class SlotMixin implements InventoryAdapter, InventoryAdapterBri
     }
 
     @Override
-    public Lens bridge$generateLens() {
+    public Lens bridge$generateLens(SlotProvider slotProvider) {
         try {
             final Lens rootLens = ((InventoryAdapter) this.inventory).bridge$getRootLens();
-            return rootLens.getSlotLens(this.slotIndex);
+            SlotLens lens = rootLens.getSlotLens(this.slotIndex);
+            if (lens != null) {
+                return lens;
+            }
         } catch (Exception ignored) {
-            // TODO figure out how to make it always work with existing lenses
-            // this works as a fallback but removes Inventory Property Support completely
-            return new SlotLensImpl(0);
         }
+        // TODO figure out how to make it always work with existing lenses
+        // this works as a fallback but removes Inventory Property Support completely
+        return new SlotLensImpl(0);
     }
 
 }
