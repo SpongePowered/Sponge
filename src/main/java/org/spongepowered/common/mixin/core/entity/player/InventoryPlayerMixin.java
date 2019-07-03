@@ -80,7 +80,7 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
     @Shadow @Final public NonNullList<ItemStack> mainInventory;
     @Shadow @Final public NonNullList<ItemStack> armorInventory;
     @Shadow @Final public NonNullList<ItemStack> offHandInventory;
-    @Shadow @Final public List<NonNullList<ItemStack>> allInventories;
+    @Shadow @Final private List<NonNullList<ItemStack>> allInventories;
 
     @Shadow public abstract int getInventoryStackLimit();
     @Shadow public abstract int getSizeInventory();
