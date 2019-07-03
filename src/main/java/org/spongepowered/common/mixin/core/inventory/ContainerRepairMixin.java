@@ -28,6 +28,7 @@ import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -70,7 +71,7 @@ public abstract class ContainerRepairMixin extends ContainerMixin implements Len
         final List<Lens> lenses = new ArrayList<>();
         lenses.add(new OrderedInventoryLensImpl(0, 3, 1, bridge$getSlotProvider()));
         lenses.add(new MainPlayerInventoryLensImpl(3, bridge$getSlotProvider(), true));
-        return new ContainerLens(adapter, bridge$getSlotProvider(), lenses);
+        return new ContainerLens(adapter.bridge$getFabric().fabric$getSize(), (Class<? extends Inventory>) adapter.getClass(), bridge$getSlotProvider(), lenses);
     }
 
     @Override

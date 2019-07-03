@@ -63,7 +63,7 @@ public class DefaultEmptyLens implements Lens {
     
     @Override
     public Translation getName(final Fabric inv) {
-        return inv.getDisplayName();
+        return inv.fabric$getDisplayName();
     }
 
     @Override

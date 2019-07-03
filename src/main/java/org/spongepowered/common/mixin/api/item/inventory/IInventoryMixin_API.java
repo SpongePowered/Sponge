@@ -22,29 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl;
+package org.spongepowered.common.mixin.api.item.inventory;
 
-import net.minecraft.inventory.Container;
-import net.minecraft.tileentity.TileEntityLockable;
+import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 
-/**
- * Lenses for real Inventories like {@link TileEntityLockable} and {@link Container}.
- *
- * <p>When possible this lens will return the real {@link InventoryAdapter} as opposed to some kind of Wrapper Adapter</p>
- */
-@SuppressWarnings("rawtypes")
-public abstract class RealLens extends AbstractLens {
+@Mixin(IInventory.class)
+@Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
+public interface IInventoryMixin_API extends DefaultImplementedAdapterInventory {
 
-    public RealLens(int base, int size, Class<? extends Inventory> adapterType) {
-        super(base, size, adapterType);
+    // Soft implemented in development since the targets have the same method from IInventory
+    @Intrinsic
+    default void inventory$clear() {
+        ((InventoryBridge) this).bridge$getAdapter().bridge$getFabric().fabric$clear();
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
-        return fabric.fabric$get(this.base).bridge$getAdapter();
-    }
 }

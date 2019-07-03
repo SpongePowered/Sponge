@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.inventory.adapter.impl.slots;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.inventory.Container;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -33,8 +34,6 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.SlotFabric;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -73,7 +72,7 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
     @SuppressWarnings("deprecation")
     @Override
     public int getStackSize() {
-        return this.slot.getStack(this.inventory).getCount();
+        return this.slot.getStack(this.bridge$getFabric()).getCount();
     }
 
     @SuppressWarnings("unchecked")
@@ -90,17 +89,17 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
 
     @Override
     public Optional<ItemStack> poll() {
-        final net.minecraft.item.ItemStack stack = this.inventory.getStack(this.ordinal);
+        final net.minecraft.item.ItemStack stack = this.bridge$getFabric().fabric$getStack(this.ordinal);
         if (stack.isEmpty()) {
             return Optional.<ItemStack>empty();
         }
-        this.inventory.setStack(this.ordinal, net.minecraft.item.ItemStack.EMPTY);
+        this.bridge$getFabric().fabric$setStack(this.ordinal, net.minecraft.item.ItemStack.EMPTY);
         return Optional.<ItemStack>of(ItemStackUtil.fromNative(stack));
     }
 
     @Override
     public Optional<ItemStack> peek() {
-        final net.minecraft.item.ItemStack stack = this.slot.getStack(this.inventory);
+        final net.minecraft.item.ItemStack stack = this.slot.getStack(this.bridge$getFabric());
         if (stack.isEmpty()) {
             return Optional.empty();
         }
@@ -109,44 +108,23 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
 
     @Override
     public InventoryTransactionResult offer(final ItemStack stack) {
-//        // TODO Correct the transaction based on how offer goes
-//        final net.minecraft.item.ItemStack old = this.inventory.getStack(this.ordinal);
-//        if (!ItemStackUtil.compare(old, stack)) {
-//            return InventoryTransactionResult.failNoTransactions();
-//        }
-//        boolean canIncrease = getMaxStackSize() != old.stackSize;
-//        if (!canIncrease) {
-//            return InventoryTransactionResult.failNoTransactions();
-//        }
-//        int remaining = getMaxStackSize() - old.stackSize;
-//        int toBeOffered = stack.getQuantity();
-//        if (toBeOffered > remaining) {
-//            old.stackSize += toBeOffered - remaining;
-//            stack.setQuantity(toBeOffered - remaining);
-//        } else {
-//            old.stackSize += remaining;
-//            // TODO Quantity being set 0 could be a problem...
-//            stack.setQuantity(0);
-//        }
-//        this.inventory.markDirty();
-//        return InventoryTransactionResult.successNoTransactions();
-
         final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
         final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        final int maxStackSize = this.slot.getMaxStackSize(this.inventory);
+        final int maxStackSize = this.slot.getMaxStackSize(this.bridge$getFabric());
         int remaining = stack.getQuantity();
 
-        final net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
+        final net.minecraft.item.ItemStack old = this.slot.getStack(this.bridge$getFabric());
         int push = Math.min(remaining, maxStackSize);
-        if (old.isEmpty() && this.slot.setStack(this.inventory, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
+        if (old.isEmpty() && this.slot.setStack(this.bridge$getFabric(), ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
             remaining -= push;
         } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
-            this.inventory.markDirty();
+            this.bridge$getFabric().fabric$markDirty();
             push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
             old.setCount(old.getCount() + push);
             remaining -= push;
         }
+        // TODO transaction failure
 
         if (remaining == stack.getQuantity()) {
             // No items were consumed
@@ -163,7 +141,7 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
         if (stack.isEmpty()) {
             return true;
         }
-        final net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
+        final net.minecraft.item.ItemStack old = this.slot.getStack(this.bridge$getFabric());
         if (old.isEmpty()) {
             return this.getMaxStackSize() >= stack.getQuantity();
         }
@@ -175,14 +153,14 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
         final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
         final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        final net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
+        final net.minecraft.item.ItemStack old = this.slot.getStack(this.bridge$getFabric());
         if (stack.getType() == ItemTypes.NONE) {
             clear(); // NONE item will clear the slot
             return result.replace(ItemStackUtil.fromNative(old)).build();
         }
         int remaining = stack.getQuantity();
-        final int push = Math.min(remaining, this.slot.getMaxStackSize(this.inventory));
-        if (this.slot.setStack(this.inventory, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
+        final int push = Math.min(remaining, this.slot.getMaxStackSize(this.bridge$getFabric()));
+        if (this.slot.setStack(this.bridge$getFabric(), ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
             result.replace(ItemStackUtil.fromNative(old));
             remaining -= push;
         }
@@ -196,17 +174,17 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
 
     @Override
     public void clear() {
-        this.slot.setStack(this.inventory, net.minecraft.item.ItemStack.EMPTY);
+        this.slot.setStack(this.bridge$getFabric(), net.minecraft.item.ItemStack.EMPTY);
     }
 
     @Override
     public int size() {
-        return !this.slot.getStack(this.inventory).isEmpty()? 1 : 0;
+        return !this.slot.getStack(this.bridge$getFabric()).isEmpty()? 1 : 0;
     }
 
     @Override
     public int totalItems() {
-        return this.slot.getStack(this.inventory).getCount();
+        return this.slot.getStack(this.bridge$getFabric()).getCount();
     }
 
     @Override
@@ -221,20 +199,20 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
 
     @Override
     public boolean contains(final ItemStack stack) {
-        final net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
+        final net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.bridge$getFabric());
         return slotStack.isEmpty() ? ItemStackUtil.toNative(stack).isEmpty() :
                 ItemStackUtil.compareIgnoreQuantity(slotStack, stack) && slotStack.getCount() >= stack.getQuantity();
     }
 
     @Override
     public boolean containsAny(final ItemStack stack) {
-        final net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
+        final net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.bridge$getFabric());
         return slotStack.isEmpty() ? ItemStackUtil.toNative(stack).isEmpty() : ItemStackUtil.compareIgnoreQuantity(slotStack, stack);
     }
 
     @Override
     public boolean contains(final ItemType type) {
-        final net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
+        final net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.bridge$getFabric());
         return slotStack.isEmpty() ? (type == null || type == ItemTypes.AIR) : slotStack.getItem().equals(type);
     }
 
@@ -242,11 +220,11 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
     public Slot transform(final Slot.Type type) {
         switch (type) {
             case INVENTORY:
-                if (this.inventory instanceof SlotFabric) {
-                    return ((Slot) ((SlotFabric) this.inventory).getDelegate());
+                if (this.bridge$getFabric() instanceof net.minecraft.inventory.Slot) {
+                    return (Slot) this.bridge$getFabric();
                 }
-                if (this.inventory instanceof ContainerFabric) {
-                    return ((Slot) ((ContainerFabric) this.inventory).getContainer().getSlot(this.slotNumber));
+                if (this.bridge$getFabric() instanceof Container) {
+                    return (Slot) ((Container) this.bridge$getFabric()).getSlot(this.slotNumber);
                 }
                 return this;
             default:

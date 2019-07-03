@@ -51,9 +51,7 @@ public class CraftingGridInventoryAdapter extends GridInventoryAdapter implement
 
     @Override
     public Optional<CraftingRecipe> getRecipe(World world) {
-        checkNotNull(world, "world");
-
-        return Sponge.getRegistry().getCraftingRecipeRegistry().findMatchingRecipe(this, world);
+        return Sponge.getRegistry().getCraftingRecipeRegistry().findMatchingRecipe(this, checkNotNull(world, "world"));
     }
 
 }

@@ -32,27 +32,18 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityMinecartContainer.class)
-public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin implements ILockableContainer, ILootContainer, InventoryAdapter,
-    InventoryAdapterBridge {
+public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin implements ILockableContainer, ILootContainer, InventoryAdapter, InventoryAdapterBridge {
 
     @Shadow private boolean dropContentsWhenDead;
-
-    protected Lens createLensOnConstruct() {
-        return this.getSizeInventory() == 0
-               ? new DefaultEmptyLens(this)
-               : new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.bridge$getSlotProvider());
-    }
 
     /**
      * @author Zidane - June 2019 - 1.12.2
@@ -77,12 +68,10 @@ public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin i
     }
 
     @Override
-    public Lens bridge$generateLens() {
-        return createLensOnConstruct();
+    public Lens bridge$generateLens(SlotProvider slots) {
+        return this.getSizeInventory() == 0
+                ? new DefaultEmptyLens(this)
+                : new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
     }
 
-    @Override
-    public Fabric bridge$generateFabric() {
-        return new IInventoryFabric(this);
-    }
 }

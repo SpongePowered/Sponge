@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.inventory;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerPlayer;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,7 +54,7 @@ public abstract class ContainerPlayerMixin extends ContainerMixin implements Con
 
     @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return new ContainerPlayerInventoryLens(adapter, bridge$getSlotProvider());
+        return new ContainerPlayerInventoryLens(fabric.fabric$getSize(), (Class<? extends Inventory>) adapter.getClass(), bridge$getSlotProvider());
     }
 
     @Override

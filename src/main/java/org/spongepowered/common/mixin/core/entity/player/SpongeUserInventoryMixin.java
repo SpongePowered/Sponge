@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
 import org.spongepowered.api.item.inventory.entity.UserInventory;
@@ -47,11 +45,9 @@ import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInvent
 import org.spongepowered.common.item.inventory.adapter.impl.comp.MainPlayerInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 
 import java.util.Optional;
@@ -90,18 +86,8 @@ public abstract class SpongeUserInventoryMixin implements InventoryAdapter, User
     }
 
     @Override
-    public Lens bridge$generateLens() {
-        return new PlayerInventoryLens(this, this.bridge$getSlotProvider());
-    }
-
-    @Override
-    public Fabric bridge$generateFabric() {
-        return new IInventoryFabric((IInventory) this);
-    }
-
-    @Override
-    public Inventory bridge$getChild(final Lens lens) {
-        return null;
+    public Lens bridge$generateLens(SlotProvider slots) {
+        return new PlayerInventoryLens(this.getSizeInventory(), this.getClass(), slots);
     }
 
     @Override

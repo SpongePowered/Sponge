@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.inventory;
 
 import net.minecraft.inventory.ContainerWorkbench;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
@@ -45,16 +46,11 @@ import java.util.List;
 public abstract class ContainerWorkbenchMixin extends ContainerMixin implements LensProviderBridge {
 
     @Override
-    public Lens bridge$generateLens() {
-        return super.bridge$generateLens();
-    }
-
-    @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
         final List<Lens> lenses = new ArrayList<>();
         lenses.add(new CraftingInventoryLensImpl(0, 1, 3, 3, bridge$getSlotProvider()));
         lenses.add(new MainPlayerInventoryLensImpl(3 * 3 + 1, bridge$getSlotProvider(), true));
-        return new ContainerLens(adapter, bridge$getSlotProvider(), lenses);
+        return new ContainerLens(adapter.bridge$getFabric().fabric$getSize(), (Class<? extends Inventory>) adapter.getClass(), bridge$getSlotProvider(), lenses);
     }
 
     @Override

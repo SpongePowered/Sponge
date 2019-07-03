@@ -27,33 +27,25 @@ package org.spongepowered.common.item.inventory.query.result;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.MutableLensSet;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.item.inventory.query.Result;
 
 import java.util.Collection;
 
 public interface QueryResult extends Result {
-    
+
     abstract class QueryLens extends AbstractLens {
-        
+
         private final MutableLensSet resultSet;
 
         public QueryLens(int size, MutableLensSet resultSet) {
-            super(0, size, QueryResult.class, null);
+            super(0, size, QueryResult.class);
             this.resultSet = resultSet;
-            this.init(null);
-        }
 
-        @SuppressWarnings("rawtypes")
-        @Override
-        protected void init(SlotProvider slots) {
             for (Lens result : this.resultSet) {
                 Collection<InventoryProperty<?, ?>> properties = this.resultSet.getProperties(result);
                 this.addSpanningChild(result, properties.toArray(new InventoryProperty[0]));
             }
         }
-
     }
-
 }

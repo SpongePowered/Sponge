@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
@@ -35,13 +35,12 @@ public class HorseInventoryLens extends RealLens {
     private OrderedInventoryLensImpl horseEquipment;
     private GridInventoryLensImpl chest;
 
-    public HorseInventoryLens(InventoryAdapter adapter, SlotProvider slots) {
+    public HorseInventoryLens(Class<? extends Inventory> adapter, SlotProvider slots) {
         super(0, 2
                 //+ 5*3  // TODO chested horse
-                ,adapter, slots);
+                ,adapter);
     }
 
-    @Override
     protected void init(SlotProvider slots) {
         this.horseEquipment = new OrderedInventoryLensImpl(0, 2, 1, slots); // 0-1
         // TODO only for "chested" horses. Will this cause problems?

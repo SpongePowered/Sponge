@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -33,22 +33,13 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
 
-
 public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens {
 
     public HotbarLensImpl(int base, int width, SlotProvider slots) {
         this(base, width, 0, 0, HotbarAdapter.class, slots);
     }
 
-    public HotbarLensImpl(int base, int width, Class<? extends Inventory> adapterType, SlotProvider slots) {
-        this(base, width, 0, 0, adapterType, slots);
-    }
-    
-    public HotbarLensImpl(int base, int width, int xBase, int yBase, SlotProvider slots) {
-        this(base, width, xBase, yBase, HotbarAdapter.class, slots);
-    }
-    
-    public HotbarLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
+    private HotbarLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, width, xBase, yBase, adapterType, slots);
     }
 
@@ -59,9 +50,9 @@ public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens {
 
     @Override
     public int getSelectedSlotIndex(Fabric inv) {
-        for (Object inner : inv.allInventories()) {
-            if (inner instanceof InventoryPlayer) {
-                return ((InventoryPlayer) inner).currentItem;
+        for (Object inner : inv.fabric$allInventories()) {
+            if (inner instanceof InventoryPlayerBridge) {
+                return ((InventoryPlayerBridge) inner).bridge$getHeldItemIndex(EnumHand.MAIN_HAND);
             }
         }
         return 0;
@@ -69,7 +60,7 @@ public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens {
 
     @Override
     public void setSelectedSlotIndex(Fabric inv, int index) {
-        inv.allInventories().stream().filter(inner -> inner instanceof InventoryPlayerBridge).forEach(inner -> {
+        inv.fabric$allInventories().stream().filter(inner -> inner instanceof InventoryPlayerBridge).forEach(inner -> {
             ((InventoryPlayerBridge) inner).bridge$setSelectedItem(index, true);
         });
     }

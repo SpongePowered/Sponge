@@ -94,6 +94,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.block.BlockFireAccessor;
@@ -441,6 +442,11 @@ public final class SpongeImplHooks {
     public static Inventory toInventory(final Object inventory, @Nullable final Object forgeItemHandler) {
         SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         return null;
+    }
+
+    public static InventoryAdapter findInventoryAdapter(final Object inventory) {
+        SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
+        throw new IllegalArgumentException("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
     }
 
     public static void onTileEntityInvalidate(final TileEntity te) {

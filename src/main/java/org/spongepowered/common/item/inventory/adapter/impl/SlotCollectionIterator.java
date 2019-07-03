@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
@@ -53,6 +54,10 @@ public class SlotCollectionIterator implements Iterable<Slot> {
     
     @SuppressWarnings("rawtypes")
     private Builder<Slot> traverseSpanningTree(Fabric inv, Lens lens, SlotProvider slots, Builder<Slot> list) {
+        if (lens instanceof SlotLens) {
+            list.add(((SlotAdapter) lens.getAdapter(inv, this.parent)));
+            return list;
+        }
         for (Lens child : lens.getSpanningChildren()) {
             if (child instanceof SlotLens) {
                 list.add((SlotAdapter) child.getAdapter(inv, this.parent));
@@ -71,5 +76,8 @@ public class SlotCollectionIterator implements Iterable<Slot> {
     public Iterator<Slot> iterator() {
         return this.slots.iterator();
     }
-    
+
+    public static SlotCollectionIterator of(Inventory parent, InventoryAdapter adapter) {
+        return new SlotCollectionIterator(parent, adapter.bridge$getFabric(), adapter.bridge$getRootLens(), adapter.bridge$getSlotProvider());
+    }
 }

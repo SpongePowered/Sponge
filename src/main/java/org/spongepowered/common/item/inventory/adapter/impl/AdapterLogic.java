@@ -133,7 +133,7 @@ public abstract class AdapterLogic{
         }
 
         if (remove && result != null && !result.isEmpty()) {
-            inv.markDirty();
+            inv.fabric$markDirty();
         }
 
         return Optional.ofNullable(result);
@@ -174,7 +174,7 @@ public abstract class AdapterLogic{
             result.reject(ItemStackUtil.cloneDefensive(nativeStack, remaining));
         }
 
-        inv.markDirty();
+        inv.fabric$markDirty();
 
         return result.build();
     }
@@ -207,7 +207,7 @@ public abstract class AdapterLogic{
             result.type(InventoryTransactionResult.Type.FAILURE).reject(ItemStackUtil.cloneDefensive(nativeStack));
         } else {
             stack.setQuantity(remaining);
-            inv.markDirty();
+            inv.fabric$markDirty();
         }
 
         return result.build();
@@ -294,7 +294,7 @@ public abstract class AdapterLogic{
     @SuppressWarnings("unchecked")
     private static <T extends InventoryProperty<?, ?>> Optional<T> findRootProperty(final InventoryAdapter adapter, final Class<T> property) {
         if (property == InventoryTitle.class) {
-            final Text text = Text.of(adapter.bridge$getFabric().getDisplayName());
+            final Text text = Text.of(adapter.bridge$getFabric().fabric$getDisplayName());
             return (Optional<T>) Optional.of(InventoryTitle.of(text));
         }
         // TODO more properties of top level inventory
@@ -307,7 +307,7 @@ public abstract class AdapterLogic{
         adapter = (InventoryAdapter) ((Inventory) adapter).root();
         if (adapter instanceof Container) {
             // If Root is a Container get the viewed inventory
-            final Object first = adapter.bridge$getFabric().get(0);
+            final Object first = adapter.bridge$getFabric().fabric$get(0);
             if (first instanceof CustomInventory) {
                 // if viewed inventory is a custom inventory get it instead
                 adapter = ((InventoryAdapter) first);

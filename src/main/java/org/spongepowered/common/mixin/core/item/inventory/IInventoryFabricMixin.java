@@ -22,77 +22,66 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl.fabric;
+package org.spongepowered.common.mixin.core.item.inventory;
 
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
-import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
+import org.spongepowered.common.item.inventory.lens.Fabric;
 
 import java.util.Collection;
-import java.util.Collections;
 
-@SuppressWarnings("unchecked")
-public class SlotFabric extends MinecraftFabric {
+@Mixin(IInventory.class)
+public interface IInventoryFabricMixin extends Fabric, IInventory, InventoryBridge {
 
-    private final Slot slot;
-
-    public SlotFabric(final Slot inventory) {
-        this.slot = inventory;
+    @Override
+    default Collection<InventoryBridge> fabric$allInventories() {
+        return ImmutableSet.of(this);
     }
 
     @Override
-    public Collection<?> allInventories() {
-        return Collections.emptyList();
+    @SuppressWarnings("unchecked")
+    default InventoryBridge fabric$get(int index) {
+        return this;
     }
 
     @Override
-    public IInventory get(final int index) {
-        if (this.slot.inventory != null) {
-            return this.slot.inventory;
-        }
-
-        throw new UnsupportedOperationException("Unable to access slot at " + index + " for delegating fabric of " + this.slot.getClass());
+    default ItemStack fabric$getStack(int index) {
+        return this.getStackInSlot(index);
     }
 
     @Override
-    public ItemStack getStack(final int index) {
-        return this.slot.getStack();
+    default void fabric$setStack(int index, ItemStack stack) {
+        this.setInventorySlotContents(index, stack);
     }
 
     @Override
-    public void setStack(final int index, final ItemStack stack) {
-        this.slot.putStack(stack);
+    default int fabric$getMaxStackSize() {
+        return this.getInventoryStackLimit();
     }
 
     @Override
-    public int getMaxStackSize() {
-        return this.slot.getSlotStackLimit();
+    default Translation fabric$getDisplayName() {
+        return new FixedTranslation(this.getDisplayName().getUnformattedText());
     }
 
     @Override
-    public Translation getDisplayName() {
-        return SlotLensImpl.SLOT_NAME;
+    default int fabric$getSize() {
+        return this.getSizeInventory();
     }
 
     @Override
-    public int getSize() {
-        return this.slot.getStack().getCount();
+    default void fabric$clear() {
+        this.clear();
     }
 
     @Override
-    public void clear() {
-        this.slot.putStack(ItemStack.EMPTY);
+    default void fabric$markDirty() {
+        this.markDirty();
     }
 
-    @Override
-    public void markDirty() {
-        this.slot.onSlotChanged();
-    }
-
-    public Slot getDelegate() {
-        return this.slot;
-    }
 }
