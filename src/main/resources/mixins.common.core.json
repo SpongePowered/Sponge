@@ -296,6 +296,7 @@
         "entity.projectile.ShulkerBulletEntityAccessor",
         "inventory.ContainerAccessor",
         "inventory.ContainerBrewingStandAccessor",
+        "inventory.ContainerDispenserAccessor",
         "inventory.ContainerFurnaceAccessor",
         "inventory.ContainerHopperAccessor",
         "inventory.ContainerHorseChestMixin",

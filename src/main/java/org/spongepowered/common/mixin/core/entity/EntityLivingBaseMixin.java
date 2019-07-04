@@ -481,22 +481,20 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
                 this.attackedAtYaw = 0.0F;
                 final Entity entity = source.getTrueSource();
 
-                if (entity != null) {
-                    if (entity instanceof EntityLivingBase) {
-                        this.shadow$setRevengeTarget((EntityLivingBase) entity);
-                    }
+                if (entity instanceof EntityLivingBase) {
+                    this.shadow$setRevengeTarget((EntityLivingBase) entity);
+                }
 
-                    if (entity instanceof EntityPlayer) {
+                if (entity instanceof EntityPlayer) {
+                    this.recentlyHit = 100;
+                    this.attackingPlayer = (EntityPlayer) entity;
+                } else if (entity instanceof EntityTameable) {
+
+                    final EntityTameable entitywolf = (EntityTameable)entity;
+
+                    if (entitywolf.isTamed()) {
                         this.recentlyHit = 100;
-                        this.attackingPlayer = (EntityPlayer) entity;
-                    } else if (entity instanceof EntityTameable) {
-
-                        final EntityTameable entitywolf = (EntityTameable)entity;
-
-                        if (entitywolf.isTamed()) {
-                            this.recentlyHit = 100;
-                            this.attackingPlayer = null;
-                        }
+                        this.attackingPlayer = null;
                     }
                 }
 
