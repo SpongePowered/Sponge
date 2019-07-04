@@ -34,7 +34,7 @@ import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.spongepowered.common.mixin.core.block.BlockRedstoneWireAccessor;
+import org.spongepowered.common.mixin.optimization.block.BlockRedstoneWireAccessor_Eigen;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -460,7 +460,7 @@ public class RedstoneWireTurbo {
         // UpdateNode object.  
         IBlockState newState;
         if (old_current_change) {
-            newState = ((BlockRedstoneWireAccessor) this.wire).accessor$calculateCurrentChanges(worldIn, pos, pos, oldState);
+            newState = ((BlockRedstoneWireAccessor_Eigen) this.wire).accessor$calculateCurrentChanges(worldIn, pos, pos, oldState);
         } else {
             // Looking up block state is slow.  This accelerator includes a version of
             // calculateCurrentChanges that uses cahed wire values for a
@@ -789,7 +789,7 @@ public class RedstoneWireTurbo {
         // Check this block's neighbors and see if its power level needs to change
         // Use the calculateCurrentChanges method in BlockRedstoneWire since we have no
         // cached block states at this point.
-        final IBlockState newState = ((BlockRedstoneWireAccessor) this.wire).accessor$calculateCurrentChanges(worldIn, pos, pos, state);
+        final IBlockState newState = ((BlockRedstoneWireAccessor_Eigen) this.wire).accessor$calculateCurrentChanges(worldIn, pos, pos, state);
         
         // If no change, exit
         if (newState == state) {
@@ -862,14 +862,14 @@ public class RedstoneWireTurbo {
         j = getMaxCurrentStrength(upd, j);
         int l = 0;
 
-        ((BlockRedstoneWireAccessor) this.wire).accessor$setCanProvidePower(false);
+        ((BlockRedstoneWireAccessor_Eigen) this.wire).accessor$setCanProvidePower(false);
         // Unfortunately, World.isBlockIndirectlyGettingPowered is complicated,
         // and I'm not ready to try to replicate even more functionality from
         // elsewhere in Minecraft into this accelerator.  So sadly, we must
         // suffer the performance hit of this very expensive call.  If there
         // is consistency to what this call returns, we may be able to cache it.
         final int k = worldIn.getRedstonePowerFromNeighbors(upd.self);
-        ((BlockRedstoneWireAccessor) this.wire).accessor$setCanProvidePower(true);
+        ((BlockRedstoneWireAccessor_Eigen) this.wire).accessor$setCanProvidePower(true);
 
         // The variable 'k' holds the maximum redstone power value of any adjacent blocks.
         // If 'k' has the highest level of all neighbors, then the power level of this 

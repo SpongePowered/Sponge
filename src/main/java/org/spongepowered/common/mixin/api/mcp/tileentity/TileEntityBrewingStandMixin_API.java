@@ -31,4 +31,9 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(TileEntityBrewingStand.class)
 public abstract class TileEntityBrewingStandMixin_API extends TileEntityLockableMixin_API<BrewingStand> implements BrewingStand {
 
+    @Override
+    public boolean brew() {
+
+        return false;
+    }
 }

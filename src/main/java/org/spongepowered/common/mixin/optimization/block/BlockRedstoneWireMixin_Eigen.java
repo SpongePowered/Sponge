@@ -46,13 +46,13 @@ import java.util.List;
 import java.util.Set;
 
 @Mixin(value = BlockRedstoneWire.class, priority = 1001)
-public abstract class MixinBlockRedstoneWire_Eigen extends Block {
+public abstract class BlockRedstoneWireMixin_Eigen extends Block {
 
     @Shadow @Final private Set<BlockPos> blocksNeedingUpdate;
     @Shadow public boolean canProvidePower;
     @Shadow protected abstract int getMaxCurrentStrength(World worldIn, BlockPos pos, int strength);
 
-    protected MixinBlockRedstoneWire_Eigen(Material materialIn) {
+    protected BlockRedstoneWireMixin_Eigen(Material materialIn) {
         super(materialIn);
     }
 

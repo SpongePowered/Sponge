@@ -32,9 +32,11 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -72,5 +74,10 @@ public interface IPropertyMixin_API<T extends Comparable<T>> extends IProperty<T
 
     default Predicate<T> trait$getPredicate() {
         return Functional.predicateIn(getAllowedValues());
+    }
+
+    @Intrinsic
+    default Optional<T> trait$parseValue(final String value) {
+        return parseValue(value).toJavaUtil();
     }
 }

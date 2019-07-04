@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block;
+package org.spongepowered.common.mixin.optimization.block;
 
 import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.state.IBlockState;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(BlockRedstoneWire.class)
-public interface BlockRedstoneWireAccessor {
+public interface BlockRedstoneWireAccessor_Eigen {
 
     @Accessor("canProvidePower") void accessor$setCanProvidePower(boolean can);
 

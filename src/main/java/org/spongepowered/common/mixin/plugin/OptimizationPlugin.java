@@ -88,14 +88,20 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::doDropsPreMergeItemDrops)
             .put("org.spongepowered.common.mixin.optimization.enchantment.MixinEnchantmentHelper_No_Source_Leak",
                     OptimizationCategory::useEnchantmentHelperFix)
-            .put("org.spongepowered.common.mixin.optimization.block.MixinBlockRedstoneWire_Eigen", (optimization) -> {
+            .put("org.spongepowered.common.mixin.optimization.block.BlockRedstoneWireMixin_Eigen", (optimization) -> {
                     if (optimization.usePandaRedstone() && optimization.useEigenRedstone()) {
                         // Disable panda redstone if eigen is enabled.
                         optimization.setPandaRedstone(false);
                     }
                 return optimization.useEigenRedstone() && !optimization.usePandaRedstone();
             })
-            .put("org.spongepowered.common.mixin.optimization.block.MixinBlockRedstoneWire_PandaRedstone", (optimization) -> {
+            .put("org.spongepowered.common.mixin.optimization.block.RedstoneWireAccessor_Eigen", (optimization) -> {
+                if (optimization.usePandaRedstone() && optimization.useEigenRedstone()) {
+                    optimization.setPandaRedstone(false);
+                }
+                return optimization.useEigenRedstone() && optimization.usePandaRedstone();
+            })
+            .put("org.spongepowered.common.mixin.optimization.block.BlockRedstoneWireMixin_Panda", (optimization) -> {
                 return optimization.usePandaRedstone() && !optimization.useEigenRedstone();
                 })
             .put("org.spongepowered.common.mixin.optimization.entity.EntityMixinTameable_Cached_Owner",

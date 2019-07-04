@@ -26,8 +26,11 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.EntityMinecartContainer;
 import org.spongepowered.api.entity.vehicle.minecart.ContainerMinecart;
+import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Optional;
 
 @Mixin(EntityMinecartContainer.class)
 public abstract class EntityMinecartContainerMixin_API<M extends ContainerMinecart<M>> extends EntityMinecartMixin_API implements ContainerMinecart<M> {
@@ -35,5 +38,11 @@ public abstract class EntityMinecartContainerMixin_API<M extends ContainerMineca
     @Override
     public CarriedInventory<M> getInventory() {
         return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Optional<M> getCarrier() {
+        return Optional.of((M) this);
     }
 }
