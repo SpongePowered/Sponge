@@ -451,8 +451,10 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
             final Integer dimensionId = ((WorldInfoBridge) this).bridge$getDimensionId();
 
             if (dimensionId != null && dimensionId == ((net.minecraft.world.DimensionType)(Object) ((WorldInfoBridge) this).bridge$getDimensionType()).getId()) {
-                keepSpawnLoaded = ((DimensionTypeBridge)((WorldInfoBridge) this).bridge$getDimensionType()).bridge$shouldKeepSpawnLoaded();
-                this.setKeepSpawnLoaded(keepSpawnLoaded);
+                if (((DimensionTypeBridge)((WorldInfoBridge) this).bridge$getDimensionType()).bridge$shouldKeepSpawnLoaded()) {
+                    this.setKeepSpawnLoaded(true);
+                    keepSpawnLoaded = true;
+                }
             }
         }
         return keepSpawnLoaded;
