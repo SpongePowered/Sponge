@@ -48,6 +48,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -118,6 +119,11 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                         PacketPhaseUtil.handleSlotRestore(player, player.openContainer, dropItemEvent.getTransactions(), true);
                     } else {
                         processSpawnedEntities(player, dropItemEvent);
+                    }
+                    for (Entity entity : entities) {
+                        if (((EntityBridge) entity).bridge$isConstructing()) {
+                            ((EntityBridge) entity).bridge$fireConstructors();
+                        }
                     }
                     slotTrans.clear();
                     mixinContainer.bridge$setCaptureInventory(false);
