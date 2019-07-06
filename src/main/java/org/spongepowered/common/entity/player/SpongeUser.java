@@ -129,6 +129,19 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return this.nbt != null;
     }
 
+    public DataHolder getDataHolder(boolean markDirty) {
+        if (this.self.isOnline()) {
+            return this.self.getPlayer().get();
+        }
+        if (!isInitialized()) {
+            initialize();
+        }
+        if (markDirty) {
+            markDirty();
+        }
+        return (DataHolder) this;
+    }
+
     public void invalidate() {
         this.nbt = null;
 

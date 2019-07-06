@@ -70,13 +70,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         boolean isUser = ((Object) this) instanceof SpongeUser;
         DataHolder holder = this;
         if (isUser) {
-            if (((User) this).isOnline()) {
-                holder = ((User) this).getPlayer().get();
-            } else {
-                if (!((SpongeUser) holder).isInitialized()) {
-                    ((SpongeUser) holder).initialize();
-                }
-            }
+            holder = ((SpongeUser) holder).getDataHolder(false);
         }
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(containerClass);
         if (optional.isPresent()) {
@@ -103,13 +97,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         boolean isUser = ((Object) this) instanceof SpongeUser;
         DataHolder holder = this;
         if (isUser) {
-            if (((User) this).isOnline()) {
-                holder = ((User) this).getPlayer().get();
-            } else {
-                if (!((SpongeUser) holder).isInitialized()) {
-                    ((SpongeUser) holder).initialize();
-                }
-            }
+            holder = ((SpongeUser) holder).getDataHolder(false);
         }
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(containerClass);
         if (optional.isPresent()) {
@@ -150,13 +138,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         boolean isUser = ((Object) this) instanceof SpongeUser;
         DataHolder holder = this;
         if (isUser) {
-            if (((User) this).isOnline()) {
-                holder = ((User) this).getPlayer().get();
-            } else {
-                if (!((SpongeUser) holder).isInitialized()) {
-                    ((SpongeUser) holder).initialize();
-                }
-            }
+            holder = ((SpongeUser) holder).getDataHolder(false);
         }
 
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(holderClass);
@@ -201,14 +183,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         boolean isUser = ((Object) this) instanceof SpongeUser;
         DataHolder holder = this;
         if (isUser) {
-            if (((User) this).isOnline()) {
-                holder = ((User) this).getPlayer().get();
-            } else {
-                if (!((SpongeUser) holder).isInitialized()) {
-                    ((SpongeUser) holder).initialize();
-                }
-                ((SpongeUser) holder).markDirty();
-            }
+            holder = ((SpongeUser) holder).getDataHolder(true);
         }
         final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = DataUtil.getBaseValueProcessor(key);
         if (optional.isPresent()) {
@@ -235,14 +210,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         boolean isUser = ((Object) this) instanceof SpongeUser;
         DataHolder holder = this;
         if (isUser) {
-            if (((User) this).isOnline()) {
-                holder = ((User) this).getPlayer().get();
-            } else {
-                if (!((SpongeUser) holder).isInitialized()) {
-                    ((SpongeUser) holder).initialize();
-                }
-                ((SpongeUser) holder).markDirty();
-            }
+            holder = ((SpongeUser) holder).getDataHolder(true);
         }
         final Optional<DataProcessor> optional = DataUtil.getWildDataProcessor(valueContainer.getClass());
         if (optional.isPresent()) {
@@ -304,14 +272,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         boolean isUser = ((Object) this) instanceof SpongeUser;
         DataHolder holder = this;
         if (isUser) {
-            if (((User) this).isOnline()) {
-                holder = ((User) this).getPlayer().get();
-            } else {
-                if (!((SpongeUser) holder).isInitialized()) {
-                    ((SpongeUser) holder).initialize();
-                }
-                ((SpongeUser) holder).markDirty();
-            }
+            holder = ((SpongeUser) holder).getDataHolder(true);
         }
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(containerClass);
         if (optional.isPresent()) {
@@ -339,14 +300,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         boolean isUser = ((Object) this) instanceof SpongeUser;
         DataHolder holder = this;
         if (isUser) {
-            if (((User) this).isOnline()) {
-                holder = ((User) this).getPlayer().get();
-            } else {
-                if (!((SpongeUser) holder).isInitialized()) {
-                    ((SpongeUser) holder).initialize();
-                }
-                ((SpongeUser) holder).markDirty();
-            }
+            holder = ((SpongeUser) holder).getDataHolder(true);
         }
         final Optional<ValueProcessor<?, ?>> optional = DataUtil.getWildValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
@@ -399,13 +353,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         boolean isUser = ((Object) this) instanceof SpongeUser;
         DataHolder holder = this;
         if (isUser) {
-            if (((User) this).isOnline()) {
-                holder = ((User) this).getPlayer().get();
-            } else {
-                if (!((SpongeUser) holder).isInitialized()) {
-                    ((SpongeUser) holder).initialize();
-                }
-            }
+            holder = ((SpongeUser) holder).getDataHolder(false);
         }
         final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = DataUtil.getBaseValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
@@ -431,13 +379,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         boolean isUser = ((Object) this) instanceof SpongeUser;
         DataHolder holder = this;
         if (isUser) {
-            if (((User) this).isOnline()) {
-                holder = ((User) this).getPlayer().get();
-            } else {
-                if (!((SpongeUser) holder).isInitialized()) {
-                    ((SpongeUser) holder).initialize();
-                }
-            }
+            holder = ((SpongeUser) holder).getDataHolder(false);
         }
         final Optional<ValueProcessor<E, V>> optional = DataUtil.getValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
@@ -463,13 +405,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         boolean isUser = ((Object) this) instanceof SpongeUser;
         DataHolder holder = this;
         if (isUser) {
-            if (((User) this).isOnline()) {
-                holder = ((User) this).getPlayer().get();
-            } else {
-                if (!((SpongeUser) holder).isInitialized()) {
-                    ((SpongeUser) holder).initialize();
-                }
-            }
+            holder = ((SpongeUser) holder).getDataHolder(false);
         }
         final Optional<ValueProcessor<?, ?>> optional = DataUtil.getWildValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
