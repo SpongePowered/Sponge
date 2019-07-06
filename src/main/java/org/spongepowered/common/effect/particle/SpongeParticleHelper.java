@@ -276,7 +276,7 @@ public final class SpongeParticleHelper {
             // but we already chose for the color, can't have both
             if (isSpell) {
                 f0 = Math.max(f0, 0.001f);
-                f2 = Math.max(f0, 0.001f);
+                f2 = Math.max(f2, 0.001f);
             }
 
             // If the f0 value 0 is, the redstone will set it automatically to red 255
