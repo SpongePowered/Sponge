@@ -577,7 +577,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void save() {
-        Preconditions.checkState(isInitialized(), "SpongeUser {} is not initialized", this.profile.getId());
+        Preconditions.checkState(isInitialized(), "User {} is not initialized", this.profile.getId());
         final SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
         final File dataFile = new File(saveHandler.playersDirectory, getUniqueId() + ".dat");
         NBTTagCompound tag;
