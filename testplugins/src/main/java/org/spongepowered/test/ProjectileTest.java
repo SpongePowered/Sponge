@@ -24,17 +24,21 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
+import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -45,59 +49,34 @@ import java.util.stream.Stream;
  * Test Bow causes and events.
  */
 @Plugin(id = "projectiletest", name = "Projectile Test", version = "0.0.0", description = "A plugin to test projectiles")
-public class ProjectileTest {
+public class ProjectileTest implements LoadableModule {
 
-    private static final Text ENABLE = Text.of("enable");
     private static final Text UNKNOWN = Text.of("Unknown");
 
-    private boolean enabled = false;
-    private final ProjectileTest.ProjListener listener = new ProjectileTest.ProjListener();
+    @Inject private PluginContainer container;
 
-    @Listener
-    public void onGameStartingServer(GameStartingServerEvent event) {
-        Sponge.getCommandManager().register(
-                this,
-                CommandSpec.builder()
-                        .arguments(GenericArguments.bool(ENABLE))
-                        .description(Text.of("Enable logging of projectiles"))
-                        .executor((src, args) -> {
-                            final boolean enable = !args.<Boolean>getOne(ENABLE).get();
-                            if (enable && !this.enabled) {
-                                this.enable();
-                            } else if (!enable && this.enabled) {
-                                this.disable();
-                            }
-                            return CommandResult.success();
-                        })
-                        .build(),
-                "logProjectiles"
-        );
+    private final ProjListener listener = new ProjListener();
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-    private void disable() {
-        Sponge.getEventManager().unregisterListeners(this.listener);
-    }
+    public static class ProjListener {
 
-    private void enable() {
-        Sponge.getEventManager().registerListeners(this, this.listener);
-        this.enabled = true;
-    }
-
-
-    public class ProjListener {
-
+        @Exclude(UseItemStackEvent.Tick.class)
         @Listener
         public void onUseItemStack(UseItemStackEvent event) {
-            this.title("UseItemStack");
-            this.broadcast("Cause", event.getCause());
-            this.broadcast("Stack", event.getItemStackInUse());
+            title(event.getClass().getSimpleName());
+            broadcast("Cause", event.getCause());
+            broadcast("Stack", event.getItemStackInUse());
         }
 
         @Listener
         public void onLaunchProjectile(LaunchProjectileEvent event) {
-            this.title("LaunchProjectile");
-            this.broadcast("     Cause", event.getCause());
-            this.broadcast("Projectile", event.getTargetEntity());
+            title("LaunchProjectile");
+            broadcast("     Cause", event.getCause());
+            broadcast("Projectile", event.getTargetEntity());
         }
 
         @Listener
@@ -114,9 +93,9 @@ public class ProjectileTest {
                             .<Text>map(Text::of)
                             .orElse(UNKNOWN)
             ).orElse(UNKNOWN);
-            this.title("ConstructEntity");
-            this.broadcast("Shooter", Text.of(proj.getShooter()));
-            this.broadcast("Creator", creatorText);
+            title("ConstructEntity");
+            broadcast("Shooter", Text.of(proj.getShooter()));
+            broadcast("Creator", creatorText);
         }
 
         private void title(String title) {
