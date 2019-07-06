@@ -44,7 +44,7 @@ import java.util.stream.Stream;
 /**
  * Test Bow causes and events.
  */
-@Plugin(id = "projectiletest", name = "Projectile Test", description = "A plugin to test projectiles")
+@Plugin(id = "projectiletest", name = "Projectile Test", version = "0.0.0", description = "A plugin to test projectiles")
 public class ProjectileTest {
 
     private static final Text ENABLE = Text.of("enable");
