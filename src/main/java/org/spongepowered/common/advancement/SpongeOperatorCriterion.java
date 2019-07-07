@@ -35,7 +35,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeOperatorCriterion implements OperatorCriterion, CriterionBridge {
+public class SpongeOperatorCriterion implements OperatorCriterion, DefaultedAdvancementCriterion {
 
     private final String name;
     private final Collection<AdvancementCriterion> criteria;
@@ -43,7 +43,7 @@ public class SpongeOperatorCriterion implements OperatorCriterion, CriterionBrid
     @Nullable private Collection<AdvancementCriterion> recursiveChildrenCriteria;
     @Nullable private Collection<AdvancementCriterion> leafChildrenCriteria;
 
-    SpongeOperatorCriterion(String namePrefix, Collection<AdvancementCriterion> criteria) {
+    SpongeOperatorCriterion(final String namePrefix, final Collection<AdvancementCriterion> criteria) {
         this.name = namePrefix + Arrays.toString(criteria.stream().map(AdvancementCriterion::getName).toArray(String[]::new));
         this.criteria = ImmutableSet.copyOf(criteria);
     }
@@ -58,12 +58,12 @@ public class SpongeOperatorCriterion implements OperatorCriterion, CriterionBrid
         return Optional.empty();
     }
 
-    private Collection<AdvancementCriterion> getAllChildrenCriteria0(boolean onlyLeaves) {
+    private Collection<AdvancementCriterion> getAllChildrenCriteria0(final boolean onlyLeaves) {
         final ImmutableSet.Builder<AdvancementCriterion> criteria = ImmutableSet.builder();
         if (!onlyLeaves) {
             criteria.add(this);
         }
-        for (AdvancementCriterion criterion : this.criteria) {
+        for (final AdvancementCriterion criterion : this.criteria) {
             if (criterion instanceof OperatorCriterion) {
                 criteria.addAll(((SpongeOperatorCriterion) criterion).getAllChildrenCriteria0(onlyLeaves));
             }
@@ -92,13 +92,13 @@ public class SpongeOperatorCriterion implements OperatorCriterion, CriterionBrid
     }
 
     @Override
-    public Collection<AdvancementCriterion> find(String name) {
+    public Collection<AdvancementCriterion> find(final String name) {
         return getRecursiveChildren().stream()
                 .filter(c -> c.getName().equals(name)).collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
-    public Optional<AdvancementCriterion> findFirst(String name) {
+    public Optional<AdvancementCriterion> findFirst(final String name) {
         return getRecursiveChildren().stream()
                 .filter(c -> c.getName().equals(name)).findFirst();
     }

@@ -22,19 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.advancement;
+package org.spongepowered.common.bridge.advancements;
 
-import net.minecraft.advancements.PlayerAdvancements;
+import org.spongepowered.api.advancement.AdvancementProgress;
+import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 
-public interface IMixinAdvancementProgress {
+public interface CriterionProgressBridge {
 
-    PlayerAdvancements getPlayerAdvancements();
+    AdvancementCriterion bridge$getCriterion();
 
-    void setPlayerAdvancements(PlayerAdvancements playerAdvancements);
+    void bridge$setCriterion(AdvancementCriterion criterion);
 
-    void setAdvancement(String advancement);
+    AdvancementProgress bridge$getAdvancementProgress();
 
-    void invalidateAchievedState();
-
-    void updateProgressMap();
+    boolean bridge$isCriterionAvailable();
 }

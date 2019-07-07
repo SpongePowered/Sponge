@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.mixin.core.advancements;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -52,22 +52,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.advancement.CriterionBridge;
+import org.spongepowered.common.advancement.DefaultedAdvancementCriterion;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
+import org.spongepowered.common.bridge.advancements.AdvancementBridge;
+import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
-import org.spongepowered.common.event.tracking.phase.plugin.ListenerPhaseContext;
-import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
-import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
+import org.spongepowered.common.bridge.advancements.CriterionBridge;
+import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -78,56 +77,47 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(Advancement.class)
-public class MixinAdvancement implements org.spongepowered.api.advancement.Advancement, IMixinAdvancement {
+public class AdvancementMixin implements AdvancementBridge {
 
     @Shadow @Final @Mutable @Nullable private Advancement parent;
     @Shadow @Final @Mutable private String[][] requirements;
     @Shadow @Final @Mutable private Map<String, Criterion> criteria;
     @Shadow @Final @Nullable private DisplayInfo display;
-    @Shadow @Final private Set<Advancement> children;
     @Shadow @Final private ITextComponent displayText;
 
-    private AdvancementCriterion criterion;
-    @Nullable private AdvancementTree tree;
-    private List<Text> toastText;
-    private Text text;
-    private String spongeId;
-    private String name;
+    private AdvancementCriterion impl$criterion;
+    @Nullable private AdvancementTree impl$tree;
+    private List<Text> impl$toastText;
+    private Text impl$text;
+    private String impl$spongeId;
+    private String impl$name;
+    @Nullable private Advancement impl$tempParent;
 
-    @Nullable private Advancement tempParent;
 
-    private void checkServer() {
-        checkState(this.isMainThread());
-    }
-
-    private boolean isMainThread() {
-        return SpongeImplHooks.isMainThread();
-    }
-
-    @SuppressWarnings({"ConstantConditions", "unchecked"})
+    @SuppressWarnings({"ConstantConditions"})
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onInit(ResourceLocation id, @Nullable Advancement parentIn, @Nullable DisplayInfo displayIn,
-            AdvancementRewards rewardsIn, Map<String, Criterion> criteriaIn, String[][] requirementsIn, CallbackInfo ci) {
+    private void impl$setUpSpongeFields(final ResourceLocation id, @Nullable final Advancement parentIn, @Nullable final DisplayInfo displayIn,
+            final AdvancementRewards rewardsIn, final Map<String, Criterion> criteriaIn, final String[][] requirementsIn, final CallbackInfo ci) {
         // Don't do anything on the client, unless we're performing registry initialization
-        if (!this.isMainThread()) {
+        if (!SpongeImplHooks.isMainThread()) {
             return;
         }
         if (displayIn != null) {
-            ((IMixinDisplayInfo) displayIn).setAdvancement(this);
+            ((DisplayInfoBridge) displayIn).bridge$setAdvancement((org.spongepowered.api.advancement.Advancement) this);
         }
         String path = id.getPath();
-        this.name = path.replace('/', '_');
-        this.spongeId = id.getNamespace() + ':' + this.name;
+        this.impl$name = path.replace('/', '_');
+        this.impl$spongeId = id.getNamespace() + ':' + this.impl$name;
         if (displayIn != null) {
-            this.name = SpongeTexts.toPlain(displayIn.getTitle());
+            this.impl$name = SpongeTexts.toPlain(displayIn.getTitle());
         }
         if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
-            Object event = ((EventListenerPhaseContext) PhaseTracker.getInstance().getCurrentContext()).getEvent();
+            final Object event = ((EventListenerPhaseContext) PhaseTracker.getInstance().getCurrentContext()).getEvent();
             if (event instanceof GameRegistryEvent.Register) {
-                Class<? extends CatalogType> catalogType = ((GameRegistryEvent.Register<?>) event).getCatalogType();
+                final Class<? extends CatalogType> catalogType = ((GameRegistryEvent.Register<?>) event).getCatalogType();
                 if (catalogType.equals(org.spongepowered.api.advancement.Advancement.class) || catalogType.equals(AdvancementTree.class)) {
                     // Wait to set the parent until the advancement is registered
-                    this.tempParent = parentIn;
+                    this.impl$tempParent = parentIn;
                     this.parent = AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT;
                 }
             }
@@ -142,50 +132,50 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             path = path.replace('/', '_');
             String name = path;
             if (displayIn != null) {
-                name = this.name;
+                name = this.impl$name;
             }
             path = id.getNamespace() + ':' + path;
-            this.tree = new SpongeAdvancementTree(this, path, new FixedTranslation(name));
-            AdvancementTreeRegistryModule.getInstance().registerAdditionalCatalog(this.tree);
+            this.impl$tree = new SpongeAdvancementTree((org.spongepowered.api.advancement.Advancement) this, path, new FixedTranslation(name));
+            AdvancementTreeRegistryModule.getInstance().registerAdditionalCatalog(this.impl$tree);
         } else {
-            this.tree = ((org.spongepowered.api.advancement.Advancement) parentIn).getTree().orElse(null);
+            this.impl$tree = ((org.spongepowered.api.advancement.Advancement) parentIn).getTree().orElse(null);
         }
-        this.text = SpongeTexts.toText(this.displayText);
+        this.impl$text = SpongeTexts.toText(this.displayText);
         final ImmutableList.Builder<Text> toastText = ImmutableList.builder();
         if (this.display != null) {
             final FrameType frameType = this.display.getFrame();
             toastText.add(Text.builder(new SpongeTranslation("advancements.toast." + frameType.getName()))
                     .format(((AdvancementType) (Object) frameType).getTextFormat())
                     .build());
-            toastText.add(getDisplayInfo().get().getTitle());
+            toastText.add(((ITextComponentBridge) this.display.getTitle()).bridge$toText());
         } else {
             toastText.add(Text.of("Unlocked advancement"));
-            toastText.add(Text.of(getId()));
+            toastText.add(Text.of(this.impl$spongeId));
         }
-        this.toastText = toastText.build();
+        this.impl$toastText = toastText.build();
         final Set<String> scoreCriteria = new HashSet<>();
-        final Map<String, CriterionBridge> criterionMap = new HashMap<>();
-        for (Map.Entry<String, Criterion> entry : new HashMap<>(criteriaIn).entrySet()) {
-            final IMixinCriterion mixinCriterion = (IMixinCriterion) entry.getValue();
-            final CriterionBridge criterion;
-            if (mixinCriterion.getScoreGoal() != null) {
-                criterion = new SpongeScoreCriterion(entry.getKey(), mixinCriterion.getScoreGoal(),
+        final Map<String, DefaultedAdvancementCriterion> criterionMap = new HashMap<>();
+        for (final Map.Entry<String, Criterion> entry : new HashMap<>(criteriaIn).entrySet()) {
+            final CriterionBridge mixinCriterion = (CriterionBridge) entry.getValue();
+            final DefaultedAdvancementCriterion criterion;
+            if (mixinCriterion.bridge$getScoreGoal() != null) {
+                criterion = new SpongeScoreCriterion(entry.getKey(), mixinCriterion.bridge$getScoreGoal(),
                         entry.getValue().getCriterionInstance());
                 scoreCriteria.add(entry.getKey());
                 ((SpongeScoreCriterion) criterion).internalCriteria.forEach(
                         criterion1 -> criteriaIn.put(criterion1.getName(), (Criterion) criterion1));
             } else {
-                criterion = (CriterionBridge) mixinCriterion;
-                ((IMixinCriterion) criterion).setName(entry.getKey());
+                criterion = (DefaultedAdvancementCriterion) mixinCriterion;
+                ((CriterionBridge) criterion).bridge$setName(entry.getKey());
             }
             criterionMap.put(entry.getKey(), criterion);
         }
         final List<String[]> entries = new ArrayList<>();
         final List<AdvancementCriterion> andCriteria = new ArrayList<>();
-        for (String[] array : requirementsIn) {
+        for (final String[] array : requirementsIn) {
             final Set<AdvancementCriterion> orCriteria = new HashSet<>();
-            for (String name : array) {
-                final CriterionBridge criterion = criterionMap.get(name);
+            for (final String name : array) {
+                final DefaultedAdvancementCriterion criterion = criterionMap.get(name);
                 if (criterion instanceof SpongeScoreCriterion) {
                     ((SpongeScoreCriterion) criterion).internalCriteria.forEach(
                             criterion1 -> entries.add(new String[] { criterion1.getName() }));
@@ -196,7 +186,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             }
             andCriteria.add(OrCriterion.of(orCriteria));
         }
-        this.criterion = AndCriterion.of(andCriteria);
+        this.impl$criterion = AndCriterion.of(andCriteria);
         if (!scoreCriteria.isEmpty()) {
             scoreCriteria.forEach(criteriaIn::remove);
             this.criteria = ImmutableMap.copyOf(criteriaIn);
@@ -205,105 +195,94 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     }
 
     @Override
-    public Optional<AdvancementTree> getTree() {
-        checkServer();
-        return Optional.ofNullable(this.tree);
+    public Optional<AdvancementTree> bridge$getTree() {
+        checkState(SpongeImplHooks.isMainThread());
+        return Optional.ofNullable(this.impl$tree);
     }
 
     @Override
-    public void setParent(@Nullable Advancement advancement) {
-        checkServer();
+    public void bridge$setParent(@Nullable final Advancement advancement) {
+        checkState(SpongeImplHooks.isMainThread());
         this.parent = advancement;
     }
 
     @Override
-    public void setTree(AdvancementTree tree) {
-        checkServer();
-        this.tree = tree;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public Collection<org.spongepowered.api.advancement.Advancement> getChildren() {
-        checkServer();
-        return ImmutableList.copyOf((Collection) this.children);
+    public void bridge$setTree(final AdvancementTree tree) {
+        checkState(SpongeImplHooks.isMainThread());
+        this.impl$tree = tree;
     }
 
     @Override
-    public AdvancementCriterion getCriterion() {
-        checkServer();
-        return this.criterion;
+    public AdvancementCriterion bridge$getCriterion() {
+        checkState(SpongeImplHooks.isMainThread());
+        return this.impl$criterion;
     }
 
     @Override
-    public void setCriterion(AdvancementCriterion criterion) {
-        checkServer();
-        this.criterion = criterion;
+    public void bridge$setCriterion(final AdvancementCriterion criterion) {
+        checkState(SpongeImplHooks.isMainThread());
+        this.impl$criterion = criterion;
     }
 
     @Override
-    public void setName(String name) {
-        checkServer();
-        this.name = name;
+    public void bridge$setName(final String name) {
+        checkState(SpongeImplHooks.isMainThread());
+        this.impl$name = name;
     }
 
     @Override
-    public boolean isRegistered() {
-        checkServer();
-        return this.tempParent == null;
+    public boolean bridge$isRegistered() {
+        checkState(SpongeImplHooks.isMainThread());
+        return this.impl$tempParent == null;
     }
 
     @Override
-    public void setRegistered() {
-        checkServer();
-        if (this.tempParent == null) {
+    public void bridge$setRegistered() {
+        checkState(SpongeImplHooks.isMainThread());
+        if (this.impl$tempParent == null) {
             return;
         }
-        this.parent = this.tempParent;
+        this.parent = this.impl$tempParent;
         // The child didn't get added yet to it's actual parent
         this.parent.addChild((Advancement) (Object) this);
-        this.tempParent = null;
+        this.impl$tempParent = null;
     }
 
     @Override
-    public Optional<org.spongepowered.api.advancement.Advancement> getParent() {
-        checkServer();
-        if (this.tempParent != null) {
-            return Optional.of((org.spongepowered.api.advancement.Advancement) this.tempParent);
+    public Optional<Advancement> bridge$getParent() {
+        checkState(SpongeImplHooks.isMainThread());
+        if (this.impl$tempParent != null) {
+            return Optional.of(this.impl$tempParent);
         }
         if (this.parent == AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT) {
             return Optional.empty();
         }
-        return Optional.ofNullable((org.spongepowered.api.advancement.Advancement) this.parent);
+        return Optional.ofNullable(this.parent);
+    }
+
+
+
+    @Override
+    public List<Text> bridge$getToastText() {
+        checkState(SpongeImplHooks.isMainThread());
+        return this.impl$toastText;
     }
 
     @Override
-    public Optional<org.spongepowered.api.advancement.DisplayInfo> getDisplayInfo() {
-        checkServer();
-        return Optional.ofNullable((org.spongepowered.api.advancement.DisplayInfo) this.display);
+    public String bridge$getId() {
+        checkState(SpongeImplHooks.isMainThread());
+        return this.impl$spongeId;
     }
 
     @Override
-    public List<Text> toToastText() {
-        checkServer();
-        return this.toastText;
+    public String bridge$getName() {
+        checkState(SpongeImplHooks.isMainThread());
+        return this.impl$name;
     }
 
     @Override
-    public String getId() {
-        checkServer();
-        return this.spongeId;
-    }
-
-    @Override
-    public String getName() {
-        checkServer();
-        return this.name;
-    }
-
-    @Override
-    public Text toText() {
-        checkServer();
-        return this.text;
+    public Text bridge$getText() {
+        checkState(SpongeImplHooks.isMainThread());
+        return this.impl$text;
     }
 }

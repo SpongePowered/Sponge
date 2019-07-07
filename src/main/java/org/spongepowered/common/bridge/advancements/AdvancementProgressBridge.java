@@ -22,36 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.advancement;
+package org.spongepowered.common.bridge.advancements;
 
-import org.spongepowered.api.advancement.AdvancementProgress;
+import net.minecraft.advancements.PlayerAdvancements;
+import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.common.advancement.ImplementationBackedCriterionProgress;
 
-import java.time.Instant;
-import java.util.Optional;
+import java.util.Map;
 
-public class SpongeAndCriterionProgress extends SpongeOperatorCriterionProgress {
+public interface AdvancementProgressBridge {
 
-    public SpongeAndCriterionProgress(final AdvancementProgress progress, final SpongeAndCriterion criterion) {
-        super(progress, criterion);
-    }
+    Advancement bridge$getAdvancement();
 
-    @Override
-    public SpongeAndCriterion getCriterion() {
-        return (SpongeAndCriterion) super.getCriterion();
-    }
+    PlayerAdvancements bridge$getPlayerAdvancements();
 
-    @Override
-    public Optional<Instant> get0() {
-        Optional<Instant> time = Optional.empty();
-        for (final AdvancementCriterion criterion : getCriterion().getCriteria()) {
-            final Optional<Instant> time1 = this.progress.get(criterion).get().get();
-            if (!time1.isPresent()) {
-                return Optional.empty();
-            } else if (!time.isPresent() || time1.get().isAfter(time.get())) {
-                time = time1;
-            }
-        }
-        return time;
-    }
+    void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements);
+
+    void bridge$setAdvancement(String advancement);
+
+    void bridge$invalidateAchievedState();
+
+    void bridge$updateProgressMap();
+
+    Map<AdvancementCriterion, ImplementationBackedCriterionProgress> bridge$getProgressMap();
 }

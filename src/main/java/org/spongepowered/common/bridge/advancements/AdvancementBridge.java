@@ -22,23 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.bridge.advancements;
 
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.ICriterionTrigger;
-import org.spongepowered.api.advancement.criteria.trigger.Trigger;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.registry.type.advancement.TriggerTypeRegistryModule;
+import net.minecraft.advancements.Advancement;
+import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.text.Text;
 
-@Mixin(CriteriaTriggers.class)
-public class MixinCriteriaTriggers {
+import java.util.List;
+import java.util.Optional;
 
-    @SuppressWarnings("rawtypes")
-    @Inject(method = "register", at = @At("RETURN"))
-    private static void onRegister(ICriterionTrigger criterion, CallbackInfoReturnable<ICriterionTrigger> ci) {
-        TriggerTypeRegistryModule.getInstance().register((Trigger) criterion);
-    }
+import javax.annotation.Nullable;
+
+public interface AdvancementBridge {
+
+    Optional<Advancement> bridge$getParent();
+
+    void bridge$setParent(@Nullable Advancement advancement);
+
+    Optional<AdvancementTree> bridge$getTree();
+
+    void bridge$setTree(AdvancementTree tree);
+
+    AdvancementCriterion bridge$getCriterion();
+
+    void bridge$setCriterion(AdvancementCriterion criterion);
+
+    String bridge$getName();
+
+    void bridge$setName(String name);
+
+    String bridge$getId();
+
+    boolean bridge$isRegistered();
+
+    void bridge$setRegistered();
+
+    Text bridge$getText();
+
+    List<Text> bridge$getToastText();
 }

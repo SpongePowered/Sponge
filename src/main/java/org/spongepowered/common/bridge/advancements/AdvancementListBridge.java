@@ -22,36 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.advancement;
+package org.spongepowered.common.bridge.advancements;
 
-import org.spongepowered.api.advancement.AdvancementProgress;
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementList;
+import net.minecraft.util.ResourceLocation;
 
-import java.time.Instant;
-import java.util.Optional;
+import java.util.Map;
+import java.util.Set;
 
-public class SpongeAndCriterionProgress extends SpongeOperatorCriterionProgress {
+import javax.annotation.Nullable;
 
-    public SpongeAndCriterionProgress(final AdvancementProgress progress, final SpongeAndCriterion criterion) {
-        super(progress, criterion);
-    }
+public interface AdvancementListBridge {
 
-    @Override
-    public SpongeAndCriterion getCriterion() {
-        return (SpongeAndCriterion) super.getCriterion();
-    }
+    Map<ResourceLocation, Advancement> bridge$getAdvancements();
 
-    @Override
-    public Optional<Instant> get0() {
-        Optional<Instant> time = Optional.empty();
-        for (final AdvancementCriterion criterion : getCriterion().getCriteria()) {
-            final Optional<Instant> time1 = this.progress.get(criterion).get().get();
-            if (!time1.isPresent()) {
-                return Optional.empty();
-            } else if (!time.isPresent() || time1.get().isAfter(time.get())) {
-                time = time1;
-            }
-        }
-        return time;
-    }
+    Set<Advancement> bridge$getRootsSet();
+
+    Set<Advancement> bridge$getNonRootsSet();
+
+    @Nullable
+    AdvancementList.Listener bridge$getListener();
 }

@@ -22,53 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.mixin.api.mcp.advancements;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.ICriterionInstance;
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.advancement.TriggerBridge;
 import org.spongepowered.common.advancement.UnknownFilteredTriggerConfiguration;
 
-@Implements(@Interface(iface = Trigger.class, prefix = "type$"))
-@Mixin(ICriterionTrigger.class)
-public interface MixinICriterionTrigger extends TriggerBridge {
+@SuppressWarnings("rawtypes")
+@Mixin(ICriterionInstance.class)
+public interface ICriterionInstanceMixin_API extends FilteredTrigger {
 
     @Shadow ResourceLocation getId();
 
-    default String type$getId() {
-        return getId().toString();
-    }
-
-    default String type$getName() {
-        return getId().getPath();
-    }
-
-    default void type$trigger() {
-        type$trigger(Sponge.getServer().getOnlinePlayers());
-    }
-
-    default void type$trigger(Iterable<Player> players) {
-        players.forEach(this::trigger);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    default Class<FilteredTriggerConfiguration> getConfigurationType() {
-        return (Class) UnknownFilteredTriggerConfiguration.class;
+    default Trigger getType() {
+        final ICriterionTrigger triggerType = CriteriaTriggers.get(getId());
+        checkNotNull(triggerType, "triggerType");
+        return (Trigger) triggerType;
     }
 
     @Override
-    default void trigger(Player player) {
-        // This could possibly be implemented in all the vanilla triggers
-        // and construct trigger method arguments based on context values
-        // Not needed for now, just assume it always fails
+    default FilteredTriggerConfiguration getConfiguration() {
+        return UnknownFilteredTriggerConfiguration.INSTANCE;
     }
 }

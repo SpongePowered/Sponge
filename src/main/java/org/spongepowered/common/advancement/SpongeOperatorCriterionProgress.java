@@ -28,19 +28,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.CriterionProgress;
 
 import java.time.Instant;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public abstract class SpongeOperatorCriterionProgress implements CriterionProgressBridge {
+public abstract class SpongeOperatorCriterionProgress implements ImplementationBackedCriterionProgress, CriterionProgress {
 
     final AdvancementProgress progress;
     private final SpongeOperatorCriterion criterion;
     @Nullable private Optional<Instant> cachedAchievedState;
 
-    SpongeOperatorCriterionProgress(AdvancementProgress progress, SpongeOperatorCriterion criterion) {
+    SpongeOperatorCriterionProgress(final AdvancementProgress progress, final SpongeOperatorCriterion criterion) {
         this.progress = progress;
         this.criterion = criterion;
     }
@@ -63,7 +64,7 @@ public abstract class SpongeOperatorCriterionProgress implements CriterionProgre
     @Override
     public Instant grant() {
         Instant time = null;
-        for (AdvancementCriterion criterion : this.criterion.getCriteria()) {
+        for (final AdvancementCriterion criterion : this.criterion.getCriteria()) {
             final Instant time1 = this.progress.get(criterion).get().grant();
             if (time == null || time1.isAfter(time)) {
                 time = time1;
@@ -76,7 +77,7 @@ public abstract class SpongeOperatorCriterionProgress implements CriterionProgre
     @Override
     public Optional<Instant> revoke() {
         final Optional<Instant> previousState = get();
-        for (AdvancementCriterion criterion : this.criterion.getCriteria()) {
+        for (final AdvancementCriterion criterion : this.criterion.getCriteria()) {
             this.progress.get(criterion).get().revoke();
         }
         return previousState;

@@ -44,7 +44,7 @@ public class SpongeScoreCriterionBuilder extends AbstractCriterionBuilder<ScoreA
     }
 
     @Override
-    public ScoreAdvancementCriterion.Builder from(ScoreAdvancementCriterion value) {
+    public ScoreAdvancementCriterion.Builder from(final ScoreAdvancementCriterion value) {
         this.goal = value.getGoal();
         return super.from(value);
     }
@@ -56,7 +56,7 @@ public class SpongeScoreCriterionBuilder extends AbstractCriterionBuilder<ScoreA
     }
 
     @Override
-    public ScoreAdvancementCriterion.Builder goal(int goal) {
+    public ScoreAdvancementCriterion.Builder goal(final int goal) {
         checkState(goal > 0, "The goal must be greater than zero.");
         this.goal = goal;
         return this;

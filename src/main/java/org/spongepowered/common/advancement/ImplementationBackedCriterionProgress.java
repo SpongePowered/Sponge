@@ -22,21 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.advancement;
 
-import net.minecraft.advancements.AdvancementManager;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.server.management.PlayerListBridge;
+public interface ImplementationBackedCriterionProgress {
 
-@Mixin(AdvancementManager.class)
-public class MixinAdvancementManager {
+    void invalidateAchievedState();
 
-    @Inject(method = "reload", at = @At("RETURN"))
-    private void onReloadReturn(CallbackInfo ci) {
-        ((PlayerListBridge) SpongeImpl.getServer().getPlayerList()).reloadAdvancementProgress();
-    }
 }

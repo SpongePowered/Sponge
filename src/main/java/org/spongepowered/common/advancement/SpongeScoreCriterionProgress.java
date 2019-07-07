@@ -37,20 +37,20 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.advancement.IMixinAdvancementProgress;
-import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
+import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
+import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 
 import java.time.Instant;
 import java.util.Optional;
 
-public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, CriterionProgressBridge {
+public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, ImplementationBackedCriterionProgress {
 
     private final SpongeScoreCriterion criterion;
     private final AdvancementProgress progress;
 
     private int score = -1;
 
-    public SpongeScoreCriterionProgress(AdvancementProgress progress, SpongeScoreCriterion criterion) {
+    public SpongeScoreCriterionProgress(final AdvancementProgress progress, final SpongeScoreCriterion criterion) {
         this.criterion = criterion;
         this.progress = progress;
     }
@@ -64,7 +64,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Cri
     public int getScore() {
         if (this.score == -1) {
             this.score = 0;
-            for (AdvancementCriterion criterion : this.criterion.internalCriteria) {
+            for (final AdvancementCriterion criterion : this.criterion.internalCriteria) {
                 final Optional<Instant> time1 = this.progress.get(criterion).get().get();
                 if (time1.isPresent()) {
                     this.score++;
@@ -75,7 +75,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Cri
     }
 
     @Override
-    public Optional<Instant> set(int score) {
+    public Optional<Instant> set(final int score) {
         checkState(score >= 0 && score <= getGoal(), "Score cannot be negative or greater than the goal.");
         int lastScore = getScore();
         if (lastScore == score) {
@@ -84,7 +84,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Cri
         final CriterionEvent.Score.Change event;
         final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
         final Advancement advancement = this.progress.getAdvancement();
-        final Player player = ((IMixinPlayerAdvancements) ((IMixinAdvancementProgress) this.progress).getPlayerAdvancements()).getPlayer();
+        final Player player = ((PlayerAdvancementsBridge) ((AdvancementProgressBridge) this.progress).bridge$getPlayerAdvancements()).bridge$getPlayer();
         if (lastScore == getGoal()) {
             event = SpongeEventFactory.createCriterionEventScoreRevoke(
                     cause, advancement, getCriterion(), player, lastScore, score);
@@ -102,7 +102,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Cri
         // This is the only case a instant will be returned
         if (score == getGoal()) {
             Instant instant = null;
-            for (AdvancementCriterion criterion : this.criterion.internalCriteria) {
+            for (final AdvancementCriterion criterion : this.criterion.internalCriteria) {
                 final org.spongepowered.api.advancement.criteria.CriterionProgress progress = this.progress.get(criterion).get();
                 if (!progress.achieved()) {
                     instant = progress.grant();
@@ -111,7 +111,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Cri
             this.score = score;
             return Optional.of(instant == null ? Instant.now() : instant);
         }
-        for (AdvancementCriterion criterion : this.criterion.internalCriteria) {
+        for (final AdvancementCriterion criterion : this.criterion.internalCriteria) {
             final org.spongepowered.api.advancement.criteria.CriterionProgress progress = this.progress.get(criterion).get();
             // We don't have enough score, grant more criteria
             if (lastScore < score && !progress.achieved()) {
@@ -134,19 +134,19 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Cri
     }
 
     @Override
-    public Optional<Instant> add(int score) {
+    public Optional<Instant> add(final int score) {
         return set(MathHelper.clamp(getScore() + score, 0, getGoal()));
     }
 
     @Override
-    public Optional<Instant> remove(int score) {
+    public Optional<Instant> remove(final int score) {
         return set(MathHelper.clamp(getScore() - score, 0, getGoal()));
     }
 
     @Override
     public Optional<Instant> get() {
         Optional<Instant> time = Optional.empty();
-        for (AdvancementCriterion criterion : this.criterion.internalCriteria) {
+        for (final AdvancementCriterion criterion : this.criterion.internalCriteria) {
             final Optional<Instant> time1 = this.progress.get(criterion).get().get();
             if (!time1.isPresent()) {
                 return Optional.empty();

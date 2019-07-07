@@ -42,18 +42,18 @@ import java.util.function.Function;
 
 public final class SpongeCriterionHelper {
 
-    static AdvancementCriterion build(Class<? extends OperatorCriterion> type, Function<Set<AdvancementCriterion>, AdvancementCriterion> function,
-            AdvancementCriterion criterion, Iterable<AdvancementCriterion> criteria) {
+    static AdvancementCriterion build(final Class<? extends OperatorCriterion> type, final Function<Set<AdvancementCriterion>, AdvancementCriterion> function,
+            final AdvancementCriterion criterion, final Iterable<AdvancementCriterion> criteria) {
         checkNotNull(criteria, "criteria");
         final List<AdvancementCriterion> builder = new ArrayList<>();
         build(type, criterion, builder);
-        for (AdvancementCriterion criterion1 : criteria) {
+        for (final AdvancementCriterion criterion1 : criteria) {
             build(type, criterion1, builder);
         }
         return builder.isEmpty() ? SpongeEmptyCriterion.INSTANCE : builder.size() == 1 ? builder.get(0) : function.apply(ImmutableSet.copyOf(builder));
     }
 
-    private static void build(Class<? extends OperatorCriterion> type, AdvancementCriterion criterion, List<AdvancementCriterion> criteria) {
+    private static void build(final Class<? extends OperatorCriterion> type, final AdvancementCriterion criterion, final List<AdvancementCriterion> criteria) {
         if (criterion == SpongeEmptyCriterion.INSTANCE) {
             return;
         }
@@ -65,7 +65,7 @@ public final class SpongeCriterionHelper {
         }
     }
 
-    static Tuple<Map<String, Criterion>, String[][]> toVanillaCriteriaData(AdvancementCriterion criterion) {
+    static Tuple<Map<String, Criterion>, String[][]> toVanillaCriteriaData(final AdvancementCriterion criterion) {
         final Map<String, Criterion> criteria = new HashMap<>();
         if (criterion == SpongeEmptyCriterion.INSTANCE) {
             return new Tuple<>(criteria, new String[0][0]);
@@ -74,12 +74,12 @@ public final class SpongeCriterionHelper {
         final String[][] idsArray = new String[criteria.size()][];
         final Iterator<Criterion> it = criteria.values().iterator();
         for (int i = 0; i < criteria.size(); i++) {
-            idsArray[i] = new String[] { ((CriterionBridge) it.next()).getName() };
+            idsArray[i] = new String[] { ((DefaultedAdvancementCriterion) it.next()).getName() };
         }
         return new Tuple<>(criteria, idsArray);
     }
 
-    private static void collectCriteria(AdvancementCriterion criterion, Map<String, Criterion> criteria) {
+    private static void collectCriteria(final AdvancementCriterion criterion, final Map<String, Criterion> criteria) {
         if (criterion instanceof SpongeOperatorCriterion) {
             ((SpongeOperatorCriterion) criterion).getCriteria()
                     .forEach(c -> collectCriteria(c, criteria));

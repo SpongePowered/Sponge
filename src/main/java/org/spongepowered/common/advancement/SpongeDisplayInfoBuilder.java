@@ -51,47 +51,47 @@ public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     }
 
     @Override
-    public DisplayInfo.Builder type(AdvancementType advancementType) {
+    public DisplayInfo.Builder type(final AdvancementType advancementType) {
         checkNotNull(advancementType, "advancementType");
         this.advancementType = advancementType;
         return this;
     }
 
     @Override
-    public DisplayInfo.Builder description(Text description) {
+    public DisplayInfo.Builder description(final Text description) {
         checkNotNull(description, "description");
         this.description = description;
         return this;
     }
 
     @Override
-    public DisplayInfo.Builder title(Text title) {
+    public DisplayInfo.Builder title(final Text title) {
         checkNotNull(title, "title");
         this.title = title;
         return this;
     }
 
     @Override
-    public DisplayInfo.Builder icon(ItemStackSnapshot itemStackSnapshot) {
+    public DisplayInfo.Builder icon(final ItemStackSnapshot itemStackSnapshot) {
         checkNotNull(itemStackSnapshot, "itemStackSnapshot");
         this.icon = itemStackSnapshot;
         return this;
     }
 
     @Override
-    public DisplayInfo.Builder showToast(boolean showToast) {
+    public DisplayInfo.Builder showToast(final boolean showToast) {
         this.showToast = showToast;
         return this;
     }
 
     @Override
-    public DisplayInfo.Builder announceToChat(boolean announceToChat) {
+    public DisplayInfo.Builder announceToChat(final boolean announceToChat) {
         this.announceToChat = announceToChat;
         return this;
     }
 
     @Override
-    public DisplayInfo.Builder hidden(boolean hidden) {
+    public DisplayInfo.Builder hidden(final boolean hidden) {
         this.hidden = hidden;
         return this;
     }
@@ -109,7 +109,7 @@ public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     }
 
     @Override
-    public DisplayInfo.Builder from(DisplayInfo value) {
+    public DisplayInfo.Builder from(final DisplayInfo value) {
         this.icon = value.getIcon();
         this.description = value.getDescription();
         this.advancementType = value.getType();

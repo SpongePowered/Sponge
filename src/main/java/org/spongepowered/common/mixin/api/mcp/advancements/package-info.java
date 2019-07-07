@@ -22,23 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.advancement;
-
-import org.spongepowered.common.advancement.SpongeScoreCriterion;
-
-import javax.annotation.Nullable;
-
-public interface IMixinCriterion {
-
-    void setName(String name);
-
-    @Nullable
-    SpongeScoreCriterion getScoreCriterion();
-
-    void setScoreCriterion(@Nullable SpongeScoreCriterion criterion);
-
-    @Nullable
-    Integer getScoreGoal();
-
-    void setScoreGoal(@Nullable Integer goal);
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.mixin.api.mcp.advancements;

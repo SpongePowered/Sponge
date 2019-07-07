@@ -22,83 +22,74 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.mixin.core.advancements;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.ICriterionInstance;
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.advancement.CriterionBridge;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
+import org.spongepowered.common.bridge.advancements.CriterionBridge;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 @Mixin(Criterion.class)
-public class MixinCriterion implements CriterionBridge, IMixinCriterion {
+public class CriterionMixin implements CriterionBridge {
 
     @Shadow @Final @Nullable private ICriterionInstance criterionInstance;
 
-    @Nullable private String name;
-    @Nullable private SpongeScoreCriterion scoreCriterion;
-    @Nullable private Integer scoreGoal;
+    @Nullable private String impl$name;
+    @Nullable private SpongeScoreCriterion impl$scoreCriterion;
+    @Nullable private Integer impl$scoreGoal;
 
     @Override
-    public String getName() {
-        if (this.name == null) {
-            this.name = UUID.randomUUID().toString().replace("-", "");
+    public String bridge$getName() {
+        if (this.impl$name == null) {
+            this.impl$name = UUID.randomUUID().toString().replace("-", "");
         }
-        return this.name;
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public Optional<FilteredTrigger<?>> getTrigger() {
-        return Optional.ofNullable((FilteredTrigger<?>) this.criterionInstance);
+        return this.impl$name;
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
+    public void bridge$setName(final String name) {
+        this.impl$name = name;
     }
 
     @Nullable
     @Override
-    public SpongeScoreCriterion getScoreCriterion() {
-        return this.scoreCriterion;
+    public SpongeScoreCriterion bridge$getScoreCriterion() {
+        return this.impl$scoreCriterion;
     }
 
     @Override
-    public void setScoreCriterion(@Nullable SpongeScoreCriterion criterion) {
-        this.scoreCriterion = criterion;
+    public void bridge$setScoreCriterion(@Nullable final SpongeScoreCriterion criterion) {
+        this.impl$scoreCriterion = criterion;
     }
 
     @Nullable
     @Override
-    public Integer getScoreGoal() {
-        return this.scoreGoal;
+    public Integer bridge$getScoreGoal() {
+        return this.impl$scoreGoal;
     }
 
     @Override
-    public void setScoreGoal(@Nullable Integer goal) {
-        this.scoreGoal = goal;
+    public void bridge$setScoreGoal(@Nullable final Integer goal) {
+        this.impl$scoreGoal = goal;
     }
 
     @Inject(method = "criterionFromJson", at = @At("RETURN"))
-    private static void onCriterionFromJson(JsonObject json, JsonDeserializationContext context, CallbackInfoReturnable<Criterion> ci) {
+    private static void impl$fixTriggerTimeDeserializer(final JsonObject json, final JsonDeserializationContext context, final CallbackInfoReturnable<Criterion> ci) {
         final Criterion criterion = ci.getReturnValue();
         if (json.has("trigger_times")) {
-            ((IMixinCriterion) criterion).setScoreGoal(json.get("trigger_times").getAsInt());
+            ((CriterionBridge) criterion).bridge$setScoreGoal(json.get("trigger_times").getAsInt());
         }
     }
 }

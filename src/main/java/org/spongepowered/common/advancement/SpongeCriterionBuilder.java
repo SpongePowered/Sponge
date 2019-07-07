@@ -27,15 +27,16 @@ package org.spongepowered.common.advancement;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.ICriterionInstance;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
+import org.spongepowered.common.bridge.advancements.CriterionBridge;
 
 public class SpongeCriterionBuilder extends AbstractCriterionBuilder<AdvancementCriterion, AdvancementCriterion.Builder>
         implements AdvancementCriterion.Builder {
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     AdvancementCriterion build0() {
         final Criterion criterion = new Criterion((ICriterionInstance) this.trigger);
-        ((IMixinCriterion) criterion).setName(this.name);
+        ((CriterionBridge) criterion).bridge$setName(this.name);
         return (AdvancementCriterion) criterion;
     }
 }

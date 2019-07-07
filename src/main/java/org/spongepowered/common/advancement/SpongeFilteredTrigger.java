@@ -36,7 +36,7 @@ public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigge
     private final SpongeTrigger triggerType;
     private final FilteredTriggerConfiguration configuration;
 
-    SpongeFilteredTrigger(SpongeTrigger triggerType, FilteredTriggerConfiguration configuration) {
+    SpongeFilteredTrigger(final SpongeTrigger triggerType, final FilteredTriggerConfiguration configuration) {
         this.triggerType = triggerType;
         this.configuration = configuration;
     }

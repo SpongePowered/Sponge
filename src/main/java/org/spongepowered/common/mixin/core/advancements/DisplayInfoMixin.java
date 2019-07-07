@@ -22,18 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.advancement;
+package org.spongepowered.common.mixin.core.advancements;
 
+import static com.google.common.base.Preconditions.checkState;
+
+import net.minecraft.advancements.DisplayInfo;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 
 import javax.annotation.Nullable;
 
-public interface IMixinDisplayInfo {
+@Mixin(DisplayInfo.class)
+public class DisplayInfoMixin implements DisplayInfoBridge {
 
-    void setAdvancement(Advancement advancement);
+    @Shadow @Final @Mutable @Nullable private ResourceLocation background;
+
+    @Nullable private Advancement impl$advancement;
+
+    @Override
+    public Advancement bridge$getAdvancement() {
+        checkState(this.impl$advancement != null, "The advancement is not yet initialized");
+        return this.impl$advancement;
+    }
+
+    @Override
+    public void bridge$setAdvancement(final Advancement advancement) {
+        this.impl$advancement = advancement;
+    }
 
     @Nullable
-    String getBackground();
+    @Override
+    public String bridge$getBackground() {
+        return this.background == null ? null : this.background.toString();
+    }
 
-    void setBackground(@Nullable String background);
+    @Override
+    public void bridge$setBackground(@Nullable final String background) {
+        this.background = background == null ? null : new ResourceLocation(background);
+    }
+
 }

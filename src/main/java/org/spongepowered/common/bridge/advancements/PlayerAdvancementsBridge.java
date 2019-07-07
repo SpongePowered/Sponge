@@ -22,13 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.advancement;
+package org.spongepowered.common.bridge.advancements;
 
-import net.minecraft.advancements.Advancement;
+import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.entity.living.player.Player;
 
-public interface IMixinICriterionTriggerListener {
+import java.util.Set;
 
-    Advancement getAdvancement();
+public interface PlayerAdvancementsBridge {
 
-    String getCriterionName();
+    Set<AdvancementTree> bridge$getAdvancementTrees();
+
+    Player bridge$getPlayer();
+
+    void bridge$reloadAdvancementProgress();
 }

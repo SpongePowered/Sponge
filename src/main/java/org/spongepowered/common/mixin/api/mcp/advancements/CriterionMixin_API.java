@@ -22,36 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.mixin.api.mcp.advancements;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.ICriterionInstance;
-import net.minecraft.advancements.ICriterionTrigger;
-import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
-import org.spongepowered.api.advancement.criteria.trigger.Trigger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.advancement.UnknownFilteredTriggerConfiguration;
+import org.spongepowered.common.advancement.DefaultedAdvancementCriterion;
+import org.spongepowered.common.bridge.advancements.CriterionBridge;
 
-@SuppressWarnings("rawtypes")
-@Mixin(ICriterionInstance.class)
-public interface MixinICriterionInstance extends FilteredTrigger {
+import java.util.Optional;
 
-    @Shadow ResourceLocation getId();
+@Mixin(Criterion.class)
+public class CriterionMixin_API implements DefaultedAdvancementCriterion {
 
-    @Override
-    default Trigger getType() {
-        final ICriterionTrigger triggerType = CriteriaTriggers.get(getId());
-        checkNotNull(triggerType, "triggerType");
-        return (Trigger) triggerType;
-    }
+    @Shadow @Final private ICriterionInstance criterionInstance;
 
     @Override
-    default FilteredTriggerConfiguration getConfiguration() {
-        return UnknownFilteredTriggerConfiguration.INSTANCE;
+    public String getName() {
+        return  ((CriterionBridge) this).bridge$getName();
     }
+
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public Optional<FilteredTrigger<?>> getTrigger() {
+        return Optional.ofNullable((FilteredTrigger<?>) this.criterionInstance);
+    }
+
 }

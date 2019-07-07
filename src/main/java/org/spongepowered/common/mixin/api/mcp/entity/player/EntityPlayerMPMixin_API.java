@@ -98,7 +98,6 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -122,8 +121,8 @@ import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
-import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
+import org.spongepowered.common.bridge.advancements.AdvancementBridge;
+import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.bridge.text.TitleBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -630,13 +629,13 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     @Override
     public AdvancementProgress getProgress(final Advancement advancement) {
         checkNotNull(advancement, "advancement");
-        checkState(((IMixinAdvancement) advancement).isRegistered(), "The advancement must be registered");
+        checkState(((AdvancementBridge) advancement).bridge$isRegistered(), "The advancement must be registered");
         return (AdvancementProgress) this.advancements.getProgress((net.minecraft.advancements.Advancement) advancement);
     }
 
     @Override
     public Collection<AdvancementTree> getUnlockedAdvancementTrees() {
-        return ((IMixinPlayerAdvancements) this.advancements).getAdvancementTrees();
+        return ((PlayerAdvancementsBridge) this.advancements).bridge$getAdvancementTrees();
     }
 
     @Override

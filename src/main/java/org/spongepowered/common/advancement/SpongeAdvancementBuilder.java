@@ -36,7 +36,7 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
+import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
@@ -86,10 +86,10 @@ public class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advancement, 
         }
         final Advancement advancement = (Advancement) new net.minecraft.advancements.Advancement(
                 resourceLocation, parent, displayInfo, rewards, result.getFirst(), result.getSecond());
-        ((IMixinAdvancement) advancement).setCriterion(this.criterion);
+        ((AdvancementBridge) advancement).bridge$setCriterion(this.criterion);
         final String plainName = name.get();
         if (StringUtils.isNotEmpty(plainName)) {
-            ((IMixinAdvancement) advancement).setName(plainName);
+            ((AdvancementBridge) advancement).bridge$setName(plainName);
         }
         return advancement;
     }

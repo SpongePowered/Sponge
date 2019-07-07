@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.text.TextFormatting;
@@ -41,36 +41,36 @@ import javax.annotation.Nullable;
 
 @Implements(@Interface(iface = AdvancementType.class, prefix = "type$"))
 @Mixin(FrameType.class)
-public class MixinFrameType {
+public class FrameTypeMixin_API {
 
     @Shadow @Final private String name;
     @Shadow @Final private TextFormatting format;
 
-    @Nullable private String id;
-    @Nullable private String spongeName;
-    @Nullable private TextFormat textFormat;
+    @Nullable private String api$id;
+    @Nullable private String api$spongeName;
+    @Nullable private TextFormat api$textFormat;
 
     public String type$getId() {
-        if (this.id == null) {
-            this.id = "minecraft:" + this.name;
+        if (this.api$id == null) {
+            this.api$id = "minecraft:" + this.name;
         }
-        return this.id;
+        return this.api$id;
     }
 
     @Intrinsic
     public String type$getName() {
-        if (this.spongeName == null) {
-            this.spongeName = Character.toUpperCase(this.name.charAt(0)) + this.name.substring(1);
+        if (this.api$spongeName == null) {
+            this.api$spongeName = Character.toUpperCase(this.name.charAt(0)) + this.name.substring(1);
         }
-        return this.spongeName;
+        return this.api$spongeName;
     }
 
     public TextFormat type$getTextFormat() {
-        if (this.textFormat == null) {
-            this.textFormat = TextFormat.of(
+        if (this.api$textFormat == null) {
+            this.api$textFormat = TextFormat.of(
                     SpongeTextColor.of(this.format),
                     SpongeTextStyle.of(this.format));
         }
-        return this.textFormat;
+        return this.api$textFormat;
     }
 }

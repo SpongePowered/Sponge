@@ -37,8 +37,8 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
-import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
+import org.spongepowered.common.bridge.advancements.AdvancementBridge;
+import org.spongepowered.common.bridge.advancements.AdvancementListBridge;
 import org.spongepowered.common.registry.CustomRegistrationPhase;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
@@ -66,8 +66,8 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
         super("minecraft");
     }
 
-    private static IMixinAdvancementList getAdvancementList() {
-        return (IMixinAdvancementList) AdvancementManager.ADVANCEMENT_LIST;
+    private static AdvancementListBridge getAdvancementList() {
+        return (AdvancementListBridge) AdvancementManager.ADVANCEMENT_LIST;
     }
 
     @Override
@@ -86,14 +86,14 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
     @Override
     public void registerAdditionalCatalog(Advancement advancement) {
         checkState(SpongeImplHooks.isMainThread());
-        ((IMixinAdvancement) advancement).setRegistered();
+        ((AdvancementBridge) advancement).bridge$setRegistered();
         final net.minecraft.advancements.Advancement mcAdv = (net.minecraft.advancements.Advancement) advancement;
-        final IMixinAdvancementList advList = getAdvancementList();
-        advList.getAdvancements().put(mcAdv.getId(), mcAdv);
+        final AdvancementListBridge advList = getAdvancementList();
+        advList.bridge$getAdvancements().put(mcAdv.getId(), mcAdv);
         // If the parent != null, that means that its not a root advancement
         if (mcAdv.getParent() != null && mcAdv.getParent() != DUMMY_ROOT_ADVANCEMENT &&
-                advList.getNonRootsSet().add(mcAdv)) { // Only update if the root wasn't already present for some reason
-            final AdvancementList.Listener listener = advList.getListener();
+                advList.bridge$getNonRootsSet().add(mcAdv)) { // Only update if the root wasn't already present for some reason
+            final AdvancementList.Listener listener = advList.bridge$getListener();
             if (listener != null) {
                 listener.nonRootAdvancementAdded(mcAdv);
             }

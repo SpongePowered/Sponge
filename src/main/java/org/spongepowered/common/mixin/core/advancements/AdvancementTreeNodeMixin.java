@@ -22,18 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.advancement;
+package org.spongepowered.common.mixin.core.advancements;
 
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementTreeNode;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementTree;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.advancement.TreeLayout;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.advancement.SpongeAdvancementTree;
+import org.spongepowered.common.advancement.SpongeTreeLayout;
 
-import java.util.Set;
+@Mixin(AdvancementTreeNode.class)
+public class AdvancementTreeNodeMixin {
 
-public interface IMixinPlayerAdvancements {
-
-    Set<AdvancementTree> getAdvancementTrees();
-
-    Player getPlayer();
-
-    void reloadAdvancementProgress();
+    @Inject(method = "layout", at = @At("RETURN"))
+    private static void onLayout(final Advancement root, final CallbackInfo ci) {
+        final AdvancementTree advancementTree = ((org.spongepowered.api.advancement.Advancement) root).getTree().get();
+        final TreeLayout layout = new SpongeTreeLayout((SpongeAdvancementTree) advancementTree);
+        SpongeImpl.postEvent(SpongeEventFactory.createAdvancementTreeEventGenerateLayout(
+                Sponge.getCauseStackManager().getCurrentCause(), layout, advancementTree));
+    }
 }

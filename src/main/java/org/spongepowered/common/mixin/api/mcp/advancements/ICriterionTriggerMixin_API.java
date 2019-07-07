@@ -22,53 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.advancement;
+package org.spongepowered.common.mixin.api.mcp.advancements;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
+import net.minecraft.advancements.ICriterionTrigger;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.advancement.TriggerBridge;
 
-@SuppressWarnings("unchecked")
-public class SpongeFilteredTriggerBuilder<C extends FilteredTriggerConfiguration> implements FilteredTrigger.Builder<C> {
+@Mixin(ICriterionTrigger.class)
+public interface ICriterionTriggerMixin_API<C extends FilteredTriggerConfiguration> extends Trigger<C> {
 
-    private C config;
-    private Trigger<C> type;
+    @Shadow ResourceLocation shadow$getId();
 
     @Override
-    public <T extends FilteredTriggerConfiguration> FilteredTrigger.Builder<T> type(final Trigger<T> type) {
-        checkNotNull(type, "type");
-        this.type = (Trigger<C>) type;
-        return (FilteredTrigger.Builder<T>) this;
+    default String getId() {
+        return shadow$getId().toString();
     }
 
     @Override
-    public FilteredTrigger.Builder<C> config(final C config) {
-        checkNotNull(config, "config");
-        this.config = config;
-        return this;
+    default String getName() {
+        return shadow$getId().getPath();
     }
 
     @Override
-    public FilteredTrigger<C> build() {
-        checkState(this.type != null, "The type must be set");
-        checkState(this.config != null, "The config must be set");
-        return new SpongeFilteredTrigger((SpongeTrigger) this.type, this.config);
+    default void trigger() {
+        trigger(Sponge.getServer().getOnlinePlayers());
     }
 
     @Override
-    public FilteredTrigger.Builder<C> from(final FilteredTrigger<C> value) {
-        this.config = value.getConfiguration();
-        this.type = value.getType();
-        return this;
+    default void trigger(final Iterable<Player> players) {
+        players.forEach(((TriggerBridge) this)::bridge$trigger);
     }
 
     @Override
-    public FilteredTrigger.Builder<C> reset() {
-        this.config = null;
-        this.type = null;
-        return this;
+    default void trigger(final Player player) {
+        ((TriggerBridge) this).bridge$trigger(player);
+        // This could possibly be implemented in all the vanilla triggers
+        // and construct trigger method arguments based on context values
+        // Not needed for now, just assume it always fails
     }
 }

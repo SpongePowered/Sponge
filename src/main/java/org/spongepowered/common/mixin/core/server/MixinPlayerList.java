@@ -93,7 +93,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.player.PlayerPhase;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
-import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
+import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.service.ban.SpongeIPBanList;
@@ -493,7 +493,7 @@ public abstract class MixinPlayerList implements PlayerListBridge {
     @Override
     public void reloadAdvancementProgress() {
         for (PlayerAdvancements playerAdvancements : this.advancements.values()) {
-            ((IMixinPlayerAdvancements) playerAdvancements).reloadAdvancementProgress();
+            ((PlayerAdvancementsBridge) playerAdvancements).bridge$reloadAdvancementProgress();
         }
     }
 }

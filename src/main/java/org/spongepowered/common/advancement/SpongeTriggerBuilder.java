@@ -72,7 +72,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
 
     @Override
     @SuppressWarnings("rawtypes")
-    public <T extends FilteredTriggerConfiguration & DataSerializable> Trigger.Builder<T> dataSerializableConfig(Class<T> dataConfigClass) {
+    public <T extends FilteredTriggerConfiguration & DataSerializable> Trigger.Builder<T> dataSerializableConfig(final Class<T> dataConfigClass) {
         checkNotNull(dataConfigClass, "dataConfigClass");
         this.configType = (Class<C>) dataConfigClass;
         this.constructor = new DataSerializableConstructor(dataConfigClass);
@@ -83,12 +83,12 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
 
         private final Class<C> dataConfigClass;
 
-        private DataSerializableConstructor(Class<C> dataConfigClass) {
+        private DataSerializableConstructor(final Class<C> dataConfigClass) {
             this.dataConfigClass = dataConfigClass;
         }
 
         @Override
-        public C apply(JsonObject jsonObject) {
+        public C apply(final JsonObject jsonObject) {
             final DataBuilder<C> builder = Sponge.getDataManager().getBuilder(this.dataConfigClass).get();
             try {
                 final DataView dataView = JsonDataFormat.serialize(GSON, jsonObject);
@@ -100,14 +100,14 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     }
 
     @Override
-    public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> typeSerializableConfig(Class<T> configClass) {
+    public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> typeSerializableConfig(final Class<T> configClass) {
         return typeSerializableConfig(configClass, TypeSerializers.getDefaultSerializers());
     }
 
     @Override
     @SuppressWarnings("rawtypes")
-    public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> typeSerializableConfig(Class<T> configClass,
-            TypeSerializerCollection typeSerializerCollection) {
+    public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> typeSerializableConfig(final Class<T> configClass,
+            final TypeSerializerCollection typeSerializerCollection) {
         checkNotNull(configClass, "configClass");
         checkNotNull(typeSerializerCollection, "typeSerializerCollection");
         this.configType = (Class<C>) configClass;
@@ -120,13 +120,13 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
         private final TypeToken<C> typeToken;
         private final TypeSerializerCollection typeSerializerCollection;
 
-        private ConfigurateConstructor(Class<C> typeToken, TypeSerializerCollection typeSerializerCollection) {
+        private ConfigurateConstructor(final Class<C> typeToken, final TypeSerializerCollection typeSerializerCollection) {
             this.typeToken = TypeToken.of(typeToken);
             this.typeSerializerCollection = typeSerializerCollection;
         }
 
         @Override
-        public C apply(JsonObject jsonObject) {
+        public C apply(final JsonObject jsonObject) {
             final GsonConfigurationLoader loader = GsonConfigurationLoader.builder()
                     .setSource(() -> new BufferedReader(new StringReader(GSON.toJson(jsonObject))))
                     .build();
@@ -141,7 +141,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
 
     @SuppressWarnings("rawtypes")
     @Override
-    public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> jsonSerializableConfig(Class<T> configClass, Gson gson) {
+    public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> jsonSerializableConfig(final Class<T> configClass, final Gson gson) {
         checkNotNull(configClass, "configClass");
         this.configType = (Class<C>) configClass;
         this.constructor = new JsonConstructor(configClass, gson);
@@ -149,7 +149,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     }
 
     @Override
-    public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> jsonSerializableConfig(Class<T> configClass) {
+    public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> jsonSerializableConfig(final Class<T> configClass) {
         return jsonSerializableConfig(configClass, GSON);
     }
 
@@ -158,13 +158,13 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
         private final Class<C> configClass;
         private final Gson gson;
 
-        private JsonConstructor(Class<C> configClass, Gson gson) {
+        private JsonConstructor(final Class<C> configClass, final Gson gson) {
             this.configClass = configClass;
             this.gson = gson;
         }
 
         @Override
-        public C apply(JsonObject jsonObject) {
+        public C apply(final JsonObject jsonObject) {
             return this.gson.fromJson(jsonObject, this.configClass);
         }
     }
@@ -177,20 +177,20 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     }
 
     @Override
-    public Trigger.Builder<C> listener(Consumer<CriterionEvent.Trigger<C>> eventListener) {
+    public Trigger.Builder<C> listener(final Consumer<CriterionEvent.Trigger<C>> eventListener) {
         this.eventHandler = eventListener;
         return this;
     }
 
     @Override
-    public Trigger.Builder<C> id(String id) {
+    public Trigger.Builder<C> id(final String id) {
         checkNotNull(id, "id");
         this.id = id;
         return this;
     }
 
     @Override
-    public Trigger.Builder<C> name(String name) {
+    public Trigger.Builder<C> name(final String name) {
         checkNotNull(name, "name");
         this.name = name;
         return this;
@@ -204,7 +204,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
         final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
         final String name = StringUtils.isNotEmpty(this.name) ? this.name : this.id;
         return (Trigger<C>) new SpongeTrigger((Class) this.configType, (Function) this.constructor,
-                new ResourceLocation(plugin.getId(), id), (Consumer) this.eventHandler, name);
+                new ResourceLocation(plugin.getId(), this.id), (Consumer) this.eventHandler, name);
     }
 
     @Override

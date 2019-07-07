@@ -22,9 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.mixin.core.advancements;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.advancements.AdvancementProgress;
@@ -32,14 +31,11 @@ import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.PlayerAdvancements;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.api.advancement.Progressable;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.CriterionProgress;
 import org.spongepowered.api.advancement.criteria.OperatorCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
-import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
-import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.CriterionEvent;
@@ -53,7 +49,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.advancement.CriterionProgressBridge;
+import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
+import org.spongepowered.common.advancement.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.advancement.SpongeAndCriterion;
 import org.spongepowered.common.advancement.SpongeAndCriterionProgress;
 import org.spongepowered.common.advancement.SpongeEmptyCriterion;
@@ -61,10 +58,9 @@ import org.spongepowered.common.advancement.SpongeOrCriterion;
 import org.spongepowered.common.advancement.SpongeOrCriterionProgress;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.advancement.SpongeScoreCriterionProgress;
-import org.spongepowered.common.interfaces.advancement.IMixinAdvancementProgress;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterionProgress;
-import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
+import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
+import org.spongepowered.common.bridge.advancements.CriterionBridge;
+import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 
 import java.time.Instant;
@@ -75,26 +71,30 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(AdvancementProgress.class)
-public class MixinAdvancementProgress implements org.spongepowered.api.advancement.AdvancementProgress, IMixinAdvancementProgress {
+public class AdvancementProgressMixin implements AdvancementProgressBridge {
 
     @Shadow @Final private Map<String, net.minecraft.advancements.CriterionProgress> criteria;
 
-    @Nullable private Map<AdvancementCriterion, CriterionProgressBridge> progressMap;
-    @Nullable private String advancement;
-    @Nullable private PlayerAdvancements playerAdvancements;
+    @Nullable private Map<AdvancementCriterion, ImplementationBackedCriterionProgress> impl$progressMap;
+    @Nullable private String impl$advancement;
+    @Nullable private PlayerAdvancements bridge$playerAdvancements;
 
-    private void checkServer() {
+    @Override
+    public Advancement  bridge$getAdvancement() {
         checkState(SpongeImplHooks.isMainThread());
+        checkState(this.impl$advancement != null, "The advancement is not yet initialized");
+        return AdvancementRegistryModule.getInstance().getById(this.impl$advancement).orElseThrow(() -> new IllegalStateException(
+            "The advancement of this advancement progress is unloaded: " + this.impl$advancement));
     }
 
     @Inject(method = "update", at = @At("RETURN"))
-    private void onUpdate(Map<String, Criterion> criteriaIn, String[][] requirements, CallbackInfo ci) {
+    private void impl$updateCriterionsandMap(final Map<String, Criterion> criteriaIn, final String[][] requirements, final CallbackInfo ci) {
         // Validate the requirements to check whether their
         // criterion actually exists, prevents bugs when mods
         // accidentally use non existent requirements
         // See https://github.com/SpongePowered/SpongeForge/issues/2191
-        for (String[] reqs : requirements) {
-            for (String req : reqs) {
+        for (final String[] reqs : requirements) {
+            for (final String req : reqs) {
                 if (!criteriaIn.containsKey(req)) {
                     final String advName = getOptionalAdvancement()
                             .map(CatalogType::getId)
@@ -105,48 +105,53 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
             }
         }
         // Update the progress map
-        updateProgressMap();
+        bridge$updateProgressMap();
     }
 
     @Override
-    public void updateProgressMap() {
+    public void bridge$updateProgressMap() {
         if (!SpongeImplHooks.isMainThread()) {
             return;
         }
         final Optional<Advancement> advancement = getOptionalAdvancement();
         if (advancement.isPresent()) {
-            this.progressMap = new HashMap<>();
-            processProgressMap(advancement.get().getCriterion(), this.progressMap);
+            this.impl$progressMap = new HashMap<>();
+            impl$processProgressMap(advancement.get().getCriterion(), this.impl$progressMap);
         } else {
-            this.progressMap = null;
+            this.impl$progressMap = null;
         }
     }
 
-    private Map<AdvancementCriterion, CriterionProgressBridge> getProgressMap() {
-        checkState(this.progressMap != null, "progressMap isn't initialized");
-        return this.progressMap;
+    @Override
+    public Map<AdvancementCriterion, ImplementationBackedCriterionProgress> bridge$getProgressMap() {
+        return this.impl$progressMap;
     }
 
-    private void processProgressMap(AdvancementCriterion criterion, Map<AdvancementCriterion, CriterionProgressBridge> progressMap) {
+    private Map<AdvancementCriterion, ImplementationBackedCriterionProgress> getProgressMap() {
+        checkState(this.impl$progressMap != null, "progressMap isn't initialized");
+        return this.impl$progressMap;
+    }
+
+    private void impl$processProgressMap(final AdvancementCriterion criterion, final Map<AdvancementCriterion, ImplementationBackedCriterionProgress> progressMap) {
         if (criterion instanceof OperatorCriterion) {
-            ((OperatorCriterion) criterion).getCriteria().forEach(child -> processProgressMap(child, progressMap));
+            ((OperatorCriterion) criterion).getCriteria().forEach(child -> impl$processProgressMap(child, progressMap));
             if (criterion instanceof AndCriterion) {
-                progressMap.put(criterion, new SpongeAndCriterionProgress(this, (SpongeAndCriterion) criterion));
+                progressMap.put(criterion, new SpongeAndCriterionProgress((org.spongepowered.api.advancement.AdvancementProgress) this, (SpongeAndCriterion) criterion));
             } else if (criterion instanceof OrCriterion) {
-                progressMap.put(criterion, new SpongeOrCriterionProgress(this, (SpongeOrCriterion) criterion));
+                progressMap.put(criterion, new SpongeOrCriterionProgress((org.spongepowered.api.advancement.AdvancementProgress) this, (SpongeOrCriterion) criterion));
             }
         } else if (criterion instanceof SpongeScoreCriterion) {
             final SpongeScoreCriterion scoreCriterion = (SpongeScoreCriterion) criterion;
-            for (AdvancementCriterion internalCriterion : scoreCriterion.internalCriteria) {
-                final IMixinCriterionProgress progress = (IMixinCriterionProgress) this.criteria.get(internalCriterion.getName());
-                progress.setCriterion(internalCriterion);
-                progressMap.put(internalCriterion, (CriterionProgressBridge) progress);
+            for (final AdvancementCriterion internalCriterion : scoreCriterion.internalCriteria) {
+                final CriterionProgressBridge progress = (CriterionProgressBridge) this.criteria.get(internalCriterion.getName());
+                progress.bridge$setCriterion(internalCriterion);
+                progressMap.put(internalCriterion, (ImplementationBackedCriterionProgress) progress);
             }
-            progressMap.put(scoreCriterion, new SpongeScoreCriterionProgress(this, scoreCriterion));
+            progressMap.put(scoreCriterion, new SpongeScoreCriterionProgress((org.spongepowered.api.advancement.AdvancementProgress) this, scoreCriterion));
         } else if (criterion != SpongeEmptyCriterion.INSTANCE) {
-            final IMixinCriterionProgress progress = (IMixinCriterionProgress) this.criteria.get(criterion.getName());
-            progress.setCriterion(criterion);
-            progressMap.put(criterion, (CriterionProgressBridge) progress);
+            final CriterionProgressBridge progress = (CriterionProgressBridge) this.criteria.get(criterion.getName());
+            progress.bridge$setCriterion(criterion);
+            progressMap.put(criterion, (ImplementationBackedCriterionProgress) progress);
         }
     }
 
@@ -155,14 +160,15 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
      * @reason Rewrite the method to add support for the complex advancement criteria, only triggered on the server.
      */
     @Inject(method = "isDone", at = @At("HEAD"), cancellable = true)
-    private void onIsDone(CallbackInfoReturnable<Boolean> ci) {
-        if (this.advancement == null || !SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
+    private void onIsDone(final CallbackInfoReturnable<Boolean> ci) {
+        if (this.impl$advancement == null || !SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
             return;
         }
 
         final Advancement advancement = getOptionalAdvancement().orElse(null);
         if (advancement != null) {
-            ci.setReturnValue(get(advancement.getCriterion()).map(Progressable::achieved).orElse(false));
+            final ImplementationBackedCriterionProgress bridge = this.impl$progressMap.get(advancement.getCriterion());
+            ci.setReturnValue(bridge != null && ((CriterionProgress) bridge).achieved());
         }
     }
 
@@ -172,14 +178,14 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
      *         score criteria and calling grant events.
      */
     @Inject(method = "grantCriterion(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
-    private void onGrantCriterion(String criterionIn, CallbackInfoReturnable<Boolean> ci) {
+    private void onGrantCriterion(final String criterionIn, final CallbackInfoReturnable<Boolean> ci) {
         if (!SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
             return;
         }
         ci.setReturnValue(spongeGrantCriterion(criterionIn));
     }
 
-    private boolean spongeGrantCriterion(String criterionIn) {
+    private boolean spongeGrantCriterion(final String criterionIn) {
         final net.minecraft.advancements.CriterionProgress criterionProgress = this.criteria.get(criterionIn);
         if (criterionProgress == null || criterionProgress.isObtained()) {
             return false;
@@ -189,30 +195,30 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
             return true;
         }
         final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
-        final Player player = ((IMixinPlayerAdvancements) this.playerAdvancements).getPlayer();
+        final Player player = ((PlayerAdvancementsBridge) this.bridge$playerAdvancements).bridge$getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.getCriterion();
-        final IMixinCriterion mixinCriterion = (IMixinCriterion) criterion;
+        final CriterionBridge mixinCriterion = (CriterionBridge) criterion;
         // The score criterion needs special care
-        final SpongeScoreCriterion scoreCriterion = mixinCriterion.getScoreCriterion();
-        CriterionEvent event;
+        final SpongeScoreCriterion scoreCriterion = mixinCriterion.bridge$getScoreCriterion();
+        final CriterionEvent event;
         if (scoreCriterion != null) {
-            final SpongeScoreCriterionProgress scoreProgress = (SpongeScoreCriterionProgress) get(scoreCriterion).get();
+            final SpongeScoreCriterionProgress scoreProgress = (SpongeScoreCriterionProgress) this.impl$progressMap.get(scoreCriterion);
             final int lastScore = scoreProgress.getScore();
             final int score = lastScore + 1;
             if (lastScore == scoreCriterion.getGoal()) {
                 event = SpongeEventFactory.createCriterionEventScoreRevoke(
-                        cause, getAdvancement(), scoreCriterion, player, lastScore, score);
+                        cause, bridge$getAdvancement(), scoreCriterion, player, lastScore, score);
             } else if (score == scoreCriterion.getGoal()) {
                 event = SpongeEventFactory.createCriterionEventScoreGrant(
-                        cause, getAdvancement(), scoreCriterion, player, Instant.now(), lastScore, score);
+                        cause, bridge$getAdvancement(), scoreCriterion, player, Instant.now(), lastScore, score);
             } else {
                 event = SpongeEventFactory.createCriterionEventScoreChange(
-                        cause, getAdvancement(), scoreCriterion, player, lastScore, score);
+                        cause, bridge$getAdvancement(), scoreCriterion, player, lastScore, score);
             }
         } else {
             event = SpongeEventFactory.createCriterionEventGrant(
-                    cause, getAdvancement(), criterion, player, Instant.now());
+                    cause, bridge$getAdvancement(), criterion, player, Instant.now());
         }
         if (SpongeImpl.postEvent(event)) {
             return false;
@@ -227,14 +233,14 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
      *         score criteria and calling revoke events.
      */
     @Inject(method = "revokeCriterion(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
-    private void revokeCriterion(String criterionIn, CallbackInfoReturnable<Boolean> ci) {
+    private void revokeCriterion(final String criterionIn, final CallbackInfoReturnable<Boolean> ci) {
         if (!SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
             return;
         }
         ci.setReturnValue(spongeRevokeCriterion(criterionIn));
     }
 
-    private boolean spongeRevokeCriterion(String criterionIn) {
+    private boolean spongeRevokeCriterion(final String criterionIn) {
         final net.minecraft.advancements.CriterionProgress criterionProgress = this.criteria.get(criterionIn);
         if (criterionProgress == null || !criterionProgress.isObtained()) {
             return false;
@@ -244,30 +250,30 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
             return true;
         }
         final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
-        final Player player = ((IMixinPlayerAdvancements) this.playerAdvancements).getPlayer();
+        final Player player = ((PlayerAdvancementsBridge) this.bridge$playerAdvancements).bridge$getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.getCriterion();
-        final IMixinCriterion mixinCriterion = (IMixinCriterion) criterion;
+        final CriterionBridge mixinCriterion = (CriterionBridge) criterion;
         // The score criterion needs special care
-        final SpongeScoreCriterion scoreCriterion = mixinCriterion.getScoreCriterion();
-        CriterionEvent event;
+        final SpongeScoreCriterion scoreCriterion = mixinCriterion.bridge$getScoreCriterion();
+        final CriterionEvent event;
         if (scoreCriterion != null) {
-            final SpongeScoreCriterionProgress scoreProgress = (SpongeScoreCriterionProgress) get(scoreCriterion).get();
+            final SpongeScoreCriterionProgress scoreProgress = (SpongeScoreCriterionProgress) this.impl$progressMap.get(scoreCriterion);
             final int lastScore = scoreProgress.getScore();
             final int score = lastScore + 1;
             if (lastScore == scoreCriterion.getGoal()) {
                 event = SpongeEventFactory.createCriterionEventScoreRevoke(
-                        cause, getAdvancement(), scoreCriterion, player, lastScore, score);
+                        cause, ((org.spongepowered.api.advancement.AdvancementProgress) this).getAdvancement(), scoreCriterion, player, lastScore, score);
             } else if (score == scoreCriterion.getGoal()) {
                 event = SpongeEventFactory.createCriterionEventScoreGrant(
-                        cause, getAdvancement(), scoreCriterion, player, Instant.now(), lastScore, score);
+                        cause, ((org.spongepowered.api.advancement.AdvancementProgress) this).getAdvancement(), scoreCriterion, player, Instant.now(), lastScore, score);
             } else {
                 event = SpongeEventFactory.createCriterionEventScoreChange(
-                        cause, getAdvancement(), scoreCriterion, player, lastScore, score);
+                        cause, ((org.spongepowered.api.advancement.AdvancementProgress) this).getAdvancement(), scoreCriterion, player, lastScore, score);
             }
         } else {
             event = SpongeEventFactory.createCriterionEventRevoke(
-                    cause, getAdvancement(), criterion, player);
+                    cause, ((org.spongepowered.api.advancement.AdvancementProgress) this).getAdvancement(), criterion, player);
         }
         if (SpongeImpl.postEvent(event)) {
             return false;
@@ -277,30 +283,30 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
     }
 
     @Override
-    public PlayerAdvancements getPlayerAdvancements() {
-        checkServer();
-        checkState(this.playerAdvancements != null, "The playerAdvancements is not yet initialized");
-        return this.playerAdvancements;
+    public PlayerAdvancements bridge$getPlayerAdvancements() {
+        checkState(SpongeImplHooks.isMainThread());
+        checkState(this.bridge$playerAdvancements != null, "The playerAdvancements is not yet initialized");
+        return this.bridge$playerAdvancements;
     }
 
     @Override
-    public void setPlayerAdvancements(PlayerAdvancements playerAdvancements) {
-        checkServer();
-        this.playerAdvancements = playerAdvancements;
+    public void bridge$setPlayerAdvancements(final PlayerAdvancements playerAdvancements) {
+        checkState(SpongeImplHooks.isMainThread());
+        this.bridge$playerAdvancements = playerAdvancements;
     }
 
     @Override
-    public void setAdvancement(String advancement) {
-        checkServer();
-        this.advancement = advancement;
+    public void bridge$setAdvancement(final String advancement) {
+        checkState(SpongeImplHooks.isMainThread());
+        this.impl$advancement = advancement;
     }
 
     @Override
-    public void invalidateAchievedState() {
+    public void bridge$invalidateAchievedState() {
         if (!SpongeImplHooks.isMainThread()) { // Ignore on the client
             return;
         }
-        for (CriterionProgressBridge progress : getProgressMap().values()) {
+        for (final ImplementationBackedCriterionProgress progress :  getProgressMap().values()) {
             progress.invalidateAchievedState();
         }
     }
@@ -312,42 +318,9 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
      * @return The advancement
      */
     private Optional<Advancement> getOptionalAdvancement() {
-        checkServer();
-        checkState(this.advancement != null, "The advancement is not yet initialized");
-        return AdvancementRegistryModule.getInstance().getById(this.advancement);
+        checkState(SpongeImplHooks.isMainThread());
+        checkState(this.impl$advancement != null, "The advancement is not yet initialized");
+        return AdvancementRegistryModule.getInstance().getById(this.impl$advancement);
     }
 
-    @Override
-    public Advancement getAdvancement() {
-        return getOptionalAdvancement().orElseThrow(() -> new IllegalStateException(
-                "The advancement of this advancement progress is unloaded: " + this.advancement));
-    }
-
-    @Override
-    public Optional<ScoreCriterionProgress> get(ScoreAdvancementCriterion criterion) {
-        checkServer();
-        return Optional.ofNullable((ScoreCriterionProgress) getProgressMap().get(criterion));
-    }
-
-    @Override
-    public Optional<CriterionProgress> get(AdvancementCriterion criterion) {
-        checkServer();
-        checkNotNull(criterion, "criterion");
-        return Optional.ofNullable(getProgressMap().get(criterion));
-    }
-
-    @Override
-    public Optional<Instant> get() {
-        return get(getAdvancement().getCriterion()).get().get();
-    }
-
-    @Override
-    public Instant grant() {
-        return get(getAdvancement().getCriterion()).get().grant();
-    }
-
-    @Override
-    public Optional<Instant> revoke() {
-        return get(getAdvancement().getCriterion()).get().revoke();
-    }
 }

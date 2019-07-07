@@ -32,8 +32,8 @@ import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
-import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
+import org.spongepowered.common.bridge.advancements.AdvancementBridge;
+import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 @SuppressWarnings("ConstantConditions")
@@ -47,19 +47,19 @@ public class SpongeAdvancementTreeBuilder extends SpongeCatalogBuilder<Advanceme
     }
 
     @Override
-    public AdvancementTree.Builder rootAdvancement(Advancement rootAdvancement) {
+    public AdvancementTree.Builder rootAdvancement(final Advancement rootAdvancement) {
         checkNotNull(rootAdvancement, "rootAdvancement");
-        checkState(((IMixinAdvancement) rootAdvancement).isRegistered(), "The root advancement must be registered.");
+        checkState(((AdvancementBridge) rootAdvancement).bridge$isRegistered(), "The root advancement must be registered.");
         checkState(!rootAdvancement.getParent().isPresent(), "The root advancement cannot have a parent.");
         checkState(rootAdvancement.getDisplayInfo().isPresent(), "The root advancement must have display info.");
-        checkState(((IMixinDisplayInfo) rootAdvancement.getDisplayInfo().get()).getBackground() == null,
+        checkState(((DisplayInfoBridge) rootAdvancement.getDisplayInfo().get()).bridge$getBackground() == null,
                 "The root advancement is already used by a different Advancement Tree.");
         this.rootAdvancement = rootAdvancement;
         return this;
     }
 
     @Override
-    public AdvancementTree.Builder background(String background) {
+    public AdvancementTree.Builder background(final String background) {
         checkNotNull(background, "background");
         this.background = background;
         return this;
@@ -74,18 +74,18 @@ public class SpongeAdvancementTreeBuilder extends SpongeCatalogBuilder<Advanceme
     }
 
     @Override
-    protected AdvancementTree build(PluginContainer plugin, String id, Translation name) {
+    protected AdvancementTree build(final PluginContainer plugin, final String id, final Translation name) {
         checkState(this.rootAdvancement != null, "The root advancement must be set");
         final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, plugin.getId() + ':' + this.id, name);
-        ((IMixinDisplayInfo) this.rootAdvancement.getDisplayInfo().get()).setBackground(this.background);
-        ((IMixinAdvancement) this.rootAdvancement).setParent(null);
+        ((DisplayInfoBridge) this.rootAdvancement.getDisplayInfo().get()).bridge$setBackground(this.background);
+        ((AdvancementBridge) this.rootAdvancement).bridge$setParent(null);
         applyTree(this.rootAdvancement, advancementTree);
         return advancementTree;
     }
 
-    private static void applyTree(Advancement advancement, AdvancementTree tree) {
-        ((IMixinAdvancement) advancement).setTree(tree);
-        for (Advancement child : advancement.getChildren()) {
+    private static void applyTree(final Advancement advancement, final AdvancementTree tree) {
+        ((AdvancementBridge) advancement).bridge$setTree(tree);
+        for (final Advancement child : advancement.getChildren()) {
             applyTree(child, tree);
         }
     }

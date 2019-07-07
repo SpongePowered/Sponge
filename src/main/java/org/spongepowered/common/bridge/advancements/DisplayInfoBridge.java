@@ -22,25 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.advancement;
+package org.spongepowered.common.bridge.advancements;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementList;
-import net.minecraft.util.ResourceLocation;
-
-import java.util.Map;
-import java.util.Set;
+import org.spongepowered.api.advancement.Advancement;
 
 import javax.annotation.Nullable;
 
-public interface IMixinAdvancementList {
+public interface DisplayInfoBridge {
 
-    Map<ResourceLocation, Advancement> getAdvancements();
+    Advancement bridge$getAdvancement();
 
-    Set<Advancement> getRootsSet();
-
-    Set<Advancement> getNonRootsSet();
+    void bridge$setAdvancement(Advancement advancement);
 
     @Nullable
-    AdvancementList.Listener getListener();
+    String bridge$getBackground();
+
+    void bridge$setBackground(@Nullable String background);
 }

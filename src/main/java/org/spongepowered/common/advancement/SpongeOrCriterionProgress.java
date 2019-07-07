@@ -32,7 +32,7 @@ import java.util.Optional;
 
 public class SpongeOrCriterionProgress extends SpongeOperatorCriterionProgress {
 
-    public SpongeOrCriterionProgress(AdvancementProgress progress, SpongeOrCriterion criterion) {
+    public SpongeOrCriterionProgress(final AdvancementProgress progress, final SpongeOrCriterion criterion) {
         super(progress, criterion);
     }
 
@@ -43,7 +43,7 @@ public class SpongeOrCriterionProgress extends SpongeOperatorCriterionProgress {
 
     @Override
     public boolean achieved() {
-        for (AdvancementCriterion criterion : getCriterion().getCriteria()) {
+        for (final AdvancementCriterion criterion : getCriterion().getCriteria()) {
             final Optional<Instant> time = this.progress.get(criterion).get().get();
             if (time.isPresent()) {
                 return true;
@@ -55,7 +55,7 @@ public class SpongeOrCriterionProgress extends SpongeOperatorCriterionProgress {
     @Override
     public Optional<Instant> get0() {
         Optional<Instant> time = Optional.empty();
-        for (AdvancementCriterion criterion : getCriterion().getCriteria()) {
+        for (final AdvancementCriterion criterion : getCriterion().getCriteria()) {
             final Optional<Instant> time1 = this.progress.get(criterion).get().get();
             if (time1.isPresent() && (!time.isPresent() || time1.get().isAfter(time.get()))) {
                 time = time1;

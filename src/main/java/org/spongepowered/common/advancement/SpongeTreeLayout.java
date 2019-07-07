@@ -37,7 +37,7 @@ public final class SpongeTreeLayout implements TreeLayout {
 
     private final SpongeAdvancementTree tree;
 
-    public SpongeTreeLayout(SpongeAdvancementTree tree) {
+    public SpongeTreeLayout(final SpongeAdvancementTree tree) {
         this.tree = tree;
     }
 
@@ -53,12 +53,12 @@ public final class SpongeTreeLayout implements TreeLayout {
         return elements.build();
     }
 
-    private static void collectElements(Advancement advancement, ImmutableSet.Builder<TreeLayoutElement> elements) {
+    private static void collectElements(final Advancement advancement, final ImmutableSet.Builder<TreeLayoutElement> elements) {
         advancement.getDisplayInfo().ifPresent(displayInfo -> elements.add((TreeLayoutElement) displayInfo));
         advancement.getChildren().forEach(child -> collectElements(child, elements));
     }
     @Override
-    public Optional<TreeLayoutElement> getElement(Advancement advancement) {
+    public Optional<TreeLayoutElement> getElement(final Advancement advancement) {
         final Optional<AdvancementTree> tree = advancement.getTree();
         if (!tree.isPresent() || !advancement.getDisplayInfo().isPresent() || tree.get() != this.tree) {
             return Optional.empty();

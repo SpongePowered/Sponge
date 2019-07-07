@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common.advancement;
 
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.entity.living.player.Player;
 
 public interface TriggerBridge {
 
-    Class<FilteredTriggerConfiguration> getConfigurationType();
-
-    void trigger(Player player);
+    void bridge$trigger(Player player);
 }

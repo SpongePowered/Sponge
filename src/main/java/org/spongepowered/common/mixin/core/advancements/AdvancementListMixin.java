@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.mixin.core.advancements;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementList;
@@ -39,12 +39,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.advancements.AdvancementListBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.registry.SpongeGameRegistryRegisterEvent;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
-import org.spongepowered.common.event.tracking.phase.plugin.ListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
 import org.spongepowered.common.registry.type.advancement.AdvancementMap;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
@@ -56,7 +55,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(AdvancementList.class)
-public class MixinAdvancementList implements IMixinAdvancementList {
+public class AdvancementListMixin implements AdvancementListBridge {
 
     @Shadow @Final private static Logger LOGGER;
 
@@ -67,12 +66,12 @@ public class MixinAdvancementList implements IMixinAdvancementList {
 
     @Inject(method = "loadAdvancements", at = @At(value = "INVOKE", shift = At.Shift.BEFORE,
             target = "Ljava/util/Map;size()I", remap = false))
-    private void onLoadAdvancements(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
+    private void impl$postRegisterAdvancements(final Map<ResourceLocation, Advancement.Builder> advancementsIn, final CallbackInfo ci) {
         // Don't post events when loading advancements on the client
         if (!SpongeImplHooks.isMainThread() || !ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
             return;
         }
-        try (EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
+        try (final EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
                 .source(Sponge.getGame())) {
             context.buildAndSwitch();
 
@@ -86,12 +85,12 @@ public class MixinAdvancementList implements IMixinAdvancementList {
     }
 
     @Inject(method = "loadAdvancements", at = @At(value = "RETURN"))
-    private void onLoadAdvancementForTrees(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
+    private void impl$postRegisterTreeEvent(final Map<ResourceLocation, Advancement.Builder> advancementsIn, final CallbackInfo ci) {
         // Don't post events when loading advancements on the client
         if (!SpongeImplHooks.isMainThread()) {
             return;
         }
-        try (EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
+        try (final EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
                 .source(Sponge.getGame())) {
             context.buildAndSwitch();
 
@@ -106,22 +105,22 @@ public class MixinAdvancementList implements IMixinAdvancementList {
     }
 
     @Override
-    public Map<ResourceLocation, Advancement> getAdvancements() {
+    public Map<ResourceLocation, Advancement> bridge$getAdvancements() {
         return this.advancements;
     }
 
     @Override
-    public Set<Advancement> getRootsSet() {
+    public Set<Advancement> bridge$getRootsSet() {
         return this.roots;
     }
 
     @Override
-    public Set<Advancement> getNonRootsSet() {
+    public Set<Advancement> bridge$getNonRootsSet() {
         return this.nonRoots;
     }
 
     @Override
-    public AdvancementList.Listener getListener() {
+    public AdvancementList.Listener bridge$getListener() {
         return this.listener;
     }
 }

@@ -22,33 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.advancement;
+package org.spongepowered.common.mixin.core.advancements;
 
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.advancement.criteria.AndCriterion;
-import org.spongepowered.api.advancement.criteria.OrCriterion;
+import net.minecraft.advancements.AdvancementManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 
-import java.util.Arrays;
+@Mixin(AdvancementManager.class)
+public class AdvancementManagerMixin {
 
-public interface CriterionBridge extends AdvancementCriterion {
-
-    @Override
-    default AdvancementCriterion and(Iterable<AdvancementCriterion> criteria) {
-        return SpongeCriterionHelper.build(AndCriterion.class, SpongeAndCriterion::new, this, criteria);
-    }
-
-    @Override
-    default AdvancementCriterion and(AdvancementCriterion... criteria) {
-        return SpongeCriterionHelper.build(AndCriterion.class, SpongeAndCriterion::new, this, Arrays.asList(criteria));
-    }
-
-    @Override
-    default AdvancementCriterion or(Iterable<AdvancementCriterion> criteria) {
-        return SpongeCriterionHelper.build(OrCriterion.class, SpongeOrCriterion::new, this, criteria);
-    }
-
-    @Override
-    default AdvancementCriterion or(AdvancementCriterion... criteria) {
-        return SpongeCriterionHelper.build(OrCriterion.class, SpongeOrCriterion::new, this, Arrays.asList(criteria));
+    @Inject(method = "reload", at = @At("RETURN"))
+    private void impl$reloadAdvancementProgressforPlayerList(final CallbackInfo ci) {
+        ((PlayerListBridge) SpongeImpl.getServer().getPlayerList()).reloadAdvancementProgress();
     }
 }

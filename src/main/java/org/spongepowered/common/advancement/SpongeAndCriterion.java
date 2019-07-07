@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class SpongeAndCriterion extends SpongeOperatorCriterion implements AndCriterion {
 
-    SpongeAndCriterion(Set<AdvancementCriterion> criteria) {
+    SpongeAndCriterion(final Set<AdvancementCriterion> criteria) {
         super("and", criteria);
     }
 }

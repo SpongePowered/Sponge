@@ -22,25 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.advancement;
+package org.spongepowered.common.mixin.core.advancements;
 
-import net.minecraft.advancements.Advancement;
-import org.spongepowered.api.advancement.AdvancementTree;
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import net.minecraft.advancements.ICriterionTrigger;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.advancement.TriggerBridge;
 
-import javax.annotation.Nullable;
+@Mixin(ICriterionTrigger.class)
+public interface ICriterionTriggerMixin extends TriggerBridge {
 
-public interface IMixinAdvancement {
-
-    void setParent(@Nullable Advancement advancement);
-
-    void setTree(AdvancementTree tree);
-
-    void setCriterion(AdvancementCriterion criterion);
-
-    void setName(String name);
-
-    boolean isRegistered();
-
-    void setRegistered();
+    @Override
+    default void bridge$trigger(Player player) {
+        // This could possibly be implemented in all the vanilla triggers
+        // and construct trigger method arguments based on context values
+        // Not needed for now, just assume it always fails
+    }
 }

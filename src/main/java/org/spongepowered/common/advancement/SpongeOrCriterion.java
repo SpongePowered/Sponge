@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class SpongeOrCriterion extends SpongeOperatorCriterion implements OrCriterion {
 
-    SpongeOrCriterion(Set<AdvancementCriterion> criteria) {
+    SpongeOrCriterion(final Set<AdvancementCriterion> criteria) {
         super("or", criteria);
     }
 }

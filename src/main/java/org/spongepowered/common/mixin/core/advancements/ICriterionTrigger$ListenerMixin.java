@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.mixin.core.advancements;
 
 import com.google.common.reflect.TypeToken;
 import net.minecraft.advancements.Advancement;
@@ -46,12 +46,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.advancement.SpongeFilteredTrigger;
 import org.spongepowered.common.advancement.SpongeTrigger;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
-import org.spongepowered.common.interfaces.advancement.IMixinICriterionTriggerListener;
-import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
+import org.spongepowered.common.bridge.advancements.CriterionBridge;
+import org.spongepowered.common.bridge.advancements.ICriterionTrigger$ListenerBridge;
+import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 
 @Mixin(ICriterionTrigger.Listener.class)
-public class MixinICriterionTriggerListener implements IMixinICriterionTriggerListener {
+public class ICriterionTrigger$ListenerMixin implements ICriterionTrigger$ListenerBridge {
 
     @Shadow @Final private ICriterionInstance criterionInstance;
     @Shadow @Final private Advancement advancement;
@@ -59,21 +59,21 @@ public class MixinICriterionTriggerListener implements IMixinICriterionTriggerLi
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "grantCriterion", at = @At("HEAD"), cancellable = true)
-    private void onGrantCriterion(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
+    private void impl$throwEventForSponge(final PlayerAdvancements playerAdvancements, final CallbackInfo ci) {
         final org.spongepowered.api.advancement.Advancement advancement =
                 (org.spongepowered.api.advancement.Advancement) this.advancement;
         AdvancementCriterion advancementCriterion = (AdvancementCriterion)
                 this.advancement.getCriteria().get(this.criterionName);
-        final IMixinCriterion mixinCriterion = (IMixinCriterion) advancementCriterion;
-        if (mixinCriterion.getScoreCriterion() != null) {
-            advancementCriterion = mixinCriterion.getScoreCriterion();
+        final CriterionBridge mixinCriterion = (CriterionBridge) advancementCriterion;
+        if (mixinCriterion.bridge$getScoreCriterion() != null) {
+            advancementCriterion = mixinCriterion.bridge$getScoreCriterion();
         }
         // Sponge filters are always handled in the trigger method
         if (!(this.criterionInstance instanceof SpongeFilteredTrigger)) {
             final FilteredTrigger filteredTrigger = (FilteredTrigger) this.criterionInstance;
             if (filteredTrigger.getType() instanceof SpongeTrigger) {
                 final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-                final Player player = ((IMixinPlayerAdvancements) playerAdvancements).getPlayer();
+                final Player player = ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer();
                 final TypeToken typeToken = TypeToken.of(filteredTrigger.getType().getConfigurationType());
                 final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause,
                         advancement, advancementCriterion, typeToken, player, filteredTrigger, true);
@@ -88,7 +88,7 @@ public class MixinICriterionTriggerListener implements IMixinICriterionTriggerLi
         // Handle the score criteria ourselves, with each trigger will
         // the score be increased by one.
         if (advancementCriterion instanceof ScoreAdvancementCriterion) {
-            ((IMixinPlayerAdvancements) playerAdvancements).getPlayer().getProgress(advancement)
+            ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer().getProgress(advancement)
                     .get((ScoreAdvancementCriterion) advancementCriterion).get().add(1);
             ci.cancel();
             SpongeImpl.getCauseStackManager().popCause();
@@ -96,17 +96,17 @@ public class MixinICriterionTriggerListener implements IMixinICriterionTriggerLi
     }
 
     @Inject(method = "grantCriterion", at = @At("RETURN"))
-    private void onGrantCriterionReturn(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
+    private void impl$popCauseAtEndOfEvent(final PlayerAdvancements playerAdvancements, final CallbackInfo ci) {
         SpongeImpl.getCauseStackManager().popCause();
     }
 
     @Override
-    public Advancement getAdvancement() {
+    public Advancement bridge$getAdvancement() {
         return this.advancement;
     }
 
     @Override
-    public String getCriterionName() {
+    public String bridge$getCriterionName() {
         return this.criterionName;
     }
 }

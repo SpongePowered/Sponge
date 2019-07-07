@@ -22,9 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
-
-import static com.google.common.base.Preconditions.checkState;
+package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
@@ -33,12 +31,8 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.advancement.CriterionProgressBridge;
-import org.spongepowered.common.interfaces.advancement.IMixinAdvancementProgress;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterionProgress;
+import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
+import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 
 import java.time.Instant;
 import java.util.Date;
@@ -48,44 +42,16 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("RedundantCast")
 @Mixin(CriterionProgress.class)
-public abstract class MixinCriterionProgress implements CriterionProgressBridge, IMixinCriterionProgress {
+public abstract class CriterionProgressMixin_API implements org.spongepowered.api.advancement.criteria.CriterionProgress {
 
-    @Shadow public abstract void obtain();
-    @Shadow public abstract void reset();
     @Shadow @Final private AdvancementProgress advancementProgress;
     @Shadow @Nullable private Date obtained;
 
-    @Nullable private AdvancementCriterion criterion;
-
-    @Inject(method = "obtain", at = @At("RETURN"))
-    private void onObtain(CallbackInfo ci) {
-        ((IMixinAdvancementProgress) this.advancementProgress).invalidateAchievedState();
-    }
-
-    @Inject(method = "reset", at = @At("RETURN"))
-    private void onReset(CallbackInfo ci) {
-        ((IMixinAdvancementProgress) this.advancementProgress).invalidateAchievedState();
-    }
-
-    @Override
-    public void setCriterion(AdvancementCriterion criterion) {
-        this.criterion = criterion;
-    }
-
-    @Override
-    public org.spongepowered.api.advancement.AdvancementProgress getAdvancementProgress() {
-        return (org.spongepowered.api.advancement.AdvancementProgress) this.advancementProgress;
-    }
-
-    @Override
-    public boolean isCriterionAvailable() {
-        return this.criterion != null;
-    }
+    @Shadow public abstract void reset();
 
     @Override
     public AdvancementCriterion getCriterion() {
-        checkState(this.criterion != null, "The criterion is not yet initialized");
-        return this.criterion;
+        return ((CriterionProgressBridge) this).bridge$getCriterion();
     }
 
     @Override
@@ -105,7 +71,7 @@ public abstract class MixinCriterionProgress implements CriterionProgressBridge,
         }
         final Advancement advancement = (Advancement) ((org.spongepowered.api.advancement.AdvancementProgress)
                 this.advancementProgress).getAdvancement();
-        ((IMixinAdvancementProgress) this.advancementProgress).getPlayerAdvancements()
+        ((AdvancementProgressBridge) this.advancementProgress).bridge$getPlayerAdvancements()
                 .grantCriterion(advancement, getCriterion().getName());
         return this.obtained.toInstant();
     }
@@ -118,12 +84,9 @@ public abstract class MixinCriterionProgress implements CriterionProgressBridge,
         final Instant instant = this.obtained.toInstant();
         final Advancement advancement = (Advancement) ((org.spongepowered.api.advancement.AdvancementProgress)
                 this.advancementProgress).getAdvancement();
-        ((IMixinAdvancementProgress) this.advancementProgress).getPlayerAdvancements()
+        ((AdvancementProgressBridge) this.advancementProgress).bridge$getPlayerAdvancements()
                 .revokeCriterion(advancement, getCriterion().getName());
         return Optional.of(instant);
     }
 
-    @Override
-    public void invalidateAchievedState() {
-    }
 }

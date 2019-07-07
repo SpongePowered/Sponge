@@ -22,5 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.bridge.advancements;
+
+import org.spongepowered.common.advancement.SpongeScoreCriterion;
+
+import javax.annotation.Nullable;
+
+public interface CriterionBridge {
+
+    String bridge$getName();
+
+    void bridge$setName(String name);
+
+    @Nullable
+    SpongeScoreCriterion bridge$getScoreCriterion();
+
+    void bridge$setScoreCriterion(@Nullable SpongeScoreCriterion criterion);
+
+    @Nullable
+    Integer bridge$getScoreGoal();
+
+    void bridge$setScoreGoal(@Nullable Integer goal);
+}

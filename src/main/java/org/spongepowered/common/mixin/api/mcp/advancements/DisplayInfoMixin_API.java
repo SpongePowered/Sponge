@@ -22,15 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
-
-import static com.google.common.base.Preconditions.checkState;
+package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import com.flowpowered.math.vector.Vector2d;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementType;
@@ -40,80 +37,31 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
+import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.SpongeTexts;
 
-import javax.annotation.Nullable;
-
-@Implements(@Interface(iface = org.spongepowered.api.advancement.DisplayInfo.class, prefix = "info$"))
 @Mixin(DisplayInfo.class)
-public class MixinDisplayInfo implements IMixinDisplayInfo, TreeLayoutElement {
+@Implements(@Interface(iface = org.spongepowered.api.advancement.DisplayInfo.class, prefix = "info$"))
+public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spongepowered.api.advancement.DisplayInfo {
 
     @Shadow @Final private FrameType frame;
     @Shadow @Final private ItemStack icon;
     @Shadow @Final private ITextComponent title;
     @Shadow @Final private ITextComponent description;
-    @Shadow @Final @Mutable @Nullable private ResourceLocation background;
     @Shadow @Final private boolean showToast;
-    @Shadow @Final private boolean announceToChat;
-    @Shadow @Final private boolean hidden;
     @Shadow private float x;
     @Shadow private float y;
 
-    @Nullable private Advancement advancement;
+    @Shadow public abstract boolean shouldAnnounceToChat();
+    @Shadow public abstract boolean shadow$isHidden();
 
     @Override
     public Advancement getAdvancement() {
-        checkState(this.advancement != null, "The advancement is not yet initialized");
-        return this.advancement;
-    }
-
-    @Override
-    public void setAdvancement(Advancement advancement) {
-        this.advancement = advancement;
-    }
-
-    @Nullable
-    @Override
-    public String getBackground() {
-        return this.background == null ? null : this.background.toString();
-    }
-
-    @Override
-    public void setBackground(@Nullable String background) {
-        this.background = background == null ? null : new ResourceLocation(background);
-    }
-
-    public ItemStackSnapshot info$getIcon() {
-        return new SpongeItemStackSnapshot((org.spongepowered.api.item.inventory.ItemStack) this.icon);
-    }
-
-    public boolean info$doesShowToast() {
-        return this.showToast;
-    }
-
-    public boolean info$doesAnnounceToChat() {
-        return this.announceToChat;
-    }
-
-    public boolean info$isHidden() {
-        return this.hidden;
-    }
-
-    public AdvancementType info$getType() {
-        return (AdvancementType) (Object) this.frame;
-    }
-
-    public Text info$getDescription() {
-        return SpongeTexts.toText(this.description);
-    }
-
-    public Text info$getTitle() {
-        return SpongeTexts.toText(this.title);
+        return ((DisplayInfoBridge) this).bridge$getAdvancement();
     }
 
     @Override
@@ -122,8 +70,46 @@ public class MixinDisplayInfo implements IMixinDisplayInfo, TreeLayoutElement {
     }
 
     @Override
-    public void setPosition(double x, double y) {
+    public void setPosition(final double x, final double y) {
         this.x = (float) x;
         this.y = (float) y;
     }
+
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public AdvancementType getType() {
+        return (AdvancementType) (Object) this.frame;
+    }
+
+    @Override
+    public Text getDescription() {
+        return SpongeTexts.toText(this.description);
+    }
+
+    @Override
+    public ItemStackSnapshot getIcon() {
+        return new SpongeItemStackSnapshot((org.spongepowered.api.item.inventory.ItemStack) this.icon);
+    }
+
+    @Override
+    public Text getTitle() {
+        return SpongeTexts.toText(this.title);
+    }
+
+    @Override
+    public boolean doesShowToast() {
+        return this.showToast;
+    }
+
+    @Override
+    public boolean doesAnnounceToChat() {
+        return this.shouldAnnounceToChat();
+    }
+
+
+    @Intrinsic
+    public boolean info$isHidden() {
+        return this.shadow$isHidden();
+    }
+
 }
