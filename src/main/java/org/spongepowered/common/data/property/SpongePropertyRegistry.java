@@ -40,44 +40,59 @@ import org.spongepowered.common.data.util.ComparatorUtil;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+import javax.annotation.Nullable;
+
+@SuppressWarnings("ConstantConditions")
 @Singleton
 public class SpongePropertyRegistry implements PropertyRegistry {
 
-    private final Map<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> propertyStoreMap = Maps.newConcurrentMap();
+    @Nullable private TempRegistry tempRegistry = new TempRegistry();
     private final Map<Class<? extends Property<?, ?>>, PropertyStoreDelegate<?>> delegateMap = Maps.newConcurrentMap();
-    private boolean allowRegistrations = true;
+
+    static final class TempRegistry {
+        final Map<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> propertyStoreMap = Maps.newConcurrentMap();
+        final Map<Class<? extends Property<?, ?>>, PropertyStoreDelegate<?>> delegateMap = Maps.newConcurrentMap();
+    }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void completeRegistration() {
-        this.allowRegistrations = false;
-        for (Map.Entry<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> entry : this.propertyStoreMap.entrySet()) {
-            ImmutableList.Builder<PropertyStore<?>> propertyStoreBuilder = ImmutableList.builder();
-            Collections.sort(entry.getValue(), ComparatorUtil.PROPERTY_STORE_COMPARATOR);
-            propertyStoreBuilder.addAll(entry.getValue());
-            final PropertyStoreDelegate<?> delegate = new PropertyStoreDelegate(propertyStoreBuilder.build());
-            this.delegateMap.put(entry.getKey(), delegate);
+        checkState(this.tempRegistry != null, "PropertyRegistry already finalized");
+        final TempRegistry temp = this.tempRegistry;
+        this.tempRegistry = null;
+        if (temp != null) {
+            for (final Map.Entry<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> entry : temp.propertyStoreMap.entrySet()) {
+                final ImmutableList.Builder<PropertyStore<?>> propertyStoreBuilder = ImmutableList.builder();
+                entry.getValue().sort(ComparatorUtil.PROPERTY_STORE_COMPARATOR);
+                propertyStoreBuilder.addAll(entry.getValue());
+                final PropertyStoreDelegate<?> delegate = new PropertyStoreDelegate(propertyStoreBuilder.build());
+                this.delegateMap.put(entry.getKey(), delegate);
+            }
+            temp.delegateMap.clear();
+            temp.propertyStoreMap.clear();
         }
-        this.propertyStoreMap.clear();
     }
 
     @Override
-    public <T extends Property<?, ?>> void register(Class<T> propertyClass, PropertyStore<T> propertyStore) {
-        checkState(this.allowRegistrations, "Registrations are no longer allowed!");
+    public <T extends Property<?, ?>> void register(final Class<T> propertyClass, final PropertyStore<T> propertyStore) {
+        checkState(this.tempRegistry != null, "Registrations are no longer allowed!");
         checkArgument(propertyClass != null, "The property class can not be null!");
-        if (!this.propertyStoreMap.containsKey(propertyClass)) {
-            this.propertyStoreMap.put(propertyClass, Collections.synchronizedList(Lists.<PropertyStore<?>>newArrayList()));
+        if (!this.tempRegistry.propertyStoreMap.containsKey(propertyClass)) {
+            this.tempRegistry.propertyStoreMap.put(propertyClass, Collections.synchronizedList(Lists.<PropertyStore<?>>newArrayList()));
         }
-        final List<PropertyStore<?>> propertyStores = this.propertyStoreMap.get(propertyClass);
+        this.tempRegistry.delegateMap.remove(propertyClass);
+        final List<PropertyStore<?>> propertyStores = this.tempRegistry.propertyStoreMap.get(propertyClass);
         propertyStores.add(checkNotNull(propertyStore));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends Property<?, ?>> Optional<PropertyStore<T>> getStore(Class<T> propertyClass) {
+    public <T extends Property<?, ?>> Optional<PropertyStore<T>> getStore(final Class<T> propertyClass) {
         checkArgument(propertyClass != null, "The property class can not be null!");
         if (!this.delegateMap.containsKey(propertyClass)) {
             return Optional.empty();
@@ -85,13 +100,30 @@ public class SpongePropertyRegistry implements PropertyRegistry {
         return Optional.of((PropertyStore<T>) this.delegateMap.get(propertyClass));
     }
 
-    public Collection<Property<?, ?>> getPropertiesFor(PropertyHolder holder) {
+    @SuppressWarnings("unchecked")
+    public Collection<Property<?, ?>> getPropertiesFor(final PropertyHolder holder) {
         final ImmutableList.Builder<Property<?, ?>> builder = ImmutableList.builder();
-        for (Map.Entry<Class<? extends Property<?, ?>>, PropertyStoreDelegate<?>> entry : this.delegateMap.entrySet()) {
-            final Optional<? extends Property<?, ?>> optional = entry.getValue().getFor(holder);
-            if (optional.isPresent()) {
-                builder.add(optional.get());
+        if (this.tempRegistry != null) { // Still doing registrations
+            final Set<Class<? extends Property<?, ?>>> used = new HashSet<>();
+            for (final Map.Entry<Class<? extends Property<?, ?>>, PropertyStoreDelegate<?>> entry : this.tempRegistry.delegateMap.entrySet()) {
+                used.add(entry.getKey());
+                entry.getValue().getFor(holder).ifPresent(builder::add);
             }
+            for (final Map.Entry<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> entry : this.tempRegistry.propertyStoreMap.entrySet()) {
+                if (!used.contains(entry.getKey())) {
+                    used.add(entry.getKey());
+                    final ImmutableList.Builder<PropertyStore<?>> propertyStoreBuilder = ImmutableList.builder();
+                    entry.getValue().sort(ComparatorUtil.PROPERTY_STORE_COMPARATOR);
+                    propertyStoreBuilder.addAll(entry.getValue());
+                    final PropertyStoreDelegate<?> delegate = new PropertyStoreDelegate(propertyStoreBuilder.build());
+                    this.tempRegistry.delegateMap.put(entry.getKey(), delegate);
+                    delegate.getFor(holder).ifPresent(builder::add);
+                }
+            }
+            return builder.build();
+        }
+        for (final Map.Entry<Class<? extends Property<?, ?>>, PropertyStoreDelegate<?>> entry : this.delegateMap.entrySet()) {
+            entry.getValue().getFor(holder).ifPresent(builder::add);
         }
         return builder.build();
     }
