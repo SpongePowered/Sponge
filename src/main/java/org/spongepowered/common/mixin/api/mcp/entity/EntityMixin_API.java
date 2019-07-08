@@ -573,7 +573,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             .getContainer()
             .set(Constants.Entity.TYPE, this.entityType.getId())
             .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
-        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
+        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
@@ -584,8 +584,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public Collection<DataManipulator<?, ?>> getContainers() {
         final List<DataManipulator<?, ?>> list = Lists.newArrayList();
         this.spongeApi$supplyVanillaManipulators(list);
-        if (this instanceof CustomDataHolderBridge && ((CustomDataHolderBridge) this).hasManipulators()) {
-            list.addAll(((CustomDataHolderBridge) this).getCustomManipulators());
+        if (this instanceof CustomDataHolderBridge && ((CustomDataHolderBridge) this).bridge$hasManipulators()) {
+            list.addAll(((CustomDataHolderBridge) this).bridge$getCustomManipulators());
         }
         return list;
     }
@@ -609,20 +609,20 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public Optional<UUID> getCreator() {
-        return Optional.empty(); // Mixed in via MixinEntity_Tracker
+        return Optional.empty(); // Mixed in via EntityMixin_TrackerAPI
     }
 
     @Override
     public Optional<UUID> getNotifier() {
-        return Optional.empty(); // Mixed in via MixinEntity_Tracker
+        return Optional.empty(); // Mixed in via EntityMixin_TrackerAPI
     }
 
     @Override
-    public void setCreator(@Nullable final UUID uuid) {  // Mixed in via MixinEntity_Tracker
+    public void setCreator(@Nullable final UUID uuid) {  // Mixed in via EntityMixin_TrackerAPI
     }
 
     @Override
-    public void setNotifier(@Nullable final UUID uuid) { // Mixed in via MixinEntity_Tracker
+    public void setNotifier(@Nullable final UUID uuid) { // Mixed in via EntityMixin_TrackerAPI
     }
 
     @Override

@@ -31,6 +31,8 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandResult;
@@ -43,22 +45,25 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.command.ServerCommandManagerBridge;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.command.WrapperCommandSource;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
-import org.spongepowered.common.bridge.command.ServerCommandManagerBridge;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.util.VecHelper;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(ServerCommandManager.class)
@@ -69,10 +74,14 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
 
     private static final CopyOnWriteArrayList<String> ASYNC_MOD_COMMAND_EXECUTORS = new CopyOnWriteArrayList<>();
 
-    private void updateStat(final ICommandSender sender, final CommandResultStats.Type type, final Optional<Integer> count) {
-        if (count.isPresent()) {
-            sender.setCommandStat(type, count.get());
-        }
+    @Redirect(method = "notifyListener",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/WorldServer;getGameRules()Lnet/minecraft/world/GameRules;"))
+    private GameRules impl$useSenderWorldGamerules(final WorldServer overworld, final ICommandSender sender, final ICommand command,
+        final int flags, final String translationKey, final Object... translationArgs) {
+        // Check the game rules of the current world instead of overworld game rules
+        return sender.getEntityWorld().getGameRules();
     }
 
     /**
@@ -137,7 +146,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
                         .add("Details of the command:")
                         .add("%s : %s", "Command", command)
                         .add("%s : %s", "Offending Mod", id)
-                        .add("%s : %s", "Sender", sender.getDisplayName() == null ? "null" : sender.getDisplayName().getUnformattedText())
+                        .add("%s : %s", "Sender", sender == null || sender.getDisplayName() == null ? "null" : sender.getDisplayName().getUnformattedText())
                         .add("Stacktrace")
                         .add(new Exception("Async Command Executor"))
                         .trace(SpongeImpl.getLogger(), Level.WARN);
@@ -154,11 +163,11 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
 
         final CommandSource source = WrapperCommandSource.of(sender);
         final CommandResult result = SpongeImpl.getGame().getCommandManager().process(source, cleanedCommand);
-        updateStat(sender, CommandResultStats.Type.AFFECTED_BLOCKS, result.getAffectedBlocks());
-        updateStat(sender, CommandResultStats.Type.AFFECTED_ENTITIES, result.getAffectedEntities());
-        updateStat(sender, CommandResultStats.Type.AFFECTED_ITEMS, result.getAffectedItems());
-        updateStat(sender, CommandResultStats.Type.QUERY_RESULT, result.getQueryResult());
-        updateStat(sender, CommandResultStats.Type.SUCCESS_COUNT, result.getSuccessCount());
+        result.getAffectedBlocks().ifPresent(integer4 -> sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, integer4));
+        result.getAffectedEntities().ifPresent(integer3 -> sender.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, integer3));
+        result.getAffectedItems().ifPresent(integer2 -> sender.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, integer2));
+        result.getQueryResult().ifPresent(integer1 -> sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, integer1));
+        result.getSuccessCount().ifPresent(integer -> sender.setCommandStat(CommandResultStats.Type.SUCCESS_COUNT, integer));
         return result.getSuccessCount().orElse(0);
 
         //return super.executeCommand(sender, command); // Try Vanilla instead

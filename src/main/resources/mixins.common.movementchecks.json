@@ -6,7 +6,7 @@
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinNetHandlerPlayServer_MovementChecks"
+      "NetHandlerPlayServerMixin_MovementChecks"
   ],
   "injectors": {
     "defaultRequire": 1

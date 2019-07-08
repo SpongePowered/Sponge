@@ -135,7 +135,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
                 this.compound = new NBTTagCompound();
                 final org.spongepowered.api.block.tileentity.TileEntity te = location.getTileEntity().get();
                 ((TileEntity) te).writeToNBT(this.compound);
-                this.manipulators = ((CustomDataHolderBridge) te).getCustomManipulators().stream()
+                this.manipulators = ((CustomDataHolderBridge) te).bridge$getCustomManipulators().stream()
                         .map(DataManipulator::asImmutable)
                         .collect(Collectors.toList());
             }

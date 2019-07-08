@@ -29,18 +29,18 @@
  * <dt>{@link org.spongepowered.api.command.CommandSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.api.command.CommandSourceMixin_API}
  * <dt>{@link org.spongepowered.api.command.source.CommandBlockSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.command.BlockCommandSourceMixin}
+ * <dd>{@link org.spongepowered.common.mixin.core.command.BlockBasedCommandSourceMixin}
  * <dt>{@link org.spongepowered.api.command.source.RconSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.network.rcon.MixinRConConsoleSource}
+ * <dd>{@link org.spongepowered.common.mixin.core.network.rcon.RConConsoleSourceMixin}
  * <dt>{@link org.spongepowered.api.command.source.SignSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.command.TileEntitySign$1Mixin}
  * <dt>{@link org.spongepowered.api.command.source.ProxySource} via /execute
  * and /function
- * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandSenderWrapper}
+ * <dd>{@link org.spongepowered.common.mixin.core.command.CommandSenderWrapperMixin}
  * </dl>
  *
- * In addition, {@link org.spongepowered.common.mixin.core.command.MixinBlockCommandBlockSender} and
- * {@link org.spongepowered.common.mixin.core.command.MixinMinecartCommandBlockSender} are for inner classes that are separate from the mixin that
+ * In addition, {@link org.spongepowered.common.mixin.core.command.TileEntityCommandBlock$1Mixin} and
+ * {@link org.spongepowered.common.mixin.core.command.EntityMinecartCommandBlock$1} are for inner classes that are separate from the mixin that
  * actually implements their command source interfaces.
  */
 @org.spongepowered.api.util.annotation.NonnullByDefault

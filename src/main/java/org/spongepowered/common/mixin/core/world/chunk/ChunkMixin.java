@@ -150,11 +150,6 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     }
 
     @Override
-    public boolean isChunkLoaded() {
-        return this.loaded;
-    }
-
-    @Override
     public boolean isQueuedForUnload() {
         return this.unloadQueued;
     }
@@ -639,7 +634,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
         return builder.build();
     }
 
-    // These methods are enabled in MixinChunk_Tracker as a Mixin plugin
+    // These methods are enabled in ChunkMixin_Tracker as a Mixin plugin
 
     @Override
     public void addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) { }

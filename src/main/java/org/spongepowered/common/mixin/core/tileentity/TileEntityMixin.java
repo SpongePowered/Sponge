@@ -106,7 +106,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      */
     @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
     private void impl$WriteSpongeDataToCompound(final NBTTagCompound compound, final CallbackInfoReturnable<NBTTagCompound> ci) {
-        if (!((CustomDataHolderBridge) this).getCustomManipulators().isEmpty()) {
+        if (!((CustomDataHolderBridge) this).bridge$getCustomManipulators().isEmpty()) {
             this.bridge$writeToSpongeCompound(this.data$getSpongeCompound());
         }
     }

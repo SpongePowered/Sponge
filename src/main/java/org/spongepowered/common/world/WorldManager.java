@@ -69,8 +69,10 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.bridge.server.integrated.IntegratedServerBridge;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge_AsyncLighting;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
@@ -81,7 +83,6 @@ import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.bridge.server.integrated.IntegratedServerBridge;
 import org.spongepowered.common.mixin.core.server.MinecraftServerAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
@@ -514,7 +515,7 @@ public final class WorldManager {
                 globalConfigAdapter.getConfig().getOptimizations().useAsyncLighting()) {
 
             // The world is unloading - there's no point in running any more lighting tasks
-            ((ServerWorldBridge) worldServer).bridge$getLightingExecutor().shutdownNow();
+            ((ServerWorldBridge_AsyncLighting) worldServer).asyncLightingBridge$getLightingExecutor().shutdownNow();
         }
 
         // Vanilla sometimes doesn't remove player entities from world first

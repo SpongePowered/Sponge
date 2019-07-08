@@ -67,7 +67,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     @SuppressWarnings({"rawtypes", "Duplicates"})
     @Override
-    public DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function) {
+    public DataTransactionResult bridge$offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function) {
         if (this.shadow$isEmpty()) {
             return DataTransactionResult.failResult(manipulator.getValues());
         }
@@ -93,19 +93,19 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public void addFailedData(ImmutableList<DataView> failedData) {
+    public void bridge$addFailedData(ImmutableList<DataView> failedData) {
         this.failedData.addAll(failedData);
         resyncCustomToTag();
     }
 
     @Override
-    public List<DataView> getFailedData() {
+    public List<DataView> bridge$getFailedData() {
         return this.failedData;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> getCustom(Class<T> customClass) {
+    public <T extends DataManipulator<?, ?>> Optional<T> bridge$getCustom(Class<T> customClass) {
         if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
@@ -120,7 +120,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     private void resyncCustomToTag() {
         if (!this.manipulators.isEmpty()) {
             final NBTTagList newList = new NBTTagList();
-            final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(this.getCustomManipulators());
+            final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(this.bridge$getCustomManipulators());
             for (DataView dataView : manipulatorViews) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
@@ -144,7 +144,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public DataTransactionResult removeCustom(Class<? extends DataManipulator<?, ?>> customClass) {
+    public DataTransactionResult bridge$removeCustom(Class<? extends DataManipulator<?, ?>> customClass) {
         if (this.shadow$isEmpty()) {
             return DataTransactionResult.failNoData();
         }
@@ -163,12 +163,12 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public boolean hasManipulators() {
+    public boolean bridge$hasManipulators() {
         return !this.manipulators.isEmpty();
     }
 
     @Override
-    public List<DataManipulator<?, ?>> getCustomManipulators() {
+    public List<DataManipulator<?, ?>> bridge$getCustomManipulators() {
         return this.manipulators.stream()
             .map(DataManipulator::copy)
             .collect(Collectors.toList());
@@ -176,7 +176,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value) {
+    public <E> DataTransactionResult bridge$offerCustom(Key<? extends BaseValue<E>> key, E value) {
         if (this.shadow$isEmpty()) {
             return DataTransactionResult.failNoData();
         }
@@ -194,7 +194,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public DataTransactionResult removeCustom(Key<?> key) {
+    public DataTransactionResult bridge$removeCustom(Key<?> key) {
         final Iterator<DataManipulator<?, ?>> iterator = this.manipulators.iterator();
         while (iterator.hasNext()) {
             final DataManipulator<?, ?> manipulator = iterator.next();
@@ -211,7 +211,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public boolean supportsCustom(Key<?> key) {
+    public boolean bridge$supportsCustom(Key<?> key) {
         if (this.shadow$isEmpty()) {
             return false;
         }
@@ -220,7 +220,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public <E> Optional<E> getCustom(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> bridge$getCustom(Key<? extends BaseValue<E>> key) {
         if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
@@ -231,7 +231,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getCustomValue(Key<V> key) {
+    public <E, V extends BaseValue<E>> Optional<V> bridge$getCustomValue(Key<V> key) {
         if (this.shadow$isEmpty()) {
             return Optional.empty();
         }

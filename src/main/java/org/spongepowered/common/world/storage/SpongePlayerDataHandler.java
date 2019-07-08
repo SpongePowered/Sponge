@@ -77,16 +77,16 @@ public final class SpongePlayerDataHandler {
             Files.createDirectories(handlerInstance.playerDir);
 
             final List<Path> playerFiles = new ArrayList<>();
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(filePath, "*.{dat}")) {
-                for (Path entry : stream) {
+            try (final DirectoryStream<Path> stream = Files.newDirectoryStream(filePath, "*.{dat}")) {
+                for (final Path entry : stream) {
                     playerFiles.add(entry);
                 }
             } catch (DirectoryIteratorException e) {
                 SpongeImpl.getLogger().error("Something happened when trying to gather all player files", e);
             }
-            for (Path playerFile : playerFiles) {
+            for (final Path playerFile : playerFiles) {
                 if (Files.isReadable(playerFile)) {
-                    NBTTagCompound compound;
+                    final NBTTagCompound compound;
 
                     try (final InputStream stream = Files.newInputStream(playerFile)) {
                         compound = CompressedStreamTools.readCompressed(stream);
@@ -99,8 +99,8 @@ public final class SpongePlayerDataHandler {
                         throw new RuntimeException("Failed to decompress player data within [" + playerFile + "]!");
                     }
 
-                    DataContainer container = NbtTranslator.getInstance().translateFrom(compound);
-                    SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
+                    final DataContainer container = NbtTranslator.getInstance().translateFrom(compound);
+                    final SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
                     handlerInstance.playerDataMap.put(data.uuid, data);
                 }
             }
@@ -115,10 +115,10 @@ public final class SpongePlayerDataHandler {
         handlerInstance.hasInitialized = true;
     }
 
-    public static void savePlayer(UUID id) {
+    public static void savePlayer(final UUID id) {
         checkState(Holder.INSTANCE.hasInitialized, "PlayerDataHandler hasn't initialized yet!");
-        SpongePlayerDataHandler instance = Holder.INSTANCE;
-        @Nullable SpongePlayerData data = instance.playerDataMap.get(checkNotNull(id, "Player id cannot be null!"));
+        final SpongePlayerDataHandler instance = Holder.INSTANCE;
+        @Nullable final SpongePlayerData data = instance.playerDataMap.get(checkNotNull(id, "Player id cannot be null!"));
         if (data != null) {
             saveFile(id.toString(), createCompoundFor(data));
         } else {
@@ -126,20 +126,20 @@ public final class SpongePlayerDataHandler {
         }
     }
 
-    private static NBTTagCompound createCompoundFor(SpongePlayerData data) {
+    private static NBTTagCompound createCompoundFor(final SpongePlayerData data) {
         return NbtTranslator.getInstance().translateData(data.toContainer());
     }
 
-    private static void saveFile(String id, NBTTagCompound compound) {
+    private static void saveFile(final String id, final NBTTagCompound compound) {
         checkState(Holder.INSTANCE.hasInitialized, "PlayerDataHandler hasn't initialized yet!");
-        SpongePlayerDataHandler instance = Holder.INSTANCE;
+        final SpongePlayerDataHandler instance = Holder.INSTANCE;
         try {
             // Ensure that where we want to put this at ALWAYS exists
             Files.createDirectories(instance.playerDir);
 
             final Path finalDatPath = instance.playerDir.resolve(id + ".dat");
             final Path newDatPath = instance.playerDir.resolve(id + ".dat.tmp");
-            try (OutputStream stream = Files.newOutputStream(newDatPath, StandardOpenOption.CREATE)) {
+            try (final OutputStream stream = Files.newOutputStream(newDatPath, StandardOpenOption.CREATE)) {
                 CompressedStreamTools.writeCompressed(compound, stream);
             }
             Files.move(newDatPath, finalDatPath, StandardCopyOption.REPLACE_EXISTING);
@@ -148,11 +148,11 @@ public final class SpongePlayerDataHandler {
         }
     }
 
-    public static void setPlayerInfo(UUID playerId, Instant join, Instant last) {
+    public static void setPlayerInfo(final UUID playerId, final Instant join, final Instant last) {
         checkState(Holder.INSTANCE.hasInitialized, "PlayerDataHandler hasn't initialized yet!");
         checkNotNull(join, "Joined date cannot be null!");
         checkNotNull(last, "Last joined date cannot be null!");
-        SpongePlayerDataHandler instance = Holder.INSTANCE;
+        final SpongePlayerDataHandler instance = Holder.INSTANCE;
 
         SpongePlayerData data = instance.playerDataMap.get(checkNotNull(playerId, "Player UUID cannot be null!"));
         if (data == null) {
@@ -164,13 +164,13 @@ public final class SpongePlayerDataHandler {
         instance.playerDataMap.put(playerId, data);
     }
 
-    public static Optional<Instant> getFirstJoined(UUID player) {
+    public static Optional<Instant> getFirstJoined(final UUID player) {
         checkState(Holder.INSTANCE.hasInitialized, "PlayerDataHandler hasn't initialized yet!");
         final SpongePlayerData data = Holder.INSTANCE.playerDataMap.get(player);
         return Optional.ofNullable(data == null ? null : Instant.ofEpochMilli(data.firstJoined));
     }
 
-    public static Optional<Instant> getLastPlayed(UUID player) {
+    public static Optional<Instant> getLastPlayed(final UUID player) {
         checkState(Holder.INSTANCE.hasInitialized, "PlayerDataHandler hasn't initialized yet!");
         final SpongePlayerData data = Holder.INSTANCE.playerDataMap.get(player);
         return Optional.ofNullable(data == null ? null : Instant.ofEpochMilli(data.lastJoined));

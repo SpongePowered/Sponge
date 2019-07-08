@@ -6,9 +6,9 @@
     "mixinPriority" : 1111,
     "mixins": [
         "bridge.OwnershipTrackedBridgeMixin",
-        "entity.MixinEntity_Tracker",
-        "world.MixinChunk_Tracker",
-        "world.MixinWorld_Tracker"
+        "entity.EntityMixin_TrackerAPI",
+        "world.ChunkMixin_Tracker",
+        "world.WorldMixin_TrackerAPI"
     ],
     "server": [
 

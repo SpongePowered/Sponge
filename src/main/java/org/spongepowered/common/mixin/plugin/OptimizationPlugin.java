@@ -98,46 +98,46 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     };
     // So that any additional optimizations can be added in succession.
     private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean >> builder()
-            .put("org.spongepowered.common.mixin.optimization.MixinSpongeImplHooks_Item_Pre_Merge",
+            .put("org.spongepowered.common.mixin.optimization.SpongeImplHooksMixin_Item_Pre_Merge",
                     OptimizationCategory::doDropsPreMergeItemDrops)
-            .put("org.spongepowered.common.mixin.optimization.enchantment.MixinEnchantmentHelper_No_Source_Leak",
+            .put("org.spongepowered.common.mixin.optimization.enchantment.EnchantmentHelperMixin_No_Source_Leak",
                     OptimizationCategory::useEnchantmentHelperFix)
             .put("org.spongepowered.common.mixin.optimization.block.BlockRedstoneWireMixin_Eigen", EIGEN_ONLY)
             .put("org.spongepowered.common.mixin.optimization.block.BlockRedstoneWireAccessor_Eigen", EIGEN_ONLY)
             .put("org.spongepowered.common.mixin.optimization.block.BlockRedstoneWireMixin_Panda", PANDA_ONLY)
             .put("org.spongepowered.common.mixin.optimization.entity.EntityMixinTameable_Cached_Owner",
                     OptimizationCategory::useCacheTameableOwners)
-            .put("org.spongepowered.common.mixin.optimization.network.play.server.MixinSPacketChunkData_Async_Lighting",
+            .put("org.spongepowered.common.mixin.optimization.network.play.server.SPacketChunkDataMixin_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
-            .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Async_Lighting",
+            .put("org.spongepowered.common.mixin.optimization.world.chunk.ChunkMixin_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
             .put("org.spongepowered.common.mixin.optimization.world.WorldServerMixin_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
-            .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Async_Lighting",
+            .put("org.spongepowered.common.mixin.optimization.world.gen.ChunkProviderServerMixin_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
-            .put("org.spongepowered.common.mixin.optimization.world.gen.structure.MixinMapGenStructure_Structure_Saving",
+            .put("org.spongepowered.common.mixin.optimization.world.gen.structure.MapGenStructureMixin_Structure_Saving",
                     OptimizationCategory::useStructureSave)
             .put("org.spongepowered.common.mixin.optimization.entity.item.EntityItemFrameMixin_MapOptimization",
                     OptimizationCategory::useMapOptimization)
-            .put("org.spongepowered.common.mixin.optimization.entity.MixinEntityTrackerEntry_MapOptimization",
+            .put("org.spongepowered.common.mixin.optimization.entity.EntityTrackerEntryMixin_MapOptimization",
                     OptimizationCategory::useMapOptimization)
-            .put("org.spongepowered.common.mixin.optimization.item.MixinItemMap_MapOptimization",
+            .put("org.spongepowered.common.mixin.optimization.item.ItemMapMixin_MapOptimization",
                     OptimizationCategory::useMapOptimization)
-            .put("org.spongepowered.common.mixin.optimization.world.storage.MixinMapData_MapOptimization",
+            .put("org.spongepowered.common.mixin.optimization.world.storage.MapDataMixin_MapOptimization",
                     OptimizationCategory::useMapOptimization)
-            .put("org.spongepowered.common.mixin.optimization.world.storage.MixinMapInfo_MapOptimization",
+            .put("org.spongepowered.common.mixin.optimization.world.storage.MapInfoMixin_MapOptimization",
                     OptimizationCategory::useMapOptimization)
-            .put("org.spongepowered.common.mixin.optimization.server.MixinMinecraftServer_MapOptimization",
+            .put("org.spongepowered.common.mixin.optimization.server.MinecraftServerMixin_MapOptimization",
                     OptimizationCategory::useMapOptimization)
-            .put("org.spongepowered.common.mixin.optimization.tileentity.MixinTileEntity_HopperOptimization",
+            .put("org.spongepowered.common.mixin.optimization.tileentity.TileEntityMixin_HopperOptimization",
                     OptimizationCategory::isOptimizeHoppers)
-            .put("org.spongepowered.common.mixin.optimization.tileentity.MixinTileEntityHopper_HopperOptimization",
+            .put("org.spongepowered.common.mixin.optimization.tileentity.TileEntityHopperMixin_HopperOptimization",
                     OptimizationCategory::isOptimizeHoppers)
-            .put("org.spongepowered.common.mixin.optimization.entity.MixinEntity_UseActiveChunkForCollisions",
+            .put("org.spongepowered.common.mixin.optimization.entity.EntityMixin_UseActiveChunkForCollisions",
                     OptimizationCategory::isUseActiveChunkForCollisions)
-            .put("org.spongepowered.common.mixin.optimization.world.MixinWorld_UseActiveChunkForCollisions",
+            .put("org.spongepowered.common.mixin.optimization.world.WorldMixin_UseActiveChunkForCollisions",
                     OptimizationCategory::isUseActiveChunkForCollisions)
-            .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_UseActiveChunkForCollisions",
+            .put("org.spongepowered.common.mixin.optimization.world.WorldServerMixin_UseActiveChunkForCollisions",
                     OptimizationCategory::isUseActiveChunkForCollisions)
             .build();
 

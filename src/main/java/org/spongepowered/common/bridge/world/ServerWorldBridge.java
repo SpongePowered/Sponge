@@ -136,11 +136,8 @@ public interface ServerWorldBridge {
 
     boolean bridge$isLightLevel(Chunk chunk, BlockPos pos, int level);
 
-    boolean bridge$updateLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk);
 
-    boolean bridge$checkLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk, List<Chunk> neighbors);
 
-    ExecutorService bridge$getLightingExecutor();
 
     WorldTimingsHandler bridge$getTimingsHandler();
 

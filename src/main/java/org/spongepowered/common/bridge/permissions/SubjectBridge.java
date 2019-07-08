@@ -28,12 +28,17 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Interface going with SubjectBridge-shared mixins (what am I even saying?).
  */
 public interface SubjectBridge {
+
+    Subject bridge$resolve();
+
+    Optional<Subject> bridge$resolveOptional();
 
     void bridge$setSubject(SubjectReference subj);
 

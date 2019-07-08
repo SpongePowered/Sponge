@@ -1,15 +1,15 @@
 {
-  "minVersion": "0.7.10",
-  "package": "org.spongepowered.common.mixin.concurrentchecks",
-  "refmap": "mixins.common.refmap.json",
-  "plugin": "org.spongepowered.common.mixin.plugin.ConcurrentChecksPlugin",
-  "target": "@env(DEFAULT)",
-  "compatibilityLevel": "JAVA_8",
-  "mixins": [
-    "MixinClassInheritanceMultiMap",
-    "MixinPlayerChunkMap_ConcurrentChecks"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+    "minVersion": "0.7.10",
+    "package": "org.spongepowered.common.mixin.concurrentchecks",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.ConcurrentChecksPlugin",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+        "ClassInheritanceMultiMapMixin_ConcurrentChecks",
+        "PlayerChunkMapMixin_ConcurrentChecks"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
 }

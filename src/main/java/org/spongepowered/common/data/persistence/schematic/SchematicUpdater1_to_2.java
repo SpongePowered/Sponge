@@ -45,7 +45,7 @@ public class SchematicUpdater1_to_2 implements DataContentUpdater {
 
     @Override
     public DataView update(DataView content) {
-        content.set(Constants.Sponge.Schematic.VERSION, 2);
+        content.set(Constants.Sponge.Schematic.CURRENT_VERSION, 2);
         content.set(Constants.Sponge.Schematic.DATA_VERSION, DataUtil.MINECRAFT_DATA_VERSION);
         content.getViewList(Constants.Sponge.Schematic.Versions.V1_TILE_ENTITY_DATA).ifPresent(tiles -> {
             tiles.forEach(tile -> {

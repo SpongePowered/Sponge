@@ -205,7 +205,7 @@ public class CustomDataNbtUtil {
                         dataHolder.offer(manipulator);
                     }
                     if (!transaction.failedData.isEmpty()) {
-                        ((CustomDataHolderBridge) dataHolder).addFailedData(transaction.failedData);
+                        ((CustomDataHolderBridge) dataHolder).bridge$addFailedData(transaction.failedData);
                     }
                 } catch (final InvalidDataException e) {
                     SpongeImpl.getLogger().error("Could not translate custom plugin data! ", e);
@@ -227,13 +227,13 @@ public class CustomDataNbtUtil {
                         // If for any reason a failed data was not deserialized, but
                         // there already exists new data, we just simply want to
                         // ignore the failed data for removal.
-                        if (!((CustomDataHolderBridge) dataHolder).getCustom(manipulator.getClass()).isPresent()) {
+                        if (!((CustomDataHolderBridge) dataHolder).bridge$getCustom(manipulator.getClass()).isPresent()) {
                             dataHolder.offer(manipulator);
                         }
                     }
                 }
                 if (!transaction.failedData.isEmpty()) {
-                    ((CustomDataHolderBridge) dataHolder).addFailedData(transaction.failedData);
+                    ((CustomDataHolderBridge) dataHolder).bridge$addFailedData(transaction.failedData);
                 }
             }
         }
@@ -251,7 +251,7 @@ public class CustomDataNbtUtil {
 
     public static void writeCustomData(final NBTTagCompound compound, final DataHolder dataHolder) {
         if (dataHolder instanceof CustomDataHolderBridge) {
-            final List<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) dataHolder).getCustomManipulators();
+            final List<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) dataHolder).bridge$getCustomManipulators();
             if (!manipulators.isEmpty()) {
                 final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(manipulators);
                 final NBTTagList manipulatorTagList = new NBTTagList();
@@ -260,7 +260,7 @@ public class CustomDataNbtUtil {
                 }
                 compound.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
             }
-            final List<DataView> failedData = ((CustomDataHolderBridge) dataHolder).getFailedData();
+            final List<DataView> failedData = ((CustomDataHolderBridge) dataHolder).bridge$getFailedData();
             if (!failedData.isEmpty()) {
                 final NBTTagList failedList = new NBTTagList();
                 for (final DataView failedDatum : failedData) {

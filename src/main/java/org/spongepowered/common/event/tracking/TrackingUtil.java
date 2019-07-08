@@ -870,7 +870,7 @@ public final class TrackingUtil {
     public static void addTileEntityToBuilder(@Nullable net.minecraft.tileentity.TileEntity existing, SpongeBlockSnapshotBuilder builder) {
         // We MUST only check to see if a TE exists to avoid creating a new one.
         TileEntity tile = (TileEntity) existing;
-        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).getCustomManipulators()) {
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).bridge$getCustomManipulators()) {
             builder.add(manipulator);
         }
         NBTTagCompound nbt = new NBTTagCompound();

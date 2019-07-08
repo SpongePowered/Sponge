@@ -6,10 +6,9 @@
     "compatibilityLevel": "JAVA_8",
     "mixinPriority": 11111,
     "mixins": [
-        "MixinAdvancement",
-        "MixinItem",
-        "MixinSchematicTranslator_Test",
-        "MixinSpongeImplHooks_test"
+        "ItemMixin_Test",
+        "SchematicTranslatorMixin_Test",
+        "SpongeImplHooksMixin_Test"
     ],
     "injectors": {
         "defaultRequire": 1

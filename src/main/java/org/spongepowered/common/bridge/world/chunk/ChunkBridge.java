@@ -106,19 +106,9 @@ public interface ChunkBridge {
 
     void setIsSpawning(boolean spawning);
 
-    AtomicInteger getPendingLightUpdates();
-
-    long getLightUpdateTime();
-
-    void setLightUpdateTime(long time);
-
     List<Chunk> getNeighbors();
 
-    boolean isChunkLoaded();
-
     boolean isQueuedForUnload();
-
-    Set<Short> getQueuedLightingUpdates(EnumSkyBlock type);
 
     void markChunkDirty();
 

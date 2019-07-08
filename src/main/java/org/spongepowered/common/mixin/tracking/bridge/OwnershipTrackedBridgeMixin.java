@@ -108,14 +108,14 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
     }
 
     @Override
-    public Optional<User> tracked$getTrackedUser(PlayerTracker.Type nbtKey) {
+    public Optional<User> tracked$getTrackedUser(final PlayerTracker.Type nbtKey) {
         final UUID uuid = this.getTrackedUniqueId(nbtKey);
 
         if (uuid == null) {
             return Optional.empty();
         }
         // get player if online
-        Player player = Sponge.getServer().getPlayer(uuid).orElse(null);
+        final Player player = Sponge.getServer().getPlayer(uuid).orElse(null);
         if (player != null) {
             return Optional.of(player);
         }
@@ -128,13 +128,13 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
         }
 
         // check username cache
-        String username = SpongeUsernameCache.getLastKnownUsername(uuid);
+        final String username = SpongeUsernameCache.getLastKnownUsername(uuid);
         if (username != null) {
             return this.tracked$userService.get(GameProfile.of(uuid, username));
         }
 
         // check mojang cache
-        GameProfile profile = this.tracked$profileManager.getCache().getById(uuid).orElse(null);
+        final GameProfile profile = this.tracked$profileManager.getCache().getById(uuid).orElse(null);
         if (profile != null) {
             return this.tracked$userService.get(profile);
         }
@@ -145,7 +145,7 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
     }
 
     @Override
-    public void tracked$setTrackedUUID(PlayerTracker.Type type, @Nullable UUID uuid) {
+    public void tracked$setTrackedUUID(final PlayerTracker.Type type, @Nullable final UUID uuid) {
         if (PlayerTracker.Type.OWNER == type) {
             this.tracked$owner = uuid;
         } else if (PlayerTracker.Type.NOTIFIER == type) {
@@ -160,7 +160,7 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
                 return;
             }
             if (!spongeData.hasKey(type.compoundKey)) {
-                NBTTagCompound sourceNbt = new NBTTagCompound();
+                final NBTTagCompound sourceNbt = new NBTTagCompound();
                 sourceNbt.setUniqueId(Constants.UUID, uuid);
                 spongeData.setTag(type.compoundKey, sourceNbt);
             } else {
@@ -171,12 +171,12 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
     }
 
     @Nullable
-    private UUID getTrackedUniqueId(PlayerTracker.Type nbtKey) {
+    private UUID getTrackedUniqueId(final PlayerTracker.Type nbtKey) {
         if (this.tracked$owner != null && PlayerTracker.Type.OWNER == nbtKey) {
             return this.tracked$owner;
         }
         if (this instanceof IEntityOwnable) {
-            IEntityOwnable ownable = (IEntityOwnable) this;
+            final IEntityOwnable ownable = (IEntityOwnable) this;
             final Entity owner = ownable.getOwner();
             if (owner instanceof EntityPlayer) {
                 this.tracked$setTrackedUUID(PlayerTracker.Type.OWNER, owner.getUniqueID());
@@ -185,18 +185,18 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
         } else if (this.tracked$notifier != null && PlayerTracker.Type.NOTIFIER == nbtKey) {
             return this.tracked$notifier;
         }
-        NBTTagCompound nbt = ((DataCompoundHolder) this).data$getSpongeCompound();
+        final NBTTagCompound nbt = ((DataCompoundHolder) this).data$getSpongeCompound();
         if (!nbt.hasKey(nbtKey.compoundKey)) {
             return null;
         }
-        NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey.compoundKey);
+        final NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey.compoundKey);
 
 
         if (!creatorNbt.hasKey(Constants.UUID_MOST) && !creatorNbt.hasKey(Constants.UUID_LEAST)) {
             return null;
         }
 
-        UUID uniqueId = creatorNbt.getUniqueId(Constants.UUID);
+        final UUID uniqueId = creatorNbt.getUniqueId(Constants.UUID);
         if (PlayerTracker.Type.OWNER == nbtKey) {
             this.tracked$owner = uniqueId;
         } else if (PlayerTracker.Type.NOTIFIER == nbtKey) {

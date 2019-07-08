@@ -922,7 +922,7 @@ public final class EntityUtil {
     // getPlayerRespawnLocation and recreatePlayerEntity
     public static boolean tempIsBedSpawn = false;
 
-    // Internal to MixinPlayerList. has side effects
+    // Internal to PlayerListMixin. has side effects
     public static Location<World> getPlayerRespawnLocation(final EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
         final Location<World> location = ((World) playerIn.world).getSpawnLocation();
         tempIsBedSpawn = false;

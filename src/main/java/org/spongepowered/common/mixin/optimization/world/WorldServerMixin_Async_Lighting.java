@@ -35,11 +35,13 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge_AsyncLighting;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge_AsyncLighting;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -48,36 +50,32 @@ import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
 
 @Mixin(value = WorldServer.class)
-public abstract class WorldServerMixin_Async_Lighting extends WorldMixin implements ServerWorldBridge {
+public abstract class WorldServerMixin_Async_Lighting extends WorldMixin implements ServerWorldBridge_AsyncLighting {
 
-    private static final int NUM_XZ_BITS = 4;
-    private static final int NUM_SHORT_Y_BITS = 8;
-    private static final short XZ_MASK = 0xF;
-    private static final short Y_SHORT_MASK = 0xFF;
-
-    private ExecutorService lightExecutorService = 
+    private ExecutorService asyncLightingImpl$lightExecutorService =
                 Executors.newFixedThreadPool(SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().getAsyncLightingCategory().getNumThreads(), new ThreadFactoryBuilder().setNameFormat("Sponge - Async Light Thread").build());
 
     @Override
-    public boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos) {
-        return this.bridge$updateLightAsync(lightType, pos, null);
+    public boolean checkLightFor(final EnumSkyBlock lightType, final BlockPos pos) {
+        return this.asyncLightingBridge$updateLightAsync(lightType, pos, null);
     }
 
     @Override
-    public boolean bridge$checkLightAsync(EnumSkyBlock lightType, BlockPos pos, net.minecraft.world.chunk.Chunk currentChunk, List<Chunk> neighbors) {
+    public boolean asyncLightingBridge$checkLightAsync(
+        final EnumSkyBlock lightType, final BlockPos pos, final net.minecraft.world.chunk.Chunk currentChunk, final List<Chunk> neighbors) {
         // Sponge - This check is not needed as neighbors are checked in bridge$updateLightAsync
         if (false && !this.isAreaLoaded(pos, 17, false)) {
             return false;
         } else {
-            final ChunkBridge spongeChunk = (ChunkBridge) currentChunk;
+            final ChunkBridge_AsyncLighting spongeChunk = (ChunkBridge_AsyncLighting) currentChunk;
             int i = 0;
             int j = 0;
             //this.theProfiler.startSection("getBrightness"); // Sponge - don't use profiler off of main thread
-            int k = this.getLightForAsync(lightType, pos, currentChunk, neighbors); // Sponge - use thread safe method
-            int l = this.getRawBlockLightAsync(lightType, pos, currentChunk, neighbors); // Sponge - use thread safe method
-            int i1 = pos.getX();
-            int j1 = pos.getY();
-            int k1 = pos.getZ();
+            final int k = this.asyncLightingImpl$getLightForAsync(lightType, pos, currentChunk, neighbors); // Sponge - use thread safe method
+            final int l = this.asyncLightingImpl$getRawBlockLightAsync(lightType, pos, currentChunk, neighbors); // Sponge - use thread safe method
+            final int i1 = pos.getX();
+            final int j1 = pos.getY();
+            final int k1 = pos.getZ();
 
             if (l > k) {
                 this.lightUpdateBlockList[j++] = 133152;
@@ -85,37 +83,37 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
                 this.lightUpdateBlockList[j++] = 133152 | k << 18;
 
                 while (i < j) {
-                    int l1 = this.lightUpdateBlockList[i++];
-                    int i2 = (l1 & 63) - 32 + i1;
-                    int j2 = (l1 >> 6 & 63) - 32 + j1;
-                    int k2 = (l1 >> 12 & 63) - 32 + k1;
-                    int l2 = l1 >> 18 & 15;
-                    BlockPos blockpos = new BlockPos(i2, j2, k2);
-                    int i3 = this.getLightForAsync(lightType, blockpos, currentChunk, neighbors); // Sponge - use thread safe method
+                    final int l1 = this.lightUpdateBlockList[i++];
+                    final int i2 = (l1 & 63) - 32 + i1;
+                    final int j2 = (l1 >> 6 & 63) - 32 + j1;
+                    final int k2 = (l1 >> 12 & 63) - 32 + k1;
+                    final int l2 = l1 >> 18 & 15;
+                    final BlockPos blockpos = new BlockPos(i2, j2, k2);
+                    int i3 = this.asyncLightingImpl$getLightForAsync(lightType, blockpos, currentChunk, neighbors); // Sponge - use thread safe method
 
                     if (i3 == l2) {
-                        this.setLightForAsync(lightType, blockpos, 0, currentChunk, neighbors); // Sponge - use thread safe method
+                        this.asyncLightingImpl$setLightForAsync(lightType, blockpos, 0, currentChunk, neighbors); // Sponge - use thread safe method
 
                         if (l2 > 0) {
-                            int j3 = MathHelper.abs(i2 - i1);
-                            int k3 = MathHelper.abs(j2 - j1);
-                            int l3 = MathHelper.abs(k2 - k1);
+                            final int j3 = MathHelper.abs(i2 - i1);
+                            final int k3 = MathHelper.abs(j2 - j1);
+                            final int l3 = MathHelper.abs(k2 - k1);
 
                             if (j3 + k3 + l3 < 17) {
-                                BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
+                                final BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
-                                for (EnumFacing enumfacing : EnumFacing.values()) {
-                                    int i4 = i2 + enumfacing.getXOffset();
-                                    int j4 = j2 + enumfacing.getYOffset();
-                                    int k4 = k2 + enumfacing.getZOffset();
+                                for (final EnumFacing enumfacing : EnumFacing.values()) {
+                                    final int i4 = i2 + enumfacing.getXOffset();
+                                    final int j4 = j2 + enumfacing.getYOffset();
+                                    final int k4 = k2 + enumfacing.getZOffset();
                                     blockpos$pooledmutableblockpos.setPos(i4, j4, k4);
                                     // Sponge start - get chunk safely
-                                    final Chunk pooledChunk = this.getLightChunk(blockpos$pooledmutableblockpos, currentChunk, neighbors);
+                                    final Chunk pooledChunk = this.asyncLightingImpl$getLightChunk(blockpos$pooledmutableblockpos, currentChunk, neighbors);
                                     if (pooledChunk == null) {
                                         continue;
                                     }
-                                    int l4 = Math.max(1, pooledChunk.getBlockState(blockpos$pooledmutableblockpos).getLightOpacity());
-                                    i3 = this.getLightForAsync(lightType, blockpos$pooledmutableblockpos, currentChunk, neighbors);
+                                    final int l4 = Math.max(1, pooledChunk.getBlockState(blockpos$pooledmutableblockpos).getLightOpacity());
+                                    i3 = this.asyncLightingImpl$getLightForAsync(lightType, blockpos$pooledmutableblockpos, currentChunk, neighbors);
                                     // Sponge end
 
                                     if (i3 == l2 - l4 && j < this.lightUpdateBlockList.length) {
@@ -136,46 +134,46 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
             //this.theProfiler.startSection("checkedPosition < toCheckCount"); // Sponge - don't use profiler off of main thread
 
             while (i < j) {
-                int i5 = this.lightUpdateBlockList[i++];
-                int j5 = (i5 & 63) - 32 + i1;
-                int k5 = (i5 >> 6 & 63) - 32 + j1;
-                int l5 = (i5 >> 12 & 63) - 32 + k1;
-                BlockPos blockpos1 = new BlockPos(j5, k5, l5);
-                int i6 = this.getLightForAsync(lightType, blockpos1, currentChunk, neighbors); // Sponge - use thread safe method
-                int j6 = this.getRawBlockLightAsync(lightType, blockpos1, currentChunk, neighbors); // Sponge - use thread safe method
+                final int i5 = this.lightUpdateBlockList[i++];
+                final int j5 = (i5 & 63) - 32 + i1;
+                final int k5 = (i5 >> 6 & 63) - 32 + j1;
+                final int l5 = (i5 >> 12 & 63) - 32 + k1;
+                final BlockPos blockpos1 = new BlockPos(j5, k5, l5);
+                final int i6 = this.asyncLightingImpl$getLightForAsync(lightType, blockpos1, currentChunk, neighbors); // Sponge - use thread safe method
+                final int j6 = this.asyncLightingImpl$getRawBlockLightAsync(lightType, blockpos1, currentChunk, neighbors); // Sponge - use thread safe method
 
                 if (j6 != i6) {
-                    this.setLightForAsync(lightType, blockpos1, j6, currentChunk, neighbors); // Sponge - use thread safe method
+                    this.asyncLightingImpl$setLightForAsync(lightType, blockpos1, j6, currentChunk, neighbors); // Sponge - use thread safe method
 
                     if (j6 > i6) {
-                        int k6 = Math.abs(j5 - i1);
-                        int l6 = Math.abs(k5 - j1);
-                        int i7 = Math.abs(l5 - k1);
-                        boolean flag = j < this.lightUpdateBlockList.length - 6;
+                        final int k6 = Math.abs(j5 - i1);
+                        final int l6 = Math.abs(k5 - j1);
+                        final int i7 = Math.abs(l5 - k1);
+                        final boolean flag = j < this.lightUpdateBlockList.length - 6;
 
                         if (k6 + l6 + i7 < 17 && flag) {
-                            // Sponge start - use thread safe method getLightForAsync
-                            if (this.getLightForAsync(lightType, blockpos1.west(), currentChunk, neighbors) < j6) {
+                            // Sponge start - use thread safe method asyncLightingImpl$getLightForAsync
+                            if (this.asyncLightingImpl$getLightForAsync(lightType, blockpos1.west(), currentChunk, neighbors) < j6) {
                                 this.lightUpdateBlockList[j++] = j5 - 1 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
                             }
 
-                            if (this.getLightForAsync(lightType, blockpos1.east(), currentChunk, neighbors) < j6) {
+                            if (this.asyncLightingImpl$getLightForAsync(lightType, blockpos1.east(), currentChunk, neighbors) < j6) {
                                 this.lightUpdateBlockList[j++] = j5 + 1 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
                             }
 
-                            if (this.getLightForAsync(lightType, blockpos1.down(), currentChunk, neighbors) < j6) {
+                            if (this.asyncLightingImpl$getLightForAsync(lightType, blockpos1.down(), currentChunk, neighbors) < j6) {
                                 this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - 1 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
                             }
 
-                            if (this.getLightForAsync(lightType, blockpos1.up(), currentChunk, neighbors) < j6) {
+                            if (this.asyncLightingImpl$getLightForAsync(lightType, blockpos1.up(), currentChunk, neighbors) < j6) {
                                 this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 + 1 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
                             }
 
-                            if (this.getLightForAsync(lightType, blockpos1.north(), currentChunk, neighbors) < j6) {
+                            if (this.asyncLightingImpl$getLightForAsync(lightType, blockpos1.north(), currentChunk, neighbors) < j6) {
                                 this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - 1 - k1 + 32 << 12);
                             }
 
-                            if (this.getLightForAsync(lightType, blockpos1.south(), currentChunk, neighbors) < j6) {
+                            if (this.asyncLightingImpl$getLightForAsync(lightType, blockpos1.south(), currentChunk, neighbors) < j6) {
                                 this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 + 1 - k1 + 32 << 12);
                             }
                             // Sponge end
@@ -185,11 +183,11 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
             }
 
             // Sponge start - Asynchronous light updates
-            spongeChunk.getQueuedLightingUpdates(lightType).remove((Short) this.blockPosToShort(pos));
-            spongeChunk.getPendingLightUpdates().decrementAndGet();
-            for (net.minecraft.world.chunk.Chunk neighborChunk : neighbors) {
-                final ChunkBridge neighbor = (ChunkBridge) neighborChunk;
-                neighbor.getPendingLightUpdates().decrementAndGet();
+            spongeChunk.asyncLightingBridge$getQueuedLightingUpdates(lightType).remove((Short) this.asyncLightingImpl$blockPosToShort(pos));
+            spongeChunk.asyncLightingBridge$getPendingLightUpdates().decrementAndGet();
+            for (final net.minecraft.world.chunk.Chunk neighborChunk : neighbors) {
+                final ChunkBridge_AsyncLighting neighbor = (ChunkBridge_AsyncLighting) neighborChunk;
+                neighbor.asyncLightingBridge$getPendingLightUpdates().decrementAndGet();
             }
 
             // Sponge end
@@ -199,8 +197,8 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
     }
 
     @Override
-    public boolean bridge$updateLightAsync(EnumSkyBlock lightType, BlockPos pos, @Nullable Chunk currentChunk) {
-        if (this.getMinecraftServer().isServerStopped() || this.lightExecutorService.isShutdown()) {
+    public boolean asyncLightingBridge$updateLightAsync(final EnumSkyBlock lightType, final BlockPos pos, @Nullable Chunk currentChunk) {
+        if (this.getMinecraftServer().isServerStopped() || this.asyncLightingImpl$lightExecutorService.isShutdown()) {
             return false;
         }
 
@@ -208,28 +206,28 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
             currentChunk = ((ChunkProviderBridge) this.chunkProvider).bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         }
 
-        final ChunkBridge spongeChunk = (ChunkBridge) currentChunk;
+        final ChunkBridge_AsyncLighting spongeChunk = (ChunkBridge_AsyncLighting) currentChunk;
         if (currentChunk == null || currentChunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {
             return false;
         }
 
-        final short shortPos = this.blockPosToShort(pos);
-        if (spongeChunk.getQueuedLightingUpdates(lightType).contains(shortPos)) {
+        final short shortPos = this.asyncLightingImpl$blockPosToShort(pos);
+        if (spongeChunk.asyncLightingBridge$getQueuedLightingUpdates(lightType).contains(shortPos)) {
             return false;
         }
 
         final Chunk chunk = currentChunk;
-        spongeChunk.getQueuedLightingUpdates(lightType).add(shortPos);
-        spongeChunk.getPendingLightUpdates().incrementAndGet();
-        spongeChunk.setLightUpdateTime(chunk.getWorld().getTotalWorldTime());
+        spongeChunk.asyncLightingBridge$getQueuedLightingUpdates(lightType).add(shortPos);
+        spongeChunk.asyncLightingBridge$getPendingLightUpdates().incrementAndGet();
+        spongeChunk.asyncLightingBridge$setLightUpdateTime(chunk.getWorld().getTotalWorldTime());
 
-        List<Chunk> neighbors = spongeChunk.getNeighbors();
+        final List<Chunk> neighbors = spongeChunk.getNeighbors();
 
         // add diagonal chunks
-        ChunkBridge southChunk = (ChunkBridge) spongeChunk.getNeighborChunk(0);
+        final ChunkBridge southChunk = (ChunkBridge) spongeChunk.getNeighborChunk(0);
         if (southChunk != null) {
-            Chunk southEastChunk = southChunk.getNeighborChunk(2);
-            Chunk southWestChunk = southChunk.getNeighborChunk(3);
+            final Chunk southEastChunk = southChunk.getNeighborChunk(2);
+            final Chunk southWestChunk = southChunk.getNeighborChunk(3);
             if (southEastChunk != null) {
                 neighbors.add(southEastChunk);
             }
@@ -237,10 +235,10 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
                 neighbors.add(southWestChunk);
             }
         }
-        ChunkBridge northChunk = (ChunkBridge) spongeChunk.getNeighborChunk(1);
+        final ChunkBridge northChunk = (ChunkBridge) spongeChunk.getNeighborChunk(1);
         if (northChunk != null) {
-            Chunk northEastChunk = northChunk.getNeighborChunk(2);
-            Chunk northWestChunk = northChunk.getNeighborChunk(3);
+            final Chunk northEastChunk = northChunk.getNeighborChunk(2);
+            final Chunk northWestChunk = northChunk.getNeighborChunk(3);
             if (northEastChunk != null) {
                 neighbors.add(northEastChunk);
             }
@@ -249,39 +247,39 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
             }
         }
 
-        for (net.minecraft.world.chunk.Chunk neighborChunk : neighbors) {
-            final ChunkBridge neighbor = (ChunkBridge) neighborChunk;
-            neighbor.getPendingLightUpdates().incrementAndGet();
-            neighbor.setLightUpdateTime(chunk.getWorld().getTotalWorldTime());
+        for (final net.minecraft.world.chunk.Chunk neighborChunk : neighbors) {
+            final ChunkBridge_AsyncLighting neighbor = (ChunkBridge_AsyncLighting) neighborChunk;
+            neighbor.asyncLightingBridge$getPendingLightUpdates().incrementAndGet();
+            neighbor.asyncLightingBridge$setLightUpdateTime(chunk.getWorld().getTotalWorldTime());
         }
 
-        //System.out.println("size = " + ((ThreadPoolExecutor) this.lightExecutorService).getQueue().size());
+        //System.out.println("size = " + ((ThreadPoolExecutor) this.asyncLightingImpl$lightExecutorService).getQueue().size());
         if (SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            this.lightExecutorService.execute(() -> {
-                this.bridge$checkLightAsync(lightType, pos, chunk, neighbors);
+            this.asyncLightingImpl$lightExecutorService.execute(() -> {
+                this.asyncLightingBridge$checkLightAsync(lightType, pos, chunk, neighbors);
             });
         } else {
-            this.bridge$checkLightAsync(lightType, pos, chunk, neighbors);
+            this.asyncLightingBridge$checkLightAsync(lightType, pos, chunk, neighbors);
         }
 
         return true;
     }
 
     @Override
-    public ExecutorService bridge$getLightingExecutor() {
-        return this.lightExecutorService;
+    public ExecutorService asyncLightingBridge$getLightingExecutor() {
+        return this.asyncLightingImpl$lightExecutorService;
     }
 
     // Thread safe methods to retrieve a chunk during async light updates
     // Each method avoids calling getLoadedChunk and instead accesses the passed neighbor chunk list to avoid concurrency issues
-    public Chunk getLightChunk(BlockPos pos, Chunk currentChunk, List<Chunk> neighbors) {
+    private Chunk asyncLightingImpl$getLightChunk(final BlockPos pos, final Chunk currentChunk, final List<Chunk> neighbors) {
         if (currentChunk.isAtLocation(pos.getX() >> 4, pos.getZ() >> 4)) {
             if (currentChunk.unloadQueued) {
                 return null;
             }
             return currentChunk;
         }
-        for (net.minecraft.world.chunk.Chunk neighbor : neighbors) {
+        for (final net.minecraft.world.chunk.Chunk neighbor : neighbors) {
             if (neighbor.isAtLocation(pos.getX() >> 4, pos.getZ() >> 4)) {
                 if (neighbor.unloadQueued) {
                     return null;
@@ -293,7 +291,7 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
         return null;
     }
 
-    private int getLightForAsync(EnumSkyBlock lightType, BlockPos pos, Chunk currentChunk, List<Chunk> neighbors) {
+    private int asyncLightingImpl$getLightForAsync(final EnumSkyBlock lightType, BlockPos pos, final Chunk currentChunk, final List<Chunk> neighbors) {
         if (pos.getY() < 0) {
             pos = new BlockPos(pos.getX(), 0, pos.getZ());
         }
@@ -301,7 +299,7 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
             return lightType.defaultLightValue;
         }
 
-        final Chunk chunk = this.getLightChunk(pos, currentChunk, neighbors);
+        final Chunk chunk = this.asyncLightingImpl$getLightChunk(pos, currentChunk, neighbors);
         if (chunk == null || chunk.unloadQueued) {
             return lightType.defaultLightValue;
         }
@@ -309,16 +307,16 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
         return chunk.getLightFor(lightType, pos);
     }
 
-    private int getRawBlockLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk currentChunk, List<Chunk> neighbors) {
-        final Chunk chunk = getLightChunk(pos, currentChunk, neighbors);
+    private int asyncLightingImpl$getRawBlockLightAsync(final EnumSkyBlock lightType, final BlockPos pos, final Chunk currentChunk, final List<Chunk> neighbors) {
+        final Chunk chunk = asyncLightingImpl$getLightChunk(pos, currentChunk, neighbors);
         if (chunk == null || chunk.unloadQueued) {
             return lightType.defaultLightValue;
         }
         if (lightType == EnumSkyBlock.SKY && chunk.canSeeSky(pos)) {
             return 15;
         } else {
-            IBlockState blockState = chunk.getBlockState(pos);
-            int blockLight = SpongeImplHooks.getChunkPosLight(blockState, (net.minecraft.world.World) (Object) this, pos);
+            final IBlockState blockState = chunk.getBlockState(pos);
+            final int blockLight = SpongeImplHooks.getChunkPosLight(blockState, (net.minecraft.world.World) (Object) this, pos);
             int i = lightType == EnumSkyBlock.SKY ? 0 : blockLight;
             int j = SpongeImplHooks.getBlockLightOpacity(blockState, (net.minecraft.world.World) (Object) this, pos);
 
@@ -335,12 +333,12 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
             } else if (i >= 14) {
                 return i;
             } else {
-                BlockPos.PooledMutableBlockPos pooledBlockPos = BlockPos.PooledMutableBlockPos.retain();
+                final BlockPos.PooledMutableBlockPos pooledBlockPos = BlockPos.PooledMutableBlockPos.retain();
 
                 try {
-                    for (EnumFacing enumfacing : EnumFacing.values()) {
+                    for (final EnumFacing enumfacing : EnumFacing.values()) {
                         pooledBlockPos.setPos(pos).move(enumfacing);
-                        int k = this.getLightForAsync(lightType, pooledBlockPos, currentChunk, neighbors) - j;
+                        final int k = this.asyncLightingImpl$getLightForAsync(lightType, pooledBlockPos, currentChunk, neighbors) - j;
 
                         if (k > i) {
                             i = k;
@@ -359,9 +357,9 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
         }
     }
 
-    public void setLightForAsync(EnumSkyBlock type, BlockPos pos, int lightValue, Chunk currentChunk, List<Chunk> neighbors) {
+    private void asyncLightingImpl$setLightForAsync(final EnumSkyBlock type, final BlockPos pos, final int lightValue, final Chunk currentChunk, final List<Chunk> neighbors) {
         if (((BlockPosBridge) pos).bridge$isValidPosition()) {
-            final Chunk chunk = this.getLightChunk(pos, currentChunk, neighbors);
+            final Chunk chunk = this.asyncLightingImpl$getLightChunk(pos, currentChunk, neighbors);
             if (chunk != null && !chunk.unloadQueued) {
                 chunk.setLightFor(type, pos, lightValue);
                 this.notifyLightSet(pos);
@@ -369,10 +367,10 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
         }
     }
 
-    private short blockPosToShort(BlockPos pos) {
-        short serialized = (short) setNibble(0, pos.getX() & XZ_MASK, 0, NUM_XZ_BITS);
-        serialized = (short) setNibble(serialized, pos.getY() & Y_SHORT_MASK, 1, NUM_SHORT_Y_BITS);
-        serialized = (short) setNibble(serialized, pos.getZ() & XZ_MASK, 3, NUM_XZ_BITS);
+    private short asyncLightingImpl$blockPosToShort(final BlockPos pos) {
+        short serialized = (short) asyncLightingImpl$setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+        serialized = (short) asyncLightingImpl$setNibble(serialized, pos.getY() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
+        serialized = (short) asyncLightingImpl$setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
         return serialized;
     }
 
@@ -385,7 +383,7 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
      * @param bitsToReplace The number of bits to replace starting from nibble index
      * @return The modified integer
      */
-    private int setNibble(int num, int data, int which, int bitsToReplace) {
+    private int asyncLightingImpl$setNibble(final int num, final int data, final int which, final int bitsToReplace) {
         return (num & ~(bitsToReplace << (which * 4)) | (data << (which * 4)));
     }
 }

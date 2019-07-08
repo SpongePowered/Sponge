@@ -152,7 +152,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
             }
         }
         // We only need to include the custom data, not vanilla manipulators supported by sponge implementation
-        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
+        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
@@ -203,8 +203,8 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
             return manipulators;
         }
         ((ItemBridge) item).bridge$gatherManipulators((net.minecraft.item.ItemStack) (Object) this, manipulators);
-        if (((CustomDataHolderBridge) this).hasManipulators()) {
-            final List<DataManipulator<?, ?>> customManipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
+        if (((CustomDataHolderBridge) this).bridge$hasManipulators()) {
+            final List<DataManipulator<?, ?>> customManipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
             manipulators.addAll(customManipulators);
         }
         return manipulators;

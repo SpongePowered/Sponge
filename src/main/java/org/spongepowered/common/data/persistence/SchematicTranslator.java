@@ -51,7 +51,6 @@ import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
-import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.data.persistence.schematic.SchematicUpdater1_to_2;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataUtil;
@@ -80,19 +79,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("deprecation")
 public class SchematicTranslator implements DataTranslator<Schematic> {
 
     private static final SchematicTranslator INSTANCE = new SchematicTranslator();
     private static final TypeToken<Schematic> TYPE_TOKEN = TypeToken.of(Schematic.class);
-    private static final int VERSION = 2;
-    private static final int MAX_SIZE = 65535;
 
     private static final ConcurrentSkipListSet<String> MISSING_MOD_IDS = new ConcurrentSkipListSet<>();
 
     private static final DataContentUpdater V1_TO_2 = new SchematicUpdater1_to_2();
 
-    private static DataFixer VANILLA_FIXER;
+    @Nullable private static DataFixer VANILLA_FIXER;
 
     public static SchematicTranslator get() {
         return INSTANCE;
@@ -122,11 +121,11 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         if (VANILLA_FIXER == null) {
             VANILLA_FIXER = ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer();
         }
-        int version = unprocessed.getInt(Constants.Sponge.Schematic.VERSION).get();
+        final int version = unprocessed.getInt(Constants.Sponge.Schematic.VERSION).get();
         // TODO version conversions
 
-        if (version > VERSION) {
-            throw new InvalidDataException(String.format("Unknown schematic version %d (current version is %d)", version, VERSION));
+        if (version > Constants.Sponge.Schematic.CURRENT_VERSION) {
+            throw new InvalidDataException(String.format("Unknown schematic version %d (current version is %d)", version, Constants.Sponge.Schematic.CURRENT_VERSION));
         } else if (version == 1) {
             unprocessed = V1_TO_2.update(unprocessed);
         }
@@ -137,18 +136,18 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 unprocessed.set(Constants.Sponge.Schematic.BLOCKENTITY_DATA, dataViews);
             }
         }
-        int dataVersion = unprocessed.getInt(Constants.Sponge.Schematic.DATA_VERSION).get();
+        final int dataVersion = unprocessed.getInt(Constants.Sponge.Schematic.DATA_VERSION).get();
         // DataFixer will be able to upgrade entity and tile entity data if and only if we're running a valid server and
         // the data version is outdated.
-        boolean needsFixers = dataVersion < DataUtil.MINECRAFT_DATA_VERSION && VANILLA_FIXER != null;
+        final boolean needsFixers = dataVersion < DataUtil.MINECRAFT_DATA_VERSION && VANILLA_FIXER != null;
         final DataView updatedView = unprocessed;
 
-        DataView metadata = updatedView.getView(Constants.Sponge.Schematic.METADATA).orElse(null);
+        final DataView metadata = updatedView.getView(Constants.Sponge.Schematic.METADATA).orElse(null);
         if (metadata != null) {
-            Optional<DataView> dot_data = metadata.getView(DataQuery.of("."));
+            final Optional<DataView> dot_data = metadata.getView(DataQuery.of("."));
             if (dot_data.isPresent()) {
-                DataView data = dot_data.get();
-                for (DataQuery key : data.getKeys(false)) {
+                final DataView data = dot_data.get();
+                for (final DataQuery key : data.getKeys(false)) {
                     if (!metadata.contains(key)) {
                         metadata.set(key, data.get(key).get());
                     }
@@ -156,9 +155,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             }
         }
         if (metadata != null) {
-            String schematicName = metadata.getString(Constants.Sponge.Schematic.NAME).orElse("unknown");
+            final String schematicName = metadata.getString(Constants.Sponge.Schematic.NAME).orElse("unknown");
             metadata.getStringList(Constants.Sponge.Schematic.REQUIRED_MODS).ifPresent(mods -> {
-                for (String modId : mods) {
+                for (final String modId : mods) {
                     if (!Sponge.getPluginManager().getPlugin(modId).isPresent()) {
                         if (MISSING_MOD_IDS.add(modId)) {
                             SpongeImpl.getLogger().warn("When attempting to load the Schematic: " + schematicName + " there is a missing modid: " + modId + " some blocks/tiles/entities may not load correctly.");
@@ -169,60 +168,60 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         }
 
         // TODO error handling for these optionals
-        int width = updatedView.getShort(Constants.Sponge.Schematic.WIDTH).get();
-        int height = updatedView.getShort(Constants.Sponge.Schematic.HEIGHT).get();
-        int length = updatedView.getShort(Constants.Sponge.Schematic.LENGTH).get();
-        if (width > MAX_SIZE || height > MAX_SIZE || length > MAX_SIZE) {
+        final int width = updatedView.getShort(Constants.Sponge.Schematic.WIDTH).get();
+        final int height = updatedView.getShort(Constants.Sponge.Schematic.HEIGHT).get();
+        final int length = updatedView.getShort(Constants.Sponge.Schematic.LENGTH).get();
+        if (width > Constants.Sponge.Schematic.MAX_SIZE || height > Constants.Sponge.Schematic.MAX_SIZE || length > Constants.Sponge.Schematic.MAX_SIZE) {
             throw new InvalidDataException(String.format("Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)",
-                    width, height, length, MAX_SIZE));
+                    width, height, length, Constants.Sponge.Schematic.MAX_SIZE));
         }
 
         final int[] offset = (int[]) updatedView.get(Constants.Sponge.Schematic.OFFSET).orElse(new int[3]);
         if (offset.length != 3) {
             throw new InvalidDataException("Schematic offset was not of length 3");
         }
-        Palette<BlockState> palette;
-        Optional<DataView> paletteData = updatedView.getView(Constants.Sponge.Schematic.PALETTE);
-        int palette_max = updatedView.getInt(Constants.Sponge.Schematic.PALETTE_MAX).orElse(0xFFFF);
+        final Palette<BlockState> palette;
+        final Optional<DataView> paletteData = updatedView.getView(Constants.Sponge.Schematic.PALETTE);
+        final int palette_max = updatedView.getInt(Constants.Sponge.Schematic.PALETTE_MAX).orElse(0xFFFF);
         if (paletteData.isPresent()) {
             // If we had a default palette_max we don't want to allocate all
             // that space for nothing so we use a sensible default instead
-            BimapPalette<BlockState> bimap = new BimapPalette<>(PaletteTypes.LOCAL_BLOCKS, palette_max != 0xFFFF ? palette_max : 64);
+            final BimapPalette<BlockState> bimap = new BimapPalette<>(PaletteTypes.LOCAL_BLOCKS, palette_max != 0xFFFF ? palette_max : 64);
             // TODO - 1.13 remove the wrapper.
             palette = new BlockPaletteWrapper(bimap, org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL);
-            DataView paletteMap = paletteData.get();
-            Set<DataQuery> paletteKeys = paletteMap.getKeys(false);
-            for (DataQuery key : paletteKeys) {
-                BlockState state = Sponge.getRegistry().getType(BlockState.class, key.getParts().get(0)).orElseGet(BlockTypes.BEDROCK::getDefaultState);
+            final DataView paletteMap = paletteData.get();
+            final Set<DataQuery> paletteKeys = paletteMap.getKeys(false);
+            for (final DataQuery key : paletteKeys) {
+                final BlockState state = Sponge.getRegistry().getType(BlockState.class, key.getParts().get(0)).orElseGet(BlockTypes.BEDROCK::getDefaultState);
                 bimap.assign(state, paletteMap.getInt(key).get());
             }
         } else {
             palette = GlobalPalette.getBlockPalette();
         }
 
-        Palette<BiomeType> biomePalette;
-        Optional<DataView> biomePaletteData = updatedView.getView(Constants.Sponge.Schematic.BIOME_PALETTE);
-        int biome_max = updatedView.getInt(Constants.Sponge.Schematic.BIOME_PALETTE_MAX).orElse(0xFFFF);
+        final Palette<BiomeType> biomePalette;
+        final Optional<DataView> biomePaletteData = updatedView.getView(Constants.Sponge.Schematic.BIOME_PALETTE);
+        final int biome_max = updatedView.getInt(Constants.Sponge.Schematic.BIOME_PALETTE_MAX).orElse(0xFFFF);
         if (biomePaletteData.isPresent()) {
-            BimapPalette<BiomeType> bimap = new BimapPalette<>(PaletteTypes.LOCAL_BIOMES, biome_max != 0xFFF ? palette_max : 64);
+            final BimapPalette<BiomeType> bimap = new BimapPalette<>(PaletteTypes.LOCAL_BIOMES, biome_max != 0xFFF ? palette_max : 64);
             biomePalette = bimap;
-            DataView biomeMap = biomePaletteData.get();
-            Set<DataQuery> biomeKeys = biomeMap.getKeys(false);
-            for (DataQuery biomeKey : biomeKeys) {
-                BiomeType biome = Sponge.getRegistry().getType(BiomeType.class, biomeKey.getParts().get(0)).get();
+            final DataView biomeMap = biomePaletteData.get();
+            final Set<DataQuery> biomeKeys = biomeMap.getKeys(false);
+            for (final DataQuery biomeKey : biomeKeys) {
+                final BiomeType biome = Sponge.getRegistry().getType(BiomeType.class, biomeKey.getParts().get(0)).get();
                 bimap.assign(biome, biomeMap.getInt(biomeKey).get());
             }
         } else {
             biomePalette = GlobalPalette.getBiomePalette();
         }
 
-        SpongeSchematicBuilder builder = new SpongeSchematicBuilder();
+        final SpongeSchematicBuilder builder = new SpongeSchematicBuilder();
         builder.blockPalette(palette);
 
-        MutableBlockVolume buffer =
+        final MutableBlockVolume buffer =
                 new ArrayMutableBlockBuffer(palette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length));
 
-        byte[] blockdata = (byte[]) updatedView.get(Constants.Sponge.Schematic.BLOCK_DATA).orElseThrow(() -> new InvalidDataException("Missing BlockData for Schematic"));
+        final byte[] blockdata = (byte[]) updatedView.get(Constants.Sponge.Schematic.BLOCK_DATA).orElseThrow(() -> new InvalidDataException("Missing BlockData for Schematic"));
         int index = 0;
         int i = 0;
         int value = 0;
@@ -243,10 +242,10 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 i++;
             }
             // index = (y * length + z) * width + x
-            int y = index / (width * length);
-            int z = (index % (width * length)) / width;
-            int x = (index % (width * length)) % width;
-            BlockState state = palette.get(value).get();
+            final int y = index / (width * length);
+            final int z = (index % (width * length)) / width;
+            final int x = (index % (width * length)) % width;
+            final BlockState state = palette.get(value).get();
             buffer.setBlock(x - offset[0], y - offset[1], z - offset[2], state);
 
             index++;
@@ -254,8 +253,8 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         builder.blocks(buffer);
 
         updatedView.get(Constants.Sponge.Schematic.BIOME_DATA).ifPresent(biomesObj -> {
-            MutableBiomeVolume biomeBuffer = new ByteArrayMutableBiomeBuffer(biomePalette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length));
-            byte[] biomes = (byte[]) biomesObj;
+            final MutableBiomeVolume biomeBuffer = new ByteArrayMutableBiomeBuffer(biomePalette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length));
+            final byte[] biomes = (byte[]) biomesObj;
             int biomeIndex = 0;
             int biomeJ= 0;
             int bVal = 0;
@@ -275,9 +274,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                     }
                     biomeJ++;
                 }
-                int z = (biomeIndex % (width * length)) / width;
-                int x = (biomeIndex % (width * length)) % width;
-                BiomeType type = biomePalette.get(bVal).get();
+                final int z = (biomeIndex % (width * length)) / width;
+                final int x = (biomeIndex % (width * length)) % width;
+                final BiomeType type = biomePalette.get(bVal).get();
                 biomeBuffer.setBiome(x - offset[0], 0, z - offset[2], type);
 
                 biomeIndex++;
@@ -285,12 +284,12 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             builder.biomes(biomeBuffer);
         });
 
-        Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
+        final Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
 
         updatedView.getViewList(Constants.Sponge.Schematic.BLOCKENTITY_DATA)
             .ifPresent(tileData ->
                 tileData.forEach(tile -> {
-                        int[] pos = (int[]) tile.get(Constants.Sponge.Schematic.BLOCKENTITY_POS).get();
+                        final int[] pos = (int[]) tile.get(Constants.Sponge.Schematic.BLOCKENTITY_POS).get();
                         tile.getString(Constants.Sponge.Schematic.BLOCKENTITY_ID)
                             .map(TileEntityTypeRegistryModule.getInstance()::getById)
                             .filter(Optional::isPresent)
@@ -317,7 +316,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 )
             );
         builder.tiles(tiles);
-        ArrayList<EntityArchetype> entityArchetypes = new ArrayList<>();
+        final ArrayList<EntityArchetype> entityArchetypes = new ArrayList<>();
         updatedView.getViewList(Constants.Sponge.Schematic.ENTITIES).map(List::stream)
             .ifPresent(stream -> {
                 final Stream<DataView>
@@ -350,8 +349,8 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         }
 
         if (metadata != null) {
-            DataContainer meta = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
-            for (DataQuery key : metadata.getKeys(false)) {
+            final DataContainer meta = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+            for (final DataQuery key : metadata.getKeys(false)) {
                 meta.set(key, metadata.get(key).get());
             }
             builder.metadata(meta);
@@ -360,47 +359,47 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     }
 
     @Override
-    public DataContainer translate(Schematic schematic) throws InvalidDataException {
-        DataContainer data = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+    public DataContainer translate(final Schematic schematic) throws InvalidDataException {
+        final DataContainer data = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
         addTo(schematic, data);
         return data;
     }
 
     @Override
-    public DataView addTo(Schematic schematic, DataView data) {
+    public DataView addTo(final Schematic schematic, final DataView data) {
         final int xMin = schematic.getBlockMin().getX();
         final int yMin = schematic.getBlockMin().getY();
         final int zMin = schematic.getBlockMin().getZ();
         final int width = schematic.getBlockSize().getX();
         final int height = schematic.getBlockSize().getY();
         final int length = schematic.getBlockSize().getZ();
-        if (width > MAX_SIZE || height > MAX_SIZE || length > MAX_SIZE) {
+        if (width > Constants.Sponge.Schematic.MAX_SIZE || height > Constants.Sponge.Schematic.MAX_SIZE || length > Constants.Sponge.Schematic.MAX_SIZE) {
             throw new IllegalArgumentException(String.format(
-                    "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, MAX_SIZE));
+                    "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, Constants.Sponge.Schematic.MAX_SIZE));
         }
         data.set(Constants.Sponge.Schematic.WIDTH, width);
         data.set(Constants.Sponge.Schematic.HEIGHT, height);
         data.set(Constants.Sponge.Schematic.LENGTH, length);
 
-        data.set(Constants.Sponge.Schematic.VERSION, VERSION);
+        data.set(Constants.Sponge.Schematic.VERSION, Constants.Sponge.Schematic.CURRENT_VERSION);
         data.set(Constants.Sponge.Schematic.DATA_VERSION, DataUtil.MINECRAFT_DATA_VERSION);
-        for (DataQuery metaKey : schematic.getMetadata().getKeys(false)) {
+        for (final DataQuery metaKey : schematic.getMetadata().getKeys(false)) {
             data.set(Constants.Sponge.Schematic.METADATA.then(metaKey), schematic.getMetadata().get(metaKey).get());
         }
         final Set<String> requiredMods = new HashSet<>();
 
-        int[] offset = new int[] {-xMin, -yMin, -zMin};
+        final int[] offset = new int[] {-xMin, -yMin, -zMin};
         data.set(Constants.Sponge.Schematic.OFFSET, offset);
 
-        Palette<BlockState> palette = schematic.getPalette();
-        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream(width * height * length)) {
+        final Palette<BlockState> palette = schematic.getPalette();
+        try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream(width * height * length)) {
             for (int y = 0; y < height; y++) {
-                int y0 = yMin + y;
+                final int y0 = yMin + y;
                 for (int z = 0; z < length; z++) {
-                    int z0 = zMin + z;
+                    final int z0 = zMin + z;
                     for (int x = 0; x < width; x++) {
-                        int x0 = xMin + x;
-                        BlockState state = schematic.getBlock(x0, y0, z0);
+                        final int x0 = xMin + x;
+                        final BlockState state = schematic.getBlock(x0, y0, z0);
                         writeIdToBuffer(buffer, palette.getOrAssign(state));
                     }
                 }
@@ -411,14 +410,14 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             // should never reach here
         }
 
-        Palette<BiomeType> biomePalette = schematic.getBiomePalette();
+        final Palette<BiomeType> biomePalette = schematic.getBiomePalette();
         schematic.getBiomes().ifPresent(biomes -> {
-            try (ByteArrayOutputStream buffer = new ByteArrayOutputStream(width * length)) {
+            try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream(width * length)) {
                 for (int z = 0; z < length; z++) {
-                    int z0 = zMin + z;
+                    final int z0 = zMin + z;
                     for (int x = 0; x < width; x++) {
-                        int x0 = xMin + x;
-                        BiomeType state = biomes.getBiome(x0, 0, z0);
+                        final int x0 = xMin + x;
+                        final BiomeType state = biomes.getBiome(x0, 0, z0);
                         writeIdToBuffer(buffer, biomePalette.getOrAssign(state));
                     }
 
@@ -432,8 +431,8 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         });
 
         if (palette.getType() == PaletteTypes.LOCAL_BLOCKS) {
-            DataQuery paletteQuery = Constants.Sponge.Schematic.PALETTE;
-            for (BlockState state : palette.getEntries()) {
+            final DataQuery paletteQuery = Constants.Sponge.Schematic.PALETTE;
+            for (final BlockState state : palette.getEntries()) {
                 // getOrAssign to skip the optional, it will never assign
                 data.set(paletteQuery.then(state.getId()), palette.getOrAssign(state));
                 final String modId = state.getType().getId().split(":")[0];
@@ -444,8 +443,8 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             data.set(Constants.Sponge.Schematic.PALETTE_MAX, palette.getHighestId());
         }
         if (biomePalette.getType() == PaletteTypes.LOCAL_BIOMES) {
-            DataQuery paletteQuery = Constants.Sponge.Schematic.BIOME_PALETTE;
-            for (BiomeType biomeType : biomePalette.getEntries()) {
+            final DataQuery paletteQuery = Constants.Sponge.Schematic.BIOME_PALETTE;
+            for (final BiomeType biomeType : biomePalette.getEntries()) {
                 data.set(paletteQuery.then(biomeType.getId()), biomePalette.getOrAssign(biomeType));
                 final String modId = biomeType.getId().split(":")[0];
                 if (!"minecraft".equals(modId) && modId != null && !modId.isEmpty()) {
@@ -455,11 +454,11 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             data.set(Constants.Sponge.Schematic.BIOME_PALETTE_MAX, biomePalette.getHighestId());
         }
 
-        List<DataView> tileEntities = Lists.newArrayList();
-        for (Map.Entry<Vector3i, TileEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
-            Vector3i pos = entry.getKey();
-            DataContainer tiledata = entry.getValue().getTileData();
-            int[] apos = new int[] {pos.getX() - xMin, pos.getY() - yMin, pos.getZ() - zMin};
+        final List<DataView> tileEntities = Lists.newArrayList();
+        for (final Map.Entry<Vector3i, TileEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
+            final Vector3i pos = entry.getKey();
+            final DataContainer tiledata = entry.getValue().getTileData();
+            final int[] apos = new int[] {pos.getX() - xMin, pos.getY() - yMin, pos.getZ() - zMin};
             tiledata.set(Constants.Sponge.Schematic.BLOCKENTITY_POS, apos);
             final SpongeTileEntityType tileEntityType = (SpongeTileEntityType) entry.getValue().getTileEntityType();
 
@@ -476,9 +475,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         }
         data.set(Constants.Sponge.Schematic.BLOCKENTITY_DATA, tileEntities);
 
-        List<DataView> entities = Lists.newArrayList();
-        for (EntityArchetype entityArchetype : schematic.getEntityArchetypes()) {
-            DataContainer entityData = entityArchetype.getEntityData();
+        final List<DataView> entities = Lists.newArrayList();
+        for (final EntityArchetype entityArchetype : schematic.getEntityArchetypes()) {
+            final DataContainer entityData = entityArchetype.getEntityData();
             entities.add(entityData);
             final SpongeEntityType type = (SpongeEntityType) entityArchetype.getType();
             final String modId = type.getId().split(":")[0];
@@ -500,7 +499,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         return data;
     }
 
-     private void writeIdToBuffer(ByteArrayOutputStream buffer, int orAssign) {
+     private void writeIdToBuffer(final ByteArrayOutputStream buffer, final int orAssign) {
         int id = orAssign;
 
         while ((id & -128) != 0) {

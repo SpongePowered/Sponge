@@ -97,7 +97,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
         this.writeToNBT(compound);
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
-        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
+        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
@@ -148,7 +148,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
         final List<DataManipulator<?, ?>> list = Lists.newArrayList();
         this.supplyVanillaManipulators(list);
         if (this instanceof CustomDataHolderBridge) {
-            list.addAll(((CustomDataHolderBridge) this).getCustomManipulators());
+            list.addAll(((CustomDataHolderBridge) this).bridge$getCustomManipulators());
         }
         return list;
     }

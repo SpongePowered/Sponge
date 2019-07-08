@@ -67,8 +67,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.mixin.core.network.play.server.AccessorSPacketPlayerListItem;
+import org.spongepowered.common.mixin.core.network.play.server.SPacketPlayerListItemAccessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -452,7 +451,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @SuppressWarnings("ConstantConditions")
     public SPacketPlayerListItem createPlayerListPacket(SPacketPlayerListItem.Action action) {
         SPacketPlayerListItem packet = new SPacketPlayerListItem(action);
-        ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas()
+        ((SPacketPlayerListItemAccessor) packet).accessor$getPlayerDatas()
             .add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }

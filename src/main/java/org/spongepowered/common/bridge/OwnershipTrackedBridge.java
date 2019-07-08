@@ -31,9 +31,9 @@ import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.tracking.bridge.OwnershipTrackedBridgeMixin;
-import org.spongepowered.common.mixin.tracking.entity.MixinEntity_Tracker;
-import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
-import org.spongepowered.common.mixin.tracking.world.MixinWorld_Tracker;
+import org.spongepowered.common.mixin.tracking.entity.EntityMixin_TrackerAPI;
+import org.spongepowered.common.mixin.tracking.world.ChunkMixin_Tracker;
+import org.spongepowered.common.mixin.tracking.world.WorldMixin_TrackerAPI;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -44,8 +44,8 @@ import javax.annotation.Nullable;
  * An optionally implemented interface to bridge getting the
  * {@link UUID} and/or {@link User} from the targets. This
  * is implemented by {@link OwnershipTrackedBridgeMixin}
- * backing hooks and implementation by {@link MixinEntity_Tracker},
- * {@link MixinChunk_Tracker}, and {@link MixinWorld_Tracker}.
+ * backing hooks and implementation by {@link EntityMixin_TrackerAPI},
+ * {@link ChunkMixin_Tracker}, and {@link WorldMixin_TrackerAPI}.
  * Note that it is not guaranteed this interface is mixed onto
  * {@link Entity} and {@link TileEntity} because of the option
  * for {@link ModuleCategory#useTracking()}. If the tracking is

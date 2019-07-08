@@ -71,7 +71,6 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.mixin.core.server.AccessorPlayerList;
-import org.spongepowered.common.mixin.core.server.MixinPlayerList;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;

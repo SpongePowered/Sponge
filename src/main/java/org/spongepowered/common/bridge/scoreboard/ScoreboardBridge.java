@@ -26,6 +26,6 @@ package org.spongepowered.common.bridge.scoreboard;
 
 public interface ScoreboardBridge {
 
-    boolean isClient();
+    boolean bridge$isClient();
 
 }

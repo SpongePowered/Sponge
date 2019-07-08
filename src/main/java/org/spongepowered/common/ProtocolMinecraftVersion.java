@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common;
 
-import org.spongepowered.api.MinecraftVersion;
-
-public interface ProtocolMinecraftVersion extends MinecraftVersion {
+public interface ProtocolMinecraftVersion {
 
     int getProtocol();
 

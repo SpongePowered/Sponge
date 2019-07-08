@@ -30,7 +30,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.mixin.core.command.MixinSubject;
+import org.spongepowered.common.mixin.core.service.permission.SubjectMixin;
 import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
 
 import java.lang.ref.WeakReference;
@@ -39,7 +39,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 /**
- * {@link MixinSubject} helper class to apply the appropriate subject to the
+ * {@link SubjectMixin} helper class to apply the appropriate subject to the
  * mixin.
  */
 public class SubjectSettingCallback implements Predicate<PermissionService> {

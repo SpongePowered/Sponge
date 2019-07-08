@@ -27,7 +27,7 @@ package org.spongepowered.common;
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.MinecraftVersion;
 
-public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion {
+public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion, MinecraftVersion {
 
     private final String name;
     private final int protocol;

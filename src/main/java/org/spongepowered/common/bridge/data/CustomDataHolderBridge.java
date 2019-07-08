@@ -41,27 +41,27 @@ import java.util.Optional;
 
 public interface CustomDataHolderBridge {
 
-    DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function);
+    DataTransactionResult bridge$offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function);
 
-    <T extends DataManipulator<?, ?>> Optional<T> getCustom(Class<T> customClass);
+    <T extends DataManipulator<?, ?>> Optional<T> bridge$getCustom(Class<T> customClass);
 
-    DataTransactionResult removeCustom(Class<? extends DataManipulator<?, ?>> customClass);
+    DataTransactionResult bridge$removeCustom(Class<? extends DataManipulator<?, ?>> customClass);
 
-    boolean hasManipulators();
+    boolean bridge$hasManipulators();
 
-    boolean supportsCustom(Key<?> key);
+    boolean bridge$supportsCustom(Key<?> key);
 
-    <E> Optional<E> getCustom(Key<? extends BaseValue<E>> key);
+    <E> Optional<E> bridge$getCustom(Key<? extends BaseValue<E>> key);
 
-    <E, V extends BaseValue<E>> Optional<V> getCustomValue(Key<V> key);
+    <E, V extends BaseValue<E>> Optional<V> bridge$getCustomValue(Key<V> key);
 
-    List<DataManipulator<?, ?>> getCustomManipulators();
+    List<DataManipulator<?, ?>> bridge$getCustomManipulators();
 
-    <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value);
+    <E> DataTransactionResult bridge$offerCustom(Key<? extends BaseValue<E>> key, E value);
 
-    DataTransactionResult removeCustom(Key<?> key);
+    DataTransactionResult bridge$removeCustom(Key<?> key);
 
-    default void removeCustomFromNbt(DataManipulator<?, ?> manipulator) {
+    default void bridge$removeCustomFromNbt(DataManipulator<?, ?> manipulator) {
         if (this instanceof DataCompoundHolder) {
             final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
             if (spongeData.hasKey(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
@@ -85,6 +85,7 @@ public interface CustomDataHolderBridge {
         }
     }
 
-    void addFailedData(ImmutableList<DataView> failedData);
-    List<DataView> getFailedData();
+    void bridge$addFailedData(ImmutableList<DataView> failedData);
+
+    List<DataView> bridge$getFailedData();
 }

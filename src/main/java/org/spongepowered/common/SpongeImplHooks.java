@@ -515,7 +515,7 @@ public final class SpongeImplHooks {
         return !Sponge.isServerAvailable() || Sponge.getServer().isMainThread();
     }
 
-    // Overridden by MixinSpongeImplHooks_ItemNameOverflowPrevention for exploit check
+    // Overridden by SpongeImplHooksMixin_ItemNameOverflowPrevention for exploit check
     public static boolean creativeExploitCheck(final Packet<?> packetIn, final EntityPlayerMP playerMP) {
         return false;
     }
@@ -530,7 +530,7 @@ public final class SpongeImplHooks {
 
     /**
      * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for MixinPlayerInteractionManager#processRightClickBlock.
+     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      *
      * @param spongeEvent The sponge event
      * @return The forge event
@@ -566,7 +566,7 @@ public final class SpongeImplHooks {
     // SpongeForge - end
     /**
      * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for MixinPlayerInteractionManager#processRightClickBlock.
+     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      *
      * @param worldIn The world
      * @param pos The position
@@ -578,7 +578,7 @@ public final class SpongeImplHooks {
 
     /**
      * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for MixinPlayerInteractionManager#processRightClickBlock.
+     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      *
      * @param forgeEventObject The forge event object, if it was created
      * @return The result as a result of the event data
@@ -589,7 +589,7 @@ public final class SpongeImplHooks {
 
     /**
      * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for MixinPlayerInteractionManager#processRightClickBlock.
+     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      *
      * @param worldIn The world in
      * @param pos The position
@@ -605,7 +605,7 @@ public final class SpongeImplHooks {
 
     /**
      * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for MixinPlayerInteractionManager#processRightClickBlock.
+     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      *
      * @param player The player interacting
      * @param event The sponge event
@@ -624,7 +624,7 @@ public final class SpongeImplHooks {
 
     /**
      * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for MixinPlayerInteractionManager#processRightClickBlock.
+     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      *
      * @param player The player
      * @param stack The item stack to check

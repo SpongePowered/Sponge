@@ -100,7 +100,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) itemStack).getCustomManipulators()) {
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) itemStack).bridge$getCustomManipulators()) {
             builder.add(manipulator.asImmutable());
             keyBuilder.addAll(manipulator.getKeys());
             valueBuilder.addAll(manipulator.getValues());
@@ -315,7 +315,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public ItemStackSnapshot merge(ItemStackSnapshot that, MergeFunction function) {
         final ItemStack thisCopy = this.privateStack.copy();
         final ItemStack thatCopy = that.createStack();
-        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) thatCopy).getCustomManipulators()) {
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) thatCopy).bridge$getCustomManipulators()) {
             thisCopy.offer(manipulator, function);
         }
         return thisCopy.createSnapshot();

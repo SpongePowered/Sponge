@@ -131,7 +131,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.entityType = entity.getType();
         this.entityId = entity.getUniqueId();
         this.manipulators = Lists.newArrayList();
-        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) entity).getCustomManipulators()) {
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) entity).bridge$getCustomManipulators()) {
             addManipulator(manipulator.asImmutable());
         }
         this.compound = new NBTTagCompound();
@@ -221,7 +221,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.rotation = transform.getRotation();
         this.scale = transform.getScale();
         this.manipulators = Lists.newArrayList();
-        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) minecraftEntity).getCustomManipulators()) {
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) minecraftEntity).bridge$getCustomManipulators()) {
             addManipulator(manipulator.asImmutable());
         }
         this.compound = new NBTTagCompound();

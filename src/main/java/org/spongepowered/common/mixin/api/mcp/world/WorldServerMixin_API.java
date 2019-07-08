@@ -342,7 +342,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         }
         final net.minecraft.tileentity.TileEntity tile = chunk.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
         if (tile != null) {
-            for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).getCustomManipulators()) {
+            for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).bridge$getCustomManipulators()) {
                 builder.add(manipulator);
             }
             NBTTagCompound nbt = new NBTTagCompound();

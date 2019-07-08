@@ -42,7 +42,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.mixin.core.network.play.server.AccessorSPacketPlayerListItem;
+import org.spongepowered.common.mixin.core.network.play.server.SPacketPlayerListItemAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Collection;
@@ -192,7 +192,7 @@ public final class SpongeTabList implements TabList {
         final SPacketPlayerListItem.AddPlayerData data = packet.new AddPlayerData((GameProfile) entry.getProfile(),
             entry.getLatency(), (GameType) (Object) entry.getGameMode(),
             entry.getDisplayName().isPresent() ? SpongeTexts.toComponent(entry.getDisplayName().get()) : null);
-        ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas().add(data);
+        ((SPacketPlayerListItemAccessor) packet).accessor$getPlayerDatas().add(data);
         this.player.connection.sendPacket(packet);
     }
 
@@ -206,7 +206,7 @@ public final class SpongeTabList implements TabList {
      */
     @SuppressWarnings("ConstantConditions")
     public void updateEntriesOnSend(final SPacketPlayerListItem packet) {
-        for (final SPacketPlayerListItem.AddPlayerData data : ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas()) {
+        for (final SPacketPlayerListItem.AddPlayerData data : ((SPacketPlayerListItemAccessor) packet).accessor$getPlayerDatas()) {
             if (packet.action == SPacketPlayerListItem.Action.ADD_PLAYER) {
                 // If an entry with the same id exists nothing will be done
                 this.addEntry(data);

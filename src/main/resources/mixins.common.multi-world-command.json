@@ -6,15 +6,15 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-        "MixinCommandDefaultGameMode",
-        "MixinCommandDifficulty",
-        "MixinCommandGameRule",
-        "MixinCommandShowSeed",
-        "MixinCommandSetDefaultSpawnpoint",
-        "MixinCommandTime",
-        "MixinCommandToggleDownfall",
-        "MixinCommandWeather",
-        "MixinCommandWorldBorder"
+        "CommandDefaultGameModeMixin_MultiWorldCommand",
+        "CommandDifficultyMixin_MultiWorldCommand",
+        "CommandGameRuleMixin_MultiWorldCommand",
+        "CommandShowSeedMixin_MultiWorldCommand",
+        "CommandSetDefaultSpawnpointMixin_MultiWorldCommand",
+        "CommandTimeMixin_MultiWorldCommand",
+        "CommandToggleDownfallMixin_MultiWorldCommand",
+        "CommandWeatherMixin_MultiWorldCommand",
+        "CommandWorldBorderMixin_MultiWorldCommand"
     ],
     "injectors": {
         "defaultRequire": 1

@@ -77,7 +77,7 @@ import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.core.world.chunk.ChunkMixin;
-import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
+import org.spongepowered.common.mixin.tracking.world.ChunkMixin_Tracker;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -377,7 +377,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * within a {@link net.minecraft.world.World} or {@link Chunk}.
      *
      * <p>Specifically used in
-     * {@link MixinChunk_Tracker#addTrackedBlockPosition(Block, BlockPos, User, PlayerTracker.Type)}
+     * {@link ChunkMixin_Tracker#addTrackedBlockPosition(Block, BlockPos, User, PlayerTracker.Type)}
      * to make sure that the current state would be providing said information,
      * instead of spending the processing to query for it.</p>
      *

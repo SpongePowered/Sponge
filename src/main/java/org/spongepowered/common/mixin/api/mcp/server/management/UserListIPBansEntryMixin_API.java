@@ -36,7 +36,7 @@ import java.net.InetAddress;
 @Mixin(UserListIPBansEntry.class)
 public abstract class UserListIPBansEntryMixin_API extends UserListEntryBanMixin_API<String> implements Ban.Ip {
 
-    public UserListIPBansEntryMixin_API(String p_i1146_1_) {
+    public UserListIPBansEntryMixin_API(final String p_i1146_1_) {
         super(p_i1146_1_);
     }
 

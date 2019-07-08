@@ -42,15 +42,15 @@ public abstract class EntityItemFrameMixin_MapOptimization extends EntityMixin {
     @Shadow public abstract ItemStack getDisplayedItem();
 
     @Inject(method = "setDisplayedItemWithUpdate", at = @At(value = "HEAD"))
-    private void mapOptimization$SetItemUpdateMapData(ItemStack stack, boolean p_174864_2_, CallbackInfo ci) {
+    private void mapOptimization$SetItemUpdateMapData(final ItemStack stack, final boolean p_174864_2_, final CallbackInfo ci) {
         if (((WorldBridge) this.world).isFake()) {
             return;
         }
 
         if (stack.getItem() instanceof ItemMap) {
-            ((OptimizedMapDataBridge) ((ItemMap) stack.getItem()).getMapData(stack, this.world)).bridge$updateItemFrameDecoration((EntityItemFrame) (Object) this);
+            ((OptimizedMapDataBridge) ((ItemMap) stack.getItem()).getMapData(stack, this.world)).mapOptimizationBridge$updateItemFrameDecoration((EntityItemFrame) (Object) this);
         } else if (this.getDisplayedItem().getItem() instanceof ItemMap && stack.isEmpty()) {
-            ((OptimizedMapDataBridge) ((ItemMap) this.getDisplayedItem().getItem()).getMapData(stack, this.world)).bridge$removeItemFrame((EntityItemFrame) (Object) this);
+            ((OptimizedMapDataBridge) ((ItemMap) this.getDisplayedItem().getItem()).getMapData(stack, this.world)).mapOptimizationBridge$removeItemFrame((EntityItemFrame) (Object) this);
         }
     }
 

@@ -68,6 +68,7 @@ public final class Constants {
     public static final String UUID = "UUID";
     public static final String UUID_MOST = "UUIDMost";
     public static final String UUID_LEAST = "UUIDLeast";
+    public static final BlockPos DUMMY_POS = new BlockPos(0, 0, 0);
 
     @SuppressWarnings("DeprecatedIsStillUsed")
     public static final class Sponge {
@@ -98,6 +99,40 @@ public final class Constants {
         // Snapshots
         public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
         public static final DataQuery SNAPSHOT_TILE_DATA = of("TileEntityData");
+
+        /**
+         * Modifies bits in an integer.
+         *
+         * @param num Integer to modify
+         * @param data Bits of data to add
+         * @param which Index of nibble to start at
+         * @param bitsToReplace The number of bits to replace starting from nibble index
+         * @return The modified integer
+         */
+        public static int setNibble(final int num, final int data, final int which, final int bitsToReplace) {
+            return (num & ~(bitsToReplace << (which * 4)) | (data << (which * 4)));
+        }
+
+        /**
+         * Serialize this BlockPos into a short value
+         */
+        public static short blockPosToShort(final BlockPos pos) {
+            short serialized = (short) setNibble(0, pos.getX() & Chunk.XZ_MASK, 0, Chunk.NUM_XZ_BITS);
+            serialized = (short) setNibble(serialized, pos.getY() & Chunk.Y_SHORT_MASK, 1, Chunk.NUM_SHORT_Y_BITS);
+            serialized = (short) setNibble(serialized, pos.getZ() & Chunk.XZ_MASK, 3, Chunk.NUM_XZ_BITS);
+            return serialized;
+        }
+
+        /**
+         * Serialize this BlockPos into an int value
+         */
+        public static int blockPosToInt(final BlockPos pos) {
+            int serialized = setNibble(0, pos.getX() & Chunk.XZ_MASK, 0, Chunk.NUM_XZ_BITS);
+            serialized = setNibble(serialized, pos.getY() & Chunk.Y_INT_MASK, 1, Chunk.NUM_INT_Y_BITS);
+            serialized = setNibble(serialized, pos.getZ() & Chunk.XZ_MASK, 7, Chunk.NUM_XZ_BITS);
+            return serialized;
+        }
+
         public static final class PlayerData {
 
             // SpongePlayerData
@@ -172,6 +207,8 @@ public final class Constants {
         public static final class Schematic {
 
             public static final DataQuery NAME = of("Name");
+            public static final int CURRENT_VERSION = 2;
+            public static final int MAX_SIZE = 65535;
 
             public static final class Versions {
 
@@ -882,6 +919,7 @@ public final class Constants {
         public static final DataQuery BLOCK_EXTENDED_STATE = of("BlockExtendedState");
         public static final DataQuery BLOCK_TYPE = of("BlockType");
         public static final DataQuery BLOCK_STATE_UNSAFE_META = of("UnsafeMeta");
+        public static final int PIXELS_PER_BLOCK = 16;
     }
 
     public static final class DataSerializers {

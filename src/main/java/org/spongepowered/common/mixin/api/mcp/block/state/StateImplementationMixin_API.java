@@ -120,7 +120,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
         if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {
             final TileEntity tileEntity = location.getTileEntity()
                 .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
-            for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).getCustomManipulators()) {
+            for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators()) {
                 builder.add(manipulator);
             }
             final NBTTagCompound compound = new NBTTagCompound();

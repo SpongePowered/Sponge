@@ -79,7 +79,7 @@ import javax.annotation.Nullable;
  * class is concrete in order to create instances of User.</p>
  *
  * <p>List of mixins mixing into this class: <ul>
- * <li>MixinSpongeUser</li><li>DataHolderMixin_API</li><li>MixinSubject</li> </ul>
+ * <li>SpongeUserMixin</li><li>DataHolderMixin_API</li><li>SubjectMixin</li> </ul>
  *
  * TODO Future note about data: The following data manipulators are always
  * applicable to User: BanData, WhitelistData, JoinData

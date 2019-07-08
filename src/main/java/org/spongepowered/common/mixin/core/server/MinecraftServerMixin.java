@@ -35,6 +35,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -130,10 +131,11 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
     @Shadow public abstract boolean isDedicatedServer();
     @Shadow public abstract String shadow$getName();
+    @Shadow public abstract PlayerProfileCache getPlayerProfileCache();
 
-    @Nullable private List<String> currentTabCompletionOptions;
-    private ResourcePack resourcePack;
-    private boolean enableSaving = true;
+    @Nullable private List<String> impl$currentTabCompletionOptions;
+    @Nullable private ResourcePack impl$resourcePack;
+    private boolean impl$enableSaving = true;
 
     @Override
     public String bridge$getIdentifier() {
@@ -242,10 +244,10 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") )
     private void impl$updateResourcePack(final String url, final String hash, final CallbackInfo ci) {
         if (url.length() == 0) {
-            this.resourcePack = null;
+            this.impl$resourcePack = null;
         } else {
             try {
-                this.resourcePack = SpongeResourcePack.create(url, hash);
+                this.impl$resourcePack = SpongeResourcePack.create(url, hash);
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             }
@@ -255,28 +257,28 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     @Nullable
     @Override
     public ResourcePack bridge$getResourcePack() {
-        return this.resourcePack;
+        return this.impl$resourcePack;
     }
 
     @Override
     public void bridge$setSaveEnabled(final boolean enabled) {
-        this.enableSaving = enabled;
+        this.impl$enableSaving = enabled;
     }
 
     @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE",
             target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;", remap = false))
-    private ArrayList<String> onGetTabCompletionCreateList() {
+    private ArrayList<String> impl$useSpongeTabCompletionList() {
         final ArrayList<String> list = new ArrayList<>();
-        this.currentTabCompletionOptions = list;
+        this.impl$currentTabCompletionOptions = list;
         return list;
     }
 
     @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 0))
-    private void onTabCompleteChat(final ICommandSender sender, final String input, final BlockPos pos, final boolean usingBlock,
+    private void impl$throwEventForTabCompletion(final ICommandSender sender, final String input, final BlockPos pos, final boolean usingBlock,
             final CallbackInfoReturnable<List<String>> cir) {
 
-        final List<String> completions = checkNotNull(this.currentTabCompletionOptions, "currentTabCompletionOptions");
-        this.currentTabCompletionOptions = null;
+        final List<String> completions = checkNotNull(this.impl$currentTabCompletionOptions, "currentTabCompletionOptions");
+        this.impl$currentTabCompletionOptions = null;
 
         Sponge.getCauseStackManager().pushCause(sender);
         final TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Sponge.getCauseStackManager().getCurrentCause(),
@@ -292,7 +294,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/command/ICommandManager;getTabCompletions(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;)Ljava/util/List;"))
-    private List<String> onGetTabCompletionOptions(
+    private List<String> impl$useSpongeCommandManagerForSuggestions(
         final ICommandManager manager, final ICommandSender sender, final String input, @Nullable final BlockPos pos, final ICommandSender sender_,
         final String input_, final BlockPos pos_, final boolean hasTargetBlock) {
         return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, getTarget(sender, pos), hasTargetBlock);
@@ -318,13 +320,13 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     }
 
     @Inject(method = "tick", at = @At(value = "RETURN"))
-    private void onServerTickEnd(final CallbackInfo ci) {
+    private void impl$copmleteTickCheckAnimationAndPhaseTracker(final CallbackInfo ci) {
         final int lastAnimTick = SpongeCommonEventFactory.lastAnimationPacketTick;
         final int lastPrimaryTick = SpongeCommonEventFactory.lastPrimaryPacketTick;
         final int lastSecondaryTick = SpongeCommonEventFactory.lastSecondaryPacketTick;
         if (SpongeCommonEventFactory.lastAnimationPlayer != null) {
             final EntityPlayerMP player = SpongeCommonEventFactory.lastAnimationPlayer.get();
-            if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
+            if (player != null && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
                 final BlockSnapshot blockSnapshot = BlockSnapshot.NONE;
 
                 final RayTraceResult result = SpongeImplHooks.rayTraceEyes(player, SpongeImplHooks.getBlockReachDistance(player) + 1);
@@ -357,7 +359,8 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
             value = "FIELD",
             target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;",
             opcode = Opcodes.GETFIELD))
-    private WorldProvider onGetWorldProviderForSnooper(final WorldServer world) {
+    private WorldProvider impl$getWorldProviderAndMaybeSetDimensionId(final WorldServer world) {
+        //noinspection ConstantConditions
         if (((WorldBridge) world).isFake() || world.getWorldInfo() == null) {
             // Return overworld provider
             return ((net.minecraft.world.World) Sponge.getServer().getWorlds().iterator().next()).provider;
@@ -400,7 +403,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
      */
     @Overwrite
     public void saveAllWorlds(final boolean dontLog) {
-        if (!this.enableSaving) {
+        if (!this.impl$enableSaving) {
             return;
         }
         for (final WorldServer world : this.worlds) {
@@ -474,7 +477,11 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
                 );
     }
 
-    @Redirect(method = "callFromMainThread", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;", remap = false))
+    @Redirect(method = "callFromMainThread",
+        at = @At(
+            value = "INVOKE",
+            target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;",
+            remap = false))
     private Object impl$callOnMainThreadWithPhaseState(final Callable<?> callable) throws Exception {
         // This method can be called async while server is stopping
         if (this.serverStopped && !SpongeImplHooks.isMainThread()) {
@@ -492,6 +499,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
         return value;
     }
 
+    @Nullable
     @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;runTask(Ljava/util/concurrent/FutureTask;Lorg/apache/logging/log4j/Logger;)Ljava/lang/Object;"))
     private Object onRun(final FutureTask<?> task, final Logger logger) {
         return SpongeImplHooks.onUtilRunTask(task, logger);

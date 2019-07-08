@@ -74,7 +74,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return (Optional<T>) from;
         } else if (this instanceof CustomDataHolderBridge) {
-            final Optional<T> custom = ((CustomDataHolderBridge) this).getCustom(containerClass);
+            final Optional<T> custom = ((CustomDataHolderBridge) this).bridge$getCustom(containerClass);
             SpongeTimings.dataGetManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return custom;
@@ -96,7 +96,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return created;
         } else if (this instanceof CustomDataHolderBridge) {
-            final Optional<T> custom = ((CustomDataHolderBridge) this).getCustom(containerClass);
+            final Optional<T> custom = ((CustomDataHolderBridge) this).bridge$getCustom(containerClass);
             if (custom.isPresent()) {
                 SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
                 TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
@@ -134,7 +134,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
             return supports;
         }
         if (this instanceof CustomDataHolderBridge) {
-            final Optional<?> custom = ((CustomDataHolderBridge) this).getCustom(holderClass);
+            final Optional<?> custom = ((CustomDataHolderBridge) this).bridge$getCustom(holderClass);
             if (custom.isPresent()) {
                 SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
                 TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
@@ -169,7 +169,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
         } else if (this instanceof CustomDataHolderBridge) {
-            final DataTransactionResult result = ((CustomDataHolderBridge) this).offerCustom(key, value);
+            final DataTransactionResult result = ((CustomDataHolderBridge) this).bridge$offerCustom(key, value);
             if ((Object) this instanceof SpongeUser) {
                 ((SpongeUser) (Object) this).markDirty();
             }
@@ -194,7 +194,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
         } else if (this instanceof CustomDataHolderBridge) {
-            final DataTransactionResult result = ((CustomDataHolderBridge) this).offerCustom(valueContainer, function);
+            final DataTransactionResult result = ((CustomDataHolderBridge) this).bridge$offerCustom(valueContainer, function);
             if ((Object) this instanceof SpongeUser) {
                 ((SpongeUser) (Object) this).markDirty();
             }
@@ -255,7 +255,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
 
             return result;
         } else if (this instanceof CustomDataHolderBridge) {
-            final DataTransactionResult result = ((CustomDataHolderBridge) this).removeCustom(containerClass);
+            final DataTransactionResult result = ((CustomDataHolderBridge) this).bridge$removeCustom(containerClass);
             if ((Object) this instanceof SpongeUser) {
                 ((SpongeUser) (Object) this).markDirty();
             }
@@ -283,7 +283,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
         } else if (this instanceof CustomDataHolderBridge) {
-            final DataTransactionResult result = ((CustomDataHolderBridge) this).removeCustom(key);
+            final DataTransactionResult result = ((CustomDataHolderBridge) this).bridge$removeCustom(key);
             SpongeTimings.dataRemoveKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
@@ -331,7 +331,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return value;
         } else if (this instanceof CustomDataHolderBridge) {
-            final Optional<E> custom = ((CustomDataHolderBridge) this).getCustom(key);
+            final Optional<E> custom = ((CustomDataHolderBridge) this).bridge$getCustom(key);
             SpongeTimings.dataGetByKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return custom;
@@ -352,7 +352,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return value;
         } else if (this instanceof CustomDataHolderBridge) {
-            final Optional<V> customValue = ((CustomDataHolderBridge) this).getCustomValue(key);
+            final Optional<V> customValue = ((CustomDataHolderBridge) this).bridge$getCustomValue(key);
             SpongeTimings.dataGetValue.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return customValue;
@@ -374,7 +374,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
             return supports;
         }
         if (this instanceof CustomDataHolderBridge) {
-            final boolean customSupport = ((CustomDataHolderBridge) this).supportsCustom(key);
+            final boolean customSupport = ((CustomDataHolderBridge) this).bridge$supportsCustom(key);
             SpongeTimings.dataSupportsKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return customSupport;

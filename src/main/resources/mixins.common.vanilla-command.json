@@ -6,12 +6,12 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-        "MixinCommandDifficulty",
-        "MixinCommandGameRule",
-        "MixinCommandSetDefaultSpawnpoint",
-        "MixinCommandToggleDownfall",
-        "MixinCommandWeather",
-        "MixinCommandWorldBorder"
+        "CommandDifficultyMixin_GlobalCommand",
+        "CommandGameRuleMixin_GlobalCommand",
+        "CommandSetDefaultSpawnpointMixin_GlobalCommand",
+        "CommandToggleDownfallMixin_GlobalCommand",
+        "CommandWeatherMixin_GlobalCommand",
+        "CommandWorldBorderMixin_GlobalCommand"
     ],
     "injectors": {
         "defaultRequire": 1

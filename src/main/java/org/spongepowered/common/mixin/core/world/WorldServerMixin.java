@@ -1926,7 +1926,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
             // We MUST only check to see if a TE exists to avoid creating a new one.
             if (tileEntity != null) {
                 final TileEntity tile = (TileEntity) tileEntity;
-                for (final DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).getCustomManipulators()) {
+                for (final DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).bridge$getCustomManipulators()) {
                     builder.add(manipulator);
                 }
                 final NBTTagCompound nbt = new NBTTagCompound();

@@ -6,13 +6,13 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-        "MixinEntity_Activation",
-        "MixinEntityAgeable_Activation",
-        "MixinEntityArrow_Activation",
-        "MixinEntityFireworkRocket_Activation",
-        "MixinEntityItem_Activation",
-        "MixinEntityLivingBase_Activation",
-        "WorldServerMixin_Activation"
+        "entity.EntityMixin_Activation",
+        "entity.EntityAgeableMixin_Activation",
+        "entity.projectile.EntityArrowMixin_Activation",
+        "entity.item.EntityFireworkRocketMixin_Activation",
+        "entity.item.EntityItemMixin_Activation",
+        "entity.EntityLivingBaseMixin_Activation",
+        "world.WorldServerMixin_Activation"
     ],
     "injectors": {
         "defaultRequire": 1

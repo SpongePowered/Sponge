@@ -7,7 +7,7 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-        "util.math.MixinMutableBlockPos"
+        "util.math.BlockPos$MutableBlockPosMixin_Optional"
     ],
     "injectors": {
         "defaultRequire": 1

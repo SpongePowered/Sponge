@@ -144,7 +144,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             if (itemCompound != null) {
                 this.compound = itemCompound.copy();
             }
-            this.itemDataSet.addAll(((CustomDataHolderBridge) itemStack).getCustomManipulators());
+            this.itemDataSet.addAll(((CustomDataHolderBridge) itemStack).bridge$getCustomManipulators());
 
         } else {
             this.itemDataSet.addAll(itemStack.getContainers());
@@ -288,10 +288,10 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
             final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
             for (DataManipulator<?, ?> manipulator : manipulators) {
-                ((CustomDataHolderBridge) itemStack).offerCustom(manipulator, MergeFunction.IGNORE_ALL);
+                ((CustomDataHolderBridge) itemStack).bridge$offerCustom(manipulator, MergeFunction.IGNORE_ALL);
             }
             if (!transaction.failedData.isEmpty()) {
-                ((CustomDataHolderBridge) itemStack).addFailedData(transaction.failedData);
+                ((CustomDataHolderBridge) itemStack).bridge$addFailedData(transaction.failedData);
             }
         }
         return Optional.of((ItemStack) itemStack);
