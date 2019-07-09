@@ -24,16 +24,32 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
+import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.scoreboard.ScoreboardBridge;
 
+import java.util.List;
+import java.util.Map;
+
 @Mixin(Scoreboard.class)
 public abstract class ScoreboardMixin implements ScoreboardBridge {
+
+    @Shadow @Final private Map<IScoreCriteria, List<ScoreObjective>> scoreObjectiveCriterias;
+    @Shadow @Final private Map<String, ScoreObjective> scoreObjectives;
+    @Shadow @Final private Map<String, Map<ScoreObjective, Score>> entitiesScoreObjectives;
+    @Shadow @Final private Map<String, ScorePlayerTeam> teams;
+    @Shadow @Final private Map<String, ScorePlayerTeam> teamMemberships;
+    @Shadow @Final private ScoreObjective[] objectiveDisplaySlots;
 
     private boolean impl$isClient;
 
@@ -46,5 +62,36 @@ public abstract class ScoreboardMixin implements ScoreboardBridge {
     @Override
     public boolean bridge$isClient() {
         return this.impl$isClient;
+    }
+
+    // TODO - Remove all of these once Mixin 0.8 is released to fix AccessorMixins in Mixins
+    @Override
+    public Map<IScoreCriteria, List<ScoreObjective>> bridge$getScoreObjectiveCriterias() {
+        return this.scoreObjectiveCriterias;
+    }
+
+    @Override
+    public Map<String, ScoreObjective> bridge$getScoreObjectives() {
+        return this.scoreObjectives;
+    }
+
+    @Override
+    public Map<String, Map<ScoreObjective, Score>> bridge$getEntitiesScoreObjectives() {
+        return this.entitiesScoreObjectives;
+    }
+
+    @Override
+    public Map<String, ScorePlayerTeam> bridge$getTeams() {
+        return this.teams;
+    }
+
+    @Override
+    public Map<String, ScorePlayerTeam> bridge$getTeamMemberships() {
+        return this.teamMemberships;
+    }
+
+    @Override
+    public ScoreObjective[] bridge$getObjectiveDisplaySlots() {
+        return this.objectiveDisplaySlots;
     }
 }

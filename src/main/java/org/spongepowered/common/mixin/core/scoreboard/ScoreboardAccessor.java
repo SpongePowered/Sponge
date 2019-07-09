@@ -22,41 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util.math;
+package org.spongepowered.common.mixin.core.scoreboard;
 
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
+import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.Scoreboard;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.math.BlockPosBridge;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(BlockPos.MutableBlockPos.class)
-@Implements(@Interface(iface = BlockPosBridge.class, prefix = "inline$", unique = true))
-public abstract class BlockPos$MutableBlockPosMixin_Optional extends BlockPos implements BlockPosBridge {
+import java.util.Map;
 
-    @Shadow protected int x;
-    @Shadow protected int y;
-    @Shadow protected int z;
+@Mixin(Scoreboard.class)
+public interface ScoreboardAccessor {
 
-    // NOT USED
-    public BlockPos$MutableBlockPosMixin_Optional(final int xIn, final int yIn, final int zIn) {
-        super(xIn, yIn, zIn);
-    }
-
-    @Override
-    public boolean bridge$isValidPosition() {
-        return this.x >= -30000000 && this.z >= -30000000 && this.x < 30000000 && this.z < 30000000 && this.y >= 0 && this.y < 256;
-    }
-
-    @Override
-    public boolean bridge$isValidXZPosition() {
-        return this.x >= -30000000 && this.z >= -30000000 && this.x < 30000000 && this.z < 30000000;
-    }
-
-    @Override
-    public boolean bridge$isInvalidYPosition() {
-        return this.y < 0 || this.y >= 256;
-    }
+    @Accessor("entitiesScoreObjectives") Map<String, Map<ScoreObjective, Score>>  accessor$getEntitiesScoreObjectivesMap();
 
 }

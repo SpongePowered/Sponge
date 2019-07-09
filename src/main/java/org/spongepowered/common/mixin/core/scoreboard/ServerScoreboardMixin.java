@@ -132,7 +132,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             }
         } else {
             final Text textName = SpongeTexts.fromLegacy(name);
-            for (final ScoreObjective scoreObjective: this.scoreObjectives.values()) {
+            for (final ScoreObjective scoreObjective: this.getScoreObjectives()) {
                 ((ScoreObjectiveBridge) scoreObjective).bridge$getSpongeObjective().removeScore(textName);
             }
         }

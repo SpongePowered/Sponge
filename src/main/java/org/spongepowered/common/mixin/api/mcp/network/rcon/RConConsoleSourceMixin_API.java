@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.network.rcon;
 
-import net.minecraft.command.ICommandSender;
 import net.minecraft.network.rcon.RConConsoleSource;
 import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.network.RemoteConnection;

@@ -30,6 +30,7 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
+import org.spongepowered.common.mixin.core.scoreboard.ScoreObjectiveAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
@@ -46,7 +47,7 @@ public class SpongeScore implements Score {
 
     private Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = new HashMap<>();
 
-    public SpongeScore(Text name) {
+    public SpongeScore(final Text name) {
         this.name = name;
         this.legacyName = SpongeTexts.toLegacy(name);
         if (this.legacyName.length() > Constants.Scoreboards.SCORE_NAME_LENGTH) {
@@ -65,14 +66,14 @@ public class SpongeScore implements Score {
     }
 
     @Override
-    public void setScore(int score) {
+    public void setScore(final int score) {
         this.score = score;
         this.updateScore();
     }
 
     private void updateScore() {
-        for (net.minecraft.scoreboard.Score score : this.scores.values()) {
-            int j = score.scorePoints;
+        for (final net.minecraft.scoreboard.Score score : this.scores.values()) {
+            final int j = score.scorePoints;
             score.scorePoints = this.score;
 
             if (j != this.score || score.forceUpdate)
@@ -85,19 +86,19 @@ public class SpongeScore implements Score {
 
     @Override
     public Set<Objective> getObjectives() {
-        Set<Objective> objectives = new HashSet<>();
-        for (ScoreObjective objective: this.scores.keySet()) {
+        final Set<Objective> objectives = new HashSet<>();
+        for (final ScoreObjective objective: this.scores.keySet()) {
             objectives.add(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
         }
         return objectives;
     }
 
     @SuppressWarnings("ConstantConditions")
-    public net.minecraft.scoreboard.Score getScoreFor(ScoreObjective objective) {
+    public net.minecraft.scoreboard.Score getScoreFor(final ScoreObjective objective) {
         if (this.scores.containsKey(objective)) {
             return this.scores.get(objective);
         }
-        net.minecraft.scoreboard.Score score = new net.minecraft.scoreboard.Score(objective.scoreboard, objective, this.legacyName);
+        final net.minecraft.scoreboard.Score score = new net.minecraft.scoreboard.Score(((ScoreObjectiveAccessor) objective).accessor$getScoreboard(), objective, this.legacyName);
 
         // We deliberately set the fields here instead of using the methods.
         // Since a new score is being created here, we want to avoid
@@ -110,7 +111,7 @@ public class SpongeScore implements Score {
         return score;
     }
 
-    public void removeScoreFor(ScoreObjective objective) {
+    public void removeScoreFor(final ScoreObjective objective) {
         if (this.scores.remove(objective) == null) {
             throw new IllegalStateException("Attempting to remove an score without an entry!");
         }

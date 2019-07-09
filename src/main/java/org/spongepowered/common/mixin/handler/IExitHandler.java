@@ -22,37 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.scoreboard;
+package org.spongepowered.common.mixin.handler;
 
-import net.minecraft.scoreboard.IScoreCriteria;
-import net.minecraft.scoreboard.Score;
-import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraft.scoreboard.ScorePlayerTeam;
-
-import java.util.List;
-import java.util.Map;
-
-public interface ScoreboardBridge {
-
-    boolean bridge$isClient();
-
-    // TODO - Remove with Mixins 0.8
-    @Deprecated
-    Map<IScoreCriteria, List<ScoreObjective>> bridge$getScoreObjectiveCriterias();
-
-    @Deprecated
-    Map<String, ScoreObjective> bridge$getScoreObjectives();
-
-    @Deprecated
-    Map<String, Map<ScoreObjective, Score>> bridge$getEntitiesScoreObjectives();
-
-    @Deprecated
-    Map<String, ScorePlayerTeam> bridge$getTeams();
-
-    @Deprecated
-    Map<String, ScorePlayerTeam> bridge$getTeamMemberships();
-
-    @Deprecated
-    ScoreObjective[] bridge$getObjectiveDisplaySlots();
-
+public interface IExitHandler
+{
+    void exit(int status);
 }
