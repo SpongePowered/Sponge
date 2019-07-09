@@ -24,20 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.network.play.server;
 
-import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketEntityStatus;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.List;
+@Mixin(SPacketEntityStatus.class)
+public interface SPacketEntityStatusAccessor {
 
-@Mixin(SPacketPlayerListItem.class)
-public interface SPacketPlayerListItemAccessor {
+    @Accessor("entityId") int accessor$getEntityId();
 
-    @Accessor("players")
-    List<SPacketPlayerListItem.AddPlayerData> accessor$getPlayerDatas();
+    @Accessor("entityId") void accessor$setEntityId(int id);
 
-    @Accessor("action") SPacketPlayerListItem.Action accessor$getAction();
+    @Accessor("logicOpcode") byte accessor$getLogicOpcode();
 
-    @Accessor("action") void accessor$setAction(SPacketPlayerListItem.Action action);
+    @Accessor("logicOpcode") void accessor$setLogicOpcoe(byte opcode);
 
 }

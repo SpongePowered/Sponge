@@ -68,6 +68,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.mixin.core.network.play.server.SPacketPlayerListItemAccessor;
+import org.spongepowered.common.mixin.core.network.play.server.SPacketSpawnPlayerAccessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +94,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
             .build(new CacheLoader<UUID, PropertyMap>() {
 
                 @Override
-                public PropertyMap load(UUID uuid) throws Exception {
+                public PropertyMap load(final UUID uuid) throws Exception {
                     return SpongeImpl.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
                             .getProperties();
                 }
@@ -106,7 +107,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Nullable private UUID skinUuid;
     private boolean aiDisabled = false, leftHanded = false;
 
-    public EntityHuman(World worldIn) {
+    public EntityHuman(final World worldIn) {
         super(worldIn);
         this.fakeProfile = new GameProfile(this.entityUniqueID, "");
         this.setSize(0.6F, 1.8F);
@@ -171,18 +172,18 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound tagCompund) {
+    public void readEntityFromNBT(final NBTTagCompound tagCompund) {
         super.readEntityFromNBT(tagCompund);
-        String skinUuidString = ((DataCompoundHolder) this).data$getSpongeCompound().getString("skinUuid");
+        final String skinUuidString = ((DataCompoundHolder) this).data$getSpongeCompound().getString("skinUuid");
         if (!skinUuidString.isEmpty()) {
             this.updateFakeProfileWithSkin(UUID.fromString(skinUuidString));
         }
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound tagCompound) {
+    public void writeEntityToNBT(final NBTTagCompound tagCompound) {
         super.writeEntityToNBT(tagCompound);
-        NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+        final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
         if (this.skinUuid != null) {
             spongeData.setString("skinUuid", this.skinUuid.toString());
         } else {
@@ -197,12 +198,12 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    public void setNoAI(boolean disable) {
+    public void setNoAI(final boolean disable) {
         this.aiDisabled = disable;
     }
 
     @Override
-    public void setLeftHanded(boolean leftHanded) {
+    public void setLeftHanded(final boolean leftHanded) {
         this.leftHanded = leftHanded;
     }
 
@@ -227,7 +228,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    public void onDeath(@Nullable DamageSource cause) {
+    public void onDeath(@Nullable final DamageSource cause) {
         super.onDeath(cause);
         this.setSize(0.2F, 0.2F);
         this.setPosition(this.posX, this.posY, this.posZ);
@@ -241,7 +242,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    protected SoundEvent getHurtSound(DamageSource source) {
+    protected SoundEvent getHurtSound(final DamageSource source) {
         return SoundEvents.ENTITY_PLAYER_HURT;
     }
 
@@ -261,7 +262,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    protected SoundEvent getFallSound(int height) {
+    protected SoundEvent getFallSound(final int height) {
         return height > 4 ? SoundEvents.ENTITY_PLAYER_BIG_FALL : SoundEvents.ENTITY_PLAYER_SMALL_FALL;
     }
     @Override
@@ -283,15 +284,15 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    protected float updateDistance(float p_110146_1_, float p_110146_2_) {
-        float retValue = super.updateDistance(p_110146_1_, p_110146_2_);
+    protected float updateDistance(final float p_110146_1_, final float p_110146_2_) {
+        final float retValue = super.updateDistance(p_110146_1_, p_110146_2_);
         // Make the body rotation follow head rotation
         this.rotationYaw = this.rotationYawHead;
         return retValue;
     }
 
     @Override
-    public boolean attackEntityAsMob(Entity entityIn) {
+    public boolean attackEntityAsMob(final Entity entityIn) {
         super.attackEntityAsMob(entityIn);
         this.swingArm(EnumHand.MAIN_HAND);
         float f = (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
@@ -302,7 +303,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
             i += EnchantmentHelper.getKnockbackModifier(this);
         }
 
-        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
+        final boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
 
         if (flag) {
             if (i > 0) {
@@ -312,7 +313,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
                 this.motionZ *= 0.6D;
             }
 
-            int j = EnchantmentHelper.getFireAspectModifier(this);
+            final int j = EnchantmentHelper.getFireAspectModifier(this);
 
             if (j > 0) {
                 entityIn.setFire(j * 4);
@@ -324,14 +325,14 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         return flag;
     }
 
-    private void renameProfile(String newName) {
-        PropertyMap props = this.fakeProfile.getProperties();
+    private void renameProfile(final String newName) {
+        final PropertyMap props = this.fakeProfile.getProperties();
         this.fakeProfile = new GameProfile(this.fakeProfile.getId(), newName);
         this.fakeProfile.getProperties().putAll(props);
     }
 
-    private boolean updateFakeProfileWithSkin(UUID skin) {
-        PropertyMap properties = PROPERTIES_CACHE.getUnchecked(skin);
+    private boolean updateFakeProfileWithSkin(final UUID skin) {
+        final PropertyMap properties = PROPERTIES_CACHE.getUnchecked(skin);
         if (properties.isEmpty()) {
             return false;
         }
@@ -340,9 +341,9 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         return true;
     }
 
-    public void removeFromTabListDelayed(@Nullable EntityPlayerMP player, SPacketPlayerListItem removePacket) {
-        int delay = SpongeImpl.getGlobalConfigAdapter().getConfig().getEntity().getHumanPlayerListRemoveDelay();
-        Runnable removeTask = () -> this.pushPackets(player, removePacket);
+    public void removeFromTabListDelayed(@Nullable final EntityPlayerMP player, final SPacketPlayerListItem removePacket) {
+        final int delay = SpongeImpl.getGlobalConfigAdapter().getConfig().getEntity().getHumanPlayerListRemoveDelay();
+        final Runnable removeTask = () -> this.pushPackets(player, removePacket);
         if (delay == 0) {
             removeTask.run();
         } else {
@@ -353,7 +354,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         }
     }
 
-    public boolean setSkinUuid(UUID skin) {
+    public boolean setSkinUuid(final UUID skin) {
         if (!SpongeImpl.getServer().isServerInOnlineMode()) {
             // Skins only work when online-mode = true
             return false;
@@ -380,7 +381,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
             return DataTransactionResult.successNoData();
         }
         this.fakeProfile.getProperties().removeAll("textures");
-        ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, this.skinUuid);
+        final ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, this.skinUuid);
         this.skinUuid = null;
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
@@ -416,7 +417,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      *
      * @param player The player that has stopped tracking this human
      */
-    public void onRemovedFrom(EntityPlayerMP player) {
+    public void onRemovedFrom(final EntityPlayerMP player) {
         this.playerPacketMap.remove(player.getUniqueID());
         player.connection.sendPacket(this.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER));
     }
@@ -429,16 +430,18 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      *
      * @return A new spawn packet
      */
+    @SuppressWarnings("ConstantConditions")
     public SPacketSpawnPlayer createSpawnPacket() {
-        SPacketSpawnPlayer packet = new SPacketSpawnPlayer();
-        packet.entityId = this.getEntityId();
-        packet.uniqueId = this.fakeProfile.getId();
-        packet.x = this.posX;
-        packet.y = this.posY;
-        packet.z = this.posZ;
-        packet.yaw = (byte) ((int) (this.rotationYaw * 256.0F / 360.0F));
-        packet.pitch = (byte) ((int) (this.rotationPitch * 256.0F / 360.0F));
-        packet.watcher = this.getDataManager();
+        final SPacketSpawnPlayer packet = new SPacketSpawnPlayer();
+        final SPacketSpawnPlayerAccessor accessor = (SPacketSpawnPlayerAccessor) packet;
+        accessor.accessor$setentityId(this.getEntityId());
+        accessor.accessor$setuniqueId(this.fakeProfile.getId());
+        accessor.accessor$setx(this.posX);
+        accessor.accessor$sety(this.posY);
+        accessor.accessor$setZ(this.posZ);
+        accessor.accessor$setYaw((byte) ((int) (this.rotationYaw * 256.0F / 360.0F)));
+        accessor.accessor$setPitch((byte) ((int) (this.rotationPitch * 256.0F / 360.0F)));
+        accessor.accessor$setWatcher(this.getDataManager());
         return packet;
     }
 
@@ -449,8 +452,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      * @return A new tab list packet
      */
     @SuppressWarnings("ConstantConditions")
-    public SPacketPlayerListItem createPlayerListPacket(SPacketPlayerListItem.Action action) {
-        SPacketPlayerListItem packet = new SPacketPlayerListItem(action);
+    public SPacketPlayerListItem createPlayerListPacket(final SPacketPlayerListItem.Action action) {
+        final SPacketPlayerListItem packet = new SPacketPlayerListItem(action);
         ((SPacketPlayerListItemAccessor) packet).accessor$getPlayerDatas()
             .add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
         return packet;
@@ -461,7 +464,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      *
      * @param packets All packets to send in a single tick
      */
-    public void pushPackets(Packet<?>... packets) {
+    public void pushPackets(final Packet<?>... packets) {
         this.pushPackets(null, packets); // null = all players
     }
 
@@ -472,7 +475,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      * @param player The player tracking this human
      * @param packets All packets to send in a single tick
      */
-    public void pushPackets(@Nullable EntityPlayerMP player, Packet<?>... packets) {
+    public void pushPackets(@Nullable final EntityPlayerMP player, final Packet<?>... packets) {
         if (player == null) {
             List<Packet<?>[]> queue = this.playerPacketMap.get(null);
             if (queue == null) {
@@ -496,24 +499,24 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      * @param player The player to get packets for (or null for all players)
      * @return An array of packets to send in a single tick
      */
-    public Packet<?>[] popQueuedPackets(@Nullable EntityPlayerMP player) {
-        List<Packet<?>[]> queue = this.playerPacketMap.get(player == null ? null : player.getUniqueID());
+    public Packet<?>[] popQueuedPackets(@Nullable final EntityPlayerMP player) {
+        final List<Packet<?>[]> queue = this.playerPacketMap.get(player == null ? null : player.getUniqueID());
         return queue == null || queue.isEmpty() ? null : queue.remove(0);
     }
 
     @Override
-    public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
+    public void attackEntityWithRangedAttack(final EntityLivingBase target, final float distanceFactor) {
         // Borrowed from Skeleton
         // TODO Figure out how to API this out
         final EntityTippedArrow entitytippedarrow = new EntityTippedArrow(this.world, this);
-        double d0 = target.posX - this.posX;
-        double d1 = target.getEntityBoundingBox().minY + target.height / 3.0F - entitytippedarrow.posY;
-        double d2 = target.posZ - this.posZ;
-        double d3 = MathHelper.sqrt(d0 * d0 + d2 * d2);
+        final double d0 = target.posX - this.posX;
+        final double d1 = target.getEntityBoundingBox().minY + target.height / 3.0F - entitytippedarrow.posY;
+        final double d2 = target.posZ - this.posZ;
+        final double d3 = MathHelper.sqrt(d0 * d0 + d2 * d2);
         entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.world.getDifficulty().getId() * 4);
         // These names are wrong
-        int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
-        int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this);
+        final int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
+        final int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this);
         entitytippedarrow.setDamage(distanceFactor * 2.0F + this.rand.nextGaussian() * 0.25D + this.world.getDifficulty().getId() * 0.11F);
 
         if (i > 0) {
@@ -535,7 +538,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    public void setSwingingArms(boolean var1) {
+    public void setSwingingArms(final boolean var1) {
         // TODO 1.12-pre2 Can we support this
     }
 }

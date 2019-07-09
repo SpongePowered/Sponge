@@ -83,7 +83,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
     @Shadow @Final private boolean[] updateSkylightColumns;
     @Shadow private boolean isGapLightingUpdated;
     @Shadow private int heightMapMinimum;
-    @Shadow private ConcurrentLinkedQueue<BlockPos> tileEntityPosQueue;
+    @Shadow @Final private ConcurrentLinkedQueue<BlockPos> tileEntityPosQueue;
 
     @Shadow public abstract int getTopFilledSegment();
     @Shadow public abstract int getHeightValue(int x, int z);

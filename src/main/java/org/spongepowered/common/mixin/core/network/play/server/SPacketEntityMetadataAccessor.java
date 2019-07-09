@@ -24,20 +24,25 @@
  */
 package org.spongepowered.common.mixin.core.network.play.server;
 
-import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SPacketEntityMetadata;
+import net.minecraft.network.play.server.SPacketEntityStatus;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
 
-@Mixin(SPacketPlayerListItem.class)
-public interface SPacketPlayerListItemAccessor {
+@Mixin(SPacketEntityMetadata.class)
+public interface SPacketEntityMetadataAccessor {
 
-    @Accessor("players")
-    List<SPacketPlayerListItem.AddPlayerData> accessor$getPlayerDatas();
+    @Accessor("entityId") int accessor$getEntityId();
 
-    @Accessor("action") SPacketPlayerListItem.Action accessor$getAction();
+    @Accessor("entityId") void accessor$setEntityId(int id);
 
-    @Accessor("action") void accessor$setAction(SPacketPlayerListItem.Action action);
+    @Accessor("dataManagerEntries") List< EntityDataManager.DataEntry<? >> accessor$getManagerEntires();
+
+    @Accessor("dataManagerEntries") void accessor$setManagerEntires(List< EntityDataManager.DataEntry<? >> entries);
+
+
 
 }

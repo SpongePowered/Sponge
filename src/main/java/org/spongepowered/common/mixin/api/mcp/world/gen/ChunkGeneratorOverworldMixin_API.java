@@ -29,14 +29,6 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
-import net.minecraft.world.gen.ChunkGeneratorSettings;
-import net.minecraft.world.gen.MapGenBase;
-import net.minecraft.world.gen.structure.MapGenMineshaft;
-import net.minecraft.world.gen.structure.MapGenScatteredFeature;
-import net.minecraft.world.gen.structure.MapGenStronghold;
-import net.minecraft.world.gen.structure.MapGenVillage;
-import net.minecraft.world.gen.structure.StructureOceanMonument;
-import net.minecraft.world.gen.structure.WoodlandMansion;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
@@ -56,18 +48,7 @@ import javax.annotation.Nullable;
 public abstract class ChunkGeneratorOverworldMixin_API
     implements GenerationPopulator {
 
-    @Shadow @Final private boolean mapFeaturesEnabled;
-    @Shadow @Final private net.minecraft.world.World world;
-    @Shadow private ChunkGeneratorSettings settings;
     @Shadow @Final private Random rand;
-    @Shadow @Final private MapGenBase caveGenerator;
-    @Shadow @Final private MapGenStronghold strongholdGenerator;
-    @Shadow @Final private MapGenVillage villageGenerator;
-    @Shadow @Final private MapGenMineshaft mineshaftGenerator;
-    @Shadow @Final private MapGenScatteredFeature scatteredFeatureGenerator;
-    @Shadow @Final private MapGenBase ravineGenerator;
-    @Shadow @Final private StructureOceanMonument oceanMonumentGenerator;
-    @Shadow @Final private WoodlandMansion woodlandMansionGenerator;
     @Shadow @Nullable private Biome[] biomesForGeneration;
 
     @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);

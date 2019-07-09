@@ -24,20 +24,52 @@
  */
 package org.spongepowered.common.mixin.core.network.play.server;
 
-import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SPacketSpawnObject;
+import net.minecraft.network.play.server.SPacketSpawnPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
+import java.util.UUID;
 
-@Mixin(SPacketPlayerListItem.class)
-public interface SPacketPlayerListItemAccessor {
+@Mixin(SPacketSpawnPlayer.class)
+public interface SPacketSpawnPlayerAccessor {
 
-    @Accessor("players")
-    List<SPacketPlayerListItem.AddPlayerData> accessor$getPlayerDatas();
+    @Accessor("entityId") int accessor$getentityId();
 
-    @Accessor("action") SPacketPlayerListItem.Action accessor$getAction();
+    @Accessor("entityId") void accessor$setentityId(int value);
 
-    @Accessor("action") void accessor$setAction(SPacketPlayerListItem.Action action);
+    @Accessor("uniqueId") UUID accessor$getuniqueId();
+
+    @Accessor("uniqueId") void accessor$setuniqueId(UUID value);
+
+    @Accessor("x") double accessor$getx();
+
+    @Accessor("x") void accessor$setx(double value);
+
+    @Accessor("y") double accessor$gety();
+
+    @Accessor("y") void accessor$sety(double value);
+
+    @Accessor("z") double accessor$getZ();
+
+    @Accessor("z") void accessor$setZ(double value);
+
+    @Accessor("yaw") byte accessor$getYaw();
+
+    @Accessor("yaw") void accessor$setYaw(byte value);
+
+    @Accessor("pitch") byte accessor$getPitch();
+
+    @Accessor("pitch") void accessor$setPitch(byte value);
+
+    @Accessor("watcher") EntityDataManager accessor$getWatcher();
+
+    @Accessor("watcher") void accessor$setWatcher(EntityDataManager value);
+
+    @Accessor("dataManagerEntries") List<EntityDataManager.DataEntry<?>> accessor$getDataManagerEntires();
+
+    @Accessor("dataManagerEntries") void accessor$setDataManagerEntires(List<EntityDataManager.DataEntry<?>> entries);
 
 }

@@ -36,6 +36,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
+import org.spongepowered.common.mixin.core.network.play.client.CPacketResourcePackStatusAccessor;
 
 public final class ResourcePackState extends BasicPacketState {
 
@@ -45,10 +46,10 @@ public final class ResourcePackState extends BasicPacketState {
 
         final NetHandlerPlayServer connection = player.connection;
         final NetHandlerPlayServerBridge mixinHandler = (NetHandlerPlayServerBridge) connection;
-        final CPacketResourcePackStatus resource = phaseContext.getPacket();
+        final CPacketResourcePackStatusAccessor resource = phaseContext.getPacket();
         final ResourcePackStatusEvent.ResourcePackStatus status;
         ResourcePack pack;
-        switch (resource.action) {
+        switch (resource.accessor$getAction()) {
             case ACCEPTED:
                 pack = mixinHandler.bridge$popReceivedResourcePack(true);
                 status = ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED;
