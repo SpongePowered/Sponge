@@ -27,7 +27,8 @@
         "world.gen.ChunkProviderServerMixin_Async_Lighting",
         "world.gen.structure.MapGenStructureMixin_Structure_Saving",
         "world.storage.MapDataMixin_MapOptimization",
-        "world.storage.MapInfoMixin_MapOptimization"
+        "world.storage.MapInfoMixin_MapOptimization",
+        "MixinCompressedStreamTools_Parallel_GZIP"
     ],
     "injectors": {
         "defaultRequire": 1

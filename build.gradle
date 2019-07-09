@@ -76,6 +76,8 @@ dependencies {
         transitive = false
     }
 
+    compile 'org.anarres:parallelgzip:1.0.5'
+
     // Taken from https://stackoverflow.com/a/7969292
     testCompile api.sourceSets.test.output
 }

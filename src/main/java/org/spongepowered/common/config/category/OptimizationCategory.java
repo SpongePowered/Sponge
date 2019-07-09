@@ -111,6 +111,9 @@ public class OptimizationCategory extends ConfigCategory {
                                                                    + "chunks are loaded.")
     private boolean useActiveChunkForCollisions = false;
 
+    @Setting(value = "use-parallel-gzip", comment = "Use parallel gzip")
+    private boolean useParallelGZIP = false;
+
     public OptimizationCategory() {
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
@@ -189,5 +192,9 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean isUseActiveChunkForCollisions() {
         return useActiveChunkForCollisions;
+    }
+
+    public boolean useParallelGZIP() {
+        return useParallelGZIP;
     }
 }
