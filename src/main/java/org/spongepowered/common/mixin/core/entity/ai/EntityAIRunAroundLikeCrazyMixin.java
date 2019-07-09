@@ -70,7 +70,7 @@ public abstract class EntityAIRunAroundLikeCrazyMixin extends EntityAIBaseMixin 
 
             // Sponge start - Throw an event before calling entity states
             // this.horseHost.removePassengers(); // Vanilla
-            if (((EntityBridge) this.horseHost).removePassengers(DismountTypes.DERAIL)) {
+            if (((EntityBridge) this.horseHost).bridge$removePassengers(DismountTypes.DERAIL)) {
                 // Sponge end
                 this.horseHost.makeMad();
                 this.horseHost.world.setEntityState(this.horseHost, (byte)6);

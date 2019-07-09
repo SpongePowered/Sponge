@@ -299,7 +299,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             } // Sponge - brackets.
         }
         // Sponge Start - set up some variables for more fasts
-        @Nullable final PhaseContext<?> context = !((WorldBridge) this.world).isFake() ? PhaseTracker.getInstance().getCurrentContext() : null;
+        @Nullable final PhaseContext<?> context = !((WorldBridge) this.world).bridge$isFake() ? PhaseTracker.getInstance().getCurrentContext() : null;
         final boolean hasCapturePos = context != null && context.state.requiresBlockPosTracking();
         // Sponge end
 
@@ -385,12 +385,12 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     }
 
     @Override
-    public void setShouldBreakBlocks(final boolean shouldBreakBlocks) {
+    public void bridge$setShouldBreakBlocks(final boolean shouldBreakBlocks) {
         this.shouldBreakBlocks = shouldBreakBlocks;
     }
 
     @Override
-    public void setShouldDamageEntities(final boolean shouldDamageEntities) {
+    public void bridge$setShouldDamageEntities(final boolean shouldDamageEntities) {
         this.shouldDamageEntities = shouldDamageEntities;
     }
 

@@ -59,6 +59,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -189,8 +190,25 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;"))
-    private EntityPlayer spongeImpl$despa(final World world, final net.minecraft.entity.Entity entity, final double distance) {
-        return ((WorldBridge) world).getClosestPlayerToEntityWhoAffectsSpawning(entity, distance);
+    private EntityPlayer impl$getClosestPlayerForSpawning(final World world, final net.minecraft.entity.Entity entity, final double distance) {
+        double bestDistance = -1.0D;
+        EntityPlayer result = null;
+
+        for (final Object entity1 : world.playerEntities) {
+            final EntityPlayer player = (EntityPlayer) entity1;
+            if (player == null || player.isDead || !((PlayerEntityBridge) player).bridge$affectsSpawning()) {
+                continue;
+            }
+
+            final double playerDistance = player.getDistanceSq(entity.posX, entity.posY, entity.posZ);
+
+            if ((distance < 0.0D || playerDistance < distance * distance) && (bestDistance == -1.0D || playerDistance < bestDistance)) {
+                bestDistance = playerDistance;
+                result = player;
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -254,7 +272,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
 
 
     @Override
-    public void onJoinWorld() {
+    public void bridge$onJoinWorld() {
         this.initSpongeAI();
     }
 

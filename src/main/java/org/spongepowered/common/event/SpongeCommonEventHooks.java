@@ -34,7 +34,7 @@ public class SpongeCommonEventHooks {
     @Listener
     public void onChunkLoad(LoadChunkEvent event) {
         final WorldBridge world = (WorldBridge) event.getTargetChunk().getWorld();
-        if (world.isFake()) {
+        if (world.bridge$isFake()) {
             return;
         }
 

@@ -65,7 +65,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
             final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.getChunk(notifyPos);
-            mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
+            mixinChunk.bridge$addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
         });
     }
 
@@ -79,7 +79,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
             final BlockPos changedBlockPos = original.getBlockPos();
             original.getWorldServer().ifPresent(worldServer -> {
                 final ChunkBridge changedMixinChunk = (ChunkBridge) worldServer.getChunk(changedBlockPos);
-                changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
+                changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
                 // and check for owner, if it's available, only if the block change was placement
                 // We don't want to set owners on modify because that would mean the current context owner
                 // would be setting itself onto potentially other owner's blocks, which since it is a modification, it's considered a
@@ -90,7 +90,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
                     context.applyOwnerIfAvailable(owner -> {
                         // We can do this when we check for notifiers because owners will always have a notifier set
                         // if not, well, file a bug report and find out the corner case that owners are set but not notifiers with block changes.
-                        changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER);
+                        changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER);
                     });
                 }
             });

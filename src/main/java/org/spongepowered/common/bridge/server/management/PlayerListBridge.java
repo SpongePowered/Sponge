@@ -26,5 +26,5 @@ package org.spongepowered.common.bridge.server.management;
 
 public interface PlayerListBridge {
 
-    void reloadAdvancementProgress();
+    void bridge$reloadAdvancementProgress();
 }

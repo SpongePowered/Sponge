@@ -98,7 +98,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setUpCommonFields(
         final WorldServer worldObjIn, final IChunkLoader chunkLoaderIn, final IChunkGenerator chunkGeneratorIn, final CallbackInfo ci) {
-        if (((WorldBridge) worldObjIn).isFake()) {
+        if (((WorldBridge) worldObjIn).bridge$isFake()) {
             return;
         }
         this.impl$EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
@@ -125,7 +125,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
     @Overwrite
     public void queueUnload(final Chunk chunkIn)
     {
-        if (!((ChunkBridge) chunkIn).isPersistedChunk() && this.world.provider.canDropChunk(chunkIn.x, chunkIn.z))
+        if (!((ChunkBridge) chunkIn).bridge$isPersistedChunk() && this.world.provider.canDropChunk(chunkIn.x, chunkIn.z))
         {
             // Sponge - we avoid using the queue and simply check the unloaded flag during unloads
             //this.droppedChunksSet.add(Long.valueOf(ChunkPos.asLong(chunkIn.x, chunkIn.z)));
@@ -254,7 +254,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
     @Overwrite
     public boolean tick()
     {
-        if (!this.world.disableLevelSaving && !((WorldBridge) this.world).isFake())
+        if (!this.world.disableLevelSaving && !((WorldBridge) this.world).bridge$isFake())
         {
             ((ServerWorldBridge) this.world).bridge$getTimingsHandler().doChunkUnload.startTiming();
             final Iterator<Chunk> iterator = this.loadedChunks.values().iterator();
@@ -263,12 +263,12 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
             while (chunksUnloaded < this.impl$maxChunkUnloads && iterator.hasNext()) {
                 final Chunk chunk = iterator.next();
                 final ChunkBridge spongeChunk = (ChunkBridge) chunk;
-                if (chunk != null && chunk.unloadQueued && !spongeChunk.isPersistedChunk()) {
+                if (chunk != null && chunk.unloadQueued && !spongeChunk.bridge$isPersistedChunk()) {
                     if (this.bridge$getChunkUnloadDelay() > 0) {
-                        if ((now - spongeChunk.getScheduledForUnload()) < this.impl$chunkUnloadDelay) {
+                        if ((now - spongeChunk.bridge$getScheduledForUnload()) < this.impl$chunkUnloadDelay) {
                             continue;
                         }
-                        spongeChunk.setScheduledForUnload(-1);
+                        spongeChunk.bridge$setScheduledForUnload(-1);
                     }
                     chunk.onUnload();
                     this.saveChunkData(chunk);
@@ -327,6 +327,6 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
         }
 
         this.loadedChunks.remove(ChunkPos.asLong(chunk.x, chunk.z));
-        ((ChunkBridge) chunk).setScheduledForUnload(-1);
+        ((ChunkBridge) chunk).bridge$setScheduledForUnload(-1);
     }
 }

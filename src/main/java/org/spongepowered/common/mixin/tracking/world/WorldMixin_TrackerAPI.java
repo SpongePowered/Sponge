@@ -54,7 +54,7 @@ public abstract class WorldMixin_TrackerAPI implements World {
         final BlockPos pos = new BlockPos(x, y, z);
         // The difference here saves the user lookup check for snapshot creation, very hot when considering
         // blocks changing with potentially n block notifiers and n block owners.
-        return ((ChunkBridge) chunk).getBlockOwnerUUID(pos);
+        return ((ChunkBridge) chunk).bridge$getBlockOwnerUUID(pos);
     }
 
     @Override
@@ -67,7 +67,7 @@ public abstract class WorldMixin_TrackerAPI implements World {
         final BlockPos pos = new BlockPos(x, y, z);
         // The difference here saves the user lookup check for snapshot creation, very hot when considering
         // blocks changing with potentially n block notifiers and n block owners.
-        return ((ChunkBridge) chunk).getBlockNotifierUUID(pos);
+        return ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos);
     }
 
     @Override
@@ -78,7 +78,7 @@ public abstract class WorldMixin_TrackerAPI implements World {
         }
 
         final BlockPos pos = new BlockPos(x, y, z);
-        ((ChunkBridge) chunk).setBlockCreator(pos, uuid);
+        ((ChunkBridge) chunk).bridge$setBlockCreator(pos, uuid);
     }
 
     @Override
@@ -89,7 +89,7 @@ public abstract class WorldMixin_TrackerAPI implements World {
         }
 
         final BlockPos pos = new BlockPos(x, y, z);
-        ((ChunkBridge) chunk).setBlockNotifier(pos, uuid);
+        ((ChunkBridge) chunk).bridge$setBlockNotifier(pos, uuid);
     }
 
 }

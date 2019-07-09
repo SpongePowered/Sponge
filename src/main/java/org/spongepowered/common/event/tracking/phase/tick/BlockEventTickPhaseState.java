@@ -96,7 +96,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
             final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.getChunk(notifyPos);
-            mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
+            mixinChunk.bridge$addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
         });
     }
 
@@ -129,10 +129,10 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         final BlockPos changedBlockPos = original.getBlockPos();
         original.getWorldServer().ifPresent(worldServer -> {
             final ChunkBridge changedMixinChunk = (ChunkBridge) worldServer.getChunk(changedBlockPos);
-            changedMixinChunk.getBlockOwner(changedBlockPos)
-                .ifPresent(owner -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER));
-            changedMixinChunk.getBlockNotifier(changedBlockPos)
-                .ifPresent(user -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER));
+            changedMixinChunk.bridge$getBlockOwner(changedBlockPos)
+                .ifPresent(owner -> changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER));
+            changedMixinChunk.bridge$getBlockNotifier(changedBlockPos)
+                .ifPresent(user -> changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER));
         });
     }
 

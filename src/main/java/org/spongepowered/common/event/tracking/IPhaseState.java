@@ -377,7 +377,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * within a {@link net.minecraft.world.World} or {@link Chunk}.
      *
      * <p>Specifically used in
-     * {@link ChunkMixin_Tracker#addTrackedBlockPosition(Block, BlockPos, User, PlayerTracker.Type)}
+     * {@link ChunkMixin_Tracker#bridge$addTrackedBlockPosition(Block, BlockPos, User, PlayerTracker.Type)}
      * to make sure that the current state would be providing said information,
      * instead of spending the processing to query for it.</p>
      *
@@ -726,8 +726,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         final Chunk chunk = ((WorldServer) mixinWorld).getChunk(pos);
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
-            mixinChunk.getBlockOwner(pos).ifPresent(phaseContext::owner);
-            mixinChunk.getBlockNotifier(pos).ifPresent(phaseContext::notifier);
+            mixinChunk.bridge$getBlockOwner(pos).ifPresent(phaseContext::owner);
+            mixinChunk.bridge$getBlockNotifier(pos).ifPresent(phaseContext::notifier);
         }
     }
 
@@ -815,7 +815,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         IBlockState iblockstate, BlockPos sourcePos) {
     }
     /**
-     * Specifically captures a block change by {@link ChunkMixin#setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)}
+     * Specifically captures a block change by {@link ChunkMixin#bridge$setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)}
      * such that the change of a {@link IBlockState} will be appropriately logged, along with any changes of tile entities being removed
      * or added, likewise, this will avoid duplicating transactions later after the fact, in the event that multiple changes are taking
      * place, including but not withstanding, tile entity replacements after the fact.

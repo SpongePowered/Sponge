@@ -41,7 +41,7 @@ public class EntityMixin_UseActiveChunkForCollisions {
     @Inject(method = "doBlockCollisions", at = @At("HEAD"), cancellable = true)
     private void activeCollision$checkForNeighboringChunkIfAvailable(final CallbackInfo ci) {
         final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
-        if (activeChunk == null || !activeChunk.areNeighborsLoaded() || activeChunk.isQueuedForUnload()) {
+        if (activeChunk == null || !activeChunk.bridge$areNeighborsLoaded() || activeChunk.bridge$isQueuedForUnload()) {
             ci.cancel();
         }
     }

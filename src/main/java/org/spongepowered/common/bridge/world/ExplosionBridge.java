@@ -28,10 +28,10 @@ public interface ExplosionBridge {
 
     boolean bridge$getShouldDamageBlocks();
 
-    void setShouldBreakBlocks(boolean shouldBreakBlocks);
+    void bridge$setShouldBreakBlocks(boolean shouldBreakBlocks);
 
     boolean bridge$getShouldDamageEntities();
 
-    void setShouldDamageEntities(boolean shouldDamageEntities);
+    void bridge$setShouldDamageEntities(boolean shouldDamageEntities);
 
 }

@@ -26,5 +26,5 @@ package org.spongepowered.common.bridge.world;
 
 public interface GameRulesBridge {
 
-    boolean removeGameRule(String gameRule);
+    boolean bridge$removeGameRule(String gameRule);
 }

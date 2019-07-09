@@ -31,7 +31,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -131,21 +130,10 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
     @Shadow @Final private PlayerChunkMap playerChunkMap;
     @Shadow @Final @Mutable private Teleporter worldTeleporter;
-    @Shadow @Final private WorldServer.ServerBlockEventList[] blockEventQueue;
-    @Shadow private int blockEventCacheIndex;
-    @Shadow private int updateEntityTick;
 
-    @Shadow protected abstract void saveLevel() throws MinecraftException;
-    @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
-    @Shadow protected abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
     @Shadow public abstract ChunkProviderServer getChunkProvider();
-    @Shadow protected abstract void playerCheckLight();
-    @Shadow protected abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
-    @Shadow private boolean canAddEntity(net.minecraft.entity.Entity entityIn) {
-        return false; // Shadowed
-    }
     @Shadow public abstract void updateBlockTick(BlockPos pos, Block blockIn, int delay, int priority);
     @Shadow protected abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
 
@@ -174,16 +162,17 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     @Override
-    public ScheduledBlockUpdate addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
-        BlockPos pos = new BlockPos(x, y, z);
+    public ScheduledBlockUpdate addScheduledUpdate(final int x, final int y, final int z, final int priority, final int ticks) {
+        final BlockPos pos = new BlockPos(x, y, z);
         this.updateBlockTick(pos, getBlockState(pos).getBlock(), ticks, priority);
-        ScheduledBlockUpdate sbu = ((ServerWorldBridge) this).bridge$getScheduledBlockUpdate();
+        final ScheduledBlockUpdate sbu = ((ServerWorldBridge) this).bridge$getScheduledBlockUpdate();
         ((ServerWorldBridge) this).bridge$setScheduledBlockUpdate(null);
         return sbu;
     }
 
+    @SuppressWarnings("SuspiciousMethodCalls")
     @Override
-    public void removeScheduledUpdate(int x, int y, int z, ScheduledBlockUpdate update) {
+    public void removeScheduledUpdate(final int x, final int y, final int z, final ScheduledBlockUpdate update) {
         // Note: Ignores position argument
         this.pendingTickListEntriesHashSet.remove(update);
         this.pendingTickListEntriesTreeSet.remove(update);
@@ -205,10 +194,10 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     @Override
-    public Collection<ScheduledBlockUpdate> getScheduledUpdates(int x, int y, int z) {
-        BlockPos position = new BlockPos(x, y, z);
-        ImmutableList.Builder<ScheduledBlockUpdate> builder = ImmutableList.builder();
-        for (NextTickListEntry sbu : this.pendingTickListEntriesTreeSet) {
+    public Collection<ScheduledBlockUpdate> getScheduledUpdates(final int x, final int y, final int z) {
+        final BlockPos position = new BlockPos(x, y, z);
+        final ImmutableList.Builder<ScheduledBlockUpdate> builder = ImmutableList.builder();
+        for (final NextTickListEntry sbu : this.pendingTickListEntriesTreeSet) {
             if (sbu.position.equals(position)) {
                 builder.add((ScheduledBlockUpdate) sbu);
             }
@@ -217,15 +206,15 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     @Override
-    public Optional<Entity> getEntity(UUID uuid) {
+    public Optional<Entity> getEntity(final UUID uuid) {
         return Optional.ofNullable((Entity) this.getEntityFromUuid(uuid));
     }
     @Override
-    public Optional<org.spongepowered.api.world.Chunk> regenerateChunk(int cx, int cy, int cz, ChunkRegenerateFlag flag) {
-        List<EntityPlayerMP> playerList = new ArrayList<>();
-        List<net.minecraft.entity.Entity> entityList = new ArrayList<>();
-        org.spongepowered.api.world.Chunk spongeChunk = null;
-        try (PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING.createPhaseContext()
+    public Optional<org.spongepowered.api.world.Chunk> regenerateChunk(final int cx, final int cy, final int cz, final ChunkRegenerateFlag flag) {
+        final List<EntityPlayerMP> playerList = new ArrayList<>();
+        final List<net.minecraft.entity.Entity> entityList = new ArrayList<>();
+        org.spongepowered.api.world.Chunk spongeChunk;
+        try (final PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING.createPhaseContext()
             .world((net.minecraft.world.World)(Object) this)) {
             context.buildAndSwitch();
             spongeChunk = this.loadChunk(cx, cy, cz, false).orElse(null);
@@ -241,12 +230,12 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
         final net.minecraft.world.chunk.Chunk chunk = (net.minecraft.world.chunk.Chunk) spongeChunk;
         final boolean keepEntities = flag.entities();
-        try (PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING.createPhaseContext()
+        try (final PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING.createPhaseContext()
             .chunk(chunk)) {
             context.buildAndSwitch();
             // If we reached this point, an existing chunk was found so we need to regen
-            for (ClassInheritanceMultiMap<net.minecraft.entity.Entity> multiEntityList : chunk.getEntityLists()) {
-                for (net.minecraft.entity.Entity entity : multiEntityList) {
+            for (final ClassInheritanceMultiMap<net.minecraft.entity.Entity> multiEntityList : chunk.getEntityLists()) {
+                for (final net.minecraft.entity.Entity entity : multiEntityList) {
                     if (entity instanceof EntityPlayerMP) {
                         playerList.add((EntityPlayerMP) entity);
                         entityList.add(entity);
@@ -256,24 +245,24 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
                 }
             }
 
-            for (net.minecraft.entity.Entity entity : entityList) {
+            for (final net.minecraft.entity.Entity entity : entityList) {
                 chunk.removeEntity(entity);
             }
 
             final ChunkProviderServer chunkProviderServer = (ChunkProviderServer) chunk.getWorld().getChunkProvider();
             ((ServerChunkProviderBridge) chunkProviderServer).bridge$unloadChunkAndSave(chunk);
-            net.minecraft.world.chunk.Chunk newChunk = chunkProviderServer.chunkGenerator.generateChunk(cx, cz);
-            PlayerChunkMapEntry playerChunk = ((WorldServer) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
+            final net.minecraft.world.chunk.Chunk newChunk = chunkProviderServer.chunkGenerator.generateChunk(cx, cz);
+            final PlayerChunkMapEntry playerChunk = ((WorldServer) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
             if (playerChunk != null) {
                 playerChunk.chunk = newChunk;
             }
 
             if (newChunk != null) {
-                WorldServer world = (WorldServer) newChunk.getWorld();
+                final WorldServer world = (WorldServer) newChunk.getWorld();
                 world.getChunkProvider().loadedChunks.put(ChunkPos.asLong(cx, cz), newChunk);
                 newChunk.onLoad();
                 newChunk.populate(world.getChunkProvider().chunkGenerator);
-                for (net.minecraft.entity.Entity entity: entityList) {
+                for (final net.minecraft.entity.Entity entity: entityList) {
                     newChunk.addEntity(entity);
                 }
 
@@ -283,14 +272,14 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
                 final PlayerChunkMapEntry playerChunkMapEntry = ((WorldServer) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
                 if (playerChunkMapEntry != null) {
-                    List<EntityPlayerMP> chunkPlayers = playerChunkMapEntry.players;
+                    final List<EntityPlayerMP> chunkPlayers = playerChunkMapEntry.players;
                     // We deliberately send two packets, to avoid sending a 'fullChunk' packet
                     // (a changedSectionFilter of 65535). fullChunk packets cause the client to
                     // completely overwrite its current chunk with a new chunk instance. This causes
                     // weird issues, such as making any entities in that chunk invisible (until they leave it
                     // for a new chunk)
                     // - Aaron1011
-                    for (EntityPlayerMP playerMP: chunkPlayers) {
+                    for (final EntityPlayerMP playerMP: chunkPlayers) {
                         playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 65534));
                         playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 1));
                     }
@@ -301,16 +290,17 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState blockState, BlockChangeFlag flag) {
+    public boolean setBlock(final int x, final int y, final int z, final BlockState blockState, final BlockChangeFlag flag) {
         checkBlockBounds(x, y, z);
         final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentState();
-        boolean isWorldGen = state.isWorldGeneration();
-        boolean handlesOwnCompletion = state.handlesOwnStateCompletion();
+        final boolean isWorldGen = state.isWorldGeneration();
+        final boolean handlesOwnCompletion = state.handlesOwnStateCompletion();
         if (!isWorldGen) {
             checkArgument(flag != null, "BlockChangeFlag cannot be null!");
         }
-        try (PhaseContext<?> context = isWorldGen || handlesOwnCompletion
+        try (final PhaseContext<?> context = isWorldGen || handlesOwnCompletion
                 ? null
                 : PluginPhase.State.BLOCK_WORKER.createPhaseContext()) {
             if (context != null) {
@@ -321,14 +311,14 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     @Override
-    public BlockSnapshot createSnapshot(int x, int y, int z) {
+    public BlockSnapshot createSnapshot(final int x, final int y, final int z) {
         if (!containsBlock(x, y, z)) {
             return BlockSnapshot.NONE;
         }
         if (!isChunkLoaded(x >> 4, z >> 4, false)) {
             return BlockSnapshot.NONE;
         }
-        BlockPos pos = new BlockPos(x, y, z);
+        final BlockPos pos = new BlockPos(x, y, z);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.worldId(this.getUniqueId())
             .position(new Vector3i(x, y, z));
@@ -342,10 +332,10 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         }
         final net.minecraft.tileentity.TileEntity tile = chunk.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
         if (tile != null) {
-            for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).bridge$getCustomManipulators()) {
+            for (final DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).bridge$getCustomManipulators()) {
                 builder.add(manipulator);
             }
-            NBTTagCompound nbt = new NBTTagCompound();
+            final NBTTagCompound nbt = new NBTTagCompound();
             // Some mods like OpenComputers assert if attempting to save robot while moving
             try {
                 tile.writeToNBT(nbt);
@@ -355,8 +345,8 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
                 // ignore
             }
         }
-        ((ChunkBridge) chunk).getBlockOwnerUUID(pos).ifPresent(builder::creator);
-        ((ChunkBridge) chunk).getBlockNotifierUUID(pos).ifPresent(builder::notifier);
+        ((ChunkBridge) chunk).bridge$getBlockOwnerUUID(pos).ifPresent(builder::creator);
+        ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos).ifPresent(builder::notifier);
 
         builder.flag(BlockChangeFlags.NONE);
 
@@ -365,24 +355,25 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     @Override
-    public Collection<Entity> spawnEntities(Iterable<? extends Entity> entities) {
-        List<Entity> entitiesToSpawn = new NonNullArrayList<>();
+    public Collection<Entity> spawnEntities(final Iterable<? extends Entity> entities) {
+        final List<Entity> entitiesToSpawn = new NonNullArrayList<>();
         entities.forEach(entitiesToSpawn::add);
         final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entitiesToSpawn);
         if (Sponge.getEventManager().post(event)) {
             return ImmutableList.of();
         }
-        for (Entity entity : event.getEntities()) {
+        for (final Entity entity : event.getEntities()) {
             EntityUtil.processEntitySpawn(entity, Optional::empty);
         }
 
         final ImmutableList.Builder<Entity> builder = ImmutableList.builder();
-        for (Entity entity : event.getEntities()) {
+        for (final Entity entity : event.getEntities()) {
             builder.add(entity);
         }
         return builder.build();
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     public void triggerExplosion(org.spongepowered.api.world.explosion.Explosion explosion) {
         checkNotNull(explosion, "explosion");
@@ -429,7 +420,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
                 mcExplosion.clearAffectedBlockPositions();
             }
 
-            for (EntityPlayer entityplayer : this.playerEntities) {
+            for (final EntityPlayer entityplayer : this.playerEntities) {
                 if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
                     ((EntityPlayerMP) entityplayer).connection
                         .sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
@@ -443,8 +434,9 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         // Sponge End
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
-    public boolean spawnEntity(Entity entity) {
+    public boolean spawnEntity(final Entity entity) {
         checkNotNull(entity, "The entity cannot be null!");
         if (PhaseTracker.isEntitySpawnInvalid(entity)) {
             return true;
@@ -474,19 +466,19 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     @Override
-    public void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume) {
+    public void playSound(final SoundType sound, final SoundCategory category, final Vector3d position, final double volume) {
         this.playSound(sound, category, position, volume, 1);
     }
 
     @Override
-    public void playSound(SoundType sound,  SoundCategory category, Vector3d position, double volume, double pitch) {
+    public void playSound(final SoundType sound,  final SoundCategory category, final Vector3d position, final double volume, final double pitch) {
         this.playSound(sound, category, position, volume, pitch, 0);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void playSound(SoundType sound,  SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
-        SoundEvent event;
+    public void playSound(final SoundType sound,  final SoundCategory category, final Vector3d position, final double volume, final double pitch, final double minVolume) {
+        final SoundEvent event;
         try {
             // Check if the event is registered (ie has an integer ID)
             event = SoundEvents.getRegisteredSoundEvent(sound.getId());
@@ -497,7 +489,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
                 .map(listener -> (ServerWorldEventHandlerBridge) listener)
                 .forEach(listener -> {
                     // There's no method for playing a custom sound to all, so I made one -_-
-                    listener.playCustomSoundToAllNearExcept(null,
+                    listener.bridge$playCustomSoundToAllNearExcept(null,
                         sound.getId(),
                         (net.minecraft.util.SoundCategory) (Object) category,
                         position.getX(), position.getY(), position.getZ(),
@@ -516,62 +508,63 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     @Override
-    public void stopSounds(SoundType sound) {
+    public void stopSounds(final SoundType sound) {
         apiImpl$stopSounds(checkNotNull(sound, "sound"), null);
     }
 
     @Override
-    public void stopSounds(SoundCategory category) {
+    public void stopSounds(final SoundCategory category) {
         apiImpl$stopSounds(null, checkNotNull(category, "category"));
     }
 
     @Override
-    public void stopSounds(SoundType sound, SoundCategory category) {
+    public void stopSounds(final SoundType sound, final SoundCategory category) {
         apiImpl$stopSounds(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
     }
 
-    private void apiImpl$stopSounds(@Nullable SoundType sound, @Nullable SoundCategory category) {
+    private void apiImpl$stopSounds(@Nullable final SoundType sound, @Nullable final SoundCategory category) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
                 SoundEffectHelper.createStopSoundPacket(sound, category), ((ServerWorldBridge) this).bridge$getDimensionId());
     }
 
     @Override
-    public void spawnParticles(ParticleEffect particleEffect, Vector3d position) {
+    public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position) {
         this.spawnParticles(particleEffect, position, Integer.MAX_VALUE);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
-    public void spawnParticles(ParticleEffect particleEffect, Vector3d position, int radius) {
+    public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position, final int radius) {
         checkNotNull(particleEffect, "The particle effect cannot be null!");
         checkNotNull(position, "The position cannot be null");
         checkArgument(radius > 0, "The radius has to be greater then zero!");
 
-        List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
+        final List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
-            PlayerList playerList = this.server.getPlayerList();
+            final PlayerList playerList = this.server.getPlayerList();
 
-            double x = position.getX();
-            double y = position.getY();
-            double z = position.getZ();
+            final double x = position.getX();
+            final double y = position.getY();
+            final double z = position.getZ();
 
-            for (Packet<?> packet : packets) {
+            for (final Packet<?> packet : packets) {
                 playerList.sendToAllNearExcept(null, x, y, z, radius, ((ServerWorldBridge) this).bridge$getDimensionId(), packet);
             }
         }
     }
 
     @Override
-    public void playRecord(Vector3i position, RecordType recordType) {
+    public void playRecord(final Vector3i position, final RecordType recordType) {
         api$playRecord(position, checkNotNull(recordType, "recordType"));
     }
 
     @Override
-    public void stopRecord(Vector3i position) {
+    public void stopRecord(final Vector3i position) {
         api$playRecord(position, null);
     }
 
-    private void api$playRecord(Vector3i position, @Nullable RecordType recordType) {
+    private void api$playRecord(final Vector3i position, @Nullable final RecordType recordType) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
                 SpongeRecordType.createPacket(position, recordType), ((ServerWorldBridge) this).bridge$getDimensionId());
     }
@@ -589,7 +582,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public long getRemainingDuration() {
-        Weather weather = getWeather();
+        final Weather weather = getWeather();
         if (weather.equals(Weathers.CLEAR)) {
             if (this.worldInfo.getCleanWeatherTime() > 0) {
                 return this.worldInfo.getCleanWeatherTime();
@@ -607,16 +600,16 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public long getRunningDuration() {
-        return this.worldInfo.getWorldTotalTime() - ((WorldBridge) this).bridge$getWeatherStartTime();
+        return this.worldInfo.getWorldTotalTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime();
     }
 
     @Override
-    public void setWeather(Weather weather) {
+    public void setWeather(final Weather weather) {
         this.setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
     }
 
     @Override
-    public void setWeather(Weather weather, long duration) {
+    public void setWeather(final Weather weather, final long duration) {
         ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
         if (weather.equals(Weathers.CLEAR)) {
             this.worldInfo.setCleanWeatherTime((int) duration);

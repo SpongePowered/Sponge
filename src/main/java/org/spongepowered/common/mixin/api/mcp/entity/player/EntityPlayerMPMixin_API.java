@@ -105,6 +105,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.packet.ResourcePackBridge;
@@ -237,7 +238,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
             // Don't bother sending messages to fake players
             return;
         }
-        ((TitleBridge) (Object) title).send((EntityPlayerMP) (Object) this);
+        ((TitleBridge) (Object) title).bridge$send((EntityPlayerMP) (Object) this);
     }
 
     @Override
@@ -582,7 +583,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     public MessageChannelEvent.Chat simulateChat(final Text message, final Cause cause) {
         checkNotNull(message, "message");
 
-        final TextComponentTranslation component = new TextComponentTranslation("chat.type.text", SpongeTexts.toComponent(((ServerPlayerEntityBridge) this).getDisplayNameText()),
+        final TextComponentTranslation component = new TextComponentTranslation("chat.type.text", SpongeTexts.toComponent(((EntityBridge) this).bridge$getDisplayNameText()),
                 SpongeTexts.toComponent(message));
         final Text[] messages = SpongeTexts.splitChatMessage(component);
 
@@ -609,11 +610,11 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         }
         if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.worldBorder), Optional.ofNullable(border), this))) {
             if (this.worldBorder != null) { //is the world border about to be unset?
-                ((net.minecraft.world.border.WorldBorder) this.worldBorder).listeners.remove(((ServerPlayerEntityBridge) this).getWorldBorderListener()); //remove the listener, if so
+                ((net.minecraft.world.border.WorldBorder) this.worldBorder).listeners.remove(((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
             }
             this.worldBorder = border;
             if (this.worldBorder != null) {
-                ((net.minecraft.world.border.WorldBorder) this.worldBorder).addListener(((ServerPlayerEntityBridge) this).getWorldBorderListener());
+                ((net.minecraft.world.border.WorldBorder) this.worldBorder).addListener(((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener());
                 this.connection.sendPacket(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) this.worldBorder, SPacketWorldBorder.Action.INITIALIZE));
             } else { //unset the border if null
                 this.connection.sendPacket(new SPacketWorldBorder(this.world.getWorldBorder(), SPacketWorldBorder.Action.INITIALIZE));

@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.item.LargeFireballEntityBridge;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 
@@ -49,13 +50,13 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityLargeFireball.class)
-public abstract class EntityLargeFireballMixin extends EntityFireballMixin implements LargeFireballEntityBridge {
+public abstract class EntityLargeFireballMixin extends EntityFireballMixin implements LargeFireballEntityBridge, ExplosiveBridge {
 
     @Shadow public int explosionPower;
 
     /**
      * @author gabizou April 13th, 2018
-     * @reason Due to changes from Forge, we have to redirect or modify the gamerule check,
+     * @reason Due to changes from Forge, we have to redirect osr modify the gamerule check,
      * but since forge doesn't allow us to continue to check the gamerule method call here,
      * we have to modify the arguments passed in (the two booleans). There may be a better way,
      * which may include redirecting the world.newExplosion method call instead of modifyargs,
@@ -70,16 +71,16 @@ public abstract class EntityLargeFireballMixin extends EntityFireballMixin imple
     )
     @Override
     @Nullable
-    public net.minecraft.world.Explosion bridge$throwExplosionEventAndExplode(net.minecraft.world.World worldObj, @Nullable Entity nil,
-        double x, double y, double z, float strength, boolean flaming,
-        boolean smoking) {
-        boolean griefer = ((GrieferBridge) this).bridge$CanGrief();
+    public net.minecraft.world.Explosion bridge$throwExplosionEventAndExplode(final net.minecraft.world.World worldObj, @Nullable final Entity nil,
+        final double x, final double y, final double z, final float strength, final boolean flaming,
+        final boolean smoking) {
+        final boolean griefer = ((GrieferBridge) this).bridge$CanGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             frame.addContext(EventContextKeys.THROWER, ((LargeFireball) this).getShooter()); // TODO - Remove in 1.13/API 8
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((LargeFireball) this).getShooter());
             frame.pushCause(((Projectile) this).getShooter());
-            Optional<net.minecraft.world.Explosion> ex = SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
+            final Optional<net.minecraft.world.Explosion> ex = SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(((LargeFireball) this))
                 .radius(strength)
@@ -97,8 +98,8 @@ public abstract class EntityLargeFireballMixin extends EntityFireballMixin imple
     }
 
     @Override
-    public void bridge$setExplosionRadius(Optional<Integer> radius) {
-        this.explosionPower = radius.orElse(Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS);
+    public void bridge$setExplosionRadius(@Nullable final Integer radius) {
+        this.explosionPower = radius == null ? Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS : radius;
     }
 
 }

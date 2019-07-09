@@ -28,8 +28,8 @@ import org.spongepowered.api.text.action.HoverAction;
 
 public interface HoverEventBridge {
 
-    HoverAction<?> getHandle();
+    HoverAction<?> bridge$getHandle();
 
-    void setHandle(HoverAction<?> handle);
+    void bridge$setHandle(HoverAction<?> handle);
 
 }

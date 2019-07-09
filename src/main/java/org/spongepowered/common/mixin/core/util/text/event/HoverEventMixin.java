@@ -55,16 +55,16 @@ public abstract class HoverEventMixin implements HoverEventBridge {
     private boolean initialized;
 
     @Override
-    public HoverAction<?> getHandle() {
+    public HoverAction<?> bridge$getHandle() {
         if (!this.initialized) {
             try {
                 // This is inefficient, but at least we only need to do it once
                 switch (this.action) {
                     case SHOW_TEXT:
-                        setHandle(TextActions.showText(((ITextComponentBridge) this.value).bridge$toText()));
+                        bridge$setHandle(TextActions.showText(((ITextComponentBridge) this.value).bridge$toText()));
                         break;
                     case SHOW_ITEM:
-                        setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(loadNbt()))));
+                        bridge$setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(loadNbt()))));
                         break;
                     case SHOW_ENTITY:
                         NBTTagCompound nbt = loadNbt();
@@ -75,7 +75,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
                         }
 
                         UUID uniqueId = UUID.fromString(nbt.getString("id"));
-                        setHandle(TextActions.showEntity(uniqueId, name, type));
+                        bridge$setHandle(TextActions.showEntity(uniqueId, name, type));
                         break;
                     default:
                 }
@@ -96,7 +96,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
     }
 
     @Override
-    public void setHandle(HoverAction<?> handle) {
+    public void bridge$setHandle(HoverAction<?> handle) {
         if (this.initialized) {
             return;
         }

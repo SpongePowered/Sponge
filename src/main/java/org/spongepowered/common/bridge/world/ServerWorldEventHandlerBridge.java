@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
 
 public interface ServerWorldEventHandlerBridge {
 
-    void playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category, double x, double y, double z,
-float volume, float pitch);
+    void bridge$playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category, double x, double y, double z,
+        float volume, float pitch);
 
 }

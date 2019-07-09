@@ -81,8 +81,8 @@ public final class SpongeMessageHandler {
 
         if (message.type == 0) { // block
             ChunkBridge spongeChunk = (ChunkBridge) sender.world.getChunk(pos);
-            owner = spongeChunk.getBlockOwner(pos);
-            notifier = spongeChunk.getBlockNotifier(pos);
+            owner = spongeChunk.bridge$getBlockOwner(pos);
+            notifier = spongeChunk.bridge$getBlockNotifier(pos);
         } else if (message.type == 1) { // entity
             Entity entity = sender.world.getEntityByID(message.entityId);
             if (entity instanceof OwnershipTrackedBridge) {

@@ -137,7 +137,7 @@ public class ItemFireworkMixin extends Item {
      * @return True if the event is cancelled and the callback needs to be cancelled
      */
     private boolean spongeImpl$ThrowConstructPreEvent(World world, EntityPlayer player, ItemStack usedItem) {
-        if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((WorldBridge) world).isFake()) {
+        if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((WorldBridge) world).bridge$isFake()) {
             final Vector3d targetPosition = new Vector3d(player.posX, player.posY , player.posZ);
             final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) world,
                 targetPosition);
@@ -192,7 +192,7 @@ public class ItemFireworkMixin extends Item {
      * @return True if the event is cancelled and the rocket should not be spawned
      */
     private boolean spongeImpl$ThrowPrimeEventAndGetCancel(World world, EntityPlayer player, EntityFireworkRocket rocket, ItemStack usedItem) {
-        if (((WorldBridge) world).isFake() ) {
+        if (((WorldBridge) world).bridge$isFake() ) {
             return false;
         }
         ((Firework) rocket).setShooter((Player) player);

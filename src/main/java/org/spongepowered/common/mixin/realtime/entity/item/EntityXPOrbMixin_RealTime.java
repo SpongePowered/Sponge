@@ -60,7 +60,7 @@ public abstract class EntityXPOrbMixin_RealTime extends EntityMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimePickupDelay(final EntityXPOrb self, final int modifier) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             this.delayBeforeCanPickup = modifier;
             return;
         }
@@ -87,7 +87,7 @@ public abstract class EntityXPOrbMixin_RealTime extends EntityMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeAge(final EntityXPOrb self, final int modifier) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             this.xpOrbAge = modifier;
             return;
         }

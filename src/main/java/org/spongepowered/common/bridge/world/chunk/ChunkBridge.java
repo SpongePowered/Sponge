@@ -55,66 +55,66 @@ import javax.annotation.Nullable;
 
 public interface ChunkBridge {
 
-    Map<Short, PlayerTracker> getTrackedShortPlayerPositions();
+    Map<Short, PlayerTracker> bridge$getTrackedShortPlayerPositions();
 
-    Map<Integer, PlayerTracker> getTrackedIntPlayerPositions();
+    Map<Integer, PlayerTracker> bridge$getTrackedIntPlayerPositions();
 
-    Optional<User> getBlockOwner(BlockPos pos);
+    Optional<User> bridge$getBlockOwner(BlockPos pos);
 
-    Optional<UUID> getBlockOwnerUUID(BlockPos pos);
+    Optional<UUID> bridge$getBlockOwnerUUID(BlockPos pos);
 
-    Optional<User> getBlockNotifier(BlockPos pos);
+    Optional<User> bridge$getBlockNotifier(BlockPos pos);
 
-    Optional<UUID> getBlockNotifierUUID(BlockPos pos);
-
-    @Nullable
-    IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockChangeFlag flag);
-
-    void setBlockNotifier(BlockPos pos, UUID uuid);
-
-    void setBlockCreator(BlockPos pos, UUID uuid);
-
-    void addTrackedBlockPosition(Block block, BlockPos pos, User user, PlayerTracker.Type trackerType);
-
-    void setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPlayerPositions);
-
-    void setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPlayerPositions);
-
-    void setNeighbor(Direction direction, Chunk neighbor);
-
-    void setNeighborChunk(int index, @Nullable Chunk chunk);
+    Optional<UUID> bridge$getBlockNotifierUUID(BlockPos pos);
 
     @Nullable
-    Chunk getNeighborChunk(int index);
+    IBlockState bridge$setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockChangeFlag flag);
 
-    boolean areNeighborsLoaded();
+    void bridge$setBlockNotifier(BlockPos pos, UUID uuid);
 
-    long getScheduledForUnload();
+    void bridge$setBlockCreator(BlockPos pos, UUID uuid);
 
-    void setScheduledForUnload(long scheduled);
+    void bridge$addTrackedBlockPosition(Block block, BlockPos pos, User user, PlayerTracker.Type trackerType);
 
-    void getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityUniverse.EntityHit> filter,
+    void bridge$setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPlayerPositions);
+
+    void bridge$setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPlayerPositions);
+
+    void bridge$setNeighbor(Direction direction, Chunk neighbor);
+
+    void bridge$setNeighborChunk(int index, @Nullable Chunk chunk);
+
+    @Nullable
+    Chunk bridge$getNeighborChunk(int index);
+
+    boolean bridge$areNeighborsLoaded();
+
+    long bridge$getScheduledForUnload();
+
+    void bridge$setScheduledForUnload(long scheduled);
+
+    void bridge$getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityUniverse.EntityHit> filter,
             double entryY, double exitY, Set<EntityUniverse.EntityHit> intersections);
 
-    boolean isPersistedChunk();
+    boolean bridge$isPersistedChunk();
 
-    void setPersistedChunk(boolean flag);
+    void bridge$setPersistedChunk(boolean flag);
 
-    void fill(ChunkPrimer primer);
+    void bridge$fill(ChunkPrimer primer);
 
-    boolean isSpawning();
+    boolean bridge$isSpawning();
 
-    void setIsSpawning(boolean spawning);
+    void bridge$setIsSpawning(boolean spawning);
 
-    List<Chunk> getNeighbors();
+    List<Chunk> bridge$getNeighbors();
 
-    boolean isQueuedForUnload();
+    boolean bridge$isQueuedForUnload();
 
-    void markChunkDirty();
+    void bridge$markChunkDirty();
 
-    boolean isActive();
+    boolean bridge$isActive();
 
-    void removeTileEntity(TileEntity removed);
+    void bridge$removeTileEntity(TileEntity removed);
 
     /**
      * Specifically similar to {@link Chunk#addTileEntity(BlockPos, TileEntity)}
@@ -126,7 +126,7 @@ public interface ChunkBridge {
      * @param targetPos
      * @param added
      */
-    void setTileEntity(BlockPos targetPos, TileEntity added);
+    void bridge$setTileEntity(BlockPos targetPos, TileEntity added);
 
-    Chunk[] getNeighborArray();
+    Chunk[] bridge$getNeighborArray();
 }

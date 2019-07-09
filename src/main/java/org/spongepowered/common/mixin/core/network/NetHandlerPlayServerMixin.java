@@ -119,6 +119,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
@@ -216,7 +217,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             this.netManager.sendPacket(new SPacketKeepAlive(now));
         } else if (packet instanceof SPacketSetExperience) {
             // Ensures experience is in sync server-side.
-            ((PlayerEntityBridge) this.player).recalculateTotalExperience();
+            ((PlayerEntityBridge) this.player).bridge$recalculateTotalExperience();
         }
 
         packet = packet;
@@ -456,7 +457,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                         event = SpongeEventFactory.createMoveEntityEventPosition(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
                     }
                     if (SpongeImpl.postEvent(event)) {
-                        mixinPlayer.bridge$setLocationAndAngles(fromTransform);
+                        ((EntityBridge) mixinPlayer).bridge$setLocationAndAngles(fromTransform);
                         this.impl$lastMoveLocation = fromLocation;
                         mixinPlayer.bridge$setVelocityOverride(null);
                         return true;
@@ -468,7 +469,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                     }
                 }
                 if (!toTransform.equals(originalToTransform)) {
-                    mixinPlayer.bridge$setLocationAndAngles(toTransform);
+                    ((EntityBridge) mixinPlayer).bridge$setLocationAndAngles(toTransform);
                     this.impl$lastMoveLocation = toTransform.getLocation();
                     mixinPlayer.bridge$setVelocityOverride(null);
                     return true;
@@ -551,7 +552,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         if (!event.isMessageCancelled()) {
             event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
         }
-        ((ServerPlayerEntityBridge) this.player).getWorldBorderListener().onPlayerDisconnect();
+        ((ServerPlayerEntityBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
     }
 
     @Redirect(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
@@ -612,7 +613,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             final int size = stack.getCount();
             item = this.player.dropItem(dropAll);
             // force client itemstack update if drop event was cancelled
-            if (item == null && ((PlayerEntityBridge) player).shouldRestoreInventory()) {
+            if (item == null && ((PlayerEntityBridge) player).bridge$shouldRestoreInventory()) {
                 final Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, this.player.inventory.currentItem);
                 final int windowId = this.player.openContainer.windowId;
                 stack.setCount(size);

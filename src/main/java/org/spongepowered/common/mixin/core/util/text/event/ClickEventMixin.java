@@ -53,13 +53,13 @@ public abstract class ClickEventMixin implements ClickEventBridge {
     private volatile boolean initialized;
 
     @Override
-    public ClickAction<?> getHandle() {
+    public ClickAction<?> bridge$getHandle() {
         if (!this.initialized) {
             try {
                 switch (this.action) {
                     case OPEN_URL:
                         try {
-                            setHandle(TextActions.openUrl(new URL(this.value)));
+                            bridge$setHandle(TextActions.openUrl(new URL(this.value)));
                         } catch (MalformedURLException e) {
                             SpongeImpl.getLogger().debug("Tried to parse invalid URL \"{}\": {}", this.value, e.getMessage());
                         }
@@ -70,19 +70,19 @@ public abstract class ClickEventMixin implements ClickEventBridge {
                                 UUID callbackId = UUID.fromString(this.value.substring(SpongeCallbackHolder.CALLBACK_COMMAND_QUALIFIED.length() + 1));
                                 Optional<Consumer<CommandSource>> callback = SpongeCallbackHolder.getInstance().getCallbackForUUID(callbackId);
                                 if (callback.isPresent()) {
-                                    setHandle(TextActions.executeCallback(callback.get()));
+                                    bridge$setHandle(TextActions.executeCallback(callback.get()));
                                     break;
                                 }
                             } catch (IllegalArgumentException ex) {
                             }
                         }
-                        setHandle(TextActions.runCommand(this.value));
+                        bridge$setHandle(TextActions.runCommand(this.value));
                         break;
                     case SUGGEST_COMMAND:
-                        setHandle(TextActions.suggestCommand(this.value));
+                        bridge$setHandle(TextActions.suggestCommand(this.value));
                         break;
                     case CHANGE_PAGE:
-                        setHandle(TextActions.changePage(Integer.parseInt(this.value)));
+                        bridge$setHandle(TextActions.changePage(Integer.parseInt(this.value)));
                         break;
                     default:
                 }
@@ -95,7 +95,7 @@ public abstract class ClickEventMixin implements ClickEventBridge {
     }
 
     @Override
-    public void setHandle(ClickAction<?> handle) {
+    public void bridge$setHandle(ClickAction<?> handle) {
         if (this.initialized) {
             return;
         }

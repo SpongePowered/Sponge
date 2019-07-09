@@ -204,7 +204,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
                 }
                 pretty.add("Unadded TileEntities queued for addition");
                 final PrettyPrinter printer = pretty;
-                this.queuedTiles.forEach((pos, tile) -> printer.add(" - %s : %s", pos, tile == null ? "null" : ((TileEntityBridge) tile).getPrettyPrinterString()));
+                this.queuedTiles.forEach((pos, tile) -> printer.add(" - %s : %s", pos, tile == null ? "null" : ((TileEntityBridge) tile).bridge$getPrettyPrinterString()));
                 this.queuedTiles.clear();
             }
             if (!this.queuedRemovals.isEmpty()) {
@@ -213,7 +213,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
                 }
                 pretty.add("Unremoved TileEntities queued for removal!");
                 final PrettyPrinter printer = pretty;
-                this.queuedRemovals.forEach((pos, tile) -> printer.add(" - %s : %s", pos, tile == null ? "null" : ((TileEntityBridge) tile).getPrettyPrinterString()));
+                this.queuedRemovals.forEach((pos, tile) -> printer.add(" - %s : %s", pos, tile == null ? "null" : ((TileEntityBridge) tile).bridge$getPrettyPrinterString()));
                 this.queuedRemovals.clear();
             }
             if (!this.affectedTileEntities.isEmpty()) {
@@ -229,7 +229,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
                         printer.add("Unremoved TileEntities affected by the proxy, likely will cause issues if these are meant to be added to the world!");
                     }
                     this.hasTile = true;
-                    printer.add(" - %s : %s", pos, ((TileEntityBridge) tileEntity).getPrettyPrinterString());
+                    printer.add(" - %s : %s", pos, ((TileEntityBridge) tileEntity).bridge$getPrettyPrinterString());
                 }));
                 this.affectedTileEntities.clear();
             }
@@ -345,7 +345,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         }
         ChunkBridge activeChunk = ((ActiveChunkReferantBridge) removed).bridge$getActiveChunk();
         if (activeChunk != null) {
-            activeChunk.removeTileEntity(removed);
+            activeChunk.bridge$removeTileEntity(removed);
         }
     }
 
@@ -358,10 +358,10 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         unmarkRemoval(targetPos, added);
         final TileEntity existing = this.affectedTileEntities.remove(targetPos);
         if (existing != null && existing != added) {
-            ((TileEntityBridge) existing).setCaptured(false);
+            ((TileEntityBridge) existing).bridge$setCaptured(false);
             existing.invalidate();
         }
-        ((TileEntityBridge) added).setCaptured(false);
+        ((TileEntityBridge) added).bridge$setCaptured(false);
         if (this.processingWorld.processingLoadedTiles) {
             added.setPos(targetPos);
             if (added.getWorld() != this.processingWorld) {
@@ -371,7 +371,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         } else {
             final Chunk chunk = this.processingWorld.getChunk(targetPos);
             if (!chunk.isEmpty()) {
-                ((ChunkBridge) chunk).setTileEntity(targetPos, added);
+                ((ChunkBridge) chunk).bridge$setTileEntity(targetPos, added);
             }
             this.processingWorld.addTileEntity(added);
         }
@@ -485,12 +485,12 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         this.markedRemoved.forEach(pos -> printer.add("  - %s", pos));
         printer.add()
             .add(" Affected Tiles");
-        this.affectedTileEntities.forEach((pos, tileEntity) -> printer.add("  - %s : %s", pos, tileEntity == null ? "null" : ((TileEntityBridge) tileEntity).getPrettyPrinterString()));
+        this.affectedTileEntities.forEach((pos, tileEntity) -> printer.add("  - %s : %s", pos, tileEntity == null ? "null" : ((TileEntityBridge) tileEntity).bridge$getPrettyPrinterString()));
         printer.add()
             .add(" QueuedTiles");
-        this.queuedTiles.forEach((pos, tileEntity) -> printer.add("  - %s : %s", pos, tileEntity == null ? "null" : ((TileEntityBridge) tileEntity).getPrettyPrinterString()));
+        this.queuedTiles.forEach((pos, tileEntity) -> printer.add("  - %s : %s", pos, tileEntity == null ? "null" : ((TileEntityBridge) tileEntity).bridge$getPrettyPrinterString()));
         printer.add().add(" QueuedRemovals");
-        this.queuedRemovals.forEach(((pos, tileEntity) -> printer.add("  - %s: %s", pos, tileEntity == null ? "null" :  ((TileEntityBridge) tileEntity).getPrettyPrinterString())));
+        this.queuedRemovals.forEach(((pos, tileEntity) -> printer.add("  - %s: %s", pos, tileEntity == null ? "null" :  ((TileEntityBridge) tileEntity).bridge$getPrettyPrinterString())));
     }
 
     @Override

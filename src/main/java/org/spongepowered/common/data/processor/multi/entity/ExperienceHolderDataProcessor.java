@@ -64,7 +64,7 @@ public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<E
         entity.experienceLevel = (Integer) keyValues.get(Keys.EXPERIENCE_LEVEL);
         entity.experienceTotal = (Integer) keyValues.get(Keys.TOTAL_EXPERIENCE);
         entity.experience = (float) (Integer) keyValues.get(Keys.EXPERIENCE_SINCE_LEVEL) / entity.xpBarCap();
-        ((ServerPlayerEntityBridge) entity).refreshExp();
+        ((ServerPlayerEntityBridge) entity).bridge$refreshExp();
         return true;
     }
 
@@ -72,7 +72,7 @@ public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<E
     protected Map<Key<?>, ?> getValues(EntityPlayer entity) {
         final int level = entity.experienceLevel;
         final int totalExp = entity.experienceTotal;
-        final int expSinceLevel = ((PlayerEntityBridge) entity).getExperienceSinceLevel();
+        final int expSinceLevel = ((PlayerEntityBridge) entity).bridge$getExperienceSinceLevel();
         final int expBetweenLevels = entity.xpBarCap();
         return ImmutableMap.<Key<?>, Object>of(Keys.EXPERIENCE_LEVEL, level,
                 Keys.TOTAL_EXPERIENCE, totalExp,

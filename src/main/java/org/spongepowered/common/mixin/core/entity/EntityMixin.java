@@ -57,7 +57,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -89,6 +88,7 @@ import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -101,7 +101,6 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
-import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
@@ -120,7 +119,6 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((Entity) (Object) this).getClass());
     private boolean isConstructing = true;
     @Nullable private Text displayName;
-    @Nullable private BlockState currentCollidingBlock;
     @Nullable private BlockPos lastCollidedBlockPos;
     private boolean trackedInWorld = false;
     private boolean vanish$collision = false;
@@ -129,7 +127,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     private boolean vanish$pendingVisibilityUpdate = false;
     private int vanish$visibilityTicks = 0;
 
-    @Shadow @Nullable public Entity ridingEntity;
+    @Shadow @Nullable private Entity ridingEntity;
     @Shadow @Final private List<Entity> riddenByEntities;
     @Shadow public net.minecraft.world.World world;
     @Shadow public double posX;
@@ -183,15 +181,13 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
     @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
     @Shadow protected abstract void removePassenger(Entity passenger);
-    @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow protected abstract void setSize(float width, float height);
     @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, Entity entityIn);
     @Shadow public abstract void extinguish();
     @Shadow protected abstract void setFlag(int flag, boolean set);
-    @Shadow @Nullable public Entity changeDimension(int dimension) { return null; } // Shadow
+    @Shadow @Nullable public Entity changeDimension(final int dimension) { return null; } // Shadow
     @Shadow public abstract boolean isInvisible();
     @Shadow public abstract void setInvisible(boolean invisible);
-    @Shadow public abstract Entity getLowestRidingEntity();
 
     // @formatter:on
 
@@ -290,7 +286,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public boolean removePassengers(final DismountType type) {
+    public boolean bridge$removePassengers(final DismountType type) {
         boolean dismount = false;
         for (int i = this.riddenByEntities.size() - 1; i >= 0; --i) {
             dismount = ((EntityMixin) (Object) this.riddenByEntities.get(i)).spongeImpl$dismountRidingEntity(type) || dismount;
@@ -311,7 +307,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
         )
     )
-    private boolean onSpongeRedirectForBlockDamageSource(final Entity entity, final DamageSource source, final float damage) {
+    private boolean impl$createLavaBlockDamageSource(final Entity entity, final DamageSource source, final float damage) {
         if (this.world.isRemote) { // Short circuit
             return entity.attackEntityFrom(source, damage);
         }
@@ -371,23 +367,6 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         return new Vector3d(this.posX, this.posY, this.posZ);
     }
 
-
-
-    // always use these methods internally when setting locations from a transform or location
-    // to avoid firing a DisplaceEntityEvent.Teleport
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public void bridge$setLocationAndAngles(final Location<World> location) {
-        if ((Entity) (Object) this instanceof EntityPlayerMP) {
-            ((EntityPlayerMP) (Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
-        } else {
-            this.setPosition(location.getX(), location.getY(), location.getZ());
-        }
-        if (this.world != location.getExtent()) {
-            this.world = (net.minecraft.world.World) location.getExtent();
-            this.dimension = ((ServerWorldBridge) this.world).bridge$getDimensionId();
-        }
-    }
 
     @SuppressWarnings("ConstantConditions")
     @Override
@@ -564,13 +543,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
 
         final IBlockState state = world.getBlockState(pos);
-        this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.onEntityWalk(world, pos, entity);
             this.lastCollidedBlockPos = pos;
         }
 
-        this.setCurrentCollidingBlock(null);
     }
 
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollision(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
@@ -586,13 +563,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             return;
         }
 
-        this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.onEntityCollision(world, pos, state, entity);
             this.lastCollidedBlockPos = pos;
         }
 
-        this.setCurrentCollidingBlock(null);
     }
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
@@ -604,13 +579,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
 
         final IBlockState state = world.getBlockState(pos);
-        this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.UP)) {
             block.onFallenUpon(world, pos, entity, fallDistance);
             this.lastCollidedBlockPos = pos;
         }
 
-        this.setCurrentCollidingBlock(null);
     }
 
 
@@ -620,7 +593,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     }
 
     @Override
-    public void vanish$setInvisible(boolean invisible) {
+    public void vanish$setInvisible(final boolean invisible) {
         this.setInvisible(invisible);
     }
 
@@ -690,14 +663,14 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @Nullable
     @Override
-    public Text getDisplayNameText() {
+    public Text bridge$getDisplayNameText() {
         return this.displayName;
     }
 
     private boolean skipSettingCustomNameTag = false;
 
     @Override
-    public void setDisplayName(@Nullable final Text displayName) {
+    public void bridge$setDisplayName(@Nullable final Text displayName) {
         this.displayName = displayName;
 
         this.skipSettingCustomNameTag = true;
@@ -751,28 +724,10 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         return EntityUtil.entityOnDropItem((Entity) (Object) this, stack, offsetY);
     }
 
-    @Override
-    public void setCurrentCollidingBlock(@Nullable final BlockState state) {
-        this.currentCollidingBlock = state;
-    }
-
-    @Override
-    public BlockState getCurrentCollidingBlock() {
-        if (this.currentCollidingBlock == null) {
-            return (BlockState) Blocks.AIR.getDefaultState();
-        }
-        return this.currentCollidingBlock;
-    }
-
     @Nullable
     @Override
-    public BlockPos getLastCollidedBlockPos() {
+    public BlockPos bridge$getLastCollidedBlockPos() {
         return this.lastCollidedBlockPos;
-    }
-
-    @Override
-    public boolean isVanilla() {
-        return this.entityType.isVanilla();
     }
 
     @Override
@@ -781,11 +736,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     }
 
     @Override
-    public boolean shouldTick() {
+    public boolean bridge$shouldTick() {
         final ChunkBridge chunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
         // Don't tick if chunk is queued for unload or is in progress of being scheduled for unload
         // See https://github.com/SpongePowered/SpongeVanilla/issues/344
-        return chunk == null || chunk.isActive();
+        return chunk == null || chunk.bridge$isActive();
     }
 
     @Override
@@ -818,7 +773,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;fire:I", opcode = Opcodes.PUTFIELD)
     )
     private void spongeImpl$ThrowIgniteEventForFire(final Entity entity, final int ticks) {
-        if (((WorldBridge) this.world).isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
+        if (((WorldBridge) this.world).bridge$isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
             this.fire = ticks; // Vanilla functionality
             return;
         }

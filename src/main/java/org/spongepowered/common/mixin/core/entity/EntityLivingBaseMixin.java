@@ -86,6 +86,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -224,7 +225,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
     public void onDeath(final DamageSource cause) {
         // Sponge Start - Call our event, and forge's event
         // This will transitively call the forge event
-        final boolean isMainThread = !((WorldBridge) this.world).isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = !((WorldBridge) this.world).bridge$isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
             if (isMainThread && this.impl$deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
@@ -315,7 +316,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
     @Nullable
     private EntityDeathContext createOrNullDeathPhase(final boolean isMainThread, final DamageSource source) {
         final boolean tracksEntityDeaths;
-        if (((WorldBridge) this.world).isFake() || !isMainThread) { // Short circuit to avoid erroring on handling
+        if (((WorldBridge) this.world).bridge$isFake() || !isMainThread) { // Short circuit to avoid erroring on handling
             return null;
         }
         final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentContext().state;
@@ -933,8 +934,8 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
 
     @Redirect(method = "onDeathUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getExperiencePoints(Lnet/minecraft/entity/player/EntityPlayer;)I"))
     private int onGetExperiencePoints(final EntityLivingBase entity, final EntityPlayer attackingPlayer) {
-        if (entity instanceof ServerPlayerEntityBridge) {
-            if (((ServerPlayerEntityBridge) entity).keepInventory()) {
+        if (entity instanceof PlayerEntityBridge) {
+            if (((PlayerEntityBridge) entity).bridge$keepInventory()) {
                 return 0;
             }
         }
@@ -951,7 +952,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
     @Inject(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;resetActiveHand()V"))
     private void updateHealthForUseFinish(final CallbackInfo ci) {
         if (this instanceof ServerPlayerEntityBridge) {
-            ((ServerPlayerEntityBridge) this).refreshScaledHealth();
+            ((ServerPlayerEntityBridge) this).bridge$refreshScaledHealth();
         }
     }
 

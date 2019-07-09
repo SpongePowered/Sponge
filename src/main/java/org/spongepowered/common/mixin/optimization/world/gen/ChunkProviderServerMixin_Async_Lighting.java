@@ -44,10 +44,10 @@ public abstract class ChunkProviderServerMixin_Async_Lighting {
     @Redirect(method = "tick",
         at = @At(
             value = "INVOKE",
-            target = "Lorg/spongepowered/common/bridge/world/chunk/ChunkBridge;isPersistedChunk()Z",
+            target = "Lorg/spongepowered/common/bridge/world/chunk/ChunkBridge;bridge$isPersistedChunk()Z",
             remap = false))
     private boolean asyncLighting$UsePendingLightUpdatesForAsyncChunk(final ChunkBridge chunk) {
-        return chunk.isPersistedChunk()
+        return chunk.bridge$isPersistedChunk()
                || ((ChunkBridge_AsyncLighting) chunk).asyncLightingBridge$getPendingLightUpdates().get() > 0
                || this.world.getTotalWorldTime() - ((ChunkBridge_AsyncLighting) chunk).asyncLightingBridge$getLightUpdateTime() < 20;
 

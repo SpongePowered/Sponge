@@ -59,7 +59,7 @@ public final class SpongeClickAction {
         }
 
         ClickEvent event = new ClickEvent(getType(action), text);
-        ((ClickEventBridge) event).setHandle(action);
+        ((ClickEventBridge) event).bridge$setHandle(action);
         return event;
     }
 

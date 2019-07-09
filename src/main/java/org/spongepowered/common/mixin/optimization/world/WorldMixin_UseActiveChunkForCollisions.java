@@ -55,7 +55,7 @@ public abstract class WorldMixin_UseActiveChunkForCollisions {
     private void activeCollision$BailIfNeighborsAreInactive(final AxisAlignedBB bb, final Material materialIn, final Entity entityIn,
         final CallbackInfoReturnable<Boolean> cir) {
         final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) entityIn).bridge$getActiveChunk();
-        if (activeChunk == null || activeChunk.isQueuedForUnload() || !activeChunk.areNeighborsLoaded()) {
+        if (activeChunk == null || activeChunk.bridge$isQueuedForUnload() || !activeChunk.bridge$areNeighborsLoaded()) {
             cir.setReturnValue(false);
         }
     }
@@ -63,7 +63,7 @@ public abstract class WorldMixin_UseActiveChunkForCollisions {
     @Redirect(method = "handleMaterialAcceleration", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(IIIIIIZ)Z"))
     private boolean activeCollision$IgnoreAreaIsLoaded(final World world, final int xStart, final int yStart, final int zStart,
         final int xEnd, final int yEnd, final int zEnd, final boolean allowEmpty) {
-        if (((WorldBridge) this).isFake()) {
+        if (((WorldBridge) this).bridge$isFake()) {
             return world.isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd, allowEmpty);
         }
         return true;

@@ -261,8 +261,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             newPlayer.setSpawnPoint(bedPos, playerIn.isSpawnForced());
         }
 
-        ((ServerPlayerEntityBridge) newPlayer).setScoreboardOnRespawn(((Player) playerIn).getScoreboard());
-        ((ServerPlayerEntityBridge) playerIn).removeScoreboardOnRespawn();
+        ((ServerPlayerEntityBridge) newPlayer).bridge$setScoreboardOnRespawn(((Player) playerIn).getScoreboard());
+        ((ServerPlayerEntityBridge) playerIn).bridge$removeScoreboardOnRespawn();
 
         for (final String s : playerIn.getTags()) {
             newPlayer.addTag(s);
@@ -271,7 +271,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         this.setPlayerGameTypeBasedOnOther(newPlayer, playerIn, worldServer);
         newPlayer.setSneaking(false);
 
-        ((ServerPlayerEntityBridge) playerIn).setDelegateAfterRespawn(newPlayer);
+        ((ServerPlayerEntityBridge) playerIn).bridge$setDelegateAfterRespawn(newPlayer);
 
         // update to safe location
         toTransform = toTransform.setLocation(location);
@@ -344,7 +344,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         for (final PotionEffect potioneffect : newPlayer.getActivePotionEffects()) {
             newPlayer.connection.sendPacket(new SPacketEntityEffect(newPlayer.getEntityId(), potioneffect));
         }
-        ((ServerPlayerEntityBridge) newPlayer).refreshScaledHealth();
+        ((ServerPlayerEntityBridge) newPlayer).bridge$refreshScaledHealth();
         newPlayer.connection.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
         SpongeCommonEventFactory.callPostPlayerRespawnEvent(newPlayer, conqueredEnd);
 
@@ -403,7 +403,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         // Synchronise with user object
         final NBTTagCompound nbt = new NBTTagCompound();
         player.writeToNBT(nbt);
-        ((SpongeUser) ((ServerPlayerEntityBridge) player).getUserObject()).readFromNbt(nbt);
+        ((SpongeUser) ((ServerPlayerEntityBridge) player).bridge$getUserObject()).readFromNbt(nbt);
 
         // Remove player reference from scoreboard
         ((ServerScoreboardBridge) ((Player) player).getScoreboard()).bridge$removePlayer(player, false);
@@ -490,11 +490,11 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Inject(method = "createPlayerForUser", at = @At("RETURN"), cancellable = true)
     private void impl$forceRecreateUser(final CallbackInfoReturnable<EntityPlayerMP> cir) {
-        ((ServerPlayerEntityBridge) cir.getReturnValue()).forceRecreateUser();
+        ((ServerPlayerEntityBridge) cir.getReturnValue()).bridge$forceRecreateUser();
     }
 
     @Override
-    public void reloadAdvancementProgress() {
+    public void bridge$reloadAdvancementProgress() {
         for (final PlayerAdvancements playerAdvancements : this.advancements.values()) {
             ((PlayerAdvancementsBridge) playerAdvancements).bridge$reloadAdvancementProgress();
         }

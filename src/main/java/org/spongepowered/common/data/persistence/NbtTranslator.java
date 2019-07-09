@@ -50,7 +50,7 @@ import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.mixin.core.nbt.AccessorNBTTagLongArray;
+import org.spongepowered.common.mixin.core.nbt.NBTTagLongArrayAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -245,7 +245,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 view.set(of(key), ((NBTTagIntArray) base).getIntArray());
                 break;
             case Constants.NBT.TAG_LONG_ARRAY:
-                view.set(of(key), ((AccessorNBTTagLongArray) base).accessor$getLongArray());
+                view.set(of(key), ((NBTTagLongArrayAccessor) base).accessor$getLongArray());
                 break;
             default:
                 throw new IllegalArgumentException("Unknown NBT type " + type);
@@ -285,7 +285,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             case Constants.NBT.TAG_INT_ARRAY:
                 return ((NBTTagIntArray) base).getIntArray();
             case Constants.NBT.TAG_LONG_ARRAY:
-                return ((AccessorNBTTagLongArray) base).accessor$getLongArray();
+                return ((NBTTagLongArrayAccessor) base).accessor$getLongArray();
             default :
                 return null;
         }

@@ -53,9 +53,10 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
     private boolean impl$loadSpawn;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setUpBridgeFields(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends WorldProvider > clazzIn,
-            CallbackInfo ci) {
-        String dimName = enumName.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
+    private void impl$setUpBridgeFields(
+        final String enumName, final int ordinal, final int idIn, final String nameIn, final String suffixIn, final Class <? extends WorldProvider > clazzIn,
+            final CallbackInfo ci) {
+        final String dimName = enumName.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
         final String modId = SpongeImplHooks.getModIdFromClass(clazzIn);
         this.impl$configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(modId).resolve(dimName);
         this.impl$config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.impl$configPath.resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID,
@@ -64,7 +65,7 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
         this.impl$loadSpawn = this.impl$generateSpawnOnLoad;
         this.impl$config.getConfig().getWorld().setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
         this.impl$sanitizedId = modId + ":" + dimName;
-        String contextId = this.impl$sanitizedId.replace(":", ".");
+        final String contextId = this.impl$sanitizedId.replace(":", ".");
         this.impl$context = new Context(Context.DIMENSION_KEY, contextId);
         if (!WorldManager.isDimensionRegistered(idIn)) {
             DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType) this);
@@ -82,10 +83,11 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
     }
 
     @Override
-    public void setShouldLoadSpawn(boolean keepSpawnLoaded) {
+    public void setShouldLoadSpawn(final boolean keepSpawnLoaded) {
         this.impl$loadSpawn = keepSpawnLoaded;
     }
 
+    @Override
     public String bridge$getSanitizedId() {
         return this.impl$sanitizedId;
     }
@@ -112,7 +114,7 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
      * their ids 1:1, this is a safe change that ensures a mixup can't happen.
      */
     @Overwrite
-    public static DimensionType getById(int dimensionTypeId) {
+    public static DimensionType getById(final int dimensionTypeId) {
         return WorldManager.getDimensionTypeByTypeId(dimensionTypeId).orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionTypeId));
     }
 }

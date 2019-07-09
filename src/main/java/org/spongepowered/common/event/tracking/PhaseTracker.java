@@ -820,7 +820,7 @@ public final class PhaseTracker {
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         // Sponge - Use our mixin method that allows using the BlockChangeFlag.
 
-        final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, spongeFlag);
+        final IBlockState originalBlockState = mixinChunk.bridge$setBlockState(pos, newState, currentState, spongeFlag);
         // Sponge End
         if (originalBlockState == null) {
             return false;
@@ -837,7 +837,7 @@ public final class PhaseTracker {
 
         // Sponge Start - At this point, we can stop and check for captures.
         //  by short circuiting here, we avoid additional block processing that would otherwise
-        //  have potential side effects (and ChunkMixin#setBlockState does a wonderful job at avoiding
+        //  have potential side effects (and ChunkMixin#bridge$setBlockState does a wonderful job at avoiding
         //  unnecessary logic in those cases).
         if (((IPhaseState) phaseState).doesBulkBlockCapture(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
             // Basically at this point, there's nothing left for us to do since
@@ -973,75 +973,77 @@ public final class PhaseTracker {
         if (!isForced && !((WorldServerAccessor) world).accessor$isChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         }
-            if (entity instanceof EntityPlayer) {
-                final EntityPlayer entityplayer = (EntityPlayer) entity;
-                world.playerEntities.add(entityplayer);
-                world.updateAllPlayersSleepingFlag();
-                SpongeImplHooks.firePlayerJoinSpawnEvent((EntityPlayerMP) entityplayer);
-            } else {
-                // Sponge start - check for vanilla owner
-                if (entity instanceof IEntityOwnable) {
-                    final IEntityOwnable ownable = (IEntityOwnable) entity;
-                    final net.minecraft.entity.Entity owner = ownable.getOwner();
-                    if (owner instanceof EntityPlayer) {
-                        context.owner = (User) owner;
+        if (entity instanceof EntityPlayer) {
+            final EntityPlayer entityplayer = (EntityPlayer) entity;
+            world.playerEntities.add(entityplayer);
+            world.updateAllPlayersSleepingFlag();
+            SpongeImplHooks.firePlayerJoinSpawnEvent((EntityPlayerMP) entityplayer);
+        } else {
+            // Sponge start - check for vanilla owner
+            if (entity instanceof IEntityOwnable) {
+                final IEntityOwnable ownable = (IEntityOwnable) entity;
+                final net.minecraft.entity.Entity owner = ownable.getOwner();
+                if (owner instanceof EntityPlayer) {
+                    context.owner = (User) owner;
+                    if (entity instanceof OwnershipTrackedBridge) {
+                        ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) owner);
+                    } else {
+                        ((Entity) entity).setCreator(ownable.getOwnerId());
+                    }
+                }
+            } else if (entity instanceof EntityThrowable) {
+                final EntityThrowable throwable = (EntityThrowable) entity;
+                final EntityLivingBase thrower = throwable.getThrower();
+                if (thrower != null) {
+                    final User user;
+                    if (thrower instanceof OwnershipTrackedBridge) {
+                        user = ((OwnershipTrackedBridge) thrower).tracked$getOwnerReference().orElse(null);
+                    } else {
+                        user = (User) thrower;
+                    }
+                    if (user != null) {
+                        context.owner = user;
                         if (entity instanceof OwnershipTrackedBridge) {
-                            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) owner);
+                            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(user);
                         } else {
-                            ((Entity) entity).setCreator(ownable.getOwnerId());
-                        }
-                    }
-                } else if (entity instanceof EntityThrowable) {
-                    final EntityThrowable throwable = (EntityThrowable) entity;
-                    final EntityLivingBase thrower = throwable.getThrower();
-                    if (thrower != null) {
-                        final User user;
-                        if (thrower instanceof OwnershipTrackedBridge) {
-                            user = ((OwnershipTrackedBridge) thrower).tracked$getOwnerReference().orElse(null);
-                        } else {
-                            user = (User) thrower;
-                        }
-                        if (user != null) {
-                            context.owner = user;
-                            if (entity instanceof OwnershipTrackedBridge) {
-                                ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(user);
-                            } else {
-                                ((Entity) entity).setCreator(user.getUniqueId());
-                            }
+                            ((Entity) entity).setCreator(user.getUniqueId());
                         }
                     }
                 }
-                // Sponge end
             }
-            // Sponge Start
-            // First, check if the owning world is a remote world. Then check if the spawn is forced.
-            // Finally, if all checks are true, then let the phase process the entity spawn. Most phases
-            // will not actively capture entity spawns, but will still throw events for them. Some phases
-            // capture all entities until the phase is marked for completion.
-            if (!isForced) {
-                if (ShouldFire.SPAWN_ENTITY_EVENT
-                    || (ShouldFire.CHANGE_BLOCK_EVENT // This bottom part of the if is due to needing to be able to capture block entity spawns
-                                                      // while block events are being listened to
-                        && ((IPhaseState) phaseState).doesBulkBlockCapture(context)
-                        && ((IPhaseState) phaseState).tracksBlockSpecificDrops(context)
-                        && context.getCaptureBlockPos().getPos().isPresent())) {
-                    try {
-                        return ((IPhaseState) phaseState).spawnEntityOrCapture(context, (Entity) entity, chunkX, chunkZ);
-                    } catch (Exception | NoClassDefFoundError e) {
-                        // Just in case something really happened, we should print a nice exception for people to
-                        // paste us
-                        this.printExceptionSpawningEntity(context, e);
-                        return false;
-                    }
+            // Sponge end
+        }
+        // Sponge Start
+        // First, check if the owning world is a remote world. Then check if the spawn is forced.
+        // Finally, if all checks are true, then let the phase process the entity spawn. Most phases
+        // will not actively capture entity spawns, but will still throw events for them. Some phases
+        // capture all entities until the phase is marked for completion.
+        if (!isForced) {
+            if (ShouldFire.SPAWN_ENTITY_EVENT
+                || (ShouldFire.CHANGE_BLOCK_EVENT
+                    // This bottom part of the if is due to needing to be able to capture block entity spawns
+                    // while block events are being listened to
+                    && ((IPhaseState) phaseState).doesBulkBlockCapture(context)
+                    && ((IPhaseState) phaseState).tracksBlockSpecificDrops(context)
+                    && context.getCaptureBlockPos().getPos().isPresent())) {
+                try {
+                    return ((IPhaseState) phaseState).spawnEntityOrCapture(context, (Entity) entity, chunkX, chunkZ);
+                } catch (Exception | NoClassDefFoundError e) {
+                    // Just in case something really happened, we should print a nice exception for people to
+                    // paste us
+                    this.printExceptionSpawningEntity(context, e);
+                    return false;
                 }
             }
-            final net.minecraft.entity.Entity customEntity = SpongeImplHooks.getCustomEntityIfItem(entity);
-            final net.minecraft.entity.Entity finalEntityToSpawn = customEntity == null ? entity : customEntity;
-            // Sponge end - continue on with the checks.
-            world.getChunk(chunkX, chunkZ).addEntity(finalEntityToSpawn);
-            world.loadedEntityList.add(finalEntityToSpawn);
-            mixinWorldServer.bridge$onSpongeEntityAdded(finalEntityToSpawn); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
-            return true;
+        }
+        final net.minecraft.entity.Entity customEntity = SpongeImplHooks.getCustomEntityIfItem(entity);
+        final net.minecraft.entity.Entity finalEntityToSpawn = customEntity == null ? entity : customEntity;
+        // Sponge end - continue on with the checks.
+        world.getChunk(chunkX, chunkZ).addEntity(finalEntityToSpawn);
+        world.loadedEntityList.add(finalEntityToSpawn);
+        // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
+        ((WorldServerAccessor) world).accessor$onEntityAdded(finalEntityToSpawn);
+        return true;
 
     }
 

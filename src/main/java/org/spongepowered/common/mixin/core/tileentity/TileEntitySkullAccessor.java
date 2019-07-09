@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import javax.annotation.Nullable;
 
 @Mixin(TileEntitySkull.class)
-public interface AccessorTileEntitySkull {
+public interface TileEntitySkullAccessor {
 
     @Nullable
     @Invoker("getPlayerProfile")

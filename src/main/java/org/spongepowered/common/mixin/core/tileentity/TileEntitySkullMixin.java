@@ -42,7 +42,8 @@ public abstract class TileEntitySkullMixin extends TileEntityMixin implements Sk
     @Shadow private com.mojang.authlib.GameProfile playerProfile;
     @Shadow private int skullType;
 
-    public void bridge$setPlayerProfile(com.mojang.authlib.GameProfile mcProfile, boolean update) {
+    @Override
+    public void bridge$setPlayerProfile(final com.mojang.authlib.GameProfile mcProfile, final boolean update) {
         this.skullType = 3;
         this.playerProfile = mcProfile;
         if (update) {
@@ -60,7 +61,7 @@ public abstract class TileEntitySkullMixin extends TileEntityMixin implements Sk
      * @param mcProfile Minecraft GameProfile
      */
     @Overwrite
-    public void setPlayerProfile(com.mojang.authlib.GameProfile mcProfile) {
+    public void setPlayerProfile(final com.mojang.authlib.GameProfile mcProfile) {
         bridge$setPlayerProfile(mcProfile, true);
     }
 
@@ -72,7 +73,7 @@ public abstract class TileEntitySkullMixin extends TileEntityMixin implements Sk
      */
     @Overwrite
     private void updatePlayerProfile() {
-        org.spongepowered.api.profile.GameProfile profile = (org.spongepowered.api.profile.GameProfile) ((AccessorTileEntitySkull) this).accessor$getMojangProfile();
+        final org.spongepowered.api.profile.GameProfile profile = (org.spongepowered.api.profile.GameProfile) ((TileEntitySkullAccessor) this).accessor$getMojangProfile();
         if (profile != null && profile.getName().isPresent() && !profile.getName().get().isEmpty()) {
             if (profile.isFilled() && profile.getPropertyMap().containsKey("textures")) {
                 ((TileEntityBridge) this).bridge$markDirty();

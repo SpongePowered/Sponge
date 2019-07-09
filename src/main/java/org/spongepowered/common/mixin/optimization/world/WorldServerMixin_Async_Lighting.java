@@ -207,7 +207,7 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
         }
 
         final ChunkBridge_AsyncLighting spongeChunk = (ChunkBridge_AsyncLighting) currentChunk;
-        if (currentChunk == null || currentChunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {
+        if (currentChunk == null || currentChunk.unloadQueued || !spongeChunk.bridge$areNeighborsLoaded()) {
             return false;
         }
 
@@ -221,13 +221,13 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
         spongeChunk.asyncLightingBridge$getPendingLightUpdates().incrementAndGet();
         spongeChunk.asyncLightingBridge$setLightUpdateTime(chunk.getWorld().getTotalWorldTime());
 
-        final List<Chunk> neighbors = spongeChunk.getNeighbors();
+        final List<Chunk> neighbors = spongeChunk.bridge$getNeighbors();
 
         // add diagonal chunks
-        final ChunkBridge southChunk = (ChunkBridge) spongeChunk.getNeighborChunk(0);
+        final ChunkBridge southChunk = (ChunkBridge) spongeChunk.bridge$getNeighborChunk(0);
         if (southChunk != null) {
-            final Chunk southEastChunk = southChunk.getNeighborChunk(2);
-            final Chunk southWestChunk = southChunk.getNeighborChunk(3);
+            final Chunk southEastChunk = southChunk.bridge$getNeighborChunk(2);
+            final Chunk southWestChunk = southChunk.bridge$getNeighborChunk(3);
             if (southEastChunk != null) {
                 neighbors.add(southEastChunk);
             }
@@ -235,10 +235,10 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
                 neighbors.add(southWestChunk);
             }
         }
-        final ChunkBridge northChunk = (ChunkBridge) spongeChunk.getNeighborChunk(1);
+        final ChunkBridge northChunk = (ChunkBridge) spongeChunk.bridge$getNeighborChunk(1);
         if (northChunk != null) {
-            final Chunk northEastChunk = northChunk.getNeighborChunk(2);
-            final Chunk northWestChunk = northChunk.getNeighborChunk(3);
+            final Chunk northEastChunk = northChunk.bridge$getNeighborChunk(2);
+            final Chunk northWestChunk = northChunk.bridge$getNeighborChunk(3);
             if (northEastChunk != null) {
                 neighbors.add(northEastChunk);
             }

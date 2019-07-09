@@ -32,7 +32,7 @@ import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 
 import javax.annotation.Nullable;
 
-public interface WitherSkullEntityBridge extends ExplosiveBridge {
+public interface WitherSkullEntityBridge {
 
     @Nullable
     Explosion bridge$CreateAndProcessExplosionEvent(net.minecraft.world.World worldObj, Entity self, double x,

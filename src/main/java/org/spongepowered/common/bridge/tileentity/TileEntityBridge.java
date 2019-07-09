@@ -32,24 +32,18 @@ public interface TileEntityBridge {
 
     void bridge$markDirty();
 
-    boolean isVanilla();
-
     // Tracking
     default SpawnType getTickedSpawnType() {
         return SpawnTypes.BLOCK_SPAWNING;
     }
 
-    boolean shouldTick();
+    boolean bridge$shouldTick();
 
-    boolean isTicking();
+    boolean bridge$isCaptured();
 
-    void setIsTicking(boolean ticking);
+    void bridge$setCaptured(boolean captured);
 
-    boolean isCaptured();
-
-    void setCaptured(boolean captured);
-
-    default String getPrettyPrinterString() {
+    default String bridge$getPrettyPrinterString() {
         return  this.toString();
     }
 }

@@ -51,7 +51,7 @@ public abstract class EntityAgeableMixin extends EntityMixin {
 
     @SuppressWarnings("deprecation")
     private void callReadyToMateEvent() {
-        if (!((WorldBridge) this.world).isFake() && ShouldFire.BREED_ENTITY_EVENT_READY_TO_MATE && ((EntityAgeable) (Object) this) instanceof EntityAnimal) {
+        if (!((WorldBridge) this.world).bridge$isFake() && ShouldFire.BREED_ENTITY_EVENT_READY_TO_MATE && ((EntityAgeable) (Object) this) instanceof EntityAnimal) {
             final org.spongepowered.api.event.entity.BreedEntityEvent.ReadyToMate event =
                 SpongeEventFactory.createBreedEntityEventReadyToMate(Sponge.getCauseStackManager().getCurrentCause(), Optional.empty(), (Animal)
                     this);

@@ -31,7 +31,7 @@ import org.spongepowered.api.event.entity.explosive.DefuseExplosiveEvent;
 import org.spongepowered.api.event.entity.explosive.PrimeExplosiveEvent;
 import org.spongepowered.common.event.ShouldFire;
 
-public interface FusedExplosiveBridge extends ExplosiveBridge {
+public interface FusedExplosiveBridge {
 
     int bridge$getFuseDuration();
 
@@ -43,7 +43,7 @@ public interface FusedExplosiveBridge extends ExplosiveBridge {
 
     default boolean bridge$shouldPrime() {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
-            PrimeExplosiveEvent.Pre event = SpongeEventFactory.createPrimeExplosiveEventPre(
+            final PrimeExplosiveEvent.Pre event = SpongeEventFactory.createPrimeExplosiveEventPre(
                     Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             return !Sponge.getEventManager().post(event);
         }
@@ -52,7 +52,7 @@ public interface FusedExplosiveBridge extends ExplosiveBridge {
 
     default void bridge$postPrime() {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_POST) {
-            PrimeExplosiveEvent.Post event = SpongeEventFactory.createPrimeExplosiveEventPost(
+            final PrimeExplosiveEvent.Post event = SpongeEventFactory.createPrimeExplosiveEventPost(
                     Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             Sponge.getEventManager().post(event);
         }
@@ -60,7 +60,7 @@ public interface FusedExplosiveBridge extends ExplosiveBridge {
 
     default boolean bridge$shouldDefuse() {
         if (ShouldFire.DEFUSE_EXPLOSIVE_EVENT_PRE) {
-            DefuseExplosiveEvent.Pre event = SpongeEventFactory.createDefuseExplosiveEventPre(
+            final DefuseExplosiveEvent.Pre event = SpongeEventFactory.createDefuseExplosiveEventPre(
                     Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             return !Sponge.getEventManager().post(event);
         }
@@ -69,7 +69,7 @@ public interface FusedExplosiveBridge extends ExplosiveBridge {
 
     default void bridge$postDefuse() {
         if (ShouldFire.DEFUSE_EXPLOSIVE_EVENT_POST) {
-            DefuseExplosiveEvent.Post event = SpongeEventFactory.createDefuseExplosiveEventPost(
+            final DefuseExplosiveEvent.Post event = SpongeEventFactory.createDefuseExplosiveEventPost(
                     Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             Sponge.getEventManager().post(event);
         }

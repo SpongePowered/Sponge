@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.tileentity;
+package org.spongepowered.common.item.inventory;
 
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.util.EnumFacing;

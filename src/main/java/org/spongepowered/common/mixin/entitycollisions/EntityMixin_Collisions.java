@@ -58,7 +58,7 @@ public class EntityMixin_Collisions implements CollisionsCapability {
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void collisions$InjectActivationInformation(final World world, final CallbackInfo ci) {
-        if (world != null && !((WorldBridge) world).isFake() && ((WorldInfoBridge) world.getWorldInfo()).bridge$isValid()) {
+        if (world != null && !((WorldBridge) world).bridge$isFake() && ((WorldInfoBridge) world.getWorldInfo()).bridge$isValid()) {
             final EntityType entityType = ((Entity) this).getType();
             if (entityType == EntityTypes.UNKNOWN || !(entityType instanceof SpongeEntityType)) {
                 return;

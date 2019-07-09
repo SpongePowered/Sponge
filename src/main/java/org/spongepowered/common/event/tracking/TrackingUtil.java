@@ -144,11 +144,11 @@ public final class TrackingUtil {
         });
     public static final int WIDTH = 40;
 
-    public static void tickEntity(net.minecraft.entity.Entity entity) {
+    public static void tickEntity(final net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
         final EntityBridge mixinEntity = (EntityBridge) entity;
-        if (!mixinEntity.shouldTick()) {
+        if (!mixinEntity.bridge$shouldTick()) {
             return;
         }
 
@@ -173,11 +173,11 @@ public final class TrackingUtil {
         }
     }
 
-    public static void tickRidingEntity(net.minecraft.entity.Entity entity) {
+    public static void tickRidingEntity(final net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
         final EntityBridge mixinEntity = (EntityBridge) entity;
-        if (!mixinEntity.shouldTick()) {
+        if (!mixinEntity.bridge$shouldTick()) {
             return;
         }
 
@@ -204,14 +204,14 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings({"unused", "try"})
-    public static void tickTileEntity(ServerWorldBridge mixinWorldServer, ITickable tile) {
+    public static void tickTileEntity(final ServerWorldBridge mixinWorldServer, final ITickable tile) {
         checkArgument(tile instanceof TileEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
         final TileEntityBridge mixinTileEntity = (TileEntityBridge) tile;
         final BlockPos pos = tileEntity.getPos();
         final ChunkBridge chunk = ((ActiveChunkReferantBridge) tile).bridge$getActiveChunk();
-        if (!mixinTileEntity.shouldTick()) {
+        if (!mixinTileEntity.bridge$shouldTick()) {
             return;
         }
         if (chunk == null) {
@@ -233,8 +233,7 @@ public final class TrackingUtil {
             // Finally, switch the context now that we have the owner and notifier
             phaseContext.buildAndSwitch();
 
-            mixinTileEntity.setIsTicking(true);
-            try (Timing timing = ((TimingBridge) tileEntity).bridge$getTimingsHandler().startTiming()) {
+            try (final Timing timing = ((TimingBridge) tileEntity).bridge$getTimingsHandler().startTiming()) {
                 tile.update();
             }
         } catch (Exception e) {
@@ -244,16 +243,16 @@ public final class TrackingUtil {
         if (tileEntity.isInvalid()) {
             ((ActiveChunkReferantBridge) tileEntity).bridge$setActiveChunk(null);
         }
-        mixinTileEntity.setIsTicking(false);
     }
 
     @SuppressWarnings("rawtypes")
-    public static void updateTickBlock(ServerWorldBridge mixinWorld, Block block, BlockPos pos, IBlockState state, Random random) {
+    public static void updateTickBlock(
+        final ServerWorldBridge mixinWorld, final Block block, final BlockPos pos, final IBlockState state, final Random random) {
         final WorldServer world = (WorldServer) mixinWorld;
         final World apiWorld = (World) world;
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
-            BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(state, state, pos, BlockChangeFlags.NONE);
+            final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(state, state, pos, BlockChangeFlags.NONE);
             final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Sponge.getCauseStackManager().getCurrentCause(), snapshot);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
@@ -282,8 +281,8 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    public static void randomTickBlock(ServerWorldBridge mixinWorld, Block block,
-        BlockPos pos, IBlockState state, Random random) {
+    public static void randomTickBlock(final ServerWorldBridge mixinWorld, final Block block,
+        final BlockPos pos, final IBlockState state, final Random random) {
         final WorldServer world = (WorldServer) mixinWorld;
         final World apiWorld = (World) world;
 
@@ -306,7 +305,7 @@ public final class TrackingUtil {
         final IPhaseState<?> currentState = currentContext.state;
         ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, currentContext, phaseContext);
         // Now actually switch to the new phase
-        try (PhaseContext<?> context = phaseContext) {
+        try (final PhaseContext<?> context = phaseContext) {
             context.buildAndSwitch();
             block.randomTick(world, pos, state, random);
         } catch (Exception | NoClassDefFoundError e) {
@@ -315,20 +314,20 @@ public final class TrackingUtil {
     }
 
 
-    public static void tickWorldProvider(ServerWorldBridge worldServer) {
+    public static void tickWorldProvider(final ServerWorldBridge worldServer) {
         final WorldProvider worldProvider = ((WorldServer) worldServer).provider;
-        try (DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext().source(worldProvider)) {
+        try (final DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext().source(worldProvider)) {
             context.buildAndSwitch();
             worldProvider.onWorldUpdateEntities();
         }
     }
 
-    public static boolean fireMinecraftBlockEvent(WorldServer worldIn, BlockEventData event) {
-        IBlockState currentState = worldIn.getBlockState(event.getPosition());
+    public static boolean fireMinecraftBlockEvent(final WorldServer worldIn, final BlockEventData event) {
+        final IBlockState currentState = worldIn.getBlockState(event.getPosition());
         final BlockEventDataBridge blockEvent = (BlockEventDataBridge) event;
         final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext();
 
-        Object source = blockEvent.getBridge$TileEntity() != null ? blockEvent.getBridge$TileEntity() : blockEvent.getBridge$TickingLocatable();
+        final Object source = blockEvent.getBridge$TileEntity() != null ? blockEvent.getBridge$TileEntity() : blockEvent.getBridge$TickingLocatable();
         if (source != null) {
             phaseContext.source(source);
         } else {
@@ -342,7 +341,7 @@ public final class TrackingUtil {
             phaseContext.notifier = user;
         }
 
-        try (BlockEventTickContext o = phaseContext) {
+        try (final BlockEventTickContext o = phaseContext) {
             o.buildAndSwitch();
             phaseContext.setEventSucceeded(currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter()));
         } // We can't return onBlockEventReceived because the phase state may have cancelled all transactions
@@ -350,7 +349,7 @@ public final class TrackingUtil {
         return phaseContext.wasNotCancelled();
     }
 
-    static boolean forceModify(Block originalBlock, Block newBlock) {
+    static boolean forceModify(final Block originalBlock, final Block newBlock) {
         if (originalBlock instanceof BlockRedstoneRepeater && newBlock instanceof BlockRedstoneRepeater) {
             return true;
         } else if (originalBlock instanceof BlockRedstoneTorch && newBlock instanceof BlockRedstoneTorch) {
@@ -363,17 +362,17 @@ public final class TrackingUtil {
     }
 
     @Nullable
-    public static User getNotifierOrOwnerFromBlock(WorldServer world, BlockPos blockPos) {
+    public static User getNotifierOrOwnerFromBlock(final WorldServer world, final BlockPos blockPos) {
         final ChunkBridge mixinChunk = (ChunkBridge) world.getChunk(blockPos);
-        User notifier = mixinChunk.getBlockNotifier(blockPos).orElse(null);
+        final User notifier = mixinChunk.bridge$getBlockNotifier(blockPos).orElse(null);
         if (notifier != null) {
             return notifier;
         }
 
-        return mixinChunk.getBlockOwner(blockPos).orElse(null);
+        return mixinChunk.bridge$getBlockOwner(blockPos).orElse(null);
     }
 
-    public static Supplier<IllegalStateException> throwWithContext(String s, PhaseContext<?> phaseContext) {
+    public static Supplier<IllegalStateException> throwWithContext(final String s, final PhaseContext<?> phaseContext) {
         return () -> {
             final PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Exception trying to process over a phase!").centre().hr();
@@ -388,7 +387,7 @@ public final class TrackingUtil {
         };
     }
 
-    public static boolean processBlockCaptures(IPhaseState<?> state, PhaseContext<?> context) {
+    public static boolean processBlockCaptures(final IPhaseState<?> state, final PhaseContext<?> context) {
         return processBlockCaptures(state, context, 0, context.getCapturedBlockSupplier());
     }
 
@@ -406,13 +405,14 @@ public final class TrackingUtil {
      * @return True if no events or transactions were cancelled
      */
     @SuppressWarnings({"unchecked"})
-    static boolean processBlockCaptures(IPhaseState<?> state, PhaseContext<?> context, int currentDepth, MultiBlockCaptureSupplier supplier) {
+    static boolean processBlockCaptures(
+        final IPhaseState<?> state, final PhaseContext<?> context, final int currentDepth, final MultiBlockCaptureSupplier supplier) {
         // Fail fast and check if it's empty.
         if (!supplier.hasBlocksCaptured()) {
             if (((IPhaseState) state).hasSpecificBlockProcess(context) && supplier.hasTransactions()) {
                 // Then we just need to process the transactions, there may be things that are not
                 // specifically block captured
-                ListMultimap<BlockPos, BlockEventData> scheduledEvents = supplier.getScheduledEvents();
+                final ListMultimap<BlockPos, BlockEventData> scheduledEvents = supplier.getScheduledEvents();
                 // Clear captured snapshots after processing them
                 supplier.clear();
                 return supplier.processTransactions(ImmutableList.of(), context, true, scheduledEvents, currentDepth);
@@ -422,14 +422,14 @@ public final class TrackingUtil {
         }
         final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
 
-        ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[EVENT_COUNT];
-        ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[EVENT_COUNT];
+        final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[EVENT_COUNT];
+        final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[EVENT_COUNT];
         for (int i = 0; i < EVENT_COUNT; i++) {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
 
         createTransactionLists(state, context, supplier, transactionArrays, transactionBuilders);
-        ListMultimap<BlockPos, BlockEventData> scheduledEvents = supplier.getScheduledEvents();
+        final ListMultimap<BlockPos, BlockEventData> scheduledEvents = supplier.getScheduledEvents();
 
         // Clear captured snapshots after processing them
         supplier.clear();
@@ -466,10 +466,10 @@ public final class TrackingUtil {
 
     }
 
-    private static void createTransactionLists(IPhaseState state, PhaseContext<?> context, MultiBlockCaptureSupplier supplier,
-        ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
+    private static void createTransactionLists(final IPhaseState state, final PhaseContext<?> context, final MultiBlockCaptureSupplier supplier,
+        final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
         final List<SpongeBlockSnapshot> snapshots = supplier.get();
-        for (SpongeBlockSnapshot snapshot : snapshots) {
+        for (final SpongeBlockSnapshot snapshot : snapshots) {
             // This processes each snapshot to assign them to the correct event in the next area, with the
             // correct builder array entry.
             context.getCapturedBlockSupplier().createTransaction(snapshot)
@@ -481,14 +481,14 @@ public final class TrackingUtil {
         }
     }
 
-    private static boolean checkCancelledEvents(List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
-        ListMultimap<BlockPos, BlockEventData> scheduledEvents, IPhaseState<?> state, PhaseContext<?> context, List<Transaction<BlockSnapshot>> invalid) {
+    private static boolean checkCancelledEvents(final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
+        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final IPhaseState<?> state, final PhaseContext<?> context, final List<Transaction<BlockSnapshot>> invalid) {
         boolean noCancelledTransactions = true;
-        for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
+        for (final ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
             if (blockEvent.isCancelled()) {
                 noCancelledTransactions = false;
                 // Don't restore the transactions just yet, since we're just marking them as invalid for now
-                for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
+                for (final Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
                     if (!scheduledEvents.isEmpty()) {
                         scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
                     }
@@ -499,14 +499,14 @@ public final class TrackingUtil {
         if (postEvent.isCancelled()) {
             // Of course, if post is cancelled, just mark all transactions as invalid.
             noCancelledTransactions = false;
-            for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+            for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
                 if (!scheduledEvents.isEmpty()) {
                     scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
                 }
                 transaction.setValid(false);
             }
         }
-        for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+        for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
             if (!transaction.isValid()) {
                 noCancelledTransactions = false;
             }
@@ -516,9 +516,9 @@ public final class TrackingUtil {
             // This is available to verify only when necessary that a state
             // absolutely needs to cancel the entire transaction chain, this is mostly for more fasts
             // since we don't want to iterate over the transaction list multiple times.
-            boolean cancelAll = ((IPhaseState) state).getShouldCancelAllTransactions(context, blockEvents, postEvent, scheduledEvents, false);
+            final boolean cancelAll = ((IPhaseState) state).getShouldCancelAllTransactions(context, blockEvents, postEvent, scheduledEvents, false);
 
-            for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+            for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
                 if (cancelAll) {
                     if (!scheduledEvents.isEmpty()) {
                         scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
@@ -535,8 +535,8 @@ public final class TrackingUtil {
         return noCancelledTransactions;
     }
 
-    private static void clearInvalidTransactionDrops(PhaseContext<?> context, ChangeBlockEvent.Post postEvent) {
-        for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+    private static void clearInvalidTransactionDrops(final PhaseContext<?> context, final ChangeBlockEvent.Post postEvent) {
+        for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
             if (!transaction.isValid()) {
                 // Cancel any block drops performed, avoids any item drops, regardless
                 if (transaction.getOriginal() instanceof SpongeBlockSnapshot) {
@@ -548,18 +548,18 @@ public final class TrackingUtil {
         }
     }
 
-    private static void rollBackTransactions(IPhaseState<?> state, PhaseContext<?> context, List<Transaction<BlockSnapshot>> invalid) {
+    private static void rollBackTransactions(final IPhaseState<?> state, final PhaseContext<?> context, final List<Transaction<BlockSnapshot>> invalid) {
         // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
         // or the events were cancelled), again in reverse order of which they were received.
-        for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
+        for (final Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
             transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
             ((IPhaseState) state).processCancelledTransaction(context, transaction, transaction.getOriginal());
         }
     }
 
-    private static void iterateChangeBlockEvents(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
-        ChangeBlockEvent[] mainEvents) {
-        for (BlockChange blockChange : BlockChange.values()) {
+    private static void iterateChangeBlockEvents(final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, final List<ChangeBlockEvent> blockEvents,
+        final ChangeBlockEvent[] mainEvents) {
+        for (final BlockChange blockChange : BlockChange.values()) {
             if (blockChange == BlockChange.DECAY) { // Decay takes place after.
                 continue;
             }
@@ -578,10 +578,10 @@ public final class TrackingUtil {
         }
     }
 
-    private static boolean performBlockAdditions(List<Transaction<BlockSnapshot>> transactions, IPhaseState<?> phaseState,
-        PhaseContext<?> phaseContext, boolean noCancelledTransactions,
-        ListMultimap<BlockPos, BlockEventData> scheduledEvents,
-        int currentDepth) {
+    private static boolean performBlockAdditions(final List<Transaction<BlockSnapshot>> transactions, final IPhaseState<?> phaseState,
+        final PhaseContext<?> phaseContext, final boolean noCancelledTransactions,
+        final ListMultimap<BlockPos, BlockEventData> scheduledEvents,
+        final int currentDepth) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         boolean hasEvents = false;
@@ -595,7 +595,7 @@ public final class TrackingUtil {
             // from time to time
             return phaseContext.getCapturedBlockSupplier().processTransactions(transactions, phaseContext, noCancelledTransactions, scheduledEvents, currentDepth);
         }
-        for (Transaction<BlockSnapshot> transaction : transactions) {
+        for (final Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 continue;
             }
@@ -620,7 +620,7 @@ public final class TrackingUtil {
      * @param phaseContext The currently working phase context
      * @param currentDepth The current processing depth, to avoid stack overflows
      */
-    public static void performTransactionProcess(Transaction<BlockSnapshot> transaction, IPhaseState<?> phaseState, PhaseContext<?> phaseContext, int currentDepth) {
+    public static void performTransactionProcess(final Transaction<BlockSnapshot> transaction, final IPhaseState<?> phaseState, final PhaseContext<?> phaseContext, final int currentDepth) {
         // Handle custom replacements - these need to get actually set onto the chunk, but ignored as far as tracking
         // goes.
         if (transaction.getCustom().isPresent()) {
@@ -660,7 +660,7 @@ public final class TrackingUtil {
         // flags, we have to abide by the changes accordingly. Likewise, this interacts with neighbor notifications being performed.
         if (transaction.getIntermediary().isEmpty()) {
             // We call onBlockAdded here for blocks without a TileEntity.
-            // ChunkMixin#setBlockState will call onBlockAdded for blocks
+            // ChunkMixin#bridge$setBlockState will call onBlockAdded for blocks
             // with a TileEntity or when capturing is not being done.
             performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, originalChangeFlag, originalState, newState);
 
@@ -674,7 +674,7 @@ public final class TrackingUtil {
         }
         IBlockState previousIntermediary = originalState;
         boolean processedOriginal = false;
-        for (Iterator<? extends BlockSnapshot> iterator = transaction.getIntermediary().iterator(); iterator.hasNext();) {
+        for (final Iterator<? extends BlockSnapshot> iterator = transaction.getIntermediary().iterator(); iterator.hasNext();) {
             final SpongeBlockSnapshot intermediary = (SpongeBlockSnapshot) iterator.next();
             final SpongeBlockChangeFlag intermediaryChangeFlag = intermediary.getChangeFlag();
             final IBlockState intermediaryState = (IBlockState) intermediary.getState();
@@ -691,7 +691,7 @@ public final class TrackingUtil {
             // Then, we can process the intermediary to final potentially if there is only the original -> intermediary -> final,
             // whereas if there's more than one intermediary, the intermediary will refer to the previous intermediary
             // block state for appropriate physics.
-            boolean isFinal = !iterator.hasNext();
+            final boolean isFinal = !iterator.hasNext();
             performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, intermediaryChangeFlag, isFinal ? intermediaryState : previousIntermediary, isFinal ? newState : intermediaryState);
             if (intermediaryChangeFlag.isNotifyClients()) {
                 world.notifyBlockUpdate(pos, isFinal ? intermediaryState :  previousIntermediary, isFinal ? newState : intermediaryState, intermediaryChangeFlag.getRawFlag());
@@ -704,8 +704,8 @@ public final class TrackingUtil {
         }
     }
 
-    private static void performOnBlockAdded(IPhaseState phaseState, PhaseContext<?> phaseContext, int currentDepth, BlockPos pos, WorldServer world,
-        SpongeBlockChangeFlag changeFlag, IBlockState originalState, IBlockState newState) {
+    private static void performOnBlockAdded(final IPhaseState phaseState, final PhaseContext<?> phaseContext, final int currentDepth, final BlockPos pos, final WorldServer world,
+        final SpongeBlockChangeFlag changeFlag, final IBlockState originalState, final IBlockState newState) {
         final Block newBlock = newState.getBlock();
         if (originalState.getBlock() != newBlock && changeFlag.performBlockPhysics()
             && (!SpongeImplHooks.hasBlockTileEntity(newBlock, newState))) {
@@ -714,9 +714,9 @@ public final class TrackingUtil {
         }
     }
 
-    public static void performNeighborAndClientNotifications(PhaseContext<?> phaseContext, int currentDepth,
-        SpongeBlockSnapshot newBlockSnapshot, ServerWorldBridge mixinWorld, BlockPos pos,
-        IBlockState newState, SpongeBlockChangeFlag changeFlag) {
+    public static void performNeighborAndClientNotifications(final PhaseContext<?> phaseContext, final int currentDepth,
+        final SpongeBlockSnapshot newBlockSnapshot, final ServerWorldBridge mixinWorld, final BlockPos pos,
+        final IBlockState newState, final SpongeBlockChangeFlag changeFlag) {
         final Block newBlock = newState.getBlock();
         final IPhaseState phaseState = phaseContext.state;
         if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
@@ -726,7 +726,13 @@ public final class TrackingUtil {
             final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
             final BlockSnapshot previousNeighbor = context.neighborNotificationSource;
             context.neighborNotificationSource = newBlockSnapshot;
-            mixinWorld.bridge$NotifyNeighborsPostBlockChange(pos, newState, changeFlag);
+            if (changeFlag.updateNeighbors()) {
+                ((WorldServer) mixinWorld).notifyNeighborsRespectDebug(pos, newState.getBlock(), changeFlag.notifyObservers());
+
+                if (newState.hasComparatorInputOverride()) {
+                    ((WorldServer) mixinWorld).updateComparatorOutputLevel(pos, newState.getBlock());
+                }
+            }
             context.neighborNotificationSource = previousNeighbor;
         } else if (changeFlag.notifyObservers()) {
             ((net.minecraft.world.World) mixinWorld).updateObservingBlocksAt(pos, newBlock);
@@ -735,8 +741,8 @@ public final class TrackingUtil {
         phaseState.performPostBlockNotificationsAndNeighborUpdates(phaseContext, newState, changeFlag, currentDepth + 1);
     }
 
-    public static void performBlockEntitySpawns(IPhaseState<?> state, PhaseContext<?> phaseContext, SpongeBlockSnapshot oldBlockSnapshot,
-        BlockPos pos) {
+    public static void performBlockEntitySpawns(final IPhaseState<?> state, final PhaseContext<?> phaseContext, final SpongeBlockSnapshot oldBlockSnapshot,
+        final BlockPos pos) {
         // This is for pre-merged items
         if (state.doesCaptureEntitySpawns() || ((IPhaseState) state).doesCaptureEntityDrops(phaseContext)) {
             phaseContext.getBlockDropSupplier().acceptAndRemoveIfPresent(pos, items ->
@@ -750,13 +756,13 @@ public final class TrackingUtil {
         }
     }
 
-    private static void spawnItemEntitiesForBlockDrops(Collection<EntityItem> entityItems, BlockSnapshot newBlockSnapshot,
-        PhaseContext<?> phaseContext) {
+    private static void spawnItemEntitiesForBlockDrops(final Collection<EntityItem> entityItems, final BlockSnapshot newBlockSnapshot,
+        final PhaseContext<?> phaseContext) {
         // Now we can spawn the entity items appropriately
         final List<Entity> itemDrops = entityItems.stream()
                 .map(entity -> (Entity) entity)
                 .collect(Collectors.toList());
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(newBlockSnapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
@@ -764,15 +770,15 @@ public final class TrackingUtil {
         }
     }
 
-    public static void spawnItemDataForBlockDrops(Collection<ItemDropData> itemStacks, BlockSnapshot oldBlockSnapshot,
-        PhaseContext<?> phaseContext) {
+    public static void spawnItemDataForBlockDrops(final Collection<ItemDropData> itemStacks, final BlockSnapshot oldBlockSnapshot,
+        final PhaseContext<?> phaseContext) {
         final Vector3i position = oldBlockSnapshot.getPosition();
         final List<ItemStackSnapshot> itemSnapshots = itemStacks.stream()
                 .map(ItemDropData::getStack)
                 .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());
         final ImmutableList<ItemStackSnapshot> originalSnapshots = ImmutableList.copyOf(itemSnapshots);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(oldBlockSnapshot);
             final DropItemEvent.Pre
                 dropItemEventPre =
@@ -782,7 +788,7 @@ public final class TrackingUtil {
                 return;
             }
         }
-        Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
+        final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
         final World world = worldLocation.getExtent();
         final WorldServer worldServer = (WorldServer) world;
         // Now we can spawn the entity items appropriately
@@ -801,7 +807,7 @@ public final class TrackingUtil {
                 })
                 .map(entity -> (Entity) entity)
                 .collect(Collectors.toList());
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(oldBlockSnapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             phaseContext.applyNotifierIfAvailable(notifier ->  frame.addContext(EventContextKeys.NOTIFIER, notifier));
@@ -809,12 +815,12 @@ public final class TrackingUtil {
         }
     }
 
-    private static void spawnEntitiesForBlock(Collection<net.minecraft.entity.Entity> entities, PhaseContext<?> phaseContext) {
+    private static void spawnEntitiesForBlock(final Collection<net.minecraft.entity.Entity> entities, final PhaseContext<?> phaseContext) {
         // Now we can spawn the entity items appropriately
         final List<Entity> entitiesSpawned = entities.stream()
             .map(entity -> (Entity) entity)
             .collect(Collectors.toList());
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             SpongeCommonEventFactory.callSpawnEntity(entitiesSpawned, phaseContext);
         }
@@ -822,9 +828,9 @@ public final class TrackingUtil {
 
     @SuppressWarnings("rawtypes")
     @Nullable
-    private static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(IPhaseState<?> state,
-        PhaseContext<?> context, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
-        final List<ChangeBlockEvent> blockEvents, ChangeBlockEvent[] mainEvents) {
+    private static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(final IPhaseState<?> state,
+        final PhaseContext<?> context, final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
+        final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent[] mainEvents) {
         if (!blockEvents.isEmpty()) {
             final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[MULTI_CHANGE_INDEX];
             // We suffix the cause with the extra events, without modifying the cause stack manager to avoid adding extra
@@ -835,7 +841,7 @@ public final class TrackingUtil {
                 final Cause.Builder builder = Cause.builder().from(currentCause);
                 final EventContext.Builder modified = EventContext.builder();
                 modified.from(currentCause.getContext());
-                for (BlockChange blockChange : BlockChange.values()) {
+                for (final BlockChange blockChange : BlockChange.values()) {
                     final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
                     if (mainEvent != null) {
                         builder.append(mainEvent);
@@ -853,7 +859,7 @@ public final class TrackingUtil {
         return null;
     }
 
-    public static void associateTrackerToTarget(BlockChange blockChange, Transaction<BlockSnapshot> transaction, User user) {
+    public static void associateTrackerToTarget(final BlockChange blockChange, final Transaction<BlockSnapshot> transaction, final User user) {
         final BlockSnapshot finalSnapshot = transaction.getFinal();
         final SpongeBlockSnapshot spongeSnapshot = (SpongeBlockSnapshot) finalSnapshot;
         final BlockPos pos = spongeSnapshot.getBlockPos();
@@ -863,17 +869,17 @@ public final class TrackingUtil {
             .map(chunk -> (ChunkBridge) chunk)
             .ifPresent(spongeChunk -> {
             final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.OWNER : PlayerTracker.Type.NOTIFIER;
-            spongeChunk.addTrackedBlockPosition(block, pos, user, trackerType);
+            spongeChunk.bridge$addTrackedBlockPosition(block, pos, user, trackerType);
         });
     }
 
-    public static void addTileEntityToBuilder(@Nullable net.minecraft.tileentity.TileEntity existing, SpongeBlockSnapshotBuilder builder) {
+    public static void addTileEntityToBuilder(@Nullable final net.minecraft.tileentity.TileEntity existing, final SpongeBlockSnapshotBuilder builder) {
         // We MUST only check to see if a TE exists to avoid creating a new one.
-        TileEntity tile = (TileEntity) existing;
-        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).bridge$getCustomManipulators()) {
+        final TileEntity tile = (TileEntity) existing;
+        for (final DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).bridge$getCustomManipulators()) {
             builder.add(manipulator);
         }
-        NBTTagCompound nbt = new NBTTagCompound();
+        final NBTTagCompound nbt = new NBTTagCompound();
         // Some mods like OpenComputers assert if attempting to save robot while moving
         try {
             existing.writeToNBT(nbt);
@@ -884,11 +890,11 @@ public final class TrackingUtil {
         }
     }
 
-    public static String phaseStateToString(String type, IPhaseState<?> state) {
+    public static String phaseStateToString(final String type, final IPhaseState<?> state) {
         return phaseStateToString(type, null, state);
     }
 
-    public static String phaseStateToString(String type, @Nullable String extra, IPhaseState<?> state) {
+    public static String phaseStateToString(final String type, @Nullable final String extra, final IPhaseState<?> state) {
         String name = state.getClass().getSimpleName();
         name = name.replace("Phase", "");
         name = name.replace("State", "");

@@ -75,7 +75,7 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
         WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         unwindingContext.getCapturedPlayer().ifPresent(player ->
             ((ChunkBridge) minecraftWorld.getChunk(notifyPos))
-                .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
+                .bridge$addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
         );
     }
 

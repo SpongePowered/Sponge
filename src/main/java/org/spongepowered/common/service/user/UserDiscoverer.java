@@ -256,7 +256,7 @@ class UserDiscoverer {
         if (player != null) {
             // If we're getting the online player, we want their current user,
             // rather than something that is recreated and may be out of sync
-            // with the player itself, which is what #getUserObject does and was
+            // with the player itself, which is what #bridge$getUserObject does and was
             // the previous call here.
             //
             // Note: During initialization of the EntityPlayerMP, this method may
@@ -266,7 +266,7 @@ class UserDiscoverer {
             // itself and starting the cycle again. This might happen if a player's
             // User has dropped out of the cache above and the player is then recreated
             // through death or world teleport. This will prevent a stack overflow.
-            Optional<User> optional = player.getBackingUser();
+            Optional<User> optional = player.bridge$getBackingUser();
             if (optional.isPresent()) {
                 final User user = optional.get();
                 userCache.put(uniqueId, user);

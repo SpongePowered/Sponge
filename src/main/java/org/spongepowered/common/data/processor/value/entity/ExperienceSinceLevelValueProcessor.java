@@ -63,14 +63,14 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
         while (value >= container.xpBarCap()) {
             value -= container.xpBarCap();
         }
-        ((PlayerEntityBridge) container).setExperienceSinceLevel(value);
-        ((ServerPlayerEntityBridge) container).refreshExp();
+        ((PlayerEntityBridge) container).bridge$setExperienceSinceLevel(value);
+        ((ServerPlayerEntityBridge) container).bridge$refreshExp();
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(EntityPlayer container) {
-        return Optional.of(((PlayerEntityBridge) container).getExperienceSinceLevel());
+        return Optional.of(((PlayerEntityBridge) container).bridge$getExperienceSinceLevel());
     }
 
     @Override

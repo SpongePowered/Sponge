@@ -43,6 +43,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
@@ -52,8 +53,10 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityFireworkRocket.class)
-public abstract class EntityFireworkRocketMixin extends EntityMixin implements FusedExplosiveBridge {
+public abstract class EntityFireworkRocketMixin extends EntityMixin implements FusedExplosiveBridge, ExplosiveBridge {
 
     @Shadow private int fireworkAge;
     @Shadow private int lifetime;
@@ -103,8 +106,8 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
     }
 
     @Override
-    public void bridge$setExplosionRadius(final Optional<Integer> radius) {
-        this.impl$explosionRadius = radius.orElse(Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS);
+    public void bridge$setExplosionRadius(final @Nullable Integer radius) {
+        this.impl$explosionRadius = radius == null ? Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS : radius;
     }
 
     @SuppressWarnings("deprecation")

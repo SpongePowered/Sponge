@@ -62,7 +62,7 @@ public abstract class EntityMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeEntityCooldown(final Entity self, final int modifier) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             this.rideCooldown = modifier;
             return;
         }
@@ -82,7 +82,7 @@ public abstract class EntityMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimePortalCounter(final Entity self, final int modifier) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             this.portalCounter = modifier;
             return;
         }

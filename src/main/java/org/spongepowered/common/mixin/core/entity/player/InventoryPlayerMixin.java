@@ -265,14 +265,14 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
     }
 
     @Override
-    public void cleanupDirty() {
+    public void bridge$cleanupDirty() {
         if (this.timesChanged != this.impl$lastTimesChanged) {
             this.player.openContainer.detectAndSendChanges();
         }
     }
 
     @Override
-    public void markClean() {
+    public void bridge$markClean() {
         this.impl$lastTimesChanged = this.timesChanged;
     }
 }

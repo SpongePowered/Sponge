@@ -70,7 +70,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.mixin.core.server.AccessorPlayerList;
+import org.spongepowered.common.mixin.core.server.PlayerListAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
@@ -147,21 +147,21 @@ public final class NetworkUtil {
      */
     public static void initializeConnectionToPlayer(final PlayerList playerList, final NetworkManager netManager, final EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
         final GameProfile gameprofile = playerIn.getGameProfile();
-        final PlayerProfileCache playerprofilecache = ((AccessorPlayerList) playerList).accessor$getPlayerListServer().getPlayerProfileCache();
+        final PlayerProfileCache playerprofilecache = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().getPlayerProfileCache();
         final GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
         final String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
         playerprofilecache.addEntry(gameprofile);
-        ((AccessorPlayerList) playerList).accessor$getPlayerListLogger().info("test");
+        ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("test");
 
         // Sponge start - save changes to offline User before reading player data
-        final SpongeUser user = (SpongeUser) ((ServerPlayerEntityBridge) playerIn).getUserObject();
+        final SpongeUser user = (SpongeUser) ((ServerPlayerEntityBridge) playerIn).bridge$getUserObject();
         if (SpongeUser.dirtyUsers.contains(user)) {
             user.save();
         }
         // Sponge end
 
         final NBTTagCompound nbttagcompound = playerList.readPlayerDataFromFile(playerIn);
-        WorldServer worldServer = ((AccessorPlayerList) playerList).accessor$getPlayerListServer().getWorld(playerIn.dimension);
+        WorldServer worldServer = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().getWorld(playerIn.dimension);
         final int actualDimensionId = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
         final BlockPos spawnPos;
         // Join data
@@ -216,11 +216,11 @@ public final class NetworkUtil {
                 }
 
                 try {
-                    ((AccessorPlayerList) playerList).accessor$getPlayerListLogger().info("Disconnecting " + (gameprofile != null ? gameprofile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
+                    ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("Disconnecting " + (gameprofile != null ? gameprofile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
                     netManager.sendPacket(new SPacketDisconnect(reason));
                     netManager.closeChannel(reason);
                 } catch (Exception exception) {
-                    ((AccessorPlayerList) playerList).accessor$getPlayerListLogger().error("Error whilst disconnecting player", exception);
+                    ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().error("Error whilst disconnecting player", exception);
                 }
                 return;
             }
@@ -251,12 +251,12 @@ public final class NetworkUtil {
 
         final WorldInfo worldinfo = worldServer.getWorldInfo();
         final BlockPos spawnBlockPos = worldServer.getSpawnPoint();
-        ((AccessorPlayerList) playerList).accessor$setPlayerGameType(playerIn, null, worldServer);
+        ((PlayerListAccessor) playerList).accessor$setPlayerGameType(playerIn, null, worldServer);
 
         // Sponge start
         if (handler == null) {
             // Create the handler here (so the player's gets set)
-            handler = new NetHandlerPlayServer(((AccessorPlayerList) playerList).accessor$getPlayerListServer(), netManager, playerIn);
+            handler = new NetHandlerPlayServer(((PlayerListAccessor) playerList).accessor$getPlayerListServer(), netManager, playerIn);
         }
         playerIn.connection = handler;
         SpongeImplHooks.fireServerConnectionEvent(netManager);
@@ -280,13 +280,13 @@ public final class NetworkUtil {
         playerList.updatePermissionLevel(playerIn);
         playerIn.getStatFile().markAllDirty();
         playerIn.getRecipeBook().init(playerIn);
-        ((AccessorPlayerList) playerList).accessor$getPlayerListServer().refreshStatusNextTick();
+        ((PlayerListAccessor) playerList).accessor$getPlayerListServer().refreshStatusNextTick();
 
         handler.setPlayerLocation(x, y, z, yaw, pitch);
         playerList.playerLoggedIn(playerIn);
 
         // Sponge start - add world name to message
-        ((AccessorPlayerList) playerList).accessor$getPlayerListLogger().info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.getName(), s1, playerIn.getEntityId(),
+        ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.getName(), s1, playerIn.getEntityId(),
             worldServer.getWorldInfo().getWorldName(), ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(),
             ((ServerWorldBridge) worldServer).bridge$getDimensionId(), playerIn.posX, playerIn.posY, playerIn.posZ);
         // Sponge end
@@ -294,7 +294,7 @@ public final class NetworkUtil {
         playerList.updateTimeAndWeatherForPlayer(playerIn, worldServer);
 
         // Sponge Start - Use the server's ResourcePack object
-        final Optional<ResourcePack> pack = ((Server) ((AccessorPlayerList) playerList).accessor$getPlayerListServer()).getDefaultResourcePack();
+        final Optional<ResourcePack> pack = ((Server) ((PlayerListAccessor) playerList).accessor$getPlayerListServer()).getDefaultResourcePack();
         pack.ifPresent(((Player) playerIn)::sendResourcePack);
         // Sponge End
 
@@ -306,7 +306,7 @@ public final class NetworkUtil {
         // This allows #getWorldScoreboard to function
         // as normal, without causing issues when it is initialized on the client.
 
-        ((ServerPlayerEntityBridge) playerIn).initScoreboard();
+        ((ServerPlayerEntityBridge) playerIn).bridge$initScoreboard();
 
         for (final PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
             handler.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
@@ -332,7 +332,7 @@ public final class NetworkUtil {
                     }
 
                     if (!playerIn.isRiding()) {
-                        ((AccessorPlayerList) playerList).accessor$getPlayerListLogger().warn("Couldn\'t reattach entity to player");
+                        ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().warn("Couldn\'t reattach entity to player");
                         worldServer.removeEntityDangerously(entity2);
 
                         for (final Entity entity3 : entity2.getRecursivePassengers()) {

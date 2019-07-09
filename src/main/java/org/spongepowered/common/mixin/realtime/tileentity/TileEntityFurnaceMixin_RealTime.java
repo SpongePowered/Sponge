@@ -64,7 +64,7 @@ public abstract class TileEntityFurnaceMixin_RealTime extends TileEntity {
         )
     )
     private void realTimeImpl$adjustForRealTimeBurnTime(final TileEntityFurnace self, final int modifier) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             this.furnaceBurnTime = modifier;
             return;
         }
@@ -94,7 +94,7 @@ public abstract class TileEntityFurnaceMixin_RealTime extends TileEntity {
         )
     )
     private void realTimeImpl$adjustForRealTimeCookTime(final TileEntityFurnace self, final int modifier) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             this.cookTime = modifier;
             return;
         }
@@ -121,7 +121,7 @@ public abstract class TileEntityFurnaceMixin_RealTime extends TileEntity {
         )
     )
     private void realTimeImpl$adjustForRealTimeCookTimeCooldown(final TileEntityFurnace self, final int modifier) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             this.cookTime = modifier;
             return;
         }

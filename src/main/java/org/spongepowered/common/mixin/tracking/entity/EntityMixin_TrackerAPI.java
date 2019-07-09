@@ -45,7 +45,7 @@ public abstract class EntityMixin_TrackerAPI implements Entity {
 
     @Override
     public Optional<UUID> getCreator() {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return Optional.empty();
         }
         final Optional<UUID> uuid = ((OwnershipTrackedBridge) this).tracked$getOwnerUUID();
@@ -57,7 +57,7 @@ public abstract class EntityMixin_TrackerAPI implements Entity {
 
     @Override
     public Optional<UUID> getNotifier() {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return Optional.empty();
         }
         final Optional<UUID> uuid = ((OwnershipTrackedBridge) this).tracked$getNotifierUUID();
@@ -69,7 +69,7 @@ public abstract class EntityMixin_TrackerAPI implements Entity {
 
     @Override
     public void setCreator(@Nullable UUID uuid) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
         ((OwnershipTrackedBridge) this).tracked$setTrackedUUID(PlayerTracker.Type.OWNER, uuid);
@@ -77,7 +77,7 @@ public abstract class EntityMixin_TrackerAPI implements Entity {
 
     @Override
     public void setNotifier(@Nullable UUID uuid) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
         ((OwnershipTrackedBridge) this).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, uuid);

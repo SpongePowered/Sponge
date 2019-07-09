@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.entity.ItemEntityBridge;
-import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
@@ -74,7 +73,7 @@ public abstract class EntityItemMixin extends EntityMixin implements ItemEntityB
 
     @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
     private double impl$changeSearchRadiusFromConfig(final double originalRadius) {
-        if (this.world.isRemote || ((WorldBridge) this.world).isFake()) {
+        if (this.world.isRemote || ((WorldBridge) this.world).bridge$isFake()) {
             return originalRadius;
         }
         if (this.cachedRadius == -1) {

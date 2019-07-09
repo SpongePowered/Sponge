@@ -127,7 +127,6 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
@@ -679,8 +678,8 @@ public class SpongeCommonEventFactory {
             } else {
 
                 final ChunkBridge mixinChunk = (ChunkBridge) ((WorldServer) world).getChunk(sourcePos);
-                mixinChunk.getBlockNotifier(sourcePos).ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
-                mixinChunk.getBlockOwner(sourcePos).ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
+                mixinChunk.bridge$getBlockNotifier(sourcePos).ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
+                mixinChunk.bridge$getBlockOwner(sourcePos).ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
             }
             Sponge.getCauseStackManager().pushCause(locatable);
 
@@ -954,7 +953,7 @@ public class SpongeCommonEventFactory {
         final boolean messageCancelled = false;
 
         if (entity instanceof EntityPlayerMP) {
-            originalChannel = channel = ((ServerPlayerEntityBridge) entity).getDeathMessageChannel();
+            originalChannel = channel = ((ServerPlayerEntityBridge) entity).bridge$getDeathMessageChannel();
         } else {
             originalChannel = MessageChannel.TO_NONE;
             channel = MessageChannel.TO_NONE;
@@ -1016,14 +1015,14 @@ public class SpongeCommonEventFactory {
             final boolean cancelled = SpongeImpl.postEvent(event);
             if (!cancelled) {
                 final EntityBridge spongeEntity = (EntityBridge) entity;
-                if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
+                if (!pos.equals(spongeEntity.bridge$getLastCollidedBlockPos())) {
                     final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
                     context.applyNotifierIfAvailable(notifier -> {
                         ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();
                         if (spongeChunk == null) {
                             spongeChunk = (ChunkBridge) world.getChunk(pos);
                         }
-                        spongeChunk.addTrackedBlockPosition(block, pos, notifier, PlayerTracker.Type.NOTIFIER);
+                        spongeChunk.bridge$addTrackedBlockPosition(block, pos, notifier, PlayerTracker.Type.NOTIFIER);
 
                     });
                 }
@@ -1066,7 +1065,7 @@ public class SpongeCommonEventFactory {
                 if (!cancelled && owner.isPresent()) {
                     final BlockPos targetPos = VecHelper.toBlockPos(impactPoint.getBlockPosition());
                     final ChunkBridge spongeChunk = (ChunkBridge) projectile.world.getChunk(targetPos);
-                    spongeChunk.addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, owner.get(), PlayerTracker.Type.NOTIFIER);
+                    spongeChunk.bridge$addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, owner.get(), PlayerTracker.Type.NOTIFIER);
                 }
             } else if (movingObjectPosition.entityHit != null) { // entity
                 final ArrayList<Entity> entityList = new ArrayList<>();
@@ -1207,7 +1206,7 @@ public class SpongeCommonEventFactory {
 
         try {
             if (displayName != null) {
-                ((ServerPlayerEntityBridge) player).setContainerDisplay(displayName);
+                ((ServerPlayerEntityBridge) player).bridge$setContainerDisplay(displayName);
             }
             if (inventory instanceof IInteractionObject) {
                 final String guiId = ((IInteractionObject) inventory).getGuiID();
@@ -1240,7 +1239,7 @@ public class SpongeCommonEventFactory {
             }
         } finally {
             if (displayName != null) {
-                ((ServerPlayerEntityBridge) player).setContainerDisplay(null);
+                ((ServerPlayerEntityBridge) player).bridge$setContainerDisplay(null);
             }
         }
 
@@ -1523,7 +1522,7 @@ public class SpongeCommonEventFactory {
         if (!Sponge.getEventManager().post(event)) {
             Explosion explosion = event.getExplosionBuilder().build();
             if (explosion.getRadius() > 0) {
-                ((ServerWorldBridge) ((Explosive) explosiveBridge).getWorld()).triggerInternalExplosion(explosion,
+                ((ServerWorldBridge) ((Explosive) explosiveBridge).getWorld()).bridge$triggerInternalExplosion(explosion,
                         e -> GeneralPhase.State.EXPLOSION.createPhaseContext().explosion(e));
             }
             return Optional.of((net.minecraft.world.Explosion) explosion);

@@ -59,7 +59,7 @@ public class ChunkMixin_TileEntityActivation {
         if (((WorldInfoBridge) this.world.getWorldInfo()).bridge$isValid()) {
             final ActivationCapability spongeTile = (ActivationCapability) tileEntityIn;
             final ChunkBridge spongeChunk = (ChunkBridge) this;
-            if (spongeChunk.isPersistedChunk()) {
+            if (spongeChunk.bridge$isPersistedChunk()) {
                 // always activate TE's in persisted chunks
                 spongeTile.activation$setDefaultActivationState(true);
                 return;

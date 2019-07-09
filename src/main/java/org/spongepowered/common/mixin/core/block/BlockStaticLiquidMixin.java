@@ -60,7 +60,7 @@ public class BlockStaticLiquidMixin {
     )
     private boolean impl$CheckEventsBeforeSpreadingFire(final World world, final BlockPos pos, final IBlockState blockState) {
         if (!ShouldFire.CHANGE_BLOCK_EVENT_PRE) { // If we're not throwing events... well..
-            if (!((WorldBridge) world).isFake()) {
+            if (!((WorldBridge) world).bridge$isFake()) {
                 return PhaseTracker.getInstance().setBlockState(((ServerWorldBridge) world), pos, blockState, BlockChangeFlags.ALL);
             }
             return world.setBlockState(pos, blockState);

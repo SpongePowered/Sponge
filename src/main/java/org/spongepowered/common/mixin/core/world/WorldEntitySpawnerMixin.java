@@ -103,7 +103,7 @@ public abstract class WorldEntitySpawnerMixin {
             Iterator<Chunk> chunkIterator = this.impl$eligibleSpawnChunks.iterator();
             while (chunkIterator.hasNext()) {
                 final Chunk chunk = chunkIterator.next();
-                ((ChunkBridge) chunk).setIsSpawning(false);
+                ((ChunkBridge) chunk).bridge$setIsSpawning(false);
                 chunkIterator.remove();
             }
 
@@ -120,7 +120,7 @@ public abstract class WorldEntitySpawnerMixin {
 
             for (final EntityPlayer entityplayer : world.playerEntities) {
                 // We treat players who do not affect spawning as "spectators"
-                if (!((PlayerEntityBridge) entityplayer).affectsSpawning() || entityplayer.isSpectator()) {
+                if (!((PlayerEntityBridge) entityplayer).bridge$affectsSpawning() || entityplayer.isSpectator()) {
                     continue;
                 }
 
@@ -134,7 +134,7 @@ public abstract class WorldEntitySpawnerMixin {
                             chunk =
                             ((ChunkProviderBridge) world.getChunkProvider())
                                 .bridge$getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
-                        if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).isPersistedChunk())) {
+                        if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).bridge$isPersistedChunk())) {
                             // Don't attempt to spawn in an unloaded chunk
                             continue;
                         }
@@ -145,9 +145,9 @@ public abstract class WorldEntitySpawnerMixin {
                         if (!flag && world.getWorldBorder().contains(chunkPos)) {
                             final PlayerChunkMapEntry playerchunkmapentry = world.getPlayerChunkMap().getEntry(chunkPos.x, chunkPos.z);
 
-                            if (playerchunkmapentry != null && playerchunkmapentry.isSentToPlayers() && !spongeChunk.isSpawning()) {
+                            if (playerchunkmapentry != null && playerchunkmapentry.isSentToPlayers() && !spongeChunk.bridge$isSpawning()) {
                                 this.impl$eligibleSpawnChunks.add(chunk);
-                                spongeChunk.setIsSpawning(true);
+                                spongeChunk.bridge$setIsSpawning(true);
                             }
                         }
                     }
@@ -322,7 +322,7 @@ public abstract class WorldEntitySpawnerMixin {
     {
         // Sponge start
         final Chunk chunk = ((ChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x, z);
-        if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).isPersistedChunk())) {
+        if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).bridge$isPersistedChunk())) {
             // Don't attempt to spawn in an unloaded chunk
             return null;
         }

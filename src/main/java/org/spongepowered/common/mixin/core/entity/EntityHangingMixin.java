@@ -103,7 +103,7 @@ public abstract class EntityHangingMixin extends EntityMixin {
         // Sponge Start - Check for client worlds,, don't care about them really. If it's server world, then we care.
         final double xOffset = ((float) this.facingDirection.getXOffset() * 0.15F);
         final double zOffset = ((float) this.facingDirection.getZOffset() * 0.15F);
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             // Sponge End
             EntityItem entityitem = new EntityItem(this.world, this.posX + xOffset, this.posY + (double) offsetY, this.posZ + zOffset, stack);
             entityitem.setDefaultPickupDelay();

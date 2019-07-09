@@ -85,6 +85,6 @@ public abstract class ContainerPlayerMixin extends ContainerMixin implements Con
 
     @Override
     protected void impl$markClean() {
-        ((InventoryPlayerBridge) this.player.inventory).markClean();
+        ((InventoryPlayerBridge) this.player.inventory).bridge$markClean();
     }
 }

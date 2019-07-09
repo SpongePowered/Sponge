@@ -48,7 +48,7 @@ public abstract class TileEntityBrewingStandMixin_RealTime extends TileEntity {
         )
     )
     private void realTimeImpl$adjustForRealTimeBrewTime(final TileEntityBrewingStand self, final int modifier) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             this.brewTime = modifier;
             return;
         }

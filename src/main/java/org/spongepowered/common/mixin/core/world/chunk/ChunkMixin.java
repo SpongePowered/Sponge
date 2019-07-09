@@ -135,7 +135,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     }
 
     @Override
-    public net.minecraft.world.chunk.Chunk[] getNeighborArray() {
+    public net.minecraft.world.chunk.Chunk[] bridge$getNeighborArray() {
         return this.impl$neighbors;
     }
 
@@ -145,22 +145,22 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     }
 
     @Override
-    public void markChunkDirty() {
+    public void bridge$markChunkDirty() {
         this.dirty = true;
     }
 
     @Override
-    public boolean isQueuedForUnload() {
+    public boolean bridge$isQueuedForUnload() {
         return this.unloadQueued;
     }
 
     @Override
-    public boolean isPersistedChunk() {
+    public boolean bridge$isPersistedChunk() {
         return this.impl$persistedChunk;
     }
 
     @Override
-    public void setPersistedChunk(final boolean flag) {
+    public void bridge$setPersistedChunk(final boolean flag) {
         this.impl$persistedChunk = flag;
         // update persisted status for entities and TE's
         for (final TileEntity tileEntity : this.tileEntities.values()) {
@@ -174,12 +174,12 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     }
 
     @Override
-    public boolean isSpawning() {
+    public boolean bridge$isSpawning() {
         return this.impl$isSpawning;
     }
 
     @Override
-    public void setIsSpawning(final boolean spawning) {
+    public void bridge$setIsSpawning(final boolean spawning) {
         this.impl$isSpawning = spawning;
     }
 
@@ -227,8 +227,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
             if (neighbor != null) {
                 final int neighborIndex = SpongeImpl.directionToIndex(direction);
                 final int oppositeNeighborIndex = SpongeImpl.directionToIndex(direction.getOpposite());
-                this.setNeighborChunk(neighborIndex, neighbor);
-                ((ChunkBridge) neighbor).setNeighborChunk(oppositeNeighborIndex, (net.minecraft.world.chunk.Chunk) (Object) this);
+                this.bridge$setNeighborChunk(neighborIndex, neighbor);
+                ((ChunkBridge) neighbor).bridge$setNeighborChunk(oppositeNeighborIndex, (net.minecraft.world.chunk.Chunk) (Object) this);
             }
         }
 
@@ -250,8 +250,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
             if (neighbor != null) {
                 final int neighborIndex = SpongeImpl.directionToIndex(direction);
                 final int oppositeNeighborIndex = SpongeImpl.directionToIndex(direction.getOpposite());
-                this.setNeighborChunk(neighborIndex, null);
-                ((ChunkBridge) neighbor).setNeighborChunk(oppositeNeighborIndex, null);
+                this.bridge$setNeighborChunk(neighborIndex, null);
+                ((ChunkBridge) neighbor).bridge$setNeighborChunk(oppositeNeighborIndex, null);
             }
         }
 
@@ -265,7 +265,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
     private void impl$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
         @SuppressWarnings("Guava") final Predicate<Entity> p_177414_4_, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
+        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
             return;
         }
 
@@ -290,7 +290,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At(value = "RETURN"))
     private void impl$throwCollsionEvent(final Class<? extends Entity> entityClass, final AxisAlignedBB aabb, final List<Entity> listToFill,
         @SuppressWarnings("Guava") final Predicate<Entity> p_177430_4_, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
+        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
             return;
         }
 
@@ -323,7 +323,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
         final IBlockState iblockstate1 = this.getBlockState(pos);
 
         // Sponge - reroute to new method that accepts snapshot to prevent a second snapshot from being created.
-        return setBlockState(pos, state, iblockstate1, BlockChangeFlags.ALL);
+        return bridge$setBlockState(pos, state, iblockstate1, BlockChangeFlags.ALL);
     }
 
     /**
@@ -341,7 +341,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     @Nullable
-    public IBlockState setBlockState(final BlockPos pos, final IBlockState newState, final IBlockState currentState, final BlockChangeFlag flag) {
+    public IBlockState bridge$setBlockState(final BlockPos pos, final IBlockState newState, final IBlockState currentState, final BlockChangeFlag flag) {
         final int xPos = pos.getX() & 15;
         final int yPos = pos.getY();
         final int zPos = pos.getZ() & 15;
@@ -385,7 +385,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
 
         // Sponge Start
         // Set up some default information variables for later processing
-        final boolean isFake = ((WorldBridge) this.world).isFake();
+        final boolean isFake = ((WorldBridge) this.world).bridge$isFake();
         final TileEntity existing = this.getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
         final PhaseContext<?> peek = isFake ? null : PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState state = isFake ? null : peek.state;
@@ -401,7 +401,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
         // if (block1 != block) // Sponge - Forge removes this change.
         // { // Sponge - remove unnecessary braces
         if (!this.world.isRemote) {
-            // Sponge - Redirect phase checks to use isFake in the event we have mods worlds doing silly things....
+            // Sponge - Redirect phase checks to use bridge$isFake in the event we have mods worlds doing silly things....
             // i.e. fake worlds. Likewise, avoid creating unnecessary snapshots/transactions
             // or triggering unprocessed captures when there are no events being thrown.
             if (!isFake && ShouldFire.CHANGE_BLOCK_EVENT && snapshot != null) {
@@ -426,7 +426,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
                         // Set tile to be captured, if it's showing up in removals later, it will
                         // be ignored since the transaction process will actually process
                         // the removal.
-                        ((TileEntityBridge) existing).setCaptured(true);
+                        ((TileEntityBridge) existing).bridge$setCaptured(true);
                         transaction.queuedRemoval = existing;
                         transaction.enqueueChanges(mixinWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
                     } else {
@@ -514,7 +514,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
             // to
             //  if (!this.world.isRemote && block1 != block && (!this.world.captureBlockSnapshots || block.hasTileEntity(state)))
             // which would normally translate to
-            // if (!isFake && currentBlock != newBlock && (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState))
+            // if (!bridge$isFake && currentBlock != newBlock && (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState))
             // but, because we have transactions to deal with, we have to still set the transaction to
             // queue on add as long as the flag deems it so.
             if (flag.performBlockPhysics()) {
@@ -546,14 +546,14 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
                     // If current owner exists, transfer it to newly created TE pos
                     // This is required for TE's that get created during move such as pistons and ComputerCraft turtles.
                     if (owner != null) {
-                        this.addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
+                        this.bridge$addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
                     }
                 }
                 if (transaction != null) {
                     // Go ahead and log the tile being replaced, the tile being removed will be at least already notified of removal
                     transaction.queueTileSet = tileentity;
                     if (tileentity != null) {
-                        ((TileEntityBridge) tileentity).setCaptured(true);
+                        ((TileEntityBridge) tileentity).bridge$setCaptured(true);
                         tileentity.setWorld(this.world);
                         tileentity.setPos(pos);// Set the position
                     }
@@ -586,7 +586,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     }
 
     @Override
-    public void removeTileEntity(final TileEntity removed) {
+    public void bridge$removeTileEntity(final TileEntity removed) {
         final TileEntity tileentity = this.tileEntities.remove(removed.getPos());
         if (tileentity != removed && tileentity != null) {
             // Because multiple requests to remove a tile entity could cause for checks
@@ -601,7 +601,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     }
 
     @Override
-    public void setTileEntity(final BlockPos pos, final TileEntity added) {
+    public void bridge$setTileEntity(final BlockPos pos, final TileEntity added) {
         if (added.getWorld() != this.world) {
             // Forge adds this because some mods do stupid things....
             added.setWorld(this.world);
@@ -623,8 +623,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
             .extendedState(extended)
             .worldId(((org.spongepowered.api.world.World) this.world).getUniqueId())
             .position(VecHelper.toVector3i(pos));
-        final Optional<UUID> creator = getBlockOwnerUUID(pos);
-        final Optional<UUID> notifier = getBlockNotifierUUID(pos);
+        final Optional<UUID> creator = bridge$getBlockOwnerUUID(pos);
+        final Optional<UUID> notifier = bridge$getBlockNotifierUUID(pos);
         creator.ifPresent(builder::creator);
         notifier.ifPresent(builder::notifier);
         if (existing != null) {
@@ -637,37 +637,37 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     // These methods are enabled in ChunkMixin_Tracker as a Mixin plugin
 
     @Override
-    public void addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) { }
+    public void bridge$addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) { }
 
     @Override
-    public Map<Integer, PlayerTracker> getTrackedIntPlayerPositions() { return Collections.emptyMap(); }
+    public Map<Integer, PlayerTracker> bridge$getTrackedIntPlayerPositions() { return Collections.emptyMap(); }
 
     @Override
-    public Map<Short, PlayerTracker> getTrackedShortPlayerPositions() { return Collections.emptyMap(); }
+    public Map<Short, PlayerTracker> bridge$getTrackedShortPlayerPositions() { return Collections.emptyMap(); }
 
     @Override
-    public Optional<User> getBlockOwner(final BlockPos pos) { return Optional.empty(); }
+    public Optional<User> bridge$getBlockOwner(final BlockPos pos) { return Optional.empty(); }
 
     @Override
-    public Optional<UUID> getBlockOwnerUUID(final BlockPos pos) { return Optional.empty(); }
+    public Optional<UUID> bridge$getBlockOwnerUUID(final BlockPos pos) { return Optional.empty(); }
 
     @Override
-    public Optional<User> getBlockNotifier(final BlockPos pos) { return Optional.empty(); }
+    public Optional<User> bridge$getBlockNotifier(final BlockPos pos) { return Optional.empty(); }
 
     @Override
-    public Optional<UUID> getBlockNotifierUUID(final BlockPos pos) { return Optional.empty(); }
+    public Optional<UUID> bridge$getBlockNotifierUUID(final BlockPos pos) { return Optional.empty(); }
 
     @Override
-    public void setBlockNotifier(final BlockPos pos, @Nullable final UUID uuid) { }
+    public void bridge$setBlockNotifier(final BlockPos pos, @Nullable final UUID uuid) { }
 
     @Override
-    public void setBlockCreator(final BlockPos pos, @Nullable final UUID uuid) { }
+    public void bridge$setBlockCreator(final BlockPos pos, @Nullable final UUID uuid) { }
 
     @Override
-    public void setTrackedIntPlayerPositions(final Map<Integer, PlayerTracker> trackedPositions) { }
+    public void bridge$setTrackedIntPlayerPositions(final Map<Integer, PlayerTracker> trackedPositions) { }
 
     @Override
-    public void setTrackedShortPlayerPositions(final Map<Short, PlayerTracker> trackedPositions) { }
+    public void bridge$setTrackedShortPlayerPositions(final Map<Short, PlayerTracker> trackedPositions) { }
 
     // Continuing the rest of the implementation
 
@@ -712,18 +712,18 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
 
     // Fast neighbor methods for internal use
     @Override
-    public void setNeighborChunk(final int index, @Nullable final net.minecraft.world.chunk.Chunk chunk) {
+    public void bridge$setNeighborChunk(final int index, @Nullable final net.minecraft.world.chunk.Chunk chunk) {
         this.impl$neighbors[index] = chunk;
     }
 
     @Nullable
     @Override
-    public net.minecraft.world.chunk.Chunk getNeighborChunk(final int index) {
+    public net.minecraft.world.chunk.Chunk bridge$getNeighborChunk(final int index) {
         return this.impl$neighbors[index];
     }
 
     @Override
-    public List<net.minecraft.world.chunk.Chunk> getNeighbors() {
+    public List<net.minecraft.world.chunk.Chunk> bridge$getNeighbors() {
         final List<net.minecraft.world.chunk.Chunk> neighborList = new ArrayList<>();
         for (final net.minecraft.world.chunk.Chunk neighbor : this.impl$neighbors) {
             if (neighbor != null) {
@@ -734,7 +734,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     }
 
     @Override
-    public boolean areNeighborsLoaded() {
+    public boolean bridge$areNeighborsLoaded() {
         for (int i = 0; i < 4; i++) {
             if (this.impl$neighbors[i] == null) {
                 return false;
@@ -745,17 +745,17 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     }
 
     @Override
-    public void setNeighbor(final Direction direction, @Nullable final net.minecraft.world.chunk.Chunk neighbor) {
+    public void bridge$setNeighbor(final Direction direction, @Nullable final net.minecraft.world.chunk.Chunk neighbor) {
         this.impl$neighbors[SpongeImpl.directionToIndex(direction)] = neighbor;
     }
 
     @Override
-    public long getScheduledForUnload() {
+    public long bridge$getScheduledForUnload() {
         return this.impl$scheduledForUnload;
     }
 
     @Override
-    public void setScheduledForUnload(final long scheduled) {
+    public void bridge$setScheduledForUnload(final long scheduled) {
         this.impl$scheduledForUnload = scheduled;
     }
 
@@ -767,7 +767,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     }
 
     @Override
-    public void fill(final ChunkPrimer primer) {
+    public void bridge$fill(final ChunkPrimer primer) {
         final boolean flag = this.world.provider.hasSkyLight();
         for (int x = 0; x < 16; ++x) {
             for (int z = 0; z < 16; ++z) {
@@ -793,11 +793,11 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     }
 
     @Override
-    public boolean isActive() {
-        if (this.isPersistedChunk()) {
+    public boolean bridge$isActive() {
+        if (this.bridge$isPersistedChunk()) {
             return true;
         }
-        return this.loaded && !this.isQueuedForUnload() && this.getScheduledForUnload() == -1;
+        return this.loaded && !this.bridge$isQueuedForUnload() && this.bridge$getScheduledForUnload() == -1;
     }
 
     @Override

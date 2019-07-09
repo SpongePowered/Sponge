@@ -30,7 +30,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
@@ -84,15 +83,15 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
     private void tracker$setUpUserService(@Nullable final World worldIn, final int x, final int z, final CallbackInfo ci) {
-        this.trackerImpl$userStorageService = worldIn != null && !((WorldBridge) worldIn).isFake()
+        this.trackerImpl$userStorageService = worldIn != null && !((WorldBridge) worldIn).bridge$isFake()
                                   ? null
                                   : SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
 
     }
 
     @Override
-    public void addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) {
-        if (((WorldBridge) this.world).isFake()) {
+    public void bridge$addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
         if (!PhaseTracker.getInstance().getCurrentState().tracksOwnersAndNotifiers()) {
@@ -163,18 +162,18 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     }
 
     @Override
-    public Map<Integer, PlayerTracker> getTrackedIntPlayerPositions() {
+    public Map<Integer, PlayerTracker> bridge$getTrackedIntPlayerPositions() {
         return this.trackerImpl$trackedIntBlockPositions;
     }
 
     @Override
-    public Map<Short, PlayerTracker> getTrackedShortPlayerPositions() {
+    public Map<Short, PlayerTracker> bridge$getTrackedShortPlayerPositions() {
         return this.trackerImpl$trackedShortBlockPositions;
     }
 
     @Override
-    public Optional<User> getBlockOwner(final BlockPos pos) {
-        if (((WorldBridge) this.world).isFake()) {
+    public Optional<User> bridge$getBlockOwner(final BlockPos pos) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return Optional.empty();
         }
         final int intKey = Constants.Sponge.blockPosToInt(pos);
@@ -195,8 +194,8 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     }
 
     @Override
-    public Optional<UUID> getBlockOwnerUUID(final BlockPos pos) {
-        if (((WorldBridge) this.world).isFake()) {
+    public Optional<UUID> bridge$getBlockOwnerUUID(final BlockPos pos) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return Optional.empty();
         }
         final int key = Constants.Sponge.blockPosToInt(pos);
@@ -217,8 +216,8 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     }
 
     @Override
-    public Optional<User> getBlockNotifier(final BlockPos pos) {
-        if (((WorldBridge) this.world).isFake()) {
+    public Optional<User> bridge$getBlockNotifier(final BlockPos pos) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return Optional.empty();
         }
         final int intKey = Constants.Sponge.blockPosToInt(pos);
@@ -237,8 +236,8 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     }
 
     @Override
-    public Optional<UUID> getBlockNotifierUUID(final BlockPos pos) {
-        if (((WorldBridge) this.world).isFake()) {
+    public Optional<UUID> bridge$getBlockNotifierUUID(final BlockPos pos) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return Optional.empty();
         }
         final int key = Constants.Sponge.blockPosToInt(pos);
@@ -305,8 +304,8 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     // Special setter used by API
     @Override
-    public void setBlockNotifier(final BlockPos pos, @Nullable final UUID uuid) {
-        if (((WorldBridge) this.world).isFake()) {
+    public void bridge$setBlockNotifier(final BlockPos pos, @Nullable final UUID uuid) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
         if (pos.getY() <= 255) {
@@ -334,8 +333,8 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     // Special setter used by API
     @Override
-    public void setBlockCreator(final BlockPos pos, @Nullable final UUID uuid) {
-        if (((WorldBridge) this.world).isFake()) {
+    public void bridge$setBlockCreator(final BlockPos pos, @Nullable final UUID uuid) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
         if (pos.getY() <= 255) {
@@ -360,18 +359,18 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     }
 
     @Override
-    public void setTrackedIntPlayerPositions(final Map<Integer, PlayerTracker> trackedPositions) {
+    public void bridge$setTrackedIntPlayerPositions(final Map<Integer, PlayerTracker> trackedPositions) {
         this.trackerImpl$trackedIntBlockPositions = trackedPositions;
     }
 
     @Override
-    public void setTrackedShortPlayerPositions(final Map<Short, PlayerTracker> trackedPositions) {
+    public void bridge$setTrackedShortPlayerPositions(final Map<Short, PlayerTracker> trackedPositions) {
         this.trackerImpl$trackedShortBlockPositions = trackedPositions;
     }
 
     @Inject(method = "onLoad", at = @At("HEAD"))
     private void trackerImpl$startLoad(final CallbackInfo callbackInfo) {
-        final boolean isFake = ((WorldBridge) this.world).isFake();
+        final boolean isFake = ((WorldBridge) this.world).bridge$isFake();
         if (!isFake) {
             if (!SpongeImplHooks.isMainThread()) {
                 final PrettyPrinter printer = new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
@@ -400,7 +399,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     @Inject(method = "onLoad", at = @At("RETURN"))
     private void trackerImpl$endLoad(final CallbackInfo callbackInfo) {
-        if (!((WorldBridge) this.world).isFake() && SpongeImplHooks.isMainThread()) {
+        if (!((WorldBridge) this.world).bridge$isFake() && SpongeImplHooks.isMainThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;
             }

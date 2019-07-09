@@ -59,8 +59,8 @@ public abstract class EntityEnderCrystalMixin extends EntityMixin implements Exp
     }
 
     @Override
-    public void bridge$setExplosionRadius(Optional<Integer> radius) {
-        this.explosionStrength = radius.orElse(Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH);
+    public void bridge$setExplosionRadius(@Nullable Integer radius) {
+        this.explosionStrength = radius == null ? Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH : radius;
     }
 
     @Redirect(method = "attackEntityFrom",

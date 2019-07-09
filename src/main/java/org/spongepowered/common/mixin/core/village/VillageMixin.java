@@ -43,7 +43,7 @@ public abstract class VillageMixin {
 
     @Inject(method = "isWoodDoor", at = @At("HEAD"), cancellable = true)
     private void impl$IgnoreEmptyChunks(final BlockPos pos, final CallbackInfoReturnable<Boolean> cir) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
         final Chunk chunk = ((ChunkProviderBridge) this.world.getChunkProvider())

@@ -28,8 +28,8 @@ import org.spongepowered.api.text.action.ClickAction;
 
 public interface ClickEventBridge {
 
-    ClickAction<?> getHandle();
+    ClickAction<?> bridge$getHandle();
 
-    void setHandle(ClickAction<?> handle);
+    void bridge$setHandle(ClickAction<?> handle);
 
 }

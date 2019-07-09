@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(PlayerList.class)
-public interface AccessorPlayerList {
+public interface PlayerListAccessor {
 
     @Accessor("server") MinecraftServer accessor$getPlayerListServer();
 

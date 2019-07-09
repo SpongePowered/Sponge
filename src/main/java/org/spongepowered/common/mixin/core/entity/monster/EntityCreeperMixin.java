@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
@@ -49,7 +50,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityCreeper.class)
-public abstract class EntityCreeperMixin extends EntityMobMixin implements FusedExplosiveBridge {
+public abstract class EntityCreeperMixin extends EntityMobMixin implements FusedExplosiveBridge, ExplosiveBridge {
 
     @Shadow private int timeSinceIgnited;
     @Shadow private int fuseTime;
@@ -73,8 +74,8 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
     }
 
     @Override
-    public void bridge$setExplosionRadius(Optional<Integer> radius) {
-        this.explosionRadius = radius.orElse(Constants.Entity.Creeper.DEFAULT_EXPLOSION_RADIUS);
+    public void bridge$setExplosionRadius(@Nullable final Integer radius) {
+        this.explosionRadius = radius == null ? Constants.Entity.Creeper.DEFAULT_EXPLOSION_RADIUS : radius;
     }
 
     @Override
@@ -83,7 +84,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
     }
 
     @Override
-    public void bridge$setFuseDuration(int fuseTicks) {
+    public void bridge$setFuseDuration(final int fuseTicks) {
         this.fuseDuration = fuseTicks;
     }
 
@@ -93,7 +94,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
     }
 
     @Override
-    public void bridge$setFuseTicksRemaining(int fuseTicks) {
+    public void bridge$setFuseTicksRemaining(final int fuseTicks) {
         // Note: The creeper will detonate when timeSinceIgnited >= fuseTime
         // assuming it is within range of a player. Every tick that the creeper
         // is not within a range of a player, timeSinceIgnited is decremented
@@ -104,7 +105,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
 
 
     @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
-    private void onStateChange(int state, CallbackInfo ci) {
+    private void onStateChange(final int state, final CallbackInfo ci) {
         bridge$setFuseDuration(this.fuseDuration);
         if (this.world.isRemote) {
             return;
@@ -120,7 +121,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
     }
 
     @Inject(method = "setCreeperState(I)V", at = @At("RETURN"))
-    private void postStateChange(int state, CallbackInfo ci) {
+    private void postStateChange(final int state, final CallbackInfo ci) {
         if (this.world.isRemote) {
             return;
         }
@@ -138,8 +139,8 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
     @Redirect(method = "explode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;createExplosion"
                                                                       + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;"))
     @Nullable
-    private net.minecraft.world.Explosion onExplode(net.minecraft.world.World world, Entity self, double x,
-        double y, double z, float strength, boolean smoking) {
+    private net.minecraft.world.Explosion onExplode(final net.minecraft.world.World world, final Entity self, final double x,
+        final double y, final double z, final float strength, final boolean smoking) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(new Location<>((World) world, new Vector3d(x, y, z)))
                 .sourceExplosive(((Creeper) this))
@@ -153,14 +154,14 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
     }
 
     @Inject(method = "explode", at = @At("RETURN"))
-    private void postExplode(CallbackInfo ci) {
+    private void postExplode(final CallbackInfo ci) {
         if (this.detonationCancelled) {
             this.detonationCancelled = this.isDead = false;
         }
     }
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityCreeper;ignite()V"))
-    private void onInteractIgnite(EntityCreeper self) {
+    private void onInteractIgnite(final EntityCreeper self) {
         this.interactPrimeCancelled = !bridge$shouldPrime();
         if (!this.interactPrimeCancelled) {
             ignite();
@@ -169,7 +170,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;damageItem"
                                                                               + "(ILnet/minecraft/entity/EntityLivingBase;)V"))
-    private void onDamageFlintAndSteel(ItemStack fas, int amount, EntityLivingBase player) {
+    private void onDamageFlintAndSteel(final ItemStack fas, final int amount, final EntityLivingBase player) {
         if (!this.interactPrimeCancelled) {
             fas.damageItem(amount, player);
             // TODO put this in the cause somehow?

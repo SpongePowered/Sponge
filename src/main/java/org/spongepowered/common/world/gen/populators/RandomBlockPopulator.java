@@ -82,7 +82,7 @@ public class RandomBlockPopulator implements RandomBlock {
         for (int i = 0; i < n; i++) {
             final Location<World> pos = chunkMin.add(random.nextInt(size.getX()), this.height.getFlooredAmount(random), random.nextInt(size.getZ()));
             if (this.check.test(pos)) {
-                if (((WorldBridge) world).isFake()) {
+                if (((WorldBridge) world).bridge$isFake()) {
                     world.setBlock(pos.getBlockPosition(), this.state, BlockChangeFlags.PHYSICS_OBSERVER);
                 } else { // This is the most direct call to set a block state, due to neighboring updates we don't want to cause.
                     PhaseTracker.getInstance().setBlockState((ServerWorldBridge) world, VecHelper.toBlockPos(pos), (IBlockState) this.state, BlockChangeFlags.PHYSICS_OBSERVER);

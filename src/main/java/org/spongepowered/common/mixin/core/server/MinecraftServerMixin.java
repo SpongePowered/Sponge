@@ -361,7 +361,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
             opcode = Opcodes.GETFIELD))
     private WorldProvider impl$getWorldProviderAndMaybeSetDimensionId(final WorldServer world) {
         //noinspection ConstantConditions
-        if (((WorldBridge) world).isFake() || world.getWorldInfo() == null) {
+        if (((WorldBridge) world).bridge$isFake() || world.getWorldInfo() == null) {
             // Return overworld provider
             return ((net.minecraft.world.World) Sponge.getServer().getWorlds().iterator().next()).provider;
         }

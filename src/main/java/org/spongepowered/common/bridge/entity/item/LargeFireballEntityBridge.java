@@ -31,7 +31,7 @@ import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 
 import javax.annotation.Nullable;
 
-public interface LargeFireballEntityBridge extends ExplosiveBridge {
+public interface LargeFireballEntityBridge {
 
     @Nullable
     Explosion bridge$throwExplosionEventAndExplode(World worldObj, @Nullable Entity nil,

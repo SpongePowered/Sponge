@@ -49,13 +49,13 @@ public class AffectsSpawningDataProcessor extends
 
     @Override
     protected boolean set(EntityPlayerMP entity, Boolean value) {
-        ((PlayerEntityBridge) entity).setAffectsSpawning(value);
+        ((PlayerEntityBridge) entity).bridge$setAffectsSpawning(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityPlayerMP entity) {
-        return Optional.of(((PlayerEntityBridge) entity).affectsSpawning());
+        return Optional.of(((PlayerEntityBridge) entity).bridge$affectsSpawning());
     }
 
     @Override

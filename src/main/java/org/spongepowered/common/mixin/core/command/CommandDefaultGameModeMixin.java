@@ -38,7 +38,7 @@ public abstract class CommandDefaultGameModeMixin {
     @Redirect(method = "setDefaultGameType",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setGameType(Lnet/minecraft/world/GameType;)V"))
     private void onSetGameType(final EntityPlayerMP entityPlayerMP, final GameType gameType) {
-        if (!((ServerPlayerEntityBridge) entityPlayerMP).hasForcedGamemodeOverridePermission()) {
+        if (!((ServerPlayerEntityBridge) entityPlayerMP).bridge$hasForcedGamemodeOverridePermission()) {
             entityPlayerMP.setGameType(gameType);
         }
     }

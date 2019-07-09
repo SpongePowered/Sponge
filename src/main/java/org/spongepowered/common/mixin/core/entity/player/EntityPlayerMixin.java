@@ -188,24 +188,24 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     }
 
     @Override
-    public int getExperienceSinceLevel() {
+    public int bridge$getExperienceSinceLevel() {
         return this.experienceTotal - ExperienceHolderUtils.xpAtLevel(this.experienceLevel);
     }
 
     @Override
-    public void setExperienceSinceLevel(final int experience) {
+    public void bridge$setExperienceSinceLevel(final int experience) {
         this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + experience;
         this.experience = (float) experience / this.xpBarCap();
     }
 
 
     @Override
-    public void recalculateTotalExperience() {
+    public void bridge$recalculateTotalExperience() {
         if (!this.dontRecalculateExperience) {
             boolean isInaccurate = ExperienceHolderUtils.getLevelForExp(this.experienceTotal) != this.experienceLevel;
             if (!isInaccurate) {
-                final float experienceLess = (this.getExperienceSinceLevel() - 0.5f) / this.xpBarCap();
-                final float experienceMore = (this.getExperienceSinceLevel() + 0.5f) / this.xpBarCap();
+                final float experienceLess = (this.bridge$getExperienceSinceLevel() - 0.5f) / this.xpBarCap();
+                final float experienceMore = (this.bridge$getExperienceSinceLevel() + 0.5f) / this.xpBarCap();
                 isInaccurate = this.experience < experienceLess || this.experience > experienceMore;
             }
             if (isInaccurate) {
@@ -225,7 +225,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
      */
     @Inject(method = "addExperienceLevel", at = @At("HEAD"), cancellable = true)
     private void onAddExperienceLevels(final int levels, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
         if (!this.dontRecalculateExperience) {
@@ -238,7 +238,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
     @Inject(method = "onEnchant", at = @At("RETURN"))
     private void onEnchantChangeExperienceLevels(final ItemStack item, final int levels, final CallbackInfo ci) {
-        recalculateTotalExperience();
+        bridge$recalculateTotalExperience();
     }
 
     /**
@@ -256,7 +256,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
             amount = i;
         }
 
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             this.experience += (float)amount / (float)this.xpBarCap();
 
             for(this.experienceTotal += amount; this.experience >= 1.0F; this.experience /= (float)this.xpBarCap()) {
@@ -273,7 +273,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         data.setTotalExp(finalExperience);
         final ImmutableSpongeExperienceHolderData
             immutable =
-            new ImmutableSpongeExperienceHolderData(this.experienceLevel, this.experienceTotal, this.getExperienceSinceLevel());
+            new ImmutableSpongeExperienceHolderData(this.experienceLevel, this.experienceTotal, this.bridge$getExperienceSinceLevel());
         final ChangeEntityExperienceEvent event = SpongeEventFactory.createChangeEntityExperienceEvent(
                 Sponge.getCauseStackManager().getCurrentCause(), immutable, data, (Player) this);
         SpongeImpl.postEvent(event);
@@ -310,7 +310,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     @Inject(method = "readEntityFromNBT", at = @At("RETURN"))
     private void recalculateXpOnLoad(final NBTTagCompound compound, final CallbackInfo ci) {
         // Fix the mistakes of /xp commands past.
-        recalculateTotalExperience();
+        bridge$recalculateTotalExperience();
     }
 
     /**
@@ -357,7 +357,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
     private boolean onSpongeIsPlayerSleeping(final EntityPlayer self) {
         if (self.isPlayerSleeping()) {
-            if (!((WorldBridge) this.world).isFake()) {
+            if (!((WorldBridge) this.world).bridge$isFake()) {
                 final CauseStackManager csm = Sponge.getCauseStackManager();
                 csm.pushCause(this);
                 final BlockPos bedLocation = this.bedLocation;
@@ -383,12 +383,12 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     }
 
     @Override
-    public boolean affectsSpawning() {
+    public boolean bridge$affectsSpawning() {
         return this.affectsSpawning && !this.isSpectator();
     }
 
     @Override
-    public void setAffectsSpawning(final boolean affectsSpawning) {
+    public void bridge$setAffectsSpawning(final boolean affectsSpawning) {
         this.affectsSpawning = affectsSpawning;
     }
 
@@ -436,7 +436,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         // Just sanity checks, if the player is not in a managed world, then don't bother either.
         // some fake players may exist in pseudo worlds as well, which means we don't want to
         // process on them since the world is not a valid world to plugins.
-        if (this.world instanceof WorldBridge && !((WorldBridge) this.world).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+        if (this.world instanceof WorldBridge && !((WorldBridge) this.world).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             // Note that this can potentially cause phase contexts to auto populate frames
             // we shouldn't rely so much on them, but sometimes the extra information is provided
             // through this method.
@@ -487,7 +487,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
             return null;
         }
         // Sponge Start - redirect to our handling to capture and throw events.
-        if (!((WorldBridge) this.world).isFake()) {
+        if (!((WorldBridge) this.world).bridge$isFake()) {
             return EntityUtil.playerDropItem(this, droppedItem, dropAround, traceItem);
         }
         // Sponge end
@@ -914,12 +914,12 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     }
 
     @Override
-    public void shouldRestoreInventory(final boolean restore) {
+    public void bridge$shouldRestoreInventory(final boolean restore) {
         this.shouldRestoreInventory = restore;
     }
 
     @Override
-    public boolean shouldRestoreInventory() {
+    public boolean bridge$shouldRestoreInventory() {
         return this.shouldRestoreInventory;
     }
 

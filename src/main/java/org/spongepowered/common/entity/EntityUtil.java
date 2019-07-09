@@ -1037,7 +1037,7 @@ public final class EntityUtil {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Nullable
     public static EntityItem playerDropItem(final PlayerEntityBridge mixinPlayer, final ItemStack droppedItem, final boolean dropAround, final boolean traceItem) {
-        mixinPlayer.shouldRestoreInventory(false);
+        mixinPlayer.bridge$shouldRestoreInventory(false);
         final EntityPlayer player = (EntityPlayer) mixinPlayer;
 
         final double posX = player.posX;
@@ -1148,7 +1148,7 @@ public final class EntityUtil {
         SpongeImpl.postEvent(dropEvent);
         if (dropEvent.isCancelled()) {
             if (mixinPlayer != null) {
-                mixinPlayer.shouldRestoreInventory(true);
+                mixinPlayer.bridge$shouldRestoreInventory(true);
             }
             return null;
         }
@@ -1165,7 +1165,7 @@ public final class EntityUtil {
         if (event.isCancelled()) {
             // Make sure the player is restoring inventories
             if (mixinPlayer != null) {
-                mixinPlayer.shouldRestoreInventory(true);
+                mixinPlayer.bridge$shouldRestoreInventory(true);
             }
             return null;
         }
@@ -1174,7 +1174,7 @@ public final class EntityUtil {
         if (item == null) {
             // Make sure the player is restoring inventories
             if (mixinPlayer != null) {
-                mixinPlayer.shouldRestoreInventory(true);
+                mixinPlayer.bridge$shouldRestoreInventory(true);
             }
             return null;
         }

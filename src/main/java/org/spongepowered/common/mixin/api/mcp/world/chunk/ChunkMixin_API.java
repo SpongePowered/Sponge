@@ -656,7 +656,7 @@ public abstract class ChunkMixin_API implements Chunk {
         int index = SpongeImpl.directionToIndex(direction);
         Direction secondary = SpongeImpl.getSecondaryDirection(direction);
         Chunk neighbor = null;
-        neighbor = (Chunk) ((ChunkBridge) this).getNeighborArray()[index];
+        neighbor = (Chunk) ((ChunkBridge) this).bridge$getNeighborArray()[index];
 
         if (neighbor == null && shouldLoad) {
             Vector3i neighborPosition = this.getPosition().add(SpongeImpl.getCardinalDirection(direction).asBlockOffset());

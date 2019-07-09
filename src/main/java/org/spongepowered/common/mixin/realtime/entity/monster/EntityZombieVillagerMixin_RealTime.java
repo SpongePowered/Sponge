@@ -60,7 +60,7 @@ public abstract class EntityZombieVillagerMixin_RealTime extends EntityLivingBas
         )
     )
     private int realTimeImpl$adjustForRealTimeConversionTimeBoost(final EntityZombieVillager self) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return this.getConversionProgress();
         }
         final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();

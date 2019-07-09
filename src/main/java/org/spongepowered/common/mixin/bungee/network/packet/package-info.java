@@ -23,4 +23,4 @@
  * THE SOFTWARE.
  */
 @org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.mixin.api.mcp.util;
+package org.spongepowered.common.mixin.bungee.network.packet;

@@ -27,7 +27,7 @@ package org.spongepowered.common.bridge.entity.item;
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 
-public interface TNTPrimedEntityBridge extends FusedExplosiveBridge {
+public interface TNTPrimedEntityBridge {
 
     void bridge$setDetonator(EntityLivingBase detonator);
 

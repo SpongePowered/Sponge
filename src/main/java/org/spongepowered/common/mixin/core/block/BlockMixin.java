@@ -159,7 +159,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
 
     @Inject(method = "dropBlockAsItem", at = @At("HEAD"), cancellable = true)
     private void checkBlockDropForTransactions(final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, final int fortune, final CallbackInfo ci) {
-        if (((WorldBridge) worldIn).isFake()) {
+        if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }
         final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldIn).bridge$getProxyAccess();
@@ -230,7 +230,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
     private void onDropBlockAsItemWithChanceHead(final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, final float chance, final int fortune,
         final CallbackInfo ci) {
-        if (!((WorldBridge) worldIn).isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
+        if (!((WorldBridge) worldIn).bridge$isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
             if (PhaseTracker.getInstance().getCurrentState().isRestoring()) {
                 ci.cancel();
                 return;
@@ -259,7 +259,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
     private void onDropBlockAsItemWithChanceReturn(final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, final float chance, final int fortune,
         final CallbackInfo ci) {
-        if (!((WorldBridge) worldIn).isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
+        if (!((WorldBridge) worldIn).bridge$isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
             if (this.data == null) {
                 // means that we didn't need to capture before
                 return;

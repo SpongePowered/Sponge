@@ -44,9 +44,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -54,35 +56,35 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityMinecartTNT.class)
-public abstract class EntityMinecartTNTMixin extends EntityMinecartMixin implements FusedExplosiveBridge {
+public abstract class EntityMinecartTNTMixin extends EntityMinecartMixin implements FusedExplosiveBridge, ExplosiveBridge {
 
     @Shadow private int minecartTNTFuse;
 
     @Shadow public abstract void ignite();
 
-    @Nullable private Integer explosionRadius = null;
-    private int fuseDuration = 80;
-    private boolean detonationCancelled;
-    @Nullable private Object primeCause;
+    @Nullable private Integer impl$explosionRadius = null;
+    private int impl$fuseDuration = Constants.Entity.Minecart.DEFAULT_FUSE_DURATION;
+    private boolean impl$detonationCancelled;
+    @Nullable private Object impl$primeCause;
 
     @Override
     public Optional<Integer> bridge$getExplosionRadius() {
-        return Optional.ofNullable(this.explosionRadius);
+        return Optional.ofNullable(this.impl$explosionRadius);
     }
 
     @Override
-    public void bridge$setExplosionRadius(final Optional<Integer> radius) {
-        this.explosionRadius = radius.orElse(null);
+    public void bridge$setExplosionRadius(final @Nullable Integer radius) {
+        this.impl$explosionRadius = radius;
     }
 
     @Override
     public int bridge$getFuseDuration() {
-        return this.fuseDuration;
+        return this.impl$fuseDuration;
     }
 
     @Override
     public void bridge$setFuseDuration(final int fuseTicks) {
-        this.fuseDuration = fuseTicks;
+        this.impl$fuseDuration = fuseTicks;
     }
 
     @Override
@@ -98,16 +100,16 @@ public abstract class EntityMinecartTNTMixin extends EntityMinecartMixin impleme
 
     @Inject(method = "attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z", at = @At("INVOKE"))
     private void onAttack(final DamageSource damageSource, final float amount, final CallbackInfoReturnable<Boolean> ci) {
-        this.primeCause = damageSource;
+        this.impl$primeCause = damageSource;
     }
 
     @Inject(method = "onActivatorRailPass(IIIZ)V", at = @At("INVOKE"))
     private void onActivate(final int x, final int y, final int z, final boolean receivingPower, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
         if (receivingPower) {
-            ((World) this.world).getNotifier(x, y, z).ifPresent(notifier -> this.primeCause = notifier);
+            ((World) this.world).getNotifier(x, y, z).ifPresent(notifier -> this.impl$primeCause = notifier);
         }
     }
 
@@ -121,12 +123,12 @@ public abstract class EntityMinecartTNTMixin extends EntityMinecartMixin impleme
 
     @Inject(method = "ignite", at = @At("RETURN"))
     private void postSpongeIgnite(final CallbackInfo ci) {
-        bridge$setFuseTicksRemaining(this.fuseDuration);
-        if (this.primeCause != null) {
-            Sponge.getCauseStackManager().pushCause(this.primeCause);
+        bridge$setFuseTicksRemaining(this.impl$fuseDuration);
+        if (this.impl$primeCause != null) {
+            Sponge.getCauseStackManager().pushCause(this.impl$primeCause);
         }
         bridge$postPrime();
-        if (this.primeCause != null) {
+        if (this.impl$primeCause != null) {
             Sponge.getCauseStackManager().popCause();
         }
     }
@@ -142,17 +144,17 @@ public abstract class EntityMinecartTNTMixin extends EntityMinecartMixin impleme
     private net.minecraft.world.Explosion onSpongeExplode(final net.minecraft.world.World worldObj, final Entity self, final double x, final double y, final double z,
         final float strength, final boolean smoking) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder().location(new Location<>((World) worldObj, new Vector3d(x, y, z))).sourceExplosive((TNTMinecart) this)
-                .radius(this.explosionRadius != null ? this.explosionRadius : strength).shouldPlaySmoke(smoking).shouldBreakBlocks(smoking))
+                .radius(this.impl$explosionRadius != null ? this.impl$explosionRadius : strength).shouldPlaySmoke(smoking).shouldBreakBlocks(smoking))
                         .orElseGet(() -> {
-                            this.detonationCancelled = true;
+                            this.impl$detonationCancelled = true;
                             return null;
                         });
     }
 
     @Inject(method = "explodeCart", at = @At("RETURN"))
     private void postExplode(final CallbackInfo ci) {
-        if (this.detonationCancelled) {
-            this.detonationCancelled = this.isDead = false;
+        if (this.impl$detonationCancelled) {
+            this.impl$detonationCancelled = this.isDead = false;
         }
     }
 

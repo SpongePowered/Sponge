@@ -45,7 +45,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public interface ServerPlayerEntityBridge extends PlayerEntityBridge {
+public interface ServerPlayerEntityBridge {
 
     default boolean bridge$usesCustomClient() {
         return false;
@@ -53,25 +53,23 @@ public interface ServerPlayerEntityBridge extends PlayerEntityBridge {
 
     int bridge$getViewDistance();
 
-    Optional<User> getBackingUser();
+    Optional<User> bridge$getBackingUser();
 
-    User getUserObject();
+    User bridge$getUserObject();
 
-    void forceRecreateUser();
+    void bridge$forceRecreateUser();
 
     void bridge$setVelocityOverride(@Nullable Vector3d velocity);
 
-    void sendBlockChange(BlockPos pos, IBlockState state);
+    void bridge$sendBlockChange(BlockPos pos, IBlockState state);
 
-    MessageChannel getDeathMessageChannel();
+    MessageChannel bridge$getDeathMessageChannel();
 
-    void initScoreboard();
+    void bridge$initScoreboard();
 
-    void removeScoreboardOnRespawn();
+    void bridge$removeScoreboardOnRespawn();
 
-    void setScoreboardOnRespawn(Scoreboard scoreboard);
-
-    ServerWorldBridge getMixinWorld();
+    void bridge$setScoreboardOnRespawn(Scoreboard scoreboard);
 
     void refreshXpHealthAndFood();
 
@@ -79,31 +77,31 @@ public interface ServerPlayerEntityBridge extends PlayerEntityBridge {
 
     void bridge$setPacketItem(ItemStack itemstack);
 
-    void refreshExp();
+    void bridge$refreshExp();
 
-    PlayerOwnBorderListener getWorldBorderListener();
+    PlayerOwnBorderListener bridge$getWorldBorderListener();
 
-    void setHealthScale(double scale);
+    void bridge$setHealthScale(double scale);
 
-    double getHealthScale();
+    double bridge$getHealthScale();
 
-    float getInternalScaledHealth();
+    float bridge$getInternalScaledHealth();
 
-    boolean isHealthScaled();
+    boolean bridge$isHealthScaled();
 
-    void setHealthScaled(boolean scaled);
+    void bridge$setHealthScaled(boolean scaled);
 
-    void refreshScaledHealth();
+    void bridge$refreshScaledHealth();
 
-    void injectScaledHealth(Collection<IAttributeInstance> set, boolean b);
+    void bridge$injectScaledHealth(Collection<IAttributeInstance> set, boolean b);
 
     void updateDataManagerForScaledHealth();
 
-    boolean hasForcedGamemodeOverridePermission();
+    boolean bridge$hasForcedGamemodeOverridePermission();
 
-    void setContainerDisplay(Text displayName);
+    void bridge$setContainerDisplay(Text displayName);
 
-    void setDelegateAfterRespawn(EntityPlayerMP delegate);
+    void bridge$setDelegateAfterRespawn(EntityPlayerMP delegate);
 
     Scoreboard bridge$getScoreboard();
 

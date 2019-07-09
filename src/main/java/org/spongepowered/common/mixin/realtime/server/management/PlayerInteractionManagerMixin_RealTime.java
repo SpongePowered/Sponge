@@ -62,7 +62,7 @@ public abstract class PlayerInteractionManagerMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeDiggingTime(final PlayerInteractionManager self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.world).isFake()) {
+        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.world).bridge$isFake()) {
             this.curblockDamage = modifier;
             return;
         }

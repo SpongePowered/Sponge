@@ -74,7 +74,7 @@ public class FilteredPopulator implements FlaggedPopulatorBridge, Populator {
     }
 
     @Override
-    public void populate(World world, Extent extent, Random rand, List<String> flags) {
+    public void bridge$populate(World world, Extent extent, Random rand, List<String> flags) {
         if (!this.check.test(extent)) {
             return;
         }
@@ -85,7 +85,7 @@ public class FilteredPopulator implements FlaggedPopulatorBridge, Populator {
     }
 
     @Override
-    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand, ImmutableBiomeVolume virtualBiomes, List<String> flags) {
+    public void bridge$populate(org.spongepowered.api.world.World world, Extent extent, Random rand, ImmutableBiomeVolume virtualBiomes, List<String> flags) {
         if (!this.check.test(extent)) {
             return;
         }

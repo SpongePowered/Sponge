@@ -41,14 +41,14 @@ public abstract class WorldServerMixin_UseActiveChunkForCollisions extends World
 
     @Override
     public boolean isFlammableWithin(AxisAlignedBB bb) {
-        if (((WorldBridge) this).isFake()) {
+        if (((WorldBridge) this).bridge$isFake()) {
             return super.isFlammableWithin(bb);
         }
         final Optional<ActiveChunkReferantBridge> source = PhaseTracker.getInstance().getCurrentContext().getSource(Entity.class)
             .map(entity -> (ActiveChunkReferantBridge) entity);
         if (source.isPresent()) {
             final ChunkBridge activeChunk = source.get().bridge$getActiveChunk();
-            if (activeChunk == null || activeChunk.isQueuedForUnload() || !activeChunk.areNeighborsLoaded()) {
+            if (activeChunk == null || activeChunk.bridge$isQueuedForUnload() || !activeChunk.bridge$areNeighborsLoaded()) {
                 return false;
             }
         } else {

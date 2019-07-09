@@ -435,7 +435,7 @@ public abstract class WorldMixin_API implements World {
     @SuppressWarnings({"unchecked"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        if (((WorldBridge) this).isFake()) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
+        if (((WorldBridge) this).bridge$isFake()) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
             return Collections.emptyList();
         }
         return (List<Chunk>) (List<?>) Lists.newArrayList(((WorldServer) (Object) this).getChunkProvider().getLoadedChunks());
@@ -781,13 +781,13 @@ public abstract class WorldMixin_API implements World {
                 final Optional<Chunk> chunk = getChunkAtBlock(xChunk, 0, zChunk);
                 if (chunk.isPresent()) {
                     ((ChunkBridge) chunk.get())
-                            .getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
+                            .bridge$getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
                 }
                 // If the intersections are near another chunk, its entities might be partially in the current chunk, so include it also
                 final ChunkBridge nearIntersections = getChunkNearIntersections(xChunk, zChunk, xCurrent, zCurrent, xNext, zNext);
                 if (nearIntersections != null) {
                     nearIntersections
-                            .getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
+                            .bridge$getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
                 }
                 // Remove the chunk from the distance
                 remainingDistance -= nextT - Math.max(0, currentT);
@@ -862,30 +862,30 @@ public abstract class WorldMixin_API implements World {
         final Vector3d direction = yDirection < 0 ? Vector3d.UNIT_Y.negate() : Vector3d.UNIT_Y;
         final double endY = start.getY() + yDirection * distance;
         final Vector3i chunkPos = SpongeChunkLayout.instance.forceToChunk(start.toInt());
-        ((ChunkBridge) getChunk(chunkPos).get()).getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
+        ((ChunkBridge) getChunk(chunkPos).get()).bridge$getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         // Check adjacent chunks if near them
         final int nearDistance = 2;
         // Neighbour -x chunk
         final Vector3i chunkBlockPos = SpongeChunkLayout.instance.forceToWorld(chunkPos);
         if (start.getX() - chunkBlockPos.getX() <= nearDistance) {
             ((ChunkBridge) getChunk(chunkPos.add(-1, 0, 0)).get())
-                    .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
+                    .bridge$getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         // Neighbour -z chunk
         if (start.getZ() - chunkBlockPos.getZ() <= nearDistance) {
             ((ChunkBridge) getChunk(chunkPos.add(0, 0, -1)).get())
-                    .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
+                    .bridge$getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         // Neighbour +x chunk
         final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
         if (chunkBlockPos.getX() + chunkWidth - start.getX() <= nearDistance) {
             ((ChunkBridge) getChunk(chunkPos.add(1, 0, 0)).get())
-                    .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
+                    .bridge$getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         // Neighbour +z chunk
         if (chunkBlockPos.getZ() + chunkWidth - start.getZ() <= nearDistance) {
             ((ChunkBridge) getChunk(chunkPos.add(0, 0, 1)).get())
-                    .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
+                    .bridge$getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         return intersecting;
     }

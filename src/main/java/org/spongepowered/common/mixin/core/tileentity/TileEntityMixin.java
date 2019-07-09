@@ -53,7 +53,6 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, TimingBridge, TrackableBridge {
 
-    private final boolean impl$isTileVanilla = getClass().getName().startsWith("net.minecraft.");
     @Nullable private Timing impl$timing;
     private boolean impl$isTicking = false;
     // Used by tracker config
@@ -85,7 +84,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
 
     @SuppressWarnings({"rawtypes"})
     @Inject(method = "register(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
-    private static void impl$registerTileEntityClassWithSpongeRegistry(final String name, final Class clazz, final CallbackInfo callbackInfo) {
+    private static void impl$registerTileEntityClassWithSpongeRegistry(final String name, @Nullable final Class clazz, final CallbackInfo callbackInfo) {
         if (clazz != null) {
             TileEntityTypeRegistryModule.getInstance().doTileEntityRegistration(clazz, name);
         }
@@ -119,7 +118,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      * @param compound The compound vanilla reads from (unused because we read from SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/tileentity/TileEntity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
+    @Inject(method = "readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     private void impl$ReadSpongeDataFromCompound(final NBTTagCompound compound, final CallbackInfo ci) {
         if (this.data$hasRootCompound()) {
             this.bridge$readFromSpongeCompound(this.data$getSpongeCompound());
@@ -146,11 +145,6 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
 
 
     @Override
-    public boolean isVanilla() {
-        return this.impl$isTileVanilla;
-    }
-
-    @Override
     public Timing bridge$getTimingsHandler() {
         if (this.impl$timing == null) {
             this.impl$timing = SpongeTimings.getTileEntityTiming((TileEntity) this);
@@ -160,28 +154,18 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
 
 
     @Override
-    public boolean shouldTick() {
+    public boolean bridge$shouldTick() {
         final ChunkBridge chunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
         // Don't tick if chunk is queued for unload or is in progress of being scheduled for unload
         // See https://github.com/SpongePowered/SpongeVanilla/issues/344
         if (chunk == null) {
             return false;
         }
-        if (!chunk.isActive()) {
+        if (!chunk.bridge$isActive()) {
             return false;
         }
 
         return true;
-    }
-
-    @Override
-    public boolean isTicking() {
-        return this.impl$isTicking;
-    }
-
-    @Override
-    public void setIsTicking(final boolean ticking) {
-        this.impl$isTicking = ticking;
     }
 
     @Override
@@ -205,12 +189,12 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
     }
 
     @Override
-    public boolean isCaptured() {
+    public boolean bridge$isCaptured() {
         return this.impl$isCaptured;
     }
 
     @Override
-    public void setCaptured(final boolean captured) {
+    public void bridge$setCaptured(final boolean captured) {
         this.impl$isCaptured = captured;
     }
 
@@ -242,7 +226,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
     }
 
     @Override
-    public String getPrettyPrinterString() {
+    public String bridge$getPrettyPrinterString() {
         return getPrettyPrinterStringHelper().toString();
     }
 }

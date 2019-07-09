@@ -56,10 +56,10 @@ public interface InventoryPlayerBridge {
     /**
      * Cleanup dirty Inventory State. E.g. after changes made through a scheduled task.
      */
-    void cleanupDirty();
+    void bridge$cleanupDirty();
 
     /**
      * Removes dirty Inventory State. Used after detectAndSendChanges.
      */
-    void markClean();
+    void bridge$markClean();
 }

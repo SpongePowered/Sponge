@@ -281,7 +281,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         Chunk chunk;
         if (this.baseGenerator instanceof SpongeGenerationPopulator && ((SpongeGenerationPopulator) this.baseGenerator).getCachedChunk() != null) {
             chunk = ((SpongeGenerationPopulator) this.baseGenerator).getCachedChunk();
-            ((ChunkBridge) chunk).fill(chunkprimer);
+            ((ChunkBridge) chunk).bridge$fill(chunkprimer);
         } else {
             chunk = new Chunk(this.world, chunkprimer, chunkX, chunkZ);
             this.cachedBiomes.fill(chunk.getBiomeArray());
@@ -362,7 +362,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                     context.buildAndSwitch();
 
                     if (populator instanceof FlaggedPopulatorBridge) {
-                        ((FlaggedPopulatorBridge) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
+                        ((FlaggedPopulatorBridge) populator).bridge$populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
                     } else {
                         populator.populate(spongeWorld, volume, this.rand, biomeBuffer);
                     }

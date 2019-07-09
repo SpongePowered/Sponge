@@ -131,7 +131,7 @@ public class TileEntityActivation {
         for (PlayerChunkMapEntry playerChunkMapEntry : playerChunkMap.entries) {
             for (EntityPlayer player : playerChunkMapEntry.players) {
                 final Chunk chunk = playerChunkMapEntry.chunk;
-                if (chunk == null || chunk.unloadQueued || ((ChunkBridge) chunk).isPersistedChunk()) {
+                if (chunk == null || chunk.unloadQueued || ((ChunkBridge) chunk).bridge$isPersistedChunk()) {
                     continue;
                 }
 
@@ -152,7 +152,7 @@ public class TileEntityActivation {
         for (Map.Entry<BlockPos, TileEntity> mapEntry : chunk.getTileEntityMap().entrySet()) {
             final TileEntity tileEntity = mapEntry.getValue();
             final ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
-            if (spongeTileEntity.activation$getSpongeTickRate() <= 0 || !((TileEntityBridge) tileEntity).shouldTick()) {
+            if (spongeTileEntity.activation$getSpongeTickRate() <= 0 || !((TileEntityBridge) tileEntity).bridge$shouldTick()) {
                 // never activate
                 continue;
             }
@@ -201,13 +201,13 @@ public class TileEntityActivation {
             return true;
         }
 
-        if (!activeChunk.isActive()) {
+        if (!activeChunk.bridge$isActive()) {
             return false;
         }
 
         long currentTick = SpongeImpl.getServer().getTickCounter();
         ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
-        boolean isActive = activeChunk.isPersistedChunk() || spongeTileEntity.activation$getActivatedTick() >= currentTick || spongeTileEntity.activation$getDefaultActivationState();
+        boolean isActive = activeChunk.bridge$isPersistedChunk() || spongeTileEntity.activation$getActivatedTick() >= currentTick || spongeTileEntity.activation$getDefaultActivationState();
 
         // Should this tileentity tick?
         if (!isActive) {

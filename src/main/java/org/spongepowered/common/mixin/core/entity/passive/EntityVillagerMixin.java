@@ -114,12 +114,6 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
         return Optional.ofNullable(this.impl$profession);
     }
 
-    @Nullable
-    @Override
-    public Profession bridge$getProfession() {
-        return this.impl$profession;
-    }
-
     @Override
     public void bridge$setProfession(final Profession profession) {
         this.impl$profession = checkNotNull(profession, "VillagerProfession cannot be null!");
@@ -144,7 +138,7 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
      */
     @SuppressWarnings("unchecked")
     @Overwrite
-    public void populateBuyingList() { // populateBuyingList
+    private void populateBuyingList() { // populateBuyingList
         // Sponge
         final List<Career> careers = (List<Career>) this.impl$profession.getCareers();
 

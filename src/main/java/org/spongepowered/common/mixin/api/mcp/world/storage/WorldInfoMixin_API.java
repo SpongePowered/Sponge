@@ -397,7 +397,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Override
     public boolean removeGameRule(final String gameRule) {
         checkNotNull(gameRule, "The gamerule cannot be null!");
-        return ((GameRulesBridge) this.gameRules).removeGameRule(gameRule);
+        return ((GameRulesBridge) this.gameRules).bridge$removeGameRule(gameRule);
     }
 
     @Override

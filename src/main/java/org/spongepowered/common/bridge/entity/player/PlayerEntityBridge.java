@@ -32,29 +32,29 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface PlayerEntityBridge extends EntityBridge {
+public interface PlayerEntityBridge {
 
-    @Nullable BlockPos getBedLocation(int dim);
+    @Nullable BlockPos bridge$getBedLocation(int dim);
 
-    boolean isSpawnForced(int dim);
+    boolean bridge$isSpawnForced(int dim);
 
     /**
      * {@link EntityPlayer#addExperienceLevel(int)} doesn't update the total
      * experience. This recalculates it for plugins to properly make use of it.
      */
-    void recalculateTotalExperience();
+    void bridge$recalculateTotalExperience();
 
-    boolean affectsSpawning();
+    boolean bridge$affectsSpawning();
 
-    void setAffectsSpawning(boolean affectsSpawning);
+    void bridge$setAffectsSpawning(boolean affectsSpawning);
 
-    boolean keepInventory();
+    boolean bridge$keepInventory();
 
-    void shouldRestoreInventory(boolean flag);
+    void bridge$shouldRestoreInventory(boolean flag);
 
-    boolean shouldRestoreInventory();
+    boolean bridge$shouldRestoreInventory();
 
-    int getExperienceSinceLevel();
+    int bridge$getExperienceSinceLevel();
 
-    void setExperienceSinceLevel(int experience);
+    void bridge$setExperienceSinceLevel(int experience);
 }

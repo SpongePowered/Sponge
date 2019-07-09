@@ -161,7 +161,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
         if (isCancelled) {
 
             final IBlockState state = this.player.world.getBlockState(pos);
-            ((ServerPlayerEntityBridge) this.player).sendBlockChange(pos, state);
+            ((ServerPlayerEntityBridge) this.player).bridge$sendBlockChange(pos, state);
             this.player.world.notifyBlockUpdate(pos, this.player.world.getBlockState(pos), state, 3);
             return;
         }
@@ -467,7 +467,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
             // Sanity checks on the world being used (hey, i don't know the rules about clients...
             // and if the world is in fact a responsible server world.
             final EnumActionResult result = actionresult.getType();
-            if (!(worldIn instanceof WorldBridge) || ((WorldBridge) worldIn).isFake()) {
+            if (!(worldIn instanceof WorldBridge) || ((WorldBridge) worldIn).bridge$isFake()) {
                 return result;
             }
 

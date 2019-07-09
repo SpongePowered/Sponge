@@ -86,7 +86,7 @@ public abstract class EntityFallingBlockMixin extends EntityMixin {
         // So, there's two cases here: either the world is not cared for, or the
         // ChangeBlockEvent is not being listened to. If it's not being listened to,
         // we need to specifically just proceed as normal.
-        if (((WorldBridge) this.world).isFake() || !ShouldFire.CHANGE_BLOCK_EVENT) {
+        if (((WorldBridge) this.world).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT) {
             return;
         }
         // Ideally, at this point we should still be in the EntityTickState and only this block should

@@ -125,8 +125,8 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         final net.minecraft.world.Explosion explosion = new net.minecraft.world.Explosion((net.minecraft.world.World) world,
                 (Entity) this.sourceExplosive, origin.getX(), origin.getY(), origin.getZ(), this.radius,
                 this.canCauseFire, this.shouldSmoke);
-        ((ExplosionBridge) explosion).setShouldBreakBlocks(this.shouldBreakBlocks);
-        ((ExplosionBridge) explosion).setShouldDamageEntities(this.shouldDamageEntities);
+        ((ExplosionBridge) explosion).bridge$setShouldBreakBlocks(this.shouldBreakBlocks);
+        ((ExplosionBridge) explosion).bridge$setShouldDamageEntities(this.shouldDamageEntities);
         return (Explosion) explosion;
     }
 }

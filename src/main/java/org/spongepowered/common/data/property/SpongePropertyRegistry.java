@@ -100,7 +100,7 @@ public class SpongePropertyRegistry implements PropertyRegistry {
         return Optional.of((PropertyStore<T>) this.delegateMap.get(propertyClass));
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Property<?, ?>> getPropertiesFor(final PropertyHolder holder) {
         final ImmutableList.Builder<Property<?, ?>> builder = ImmutableList.builder();
         if (this.tempRegistry != null) { // Still doing registrations

@@ -45,7 +45,6 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -107,7 +106,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
         context.getSource(Player.class)
             .ifPresent(player -> ((ChunkBridge) minecraftWorld.getChunk(notifyPos))
-                .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER));
+                .bridge$addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER));
     }
 
     @Override

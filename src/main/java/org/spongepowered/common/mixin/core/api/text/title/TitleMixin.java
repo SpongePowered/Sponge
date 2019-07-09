@@ -53,7 +53,7 @@ public abstract class TitleMixin implements TitleBridge {
     private List<SPacketTitle> packets;
 
     @Override
-    public void send(EntityPlayerMP player) {
+    public void bridge$send(EntityPlayerMP player) {
         for (SPacketTitle packet : this.getPackets()) {
             player.connection.sendPacket(packet);
         }

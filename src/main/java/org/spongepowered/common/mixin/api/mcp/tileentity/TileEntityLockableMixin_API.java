@@ -44,7 +44,7 @@ import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.tileentity.DefaultSingleBlockCarrier;
+import org.spongepowered.common.item.inventory.DefaultSingleBlockCarrier;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;

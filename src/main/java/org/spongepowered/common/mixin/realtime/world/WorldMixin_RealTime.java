@@ -43,7 +43,7 @@ public abstract class WorldMixin_RealTime implements RealTimeTrackingBridge {
 
     @Override
     public long realTimeBridge$getRealTimeTicks() {
-        if (((WorldBridge) this).isFake()) {
+        if (((WorldBridge) this).bridge$isFake()) {
             return 1;
         }
         if (this.getMinecraftServer() != null) {

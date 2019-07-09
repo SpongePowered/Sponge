@@ -52,13 +52,13 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected boolean set(Entity container, Text value) {
-        ((EntityBridge) container).setDisplayName(value);
+        ((EntityBridge) container).bridge$setDisplayName(value);
         return true;
     }
 
     @Override
     protected Optional<Text> getVal(Entity container) {
-        return Optional.ofNullable(((EntityBridge) container).getDisplayNameText());
+        return Optional.ofNullable(((EntityBridge) container).bridge$getDisplayNameText());
     }
 
     @Override
@@ -72,7 +72,7 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
         final Optional<Text> optional = this.getValueFromContainer(container);
         if (optional.isPresent()) {
             try {
-                ((EntityBridge) container).setDisplayName(null);
+                ((EntityBridge) container).bridge$setDisplayName(null);
                 return builder.replace(new ImmutableSpongeValue<>(this.key, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
             } catch (Exception e) {
                 SpongeImpl.getLogger().error("There was an issue resetting the display name on an entity!", e);

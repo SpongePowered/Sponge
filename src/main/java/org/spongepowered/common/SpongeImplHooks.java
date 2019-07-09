@@ -430,11 +430,11 @@ public final class SpongeImplHooks {
     }
 
     public static BlockPos getBedLocation(final EntityPlayer playerIn, final int dimension) {
-        return ((PlayerEntityBridge) playerIn).getBedLocation(dimension);
+        return ((PlayerEntityBridge) playerIn).bridge$getBedLocation(dimension);
     }
 
     public static boolean isSpawnForced(final EntityPlayer playerIn, final int dimension) {
-        return ((PlayerEntityBridge) playerIn).isSpawnForced(dimension);
+        return ((PlayerEntityBridge) playerIn).bridge$isSpawnForced(dimension);
     }
 
     public static Inventory toInventory(final Object inventory, @Nullable final Object forgeItemHandler) {

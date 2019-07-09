@@ -410,7 +410,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     /**
-     * Specifically called by {@link ChunkMixin#setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)} while it is preparing
+     * Specifically called by {@link ChunkMixin#bridge$setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)} while it is preparing
      * various transactional aspects, such as potential tile entity removals, replacements, etc. Specifically should never be called outside
      * of that reaction since {@link BlockTransaction#enqueueChanges(SpongeProxyBlockAccess, MultiBlockCaptureSupplier)}
      * does not get called automatically, it is called prior to queueing potential tile replacements, and prior to calling to
@@ -466,7 +466,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     if (isSame) {
                         changeBlock.ignoreBreakBlockLogic = true;
                         changeBlock.queuedRemoval = null;
-                        ((TileEntityBridge) newTile).setCaptured(false);
+                        ((TileEntityBridge) newTile).bridge$setCaptured(false);
                         break;
                     }
                 }
@@ -710,7 +710,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     if (transaction.tilesAtTransaction != null) {
                         transaction.tilesAtTransaction.forEach((pos, tile) -> {
                             if (PRINT_TRANSACTIONS) {
-                                printer.addWrapped(120, "  %s : %s, %s", "UnaffectedTile", pos, tile == null ? "null" : ((TileEntityBridge) tile).getPrettyPrinterString());
+                                printer.addWrapped(120, "  %s : %s, %s", "UnaffectedTile", pos, tile == null ? "null" : ((TileEntityBridge) tile).bridge$getPrettyPrinterString());
                             }
                             if (access != null) {
                                 access.pushTile(pos, tile);

@@ -52,7 +52,7 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
             player.experienceTotal = ExperienceHolderUtils.xpAtLevel(value);
             player.experience = 0;
             player.experienceLevel = value;
-            ((ServerPlayerEntityBridge) container).refreshExp();
+            ((ServerPlayerEntityBridge) container).bridge$refreshExp();
             final ImmutableBoundedValue<Integer> oldImmutableValue = constructImmutableValue(oldValue);
             return DataTransactionResult.successReplaceResult(newValue, oldImmutableValue);
         }

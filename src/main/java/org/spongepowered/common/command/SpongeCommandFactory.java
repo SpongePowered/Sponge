@@ -388,7 +388,7 @@ public class SpongeCommandFactory {
                 }
 
                 protected Text getChunksInfo(WorldServer worldserver) {
-                    if (((WorldBridge) worldserver).isFake() || worldserver.getWorldInfo() == null) {
+                    if (((WorldBridge) worldserver).bridge$isFake() || worldserver.getWorldInfo() == null) {
                         return Text.of(NEWLINE_TEXT, "Fake world");
                     }
                     return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(((ServerWorldBridge) worldserver).bridge$getDimensionId()), NEWLINE_TEXT,
@@ -533,8 +533,8 @@ public class SpongeCommandFactory {
                 final IBlockState blockState = worldServer.getBlockState(rayTraceResult.getBlockPos());
                 final BlockState spongeState = (BlockState) blockState;
                 src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Type: ", TextColors.BLUE, TextStyles.RESET, spongeState.getId()));
-                src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Owner: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.getBlockOwner(rayTraceResult.getBlockPos())));
-                src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Notifier: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.getBlockNotifier(rayTraceResult.getBlockPos())));
+                src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Owner: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.bridge$getBlockOwner(rayTraceResult.getBlockPos())));
+                src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Notifier: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.bridge$getBlockNotifier(rayTraceResult.getBlockPos())));
                 return CommandResult.success();
             })
             .build();

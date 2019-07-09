@@ -65,37 +65,25 @@ public interface EntityBridge {
      */
     void bridge$setWorldTracked(boolean tracked);
 
-    boolean removePassengers(DismountType type);
+    boolean bridge$removePassengers(DismountType type);
 
     void bridge$setImplVelocity(Vector3d velocity);
 
-    @Nullable Text getDisplayNameText();
+    @Nullable Text bridge$getDisplayNameText();
 
-    void setDisplayName(@Nullable Text displayName);
+    void bridge$setDisplayName(@Nullable Text displayName);
 
-    void setCurrentCollidingBlock(BlockState state);
-
-    @Nullable BlockState getCurrentCollidingBlock();
-
-    @Nullable BlockPos getLastCollidedBlockPos();
-
-    boolean isVanilla();
-
-    void setDestructCause(Cause cause);
-
-    void bridge$setLocationAndAngles(Location<World> location);
+    @Nullable BlockPos bridge$getLastCollidedBlockPos();
 
     void bridge$setLocationAndAngles(Transform<World> transform);
 
-    void createForgeCapabilities();
-
-    default void onJoinWorld() {
+    default void bridge$onJoinWorld() {
 
     }
 
-    boolean shouldTick();
+    boolean bridge$shouldTick();
 
-    default void clearWrappedCaptureList() {
+    default void bridge$clearWrappedCaptureList() {
 
     }
 
@@ -108,7 +96,7 @@ public interface EntityBridge {
      *
      * @param phaseContext The context, for whatever reason in the future
      */
-    default void onCancelledBlockChange(EntityTickContext phaseContext) {
+    default void bridge$onCancelledBlockChange(EntityTickContext phaseContext) {
 
     }
 }

@@ -129,7 +129,7 @@ public abstract class SlotCraftingMixin extends Slot {
      */
     @Inject(method = "onTake", cancellable = true, at = @At("RETURN"))
     private void afterTake(final EntityPlayer thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
-        if (((WorldBridge) thePlayer.world).isFake()) {
+        if (((WorldBridge) thePlayer.world).bridge$isFake()) {
             return;
         }
         ((ContainerBridge) thePlayer.openContainer).bridge$detectAndSendChanges(true);

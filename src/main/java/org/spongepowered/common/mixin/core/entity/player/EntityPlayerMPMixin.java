@@ -124,7 +124,6 @@ import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.scoreboard.TeamBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -172,7 +171,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     // Used to restore original item received in a packet after canceling an event
     private ItemStack impl$packetItem = ItemStack.EMPTY;
-    private User impl$user = getUserObject();
+    private User impl$user = bridge$getUserObject();
     private Set<SkinPart> impl$skinParts = Sets.newHashSet();
     private int impl$viewDistance;
     @Nullable private GameType impl$pendingGameType;
@@ -214,7 +213,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
 
     @Override
-    public boolean keepInventory() {
+    public boolean bridge$keepInventory() {
         return this.keepInventory;
     }
 
@@ -327,7 +326,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean keepInventory(final GameRules gameRules, final String key, final EntityPlayerMP corpse, final boolean keepEverything) {
-        final boolean keep = ((PlayerEntityBridge) corpse).keepInventory(); // Override Keep Inventory GameRule?
+        final boolean keep = ((PlayerEntityBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
         if (!keep) {
             // Copy corpse inventory to respawned player
             this.inventory.copyInventory(corpse.inventory);
@@ -335,11 +334,6 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             corpse.inventory.clear();
         }
         return keep;
-    }
-
-    @Override
-    public ServerWorldBridge getMixinWorld() {
-        return ((ServerWorldBridge) this.world);
     }
 
     /* // gabizou comment - Due to forge changes, this is now required to be injected/overwritten
@@ -389,7 +383,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public void forceRecreateUser() {
+    public void bridge$forceRecreateUser() {
         final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
         if (!(service instanceof SpongeUserStorageService)) {
             SpongeImpl.getLogger().error("Not re-creating User object for player {}, as UserStorageServer has been replaced with {}", this.shadow$getName(), service);
@@ -399,15 +393,15 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public Optional<User> getBackingUser() {
-        // may be null during initialization, mainly used to avoid potential stack overflow with #getUserObject
+    public Optional<User> bridge$getBackingUser() {
+        // may be null during initialization, mainly used to avoid potential stack overflow with #bridge$getUserObject
         return Optional.ofNullable(this.impl$user);
     }
 
     @Override
-    public User getUserObject() {
+    public User bridge$getUserObject() {
         final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
-        if (this.isFake) { // Fake players are recogizeable through the field set up with isFake.
+        if (this.isFake) { // Fake players are recogizeable through the field set up with bridge$isFake.
             return service.getOrCreate(SpongeUserStorageService.FAKEPLAYER_PROFILE);
         }
         return service.getOrCreate((GameProfile) this.getGameProfile());
@@ -493,7 +487,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         this.lastExperience = -1;
         this.lastHealth = -1.0F;
         this.lastFoodLevel = -1;
-        refreshScaledHealth();
+        bridge$refreshScaledHealth();
     }
 
     @Override
@@ -502,7 +496,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public void refreshExp() {
+    public void bridge$refreshExp() {
         this.lastExperience = -1;
     }
 
@@ -522,7 +516,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public void initScoreboard() {
+    public void bridge$initScoreboard() {
         ((ServerScoreboardBridge) this.getWorldScoreboard()).bridge$addPlayer((EntityPlayerMP) (Object) this, true);
     }
 
@@ -540,18 +534,18 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public void setScoreboardOnRespawn(final Scoreboard scoreboard) {
+    public void bridge$setScoreboardOnRespawn(final Scoreboard scoreboard) {
         this.impl$spongeScoreboard = scoreboard;
         ((ServerScoreboardBridge) ((Player) this).getScoreboard()).bridge$addPlayer((EntityPlayerMP) (Object) this, false);
     }
 
     @Override
-    public void removeScoreboardOnRespawn() {
+    public void bridge$removeScoreboardOnRespawn() {
         ((ServerScoreboardBridge) ((Player) this).getScoreboard()).bridge$removePlayer((EntityPlayerMP) (Object) this, false);
     }
 
     @Override
-    public MessageChannel getDeathMessageChannel() {
+    public MessageChannel bridge$getDeathMessageChannel() {
         final EntityPlayerMP player = (EntityPlayerMP) (Object) this;
         if (player.world.getGameRules().getBoolean("showDeathMessages")) {
             @Nullable final Team team = player.getTeam();
@@ -667,17 +661,17 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @Override
     @Nullable
-    public Text getDisplayNameText() {
+    public Text bridge$getDisplayNameText() {
         return Text.of(shadow$getName());
     }
 
     @Override
-    public void setDisplayName(@Nullable final Text displayName) {
+    public void bridge$setDisplayName(@Nullable final Text displayName) {
         // Do nothing
     }
 
     @Override
-    public void sendBlockChange(final BlockPos pos, final IBlockState state) {
+    public void bridge$sendBlockChange(final BlockPos pos, final IBlockState state) {
         final SPacketBlockChange packet = new SPacketBlockChange();
         packet.blockPosition = pos;
         packet.blockState = state;
@@ -740,7 +734,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public PlayerOwnBorderListener getWorldBorderListener() {
+    public PlayerOwnBorderListener bridge$getWorldBorderListener() {
         return this.borderListener;
     }
 
@@ -775,30 +769,30 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             )
     )
     private float spongeGetScaledHealthForPacket(final EntityPlayerMP entityPlayerMP) {
-        return getInternalScaledHealth();
+        return bridge$getInternalScaledHealth();
     }
 
     @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 0))
     private void updateHealthPriorToArmor(final CallbackInfo ci) {
-        refreshScaledHealth();
+        bridge$refreshScaledHealth();
     }
 
     @Override
-    public void setHealthScale(final double scale) {
+    public void bridge$setHealthScale(final double scale) {
         checkArgument(scale > 0, "Health scale must be greater than 0!");
         checkArgument(scale < Float.MAX_VALUE, "Health scale cannot exceed Float.MAX_VALUE!");
         this.impl$healthScale = scale;
         this.impl$healthScaling = true;
-        refreshScaledHealth();
+        bridge$refreshScaledHealth();
     }
 
     @Override
-    public void refreshScaledHealth() {
+    public void bridge$refreshScaledHealth() {
         // We need to use the dirty instances to signify that the player needs to ahve it updated, instead
         // of modifying the attribute instances themselves, we bypass other potentially detrimental logi
         // that would otherwise break the actual health scaling.
         final Set<IAttributeInstance> dirtyInstances = ((AttributeMap) this.getAttributeMap()).getDirtyInstances();
-        injectScaledHealth(dirtyInstances, true);
+        bridge$injectScaledHealth(dirtyInstances, true);
 
         // Send the new information to the client.
         sendHealthUpdate();
@@ -809,11 +803,11 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     private void sendHealthUpdate() {
-        this.connection.sendPacket(new SPacketUpdateHealth(getInternalScaledHealth(), getFoodStats().getFoodLevel(), getFoodStats().getSaturationLevel()));
+        this.connection.sendPacket(new SPacketUpdateHealth(bridge$getInternalScaledHealth(), getFoodStats().getFoodLevel(), getFoodStats().getSaturationLevel()));
     }
 
     @Override
-    public void injectScaledHealth(final Collection<IAttributeInstance> set, final boolean force) {
+    public void bridge$injectScaledHealth(final Collection<IAttributeInstance> set, final boolean force) {
         if (!this.impl$healthScaling && !force) {
             return;
         }
@@ -852,12 +846,12 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public double getHealthScale() {
+    public double bridge$getHealthScale() {
         return this.impl$healthScale;
     }
 
     @Override
-    public float getInternalScaledHealth() {
+    public float bridge$getInternalScaledHealth() {
         if (this.impl$healthScaling) {
             // Micro-optimization so we don't have to recalculate it all the time
             if (this.cachedHealth != -1 && this.getHealth() == this.cachedHealth) {
@@ -894,38 +888,38 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public boolean isHealthScaled() {
+    public boolean bridge$isHealthScaled() {
         return this.impl$healthScaling;
     }
 
     @Override
-    public void setHealthScaled(final boolean scaled) {
+    public void bridge$setHealthScaled(final boolean scaled) {
         this.impl$healthScaling = scaled;
     }
 
     @Override
     public void updateDataManagerForScaledHealth() {
-        this.dataManager.set(EntityLivingBase.HEALTH, getInternalScaledHealth());
+        this.dataManager.set(EntityLivingBase.HEALTH, bridge$getInternalScaledHealth());
     }
 
     @Redirect(method = "readEntityFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getForceGamemode()Z"))
     private boolean onCheckForcedGameMode(final MinecraftServer minecraftServer) {
-        return minecraftServer.getForceGamemode() && !hasForcedGamemodeOverridePermission();
+        return minecraftServer.getForceGamemode() && !bridge$hasForcedGamemodeOverridePermission();
     }
 
     @Override
-    public boolean hasForcedGamemodeOverridePermission() {
+    public boolean bridge$hasForcedGamemodeOverridePermission() {
         final Player player = (Player) this;
         return player.hasPermission(player.getActiveContexts(), Constants.Permissions.FORCE_GAMEMODE_OVERRIDE);
     }
 
     @Override
-    public void setDelegateAfterRespawn(EntityPlayerMP delegate) {
+    public void bridge$setDelegateAfterRespawn(EntityPlayerMP delegate) {
         this.impl$delegate = delegate;
     }
 
     @Override
-    public void setContainerDisplay(final Text displayName) {
+    public void bridge$setContainerDisplay(final Text displayName) {
         this.displayName = displayName;
     }
 

@@ -54,7 +54,7 @@ public abstract class EntityPlayerMPMixin_RealTime extends EntityPlayerMixin_Rea
         )
     )
     private void realTimeImpl$adjustForRealTimePortalCooldown(final EntityPlayerMP self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer((EntityPlayerMP) (Object) this) || ((WorldBridge) this.world).isFake()) {
+        if (SpongeImplHooks.isFakePlayer((EntityPlayerMP) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
             this.timeUntilPortal = modifier;
             return;
         }

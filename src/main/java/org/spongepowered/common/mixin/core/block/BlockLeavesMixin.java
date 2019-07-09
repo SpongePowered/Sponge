@@ -105,7 +105,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
     private void destroy(final net.minecraft.world.World worldIn, final BlockPos pos) {
         final IBlockState state = worldIn.getBlockState(pos);
         // Sponge Start - Cause tracking
-        if (!((WorldBridge) worldIn).isFake()) {
+        if (!((WorldBridge) worldIn).bridge$isFake()) {
             final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
             final IPhaseState<?> currentState = peek.state;
             try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext()

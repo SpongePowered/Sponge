@@ -90,7 +90,7 @@ public class ItemEnderEyeMixin extends Item {
     )
     private void implThrowForPreEvent(final World worldIn, final EntityPlayer playerIn, final EnumHand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, final RayTraceResult rayTraceResult, @Nullable final BlockPos targetPos) {
-        if (targetPos != null && !((WorldBridge) worldIn).isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+        if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.height / 2.0F), playerIn.posZ);
             final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
                 targetPosition);
@@ -116,7 +116,7 @@ public class ItemEnderEyeMixin extends Item {
     @Surrogate
     private void implThrowForPreEvent(final World worldIn, final EntityPlayer playerIn, final EnumHand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
-        if (targetPos != null && !((WorldBridge) worldIn).isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+        if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.height / 2.0F), playerIn.posZ);
             final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
                 targetPosition);
@@ -167,7 +167,7 @@ public class ItemEnderEyeMixin extends Item {
     private void implSetShooter(final World worldIn, final EntityPlayer playerIn, final EnumHand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack playerStack, final RayTraceResult result,
         final BlockPos targetPos, final EntityEnderEye enderEye) {
-        if (((WorldBridge) worldIn).isFake()) {
+        if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }
         ((EyeOfEnder) enderEye).setShooter((ProjectileSource) playerIn);
@@ -192,7 +192,7 @@ public class ItemEnderEyeMixin extends Item {
     private void implSetShooter(final World worldIn, final EntityPlayer playerIn, final EnumHand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack playerStack,
         final BlockPos targetPos, final EntityEnderEye enderEye, final CallbackInfoReturnable<ActionResult<ItemStack>> preEventCir) {
-        if (((WorldBridge) worldIn).isFake()) {
+        if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }
         ((EyeOfEnder) enderEye).setShooter((ProjectileSource) playerIn);

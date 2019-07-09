@@ -31,6 +31,6 @@ import java.util.Map;
 
 public interface StatisticsManagerBridge {
 
-    Map<StatBase, TupleIntJsonSerializable> getStatsData();
+    Map<StatBase, TupleIntJsonSerializable> bridge$getStatsData();
 
 }

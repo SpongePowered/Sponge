@@ -87,7 +87,7 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
         container.experience = (float)(value - experienceForCurrentLevel) / ExperienceHolderUtils.getExpBetweenLevels(level);
         container.experienceLevel = level;
         container.experienceTotal = value;
-        ((ServerPlayerEntityBridge) container).refreshExp();
+        ((ServerPlayerEntityBridge) container).bridge$refreshExp();
         return true;
     }
 

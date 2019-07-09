@@ -89,7 +89,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
 
     @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;", at = @At("HEAD"), cancellable = true)
     private static void onSetExplosionSource(@Nullable final Explosion explosionIn, final CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
-        if (explosionIn != null && explosionIn.exploder != null && !((WorldBridge) explosionIn.world).isFake()) {
+        if (explosionIn != null && explosionIn.exploder != null && !((WorldBridge) explosionIn.world).bridge$isFake()) {
             if (explosionIn.getExplosivePlacedBy() == null && explosionIn.exploder instanceof OwnershipTrackedBridge) {
                 // check creator
                 final OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) explosionIn.exploder;

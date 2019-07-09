@@ -66,7 +66,7 @@ public abstract class EntityEndermanMixin extends EntityMobMixin {
      * @param phaseContext The context, for whatever reason in the future
      */
     @Override
-    public void onCancelledBlockChange(EntityTickContext phaseContext) {
+    public void bridge$onCancelledBlockChange(EntityTickContext phaseContext) {
         if (this.getHeldBlockState() != null) {
             this.setHeldBlockState(null);
         }

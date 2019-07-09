@@ -148,7 +148,7 @@ public abstract class EntityMobMixin extends EntityLivingMixin {
     {
         final BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
         final Chunk chunk = ((ChunkProviderBridge) this.world.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
-        if (chunk == null || !((ChunkBridge) chunk).isActive()) {
+        if (chunk == null || !((ChunkBridge) chunk).bridge$isActive()) {
             return false;
         }
 

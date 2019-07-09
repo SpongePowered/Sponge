@@ -48,7 +48,6 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge_AsyncLighting;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.util.Constants;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -97,7 +96,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
     private void asyncLighting$initializeFields(final World worldIn, final int x, final int z, final CallbackInfo ci) {
-        this.asyncLighting$isServerChunk = !((WorldBridge) worldIn).isFake();
+        this.asyncLighting$isServerChunk = !((WorldBridge) worldIn).bridge$isFake();
         if (this.asyncLighting$isServerChunk) {
             this.asyncLighting$lightExecutorService = ((ServerWorldBridge_AsyncLighting) worldIn).asyncLightingBridge$getLightingExecutor();
         }
@@ -231,7 +230,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
             .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
 
         final ChunkBridge spongeChunk = (ChunkBridge) chunk;
-        if (chunk == null || chunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {
+        if (chunk == null || chunk.unloadQueued || !spongeChunk.bridge$areNeighborsLoaded()) {
             return Blocks.AIR.getDefaultState();
         }
 
@@ -263,7 +262,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
                 return;
             }
 
-            if (this.isQueuedForUnload()) {
+            if (this.bridge$isQueuedForUnload()) {
                 return;
             }
             final List<Chunk> neighborChunks = this.asyncLighting$getSurroundingChunks();
@@ -430,27 +429,27 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
      * @return True if surrounded chunks are loaded, false if not
      */
     private boolean asyncLighting$isAreaLoaded() {
-        if (!this.areNeighborsLoaded()) {
+        if (!this.bridge$areNeighborsLoaded()) {
             return false;
         }
 
         // add diagonal chunks
-        final Chunk southEastChunk = ((ChunkBridge) this.getNeighborChunk(0)).getNeighborChunk(2);
+        final Chunk southEastChunk = ((ChunkBridge) this.bridge$getNeighborChunk(0)).bridge$getNeighborChunk(2);
         if (southEastChunk == null) {
             return false;
         }
 
-        final Chunk southWestChunk = ((ChunkBridge) this.getNeighborChunk(0)).getNeighborChunk(3);
+        final Chunk southWestChunk = ((ChunkBridge) this.bridge$getNeighborChunk(0)).bridge$getNeighborChunk(3);
         if (southWestChunk == null) {
             return false;
         }
 
-        final Chunk northEastChunk = ((ChunkBridge) this.getNeighborChunk(1)).getNeighborChunk(2);
+        final Chunk northEastChunk = ((ChunkBridge) this.bridge$getNeighborChunk(1)).bridge$getNeighborChunk(2);
         if (northEastChunk == null) {
             return false;
         }
 
-        final Chunk northWestChunk = ((ChunkBridge) this.getNeighborChunk(1)).getNeighborChunk(3);
+        final Chunk northWestChunk = ((ChunkBridge) this.bridge$getNeighborChunk(1)).bridge$getNeighborChunk(3);
         if (northWestChunk == null) {
             return false;
         }
@@ -464,33 +463,33 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
      * @return The list of surrounding chunks, empty list if not loaded
      */
     private List<Chunk> asyncLighting$getSurroundingChunks() {
-        if (!this.areNeighborsLoaded()) {
+        if (!this.bridge$areNeighborsLoaded()) {
             return Collections.emptyList();
         }
 
         // add diagonal chunks
-        final Chunk southEastChunk = ((ChunkBridge) this.getNeighborChunk(0)).getNeighborChunk(2);
+        final Chunk southEastChunk = ((ChunkBridge) this.bridge$getNeighborChunk(0)).bridge$getNeighborChunk(2);
         if (southEastChunk == null) {
             return Collections.emptyList();
         }
 
-        final Chunk southWestChunk = ((ChunkBridge) this.getNeighborChunk(0)).getNeighborChunk(3);
+        final Chunk southWestChunk = ((ChunkBridge) this.bridge$getNeighborChunk(0)).bridge$getNeighborChunk(3);
         if (southWestChunk == null) {
             return Collections.emptyList();
         }
 
-        final Chunk northEastChunk = ((ChunkBridge) this.getNeighborChunk(1)).getNeighborChunk(2);
+        final Chunk northEastChunk = ((ChunkBridge) this.bridge$getNeighborChunk(1)).bridge$getNeighborChunk(2);
         if (northEastChunk == null) {
             return Collections.emptyList();
         }
 
-        final Chunk northWestChunk = ((ChunkBridge) this.getNeighborChunk(1)).getNeighborChunk(3);
+        final Chunk northWestChunk = ((ChunkBridge) this.bridge$getNeighborChunk(1)).bridge$getNeighborChunk(3);
         if (northWestChunk == null) {
             return Collections.emptyList();
         }
 
         List<Chunk> chunkList;
-        chunkList = this.getNeighbors();
+        chunkList = this.bridge$getNeighbors();
         chunkList.add(southEastChunk);
         chunkList.add(southWestChunk);
         chunkList.add(northEastChunk);

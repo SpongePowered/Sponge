@@ -33,10 +33,10 @@ import java.util.Random;
 
 public interface FlaggedPopulatorBridge {
 
-    void populate(World world, Extent extent, Random rand, List<String> flags);
+    void bridge$populate(World world, Extent extent, Random rand, List<String> flags);
 
-    default void populate(World world, Extent extent, Random rand, ImmutableBiomeVolume virtualBiomes, List<String> flags) {
-        populate(world, extent, rand, flags);
+    default void bridge$populate(final World world, final Extent extent, final Random rand, final ImmutableBiomeVolume virtualBiomes, final List<String> flags) {
+        bridge$populate(world, extent, rand, flags);
     }
 
 }

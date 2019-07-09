@@ -53,7 +53,7 @@ public class WorldTickContext extends ListenerPhaseContext<WorldTickContext> {
     public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
         String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent);
-        if (!((WorldBridge) this.tickingWorld).isFake()) {
+        if (!((WorldBridge) this.tickingWorld).bridge$isFake()) {
             printer.add(s + "- %s: %s", "TickingWorld", ((org.spongepowered.api.world.World) this.tickingWorld).getName());
         } else {
             printer.add(s + "- %s: %s", "Ticking World", "Pseudo Fake World?" + this.tickingWorld);

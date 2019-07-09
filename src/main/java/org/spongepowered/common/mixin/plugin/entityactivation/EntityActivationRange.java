@@ -129,7 +129,7 @@ public class EntityActivationRange {
      */
     public static void initializeEntityActivationState(Entity entity) {
         final ActivationCapability spongeEntity = (ActivationCapability) entity;
-        if (((WorldBridge) entity.world).isFake()) {
+        if (((WorldBridge) entity.world).bridge$isFake()) {
             return;
         }
 
@@ -219,7 +219,7 @@ public class EntityActivationRange {
      * @param world The world to perform activation checks in
      */
     public static void activateEntities(World world) {
-        if (((WorldBridge) world).isFake()) {
+        if (((WorldBridge) world).bridge$isFake()) {
             return;
         }
 
@@ -266,7 +266,7 @@ public class EntityActivationRange {
                 EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
                 final ActivationCapability spongeEntity = (ActivationCapability) entity;
                 long currentTick = SpongeImpl.getServer().getTickCounter();
-                if (!((EntityBridge) entity).shouldTick()) {
+                if (!((EntityBridge) entity).bridge$shouldTick()) {
                     continue;
                 }
                 if (type == EntityTypes.UNKNOWN) {
@@ -397,12 +397,12 @@ public class EntityActivationRange {
             return true;
         }
 
-        if (!activeChunk.isActive()) {
+        if (!activeChunk.bridge$isActive()) {
             return false;
         }
 
         // If in forced chunk or is player
-        if (activeChunk.isPersistedChunk() || (!SpongeImplHooks.isFakePlayer(entity) && entity instanceof EntityPlayerMP)) {
+        if (activeChunk.bridge$isPersistedChunk() || (!SpongeImplHooks.isFakePlayer(entity) && entity instanceof EntityPlayerMP)) {
             return true;
         }
 
@@ -425,7 +425,7 @@ public class EntityActivationRange {
             isActive = false;
         }
 
-        if (isActive && !activeChunk.areNeighborsLoaded()) {
+        if (isActive && !activeChunk.bridge$areNeighborsLoaded()) {
             isActive = false;
         }
 

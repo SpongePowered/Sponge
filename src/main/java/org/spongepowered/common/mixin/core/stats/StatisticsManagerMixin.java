@@ -81,7 +81,7 @@ public abstract class StatisticsManagerMixin implements StatisticsManagerBridge 
     }
 
     @Override
-    public Map<StatBase, TupleIntJsonSerializable> getStatsData() {
+    public Map<StatBase, TupleIntJsonSerializable> bridge$getStatsData() {
         return ImmutableMap.copyOf(this.statsData);
     }
 

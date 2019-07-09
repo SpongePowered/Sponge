@@ -64,7 +64,7 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
     @Inject(method = "canFlowInto", at = @At("HEAD"), cancellable = true)
     private void impl$throwPreForFlowingInto(final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state,
         final CallbackInfoReturnable<Boolean> cir) {
-        if (!((WorldBridge) worldIn).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE &&
+        if (!((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE &&
             SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos).isCancelled()) {
             cir.setReturnValue(false);
         }
@@ -73,7 +73,7 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
     @Inject(method = "updateTick", at = @At("HEAD"), cancellable = true)
     private void impl$throwPreOnUpdate(
         final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, final Random rand, final CallbackInfo ci) {
-        if (!((WorldBridge) worldIn).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+        if (!((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos).isCancelled()) {
                 ci.cancel();
             }

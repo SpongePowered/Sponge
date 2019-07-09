@@ -43,7 +43,7 @@ public abstract class EntityItemFrameMixin_MapOptimization extends EntityMixin {
 
     @Inject(method = "setDisplayedItemWithUpdate", at = @At(value = "HEAD"))
     private void mapOptimization$SetItemUpdateMapData(final ItemStack stack, final boolean p_174864_2_, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
 

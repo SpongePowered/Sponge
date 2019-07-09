@@ -88,7 +88,7 @@ public class SpongeHoverAction {
         }
 
         HoverEvent event = new HoverEvent(type, component);
-        ((HoverEventBridge) event).setHandle(action);
+        ((HoverEventBridge) event).bridge$setHandle(action);
         return event;
     }
 

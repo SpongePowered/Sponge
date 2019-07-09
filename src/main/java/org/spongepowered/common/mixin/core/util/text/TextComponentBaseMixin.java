@@ -202,10 +202,10 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
             builder.style(new TextStyle(this.style.bold, this.style.italic, this.style.underlined, this.style.strikethrough, this.style.obfuscated));
 
             if (this.style.clickEvent != null) {
-                builder.onClick(((ClickEventBridge) this.style.clickEvent).getHandle());
+                builder.onClick(((ClickEventBridge) this.style.clickEvent).bridge$getHandle());
             }
             if (this.style.hoverEvent != null) {
-                builder.onHover(((HoverEventBridge) this.style.hoverEvent).getHandle());
+                builder.onHover(((HoverEventBridge) this.style.hoverEvent).bridge$getHandle());
             }
             if (this.style.insertion != null) {
                 builder.onShiftClick(TextActions.insertText(this.style.insertion));

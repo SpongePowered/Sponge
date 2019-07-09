@@ -119,8 +119,8 @@ public abstract class BlockDispenserMixin extends BlockMixin {
         final ChunkBridge mixinChunk = (ChunkBridge) worldIn.getChunk(pos);
         this.impl$context = BlockPhase.State.DISPENSE.createPhaseContext()
             .source(spongeBlockSnapshot)
-            .owner(() -> mixinChunk.getBlockOwner(pos))
-            .notifier(() -> mixinChunk.getBlockNotifier(pos))
+            .owner(() -> mixinChunk.bridge$getBlockOwner(pos))
+            .notifier(() -> mixinChunk.bridge$getBlockNotifier(pos))
             .buildAndSwitch();
     }
 

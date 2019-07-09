@@ -84,6 +84,7 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
      * @author unknown
      * @reason eigen
      */
+    @Override
     @SuppressWarnings("deprecation")
     @Overwrite
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
@@ -144,7 +145,7 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
      * Note:  Made this public so that RedstoneWireTurbo can access it.
      */
     @Overwrite
-    public IBlockState calculateCurrentChanges(World worldIn, BlockPos pos1, BlockPos pos2, IBlockState state)
+    private IBlockState calculateCurrentChanges(World worldIn, BlockPos pos1, BlockPos pos2, IBlockState state)
     {
         IBlockState iblockstate = state;
         int i = state.getValue(BlockRedstoneWire.POWER).intValue();

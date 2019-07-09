@@ -192,7 +192,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
             // Prevent Shulker Boxes from dropping when restoring BlockSnapshot
 //            if (current.getBlock().getClass() == BlockShulkerBox.class) {
-//                world.removeTileEntity(pos);
+//                world.bridge$removeTileEntity(pos);
 //            }
             world.removeTileEntity(pos);
             PhaseTracker.getInstance().setBlockState(mixinWorldServer, pos, replaced, BlockChangeFlagRegistryModule.andNotifyClients(flag));

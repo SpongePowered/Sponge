@@ -147,7 +147,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                     frame.pushCause(tickingTile);
                     SpongeCommonEventFactory.callSpawnEntityCustom(entities, context);
                     // Now to clean up the list that is tied to the entity, so that this phase context isn't continuously wrapped
-                    ((EntityBridge) nestedEntity).clearWrappedCaptureList();
+                    ((EntityBridge) nestedEntity).bridge$clearWrappedCaptureList();
                 });
         }
     }

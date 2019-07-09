@@ -37,7 +37,7 @@ public abstract class WorldServerMixin_RealTime extends WorldMixin_RealTime impl
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void realTimeImpl$fixTimeOfDayForRealTime(CallbackInfo ci) {
-        if (((WorldBridge) this).isFake()) {
+        if (((WorldBridge) this).bridge$isFake()) {
             return;
         }
         if (this.worldInfo.getGameRulesInstance().getBoolean("doDaylightCycle")) {

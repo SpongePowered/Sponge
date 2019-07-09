@@ -41,6 +41,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.entity.item.TNTPrimedEntityBridge;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
@@ -50,19 +52,17 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityTNTPrimed.class)
-public abstract class EntityTNTPrimedMixin extends EntityMixin implements TNTPrimedEntityBridge {
+public abstract class EntityTNTPrimedMixin extends EntityMixin implements TNTPrimedEntityBridge, FusedExplosiveBridge, ExplosiveBridge {
 
     @Shadow private int fuse;
 
-    @Nullable private EntityLivingBase detonator;
+    @Nullable private EntityLivingBase impl$detonator;
     private int bridge$explosionRadius = Constants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS;
-    private int bridge$fuseDuration = 80;
-    private boolean bridge$explding = false;
-    private boolean detonationCancelled;
+    private int bridge$fuseDuration = Constants.Entity.PrimedTNT.DEFAULT_FUSE_DURATION;
 
     @Override
-    public void bridge$setDetonator(EntityLivingBase detonator) {
-        this.detonator = detonator;
+    public void bridge$setDetonator(final EntityLivingBase detonator) {
+        this.impl$detonator = detonator;
     }
 
     @Override
@@ -71,8 +71,8 @@ public abstract class EntityTNTPrimedMixin extends EntityMixin implements TNTPri
     }
 
     @Override
-    public void bridge$setExplosionRadius(Optional<Integer> radius) {
-        this.bridge$explosionRadius = radius.orElse(Constants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS);
+    public void bridge$setExplosionRadius(@Nullable final Integer radius) {
+        this.bridge$explosionRadius = radius == null ? Constants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS : radius;
     }
 
     @Override
@@ -81,7 +81,7 @@ public abstract class EntityTNTPrimedMixin extends EntityMixin implements TNTPri
     }
 
     @Override
-    public void bridge$setFuseDuration(int fuseTicks) {
+    public void bridge$setFuseDuration(final int fuseTicks) {
         this.bridge$fuseDuration = fuseTicks;
     }
 
@@ -91,7 +91,7 @@ public abstract class EntityTNTPrimedMixin extends EntityMixin implements TNTPri
     }
 
     @Override
-    public void bridge$setFuseTicksRemaining(int fuseTicks) {
+    public void bridge$setFuseTicksRemaining(final int fuseTicks) {
         this.fuse = fuseTicks;
     }
 
@@ -103,8 +103,9 @@ public abstract class EntityTNTPrimedMixin extends EntityMixin implements TNTPri
             target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;"
         )
     )
-    private net.minecraft.world.Explosion spongeImpl$UseSpongeExplosionInstead(net.minecraft.world.World worldObj, Entity self, double x,
-                                                      double y, double z, float strength, boolean smoking) {
+    private net.minecraft.world.Explosion spongeImpl$UseSpongeExplosionInstead(
+        final net.minecraft.world.World worldObj, final Entity self, final double x,
+                                                      final double y, final double z, final float strength, final boolean smoking) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive((PrimedTNT) this)
@@ -113,18 +114,17 @@ public abstract class EntityTNTPrimedMixin extends EntityMixin implements TNTPri
                 .shouldBreakBlocks(smoking))
                 .orElseGet(() -> {
                     ((PrimedTNT) this).defuse();
-                    this.detonationCancelled = true;
                     return null;
                 });
     }
 
 
     @Inject(method = "onUpdate", at = @At("RETURN"))
-    private void onSpongeUpdateTNTPushPrime(CallbackInfo ci) {
+    private void onSpongeUpdateTNTPushPrime(final CallbackInfo ci) {
         if (this.fuse == this.bridge$fuseDuration - 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                if (this.detonator != null) {
-                    frame.pushCause(this.detonator);
+                if (this.impl$detonator != null) {
+                    frame.pushCause(this.impl$detonator);
                 }
                 frame.pushCause(this);
                 bridge$postPrime();

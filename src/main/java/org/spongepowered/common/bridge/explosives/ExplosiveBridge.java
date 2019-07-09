@@ -26,10 +26,12 @@ package org.spongepowered.common.bridge.explosives;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public interface ExplosiveBridge {
 
     Optional<Integer> bridge$getExplosionRadius();
 
-    void bridge$setExplosionRadius(Optional<Integer> radius);
+    void bridge$setExplosionRadius(@Nullable Integer radius);
 
 }

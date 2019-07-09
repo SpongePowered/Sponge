@@ -89,13 +89,13 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         final ChunkBridge chunk = (ChunkBridge) chunkIn;
 
         // Add tracked block positions
-        if (chunk.getTrackedShortPlayerPositions().size() > 0 || chunk.getTrackedIntPlayerPositions().size() > 0) {
+        if (chunk.bridge$getTrackedShortPlayerPositions().size() > 0 || chunk.bridge$getTrackedIntPlayerPositions().size() > 0) {
             final NBTTagCompound trackedNbt = new NBTTagCompound();
             final NBTTagList positions = new NBTTagList();
             trackedNbt.setTag(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, positions);
             compound.setTag(Constants.Sponge.SPONGE_DATA, trackedNbt);
 
-            for (final Map.Entry<Short, PlayerTracker> mapEntry : chunk.getTrackedShortPlayerPositions().entrySet()) {
+            for (final Map.Entry<Short, PlayerTracker> mapEntry : chunk.bridge$getTrackedShortPlayerPositions().entrySet()) {
                 final Short pos = mapEntry.getKey();
                 final int ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 final int notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
@@ -106,7 +106,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                 positions.appendTag(valueNbt);
             }
 
-            for (final Map.Entry<Integer, PlayerTracker> mapEntry : chunk.getTrackedIntPlayerPositions().entrySet()) {
+            for (final Map.Entry<Integer, PlayerTracker> mapEntry : chunk.bridge$getTrackedIntPlayerPositions().entrySet()) {
                 final Integer pos = mapEntry.getKey();
                 final int ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 final int notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
@@ -148,8 +148,8 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                     }
                 }
             }
-            chunk.setTrackedIntPlayerPositions(trackedIntPlayerPositions);
-            chunk.setTrackedShortPlayerPositions(trackedShortPlayerPositions);
+            chunk.bridge$setTrackedIntPlayerPositions(trackedIntPlayerPositions);
+            chunk.bridge$setTrackedShortPlayerPositions(trackedShortPlayerPositions);
         }
     }
 

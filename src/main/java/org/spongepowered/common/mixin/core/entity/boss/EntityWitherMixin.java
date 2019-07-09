@@ -39,21 +39,26 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.monster.EntityMobMixin;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @Mixin(value = EntityWither.class)
-public abstract class EntityWitherMixin extends EntityMobMixin implements FusedExplosiveBridge {
+public abstract class EntityWitherMixin extends EntityMobMixin implements FusedExplosiveBridge, ExplosiveBridge {
+
+    @Shadow private int blockBreakCounter;
 
     @Shadow public abstract void setInvulTime(int ticks);
     @Shadow public abstract int getInvulTime();
 
-    @Shadow private int blockBreakCounter;
-    private int explosionRadius = 7;
-    private int fuseDuration = 220;
+    private int impl$explosionRadius = Constants.Entity.Wither.DEFAULT_WITHER_EXPLOSION_RADIUS;
+    private int impl$fuseDuration = Constants.Entity.Wither.DEFAULT_FUSE_DURATION;
 
     /**
      * @author gabizou - April 11th, 2018
@@ -85,13 +90,13 @@ public abstract class EntityWitherMixin extends EntityMobMixin implements FusedE
                 opcode = Opcodes.GETFIELD
             )
     )
-    private int spongeImpl$onCanGrief(EntityWither thisEntity) {
+    private int spongeImpl$onCanGrief(final EntityWither thisEntity) {
         return this.blockBreakCounter == 0 ? ((GrieferBridge) this).bridge$CanGrief() ? 0 : -1 : -1;
     }
 
     @ModifyArg(method = "launchWitherSkullToCoords", at = @At(value = "INVOKE",
                target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
-    private Entity onSpawnWitherSkull(Entity entity) {
+    private Entity onSpawnWitherSkull(final Entity entity) {
         ((GrieferBridge) entity).bridge$SetCanGrief(((GrieferBridge) this).bridge$CanGrief());
         return entity;
     }
@@ -100,22 +105,22 @@ public abstract class EntityWitherMixin extends EntityMobMixin implements FusedE
 
     @Override
     public Optional<Integer> bridge$getExplosionRadius() {
-        return Optional.of(this.explosionRadius);
+        return Optional.of(this.impl$explosionRadius);
     }
 
     @Override
-    public void bridge$setExplosionRadius(Optional<Integer> radius) {
-        this.explosionRadius = radius.orElse(7);
+    public void bridge$setExplosionRadius(@Nullable final Integer radius) {
+        this.impl$explosionRadius = radius == null ? Constants.Entity.Wither.DEFAULT_WITHER_EXPLOSION_RADIUS : radius;
     }
 
     @Override
     public int bridge$getFuseDuration() {
-        return this.fuseDuration;
+        return this.impl$fuseDuration;
     }
 
     @Override
-    public void bridge$setFuseDuration(int fuseTicks) {
-        this.fuseDuration = fuseTicks;
+    public void bridge$setFuseDuration(final int fuseTicks) {
+        this.impl$fuseDuration = fuseTicks;
     }
 
     @Override
@@ -124,7 +129,7 @@ public abstract class EntityWitherMixin extends EntityMobMixin implements FusedE
     }
 
     @Override
-    public void bridge$setFuseTicksRemaining(int fuseTicks) {
+    public void bridge$setFuseTicksRemaining(final int fuseTicks) {
         setInvulTime(fuseTicks);
     }
 
@@ -136,19 +141,19 @@ public abstract class EntityWitherMixin extends EntityMobMixin implements FusedE
      */
     @Redirect(method = "ignite", at = @At(value = "INVOKE",
               target = "Lnet/minecraft/entity/boss/EntityWither;setInvulTime(I)V"))
-    private void onSpawnPrime(EntityWither self, int fuseTicks) {
+    private void onSpawnPrime(final EntityWither self, final int fuseTicks) {
         ((Wither) this).prime();
     }
 
     @Redirect(method = "updateAITasks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;newExplosion"
                                                                             + "(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;"))
-    private net.minecraft.world.Explosion spongeImpl$UseSpongeExplosion(net.minecraft.world.World worldObj, Entity self, double x,
-                                                      double y, double z, float strength, boolean flaming,
-                                                      boolean smoking) {
+    private net.minecraft.world.Explosion spongeImpl$UseSpongeExplosion(final net.minecraft.world.World worldObj, final Entity self, final double x,
+                                                      final double y, final double z, final float strength, final boolean flaming,
+                                                      final boolean smoking) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .sourceExplosive((Wither) this)
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
-                .radius(this.explosionRadius)
+                .radius(this.impl$explosionRadius)
                 .canCauseFire(flaming)
                 .shouldPlaySmoke(smoking)
                 .shouldBreakBlocks(smoking && ((GrieferBridge) this).bridge$CanGrief()))

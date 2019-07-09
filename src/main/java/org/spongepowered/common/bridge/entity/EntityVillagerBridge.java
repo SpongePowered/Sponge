@@ -29,15 +29,11 @@ import org.spongepowered.api.data.type.Profession;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 public interface EntityVillagerBridge {
 
     void bridge$setCareer(Career career);
 
     Career bridge$getCareer();
-
-    @Nullable Profession bridge$getProfession();
 
     Optional<Profession> bridge$getProfessionOptional();
 

@@ -42,7 +42,7 @@ public abstract class EntityLivingBaseMixin_RealTime extends EntityMixin_RealTim
     @Redirect(method = "onDeathUpdate",
         at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;deathTime:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void realTimeImpl$adjustForRealTimeDeathTime(final EntityLivingBase self, final int vanillaNewDeathTime) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             this.deathTime = vanillaNewDeathTime;
             return;
         }

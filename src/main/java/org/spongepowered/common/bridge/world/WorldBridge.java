@@ -24,11 +24,7 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.WorldInfo;
-
-import javax.annotation.Nullable;
 
 public interface WorldBridge {
 
@@ -45,20 +41,8 @@ public interface WorldBridge {
      *
      * @return If this world is fake or not
      */
-    boolean isFake();
+    boolean bridge$isFake();
 
     void bridge$clearFakeCheck();
-
-    long bridge$getWeatherStartTime();
-
-    void setWeatherStartTime(long weatherStartTime);
-
-    void setRedirectedWorldInfo(@Nullable WorldInfo info);
-
-    @Nullable
-    EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
-
-    @Nullable
-    EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
 
 }

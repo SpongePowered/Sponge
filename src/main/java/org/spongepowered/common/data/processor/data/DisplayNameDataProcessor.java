@@ -80,7 +80,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
     @Override
     public Optional<DisplayNameData> from(DataHolder holder) {
         if (holder instanceof Entity) {
-            @Nullable Text displayName = ((EntityBridge) holder).getDisplayNameText();
+            @Nullable Text displayName = ((EntityBridge) holder).bridge$getDisplayNameText();
             if (displayName != null) {
                 return Optional.of(new SpongeDisplayNameData(displayName));
             }
@@ -131,7 +131,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             final Text newValue = merged.displayName().get();
             final ImmutableValue<Text> immutableValue = merged.displayName().asImmutable();
             try {
-                ((EntityBridge) holder).setDisplayName(newValue);
+                ((EntityBridge) holder).bridge$setDisplayName(newValue);
                 if (old.isPresent()) {
                     return DataTransactionResult.successReplaceResult(old.get().displayName().asImmutable(), immutableValue);
                 }
@@ -176,7 +176,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             final Optional<DisplayNameData> optional = this.from(holder);
             if (optional.isPresent()) {
                 try {
-                    ((EntityBridge) holder).setDisplayName(null);
+                    ((EntityBridge) holder).bridge$setDisplayName(null);
                     return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
                     SpongeImpl.getLogger().error("There was an issue resetting the display name from an Entity!", e);

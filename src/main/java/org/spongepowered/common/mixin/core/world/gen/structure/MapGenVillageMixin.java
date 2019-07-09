@@ -46,7 +46,7 @@ import java.util.Random;
 public abstract class MapGenVillageMixin extends MapGenStructureMixin implements FlaggedPopulatorBridge {
 
     @Override
-    public void populate(final org.spongepowered.api.world.World worldIn, final Extent extent, final Random random, final List<String> flags) {
+    public void bridge$populate(final org.spongepowered.api.world.World worldIn, final Extent extent, final Random random, final List<String> flags) {
         final Vector3i min = extent.getBlockMin();
         final World world = (World) worldIn;
         final boolean flag = generateStructure(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));

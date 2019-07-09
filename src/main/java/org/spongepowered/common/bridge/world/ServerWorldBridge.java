@@ -59,21 +59,11 @@ public interface ServerWorldBridge {
 
     int bridge$getDimensionId();
 
-    Weather bridge$getPreviousWeather();
-
     void bridge$setPreviousWeather(Weather weather);
-
-    void bridge$updateWorldGenerator();
 
     void bridge$updateRotation(Entity entityIn);
 
-    void bridge$NotifyNeighborsPostBlockChange(BlockPos pos, IBlockState newState, BlockChangeFlag flags);
-
-    boolean bridge$setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag);
-
     boolean bridge$forceSpawnEntity(Entity entity);
-
-    void bridge$onSpongeEntityAdded(Entity entity);
 
     void bridge$addEntityRotationUpdate(Entity entity, Vector3d rotation);
 
@@ -136,18 +126,15 @@ public interface ServerWorldBridge {
 
     boolean bridge$isLightLevel(Chunk chunk, BlockPos pos, int level);
 
-
-
-
     WorldTimingsHandler bridge$getTimingsHandler();
 
-    int getChunkGCTickInterval();
+    int bridge$getChunkGCTickInterval();
 
-    long getChunkUnloadDelay();
+    long bridge$getChunkUnloadDelay();
 
-    net.minecraft.world.Explosion triggerInternalExplosion(Explosion explosion, Function<net.minecraft.world.Explosion, PhaseContext<?>> contextCreator);
+    net.minecraft.world.Explosion bridge$triggerInternalExplosion(Explosion explosion, Function<net.minecraft.world.Explosion, PhaseContext<?>> contextCreator);
 
-    void doChunkGC();
+    void bridge$doChunkGC();
 
     void bridge$incrementChunkLoadCount();
 
@@ -161,4 +148,6 @@ public interface ServerWorldBridge {
     ScheduledBlockUpdate bridge$getScheduledBlockUpdate();
 
     void bridge$setScheduledBlockUpdate(@Nullable ScheduledBlockUpdate sbu);
+
+    long bridge$getWeatherStartTime();
 }

@@ -39,7 +39,7 @@ public abstract class EntityAgeableMixin_RealTime extends EntityMixin_RealTime {
 
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityAgeable;setGrowingAge(I)V"))
     private void realTimeImpl$adjustForRealTimeGrowingUp(final EntityAgeable self, final int age) {
-        if (((WorldBridge) this.world).isFake()) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
             this.setGrowingAge(age);
             return;
         }

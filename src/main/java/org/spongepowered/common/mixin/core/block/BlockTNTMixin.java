@@ -72,7 +72,7 @@ public abstract class BlockTNTMixin extends BlockMixin {
                 if (igniter != null) {
                     frame.addContext(EventContextKeys.IGNITER, (Living) igniter);
                 }
-                if (!((TNTPrimedEntityBridge) tnt).bridge$shouldPrime()) {
+                if (!((FusedExplosiveBridge) tnt).bridge$shouldPrime()) {
                     ci.cancel();
                 }
             }

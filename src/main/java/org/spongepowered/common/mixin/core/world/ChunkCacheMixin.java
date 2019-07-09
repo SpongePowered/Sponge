@@ -45,7 +45,7 @@ public class ChunkCacheMixin {
         final net.minecraft.world.chunk.Chunk chunk =
                 ((ChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
         ChunkBridge spongeChunk = (ChunkBridge) chunk;
-        if (chunk == null || chunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {
+        if (chunk == null || chunk.unloadQueued || !spongeChunk.bridge$areNeighborsLoaded()) {
             return null;
         }
 

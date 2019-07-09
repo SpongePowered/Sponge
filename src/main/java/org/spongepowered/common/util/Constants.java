@@ -747,6 +747,7 @@ public final class Constants {
             public static final String SLOW_WHEN_EMPTY = "slowWhenEmpty";
             public static final String AIRBORNE_MODIFIER = "airborneModifier";
             public static final String DERAILED_MODIFIER = "derailedModifier";
+            public static final int DEFAULT_FUSE_DURATION = 80;
         }
 
         public static final class Ocelot {
@@ -784,6 +785,7 @@ public final class Constants {
 
             public static final int DEFAULT_EXPLOSION_RADIUS = 4;
 
+            public static final int DEFAULT_FUSE_DURATION = 80;
         }
         public static final class Rabbit {
             public static final RabbitType DEFAULT_TYPE = RabbitTypes.WHITE;
@@ -794,9 +796,16 @@ public final class Constants {
             public static final int MAX_EXPIRATION_TICKS = 2400;
         }
 
+        public static final class Wither {
+
+            public static final int DEFAULT_WITHER_EXPLOSION_RADIUS = 7;
+            public static final int DEFAULT_FUSE_DURATION = 220;
+        }
         public static final class WitherSkull {
 
             public static final int DEFAULT_EXPLOSION_RADIUS = 1;
+            public static final float DEFAULT_WITHER_CREATED_SKULL_DAMAGE = 8.0f;
+            public static final float DEFAULT_NO_SOURCE_SKULL_DAMAGE = 5.0f;
         }
 
         public static final class Wolf {

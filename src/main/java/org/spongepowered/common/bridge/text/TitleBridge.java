@@ -28,6 +28,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 
 public interface TitleBridge {
 
-    void send(EntityPlayerMP player);
+    void bridge$send(EntityPlayerMP player);
 
 }

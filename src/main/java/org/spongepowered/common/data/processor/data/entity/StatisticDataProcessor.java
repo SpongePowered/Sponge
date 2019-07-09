@@ -80,7 +80,7 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
     protected Optional<Map<Statistic, Long>> getVal(final EntityPlayerMP player) {
         checkNotNull(player, "null player");
         final StatisticsManagerServer stats = player.getStatFile();
-        final Map<StatBase, TupleIntJsonSerializable> data = ((StatisticsManagerBridge) stats).getStatsData();
+        final Map<StatBase, TupleIntJsonSerializable> data = ((StatisticsManagerBridge) stats).bridge$getStatsData();
         final Map<Statistic, Long> statMap = Maps.newHashMap();
         for (final Entry<StatBase, TupleIntJsonSerializable> statEntry : data.entrySet()) {
             statMap.put((Statistic) statEntry.getKey(), (long) statEntry.getValue().getIntegerValue());

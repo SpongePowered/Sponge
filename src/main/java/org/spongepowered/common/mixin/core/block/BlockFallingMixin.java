@@ -54,7 +54,7 @@ public class BlockFallingMixin {
         )
     )
     private boolean impl$CheckIfAreaIsLoadedAndIfThrownEventIsntCancelled(final World world, final BlockPos pos, final BlockPos to) {
-        if (world.isAreaLoaded(pos, to) && !((WorldBridge) world).isFake()) {
+        if (world.isAreaLoaded(pos, to) && !((WorldBridge) world).bridge$isFake()) {
 
             final BlockPos actualPos = pos.add(32, 32, 32);
             final EntityType fallingBlock = EntityTypes.FALLING_BLOCK;

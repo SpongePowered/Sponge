@@ -98,7 +98,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         // If we're doing bulk captures for blocks, go ahead and do them. otherwise continue with entity checks
         if (phaseContext.allowsBulkBlockCaptures()) {
             if (!TrackingUtil.processBlockCaptures(this, phaseContext)) {
-                ((EntityBridge) tickingEntity).onCancelledBlockChange(phaseContext);
+                ((EntityBridge) tickingEntity).bridge$onCancelledBlockChange(phaseContext);
             }
         }
         // And finally, if we're not capturing entities, there's nothing left for us to do.
