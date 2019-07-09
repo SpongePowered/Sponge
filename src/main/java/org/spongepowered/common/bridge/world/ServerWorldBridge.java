@@ -150,4 +150,6 @@ public interface ServerWorldBridge {
     void bridge$setScheduledBlockUpdate(@Nullable ScheduledBlockUpdate sbu);
 
     long bridge$getWeatherStartTime();
+
+    void bridge$setWeatherStartTime(long start);
 }

@@ -2516,25 +2516,9 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
     public long bridge$getWeatherStartTime() {
         return this.impl$weatherStartTime;
     }
-//
-    // To be added to SpongeVanilla.
-//    @Override
-//    int impl$updateRainTimeStart(final int newRainTime) {
-//        if (!this.bridge$isFake()) {
-//            if (this.worldInfo.getRainTime() - 1 != newRainTime) {
-//                this.impl$weatherStartTime = this.getTotalWorldTime();
-//            }
-//        }
-//        return newRainTime;
-//    }
-//
-//    @Override
-//    int impl$updateThunderTimeStart(int newThunderTime) {
-//        if (!this.bridge$isFake()) {
-//            if (this.worldInfo.getThunderTime() - 1 != newThunderTime) {
-//                this.impl$weatherStartTime = this.getTotalWorldTime();
-//            }
-//        }
-//        return newThunderTime;
-//    }
+
+    @Override
+    public void bridge$setWeatherStartTime(long start) {
+        this.impl$weatherStartTime = start;
+    }
 }

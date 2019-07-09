@@ -501,16 +501,6 @@ public abstract class WorldMixin implements WorldBridge {
         return null;
     }
 
-//    @ModifyArg(method = "updateWeather", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setRainTime(I)V"))
-//    int impl$updateRainTimeStart(final int newRainTime) {
-//        return newRainTime;
-//    }
-//
-//    @ModifyArg(method = "updateWeather", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setThunderTime(I)V"))
-//    int impl$updateThunderTimeStart(final int newThunderTime) {
-//        return newThunderTime;
-//    }
-
     /**
      * @author gabizou
      * @reason Adds a redirector to use instead of an injector to avoid duplicate chunk area loaded lookups.
