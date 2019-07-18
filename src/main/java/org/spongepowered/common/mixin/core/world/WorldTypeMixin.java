@@ -25,7 +25,10 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.gen.IChunkGenerator;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,16 +36,27 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.world.WorldTypeBridge;
 import org.spongepowered.common.registry.type.world.GeneratorTypeRegistryModule;
 
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
+
 @Mixin(WorldType.class)
-public abstract class WorldTypeMixin {
+public abstract class WorldTypeMixin implements WorldTypeBridge {
 
     @Shadow @Final private String name;
     @Shadow @Final private int id;
 
+    @Nullable private Function<World, BiomeProvider> impl$biomeProvider;
+    @Nullable private BiFunction<World, String, IChunkGenerator> impl$chunkGenerator;
+
+
     @Inject(method = "<init>(ILjava/lang/String;)V", at = @At("RETURN"))
-    private void onConstructSpongeRegister(int id, String name, CallbackInfo callbackInfo) {
+    private void onConstructSpongeRegister(final int id, final String name, final CallbackInfo callbackInfo) {
         // Ensures that new world types are automatically registered with the registry module
         GeneratorTypeRegistryModule.getInstance().registerAdditionalCatalog((GeneratorType) this);
     }
@@ -57,7 +71,7 @@ public abstract class WorldTypeMixin {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (!(obj instanceof WorldType)) {
             return false;
         }
@@ -73,5 +87,25 @@ public abstract class WorldTypeMixin {
                 .add("name", this.name)
                 .add("settings", ((GeneratorType) this).getGeneratorSettings())
                 .toString();
+    }
+
+    @Override
+    public Optional<Function<World, BiomeProvider>> bridge$getBiomeProvider() {
+        return Optional.ofNullable(this.impl$biomeProvider);
+    }
+
+    @Override
+    public Optional<BiFunction<World, String, IChunkGenerator>> bridge$getChvunkGenerator() {
+        return Optional.ofNullable(this.impl$chunkGenerator);
+    }
+
+    @Override
+    public void bridge$setChunkGenerator(final BiFunction<World, String, IChunkGenerator> function) {
+        this.impl$chunkGenerator = function;
+    }
+
+    @Override
+    public void bridge$setBiomeProvider(final Function<World, BiomeProvider> function) {
+        this.impl$biomeProvider = function;
     }
 }

@@ -30,6 +30,7 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
+import org.spongepowered.common.mixin.core.scoreboard.ScoreAccessor;
 import org.spongepowered.common.mixin.core.scoreboard.ScoreObjectiveAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
@@ -73,12 +74,12 @@ public class SpongeScore implements Score {
 
     private void updateScore() {
         for (final net.minecraft.scoreboard.Score score : this.scores.values()) {
-            final int j = score.scorePoints;
-            score.scorePoints = this.score;
+            final int j = ((ScoreAccessor) score).accessor$getScorePoints();
+            ((ScoreAccessor) score).accessor$setScorePoints(this.score);
 
-            if (j != this.score || score.forceUpdate)
+            if (j != this.score || ((ScoreAccessor) score).accessor$getForceUpdate())
             {
-                score.forceUpdate = false;
+                ((ScoreAccessor) score).accessor$setForceUpdate(false);
                 score.getScoreScoreboard().onScoreUpdated(score);
             }
         }
@@ -103,7 +104,7 @@ public class SpongeScore implements Score {
         // We deliberately set the fields here instead of using the methods.
         // Since a new score is being created here, we want to avoid
         // sending packets until everything is in the proper state.
-        score.scorePoints = this.score;
+        ((ScoreAccessor) score).accessor$setScorePoints(this.score);
 
         ((ScoreBridge) score).bridge$setSpongeScore(this);
         this.scores.put(objective, score);

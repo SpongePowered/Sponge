@@ -38,6 +38,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.tileentity.MobSpawnerBaseLogicBridge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -54,32 +55,46 @@ public abstract class TileEntityMobSpawnerMixin_API extends TileEntityMixin_API 
     @Shadow public abstract MobSpawnerBaseLogic getSpawnerBaseLogic();
 
     @Override
-    public void spawnEntityBatchImmediately(boolean force) {
-        if (force) {
-            final short oldMaxNearby = (short) getSpawnerBaseLogic().maxNearbyEntities;
-            getSpawnerBaseLogic().maxNearbyEntities = Short.MAX_VALUE;
+    public void spawnEntityBatchImmediately(final boolean force) {
+        final MobSpawnerBaseLogicBridge bridge = ((MobSpawnerBaseLogicBridge) getSpawnerBaseLogic());
 
-            getSpawnerBaseLogic().spawnDelay = 0;
+        if (force) {
+            final short oldMaxNearby = (short) bridge.bridge$getMaxNearbyEntities();
+            bridge.bridge$setMaxNearbyEntities(Short.MAX_VALUE);
+
+            bridge.bridge$setSpawnDelay(0);
             getSpawnerBaseLogic().updateSpawner();
 
-            getSpawnerBaseLogic().maxNearbyEntities = oldMaxNearby;
+            bridge.bridge$setMaxNearbyEntities(oldMaxNearby);
         } else {
-            getSpawnerBaseLogic().spawnDelay = 0;
+            bridge.bridge$setSpawnDelay(0);
         }
     }
 
     @Override
     public MobSpawnerData getMobSpawnerData() {
+//        final MobSpawnerBaseLogicAccessor accessor = (MobSpawnerBaseLogicAccessor) this.getSpawnerBaseLogic();
+//        return new SpongeMobSpawnerData(
+//                (short) accessor.accessor$getSpawnDelay(),
+//                (short) accessor.accessor$getMinSpawnDelay(),
+//                (short) accessor.accessor$getMaxSpawnDelay(),
+//                (short) accessor.accessor$getSpawnCount(),
+//                (short) accessor.accessor$getMaxNearbyEntities(),
+//                (short) accessor.accessor$getActivatingRangeFromPlayer(),
+//                (short) accessor.accessor$getSpawnRange(),
+//                SpawnerUtils.getNextEntity(accessor),
+//                SpawnerUtils.getEntities(this.mobSpawnerLogic));
+        final MobSpawnerBaseLogicBridge accessor = (MobSpawnerBaseLogicBridge) this.getSpawnerBaseLogic();
         return new SpongeMobSpawnerData(
-                (short) getSpawnerBaseLogic().spawnDelay,
-                (short) getSpawnerBaseLogic().minSpawnDelay,
-                (short) getSpawnerBaseLogic().maxSpawnDelay,
-                (short) getSpawnerBaseLogic().spawnCount,
-                (short) getSpawnerBaseLogic().maxNearbyEntities,
-                (short) getSpawnerBaseLogic().activatingRangeFromPlayer,
-                (short) getSpawnerBaseLogic().spawnRange,
-                SpawnerUtils.getNextEntity(getSpawnerBaseLogic()),
-                SpawnerUtils.getEntities(getSpawnerBaseLogic()));
+            (short) accessor.bridge$getSpawnDelay(),
+            (short) accessor.bridge$getMinSpawnDelay(),
+            (short) accessor.bridge$getMaxSpawnDelay(),
+            (short) accessor.bridge$getSpawnCount(),
+            (short) accessor.bridge$getMaxNearbyEntities(),
+            (short) accessor.bridge$getActivatingRangeFromPlayer(),
+            (short) accessor.bridge$getSpawnRange(),
+            SpawnerUtils.getNextEntity(accessor),
+            SpawnerUtils.getEntities(getSpawnerBaseLogic()));
     }
 
     @Override
@@ -88,7 +103,7 @@ public abstract class TileEntityMobSpawnerMixin_API extends TileEntityMixin_API 
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_REMAINING_DELAY)
-            .actualValue((short) getSpawnerBaseLogic().spawnDelay)
+            .actualValue((short) ((MobSpawnerBaseLogicBridge) getSpawnerBaseLogic()).bridge$getSpawnDelay())
             .build();
     }
 
@@ -98,7 +113,7 @@ public abstract class TileEntityMobSpawnerMixin_API extends TileEntityMixin_API 
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_MINIMUM_SPAWN_DELAY)
-            .actualValue((short) getSpawnerBaseLogic().minSpawnDelay)
+            .actualValue((short) ((MobSpawnerBaseLogicBridge) getSpawnerBaseLogic()).bridge$getMinSpawnDelay())
             .build();
     }
 
@@ -108,7 +123,7 @@ public abstract class TileEntityMobSpawnerMixin_API extends TileEntityMixin_API 
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_MAXIMUM_SPAWN_DELAY)
-            .actualValue((short) getSpawnerBaseLogic().maxSpawnDelay)
+            .actualValue((short) ((MobSpawnerBaseLogicBridge) getSpawnerBaseLogic()).bridge$getMaxSpawnDelay())
             .build();
     }
 
@@ -118,7 +133,7 @@ public abstract class TileEntityMobSpawnerMixin_API extends TileEntityMixin_API 
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_SPAWN_COUNT)
-            .actualValue((short) getSpawnerBaseLogic().spawnCount)
+            .actualValue((short) ((MobSpawnerBaseLogicBridge) getSpawnerBaseLogic()).bridge$getSpawnCount())
             .build();
     }
 
@@ -128,7 +143,7 @@ public abstract class TileEntityMobSpawnerMixin_API extends TileEntityMixin_API 
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_MAXMIMUM_NEARBY_ENTITIES)
-            .actualValue((short) getSpawnerBaseLogic().maxNearbyEntities)
+            .actualValue((short) ((MobSpawnerBaseLogicBridge) getSpawnerBaseLogic()).bridge$getMaxNearbyEntities())
             .build();
     }
 
@@ -138,7 +153,7 @@ public abstract class TileEntityMobSpawnerMixin_API extends TileEntityMixin_API 
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_REQUIRED_PLAYER_RANGE)
-            .actualValue((short) getSpawnerBaseLogic().activatingRangeFromPlayer)
+            .actualValue((short) ((MobSpawnerBaseLogicBridge) getSpawnerBaseLogic()).bridge$getActivatingRangeFromPlayer())
             .build();
     }
 
@@ -148,14 +163,14 @@ public abstract class TileEntityMobSpawnerMixin_API extends TileEntityMixin_API 
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_SPAWN_RANGE)
-            .actualValue((short) getSpawnerBaseLogic().spawnRange)
+            .actualValue((short) ((MobSpawnerBaseLogicBridge) getSpawnerBaseLogic()).bridge$getSpawnRange())
             .build();
     }
 
     @Override
     public Value<WeightedSerializableObject<EntityArchetype>> nextEntityToSpawn() {
         return new SpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN,
-            Constants.TileEntity.Spawner.DEFAULT_NEXT_ENTITY_TO_SPAWN, SpawnerUtils.getNextEntity(getSpawnerBaseLogic()));
+            Constants.TileEntity.Spawner.DEFAULT_NEXT_ENTITY_TO_SPAWN, SpawnerUtils.getNextEntity((MobSpawnerBaseLogicBridge) getSpawnerBaseLogic()));
     }
 
     @Override
@@ -164,7 +179,7 @@ public abstract class TileEntityMobSpawnerMixin_API extends TileEntityMixin_API 
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(final List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getMobSpawnerData());
     }

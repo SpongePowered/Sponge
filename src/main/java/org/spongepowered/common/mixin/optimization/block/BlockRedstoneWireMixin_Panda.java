@@ -50,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.util.EnumFacingBridge;
 
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +58,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings({"deprecation", "ConstantConditions"})
 @Mixin(value = BlockRedstoneWire.class, priority = 1001)
 public abstract class BlockRedstoneWireMixin_Panda extends Block {
 
@@ -83,12 +85,12 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
     static {
         final Set<Vec3i> set = Sets.newLinkedHashSet();
         for (final EnumFacing facing : facings) {
-            set.add(facing.directionVec);
+            set.add(((EnumFacingBridge) (Object) facing).bridge$getDirectionVec());
         }
         for (final EnumFacing facing1 : facings) {
-            final Vec3i v1 = facing1.directionVec;
+            final Vec3i v1 = ((EnumFacingBridge) (Object) facing1).bridge$getDirectionVec();
             for (final EnumFacing facing2 : facings) {
-                final Vec3i v2 = facing2.directionVec;
+                final Vec3i v2 = ((EnumFacingBridge) (Object) facing2).bridge$getDirectionVec();
                 // TODO Adding an add-method to Vec3i would be nicer of course
                 set.add(new Vec3i(v1.getX() + v2.getX(), v1.getY() + v2.getY(), v1.getZ() + v2.getZ()));
             }
@@ -97,7 +99,7 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
         surroundingBlocksOffset = set.toArray(new Vec3i[set.size()]);
     }
 
-    @Shadow public boolean canProvidePower;
+    @Shadow private boolean canProvidePower;
     @Shadow protected abstract int getMaxCurrentStrength(World worldIn, BlockPos pos, int strength);
     @Shadow protected abstract boolean isPowerSourceAt(IBlockAccess worldIn, BlockPos pos, EnumFacing side);
 

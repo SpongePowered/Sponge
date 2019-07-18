@@ -53,18 +53,18 @@ import java.util.stream.Collectors;
 @Mixin(ScorePlayerTeam.class)
 public abstract class ScorePlayerTeamMixin extends net.minecraft.scoreboard.Team implements TeamBridge {
 
-    @Shadow @Nullable public Scoreboard scoreboard;
-    @Shadow public String name;
-    @Shadow public Set<String> membershipSet;
-    @Shadow public String displayName;
-    @Shadow public TextFormatting color;
-    @Shadow public String prefix;
-    @Shadow public String suffix;
-    @Shadow public boolean allowFriendlyFire;
-    @Shadow public boolean canSeeFriendlyInvisibles;
-    @Shadow public net.minecraft.scoreboard.Team.EnumVisible nameTagVisibility;
-    @Shadow public net.minecraft.scoreboard.Team.EnumVisible deathMessageVisibility;
-    @Shadow public net.minecraft.scoreboard.Team.CollisionRule collisionRule;
+    @Shadow @Nullable private Scoreboard scoreboard;
+    @Shadow private String name;
+    @Shadow private Set<String> membershipSet;
+    @Shadow private String displayName;
+    @Shadow private TextFormatting color;
+    @Shadow private String prefix;
+    @Shadow private String suffix;
+    @Shadow private boolean allowFriendlyFire;
+    @Shadow private boolean canSeeFriendlyInvisibles;
+    @Shadow private net.minecraft.scoreboard.Team.EnumVisible nameTagVisibility;
+    @Shadow private net.minecraft.scoreboard.Team.EnumVisible deathMessageVisibility;
+    @Shadow private net.minecraft.scoreboard.Team.CollisionRule collisionRule;
 
     @Shadow public abstract void setAllowFriendlyFire(boolean friendlyFire);
 

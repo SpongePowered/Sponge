@@ -34,6 +34,7 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
+import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
 import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
 
 import java.util.Optional;
@@ -45,28 +46,28 @@ public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected WeightedCollectionValue<EntityArchetype> constructValue(WeightedTable<EntityArchetype> actualValue) {
+    protected WeightedCollectionValue<EntityArchetype> constructValue(final WeightedTable<EntityArchetype> actualValue) {
         return new SpongeWeightedCollectionValue<>(this.key, actualValue);
     }
 
     @Override
-    protected boolean set(TileEntityMobSpawnerAccessor container, WeightedTable<EntityArchetype> value) {
-        SpawnerUtils.setEntities(container.accessor$getSpawnerLogic(), value);
+    protected boolean set(final TileEntityMobSpawnerAccessor container, final WeightedTable<EntityArchetype> value) {
+        SpawnerUtils.setEntities((MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic(), value);
         return true;
     }
 
     @Override
-    protected Optional<WeightedTable<EntityArchetype>> getVal(TileEntityMobSpawnerAccessor container) {
+    protected Optional<WeightedTable<EntityArchetype>> getVal(final TileEntityMobSpawnerAccessor container) {
         return Optional.of(SpawnerUtils.getEntities(container.accessor$getSpawnerLogic()));
     }
 
     @Override
-    protected ImmutableValue<WeightedTable<EntityArchetype>> constructImmutableValue(WeightedTable<EntityArchetype> value) {
+    protected ImmutableValue<WeightedTable<EntityArchetype>> constructImmutableValue(final WeightedTable<EntityArchetype> value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

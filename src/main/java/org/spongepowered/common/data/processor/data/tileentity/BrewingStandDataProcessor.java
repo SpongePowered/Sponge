@@ -35,6 +35,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.tileentity.TileEntityBrewingStandAccessor;
 
 import java.util.Optional;
 
@@ -46,8 +47,8 @@ public class BrewingStandDataProcessor extends
     }
 
     @Override
-    protected boolean set(TileEntityBrewingStand entity, Integer value) {
-        if (!entity.canBrew()) {
+    protected boolean set(final TileEntityBrewingStand entity, final Integer value) {
+        if (!((TileEntityBrewingStandAccessor) entity).accessor$canBrew()) {
             return false;
         }
 
@@ -56,12 +57,12 @@ public class BrewingStandDataProcessor extends
     }
 
     @Override
-    protected Optional<Integer> getVal(TileEntityBrewingStand entity) {
-        return Optional.of(entity.canBrew() ? entity.getField(0) : 0);
+    protected Optional<Integer> getVal(final TileEntityBrewingStand entity) {
+        return Optional.of(((TileEntityBrewingStandAccessor) entity).accessor$canBrew() ? entity.getField(0) : 0);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected MutableBoundedValue<Integer> constructValue(final Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.REMAINING_BREW_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -71,7 +72,7 @@ public class BrewingStandDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 
@@ -81,7 +82,7 @@ public class BrewingStandDataProcessor extends
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData(); // cannot be removed
     }
 

@@ -123,6 +123,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     @Shadow private void relightBlock(final int x, final int y, final int z) { }
     // @formatter:on
 
+    @Shadow protected abstract void populate(IChunkGenerator generator);
+
     private long impl$scheduledForUnload = -1; // delay chunk unloads
     private boolean impl$persistedChunk = false;
     private boolean impl$isSpawning = false;
@@ -798,6 +800,11 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
             return true;
         }
         return this.loaded && !this.bridge$isQueuedForUnload() && this.bridge$getScheduledForUnload() == -1;
+    }
+
+    @Override
+    public void accessor$populate(final IChunkGenerator generator) {
+        this.populate(generator);
     }
 
     @Override

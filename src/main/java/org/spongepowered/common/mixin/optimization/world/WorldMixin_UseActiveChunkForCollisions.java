@@ -64,7 +64,7 @@ public abstract class WorldMixin_UseActiveChunkForCollisions {
     private boolean activeCollision$IgnoreAreaIsLoaded(final World world, final int xStart, final int yStart, final int zStart,
         final int xEnd, final int yEnd, final int zEnd, final boolean allowEmpty) {
         if (((WorldBridge) this).bridge$isFake()) {
-            return world.isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd, allowEmpty);
+            return this.isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd, allowEmpty);
         }
         return true;
     }

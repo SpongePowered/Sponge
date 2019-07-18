@@ -25,17 +25,45 @@
 package org.spongepowered.common.bridge.world.chunk;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.IChunkGenerator;
+import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
+import javax.annotation.Nullable;
 
 /**
  * Specific bridge for the {@link ChunkProviderServer}, with a direct
  * pairing to {@link WorldServer} as a hard requirement.
  */
 public interface ServerChunkProviderBridge {
+
+    /**
+     * To be moved to ChunkProviderServerAccessor when Mixin 0.8 is available
+     */
+    @Nullable
+    @Deprecated
+    IChunkGenerator accessor$getChunkGenerator();
+
+    /**
+     * To be moved to ChunkProviderServerAccessor when Mixin 0.8 is available
+     */
+    @Deprecated
+    void accessor$setChunkGenerator(IChunkGenerator spongeGen);
+
+    /**
+     * To be moved to ChunkProviderServerAccessor when Mixin 0.8 is available
+     */
+    @Deprecated
+    Long2ObjectMap<Chunk> accessor$getLoadedChunks();
 
     CompletableFuture<Boolean> bridge$doesChunkExistSync(Vector3i chunkCoords);
 

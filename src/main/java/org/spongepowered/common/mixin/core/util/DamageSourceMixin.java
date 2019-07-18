@@ -46,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
+import org.spongepowered.common.bridge.world.ExplosionBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 
@@ -89,18 +90,21 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
 
     @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;", at = @At("HEAD"), cancellable = true)
     private static void onSetExplosionSource(@Nullable final Explosion explosionIn, final CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
-        if (explosionIn != null && explosionIn.exploder != null && !((WorldBridge) explosionIn.world).bridge$isFake()) {
-            if (explosionIn.getExplosivePlacedBy() == null && explosionIn.exploder instanceof OwnershipTrackedBridge) {
-                // check creator
-                final OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) explosionIn.exploder;
-                spongeEntity.tracked$getOwnerReference()
-                    .filter(user -> user instanceof EntityPlayer)
-                    .map(user -> (EntityPlayer) user)
-                    .ifPresent(player -> {
-                        final EntityDamageSourceIndirect damageSource = new EntityDamageSourceIndirect("explosion.player", explosionIn.exploder, player);
-                        damageSource.setDifficultyScaled().setExplosion();
-                        cir.setReturnValue(damageSource);
-                    });
+        if (explosionIn != null) {
+            final Entity entity = ((ExplosionBridge) explosionIn).bridge$getExploder();
+            if (entity != null && !((WorldBridge) ((ExplosionBridge) explosionIn).bridge$getWorld()).bridge$isFake()) {
+                if (explosionIn.getExplosivePlacedBy() == null && entity instanceof OwnershipTrackedBridge) {
+                    // check creator
+                    final OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) entity;
+                    spongeEntity.tracked$getOwnerReference()
+                        .filter(user -> user instanceof EntityPlayer)
+                        .map(user -> (EntityPlayer) user)
+                        .ifPresent(player -> {
+                            final EntityDamageSourceIndirect damageSource = new EntityDamageSourceIndirect("explosion.player", entity, player);
+                            damageSource.setDifficultyScaled().setExplosion();
+                            cir.setReturnValue(damageSource);
+                        });
+                }
             }
         }
     }

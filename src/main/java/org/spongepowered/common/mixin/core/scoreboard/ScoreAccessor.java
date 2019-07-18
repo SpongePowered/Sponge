@@ -25,11 +25,21 @@
 package org.spongepowered.common.mixin.core.scoreboard;
 
 import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(Score.class)
 public interface ScoreAccessor {
 
-    @Accessor("forceUpdate") void accessor$setForceUpdate(boolean b);
+    @Accessor("objective") ScoreObjective accessor$getObjective();
+
+    @Accessor("scorePoints") int accessor$getScorePoints();
+
+    @Accessor("scorePoints") void accessor$setScorePoints(int scorePoints);
+
+    @Accessor("forceUpdate") boolean accessor$getForceUpdate();
+
+    @Accessor("forceUpdate") void accessor$setForceUpdate(boolean forceUpdate);
+
 }

@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.bridge.world;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.world.World;
+
+import javax.annotation.Nullable;
+
 public interface ExplosionBridge {
 
     boolean bridge$getShouldDamageBlocks();
@@ -34,4 +39,8 @@ public interface ExplosionBridge {
 
     void bridge$setShouldDamageEntities(boolean shouldDamageEntities);
 
+    @Nullable
+    Entity bridge$getExploder();
+
+    World bridge$getWorld();
 }

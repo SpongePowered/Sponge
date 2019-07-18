@@ -35,6 +35,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.tileentity.TileEntityHopperAccessor;
 
 import java.util.Optional;
 
@@ -46,21 +47,21 @@ public class CooldownDataProcessor
     }
 
     @Override
-    public boolean set(TileEntityHopper entity, Integer value) {
+    public boolean set(final TileEntityHopper entity, final Integer value) {
         if (value < 1) {
             return false;
         }
-        entity.transferCooldown = value;
+        ((TileEntityHopperAccessor) entity ).accessor$setTransferCooldown(value);
         return true;
     }
 
     @Override
-    public Optional<Integer> getVal(TileEntityHopper entity) {
-        return Optional.ofNullable(entity.transferCooldown < 1 ? null : entity.transferCooldown);
+    public Optional<Integer> getVal(final TileEntityHopper entity) {
+        return Optional.ofNullable(((TileEntityHopperAccessor) entity ).accessor$getTransferCooldown() < 1 ? null : ((TileEntityHopperAccessor) entity ).accessor$getTransferCooldown());
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer value) {
+    protected MutableBoundedValue<Integer> constructValue(final Integer value) {
         return SpongeValueFactory.boundedBuilder(Keys.COOLDOWN)
                 .minimum(1)
                 .maximum(Integer.MAX_VALUE)
@@ -70,7 +71,7 @@ public class CooldownDataProcessor
     }
 
     @Override
-    public ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    public ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 
@@ -80,14 +81,14 @@ public class CooldownDataProcessor
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (container instanceof TileEntityHopper) {
-            TileEntityHopper hopper = (TileEntityHopper) container;
-            Optional<Integer> old = getVal(hopper);
+            final TileEntityHopper hopper = (TileEntityHopper) container;
+            final Optional<Integer> old = getVal(hopper);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            hopper.transferCooldown = -1;
+            ((TileEntityHopperAccessor) hopper).accessor$setTransferCooldown(-1);
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();

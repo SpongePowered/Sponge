@@ -52,6 +52,8 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
+import org.spongepowered.common.mixin.core.util.CombatEntryAccessor;
+import org.spongepowered.common.mixin.core.util.CombatTrackerAccessor;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -220,11 +222,11 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     private void appendContextOfPossibleEntityDeath(Entity tickingEntity, CauseStackManager.StackFrame frame) {
         if (EntityUtil.isEntityDead((net.minecraft.entity.Entity) tickingEntity)) {
             if (tickingEntity instanceof EntityLivingBase) {
-                CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
+                CombatEntry entry = ((CombatTrackerAccessor) ((EntityLivingBase) tickingEntity).getCombatTracker()).accessor$getBestCombatEntry();
                 if (entry != null) {
-                    if (entry.damageSrc != null) {
+                    if (((CombatEntryAccessor) entry).accessor$getDamageSrc() != null) {
                         frame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE,
-                                (DamageSource) entry.damageSrc);
+                                (DamageSource) ((CombatEntryAccessor) entry).accessor$getDamageSrc());
                     }
                 }
             }

@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.util.FoodStatsAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -43,7 +44,7 @@ public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<E
     }
 
     @Override
-    public MutableBoundedValue<Double> constructValue(Double defaultValue) {
+    public MutableBoundedValue<Double> constructValue(final Double defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.SATURATION)
             .defaultValue(Constants.Entity.Player.DEFAULT_SATURATION)
             .minimum(0D)
@@ -53,23 +54,23 @@ public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<E
     }
 
     @Override
-    protected boolean set(EntityPlayer container, Double value) {
-        container.getFoodStats().foodSaturationLevel = value.floatValue();
+    protected boolean set(final EntityPlayer container, final Double value) {
+        ((FoodStatsAccessor) container.getFoodStats()).accessor$setFoodSaturationLevel(value.floatValue());
         return true;
     }
 
     @Override
-    protected Optional<Double> getVal(EntityPlayer container) {
+    protected Optional<Double> getVal(final EntityPlayer container) {
         return Optional.of((double) container.getFoodStats().getSaturationLevel());
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
+    protected ImmutableValue<Double> constructImmutableValue(final Double value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

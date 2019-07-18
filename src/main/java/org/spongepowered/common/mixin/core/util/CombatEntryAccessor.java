@@ -22,34 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.type;
+package org.spongepowered.common.mixin.core.util;
 
-import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.util.CombatEntry;
+import net.minecraft.util.DamageSource;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Arrays;
+import javax.annotation.Nullable;
 
-public abstract class SpongeWorldType extends WorldType {
+@Mixin(CombatEntry.class)
+public interface CombatEntryAccessor {
 
-    protected SpongeWorldType(String name) {
-        super(getNextID(), name);
-    }
+    @Accessor("damageSrc") @Nullable DamageSource accessor$getDamageSrc();
 
-    private static int getNextID() {
-        for (int x = 0; x < WORLD_TYPES.length; x++) {
-            if (WORLD_TYPES[x] == null) {
-                return x;
-            }
-        }
-
-        int oldLen = WORLD_TYPES.length;
-        WORLD_TYPES = Arrays.copyOf(WORLD_TYPES, oldLen + 16);
-        return oldLen;
-    }
-
-    public abstract BiomeProvider getBiomeProvider(World world);
-
-    public abstract IChunkGenerator getChunkGenerator(World world, String generatorOptions);
 }

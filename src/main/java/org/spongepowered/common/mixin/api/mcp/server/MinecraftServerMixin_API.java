@@ -141,7 +141,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public boolean hasWhitelist() {
-        return this.getPlayerList().whiteListEnforced;
+        return this.getPlayerList().isWhiteListEnabled();
     }
 
     @Override

@@ -31,6 +31,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
 import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
 import org.spongepowered.common.util.Constants;
 
@@ -43,7 +44,7 @@ public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProces
     }
 
     @Override
-    protected MutableBoundedValue<Short> constructValue(Short actualValue) {
+    protected MutableBoundedValue<Short> constructValue(final Short actualValue) {
         return SpongeValueFactory.boundedBuilder(this.key)
                 .minimum((short) 0)
                 .maximum(Short.MAX_VALUE)
@@ -53,23 +54,23 @@ public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProces
     }
 
     @Override
-    protected boolean set(TileEntityMobSpawnerAccessor container, Short value) {
-        container.accessor$getSpawnerLogic().minSpawnDelay = value;
+    protected boolean set(final TileEntityMobSpawnerAccessor container, final Short value) {
+        ((MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic()).accessor$setMinSpawnDelay(value);
         return true;
     }
 
     @Override
-    protected Optional<Short> getVal(TileEntityMobSpawnerAccessor container) {
-        return Optional.of((short) container.accessor$getSpawnerLogic().minSpawnDelay);
+    protected Optional<Short> getVal(final TileEntityMobSpawnerAccessor container) {
+        return Optional.of((short) ((MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic()).accessor$getMinSpawnDelay());
     }
 
     @Override
-    protected ImmutableValue<Short> constructImmutableValue(Short value) {
+    protected ImmutableValue<Short> constructImmutableValue(final Short value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

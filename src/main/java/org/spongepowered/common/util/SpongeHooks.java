@@ -91,27 +91,27 @@ public class SpongeHooks {
 
     private static Object2LongMap<CollisionWarning> recentWarnings = new Object2LongOpenHashMap<>();
 
-    public static void logInfo(String msg, Object... args) {
+    public static void logInfo(final String msg, final Object... args) {
         SpongeImpl.getLogger().info(MessageFormat.format(msg, args));
     }
 
-    public static void logWarning(String msg, Object... args) {
+    public static void logWarning(final String msg, final Object... args) {
         SpongeImpl.getLogger().warn(MessageFormat.format(msg, args));
     }
 
-    public static void logSevere(String msg, Object... args) {
+    public static void logSevere(final String msg, final Object... args) {
         SpongeImpl.getLogger().fatal(MessageFormat.format(msg, args));
     }
 
-    public static void logStack(SpongeConfig<? extends GeneralConfigBase> config) {
+    public static void logStack(final SpongeConfig<? extends GeneralConfigBase> config) {
         if (config.getConfig().getLogging().logWithStackTraces()) {
-            Throwable ex = new Throwable();
+            final Throwable ex = new Throwable();
             ex.fillInStackTrace();
             SpongeImpl.getLogger().catching(Level.INFO, ex);
         }
     }
 
-    public static void logEntityDeath(Entity entity) {
+    public static void logEntityDeath(final Entity entity) {
         if (entity == null || entity.world.isRemote) {
             return;
         }
@@ -123,7 +123,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logEntityDespawn(Entity entity, String reason) {
+    public static void logEntityDespawn(final Entity entity, final String reason) {
         if (entity == null || entity.world.isRemote) {
             return;
         }
@@ -135,7 +135,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logEntitySpawn(Entity entity) {
+    public static void logEntitySpawn(final Entity entity) {
         if (entity == null) {
             return;
         }
@@ -144,7 +144,7 @@ public class SpongeHooks {
             return;
         }
 
-        String spawnName = entity.getName();
+        final String spawnName = entity.getName();
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().entitySpawnLogging()) {
@@ -155,7 +155,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logBlockTrack(World world, Block block, BlockPos pos, User user, boolean allowed) {
+    public static void logBlockTrack(final World world, final Block block, final BlockPos pos, final User user, final boolean allowed) {
         if (world.isRemote) {
             return;
         }
@@ -178,14 +178,14 @@ public class SpongeHooks {
         }
     }
 
-    public static void logBlockAction(World world, @Nullable BlockChange type, Transaction<BlockSnapshot> transaction) {
+    public static void logBlockAction(final World world, @Nullable final BlockChange type, final Transaction<BlockSnapshot> transaction) {
         if (world.isRemote) {
             return;
         }
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
 
-        LoggingCategory logging = configAdapter.getConfig().getLogging();
+        final LoggingCategory logging = configAdapter.getConfig().getLogging();
         if (type != null && type.allowsLogging(logging)) {
             logInfo("Block " + type.name() + " [World: {2}][DimId: {3}][OriginalState: {4}][NewState: {5}]",
                     world.getWorldInfo().getWorldName(),
@@ -196,7 +196,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logChunkLoad(World world, Vector3i chunkPos) {
+    public static void logChunkLoad(final World world, final Vector3i chunkPos) {
         if (world.isRemote) {
             return;
         }
@@ -209,7 +209,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logChunkUnload(World world, Vector3i chunkPos) {
+    public static void logChunkUnload(final World world, final Vector3i chunkPos) {
         if (world.isRemote) {
             return;
         }
@@ -222,7 +222,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logChunkGCQueueUnload(WorldServer world, Chunk chunk) {
+    public static void logChunkGCQueueUnload(final WorldServer world, final Chunk chunk) {
         if (world.isRemote) {
             return;
         }
@@ -234,7 +234,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logExploitSignCommandUpdates(EntityPlayer player, TileEntity te, String command) {
+    public static void logExploitSignCommandUpdates(final EntityPlayer player, final TileEntity te, final String command) {
         if (player.world.isRemote) {
             return;
         }
@@ -250,7 +250,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logExploitItemNameOverflow(EntityPlayer player, int length) {
+    public static void logExploitItemNameOverflow(final EntityPlayer player, final int length) {
         if (player.world.isRemote) {
             return;
         }
@@ -264,7 +264,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logExploitRespawnInvisibility(EntityPlayer player) {
+    public static void logExploitRespawnInvisibility(final EntityPlayer player) {
         if (player.world.isRemote) {
             return;
         }
@@ -277,7 +277,7 @@ public class SpongeHooks {
         }
     }
 
-    public static boolean checkBoundingBoxSize(Entity entity, AxisAlignedBB aabb) {
+    public static boolean checkBoundingBoxSize(final Entity entity, final AxisAlignedBB aabb) {
         if (entity == null || entity.world.isRemote) {
             return false;
         }
@@ -291,14 +291,14 @@ public class SpongeHooks {
         if (maxBoundingBoxSize <= 0) {
             return false;
         }
-        int x = MathHelper.floor(aabb.minX);
-        int x1 = MathHelper.floor(aabb.maxX + 1.0D);
-        int y = MathHelper.floor(aabb.minY);
-        int y1 = MathHelper.floor(aabb.maxY + 1.0D);
-        int z = MathHelper.floor(aabb.minZ);
-        int z1 = MathHelper.floor(aabb.maxZ + 1.0D);
+        final int x = MathHelper.floor(aabb.minX);
+        final int x1 = MathHelper.floor(aabb.maxX + 1.0D);
+        final int y = MathHelper.floor(aabb.minY);
+        final int y1 = MathHelper.floor(aabb.maxY + 1.0D);
+        final int z = MathHelper.floor(aabb.minZ);
+        final int z1 = MathHelper.floor(aabb.maxZ + 1.0D);
 
-        int size = Math.abs(x1 - x) * Math.abs(y1 - y) * Math.abs(z1 - z);
+        final int size = Math.abs(x1 - x) * Math.abs(y1 - y) * Math.abs(z1 - z);
         if (size > maxBoundingBoxSize) {
             logWarning("Entity being removed for bounding box restrictions");
             logWarning("BB Size: {0} > {1} avg edge: {2}", size, maxBoundingBoxSize, aabb.getAverageEdgeLength());
@@ -306,7 +306,7 @@ public class SpongeHooks {
             logWarning("Calculated bounding box: {0}", aabb);
             logWarning("Entity bounding box: {0}", entity.getCollisionBoundingBox());
             logWarning("Entity: {0}", entity);
-            NBTTagCompound tag = new NBTTagCompound();
+            final NBTTagCompound tag = new NBTTagCompound();
             entity.writeToNBT(tag);
             logWarning("Entity NBT: {0}", tag);
             logStack(configAdapter);
@@ -316,20 +316,20 @@ public class SpongeHooks {
         return false;
     }
 
-    public static boolean checkEntitySpeed(Entity entity, double x, double y, double z) {
+    public static boolean checkEntitySpeed(final Entity entity, final double x, final double y, final double z) {
         if (entity == null || entity.world.isRemote) {
             return false;
         }
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.world.getWorldInfo()).bridge$getConfigAdapter();
-        int maxSpeed = configAdapter.getConfig().getEntity().getMaxSpeed();
+        final int maxSpeed = configAdapter.getConfig().getEntity().getMaxSpeed();
         if (maxSpeed > 0) {
-            double distance = x * x + z * z;
+            final double distance = x * x + z * z;
             if (distance > maxSpeed && !entity.isRiding()) {
                 if (configAdapter.getConfig().getLogging().logEntitySpeedRemoval()) {
                     logInfo("Speed violation: {0} was over {1} - Removing Entity: {2}", distance, maxSpeed, entity);
                     if (entity instanceof EntityLivingBase) {
-                        EntityLivingBase livingBase = (EntityLivingBase) entity;
+                        final EntityLivingBase livingBase = (EntityLivingBase) entity;
                         logInfo("Entity Motion: ({0}, {1}, {2}) Move Strafing: {3} Move Forward: {4}",
                                 entity.motionX, entity.motionY,
                                 entity.motionZ,
@@ -340,7 +340,7 @@ public class SpongeHooks {
                         logInfo("Move offset: ({0}, {1}, {2})", x, y, z);
                         logInfo("Motion: ({0}, {1}, {2})", entity.motionX, entity.motionY, entity.motionZ);
                         logInfo("Entity: {0}", entity);
-                        NBTTagCompound tag = new NBTTagCompound();
+                        final NBTTagCompound tag = new NBTTagCompound();
                         entity.writeToNBT(tag);
                         logInfo("Entity NBT: {0}", tag);
                         logStack(configAdapter);
@@ -362,7 +362,7 @@ public class SpongeHooks {
 
     // TODO - needs to be hooked
     @SuppressWarnings("rawtypes")
-    public static void logEntitySize(Entity entity, List list) {
+    public static void logEntitySize(final Entity entity, final List list) {
         if (entity == null || entity.world.isRemote) {
             return;
         }
@@ -371,16 +371,16 @@ public class SpongeHooks {
         if (!configAdapter.getConfig().getLogging().logEntityCollisionChecks()) {
             return;
         }
-        int collisionWarnSize = configAdapter.getConfig().getEntity().getMaxCollisionSize();
+        final int collisionWarnSize = configAdapter.getConfig().getEntity().getMaxCollisionSize();
 
         if (list == null) {
             return;
         }
 
         if (collisionWarnSize > 0 && (entity.getEntityWorld().getMinecraftServer().getTickCounter() % 10) == 0 && list.size() >= collisionWarnSize) {
-            SpongeHooks.CollisionWarning warning = new SpongeHooks.CollisionWarning(entity.world, entity);
+            final SpongeHooks.CollisionWarning warning = new SpongeHooks.CollisionWarning(entity.world, entity);
             if (SpongeHooks.recentWarnings.containsKey(warning)) {
-                long lastWarned = SpongeHooks.recentWarnings.get(warning);
+                final long lastWarned = SpongeHooks.recentWarnings.get(warning);
                 if ((MinecraftServer.getCurrentTimeMillis() - lastWarned) < 30000) {
                     return;
                 }
@@ -395,17 +395,17 @@ public class SpongeHooks {
         public BlockPos blockPos;
         public int dimensionId;
 
-        public CollisionWarning(World world, Entity entity) {
+        public CollisionWarning(final World world, final Entity entity) {
             this.dimensionId = ((ServerWorldBridge) world).bridge$getDimensionId();
             this.blockPos = new BlockPos(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ);
         }
 
         @Override
-        public boolean equals(Object otherObj) {
+        public boolean equals(final Object otherObj) {
             if (!(otherObj instanceof CollisionWarning) || (otherObj == null)) {
                 return false;
             }
-            CollisionWarning other = (CollisionWarning) otherObj;
+            final CollisionWarning other = (CollisionWarning) otherObj;
             return (other.dimensionId == this.dimensionId) && other.blockPos.equals(this.blockPos);
         }
 
@@ -417,16 +417,16 @@ public class SpongeHooks {
 
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static void dumpHeap(File file, boolean live) {
+    public static void dumpHeap(final File file, final boolean live) {
         try {
             if (file.getParentFile() != null) {
                 file.getParentFile().mkdirs();
             }
 
-            Class clazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
-            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-            Object hotspotMBean = ManagementFactory.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic", clazz);
-            Method m = clazz.getMethod("dumpHeap", String.class, boolean.class);
+            final Class clazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
+            final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+            final Object hotspotMBean = ManagementFactory.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic", clazz);
+            final Method m = clazz.getMethod("dumpHeap", String.class, boolean.class);
             m.invoke(hotspotMBean, file.getPath(), live);
         } catch (Throwable t) {
             logSevere("Could not write heap to {0}", file);
@@ -437,11 +437,11 @@ public class SpongeHooks {
         if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getDebug().isEnableThreadContentionMonitoring()) {
             return;
         }
-        ThreadMXBean mbean = ManagementFactory.getThreadMXBean();
+        final ThreadMXBean mbean = ManagementFactory.getThreadMXBean();
         mbean.setThreadContentionMonitoringEnabled(true);
     }
 
-    public static SpongeConfig<? extends GeneralConfigBase> getConfigAdapter(Path dimensionPath, String worldFolder) {
+    public static SpongeConfig<? extends GeneralConfigBase> getConfigAdapter(final Path dimensionPath, final String worldFolder) {
         if (worldFolder != null) {
             final org.spongepowered.api.world.World sWorld = SpongeImpl.getGame().getServer().getWorld(worldFolder).orElse(null);
             if (sWorld != null) {
@@ -467,7 +467,7 @@ public class SpongeHooks {
     }
 
     public static void refreshActiveConfigs() {
-        for (BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
+        for (final BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
             if (blockType instanceof CollisionsCapability) {
                 ((CollisionsCapability) blockType).collision$requiresCollisionsCacheRefresh(true);
             }
@@ -475,19 +475,19 @@ public class SpongeHooks {
                 ((BlockBridge) blockType).bridge$initializeTrackerState();
             }
         }
-        for (TileEntityType tileEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {
+        for (final TileEntityType tileEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {
             ((SpongeTileEntityType) tileEntityType).initializeTrackerState();
         }
-        for (EntityType entityType : EntityTypeRegistryModule.getInstance().getAll()) {
+        for (final EntityType entityType : EntityTypeRegistryModule.getInstance().getAll()) {
             ((SpongeEntityType) entityType).initializeTrackerState();
         }
 
-        for (WorldServer world : WorldManager.getWorlds()) {
+        for (final WorldServer world : WorldManager.getWorlds()) {
             final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
             // Reload before updating world config cache
             configAdapter.load();
             ((ServerWorldBridge) world).bridge$updateConfigCache();
-            for (Entity entity : world.loadedEntityList) {
+            for (final Entity entity : world.loadedEntityList) {
                 if (entity instanceof ActivationCapability) {
                     ((ActivationCapability) entity).activation$requiresActivationCacheRefresh(true);
                 }
@@ -498,7 +498,7 @@ public class SpongeHooks {
                     ((TrackableBridge) entity).bridge$refreshTrackerStates();
                 }
             }
-            for (TileEntity tileEntity : world.loadedTileEntityList) {
+            for (final TileEntity tileEntity : world.loadedTileEntityList) {
                 if (tileEntity instanceof ActivationCapability) {
                     ((ActivationCapability) tileEntity).activation$requiresActivationCacheRefresh(true);
                 }
@@ -523,7 +523,7 @@ public class SpongeHooks {
         }
     }
 
-    public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(Map<String, Boolean> entries) {
+    public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(final Map<String, Boolean> entries) {
         return SpongeImpl.getGlobalConfigAdapter()
                 .updateSetting("metrics.plugin-permissions", entries, new TypeToken<Map<String, Boolean>>() { private static final long serialVersionUID = -1; });
     }

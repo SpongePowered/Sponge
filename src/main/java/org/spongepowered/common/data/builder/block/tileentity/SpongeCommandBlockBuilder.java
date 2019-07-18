@@ -42,16 +42,16 @@ public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock>
     }
 
     @Override
-    protected Optional<CommandBlock> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<CommandBlock> buildContent(final DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(commandBlock -> {
             if (!container.contains(
                 Constants.TileEntity.CommandBlock.STORED_COMMAND, Constants.TileEntity.CommandBlock.SUCCESS_COUNT, Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT)) {
                 ((TileEntity) commandBlock).invalidate();
                 return Optional.empty();
             }
-            CommandBlockBaseLogic cmdBlockLogic = ((TileEntityCommandBlock) commandBlock).getCommandBlockLogic();
+            final CommandBlockBaseLogic cmdBlockLogic = ((TileEntityCommandBlock) commandBlock).getCommandBlockLogic();
             cmdBlockLogic.setCommand(container.getString(Constants.TileEntity.CommandBlock.STORED_COMMAND).get());
-            cmdBlockLogic.successCount = container.getInt(Constants.TileEntity.CommandBlock.SUCCESS_COUNT).get();
+            cmdBlockLogic.setSuccessCount(container.getInt(Constants.TileEntity.CommandBlock.SUCCESS_COUNT).get());
             cmdBlockLogic.setTrackOutput(container.getBoolean(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT).get());
             if (cmdBlockLogic.shouldTrackOutput()) {
                 cmdBlockLogic.setLastOutput(SpongeTexts.toComponent(SpongeTexts.fromLegacy(

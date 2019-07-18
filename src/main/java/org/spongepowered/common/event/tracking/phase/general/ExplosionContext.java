@@ -31,6 +31,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.mixin.core.world.ExplosionAccessor;
 
 import javax.annotation.Nullable;
 
@@ -49,7 +50,7 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         return this;
     }
 
-    public ExplosionContext potentialExplosionSource(WorldServer worldServer, @Nullable Entity entityIn) {
+    public ExplosionContext potentialExplosionSource(final WorldServer worldServer, @Nullable final Entity entityIn) {
         if (entityIn != null) {
             this.source(entityIn);
         } else {
@@ -58,7 +59,7 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         return this;
     }
     
-    public ExplosionContext explosion(Explosion explosion) {
+    public ExplosionContext explosion(final Explosion explosion) {
         this.explosion = explosion;
         return this;
     }
@@ -72,18 +73,23 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "Explosion", this.explosion);
     }
 
     @Override
-    protected boolean isRunaway(PhaseContext<?> phaseContext) {
+    protected boolean isRunaway(final PhaseContext<?> phaseContext) {
         if (phaseContext.getClass() != ExplosionContext.class) {
             return false;
         }
-        final Explosion otherExplosion = ((ExplosionContext) phaseContext).explosion;
-        return otherExplosion.world == this.explosion.world && otherExplosion.x == this.explosion.x && otherExplosion.y == this.explosion.y && otherExplosion.z == this.explosion.z;
+        final ExplosionAccessor otherExplosion = (ExplosionAccessor) ((ExplosionContext) phaseContext).explosion;
+        final ExplosionAccessor thisExplosion = (ExplosionAccessor) this.explosion;
+
+        return otherExplosion.accessor$getWorld() == thisExplosion.accessor$getWorld()
+               && otherExplosion.accessor$getX() == thisExplosion.accessor$getX()
+               && otherExplosion.accessor$getY() == thisExplosion.accessor$getY()
+               && otherExplosion.accessor$getZ() == thisExplosion.accessor$getZ();
     }
 }

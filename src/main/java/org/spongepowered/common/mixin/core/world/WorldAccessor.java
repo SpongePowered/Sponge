@@ -24,11 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -39,5 +43,26 @@ public interface WorldAccessor {
     @Nullable
     TileEntity accessPendingTileEntityAt(BlockPos pos);
 
+    @Invoker("isValid") boolean accessor$isValid(BlockPos pos);
+
+    @Accessor("unloadedEntityList") List<Entity> accessor$getUnloadedEntityList();
+
+    /**
+     * Tile Entity additions that were deferred because the World was still iterating existing Tile Entities; will be
+     * added to the world at the end of the tick.
+     */
+    @Accessor("addedTileEntityList") List<TileEntity> accessor$getAddedTileEntityList();
+
+    /**
+     * Tile Entity removals that were deferred because the World was still iterating existing Tile Entities; will be
+     * removed from the world at the end of the tick.
+     */
+    @Accessor("tileEntitiesToBeRemoved") List<TileEntity> accessor$getTileEntitiesToBeRemoved();
+
+    /**
+     * True while the World is ticking {@link #accessor$getTickableTileEntities()}, to prevent CME's if any of those ticks create more
+     * tile entities.
+     */
+    @Accessor("processingLoadedTiles") boolean accessor$getProcessingLoadedTiles();
 
 }

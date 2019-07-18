@@ -31,6 +31,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.WeightedSpawnerEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import org.apache.logging.log4j.Level;
@@ -42,21 +43,40 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.tileentity.MobSpawnerBaseLogicBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 @Mixin(MobSpawnerBaseLogic.class)
-public abstract class MobSpawnerBaseLogicMixin {
+public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBridge {
+
+    @Shadow private int spawnDelay;
+    @Shadow @Final @Mutable private List<WeightedSpawnerEntity> potentialSpawns;
+    @Shadow private WeightedSpawnerEntity spawnData;
+    @Shadow private double mobRotation;
+    @Shadow private double prevMobRotation;
+    @Shadow private int minSpawnDelay;
+    @Shadow private int maxSpawnDelay;
+    @Shadow private int spawnCount;
+    @Shadow private Entity cachedEntity;
+    @Shadow private int maxNearbyEntities;
+    @Shadow private int activatingRangeFromPlayer;
+    @Shadow private int spawnRange;
 
     /**
      * @author gabizou - January 30th, 2016
@@ -84,7 +104,8 @@ public abstract class MobSpawnerBaseLogicMixin {
             target = "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;"
         )
     )
-    private Entity impl$ThrowEventAndConstruct(NBTTagCompound compound, World world, double x, double y, double z, boolean doesNotForceSpawn) {
+    private Entity impl$ThrowEventAndConstruct(
+        final NBTTagCompound compound, final World world, final double x, final double y, final double z, final boolean doesNotForceSpawn) {
         final String entityTypeString = compound.getString(Constants.Entity.ENTITY_TYPE_ID);
         final Class<? extends Entity> clazz = SpongeImplHooks.getEntityClass(new ResourceLocation(entityTypeString));
         if (clazz == null) {
@@ -99,23 +120,23 @@ public abstract class MobSpawnerBaseLogicMixin {
             printer.trace(System.err, SpongeImpl.getLogger(), Level.WARN);
             return null;
         }
-        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(clazz);
+        final EntityType type = EntityTypeRegistryModule.getInstance().getForClass(clazz);
         if (type == null) {
             return null;
         }
         if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.MOB_SPAWNER);
-                Transform<org.spongepowered.api.world.World> transform = new Transform<>(
+                final Transform<org.spongepowered.api.world.World> transform = new Transform<>(
                     ((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
-                ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
+                final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
                 SpongeImpl.postEvent(event);
                 if (event.isCancelled()) {
                     return null;
                 }
             }
         }
-        Entity entity;
+        final Entity entity;
         try {
             entity = EntityList.createEntityFromNBT(compound, world);
         } catch (Exception e) {
@@ -146,4 +167,123 @@ public abstract class MobSpawnerBaseLogicMixin {
         return entity;
     }
 
+    @Override
+    public int bridge$getSpawnDelay() {
+        return this.spawnDelay;
+    }
+
+    @Override
+    public void bridge$setSpawnDelay(final int spawnDelay) {
+        this.spawnDelay = spawnDelay;
+    }
+
+    @Override
+    public List<WeightedSpawnerEntity> bridge$getPotentialSpawns() {
+        return this.potentialSpawns;
+    }
+
+    @Override
+    public void bridge$setPotentialSpawns(final List<WeightedSpawnerEntity> potentialSpawns) {
+        this.potentialSpawns = potentialSpawns;
+    }
+
+    @Override
+    public WeightedSpawnerEntity bridge$getSpawnData() {
+        return this.spawnData;
+    }
+
+    @Override
+    public void bridge$setSpawnData(final WeightedSpawnerEntity spawnData) {
+        this.spawnData = spawnData;
+    }
+
+    @Override
+    public double bridge$getMobRotation() {
+        return this.mobRotation;
+    }
+
+    @Override
+    public void bridge$setMobRotation(final double mobRotation) {
+        this.mobRotation = mobRotation;
+    }
+
+    @Override
+    public double bridge$getPrevMobRotation() {
+        return this.prevMobRotation;
+    }
+
+    @Override
+    public void bridge$setPrevMobRotation(final double prevMobRotation) {
+        this.prevMobRotation = prevMobRotation;
+    }
+
+    @Override
+    public int bridge$getMinSpawnDelay() {
+        return this.minSpawnDelay;
+    }
+
+    @Override
+    public void bridge$setMinSpawnDelay(final int minSpawnDelay) {
+        this.minSpawnDelay = minSpawnDelay;
+    }
+
+    @Override
+    public int bridge$getMaxSpawnDelay() {
+        return this.maxSpawnDelay;
+    }
+
+    @Override
+    public void bridge$setMaxSpawnDelay(final int maxSpawnDelay) {
+        this.maxSpawnDelay = maxSpawnDelay;
+    }
+
+    @Override
+    public int bridge$getSpawnCount() {
+        return this.spawnCount;
+    }
+
+    @Override
+    public void bridge$setSpawnCount(final int spawnCount) {
+        this.spawnCount = spawnCount;
+    }
+
+    @Override
+    public Entity bridge$getCachedEntity() {
+        return this.cachedEntity;
+    }
+
+    @Override
+    public void bridge$setCachedEntity(final Entity cachedEntity) {
+        this.cachedEntity = cachedEntity;
+    }
+
+    @Override
+    public int bridge$getMaxNearbyEntities() {
+        return this.maxNearbyEntities;
+    }
+
+    @Override
+    public void bridge$setMaxNearbyEntities(final int maxNearbyEntities) {
+        this.maxNearbyEntities = maxNearbyEntities;
+    }
+
+    @Override
+    public int bridge$getActivatingRangeFromPlayer() {
+        return this.activatingRangeFromPlayer;
+    }
+
+    @Override
+    public void bridge$setActivatingRangeFromPlayer(final int activatingRangeFromPlayer) {
+        this.activatingRangeFromPlayer = activatingRangeFromPlayer;
+    }
+
+    @Override
+    public int bridge$getSpawnRange() {
+        return this.spawnRange;
+    }
+
+    @Override
+    public void bridge$setSpawnRange(final int spawnRange) {
+        this.spawnRange = spawnRange;
+    }
 }

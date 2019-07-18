@@ -110,6 +110,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.packet.ResourcePackBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.world.WorldBorderBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -610,7 +611,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         }
         if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.worldBorder), Optional.ofNullable(border), this))) {
             if (this.worldBorder != null) { //is the world border about to be unset?
-                ((net.minecraft.world.border.WorldBorder) this.worldBorder).listeners.remove(((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
+                ((WorldBorderBridge) this.worldBorder).bridge$getListeners().remove(((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
             }
             this.worldBorder = border;
             if (this.worldBorder != null) {

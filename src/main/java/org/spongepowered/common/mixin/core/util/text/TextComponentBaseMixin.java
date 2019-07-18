@@ -43,6 +43,8 @@ import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.bridge.util.text.StyleBridge;
+import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
 import org.spongepowered.common.bridge.util.text.event.ClickEventBridge;
 import org.spongepowered.common.bridge.util.text.event.HoverEventBridge;
 import org.spongepowered.common.text.ResolvedChatStyle;
@@ -156,14 +158,15 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
     }
 
     private static ResolvedChatStyle resolve(final ResolvedChatStyle current, final Style previous, final Style style) {
-        if (current != null && style.parentStyle == previous) {
+        final StyleBridge bridge = (StyleBridge) style;
+        if (current != null && bridge.bridge$getParentStyle() == previous) {
             return new ResolvedChatStyle(
-                    defaultIfNull(style.color, current.color),
-                    firstNonNull(style.bold, current.bold),
-                    firstNonNull(style.italic, current.italic),
-                    firstNonNull(style.underlined, current.underlined),
-                    firstNonNull(style.strikethrough, current.strikethrough),
-                    firstNonNull(style.obfuscated, current.obfuscated)
+                    defaultIfNull(bridge.bridge$getColor(), current.color),
+                    firstNonNull(bridge.bridge$getBold(), current.bold),
+                    firstNonNull(bridge.bridge$getItalic(), current.italic),
+                    firstNonNull(bridge.bridge$getUnderlined(), current.underlined),
+                    firstNonNull(bridge.bridge$getStrikethrough(), current.strikethrough),
+                    firstNonNull(bridge.bridge$getObfuscated(), current.obfuscated)
             );
         }
         return new ResolvedChatStyle(
@@ -180,8 +183,9 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
         return b1 != null ? b1 : b2;
     }
 
+    @SuppressWarnings("ConstantConditions")
     private static void apply(final StringBuilder builder, final char code, final TextFormatting formatting) {
-        builder.append(code).append(formatting.formattingCode);
+        builder.append(code).append(((TextFormattingBridge) (Object) formatting).bridge$getFormattingCode());
     }
 
     private static void apply(final StringBuilder builder, final char code, final TextFormatting formatting, final boolean state) {
@@ -194,21 +198,22 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
     public Text bridge$toText() {
         final Text.Builder builder = impl$createBuilder();
 
-        if (this.style != null) {
-            if (this.style.color != null) {
-                builder.color(SpongeTextColor.of(this.style.color));
+        final StyleBridge style = (StyleBridge) this.style;
+        if (style != null) {
+            if (style.bridge$getColor() != null) {
+                builder.color(SpongeTextColor.of(style.bridge$getColor()));
             }
 
-            builder.style(new TextStyle(this.style.bold, this.style.italic, this.style.underlined, this.style.strikethrough, this.style.obfuscated));
+            builder.style(new TextStyle(style.bridge$getObfuscated(), style.bridge$getItalic(), style.bridge$getUnderlined(), style.bridge$getStrikethrough(), style.bridge$getObfuscated()));
 
-            if (this.style.clickEvent != null) {
-                builder.onClick(((ClickEventBridge) this.style.clickEvent).bridge$getHandle());
+            if (style.bridge$getClickEvent() != null) {
+                builder.onClick(((ClickEventBridge) style.bridge$getClickEvent()).bridge$getHandle());
             }
-            if (this.style.hoverEvent != null) {
-                builder.onHover(((HoverEventBridge) this.style.hoverEvent).bridge$getHandle());
+            if (style.bridge$getHoverEvent() != null) {
+                builder.onHover(((HoverEventBridge) style.bridge$getHoverEvent()).bridge$getHandle());
             }
-            if (this.style.insertion != null) {
-                builder.onShiftClick(TextActions.insertText(this.style.insertion));
+            if (style.bridge$getInsertion() != null) {
+                builder.onShiftClick(TextActions.insertText(style.bridge$getInsertion()));
             }
         }
 

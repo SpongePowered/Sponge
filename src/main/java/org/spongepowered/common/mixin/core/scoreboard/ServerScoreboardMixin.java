@@ -51,6 +51,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
+import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeObjective;
@@ -111,7 +112,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Override
     public void removeTeam(final ScorePlayerTeam team) {
         super.removeTeam(team);
-        team.scoreboard = null;
+        ((ScorePlayerTeamBridge) team).bridge$setScoreboard(null);
     }
 
     @Override

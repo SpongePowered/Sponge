@@ -37,6 +37,7 @@ import org.spongepowered.api.data.manipulator.mutable.CommandData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
+import org.spongepowered.common.mixin.core.tileentity.CommandBlockBaseLogicAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Map;
@@ -49,7 +50,7 @@ public class TileEntityCommandDataProcessor extends AbstractTileEntityDataProces
     }
 
     @Override
-    public Optional<CommandData> fill(DataContainer container, CommandData commandData) {
+    public Optional<CommandData> fill(final DataContainer container, final CommandData commandData) {
         if (!container.contains(
                 Keys.LAST_COMMAND_OUTPUT.getQuery(), 
                 Keys.SUCCESS_COUNT.getQuery(), 
@@ -57,11 +58,10 @@ public class TileEntityCommandDataProcessor extends AbstractTileEntityDataProces
                 Keys.TRACKS_OUTPUT.getQuery())) {
             return Optional.empty();
         }
-        @SuppressWarnings("unchecked")
-        Optional<Text> lastCommandOutput = (Optional<Text>) container.get(Keys.LAST_COMMAND_OUTPUT.getQuery()).get();
-        int successCount = container.getInt(Keys.SUCCESS_COUNT.getQuery()).get();
-        String command = container.getString(Keys.COMMAND.getQuery()).get();
-        boolean tracksOutput = container.getBoolean(Keys.TRACKS_OUTPUT.getQuery()).get();
+        @SuppressWarnings("unchecked") final Optional<Text> lastCommandOutput = (Optional<Text>) container.get(Keys.LAST_COMMAND_OUTPUT.getQuery()).get();
+        final int successCount = container.getInt(Keys.SUCCESS_COUNT.getQuery()).get();
+        final String command = container.getString(Keys.COMMAND.getQuery()).get();
+        final boolean tracksOutput = container.getBoolean(Keys.TRACKS_OUTPUT.getQuery()).get();
         
         commandData.set(Keys.LAST_COMMAND_OUTPUT, lastCommandOutput);
         commandData.set(Keys.SUCCESS_COUNT, successCount);
@@ -71,35 +71,35 @@ public class TileEntityCommandDataProcessor extends AbstractTileEntityDataProces
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult remove(final DataHolder dataHolder) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected boolean doesDataExist(TileEntityCommandBlock entity) {
+    protected boolean doesDataExist(final TileEntityCommandBlock entity) {
         return true;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected boolean set(TileEntityCommandBlock entity, Map<Key<?>, Object> keyValues) {
-        CommandBlockBaseLogic logic = entity.getCommandBlockLogic();
+    protected boolean set(final TileEntityCommandBlock entity, final Map<Key<?>, Object> keyValues) {
+        final CommandBlockBaseLogic logic = entity.getCommandBlockLogic();
         logic.setLastOutput(SpongeTexts.toComponent(((Optional<Text>) keyValues.get(Keys.LAST_COMMAND_OUTPUT)).orElse(Text.of())));
-        logic.commandStored = (String) keyValues.get(Keys.COMMAND);
-        logic.successCount = (int) keyValues.get(Keys.SUCCESS_COUNT);
+        ((CommandBlockBaseLogicAccessor) logic).accessor$setCommandStored((String) keyValues.get(Keys.COMMAND));
+        ((CommandBlockBaseLogicAccessor) logic).accessor$setSuccessCount((int) keyValues.get(Keys.SUCCESS_COUNT));
         logic.setTrackOutput((boolean) keyValues.get(Keys.TRACKS_OUTPUT));
         entity.markDirty();
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(TileEntityCommandBlock entity) {
-        CommandBlockBaseLogic logic = entity.getCommandBlockLogic();
-        Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(4);
-        Optional<Text> lastCommandOutput = logic.getLastOutput() != null ? Optional.of(SpongeTexts.toText(logic.getLastOutput())) : Optional.empty();
+    protected Map<Key<?>, ?> getValues(final TileEntityCommandBlock entity) {
+        final CommandBlockBaseLogic logic = entity.getCommandBlockLogic();
+        final Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(4);
+        final Optional<Text> lastCommandOutput = logic.getLastOutput() != null ? Optional.of(SpongeTexts.toText(logic.getLastOutput())) : Optional.empty();
         values.put(Keys.LAST_COMMAND_OUTPUT, lastCommandOutput);
-        values.put(Keys.COMMAND, logic.commandStored);
-        values.put(Keys.SUCCESS_COUNT, logic.successCount);
+        values.put(Keys.COMMAND, logic.getCommand());
+        values.put(Keys.SUCCESS_COUNT, logic.getSuccessCount());
         values.put(Keys.TRACKS_OUTPUT, logic.shouldTrackOutput());
         return values;
     }

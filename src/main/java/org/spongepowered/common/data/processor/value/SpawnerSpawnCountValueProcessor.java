@@ -31,6 +31,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
 import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
 import org.spongepowered.common.util.Constants;
 
@@ -54,13 +55,13 @@ public class SpawnerSpawnCountValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected boolean set(TileEntityMobSpawnerAccessor container, Short value) {
-        container.accessor$getSpawnerLogic().spawnCount = value;
+        ((MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic()).accessor$setSpawnCount(value);
         return true;
     }
 
     @Override
     protected Optional<Short> getVal(TileEntityMobSpawnerAccessor container) {
-        return Optional.of((short) container.accessor$getSpawnerLogic().spawnCount);
+        return Optional.of((short) ((MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic()).accessor$getSpawnCount());
     }
 
     @Override

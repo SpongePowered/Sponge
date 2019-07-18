@@ -26,14 +26,18 @@ package org.spongepowered.common.util;
 
 import net.minecraft.server.management.UserList;
 import net.minecraft.server.management.UserListEntry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.mixin.core.server.management.UserLIstEntryAccessor;
+import org.spongepowered.common.mixin.core.server.management.UserListAccessor;
 
 import java.io.IOException;
 
 public class UserListUtils {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void addEntry(UserList list, UserListEntry entry) {
-        list.getValues().put(list.getObjectKey(entry.getValue()), entry);
+    public static void addEntry(final UserList list, final UserListEntry entry) {
+        ((UserListAccessor) list).accessor$getValues().put(((UserListAccessor) list).accessor$getObjectKey(((UserLIstEntryAccessor) entry).accessor$getValue()), entry);
 
         try {
             list.writeChanges();
@@ -44,8 +48,8 @@ public class UserListUtils {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static void removeEntry(UserList list, Object object) {
-        list.getValues().remove(list.getObjectKey(object));
+    public static void removeEntry(final UserList list, final Object object) {
+        ((UserListAccessor) list).accessor$getValues().remove(((UserListAccessor) list).accessor$getObjectKey(object));
 
         try {
             list.writeChanges();

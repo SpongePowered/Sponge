@@ -33,6 +33,9 @@ import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
+import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
+import org.spongepowered.common.mixin.core.util.text.StyleAccessor;
+import org.spongepowered.common.mixin.core.util.text.TextComponentStringAccessor;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.ArrayList;
@@ -52,10 +55,10 @@ public final class LegacyTexts {
     }
 
     static {
-        char[] lookup = new char[formatting.length];
+        final char[] lookup = new char[formatting.length];
 
         for (int i = 0; i < formatting.length; i++) {
-            lookup[i] = formatting[i].formattingCode;
+            lookup[i] = ((TextFormattingBridge) (Object) formatting[i]).bridge$getFormattingCode();
         }
 
         LOOKUP = new String(lookup);
@@ -65,7 +68,7 @@ public final class LegacyTexts {
         return formatting.length;
     }
 
-    public static int findFormat(char format) {
+    public static int findFormat(final char format) {
         int pos = LOOKUP.indexOf(format);
         if (pos == -1) {
             pos = LOOKUP.indexOf(Character.toLowerCase(format));
@@ -74,13 +77,13 @@ public final class LegacyTexts {
         return pos;
     }
 
-    public static boolean isFormat(char format) {
+    public static boolean isFormat(final char format) {
         return findFormat(format) != -1;
     }
 
     @Nullable
-    public static TextFormatting parseFormat(char format) {
-        int pos = findFormat(format);
+    public static TextFormatting parseFormat(final char format) {
+        final int pos = findFormat(format);
         return pos != -1 ? formatting[pos] : null;
     }
 
@@ -100,7 +103,7 @@ public final class LegacyTexts {
      * @param code The formatting sign (e.g. {@code &})
      * @return The parsed text
      */
-    public static Text parse(String input, char code) {
+    public static Text parse(final String input, final char code) {
         int pos = input.length();
         if (pos < FORMATTING_CODE_LENGTH) {
             // Not enough characters to form a formatting code => plain text
@@ -116,7 +119,7 @@ public final class LegacyTexts {
 
         LiteralText.Builder current = null;
         boolean reset = false;
-        List<Text> parts = Lists.newArrayList();
+        final List<Text> parts = Lists.newArrayList();
 
         do {
             // Parse the formatting code
@@ -178,7 +181,7 @@ public final class LegacyTexts {
         return Text.builder(pos > 0 ? input.substring(0, pos) : "").append(parts).build();
     }
 
-    private static boolean applyStyle(Text.Builder builder, TextFormatting formatting) {
+    private static boolean applyStyle(final Text.Builder builder, final TextFormatting formatting) {
         switch (formatting) {
             case BOLD:
                 builder.style(TextStyles.BOLD);
@@ -205,7 +208,8 @@ public final class LegacyTexts {
         return false;
     }
 
-    public static TextComponentString parseComponent(TextComponentString component, char code) {
+    @SuppressWarnings("ConstantConditions")
+    public static TextComponentString parseComponent(final TextComponentString component, final char code) {
         String text = component.getText();
         int next = text.lastIndexOf(code, text.length() - 2);
 
@@ -218,9 +222,9 @@ public final class LegacyTexts {
 
             int pos = text.length();
             do {
-                TextFormatting format = parseFormat(text.charAt(next + 1));
+                final TextFormatting format = parseFormat(text.charAt(next + 1));
                 if (format != null) {
-                    int from = next + 2;
+                    final int from = next + 2;
                     if (from != pos) {
                         if (current != null) {
                             if (reset) {
@@ -229,7 +233,7 @@ public final class LegacyTexts {
                                 reset = false;
                                 current = new TextComponentString("");
                             } else {
-                                TextComponentString old = current;
+                                final TextComponentString old = current;
                                 current = new TextComponentString("");
                                 current.appendSibling(old);
                             }
@@ -237,7 +241,7 @@ public final class LegacyTexts {
                             current = new TextComponentString("");
                         }
 
-                        current.text = text.substring(from, pos);
+                        ((TextComponentStringAccessor) current).accessor$setText(text.substring(from, pos));
                     } else if (current == null) {
                         current = new TextComponentString("");
                     }
@@ -257,7 +261,7 @@ public final class LegacyTexts {
             Collections.reverse(parsed);
             text = pos > 0 ? text.substring(0, pos) : "";
             if (component.getSiblings().isEmpty()) {
-                TextComponentString newComponent = new TextComponentString(text);
+                final TextComponentString newComponent = new TextComponentString(text);
                 newComponent.getSiblings().addAll(parsed);
                 newComponent.setStyle(component.getStyle());
                 return newComponent;
@@ -266,7 +270,7 @@ public final class LegacyTexts {
             return component;
         }
 
-        TextComponentString newComponent = new TextComponentString(text);
+        final TextComponentString newComponent = new TextComponentString(text);
         if (parsed != null) {
             newComponent.getSiblings().addAll(parsed);
         }
@@ -284,26 +288,26 @@ public final class LegacyTexts {
         return newComponent;
     }
 
-    private static boolean applyStyle(Style style, TextFormatting formatting) {
+    private static boolean applyStyle(final Style style, final TextFormatting formatting) {
         switch (formatting) {
             case BOLD:
-                style.bold = true;
+                ((StyleAccessor) style).accessor$setBold(true);
                 break;
             case ITALIC:
-                style.italic = true;
+                ((StyleAccessor) style).accessor$setItalic(true);
                 break;
             case UNDERLINE:
-                style.underlined = true;
+                ((StyleAccessor) style).accessor$setUnderlined(true);
                 break;
             case STRIKETHROUGH:
-                style.strikethrough = true;
+                ((StyleAccessor) style).accessor$setStrikethrough(true);
                 break;
             case OBFUSCATED:
-                style.obfuscated = true;
+                ((StyleAccessor) style).accessor$setObfuscated(true);
                 break;
             default:
-                if (style.color == null) {
-                    style.color = formatting;
+                if (((StyleAccessor) style).accessor$getColor() == null) {
+                    ((StyleAccessor) style).accessor$setColor(formatting);
                 }
                 return true;
         }
@@ -311,14 +315,14 @@ public final class LegacyTexts {
         return false;
     }
 
-    public static String replace(String text, char from, char to) {
+    public static String replace(final String text, final char from, final char to) {
         int pos = text.indexOf(from);
-        int last = text.length() - 1;
+        final int last = text.length() - 1;
         if (pos == -1 || pos == last) {
             return text;
         }
 
-        char[] result = text.toCharArray();
+        final char[] result = text.toCharArray();
         for (; pos < last; pos++) {
             if (result[pos] == from && isFormat(result[pos + 1])) {
                 result[pos] = to;
@@ -328,26 +332,26 @@ public final class LegacyTexts {
         return new String(result);
     }
 
-    public static String strip(String text, char code) {
+    public static String strip(final String text, final char code) {
         return strip(text, code, false, false);
     }
 
-    public static String stripAll(String text, char code) {
+    public static String stripAll(final String text, final char code) {
         return strip(text, code, true, false);
     }
 
-    public static String stripChars(String text, char code) {
+    public static String stripChars(final String text, final char code) {
         return strip(text, code, false, true);
     }
 
-    private static String strip(String text, char code, boolean all, boolean keepFormat) {
+    private static String strip(final String text, final char code, final boolean all, final boolean keepFormat) {
         int next = text.indexOf(code);
-        int last = text.length() - 1;
+        final int last = text.length() - 1;
         if (next == -1 || next == last) {
             return text;
         }
 
-        StringBuilder result = new StringBuilder(text.length());
+        final StringBuilder result = new StringBuilder(text.length());
 
         int pos = 0;
         do {

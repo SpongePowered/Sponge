@@ -672,7 +672,7 @@ public final class WorldManager {
 
         // We cannot call getCurrentSavesDirectory here as that would generate a savehandler and trigger a session lock.
         // We'll go ahead and make the directories for the save name here so that the migrator won't fail
-        final Path currentSavesDir = server.anvilFile.toPath().resolve(server.getFolderName());
+        final Path currentSavesDir = ((MinecraftServerAccessor) server).accessor$getAnvilFile().toPath().resolve(server.getFolderName());
         try {
             // Symlink needs special handling
             if (Files.isSymbolicLink(currentSavesDir)) {
@@ -797,7 +797,7 @@ public final class WorldManager {
 
             // Step 5 - Load server resource pack from dimension 0
             if (dimensionId == 0) {
-                server.setResourcePackFromWorld(worldFolderName, saveHandler);
+                ((MinecraftServerAccessor) server).accessor$setResourcePackFromWorld(worldFolderName, saveHandler);
             }
 
             // Step 6 - Cache the WorldProperties we've made so we don't load from disk later.

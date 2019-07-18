@@ -22,29 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.type;
+package org.spongepowered.common.bridge.world.end;
 
-import net.minecraft.init.Biomes;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.biome.BiomeProviderSingle;
-import net.minecraft.world.gen.IChunkGenerator;
-import net.minecraft.world.gen.ChunkGeneratorHell;
+import net.minecraft.world.BossInfo;
 
-public class SpongeWorldTypeNether extends SpongeWorldType {
+public interface DragonFightManagerBridge {
 
-    public SpongeWorldTypeNether() {
-        super("nether");
-        enableInfoNotice();
-    }
-
-    @Override
-    public BiomeProvider getBiomeProvider(World world) {
-        return new BiomeProviderSingle(Biomes.HELL);
-    }
-
-    @Override
-    public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
-        return new ChunkGeneratorHell(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed());
-    }
+    BossInfo bridge$getBossInfo();
 }

@@ -30,6 +30,7 @@ public interface WorldProviderBridge {
 
     WorldBorder bridge$createServerWorldBorder();
 
+    @Deprecated // TODO - Migrate to Accessor Mixin 0.8
     void bridge$setGeneratorSettings(String generatorSettings);
 
     float bridge$getMovementFactor();

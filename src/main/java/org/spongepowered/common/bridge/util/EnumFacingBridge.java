@@ -22,30 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.type;
+package org.spongepowered.common.bridge.util;
 
-import net.minecraft.init.Biomes;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.biome.BiomeProviderSingle;
-import net.minecraft.world.gen.IChunkGenerator;
-import net.minecraft.world.gen.ChunkGeneratorEnd;
+import net.minecraft.util.math.Vec3i;
 
-public class SpongeWorldTypeEnd extends SpongeWorldType {
+public interface EnumFacingBridge {
 
-    public SpongeWorldTypeEnd() {
-        super("the_end");
-        enableInfoNotice();
-    }
+    @Deprecated
+    Vec3i bridge$getDirectionVec();
 
-    @Override
-    public BiomeProvider getBiomeProvider(World world) {
-        return new BiomeProviderSingle(Biomes.SKY);
-    }
-
-    @Override
-    public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
-        return new ChunkGeneratorEnd(world, true, world.getSeed(), new BlockPos(100, 50, 0));
-    }
 }

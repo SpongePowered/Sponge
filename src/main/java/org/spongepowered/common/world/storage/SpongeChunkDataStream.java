@@ -28,6 +28,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.world.chunk.storage.RegionFile;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.storage.ChunkDataStream;
+import org.spongepowered.common.bridge.world.chunk.storage.RegionFileAccessor;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -42,13 +43,13 @@ public class SpongeChunkDataStream implements ChunkDataStream {
         private final RegionFile file;
         public int index;
 
-        public RegionFileItr(RegionFile regionFile) {
+        public RegionFileItr(final RegionFile regionFile) {
             this.file = regionFile;
         }
 
         public int getNext() {
             int index = this.index;
-            int[] offsets = this.file.offsets;
+            final int[] offsets = ((RegionFileAccessor) this.file).accessor$getOffsets();
             while (index != -1 && index < offsets.length && offsets[index] == 0) {
                 index++;
             }
@@ -58,9 +59,9 @@ public class SpongeChunkDataStream implements ChunkDataStream {
             return index;
         }
 
-        public DataInputStream getStreamAt(int index) {
-            int x = index & 31;
-            int z = index >>> 5;
+        public DataInputStream getStreamAt(final int index) {
+            final int x = index & 31;
+            final int z = index >>> 5;
             return this.file.getChunkDataInputStream(x, z);
         }
 
@@ -70,7 +71,7 @@ public class SpongeChunkDataStream implements ChunkDataStream {
     private RegionFileItr regionFileItr;
     private final Path worldDir;
 
-    public SpongeChunkDataStream(Path worldDir) {
+    public SpongeChunkDataStream(final Path worldDir) {
         this.worldDir = worldDir;
     }
 
@@ -78,8 +79,8 @@ public class SpongeChunkDataStream implements ChunkDataStream {
         if (this.regionFileItr != null) {
             return true;
         }
-        Iterable<Path> files = WorldStorageUtil.listRegionFiles(this.worldDir);
-        for (Path file : files) {
+        final Iterable<Path> files = WorldStorageUtil.listRegionFiles(this.worldDir);
+        for (final Path file : files) {
             if (!this.openedFiles.contains(file)) {
                 this.regionFileItr = new RegionFileItr(WorldStorageUtil.getRegionFile(file));
                 this.openedFiles.add(file);
@@ -103,12 +104,12 @@ public class SpongeChunkDataStream implements ChunkDataStream {
 
     @Override
     public DataContainer next() {
-        int next = getNextIndex();
+        final int next = getNextIndex();
         if (next == -1) {
             throw new NoSuchElementException();
         }
         this.regionFileItr.index = next + 1;
-        DataInputStream stream = this.regionFileItr.getStreamAt(next);
+        final DataInputStream stream = this.regionFileItr.getStreamAt(next);
         try {
             return WorldStorageUtil.readDataFromRegion(stream);
         } catch (IOException e) {
@@ -125,8 +126,8 @@ public class SpongeChunkDataStream implements ChunkDataStream {
     public int available() {
         // Advance to the end of the stream, counting along the way. Store
         // previous state and reset to it afterwards.
-        RegionFileItr currentItr = this.regionFileItr;
-        Set<Path> currentOpenedFiles = Sets.newHashSet(this.openedFiles);
+        final RegionFileItr currentItr = this.regionFileItr;
+        final Set<Path> currentOpenedFiles = Sets.newHashSet(this.openedFiles);
         int count = 0;
         int index = getNextIndex();
         while (index != -1) {

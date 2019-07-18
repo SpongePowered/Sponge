@@ -145,15 +145,15 @@ public class SpongeObjective implements Objective {
     }
 
     private void addScoreToScoreboard(final net.minecraft.scoreboard.Scoreboard scoreboard, final net.minecraft.scoreboard.Score score) {
-        final String name = score.scorePlayerName;
+        final String name = score.getPlayerName();
         final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectivesMap()
             .computeIfAbsent(name, k -> Maps.newHashMap());
 
-        scoreMap.put(score.objective, score);
+        scoreMap.put(((ScoreAccessor) score).accessor$getObjective(), score);
 
         // Trigger refresh
         ((ScoreAccessor) score).accessor$setForceUpdate(true);
-        score.setScorePoints(score.scorePoints);
+        score.setScorePoints(((ScoreAccessor) score).accessor$getScorePoints());
     }
 
     @Override

@@ -32,13 +32,11 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketChunkData;
-import net.minecraft.network.play.server.SPacketExplosion;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
@@ -84,9 +82,10 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
+import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
@@ -209,6 +208,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     public Optional<Entity> getEntity(final UUID uuid) {
         return Optional.ofNullable((Entity) this.getEntityFromUuid(uuid));
     }
+    @SuppressWarnings("deprecation")
     @Override
     public Optional<org.spongepowered.api.world.Chunk> regenerateChunk(final int cx, final int cy, final int cz, final ChunkRegenerateFlag flag) {
         final List<EntityPlayerMP> playerList = new ArrayList<>();
@@ -251,17 +251,18 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
             final ChunkProviderServer chunkProviderServer = (ChunkProviderServer) chunk.getWorld().getChunkProvider();
             ((ServerChunkProviderBridge) chunkProviderServer).bridge$unloadChunkAndSave(chunk);
-            final net.minecraft.world.chunk.Chunk newChunk = chunkProviderServer.chunkGenerator.generateChunk(cx, cz);
+            // TODO - Move to accessor with Mixin 0.8
+            final net.minecraft.world.chunk.Chunk newChunk = ((ServerChunkProviderBridge) chunkProviderServer).accessor$getChunkGenerator().generateChunk(cx, cz);
             final PlayerChunkMapEntry playerChunk = ((WorldServer) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
             if (playerChunk != null) {
-                playerChunk.chunk = newChunk;
+                ((PlayerChunkMapEntryBridge) playerChunk).bridge$setChunk(newChunk);
             }
 
             if (newChunk != null) {
                 final WorldServer world = (WorldServer) newChunk.getWorld();
-                world.getChunkProvider().loadedChunks.put(ChunkPos.asLong(cx, cz), newChunk);
+                ((ServerChunkProviderBridge) world.getChunkProvider()).accessor$getLoadedChunks().put(ChunkPos.asLong(cx, cz), newChunk);
                 newChunk.onLoad();
-                newChunk.populate(world.getChunkProvider().chunkGenerator);
+                ((ChunkBridge) newChunk).accessor$populate(((ServerChunkProviderBridge) world.getChunkProvider()).accessor$getChunkGenerator());
                 for (final net.minecraft.entity.Entity entity: entityList) {
                     newChunk.addEntity(entity);
                 }
@@ -272,7 +273,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
                 final PlayerChunkMapEntry playerChunkMapEntry = ((WorldServer) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
                 if (playerChunkMapEntry != null) {
-                    final List<EntityPlayerMP> chunkPlayers = playerChunkMapEntry.players;
+                    final List<EntityPlayerMP> chunkPlayers = ((PlayerChunkMapEntryBridge) playerChunkMapEntry).bridge$getPlayers();
                     // We deliberately send two packets, to avoid sending a 'fullChunk' packet
                     // (a changedSectionFilter of 65535). fullChunk packets cause the client to
                     // completely overwrite its current chunk with a new chunk instance. This causes
@@ -406,11 +407,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             .explosion((Explosion) explosion)
             .source(explosion.getSourceExplosive().isPresent() ? explosion.getSourceExplosive() : this)) {
             ignored.buildAndSwitch();
-            final double x = mcExplosion.x;
-            final double y = mcExplosion.y;
-            final double z = mcExplosion.z;
             final boolean damagesTerrain = explosion.shouldBreakBlocks();
-            final float strength = explosion.getRadius();
             // Sponge End
 
             mcExplosion.doExplosionA();
@@ -418,14 +415,6 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
             if (!damagesTerrain) {
                 mcExplosion.clearAffectedBlockPositions();
-            }
-
-            for (final EntityPlayer entityplayer : this.playerEntities) {
-                if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
-                    ((EntityPlayerMP) entityplayer).connection
-                        .sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
-                            mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
-                }
             }
 
             // Sponge Start - end processing
@@ -632,17 +621,20 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int getViewDistance() {
-        return this.playerChunkMap.playerViewRadius;
+        // TODO - Mixin 0.8 accessors
+        return ((PlayerChunkMapBridge) this.playerChunkMap).bridge$getViewDistance();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void setViewDistance(final int viewDistance) {
         this.playerChunkMap.setPlayerViewRadius(viewDistance);
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.getWorldInfo()).bridge$getConfigAdapter();
         // don't use the parameter, use the field that has been clamped
-        configAdapter.getConfig().getWorld().setViewDistance(this.playerChunkMap.playerViewRadius);
+        configAdapter.getConfig().getWorld().setViewDistance(((PlayerChunkMapBridge) this.playerChunkMap).bridge$getViewDistance());
         configAdapter.save();
     }
 

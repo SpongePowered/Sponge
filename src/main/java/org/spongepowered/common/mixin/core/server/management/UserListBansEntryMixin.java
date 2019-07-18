@@ -37,10 +37,6 @@ import java.util.Date;
 @Mixin(UserListBansEntry.class)
 public abstract class UserListBansEntryMixin extends UserListEntryBanMixin<GameProfile> {
 
-    public UserListBansEntryMixin(final com.mojang.authlib.GameProfile p_i1146_1_) {
-        super(p_i1146_1_);
-    }
-
     /**
      * Fix {@link Ban#getCreationDate()} by passing the correct date to the
      * super constructor. (Minecraft incorrectly passes endDate as startDate)

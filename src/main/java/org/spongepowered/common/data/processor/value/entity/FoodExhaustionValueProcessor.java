@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.util.FoodStatsAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -43,7 +44,7 @@ public class FoodExhaustionValueProcessor extends AbstractSpongeValueProcessor<E
     }
 
     @Override
-    public MutableBoundedValue<Double> constructValue(Double defaultValue) {
+    public MutableBoundedValue<Double> constructValue(final Double defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.EXHAUSTION)
             .defaultValue(Constants.Entity.Player.DEFAULT_EXHAUSTION)
             .minimum(0D)
@@ -53,23 +54,23 @@ public class FoodExhaustionValueProcessor extends AbstractSpongeValueProcessor<E
     }
 
     @Override
-    protected boolean set(EntityPlayer container, Double value) {
-        container.getFoodStats().foodExhaustionLevel = value.floatValue();
+    protected boolean set(final EntityPlayer container, final Double value) {
+        ((FoodStatsAccessor) container.getFoodStats()).accessor$setFoodExhaustionLevel(value.floatValue());
         return true;
     }
 
     @Override
-    protected Optional<Double> getVal(EntityPlayer container) {
-        return Optional.of((double) container.getFoodStats().foodExhaustionLevel);
+    protected Optional<Double> getVal(final EntityPlayer container) {
+        return Optional.of((double) ((FoodStatsAccessor) container.getFoodStats()).accessor$getFoodExhaustionLevel());
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
+    protected ImmutableValue<Double> constructImmutableValue(final Double value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

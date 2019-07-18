@@ -42,10 +42,6 @@ public abstract class UserListIPBansEntryMixin extends UserListEntryBanMixin<Str
 
     @Nullable private InetAddress impl$address;
 
-    public UserListIPBansEntryMixin(final String p_i1146_1_) {
-        super(p_i1146_1_);
-    }
-
     @Inject(method = "<init>(Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;)V", at = @At("RETURN"))
     private void impl$UpdateInetAddress(final CallbackInfo ci) {
         this.setAddress();
@@ -58,7 +54,7 @@ public abstract class UserListIPBansEntryMixin extends UserListEntryBanMixin<Str
 
     private void setAddress() {
         try {
-            this.impl$address = InetAddress.getByName(this.value);
+            this.impl$address = InetAddress.getByName(this.getValue());
         } catch (UnknownHostException e) {
             throw new IllegalStateException("Error parsing Ban IP address!", e);
         }

@@ -61,7 +61,7 @@ public abstract class CooldownTrackerMixin implements CooldownTrackerBridge {
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Map$Entry;getKey()Ljava/lang/Object;", remap = false))
-    private Object onTick(final Map.Entry<Item, CooldownTracker.Cooldown> entry) {
+    private Object onTick(final Map.Entry<Item, ?> entry) {
         impl$throwEndCooldownEvent((ItemType) entry.getKey());
         return entry.getKey();
     }

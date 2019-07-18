@@ -35,6 +35,7 @@ import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.block.BlockJukeboxBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.block.BlockJukeboxAccessor;
 import org.spongepowered.common.util.Constants;
@@ -60,17 +61,19 @@ public abstract class TileEntityJukeboxMixin_API extends TileEntityMixin_API imp
         this.world.playRecord(this.pos, null);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void ejectRecord() {
-        IBlockState block = this.world.getBlockState(this.pos);
+        final IBlockState block = this.world.getBlockState(this.pos);
         if (block.getBlock() == Blocks.JUKEBOX) {
-            ((BlockJukeboxAccessor) block.getBlock()).accessor$dropRecordItem(this.world, this.pos, block);
+            // TODO - Mixin 0.8 accessors
+            ((BlockJukeboxBridge) block.getBlock()).bridge$dropRecordItem(this.world, this.pos, block);
             this.world.setBlockState(this.pos, block.withProperty(BlockJukebox.HAS_RECORD, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }
 
     @Override
-    public void insertRecord(ItemStack record) {
+    public void insertRecord(final ItemStack record) {
         final net.minecraft.item.ItemStack itemStack = ItemStackUtil.toNative(record);
         if (!(itemStack.getItem() instanceof ItemRecord)) {
             return;
@@ -84,7 +87,7 @@ public abstract class TileEntityJukeboxMixin_API extends TileEntityMixin_API imp
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(final List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         get(RepresentedItemData.class).ifPresent(manipulators::add);
     }

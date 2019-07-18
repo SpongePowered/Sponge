@@ -28,6 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
+import org.spongepowered.common.mixin.core.util.EntityDamageSourceIndirectAccessor;
 
 /*
 To summarize, the way this works is that DamageSource isn't directly created, but
@@ -60,7 +61,7 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends EntityDamag
     }
 
     public void setIndirectSource(final Entity entity) {
-        this.indirectEntity = entity;
+        ((EntityDamageSourceIndirectAccessor) this).accessor$setIndirectEntity(entity);
     }
 
 

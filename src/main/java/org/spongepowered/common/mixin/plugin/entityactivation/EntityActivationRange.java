@@ -74,6 +74,7 @@ import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
+import org.spongepowered.common.mixin.entityactivation.util.math.AxisAlignedBBAccessor_EntityActivation;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 
 import java.util.Map;
@@ -104,7 +105,7 @@ public class EntityActivationRange {
      * @param entity Entity to get type for
      * @return group id
      */
-    public static byte initializeEntityActivationType(Entity entity) {
+    public static byte initializeEntityActivationType(final Entity entity) {
 
         // account for entities that dont extend EntityMob, EntityAmbientCreature, EntityCreature
         if (((IMob.class.isAssignableFrom(entity.getClass())
@@ -127,7 +128,7 @@ public class EntityActivationRange {
      *
      * @param entity Entity to check
      */
-    public static void initializeEntityActivationState(Entity entity) {
+    public static void initializeEntityActivationState(final Entity entity) {
         final ActivationCapability spongeEntity = (ActivationCapability) entity;
         if (((WorldBridge) entity.world).bridge$isFake()) {
             return;
@@ -151,7 +152,7 @@ public class EntityActivationRange {
 
         final EntityActivationRangeCategory config =
             ((WorldInfoBridge) entity.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntityActivationRange();
-        EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
+        final EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
         if (type == EntityTypes.UNKNOWN || !(type instanceof SpongeEntityType)) {
             spongeEntity.activation$setDefaultActivationState(true);
             return;
@@ -163,8 +164,8 @@ public class EntityActivationRange {
             spongeType.setActivationRangeInitialized(true);
         }
 
-        EntityActivationModCategory entityMod = config.getModList().get(spongeType.getModId().toLowerCase());
-        int defaultActivationRange = config.getDefaultRanges().get(activationTypeMappings.get(activationType));
+        final EntityActivationModCategory entityMod = config.getModList().get(spongeType.getModId().toLowerCase());
+        final int defaultActivationRange = config.getDefaultRanges().get(activationTypeMappings.get(activationType));
         if (entityMod == null) {
             // use default activation range
             spongeEntity.activation$setActivationRange(defaultActivationRange);
@@ -177,8 +178,8 @@ public class EntityActivationRange {
                 return;
             }
 
-            Integer defaultModActivationRange = entityMod.getDefaultRanges().get(activationTypeMappings.get(activationType));
-            Integer entityActivationRange = entityMod.getEntityList().get(type.getName().toLowerCase());
+            final Integer defaultModActivationRange = entityMod.getDefaultRanges().get(activationTypeMappings.get(activationType));
+            final Integer entityActivationRange = entityMod.getEntityList().get(type.getName().toLowerCase());
             if (defaultModActivationRange != null && entityActivationRange == null) {
                 spongeEntity.activation$setActivationRange(defaultModActivationRange);
                 if (defaultModActivationRange > 0) {
@@ -203,13 +204,13 @@ public class EntityActivationRange {
      * @param y The y value to expand by
      * @param z The z value to expand by
      */
-    public static void growBb(AxisAlignedBB target, AxisAlignedBB source, int x, int y, int z) {
-        target.minX = source.minX - x;
-        target.minY = source.minY - y;
-        target.minZ = source.minZ - z;
-        target.maxX = source.maxX + x;
-        target.maxY = source.maxY + y;
-        target.maxZ = source.maxZ + z;
+    public static void growBb(final AxisAlignedBB target, final AxisAlignedBB source, final int x, final int y, final int z) {
+        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMinX(source.minX - x);
+        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMinY(source.minY - y);
+        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMinZ(source.minZ - z);
+        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMaxX(source.maxX + x);
+        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMaxY(source.maxY + y);
+        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMaxZ(source.maxZ + z);
     }
 
     /**
@@ -218,15 +219,15 @@ public class EntityActivationRange {
      *
      * @param world The world to perform activation checks in
      */
-    public static void activateEntities(World world) {
+    public static void activateEntities(final World world) {
         if (((WorldBridge) world).bridge$isFake()) {
             return;
         }
 
-        for (EntityPlayer player : world.playerEntities) {
+        for (final EntityPlayer player : world.playerEntities) {
 
             int maxRange = 0;
-            for (Integer range : maxActivationRanges.values()) {
+            for (final Integer range : maxActivationRanges.values()) {
                 if (range > maxRange) {
                     maxRange = range;
                 }
@@ -236,15 +237,15 @@ public class EntityActivationRange {
             ((ActivationCapability) player).activation$setActivatedTick(SpongeImpl.getServer().getTickCounter());
             growBb(maxBB, player.getEntityBoundingBox(), maxRange, 256, maxRange);
 
-            int i = MathHelper.floor(maxBB.minX / 16.0D);
-            int j = MathHelper.floor(maxBB.maxX / 16.0D);
-            int k = MathHelper.floor(maxBB.minZ / 16.0D);
-            int l = MathHelper.floor(maxBB.maxZ / 16.0D);
+            final int i = MathHelper.floor(maxBB.minX / 16.0D);
+            final int j = MathHelper.floor(maxBB.maxX / 16.0D);
+            final int k = MathHelper.floor(maxBB.minZ / 16.0D);
+            final int l = MathHelper.floor(maxBB.maxZ / 16.0D);
 
             for (int i1 = i; i1 <= j; ++i1) {
                 for (int j1 = k; j1 <= l; ++j1) {
-                    WorldServer worldserver = (WorldServer) world;
-                    Chunk chunk = ((ChunkProviderBridge) worldserver.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(i1, j1);
+                    final WorldServer worldserver = (WorldServer) world;
+                    final Chunk chunk = ((ChunkProviderBridge) worldserver.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(i1, j1);
                     if (chunk != null) {
                         activateChunkEntities(player, chunk);
                     }
@@ -258,14 +259,14 @@ public class EntityActivationRange {
      *
      * @param chunk Chunk to check for activation
      */
-    private static void activateChunkEntities(EntityPlayer player, Chunk chunk) {
+    private static void activateChunkEntities(final EntityPlayer player, final Chunk chunk) {
         for (int i = 0; i < chunk.getEntityLists().length; ++i) {
 
-            for (Object o : chunk.getEntityLists()[i]) {
-                Entity entity = (Entity) o;
-                EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
+            for (final Object o : chunk.getEntityLists()[i]) {
+                final Entity entity = (Entity) o;
+                final EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
                 final ActivationCapability spongeEntity = (ActivationCapability) entity;
-                long currentTick = SpongeImpl.getServer().getTickCounter();
+                final long currentTick = SpongeImpl.getServer().getTickCounter();
                 if (!((EntityBridge) entity).bridge$shouldTick()) {
                     continue;
                 }
@@ -286,8 +287,8 @@ public class EntityActivationRange {
                         spongeEntity.activation$requiresActivationCacheRefresh(false);
                     }
                     // check for entity type overrides
-                    byte activationType = spongeEntity.activation$getActivationType();
-                    int bbActivationRange = spongeEntity.activation$getActivationRange();
+                    final byte activationType = spongeEntity.activation$getActivationType();
+                    final int bbActivationRange = spongeEntity.activation$getActivationRange();
 
                     if (activationType == 5) {
                         growBb(miscBB, player.getEntityBoundingBox(), bbActivationRange, 256, bbActivationRange);
@@ -340,7 +341,7 @@ public class EntityActivationRange {
      * @param entity Entity to check
      * @return Whether entity should still be maintained active
      */
-    public static boolean checkEntityImmunities(Entity entity) {
+    public static boolean checkEntityImmunities(final Entity entity) {
         // quick checks.
         if (entity.fire > 0) {
             return true;
@@ -354,7 +355,7 @@ public class EntityActivationRange {
         }
         // special cases.
         if (entity instanceof EntityLivingBase) {
-            EntityLivingBase living = (EntityLivingBase) entity;
+            final EntityLivingBase living = (EntityLivingBase) entity;
             if (living.hurtTime > 0 || living.getActivePotionEffects().size() > 0) {
                 return true;
             }
@@ -365,7 +366,7 @@ public class EntityActivationRange {
                 return true;
             }
             if (entity instanceof EntityAnimal) {
-                EntityAnimal animal = (EntityAnimal) entity;
+                final EntityAnimal animal = (EntityAnimal) entity;
                 if (animal.isChild() || animal.isInLove()) {
                     return true;
                 }
@@ -386,7 +387,7 @@ public class EntityActivationRange {
      * @param entity The entity to check for activity
      * @return Whether the given entity should be active
      */
-    public static boolean checkIfActive(Entity entity) {
+    public static boolean checkIfActive(final Entity entity) {
         // Never safe to skip fireworks or entities not yet added to chunk
         if (entity.world.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
             return true;
@@ -406,8 +407,8 @@ public class EntityActivationRange {
             return true;
         }
 
-        long currentTick = SpongeImpl.getServer().getTickCounter();
-        ActivationCapability spongeEntity = (ActivationCapability) entity;
+        final long currentTick = SpongeImpl.getServer().getTickCounter();
+        final ActivationCapability spongeEntity = (ActivationCapability) entity;
         boolean isActive = spongeEntity.activation$getActivatedTick() >= currentTick || spongeEntity.activation$getDefaultActivationState();
 
         // Should this entity tick?
@@ -432,7 +433,7 @@ public class EntityActivationRange {
         return isActive;
     }
 
-    public static void addEntityToConfig(World world, SpongeEntityType type, byte activationType) {
+    public static void addEntityToConfig(final World world, final SpongeEntityType type, final byte activationType) {
         checkNotNull(world, "world");
         checkNotNull(type, "type");
 
@@ -445,7 +446,7 @@ public class EntityActivationRange {
         entityType = EntityActivationRange.activationTypeMappings.get(activationType);
         final String entityModId = type.getModId().toLowerCase();
         final String entityId = type.getName().toLowerCase();
-        EntityActivationRangeCategory activationCategory = globalConfigAdapter.getConfig().getEntityActivationRange();
+        final EntityActivationRangeCategory activationCategory = globalConfigAdapter.getConfig().getEntityActivationRange();
         EntityActivationModCategory entityMod = activationCategory.getModList().get(entityModId);
         Integer defaultActivationRange = activationCategory.getDefaultRanges().get(entityType);
         if (defaultActivationRange == null) {
@@ -478,7 +479,7 @@ public class EntityActivationRange {
         }
 
         // check max ranges
-        Integer maxRange = maxActivationRanges.get(activationType);
+        final Integer maxRange = maxActivationRanges.get(activationType);
         if (maxRange == null) {
             maxActivationRanges.put(activationType, activationRange);
         } else if (activationRange > maxRange) {

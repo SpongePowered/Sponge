@@ -37,6 +37,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
 import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
 
 import java.util.Map;
@@ -56,24 +57,24 @@ public class MobSpawnerDataProcessor extends AbstractMultiDataSingleTargetProces
     @Override
     protected boolean set(TileEntityMobSpawnerAccessor entity, Map<Key<?>, Object> values) {
         MobSpawnerBaseLogic logic = entity.accessor$getSpawnerLogic();
-        SpawnerUtils.applyData(logic, values);
+        SpawnerUtils.applyData(((MobSpawnerBaseLogicAccessor) logic), values);
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(TileEntityMobSpawnerAccessor spawner) {
-        MobSpawnerBaseLogic logic = spawner.accessor$getSpawnerLogic();
+        MobSpawnerBaseLogicAccessor logic = (MobSpawnerBaseLogicAccessor) spawner.accessor$getSpawnerLogic();
         Map<Key<?>, Object> values = Maps.newIdentityHashMap();
 
-        values.put(Keys.SPAWNER_REMAINING_DELAY, (short) logic.spawnDelay);
-        values.put(Keys.SPAWNER_MINIMUM_DELAY, (short) logic.minSpawnDelay);
-        values.put(Keys.SPAWNER_MAXIMUM_DELAY, (short) logic.maxSpawnDelay);
-        values.put(Keys.SPAWNER_SPAWN_COUNT, (short) logic.spawnCount);
-        values.put(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, (short) logic.maxNearbyEntities);
-        values.put(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, (short) logic.activatingRangeFromPlayer);
-        values.put(Keys.SPAWNER_SPAWN_RANGE, (short) logic.spawnRange);
+        values.put(Keys.SPAWNER_REMAINING_DELAY, (short) logic.accessor$getSpawnDelay());
+        values.put(Keys.SPAWNER_MINIMUM_DELAY, (short) logic.accessor$getMinSpawnDelay());
+        values.put(Keys.SPAWNER_MAXIMUM_DELAY, (short) logic.accessor$getMaxSpawnDelay());
+        values.put(Keys.SPAWNER_SPAWN_COUNT, (short) logic.accessor$getSpawnCount());
+        values.put(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, (short) logic.accessor$getMaxNearbyEntities());
+        values.put(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, (short) logic.accessor$getActivatingRangeFromPlayer());
+        values.put(Keys.SPAWNER_SPAWN_RANGE, (short) logic.accessor$getSpawnRange());
         values.put(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, SpawnerUtils.getNextEntity(logic));
-        values.put(Keys.SPAWNER_ENTITIES, SpawnerUtils.getEntities(logic));
+        values.put(Keys.SPAWNER_ENTITIES, SpawnerUtils.getEntities((MobSpawnerBaseLogic) logic));
 
         return values;
     }

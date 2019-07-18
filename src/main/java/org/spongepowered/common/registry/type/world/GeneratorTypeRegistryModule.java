@@ -24,20 +24,27 @@
  */
 package org.spongepowered.common.registry.type.world;
 
+import net.minecraft.init.Biomes;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.biome.BiomeProviderSingle;
+import net.minecraft.world.gen.ChunkGeneratorEnd;
+import net.minecraft.world.gen.ChunkGeneratorHell;
+import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.RegistrationPhase;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.common.bridge.world.WorldTypeBridge;
+import org.spongepowered.common.mixin.core.world.WorldTypeAccessor;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
-import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
-import org.spongepowered.common.world.type.SpongeWorldTypeNether;
-import org.spongepowered.common.world.type.SpongeWorldTypeOverworld;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -50,19 +57,41 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
         return Holder.INSTANCE;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void registerDefaults() {
-        for (WorldType worldType : WorldType.WORLD_TYPES) {
+        for (final WorldType worldType : WorldType.WORLD_TYPES) {
             this.registerAdditionalCatalog((GeneratorType) worldType);
         }
-        this.registerAdditionalCatalog((GeneratorType) new SpongeWorldTypeEnd());
-        this.registerAdditionalCatalog((GeneratorType) new SpongeWorldTypeNether());
-        this.registerAdditionalCatalog((GeneratorType) new SpongeWorldTypeOverworld());
+        {
+            final WorldType the_end = new WorldType(getNextID(), "the_end");
+            ((WorldTypeBridge) the_end).bridge$setChunkGenerator((world, options)
+                -> new ChunkGeneratorEnd(world, true, world.getSeed(), new BlockPos(100, 50, 0)));
+            ((WorldTypeBridge) the_end).bridge$setBiomeProvider(world -> new BiomeProviderSingle(Biomes.SKY));
+            ((WorldTypeAccessor) the_end).accessor$setHasInfoNotice(true);
+
+            this.registerAdditionalCatalog((GeneratorType) the_end);
+        }
+        {
+            final WorldType nether = new WorldType(getNextID(), "nether");
+            ((WorldTypeAccessor) nether).accessor$setHasInfoNotice(true);
+            ((WorldTypeBridge) nether).bridge$setBiomeProvider(world -> new BiomeProviderSingle(Biomes.HELL));
+            ((WorldTypeBridge) nether).bridge$setChunkGenerator((world, s) -> new ChunkGeneratorHell(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed()));
+            this.registerAdditionalCatalog((GeneratorType) nether);
+        }
+        {
+            final WorldType overworld = new WorldType(getNextID(), "overworld");
+            ((WorldTypeAccessor) overworld).accessor$setCanBeCreated(false);
+            ((WorldTypeBridge) overworld).bridge$setBiomeProvider(world -> new BiomeProvider(world.getWorldInfo()));
+            ((WorldTypeBridge) overworld).bridge$setChunkGenerator(((world, s) -> new ChunkGeneratorOverworld(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), s)));
+            this.registerAdditionalCatalog((GeneratorType) overworld);
+        }
+
     }
 
     @AdditionalRegistration(RegistrationPhase.PRE_REGISTRY)
     public void registerAdditional() {
-        for (WorldType worldType : WorldType.WORLD_TYPES) {
+        for (final WorldType worldType : WorldType.WORLD_TYPES) {
             if (worldType != null && !this.catalogTypeMap.values().contains(worldType)) {
                 this.catalogTypeMap.put(worldType.getName().toLowerCase(Locale.ENGLISH), (GeneratorType) worldType);
             }
@@ -74,8 +103,8 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
     @Override
     public Map<String, GeneratorType> provideCatalogMap() {
         final HashMap<String, GeneratorType> map = new HashMap<>();
-        for (Map.Entry<String, GeneratorType> entry : this.catalogTypeMap.entrySet()) {
-            String replace = entry.getKey().replace("minecraft:", "").replace("sponge:", "")
+        for (final Map.Entry<String, GeneratorType> entry : this.catalogTypeMap.entrySet()) {
+            final String replace = entry.getKey().replace("minecraft:", "").replace("sponge:", "")
                     .replace("debug_all_block_states", "debug");
             map.put(replace, entry.getValue());
         }
@@ -95,7 +124,7 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
     }
 
     @Override
-    public void registerAdditionalCatalog(GeneratorType extraCatalog) {
+    public void registerAdditionalCatalog(final GeneratorType extraCatalog) {
         if (extraCatalog != null) {
             this.catalogTypeMap.put(extraCatalog.getId(), extraCatalog);
         }
@@ -103,5 +132,17 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
 
     private static final class Holder {
         static final GeneratorTypeRegistryModule INSTANCE = new GeneratorTypeRegistryModule();
+    }
+
+    private static int getNextID() {
+        for (int x = 0; x < WorldType.WORLD_TYPES.length; x++) {
+            if (WorldType.WORLD_TYPES[x] == null) {
+                return x;
+            }
+        }
+
+        final int oldLen = WorldType.WORLD_TYPES.length;
+        WorldType.WORLD_TYPES = Arrays.copyOf(WorldType.WORLD_TYPES, oldLen + 16);
+        return oldLen;
     }
 }

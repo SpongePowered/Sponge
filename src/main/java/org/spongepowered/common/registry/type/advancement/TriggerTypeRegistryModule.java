@@ -46,12 +46,12 @@ public class TriggerTypeRegistryModule extends AbstractPrefixAlternateCatalogTyp
     }
 
     @Override
-    public void register(Trigger triggerType) {
+    public void register(final Trigger triggerType) {
         super.register(triggerType);
     }
 
     @Override
-    public void registerAdditionalCatalog(Trigger triggerType) {
+    public void registerAdditionalCatalog(final Trigger triggerType) {
         // Register on CriterionTriggers, that register method will
         // delegate to the register method within this module
         CriteriaTriggers.register((ICriterionTrigger) triggerType);

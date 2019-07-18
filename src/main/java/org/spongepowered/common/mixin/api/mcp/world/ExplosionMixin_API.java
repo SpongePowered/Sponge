@@ -48,26 +48,23 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.world.Explosion.class)
 public abstract class ExplosionMixin_API implements Explosion {
 
-    @Shadow @Final private List<BlockPos> affectedBlockPositions;
-    @Shadow @Final private Map<EntityPlayer, Vec3d> playerKnockbackMap;
-    @Shadow @Final private Random random;
-    @Shadow public boolean causesFire;
-    @Shadow public boolean damagesTerrain;
-    @Shadow public net.minecraft.world.World world;
-    @Shadow public double x;
-    @Shadow public double y;
-    @Shadow public double z;
-    @Shadow public Entity exploder;
-    @Shadow public float size;
+    @Shadow @Final private boolean causesFire;
+    @Shadow @Final private boolean damagesTerrain;
+    @Shadow @Final private net.minecraft.world.World world;
+    @Shadow @Final private double x;
+    @Shadow @Final private double y;
+    @Shadow @Final private double z;
+    @Shadow @Final private Entity exploder;
+    @Shadow @Final private float size;
 
-    @Nullable private Location<World> location;
+    @Nullable private Location<World> api$location;
 
     @Override
     public Location<World> getLocation() {
-        if (this.location == null) {
-            this.location = new Location<>((World) this.world, new Vector3d(this.x, this.y, this.z));
+        if (this.api$location == null) {
+            this.api$location = new Location<>((World) this.world, new Vector3d(this.x, this.y, this.z));
         }
-        return this.location;
+        return this.api$location;
     }
 
     @Override

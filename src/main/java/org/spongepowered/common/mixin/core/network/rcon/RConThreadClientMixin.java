@@ -38,6 +38,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.network.rcon.RconConnectionEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.network.rcon.RConConsoleSourceBridge;
+import org.spongepowered.common.bridge.network.rcon.RConThreadClientBridge;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -52,7 +54,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutionException;
 
 @Mixin(RConThreadClient.class)
-public abstract class RConThreadClientMixin extends RConThreadBase {
+public abstract class RConThreadClientMixin extends RConThreadBase implements RConThreadClientBridge {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -63,8 +65,8 @@ public abstract class RConThreadClientMixin extends RConThreadBase {
 
     @Shadow private boolean loggedIn;
     @Shadow private Socket clientSocket;
-    @Shadow @Final private String rconPassword;
-    @Shadow @Final private byte[] buffer;
+    @Shadow @Final @Mutable private String rconPassword;
+    @Shadow @Final @Mutable private byte[] buffer;
 
     private RConConsoleSource impl$source;
 
@@ -220,5 +222,45 @@ public abstract class RConThreadClientMixin extends RConThreadBase {
             }
         }
         closeSocket();
+    }
+
+    @Override
+    public boolean bridge$getLoggedIn() {
+        return this.loggedIn;
+    }
+
+    @Override
+    public void bridge$setLoggedIn(boolean loggedIn) {
+        this.loggedIn = loggedIn;
+    }
+
+    @Override
+    public Socket bridge$getClientSocket() {
+        return this.clientSocket;
+    }
+
+    @Override
+    public void bridge$setClientSocket(Socket clientSocket) {
+        this.clientSocket = clientSocket;
+    }
+
+    @Override
+    public byte[] bridge$getBuffer() {
+        return this.buffer;
+    }
+
+    @Override
+    public void bridge$setBuffer(byte[] buffer) {
+        this.buffer = buffer;
+    }
+
+    @Override
+    public String bridge$getRconPassword() {
+        return this.rconPassword;
+    }
+
+    @Override
+    public void bridge$setRconPassword(String rconPassword) {
+        this.rconPassword = rconPassword;
     }
 }

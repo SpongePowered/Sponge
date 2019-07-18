@@ -46,6 +46,8 @@ import org.spongepowered.common.config.category.TileEntityActivationModCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
+import org.spongepowered.common.mixin.core.server.management.PlayerChunkMapAccessor;
+import org.spongepowered.common.mixin.core.server.management.PlayerchunkMapEntryAccessor;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.util.VecHelper;
 
@@ -58,7 +60,7 @@ public class TileEntityActivation {
      *
      * @param tileEntity The tileentity to check
      */
-    public static void initializeTileEntityActivationState(TileEntity tileEntity) {
+    public static void initializeTileEntityActivationState(final TileEntity tileEntity) {
         if (tileEntity.getWorld() == null || tileEntity.getWorld().isRemote || !(tileEntity instanceof ITickable)) {
             return;
         }
@@ -72,8 +74,8 @@ public class TileEntityActivation {
             return;
         }
         final TileEntityActivationModCategory tileEntityActModCat = tileEntityActCat.getModList().get(spongeType.getModId().toLowerCase());
-        int defaultActivationRange = tileEntityActCat.getDefaultBlockRange();
-        int defaultTickRate = tileEntityActCat.getDefaultTickRate();
+        final int defaultActivationRange = tileEntityActCat.getDefaultBlockRange();
+        final int defaultTickRate = tileEntityActCat.getDefaultTickRate();
         if (tileEntityActModCat == null) {
             // use default activation range
             spongeTileEntity.activation$setActivationRange(defaultActivationRange);
@@ -90,8 +92,8 @@ public class TileEntityActivation {
                 return;
             }
 
-            Integer defaultModActivationRange = tileEntityActModCat.getDefaultBlockRange();
-            Integer tileEntityActivationRange = tileEntityActModCat.getTileEntityRangeList().get(type.getName().toLowerCase());
+            final Integer defaultModActivationRange = tileEntityActModCat.getDefaultBlockRange();
+            final Integer tileEntityActivationRange = tileEntityActModCat.getTileEntityRangeList().get(type.getName().toLowerCase());
             if (defaultModActivationRange != null && tileEntityActivationRange == null) {
                 spongeTileEntity.activation$setActivationRange(defaultModActivationRange);
                 if (defaultModActivationRange > 0) {
@@ -104,8 +106,8 @@ public class TileEntityActivation {
                 }
             }
 
-            Integer defaultModTickRate = tileEntityActModCat.getDefaultTickRate();
-            Integer tileEntityTickRate = tileEntityActModCat.getTileEntityTickRateList().get(type.getName().toLowerCase());
+            final Integer defaultModTickRate = tileEntityActModCat.getDefaultTickRate();
+            final Integer tileEntityTickRate = tileEntityActModCat.getTileEntityTickRateList().get(type.getName().toLowerCase());
             if (defaultModTickRate != null && tileEntityTickRate == null) {
                 spongeTileEntity.activation$setSpongeTickRate(defaultModTickRate);
                 if (defaultModTickRate <= 0) {
@@ -126,11 +128,11 @@ public class TileEntityActivation {
     *
     * @param world The world to perform activation checks in
     */
-    public static void activateTileEntities(WorldServer world) {
+    public static void activateTileEntities(final WorldServer world) {
         final PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
-        for (PlayerChunkMapEntry playerChunkMapEntry : playerChunkMap.entries) {
-            for (EntityPlayer player : playerChunkMapEntry.players) {
-                final Chunk chunk = playerChunkMapEntry.chunk;
+        for (final PlayerChunkMapEntry playerChunkMapEntry : ((PlayerChunkMapAccessor) playerChunkMap).accessor$getEntries()) {
+            for (final EntityPlayer player : ((PlayerchunkMapEntryAccessor) playerChunkMapEntry).accessor$getPlayers()) {
+                final Chunk chunk = ((PlayerchunkMapEntryAccessor) playerChunkMapEntry).accessor$getChunk();
                 if (chunk == null || chunk.unloadQueued || ((ChunkBridge) chunk).bridge$isPersistedChunk()) {
                     continue;
                 }
@@ -146,10 +148,10 @@ public class TileEntityActivation {
      *
      * @param chunk Chunk to check for activation
      */
-    private static void activateChunkTileEntities(EntityPlayer player, Chunk chunk) {
+    private static void activateChunkTileEntities(final EntityPlayer player, final Chunk chunk) {
         final Vector3i playerPos = VecHelper.toVector3i(player.getPosition());
         final long currentTick = SpongeImpl.getServer().getTickCounter();
-        for (Map.Entry<BlockPos, TileEntity> mapEntry : chunk.getTileEntityMap().entrySet()) {
+        for (final Map.Entry<BlockPos, TileEntity> mapEntry : chunk.getTileEntityMap().entrySet()) {
             final TileEntity tileEntity = mapEntry.getValue();
             final ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
             if (spongeTileEntity.activation$getSpongeTickRate() <= 0 || !((TileEntityBridge) tileEntity).bridge$shouldTick()) {
@@ -174,8 +176,8 @@ public class TileEntityActivation {
                     spongeTileEntity.activation$requiresActivationCacheRefresh(false);
                 }
 
-                int bbActivationRange = ((ActivationCapability) tileEntity).activation$getActivationRange();
-                int blockDistance = Math.round(tilePos.distance(playerPos));
+                final int bbActivationRange = ((ActivationCapability) tileEntity).activation$getActivationRange();
+                final int blockDistance = Math.round(tilePos.distance(playerPos));
                 if (blockDistance <= bbActivationRange) {
                     ((ActivationCapability) tileEntity).activation$setActivatedTick(currentTick);
                 }
@@ -189,7 +191,7 @@ public class TileEntityActivation {
      * @param tileEntity The tileentity to check for activity
      * @return Whether the given tileentity should be active
      */
-    public static boolean checkIfActive(TileEntity tileEntity) {
+    public static boolean checkIfActive(final TileEntity tileEntity) {
         if (tileEntity.getWorld() == null || tileEntity.getWorld().isRemote || !(tileEntity instanceof ITickable)) {
             return true;
         }
@@ -205,8 +207,8 @@ public class TileEntityActivation {
             return false;
         }
 
-        long currentTick = SpongeImpl.getServer().getTickCounter();
-        ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
+        final long currentTick = SpongeImpl.getServer().getTickCounter();
+        final ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
         boolean isActive = activeChunk.bridge$isPersistedChunk() || spongeTileEntity.activation$getActivatedTick() >= currentTick || spongeTileEntity.activation$getDefaultActivationState();
 
         // Should this tileentity tick?
@@ -225,7 +227,7 @@ public class TileEntityActivation {
         return isActive;
     }
 
-    public static void addTileEntityToConfig(World world, SpongeTileEntityType type) {
+    public static void addTileEntityToConfig(final World world, final SpongeTileEntityType type) {
         final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
         if (!worldConfigAdapter.getConfig().getTileEntityActivationRange().autoPopulateData()) {
@@ -234,10 +236,10 @@ public class TileEntityActivation {
 
         boolean requiresSave = false;
         final String tileModId = type.getModId().toLowerCase();
-        TileEntityActivationCategory activationCategory = globalConfigAdapter.getConfig().getTileEntityActivationRange();
+        final TileEntityActivationCategory activationCategory = globalConfigAdapter.getConfig().getTileEntityActivationRange();
         TileEntityActivationModCategory tileEntityMod = activationCategory.getModList().get(tileModId);
-        int defaultRange = activationCategory.getDefaultBlockRange();
-        int defaultTickRate = activationCategory.getDefaultTickRate();
+        final int defaultRange = activationCategory.getDefaultBlockRange();
+        final int defaultTickRate = activationCategory.getDefaultTickRate();
         if (tileEntityMod == null) {
             tileEntityMod = new TileEntityActivationModCategory(tileModId);
             activationCategory.getModList().put(tileModId, tileEntityMod);
@@ -247,7 +249,7 @@ public class TileEntityActivation {
         if (tileEntityMod != null) {
             // check for tileentity range overrides
             final String tileId = type.getName().toLowerCase();
-            Integer tileEntityActivationRange = tileEntityMod.getTileEntityRangeList().get(tileId);
+            final Integer tileEntityActivationRange = tileEntityMod.getTileEntityRangeList().get(tileId);
             Integer modDefaultRange = tileEntityMod.getDefaultBlockRange();
             if (modDefaultRange == null) {
                 modDefaultRange = defaultRange;
@@ -262,7 +264,7 @@ public class TileEntityActivation {
             if (modDefaultTickRate == null) {
                 modDefaultTickRate = defaultTickRate;
             }
-            Integer tileEntityActivationTickRate = tileEntityMod.getTileEntityTickRateList().get(tileId);
+            final Integer tileEntityActivationTickRate = tileEntityMod.getTileEntityTickRateList().get(tileId);
             if (tileEntityActivationTickRate == null) {
                 tileEntityMod.getTileEntityTickRateList().put(tileId, modDefaultTickRate);
                 requiresSave = true;

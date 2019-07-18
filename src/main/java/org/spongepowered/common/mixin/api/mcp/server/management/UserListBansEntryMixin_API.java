@@ -34,10 +34,6 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(UserListBansEntry.class)
 public abstract class UserListBansEntryMixin_API extends UserListEntryBanMixin_API<com.mojang.authlib.GameProfile> implements Ban.Profile {
 
-    public UserListBansEntryMixin_API(com.mojang.authlib.GameProfile p_i1146_1_) {
-        super(p_i1146_1_);
-    }
-
     @Override
     public BanType getType() {
         return BanTypes.PROFILE;

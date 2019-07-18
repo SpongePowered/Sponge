@@ -42,12 +42,12 @@ public class TileEntitySuccessCountValueProcessor extends AbstractSpongeValuePro
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected MutableBoundedValue<Integer> constructValue(final Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.SUCCESS_COUNT)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -57,20 +57,20 @@ public class TileEntitySuccessCountValueProcessor extends AbstractSpongeValuePro
     }
 
     @Override
-    protected boolean set(TileEntityCommandBlock container, Integer value) {
-        container.getCommandBlockLogic().successCount = value;
+    protected boolean set(final TileEntityCommandBlock container, final Integer value) {
+        container.getCommandBlockLogic().setSuccessCount(value);
         container.getCommandBlockLogic().updateCommand();
         container.markDirty();
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(TileEntityCommandBlock container) {
-        return Optional.of(container.getCommandBlockLogic().successCount);
+    protected Optional<Integer> getVal(final TileEntityCommandBlock container) {
+        return Optional.of(container.getCommandBlockLogic().getSuccessCount());
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 

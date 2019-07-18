@@ -40,6 +40,7 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectional
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.tileentity.TileEntitySkullAccessor;
 
 import java.util.Optional;
 
@@ -51,18 +52,18 @@ public class SkullRotationDataProcessor
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         // If a skull has rotation, you can't remove it
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected Value<Direction> constructValue(Direction actualValue) {
+    protected Value<Direction> constructValue(final Direction actualValue) {
         return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, actualValue);
     }
 
     @Override
-    protected boolean set(TileEntitySkull skull, Direction value) {
+    protected boolean set(final TileEntitySkull skull, final Direction value) {
         if (value.ordinal() > 15) {
             return false;
         }
@@ -71,16 +72,16 @@ public class SkullRotationDataProcessor
     }
 
     @Override
-    protected Optional<Direction> getVal(TileEntitySkull skull) {
+    protected Optional<Direction> getVal(final TileEntitySkull skull) {
         if (skull.getWorld().getBlockState(skull.getPos()).getValue(BlockSkull.FACING) != EnumFacing.UP) {
             return Optional.empty();
         }
-        int rot = skull.skullRotation % 16;
+        final int rot = ((TileEntitySkullAccessor) skull).accessor$getSkullRotation() % 16;
         return Optional.of(Direction.values()[rot < 0 ? rot + 16 : rot]);
     }
 
     @Override
-    protected ImmutableValue<Direction> constructImmutableValue(Direction value) {
+    protected ImmutableValue<Direction> constructImmutableValue(final Direction value) {
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.DIRECTION, Direction.NORTH, value);
     }
 

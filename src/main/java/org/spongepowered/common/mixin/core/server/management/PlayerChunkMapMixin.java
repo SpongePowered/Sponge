@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
+import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 
@@ -47,10 +48,17 @@ public abstract class PlayerChunkMapMixin implements PlayerChunkMapBridge {
 
     @Shadow @Nullable public abstract PlayerChunkMapEntry getEntry(int chunkX, int chunkZ);
 
+    @Shadow private int playerViewRadius;
+
     @Override
     public boolean bridge$isChunkInUse(final int x, final int z) {
         final PlayerChunkMapEntry playerInstance = this.getEntry(x, z);
-        return playerInstance != null && playerInstance.players.size() > 0;
+        return playerInstance != null && ((PlayerChunkMapEntryBridge) playerInstance).bridge$getPlayers().size() > 0;
+    }
+
+    @Override
+    public int bridge$getViewDistance() {
+        return this.playerViewRadius;
     }
 
     @Redirect(method = "removeEntry", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;"

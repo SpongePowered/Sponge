@@ -473,6 +473,8 @@ public final class Constants {
             public static final DataQuery EXPERIENCE_QUERY = of("GrantsExperience");
             public static final DataQuery MAX_QUERY = of("MaxUses");
             public static final DataQuery USES_QUERY = of("Uses");
+            public static final int DEFAULT_USE_COUNT = 0;
+            public static final int DEFAULT_MAX_USES = 7;
         }
 
         public static final class Fireworks {

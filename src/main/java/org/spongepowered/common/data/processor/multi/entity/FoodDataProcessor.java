@@ -37,6 +37,8 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.mixin.core.util.FoodStatsAccessor;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
 import java.util.Optional;
@@ -49,34 +51,34 @@ public class FoodDataProcessor extends AbstractEntityDataProcessor<EntityPlayer,
 
     @Override
     protected FoodData createManipulator() {
-        return new SpongeFoodData(20, 20, 0);
+        return new SpongeFoodData(Constants.Entity.Player.DEFAULT_FOOD_LEVEL, Constants.Entity.Player.DEFAULT_SATURATION, Constants.Entity.Player.DEFAULT_EXHAUSTION);
     }
 
     @Override
-    protected boolean doesDataExist(EntityPlayer entity) {
+    protected boolean doesDataExist(final EntityPlayer entity) {
         return true;
     }
 
     @Override
-    protected boolean set(EntityPlayer entity, Map<Key<?>, Object> keyValues) {
+    protected boolean set(final EntityPlayer entity, final Map<Key<?>, Object> keyValues) {
         entity.getFoodStats().setFoodLevel((Integer) keyValues.get(Keys.FOOD_LEVEL));
-        entity.getFoodStats().foodSaturationLevel = ((Double) keyValues.get(Keys.SATURATION)).floatValue();
-        entity.getFoodStats().foodExhaustionLevel = ((Double) keyValues.get(Keys.EXHAUSTION)).floatValue();
+        ((FoodStatsAccessor) entity.getFoodStats()).accessor$setFoodSaturationLevel(((Double) keyValues.get(Keys.SATURATION)).floatValue());
+        ((FoodStatsAccessor) entity.getFoodStats()).accessor$setFoodExhaustionLevel(((Double) keyValues.get(Keys.EXHAUSTION)).floatValue());
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityPlayer entity) {
+    protected Map<Key<?>, ?> getValues(final EntityPlayer entity) {
         final int food = entity.getFoodStats().getFoodLevel();
-        final double saturation = entity.getFoodStats().foodSaturationLevel;
-        final double exhaustion = entity.getFoodStats().foodExhaustionLevel;
+        final double saturation = entity.getFoodStats().getSaturationLevel();
+        final double exhaustion = ((FoodStatsAccessor) entity.getFoodStats()).accessor$getFoodExhaustionLevel();
         return ImmutableMap.<Key<?>, Object>of(Keys.FOOD_LEVEL, food,
                                                Keys.SATURATION, saturation,
                                                Keys.EXHAUSTION, exhaustion);
     }
 
     @Override
-    public Optional<FoodData> fill(DataContainer container, FoodData foodData) {
+    public Optional<FoodData> fill(final DataContainer container, final FoodData foodData) {
         foodData.set(Keys.FOOD_LEVEL, getData(container, Keys.FOOD_LEVEL));
         foodData.set(Keys.SATURATION, getData(container, Keys.SATURATION));
         foodData.set(Keys.EXHAUSTION, getData(container, Keys.EXHAUSTION));
@@ -84,7 +86,7 @@ public class FoodDataProcessor extends AbstractEntityDataProcessor<EntityPlayer,
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult remove(final DataHolder dataHolder) {
         return DataTransactionResult.failNoData();
     }
 

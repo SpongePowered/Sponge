@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.management;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketChunkData;
 import net.minecraft.server.management.PlayerChunkMap;
@@ -39,6 +40,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
 import org.spongepowered.common.util.Constants;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 @Mixin(PlayerChunkMapEntry.class)
 public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBridge {
 
@@ -48,6 +53,8 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     @Shadow public int changedSectionFilter;
     @Shadow public abstract void sendPacket(Packet<?> packetIn);
 
+    @Shadow @Final private List<EntityPlayerMP> players;
+    @Shadow @Nullable private Chunk chunk;
     private boolean impl$updateBiomes;
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
@@ -65,6 +72,16 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     @Override
     public void bridge$markBiomesForUpdate() {
         this.impl$updateBiomes = true;
-        this.playerChunkMap.dirtyEntries.add((PlayerChunkMapEntry) (Object) this);
+        this.playerChunkMap.entryChanged((PlayerChunkMapEntry) (Object) this);
+    }
+
+    @Override
+    public List<EntityPlayerMP> bridge$getPlayers() {
+        return this.players;
+    }
+
+    @Override
+    public void bridge$setChunk(Chunk newChunk) {
+        this.chunk = newChunk;
     }
 }

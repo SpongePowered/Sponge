@@ -93,6 +93,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow protected abstract int getBlockLightOpacity(int x, int y, int z);
     @Shadow protected abstract void updateSkylightNeighborHeight(int x, int z, int startY, int endY);
+    @Shadow protected abstract void checkLightSide(EnumFacing facing);
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
     private void asyncLighting$initializeFields(final World worldIn, final int x, final int z, final CallbackInfo ci) {
@@ -295,6 +296,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
      *
      * @param neighbors A thread-safe list of surrounding neighbor chunks
      */
+    @SuppressWarnings("ConstantConditions")
     private void asyncLighting$checkLightAsync(final List<Chunk> neighbors)
     {
         this.isTerrainPopulated = true;
@@ -327,7 +329,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
                     if (chunk == null) {
                         continue;
                     }
-                    chunk.checkLightSide(enumfacing.getOpposite());
+                    ((ChunkMixin_Async_Lighting) (Object) chunk).checkLightSide(enumfacing.getOpposite());
                 }
 
                 for (int i = 0; i < this.updateSkylightColumns.length; ++i)

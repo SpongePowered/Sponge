@@ -80,33 +80,30 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.world.Explosion.class)
 public abstract class ExplosionMixin implements ExplosionBridge {
 
-    public Vector3d origin;
-    public Vec3d position; // Added for Forge
-    private boolean shouldBreakBlocks;
-    private boolean shouldDamageEntities;
+    private boolean impl$shouldBreakBlocks;
+    private boolean impl$shouldDamageEntities;
 //    private Cause createdCause;
 
     @Shadow @Final private List<BlockPos> affectedBlockPositions;
     @Shadow @Final private Map<EntityPlayer, Vec3d> playerKnockbackMap;
     @Shadow @Final private Random random;
-    @Shadow public boolean causesFire;
-    @Shadow public boolean damagesTerrain;
-    @Shadow public net.minecraft.world.World world;
-    @Shadow public double x;
-    @Shadow public double y;
-    @Shadow public double z;
-    @Shadow public Entity exploder;
-    @Shadow public float size;
+    @Shadow @Final private boolean causesFire;
+    @Shadow @Final private boolean damagesTerrain;
+    @Shadow @Final private net.minecraft.world.World world;
+    @Shadow @Final private double x;
+    @Shadow @Final private double y;
+    @Shadow @Final private double z;
+    @Shadow @Final private Entity exploder;
+    @Shadow @Final private float size;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     private void onConstructed(final net.minecraft.world.World world, final Entity entity, final double originX, final double originY,
             final double originZ, final float radius, final boolean isFlaming, final boolean isSmoking,
             final CallbackInfo ci) {
-        this.origin = new Vector3d(this.x, this.y, this.z);
         // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
-        // Sponge-created explosions will explicitly set 'shouldBreakBlocks' to its proper value
-        this.shouldBreakBlocks = this.damagesTerrain;
-        this.shouldDamageEntities = true;
+        // Sponge-created explosions will explicitly set 'impl$shouldBreakBlocks' to its proper value
+        this.impl$shouldBreakBlocks = this.damagesTerrain;
+        this.impl$shouldDamageEntities = true;
     }
 
     /**
@@ -118,7 +115,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     @Overwrite
     public void doExplosionA() {
         // Sponge Start - If the explosion should not break blocks, don't bother calculating it
-        if (this.shouldBreakBlocks) {
+        if (this.impl$shouldBreakBlocks) {
             // Sponge End
             final Set<BlockPos> set = Sets.<BlockPos>newHashSet();
             final int i = 16;
@@ -176,7 +173,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         final int j1 = MathHelper.floor(this.z + (double) f3 + 1.0D);
 
         // Sponge Start - Check if this explosion should damage entities
-        final List<Entity> list = this.shouldDamageEntities
+        final List<Entity> list = this.impl$shouldDamageEntities
                             ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
                             : Collections.emptyList();
         // Now we can throw our Detonate Event
@@ -201,14 +198,14 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             if (detonate.isCancelled()) {
                 return;
             }
-            if (this.shouldBreakBlocks) {
+            if (this.impl$shouldBreakBlocks) {
                 for (final Location<World> worldLocation : detonate.getAffectedLocations()) {
                     this.affectedBlockPositions.add(VecHelper.toBlockPos(worldLocation));
                 }
             }
             // Clear the list of entities so they can be pulled from the event.
             list.clear();
-            if (this.shouldDamageEntities) {
+            if (this.impl$shouldDamageEntities) {
                 for (final org.spongepowered.api.entity.Entity entity : detonate.getEntities()) {
                     try {
                         list.add((Entity) entity);
@@ -278,7 +275,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         this.world.playSound((EntityPlayer) null, this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE,
             SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
 
-        if (this.size >= 2.0F && (this.damagesTerrain || this.shouldBreakBlocks)) {
+        if (this.size >= 2.0F && (this.damagesTerrain || this.impl$shouldBreakBlocks)) {
             // Sponge Start - Use WorldServer methods since we prune the explosion packets
             // to avoid spamming/lagging the client out when some ~idiot~ decides to explode
             // hundreds of explosions at once
@@ -303,7 +300,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         final boolean hasCapturePos = context != null && context.state.requiresBlockPosTracking();
         // Sponge end
 
-        if (this.shouldBreakBlocks) { // Sponge - use 'shouldBreakBlocks' instead of 'damagesTerrain'
+        if (this.impl$shouldBreakBlocks) { // Sponge - use 'impl$shouldBreakBlocks' instead of 'damagesTerrain'
             for (final BlockPos blockpos : this.affectedBlockPositions) {
                 final IBlockState iblockstate = this.world.getBlockState(blockpos);
                 final Block block = iblockstate.getBlock();
@@ -376,22 +373,33 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
     @Override
     public boolean bridge$getShouldDamageBlocks() {
-        return this.shouldBreakBlocks;
+        return this.impl$shouldBreakBlocks;
     }
 
     @Override
     public boolean bridge$getShouldDamageEntities() {
-        return this.shouldDamageEntities;
+        return this.impl$shouldDamageEntities;
     }
 
     @Override
     public void bridge$setShouldBreakBlocks(final boolean shouldBreakBlocks) {
-        this.shouldBreakBlocks = shouldBreakBlocks;
+        this.impl$shouldBreakBlocks = shouldBreakBlocks;
     }
 
     @Override
     public void bridge$setShouldDamageEntities(final boolean shouldDamageEntities) {
-        this.shouldDamageEntities = shouldDamageEntities;
+        this.impl$shouldDamageEntities = shouldDamageEntities;
+    }
+
+    @Nullable
+    @Override
+    public Entity bridge$getExploder() {
+        return this.exploder;
+    }
+
+    @Override
+    public net.minecraft.world.World bridge$getWorld() {
+        return this.world;
     }
 
     @Override

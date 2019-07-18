@@ -37,15 +37,18 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.village.MerchantRecipeAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> implements TradeOffer.Builder, DataBuilder<TradeOffer> {
 
-    private ItemStackSnapshot firstItem;
-    private ItemStackSnapshot secondItem;
-    private ItemStackSnapshot sellingItem;
+    private ItemStackSnapshot firstItem = ItemStackSnapshot.NONE;
+    @Nullable private ItemStackSnapshot secondItem;
+    private ItemStackSnapshot sellingItem = ItemStackSnapshot.NONE;
     private int useCount;
     private int maxUses;
     private boolean allowsExperience;
@@ -56,45 +59,46 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     }
 
     @Override
-    public TradeOffer.Builder firstBuyingItem(ItemStack item) {
+    public TradeOffer.Builder firstBuyingItem(final ItemStack item) {
         checkNotNull(item, "Buying item cannot be null");
         this.firstItem = item.createSnapshot();
         return this;
     }
 
     @Override
-    public TradeOffer.Builder secondBuyingItem(ItemStack item) {
+    public TradeOffer.Builder secondBuyingItem(final ItemStack item) {
         this.secondItem = item.createSnapshot();
         return this;
     }
 
     @Override
-    public TradeOffer.Builder sellingItem(ItemStack item) {
+    public TradeOffer.Builder sellingItem(final ItemStack item) {
         checkNotNull(item, "Selling item cannot be null");
         this.sellingItem = item.createSnapshot();
         return this;
     }
 
     @Override
-    public TradeOffer.Builder uses(int uses) {
+    public TradeOffer.Builder uses(final int uses) {
         checkArgument(uses >= 0, "Usage count cannot be negative");
         this.useCount = uses;
         return this;
     }
 
     @Override
-    public TradeOffer.Builder maxUses(int maxUses) {
+    public TradeOffer.Builder maxUses(final int maxUses) {
         checkArgument(maxUses > 0, "Max usage count must be greater than 0");
         this.maxUses = maxUses;
         return this;
     }
 
     @Override
-    public TradeOffer.Builder canGrantExperience(boolean experience) {
+    public TradeOffer.Builder canGrantExperience(final boolean experience) {
         this.allowsExperience = experience;
         return this;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public TradeOffer build() throws IllegalStateException {
         checkState(this.firstItem != null, "Trading item has not been set");
@@ -103,14 +107,14 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         final ItemStack first = this.firstItem.createStack();
         final ItemStack second = this.secondItem == null ? null : this.secondItem.createStack();
         final ItemStack selling = this.sellingItem.createStack();
-        MerchantRecipe recipe = new MerchantRecipe(ItemStackUtil.toNative(first), ItemStackUtil.toNative(second), ItemStackUtil.toNative(selling),
+        final MerchantRecipe recipe = new MerchantRecipe(ItemStackUtil.toNative(first), ItemStackUtil.toNative(second), ItemStackUtil.toNative(selling),
                         this.useCount, this.maxUses);
-        recipe.rewardsExp = this.allowsExperience;
+        ((MerchantRecipeAccessor) recipe).accessor$setRewardsExp(this.allowsExperience);
         return (TradeOffer) recipe;
     }
 
     @Override
-    public TradeOffer.Builder from(TradeOffer offer) {
+    public TradeOffer.Builder from(final TradeOffer offer) {
         checkNotNull(offer, "Trade offer cannot be null");
         // Assumes the offer's values don't need to be validated
         this.firstItem = offer.getFirstBuyingItem();
@@ -124,17 +128,17 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @Override
     public SpongeTradeOfferBuilder reset() {
-        this.firstItem = null;
+        this.firstItem = ItemStackSnapshot.NONE;
         this.secondItem = null;
-        this.sellingItem = null;
-        this.useCount = 0;
-        this.maxUses = 7;
+        this.sellingItem = ItemStackSnapshot.NONE;
+        this.useCount = Constants.Item.TradeOffer.DEFAULT_USE_COUNT;
+        this.maxUses = Constants.Item.TradeOffer.DEFAULT_MAX_USES;
         this.allowsExperience = true;
         return this;
     }
 
     @Override
-    protected Optional<TradeOffer> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<TradeOffer> buildContent(final DataView container) throws InvalidDataException {
         if (!container.contains(
             Constants.Item.TradeOffer.FIRST_QUERY,
             Constants.Item.TradeOffer.SECOND_QUERY,
@@ -155,7 +159,7 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
             secondPresent = true;
             secondItem = container.getSerializable(Constants.Item.TradeOffer.SECOND_QUERY, ItemStack.class).get();
         }
-        TradeOffer.Builder builder = new SpongeTradeOfferBuilder();
+        final TradeOffer.Builder builder = new SpongeTradeOfferBuilder();
         builder.firstBuyingItem(firstItem);
         if (secondPresent) {
             builder.secondBuyingItem(secondItem);

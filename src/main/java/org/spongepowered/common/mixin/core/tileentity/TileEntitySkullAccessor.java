@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import javax.annotation.Nullable;
@@ -37,5 +38,10 @@ public interface TileEntitySkullAccessor {
     @Nullable
     @Invoker("getPlayerProfile")
     GameProfile accessor$getMojangProfile();
+
+    @Accessor("skullRotation") int accessor$getSkullRotation();
+
+    @Accessor("skullRotation") void accessor$setSkullRotation(int skullRotation);
+
 
 }

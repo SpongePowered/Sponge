@@ -34,6 +34,7 @@ import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
 import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
 import org.spongepowered.common.util.Constants;
 
@@ -47,29 +48,29 @@ public class SpawnerNextEntityToSpawnValueProcessor extends AbstractSpongeValueP
     }
 
     @Override
-    protected Value<WeightedSerializableObject<EntityArchetype>> constructValue(WeightedSerializableObject<EntityArchetype> actualValue) {
+    protected Value<WeightedSerializableObject<EntityArchetype>> constructValue(final WeightedSerializableObject<EntityArchetype> actualValue) {
         return new SpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN,
                 Constants.TileEntity.Spawner.DEFAULT_NEXT_ENTITY_TO_SPAWN, actualValue);
     }
 
     @Override
-    protected boolean set(TileEntityMobSpawnerAccessor container, WeightedSerializableObject<EntityArchetype> value) {
+    protected boolean set(final TileEntityMobSpawnerAccessor container, final WeightedSerializableObject<EntityArchetype> value) {
         SpawnerUtils.setNextEntity(container.accessor$getSpawnerLogic(), value);
         return true;
     }
 
     @Override
-    protected Optional<WeightedSerializableObject<EntityArchetype>> getVal(TileEntityMobSpawnerAccessor container) {
-        return Optional.of(SpawnerUtils.getNextEntity(container.accessor$getSpawnerLogic()));
+    protected Optional<WeightedSerializableObject<EntityArchetype>> getVal(final TileEntityMobSpawnerAccessor container) {
+        return Optional.of(SpawnerUtils.getNextEntity((MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic()));
     }
 
     @Override
-    protected ImmutableValue<WeightedSerializableObject<EntityArchetype>> constructImmutableValue(WeightedSerializableObject<EntityArchetype> value) {
+    protected ImmutableValue<WeightedSerializableObject<EntityArchetype>> constructImmutableValue(final WeightedSerializableObject<EntityArchetype> value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

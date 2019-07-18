@@ -101,6 +101,8 @@ import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeEventManager;
+import org.spongepowered.common.mixin.core.world.WorldAccessor;
+import org.spongepowered.common.mixin.core.world.WorldServerAccessor;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -148,11 +150,11 @@ public class SpongeCommandFactory {
     private static final String OS_ARCH = System.getProperty("os.arch", "UNKNOWN");
 
     private static final CommandElement DUMMY_ELEMENT = new CommandElement(Text.EMPTY) {
-        @Nullable @Override protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+        @Nullable @Override protected Object parseValue(final CommandSource source, final CommandArgs args) throws ArgumentParseException {
             throw args.createError(t("No subcommand was specified")); // this will never be visible, but just in case
         }
 
-        @Override public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+        @Override public List<String> complete(final CommandSource src, final CommandArgs args, final CommandContext context) {
             return ImmutableList.of();
         }
     };
@@ -166,9 +168,9 @@ public class SpongeCommandFactory {
 
         @Nullable
         @Override
-        protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
-            String input = args.next();
-            Optional<? extends CommandMapping> cmd = SpongeImpl.getGame().getCommandManager().get(input, source);
+        protected Object parseValue(final CommandSource source, final CommandArgs args) throws ArgumentParseException {
+            final String input = args.next();
+            final Optional<? extends CommandMapping> cmd = SpongeImpl.getGame().getCommandManager().get(input, source);
 
             if (!cmd.isPresent()) {
                 throw args.createError(SpongeApiTranslationHelper.t("No such command: ", input));
@@ -176,7 +178,7 @@ public class SpongeCommandFactory {
             return cmd.orElse(null);
         }
 
-        @Override public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+        @Override public List<String> complete(final CommandSource src, final CommandArgs args, final CommandContext context) {
             final String prefix = args.nextIfPresent().orElse("");
             return commandsStr(src).stream()
                 .filter(new StartsWithPredicate(prefix))
@@ -251,30 +253,30 @@ public class SpongeCommandFactory {
     private abstract static class ConfigUsingExecutor implements CommandExecutor {
         private boolean requireWorldLoaded;
 
-        ConfigUsingExecutor(boolean requireWorldLoaded) {
+        ConfigUsingExecutor(final boolean requireWorldLoaded) {
             this.requireWorldLoaded = requireWorldLoaded;
         }
 
         @Override
-        public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+        public CommandResult execute(final CommandSource src, final CommandContext args) throws CommandException {
             return execute(src, args, 0);
         }
 
-        public CommandResult execute(CommandSource src, CommandContext args, int successes) throws CommandException {
+        public CommandResult execute(final CommandSource src, final CommandContext args, int successes) throws CommandException {
             if (args.hasAny("global")) {
                 src.sendMessage(Text.of("Global: ", processGlobal(SpongeImpl.getGlobalConfigAdapter(), src, args)));
                 ++successes;
             }
             if (args.hasAny("dimension")) {
-                for (DimensionType dimensionType : args.<DimensionType>getAll("dimension")) {
+                for (final DimensionType dimensionType : args.<DimensionType>getAll("dimension")) {
                     src.sendMessage(Text.of("Dimension ", dimensionType.getName(), ": ", processDimension(((DimensionTypeBridge) dimensionType).
                         bridge$getDimensionConfig(), dimensionType, src, args)));
                     ++successes;
                 }
             }
             if (args.hasAny("world")) {
-                for (WorldProperties properties : args.<WorldProperties>getAll("world")) {
-                    Optional<World> world = SpongeImpl.getGame().getServer().getWorld(properties.getUniqueId());
+                for (final WorldProperties properties : args.<WorldProperties>getAll("world")) {
+                    final Optional<World> world = SpongeImpl.getGame().getServer().getWorld(properties.getUniqueId());
                     if (!world.isPresent() && this.requireWorldLoaded) {
                         throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
@@ -289,34 +291,34 @@ public class SpongeCommandFactory {
             return CommandResult.builder().successCount(successes).build(); // TODO: How do we handle results?
         }
 
-        protected Text processGlobal(SpongeConfig<GlobalConfig> config, CommandSource source, CommandContext args)
+        protected Text processGlobal(final SpongeConfig<GlobalConfig> config, final CommandSource source, final CommandContext args)
             throws CommandException {
             return process(config, source, args);
         }
 
-        protected Text processDimension(SpongeConfig<DimensionConfig> config, DimensionType dim, CommandSource source,
-            CommandContext args) throws CommandException {
+        protected Text processDimension(final SpongeConfig<DimensionConfig> config, final DimensionType dim, final CommandSource source,
+            final CommandContext args) throws CommandException {
             return process(config, source, args);
         }
 
-        protected Text processWorld(SpongeConfig<WorldConfig> config, World world, CommandSource source,
-            CommandContext args) throws CommandException {
+        protected Text processWorld(final SpongeConfig<WorldConfig> config, final World world, final CommandSource source,
+            final CommandContext args) throws CommandException {
             return process(config, source, args);
         }
 
-        protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args) throws CommandException {
+        protected Text process(final SpongeConfig<? extends ConfigBase> config, final CommandSource source, final CommandContext args) throws CommandException {
             return Text.of("Unimplemented");
         }
     }
 
     private abstract static class ConfigIncludingTrackerUsingExecutor extends ConfigUsingExecutor {
 
-        ConfigIncludingTrackerUsingExecutor(boolean requireWorldLoaded) {
+        ConfigIncludingTrackerUsingExecutor(final boolean requireWorldLoaded) {
             super(requireWorldLoaded);
         }
 
         @Override
-        public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+        public CommandResult execute(final CommandSource src, final CommandContext args) throws CommandException {
             int successes = 0;
             if (args.hasAny("tracker")) {
                 src.sendMessage(Text.of("Tracker: ", processTracker(SpongeImpl.getTrackerConfigAdapter(), src, args)));
@@ -326,7 +328,7 @@ public class SpongeCommandFactory {
             return execute(src, args, successes);
         }
 
-        protected Text processTracker(SpongeConfig<TrackerConfig> config, CommandSource source, CommandContext args)
+        protected Text processTracker(final SpongeConfig<TrackerConfig> config, final CommandSource source, final CommandContext args)
             throws CommandException {
             return process(config, source, args);
         }
@@ -341,10 +343,10 @@ public class SpongeCommandFactory {
             .permission("sponge.command.chunks")
             .executor(new ConfigUsingExecutor(true) {
                 @Override
-                public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-                    CommandResult res = super.execute(src, args);
+                public CommandResult execute(final CommandSource src, final CommandContext args) throws CommandException {
+                    final CommandResult res = super.execute(src, args);
                     if (args.hasAny("dump")) {
-                        File file = new File(new File(new File("."), "chunk-dumps"),
+                        final File file = new File(new File(new File("."), "chunk-dumps"),
                             "chunk-info-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(Instant.now()) + "-server.txt");
                         src.sendMessage(Text.of("Writing chunk info to: ", file));
                         ChunkSaveHelper.writeChunks(file, args.hasAny("dump-all"));
@@ -354,9 +356,9 @@ public class SpongeCommandFactory {
                 }
 
                 @Override
-                protected Text processGlobal(SpongeConfig<GlobalConfig> config, CommandSource source, CommandContext args)
+                protected Text processGlobal(final SpongeConfig<GlobalConfig> config, final CommandSource source, final CommandContext args)
                     throws CommandException {
-                    for (World world : SpongeImpl.getGame().getServer().getWorlds()) {
+                    for (final World world : SpongeImpl.getGame().getServer().getWorlds()) {
                         source.sendMessage(Text.of("World ", Text.of(TextStyles.BOLD, world.getName()),
                             getChunksInfo(((WorldServer) world))));
                     }
@@ -364,8 +366,8 @@ public class SpongeCommandFactory {
                 }
 
                 @Override
-                protected Text processDimension(SpongeConfig<DimensionConfig> config, DimensionType dim, CommandSource source,
-                    CommandContext args)
+                protected Text processDimension(final SpongeConfig<DimensionConfig> config, final DimensionType dim, final CommandSource source,
+                    final CommandContext args)
                     throws CommandException {
                     SpongeImpl.getGame().getServer().getWorlds().stream().filter(world -> world.getDimension().getType().equals(dim))
                         .forEach(world -> source.sendMessage(Text.of("World ", Text.of(TextStyles.BOLD, world.getName()),
@@ -374,20 +376,21 @@ public class SpongeCommandFactory {
                 }
 
                 @Override
-                protected Text processWorld(SpongeConfig<WorldConfig> config, World world, CommandSource source, CommandContext args)
+                protected Text processWorld(
+                    final SpongeConfig<WorldConfig> config, final World world, final CommandSource source, final CommandContext args)
                     throws CommandException {
                     return getChunksInfo((WorldServer) world);
                 }
 
-                protected Text key(Object text) {
+                protected Text key(final Object text) {
                     return Text.of(TextColors.GOLD, text);
                 }
 
-                protected Text value(Object text) {
+                protected Text value(final Object text) {
                     return Text.of(TextColors.GRAY, text);
                 }
 
-                protected Text getChunksInfo(WorldServer worldserver) {
+                protected Text getChunksInfo(final WorldServer worldserver) {
                     if (((WorldBridge) worldserver).bridge$isFake() || worldserver.getWorldInfo() == null) {
                         return Text.of(NEWLINE_TEXT, "Fake world");
                     }
@@ -396,8 +399,8 @@ public class SpongeCommandFactory {
                         key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), NEWLINE_TEXT,
                         key("Entities: "), value(worldserver.loadedEntityList.size()), NEWLINE_TEXT,
                         key("Tile Entities: "), value(worldserver.loadedTileEntityList.size()), NEWLINE_TEXT,
-                        key("Removed Entities:"), value(worldserver.unloadedEntityList.size()), NEWLINE_TEXT,
-                        key("Removed Tile Entities: "), value(worldserver.tileEntitiesToBeRemoved), NEWLINE_TEXT
+                        key("Removed Entities:"), value(((WorldAccessor) worldserver).accessor$getUnloadedEntityList().size()), NEWLINE_TEXT,
+                        key("Removed Tile Entities: "), value(((WorldAccessor) worldserver).accessor$getTileEntitiesToBeRemoved()), NEWLINE_TEXT
                     );
                 }
             })
@@ -413,7 +416,7 @@ public class SpongeCommandFactory {
             .permission("sponge.command.config")
             .executor(new ConfigIncludingTrackerUsingExecutor(false) {
                 @Override
-                protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args)
+                protected Text process(final SpongeConfig<? extends ConfigBase> config, final CommandSource source, final CommandContext args)
                     throws CommandException {
                     final Optional<String> key = args.getOne("key");
                     final Optional<String> value = args.getOne("value");
@@ -441,7 +444,7 @@ public class SpongeCommandFactory {
             .permission("sponge.command.reload")
             .executor(new ConfigIncludingTrackerUsingExecutor(false) {
                 @Override
-                protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args)
+                protected Text process(final SpongeConfig<? extends ConfigBase> config, final CommandSource source, final CommandContext args)
                     throws CommandException {
                     config.load();
                     SpongeHooks.refreshActiveConfigs();
@@ -457,7 +460,7 @@ public class SpongeCommandFactory {
             .permission("sponge.command.save")
             .executor(new ConfigIncludingTrackerUsingExecutor(false) {
                 @Override
-                protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args)
+                protected Text process(final SpongeConfig<? extends ConfigBase> config, final CommandSource source, final CommandContext args)
                     throws CommandException {
                     config.save();
                     return Text.of("Saved");
@@ -587,11 +590,11 @@ public class SpongeCommandFactory {
             .build();
     }
 
-    public static Text title(String title) {
+    public static Text title(final String title) {
         return Text.of(TextColors.GREEN, title);
     }
 
-    public static Text hl(String toHighlight) {
+    public static Text hl(final String toHighlight) {
         return Text.of(TextColors.DARK_GREEN, toHighlight);
     }
 
@@ -675,19 +678,19 @@ public class SpongeCommandFactory {
             }).build();
     }
 
-    public static void appendPluginMeta(Text.Builder builder, String key, Optional<?> value) {
+    public static void appendPluginMeta(final Text.Builder builder, final String key, final Optional<?> value) {
         if (value.isPresent()) {
             appendPluginMeta(builder, key, value.get());
         }
     }
 
-    public static void appendPluginMeta(Text.Builder builder, String key, Object value) {
+    public static void appendPluginMeta(final Text.Builder builder, final String key, final Object value) {
         builder.append(NEWLINE_TEXT, INDENT_TEXT, title(key + ": "), Text.of(value));
     }
 
-    public static void sendContainerMeta(CommandSource src, CommandContext args, String argumentName) {
-        for (PluginContainer container : args.<PluginContainer>getAll(argumentName)) {
-            Text.Builder builder = Text.builder().append(title(container.getName()));
+    public static void sendContainerMeta(final CommandSource src, final CommandContext args, final String argumentName) {
+        for (final PluginContainer container : args.<PluginContainer>getAll(argumentName)) {
+            final Text.Builder builder = Text.builder().append(title(container.getName()));
             container.getVersion().ifPresent(version -> builder.append(Text.of((" v" + version))));
 
             appendPluginMeta(builder, "ID", container.getId());
@@ -842,7 +845,7 @@ public class SpongeCommandFactory {
             .build();
     }
 
-    private static void printWorldTickTime(CommandSource src, World world) {
+    private static void printWorldTickTime(final CommandSource src, final World world) {
         final long[] worldTickTimes = ((MinecraftServerBridge) SpongeImpl.getServer()).bridge$getWorldTickTimes(((ServerWorldBridge) world).bridge$getDimensionId());
         final double worldMeanTickTime = mean(worldTickTimes) * 1.0e-6d;
         final double worldTps = Math.min(1000.0 / worldMeanTickTime, 20);
@@ -853,10 +856,10 @@ public class SpongeCommandFactory {
             THREE_DECIMAL_DIGITS_FORMATTER.format(worldMeanTickTime), "ms"));
     }
 
-    private static Long mean(long[] values) {
+    private static Long mean(final long[] values) {
         Long mean = 0L;
         if (values.length > 0) {
-            for (long value : values) {
+            for (final long value : values) {
                 mean += value;
             }
 
@@ -1005,11 +1008,11 @@ public class SpongeCommandFactory {
     }
 
     private static CompletableFuture<CommentedConfigurationNode> setPermissions(
-        MetricsCategory category,
-        PluginContainer container,
-        boolean enabled) {
+        final MetricsCategory category,
+        final PluginContainer container,
+        final boolean enabled) {
 
-        Map<String, Boolean> permissions = category.getPluginPermissions();
+        final Map<String, Boolean> permissions = category.getPluginPermissions();
         permissions.put(container.getId(), enabled);
         return SpongeHooks.savePluginsInMetricsConfig(permissions);
     }
@@ -1025,7 +1028,7 @@ public class SpongeCommandFactory {
      * @param src The command source to permission check
      * @return A collection of primary aliases
      */
-    private static Collection<String> commandsStr(CommandSource src) {
+    private static Collection<String> commandsStr(final CommandSource src) {
         return commands(src).stream().map(CommandMapping::getPrimaryAlias).collect(Collectors.toList());
     }
 
@@ -1035,7 +1038,7 @@ public class SpongeCommandFactory {
      * @param src The command source to test permissions against
      * @return A set of command mappings, sorted by primary alias
      */
-    private static TreeSet<CommandMapping> commands(CommandSource src) {
+    private static TreeSet<CommandMapping> commands(final CommandSource src) {
         final TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
         commands.addAll(Sponge.getCommandManager().getAll().values().stream().filter(input -> input.getCallable().testPermission(src)).collect(Collectors.toList()));
         return commands;
@@ -1050,14 +1053,14 @@ public class SpongeCommandFactory {
      * @return A text representing the command mapping, formatted for display
      *     on the help index
      */
-    private static Text createDescription(CommandSource source, CommandMapping mapping) {
+    private static Text createDescription(final CommandSource source, final CommandMapping mapping) {
         @SuppressWarnings("unchecked")
         final Optional<Text> description = mapping.getCallable().getShortDescription(source);
         final Text.Builder text = Text.builder("/" + mapping.getPrimaryAlias());
         text.color(TextColors.GREEN);
         // End with a space, so tab completion works immediately.
         text.onClick(TextActions.suggestCommand("/" + mapping.getPrimaryAlias() + " "));
-        Optional<? extends Text> longDescription = mapping.getCallable().getHelp(source);
+        final Optional<? extends Text> longDescription = mapping.getCallable().getHelp(source);
         if (longDescription.isPresent()) {
             text.onHover(TextActions.showText(longDescription.get()));
         }

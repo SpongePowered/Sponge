@@ -37,6 +37,7 @@ import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.common.mixin.core.world.chunk.ChunkPrimerAccessor;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
@@ -104,7 +105,7 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ArrayMutableBlockBuffer(GlobalPalette.getBlockPalette(), this.start, this.size, this.chunkPrimer.data.clone());
+                return new ArrayMutableBlockBuffer(GlobalPalette.getBlockPalette(), this.start, this.size, ((ChunkPrimerAccessor) this.chunkPrimer).accessor$getData().clone());
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -113,7 +114,7 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
 
     @Override
     public ImmutableBlockVolume getImmutableBlockCopy() {
-        return new ArrayImmutableBlockBuffer(GlobalPalette.getBlockPalette(), this.start, this.size, this.chunkPrimer.data);
+        return new ArrayImmutableBlockBuffer(GlobalPalette.getBlockPalette(), this.start, this.size, ((ChunkPrimerAccessor) this.chunkPrimer).accessor$getData());
     }
 
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.service.rcon;
 
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.service.rcon.RconService;
+import org.spongepowered.common.mixin.core.server.DedicatedServerAccessor;
 
 public class MinecraftRconService implements RconService {
     private final DedicatedServer server;
@@ -36,7 +37,7 @@ public class MinecraftRconService implements RconService {
 
     @Override
     public boolean isRconEnabled() {
-        return this.server.rconThread != null;
+        return ((DedicatedServerAccessor) this.server).accessor$getRConThread() != null;
     }
 
     @Override

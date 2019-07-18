@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProvider;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.gen.BiomeGenerator;
@@ -37,6 +38,7 @@ import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
+import org.spongepowered.common.mixin.core.world.WorldProviderAccessor;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
 import java.util.List;
@@ -64,14 +66,14 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     private BiomeGenerator biomeGenerator;
     private GenerationPopulator baseGenerator;
 
-    public SpongeWorldGenerator(World world, BiomeGenerator biomeGenerator, GenerationPopulator baseGenerator) {
+    public SpongeWorldGenerator(final World world, final BiomeGenerator biomeGenerator, final GenerationPopulator baseGenerator) {
         this.world = checkNotNull(world);
         this.biomeGenerator = checkNotNull(biomeGenerator);
         this.baseGenerator = checkNotNull(baseGenerator);
         this.populators = Lists.newArrayList();
         this.generationPopulators = Lists.newArrayList();
         this.biomeSettings = Maps.newHashMap();
-        this.world.provider.biomeProvider = CustomBiomeProvider.of(biomeGenerator);
+        ((WorldProviderAccessor) this.world.provider).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
         if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
             ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
         }
@@ -83,7 +85,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     }
 
     @Override
-    public List<GenerationPopulator> getGenerationPopulators(Class<? extends GenerationPopulator> type) {
+    public List<GenerationPopulator> getGenerationPopulators(final Class<? extends GenerationPopulator> type) {
         return this.generationPopulators.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 
@@ -93,7 +95,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     }
 
     @Override
-    public List<Populator> getPopulators(Class<? extends Populator> type) {
+    public List<Populator> getPopulators(final Class<? extends Populator> type) {
         return this.populators.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 
@@ -103,10 +105,10 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     }
 
     @Override
-    public void setBiomeGenerator(BiomeGenerator biomeGenerator) {
+    public void setBiomeGenerator(final BiomeGenerator biomeGenerator) {
         this.biomeGenerator = checkNotNull(biomeGenerator, "biomeGenerator");
         // Replace biome generator with possible modified one
-        this.world.provider.biomeProvider = CustomBiomeProvider.of(biomeGenerator);
+        ((WorldProviderAccessor) this.world.provider).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
         if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
             ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
         }
@@ -118,7 +120,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     }
 
     @Override
-    public void setBaseGenerationPopulator(GenerationPopulator generator) {
+    public void setBaseGenerationPopulator(final GenerationPopulator generator) {
         this.baseGenerator = checkNotNull(generator, "generator");
         if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
             ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(this.biomeGenerator);
@@ -126,7 +128,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     }
 
     @Override
-    public BiomeGenerationSettings getBiomeSettings(BiomeType type) {
+    public BiomeGenerationSettings getBiomeSettings(final BiomeType type) {
         checkNotNull(type);
         BiomeGenerationSettings settings = this.biomeSettings.get(type);
         if (settings == null) {

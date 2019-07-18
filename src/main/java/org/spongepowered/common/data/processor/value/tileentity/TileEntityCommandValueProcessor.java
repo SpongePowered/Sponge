@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
+import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -42,28 +43,31 @@ public class TileEntityCommandValueProcessor extends AbstractSpongeValueProcesso
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected Value<String> constructValue(String actualValue) {
+    protected Value<String> constructValue(final String actualValue) {
         return new SpongeValue<>(Keys.COMMAND, actualValue);
     }
 
     @Override
-    protected boolean set(TileEntityCommandBlock container, String value) {
-        container.getCommandBlockLogic().commandStored = value;
+    protected boolean set(final TileEntityCommandBlock container, final String value) {
+        final CommandBlockBaseLogic logic = container.getCommandBlockLogic();
+        final int successCount = logic.getSuccessCount();
+        logic.setCommand(value);
+        logic.setSuccessCount(successCount);
         return true;
     }
 
     @Override
-    protected Optional<String> getVal(TileEntityCommandBlock container) {
-        return Optional.ofNullable(container.getCommandBlockLogic().commandStored);
+    protected Optional<String> getVal(final TileEntityCommandBlock container) {
+        return Optional.ofNullable(container.getCommandBlockLogic().getCommand());
     }
 
     @Override
-    protected ImmutableValue<String> constructImmutableValue(String value) {
+    protected ImmutableValue<String> constructImmutableValue(final String value) {
         return constructValue(value).asImmutable();
     }
 

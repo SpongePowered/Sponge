@@ -56,6 +56,7 @@ import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 
@@ -109,7 +110,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     private InventoryEnderChest enderChest; // lazy load when accessing inventory
     private NBTTagCompound nbt = new NBTTagCompound();
 
-    public SpongeUser(GameProfile profile) {
+    public SpongeUser(final GameProfile profile) {
         this.profile = profile;
     }
 
@@ -117,15 +118,15 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         this.spawnLocations.clear();
     }
 
-    public void readFromNbt(NBTTagCompound compound) {
+    public void readFromNbt(final NBTTagCompound compound) {
         this.reset();
         this.nbt = compound;
 
         // net.minecraft.entity.Entity#readFromNBT
 
-        NBTTagList position = compound.getTagList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+        final NBTTagList position = compound.getTagList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
         //NBTTagList motion = compound.getTagList("Motion", NbtDataUtil.TAG_DOUBLE);
-        NBTTagList rotation = compound.getTagList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
+        final NBTTagList rotation = compound.getTagList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
         //this.motionX = motion.getDoubleAt(0);
         //this.motionY = motion.getDoubleAt(1);
         //this.motionZ = motion.getDoubleAt(2);
@@ -347,7 +348,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     private SpongeUser loadInventory() {
         if (this.inventory == null) {
             this.inventory = new SpongeUserInventory(this);
-            NBTTagList nbttaglist = this.nbt.getTagList(Constants.Entity.Player.INVENTORY, 10);
+            final NBTTagList nbttaglist = this.nbt.getTagList(Constants.Entity.Player.INVENTORY, 10);
             this.inventory.readFromNBT(nbttaglist);
             this.inventory.currentItem = this.nbt.getInteger(Constants.Entity.Player.SELECTED_ITEM_SLOT);
         }
@@ -359,14 +360,14 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             this.enderChest = new SpongeUserInventoryEnderchest(this);
             if (this.nbt.hasKey(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9))
             {
-                NBTTagList nbttaglist1 = this.nbt.getTagList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
+                final NBTTagList nbttaglist1 = this.nbt.getTagList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
                 this.enderChest.loadInventoryFromNBT(nbttaglist1);
             }
         }
         return this;
     }
 
-    public void writeToNbt(NBTTagCompound compound) {
+    public void writeToNbt(final NBTTagCompound compound) {
 
         this.loadInventory();
         this.loadEnderInventory();
@@ -389,7 +390,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         spongeCompound.removeTag(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
 
         final NBTTagList spawnList = new NBTTagList();
-        for (Entry<UUID, RespawnLocation> entry : this.spawnLocations.entrySet()) {
+        for (final Entry<UUID, RespawnLocation> entry : this.spawnLocations.entrySet()) {
             final RespawnLocation respawn = entry.getValue();
 
             final NBTTagCompound spawnCompound = new NBTTagCompound();
@@ -446,22 +447,22 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public boolean canEquip(EquipmentType type) {
+    public boolean canEquip(final EquipmentType type) {
         return getForInventory(p -> p.canEquip(type), u -> true); // TODO Inventory API
     }
 
     @Override
-    public boolean canEquip(EquipmentType type, @Nullable ItemStack equipment) {
+    public boolean canEquip(final EquipmentType type, @Nullable final ItemStack equipment) {
         return getForInventory(p -> p.canEquip(type, equipment), u -> true); // TODO Inventory API
     }
 
     @Override
-    public Optional<ItemStack> getEquipped(EquipmentType type) {
+    public Optional<ItemStack> getEquipped(final EquipmentType type) {
         return this.getForInventory(p -> p.getEquipped(type), u -> u.getEquippedItem(type));
     }
 
     @Override
-    public boolean equip(EquipmentType type, @Nullable ItemStack equipment) {
+    public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
         if (this.canEquip(type, equipment)) {
             this.setForInventory(p -> p.equip(type, equipment), u -> u.setEquippedItem(type, equipment));
             return true;
@@ -476,7 +477,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public Optional<ItemStack> getItemInHand(HandType handType) {
+    public Optional<ItemStack> getItemInHand(final HandType handType) {
         if (handType == HandTypes.MAIN_HAND) {
             return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.MAIN_HAND));
         } else if (handType == HandTypes.OFF_HAND) {
@@ -486,7 +487,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public void setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
+    public void setItemInHand(final HandType handType, @Nullable final ItemStack itemInHand) {
         if (handType == HandTypes.MAIN_HAND) {
             this.setForInventory(p -> p.setItemInHand(handType, itemInHand), u -> u.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand));
         } else if (handType == HandTypes.OFF_HAND) {
@@ -498,7 +499,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     @Override
     public Map<UUID, RespawnLocation> bridge$getBedlocations() {
-        Optional<Player> player = this.self.getPlayer();
+        final Optional<Player> player = this.self.getPlayer();
         if (player.isPresent()) {
             return ((BedLocationsBridge) player.get()).bridge$getBedlocations();
         }
@@ -506,8 +507,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public boolean bridge$setBedLocations(Map<UUID, RespawnLocation> value) {
-        Optional<Player> player = this.self.getPlayer();
+    public boolean bridge$setBedLocations(final Map<UUID, RespawnLocation> value) {
+        final Optional<Player> player = this.self.getPlayer();
         if (player.isPresent()) {
             return ((BedLocationsBridge) player.get()).bridge$setBedLocations(value);
         }
@@ -519,11 +520,11 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     @Override
     public ImmutableMap<UUID, RespawnLocation> bridge$removeAllBeds() {
-        Optional<Player> player = this.self.getPlayer();
+        final Optional<Player> player = this.self.getPlayer();
         if (player.isPresent()) {
             return ((BedLocationsBridge) player.get()).bridge$removeAllBeds();
         }
-        ImmutableMap<UUID, RespawnLocation> locations = ImmutableMap.copyOf(this.spawnLocations);
+        final ImmutableMap<UUID, RespawnLocation> locations = ImmutableMap.copyOf(this.spawnLocations);
         this.spawnLocations.clear();
         this.markDirty();
         return locations;
@@ -534,8 +535,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void save() {
-        SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
-        File dataFile = new File(saveHandler.playersDirectory, getUniqueId() + ".dat");
+        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
+        final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), getUniqueId() + ".dat");
         NBTTagCompound tag;
         if (dataFile.isFile()) {
             try {
@@ -548,7 +549,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             tag = new NBTTagCompound();
         }
         writeToNbt(tag);
-        try (FileOutputStream out = new FileOutputStream(dataFile)) {
+        try (final FileOutputStream out = new FileOutputStream(dataFile)) {
             CompressedStreamTools.writeCompressed(tag, out);
             dirtyUsers.remove(this);
         } catch (IOException e) {
@@ -558,14 +559,14 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     // Helpers for UserInventory
 
-    private <T> T getForInventory(Function<Player, T> playerFunction, Function<SpongeUser, T> userFunction) {
+    private <T> T getForInventory(final Function<Player, T> playerFunction, final Function<SpongeUser, T> userFunction) {
         if (this.self.getPlayer().isPresent()) {
             return playerFunction.apply(this.self.getPlayer().get());
         }
         return userFunction.apply(this.loadInventory()); // Load Inventory if not yet loaded
     }
 
-    private void setForInventory(Consumer<Player> playerFunction, Consumer<SpongeUser> userFunction) {
+    private void setForInventory(final Consumer<Player> playerFunction, final Consumer<SpongeUser> userFunction) {
         if (this.self.getPlayer().isPresent()) {
             playerFunction.accept(this.self.getPlayer().get());
             return;
@@ -576,11 +577,11 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     // Helpers for Equipment:
 
-    private Optional<ItemStack> getEquippedItem(EquipmentType type) {
+    private Optional<ItemStack> getEquippedItem(final EquipmentType type) {
         if (type instanceof SpongeEquipmentType) {
-            EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
+            final EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
             if (slots.length == 1) {
-                net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
+                final net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
                 if (!nmsItem.isEmpty()) {
                     return Optional.of(ItemStackUtil.fromNative(nmsItem));
                 }
@@ -589,10 +590,10 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return Optional.empty();
     }
 
-    private void setEquippedItem(EquipmentType type, @Nullable ItemStack item) {
+    private void setEquippedItem(final EquipmentType type, @Nullable final ItemStack item) {
         if (type instanceof SpongeEquipmentType) {
-            EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
-            for (EntityEquipmentSlot slot : slots) {
+            final EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
+            for (final EntityEquipmentSlot slot : slots) {
                 this.setItemStackToSlot(slot, ItemStackUtil.toNative(item));
                 // TODO check canequip
                 return;
@@ -600,7 +601,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         }
     }
 
-    private net.minecraft.item.ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn) {
+    private net.minecraft.item.ItemStack getItemStackFromSlot(final EntityEquipmentSlot slotIn) {
         if (slotIn == EntityEquipmentSlot.MAINHAND) {
             return this.inventory.getCurrentItem();
         } else if (slotIn == EntityEquipmentSlot.OFFHAND) {
@@ -611,7 +612,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         }
     }
 
-    private void setItemStackToSlot(EntityEquipmentSlot slotIn, net.minecraft.item.ItemStack stack) {
+    private void setItemStackToSlot(final EntityEquipmentSlot slotIn, final net.minecraft.item.ItemStack stack) {
         if (slotIn == EntityEquipmentSlot.MAINHAND) {
             this.inventory.mainInventory.set(this.inventory.currentItem, stack);
         } else if (slotIn == EntityEquipmentSlot.OFFHAND) {

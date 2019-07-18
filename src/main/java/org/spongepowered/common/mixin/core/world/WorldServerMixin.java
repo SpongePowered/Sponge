@@ -144,10 +144,12 @@ import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
+import org.spongepowered.common.bridge.world.WorldTypeBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
@@ -168,7 +170,6 @@ import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -185,7 +186,6 @@ import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
-import org.spongepowered.common.world.type.SpongeWorldType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -330,6 +330,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         PhaseTracker.getInstance().getCurrentContext().close();
     }
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
     private void onCreateSpawnPosition(final WorldSettings settings, final CallbackInfo ci) {
         final GeneratorType generatorType = (GeneratorType) settings.getTerrainType();
@@ -339,7 +340,8 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
             this.createBonusChest();
         }
 
-        if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) || ((((WorldServer) (Object) this)).getChunkProvider().chunkGenerator instanceof ChunkGeneratorEnd)) {
+        if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END))
+            || (((ServerChunkProviderBridge) (((WorldServer) (Object) this)).getChunkProvider()).accessor$getChunkGenerator() instanceof ChunkGeneratorEnd)) {
             this.worldInfo.setSpawn(new BlockPos(100, 50, 0));
             ci.cancel();
         }
@@ -383,6 +385,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void impl$updateWorldGenerator() {
 
         // Get the default generator for the world type
@@ -413,7 +416,8 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         this.impl$spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
 
         final ChunkProviderServer chunkProviderServer = this.getChunkProvider();
-        chunkProviderServer.chunkGenerator = this.impl$spongegen;
+        // TODO - Migrate to ChunkProviderServerAccessor with Mixin 0.8<
+        ((ServerChunkProviderBridge) chunkProviderServer).accessor$setChunkGenerator(this.impl$spongegen);
     }
 
     @Override
@@ -444,26 +448,25 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         return this.bridge$createWorldGenerator(jsonSettings);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public SpongeWorldGenerator bridge$createWorldGenerator(final String settings) {
         final WorldServer worldServer = (WorldServer) (Object) this;
         final WorldType worldType = worldServer.getWorldType();
-        final IChunkGenerator chunkGenerator;
-        final BiomeProvider biomeProvider;
-        if (worldType instanceof SpongeWorldType) {
-            chunkGenerator = ((SpongeWorldType) worldType).getChunkGenerator(worldServer, settings);
-            biomeProvider = ((SpongeWorldType) worldType).getBiomeProvider(worldServer);
-        } else {
-            final IChunkGenerator currentGenerator = this.getChunkProvider().chunkGenerator;
-            if (currentGenerator != null) {
-                chunkGenerator = currentGenerator;
-            } else {
-                final WorldProvider worldProvider = worldServer.provider;
-                ((WorldProviderBridge) worldProvider).bridge$setGeneratorSettings(settings);
-                chunkGenerator = worldProvider.createChunkGenerator();
-            }
-            biomeProvider = worldServer.provider.biomeProvider;
-        }
+        final IChunkGenerator chunkGenerator = ((WorldTypeBridge) worldType).bridge$getChvunkGenerator()
+            .map(func -> func.apply(worldServer, settings))
+            .orElseGet(() -> {
+                final IChunkGenerator current = ((ServerChunkProviderBridge) this.getChunkProvider()).accessor$getChunkGenerator();
+                if (current == null) {
+                    final WorldProvider worldProvider = worldServer.provider;
+                    ((WorldProviderBridge) worldProvider).bridge$setGeneratorSettings(settings);
+                    return worldProvider.createChunkGenerator();
+                }
+                return current;
+            });
+        final BiomeProvider biomeProvider = ((WorldTypeBridge) worldType).bridge$getBiomeProvider()
+            .map(func -> func.apply(worldServer))
+            .orElseGet(worldServer.provider::getBiomeProvider);
         return new SpongeWorldGenerator(worldServer, (BiomeGenerator) biomeProvider, SpongeGenerationPopulator.of(worldServer, chunkGenerator));
     }
     /**
@@ -1122,7 +1125,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
 
             // If we reach this point the chunk leaked so queue for unload
             chunkProviderServer.queueUnload(chunk);
-            SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.world, chunk);
+            SpongeHooks.logChunkGCQueueUnload((WorldServer) (Object) this, chunk);
         }
     }
 
@@ -1319,11 +1322,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         try (final PhaseContext<?> ignored = contextCreator.apply(mcExplosion)
                 .source(((Optional) explosion.getSourceExplosive()).orElse(this))) {
             ignored.buildAndSwitch();
-            final double x = mcExplosion.x;
-            final double y = mcExplosion.y;
-            final double z = mcExplosion.z;
             final boolean damagesTerrain = explosion.shouldBreakBlocks();
-            final float strength = explosion.getRadius();
             // Sponge End
 
             mcExplosion.doExplosionA();

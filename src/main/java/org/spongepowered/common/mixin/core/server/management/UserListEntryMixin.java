@@ -22,27 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.type;
+package org.spongepowered.common.mixin.core.server.management;
 
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.gen.IChunkGenerator;
-import net.minecraft.world.gen.ChunkGeneratorOverworld;
+import net.minecraft.server.management.UserListEntry;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public class SpongeWorldTypeOverworld extends SpongeWorldType {
+@Mixin(UserListEntry.class)
+public abstract class UserListEntryMixin<T> {
 
-    public SpongeWorldTypeOverworld() {
-        super("overworld");
-        this.setCanBeCreated(false);
-    }
+    @Shadow abstract T getValue(); // Valid for subclass use, it's package
 
-    @Override
-    public BiomeProvider getBiomeProvider(World world) {
-        return new BiomeProvider(world.getWorldInfo());
-    }
-
-    @Override
-    public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
-        return new ChunkGeneratorOverworld(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
-    }
 }

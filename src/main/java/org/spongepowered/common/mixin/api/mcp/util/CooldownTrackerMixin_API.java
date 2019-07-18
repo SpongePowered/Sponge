@@ -32,6 +32,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.util.CooldownTracker$CooldownBridge;
 import org.spongepowered.common.bridge.util.CooldownTrackerBridge;
 
 import java.util.Map;
@@ -41,7 +42,7 @@ import java.util.OptionalInt;
 @Mixin(CooldownTracker.class)
 public abstract class CooldownTrackerMixin_API implements org.spongepowered.api.entity.living.player.CooldownTracker {
 
-    @Shadow @Final private Map<Item, CooldownTracker.Cooldown> cooldowns;
+    @Shadow @Final private Map<Item, ?> cooldowns;
     @Shadow private int ticks;
 
     @Shadow public abstract boolean hasCooldown(Item itemIn);
@@ -58,10 +59,10 @@ public abstract class CooldownTrackerMixin_API implements org.spongepowered.api.
     public OptionalInt getCooldown(final ItemType type) {
         checkNotNull(type, "Item type cannot be null!");
 
-        final CooldownTracker.Cooldown cooldown = this.cooldowns.get((Item) type);
+        final CooldownTracker$CooldownBridge cooldown = (CooldownTracker$CooldownBridge) this.cooldowns.get((Item) type);
 
         if (cooldown != null) {
-            final int remainingCooldown = cooldown.expireTicks - this.ticks;
+            final int remainingCooldown = cooldown.bridge$getExpireTicks() - this.ticks;
             if (remainingCooldown > 0) {
                 return OptionalInt.of(remainingCooldown);
             }

@@ -112,6 +112,21 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
     }
 
     @Override
+    public void accessor$setChunkGenerator(IChunkGenerator spongeGen) {
+        this.chunkGenerator = spongeGen;
+    }
+
+    @Override
+    public Long2ObjectMap<Chunk> accessor$getLoadedChunks() {
+        return this.loadedChunks;
+    }
+
+    @Override
+    public IChunkGenerator accessor$getChunkGenerator() {
+        return this.chunkGenerator;
+    }
+
+    @Override
     public CompletableFuture<Boolean> bridge$doesChunkExistSync(final Vector3i chunkCoords) {
         return WorldStorageUtil.doesChunkExistSync(this.world, this.chunkLoader, chunkCoords);
     }
@@ -190,7 +205,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
         final ChunkProviderServer provider, final int someVar, final int someOther) {
 
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
-        report.makeCategory("Current PhaseState")
+        report.makeCategoryDepth("Current PhaseState", 1)
             .addDetail(currentContext.state.toString(), () -> {
 
                 final PrettyPrinter printer = new PrettyPrinter(50);

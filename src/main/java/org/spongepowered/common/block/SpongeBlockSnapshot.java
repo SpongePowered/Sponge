@@ -66,6 +66,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.mixin.core.world.WorldAccessor;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.Constants;
@@ -105,7 +106,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Nullable private WeakReference<WorldServer> world;
     public BlockChange blockChange; // used for post event
 
-    SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
+    SpongeBlockSnapshot(final SpongeBlockSnapshotBuilder builder) {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
         this.extendedState = builder.extendedState;
         this.worldUniqueId = checkNotNull(builder.worldUuid, "The world UUID was null");
@@ -118,8 +119,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         // TODO - delegate this to NbtProcessors when schematics are merged.
         final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> tileBuilder = ImmutableMap.builder();
         this.extraData = builder.manipulators == null ? ImmutableList.<ImmutableDataManipulator<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
-        for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
-            for (ImmutableValue<?> value : manipulator.getValues()) {
+        for (final ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
+            for (final ImmutableValue<?> value : manipulator.getValues()) {
                 tileBuilder.put(value.getKey(), value);
             }
         }
@@ -140,12 +141,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public BlockSnapshot withState(BlockState blockState) {
+    public BlockSnapshot withState(final BlockState blockState) {
         return createBuilder().blockState(blockState).build();
     }
 
     @Override
-    public BlockSnapshot withLocation(Location<World> location) {
+    public BlockSnapshot withLocation(final Location<World> location) {
         return createBuilder()
             .position(location.getBlockPosition())
             .worldId(location.getExtent().getUniqueId())
@@ -153,7 +154,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public BlockSnapshot withContainer(DataContainer container) {
+    public BlockSnapshot withContainer(final DataContainer container) {
         return new SpongeBlockSnapshotBuilder().build(container).get();
     }
 
@@ -168,24 +169,24 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public boolean restore(boolean force, BlockChangeFlag flag) {
+    public boolean restore(final boolean force, final BlockChangeFlag flag) {
         final Optional<World> optionalWorld = SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId);
         if (!optionalWorld.isPresent()) {
             return false;
         }
 
-        WorldServer world = (WorldServer) optionalWorld.get();
+        final WorldServer world = (WorldServer) optionalWorld.get();
         final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) world;
         // We need to deterministically define the context as nullable if we don't need to enter.
         // this way we guarantee an exit.
-        try (PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext()) {
+        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext()) {
             context.buildAndSwitch();
-            BlockPos pos = VecHelper.toBlockPos(this.pos);
-            if (!world.isValid(pos)) { // Invalid position. Inline this check
+            final BlockPos pos = VecHelper.toBlockPos(this.pos);
+            if (!((WorldAccessor) world).accessor$isValid(pos)) { // Invalid position. Inline this check
                 return false;
             }
-            IBlockState current = world.getBlockState(pos);
-            IBlockState replaced = (IBlockState) this.blockState;
+            final IBlockState current = world.getBlockState(pos);
+            final IBlockState replaced = (IBlockState) this.blockState;
             if (!force && (current.getBlock() != replaced.getBlock() || current != replaced)) {
                 return false;
             }
@@ -258,7 +259,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Optional<Location<World>> getLocation() {
-        Optional<World> worldOptional = SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId);
+        final Optional<World> worldOptional = SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId);
         if (worldOptional.isPresent()) {
             return Optional.of(new Location<>(worldOptional.get(), this.getPosition()));
         }
@@ -308,12 +309,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
-        Optional<T> optional = this.blockState.get(containerClass);
+    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> get(final Class<T> containerClass) {
+        final Optional<T> optional = this.blockState.get(containerClass);
         if (optional.isPresent()) {
             return optional;
         }
-        for (ImmutableDataManipulator<?, ?> dataManipulator : this.extraData) {
+        for (final ImmutableDataManipulator<?, ?> dataManipulator : this.extraData) {
             if (containerClass.isInstance(dataManipulator)) {
                 return Optional.of(((T) dataManipulator));
             }
@@ -322,23 +323,23 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
+    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
         return get(containerClass);
     }
 
     @Override
-    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    public boolean supports(final Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         return this.blockState.supports(containerClass);
     }
 
     @Override
-    public <E> Optional<BlockSnapshot> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
+    public <E> Optional<BlockSnapshot> transform(final Key<? extends BaseValue<E>> key, final Function<E, E> function) {
         return Optional.empty();
     }
 
     @Override
-    public <E> Optional<BlockSnapshot> with(Key<? extends BaseValue<E>> key, E value) {
-        Optional<BlockState> optional = this.blockState.with(key, value);
+    public <E> Optional<BlockSnapshot> with(final Key<? extends BaseValue<E>> key, final E value) {
+        final Optional<BlockState> optional = this.blockState.with(key, value);
         if (optional.isPresent()) {
             return Optional.of(withState(optional.get()));
         }
@@ -347,12 +348,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public Optional<BlockSnapshot> with(BaseValue<?> value) {
+    public Optional<BlockSnapshot> with(final BaseValue<?> value) {
         return with((Key) value.getKey(), value.get());
     }
 
     @Override
-    public Optional<BlockSnapshot> with(ImmutableDataManipulator<?, ?> valueContainer) {
+    public Optional<BlockSnapshot> with(final ImmutableDataManipulator<?, ?> valueContainer) {
         if (((BlockBridge) this.blockState.getType()).bridge$supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
             final BlockState newState;
             boolean changeState = false;
@@ -373,9 +374,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public Optional<BlockSnapshot> with(Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
+    public Optional<BlockSnapshot> with(final Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
         BlockSnapshot snapshot = this;
-        for (ImmutableDataManipulator<?, ?> manipulator : valueContainers) {
+        for (final ImmutableDataManipulator<?, ?> manipulator : valueContainers) {
             final Optional<BlockSnapshot> optional = snapshot.with(manipulator);
             if (!optional.isPresent()) {
                 return Optional.empty();
@@ -386,21 +387,21 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public Optional<BlockSnapshot> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    public Optional<BlockSnapshot> without(final Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         return Optional.empty();
     }
 
     @Override
-    public BlockSnapshot merge(BlockSnapshot that) {
+    public BlockSnapshot merge(final BlockSnapshot that) {
         return merge(that, MergeFunction.FORCE_NOTHING);
     }
 
     @Override
-    public BlockSnapshot merge(BlockSnapshot that, MergeFunction function) {
+    public BlockSnapshot merge(final BlockSnapshot that, final MergeFunction function) {
         BlockSnapshot merged = this;
         merged = merged.withState(function.merge(this.blockState, that.getState()));
-        for (ImmutableDataManipulator<?, ?> manipulator : that.getContainers()) {
-            Optional<BlockSnapshot> optional = merged.with(function.merge(this.get(manipulator.getClass()).orElse(null), manipulator));
+        for (final ImmutableDataManipulator<?, ?> manipulator : that.getContainers()) {
+            final Optional<BlockSnapshot> optional = merged.with(function.merge(this.get(manipulator.getClass()).orElse(null), manipulator));
             if (optional.isPresent()) {
                 merged = optional.get();
             }
@@ -414,7 +415,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> get(final Key<? extends BaseValue<E>> key) {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((E) this.keyValueMap.get(key).get());
         } else if (getKeyValueMap().containsKey(key)) {
@@ -426,7 +427,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private ImmutableMap<Key<?>, ImmutableValue<?>> getKeyValueMap() {
         if (this.blockKeyValueMap == null) {
             final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableMap.builder();
-            for (ImmutableValue<?> value : this.blockState.getValues()) {
+            for (final ImmutableValue<?> value : this.blockState.getValues()) {
                 mapBuilder.put(value.getKey(), value);
             }
             this.blockKeyValueMap = mapBuilder.build();
@@ -451,8 +452,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private ImmutableMap<Key<?>, ImmutableValue<?>> getTileMap() {
         if (this.keyValueMap == null) {
             final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> tileBuilder = ImmutableMap.builder();
-            for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
-                for (ImmutableValue<?> value : manipulator.getValues()) {
+            for (final ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
+                for (final ImmutableValue<?> value : manipulator.getValues()) {
                     tileBuilder.put(value.getKey(), value);
                 }
             }
@@ -470,7 +471,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+    public <E, V extends BaseValue<E>> Optional<V> getValue(final Key<V> key) {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((V) this.keyValueMap.get(key).asMutable());
         } else if (getKeyValueMap().containsKey(key)) {
@@ -480,7 +481,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public boolean supports(Key<?> key) {
+    public boolean supports(final Key<?> key) {
         checkNotNull(key, "Key");
         return this.keyValueMap.containsKey(key) || getKeyValueMap().containsKey(key);
     }
@@ -518,7 +519,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             .extendedState(this.extendedState)
             .position(this.pos)
             .worldId(this.worldUniqueId);
-        for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
+        for (final ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
             builder.add(manipulator);
         }
         if (this.compound != null) {
@@ -548,7 +549,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
+    public <T extends Property<?, ?>> Optional<T> getProperty(final Class<T> propertyClass) {
         return this.blockState.getProperty(propertyClass);
     }
 
@@ -567,7 +568,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             return Optional.empty();
         }
         final String tileId = this.compound.getString(Constants.Item.BLOCK_ENTITY_ID);
-        final Class<? extends TileEntity> tileClass = TileEntity.REGISTRY.getObject(new ResourceLocation(tileId));
+        final Class<? extends TileEntity> tileClass = (Class<? extends TileEntity>) TileEntityTypeRegistryModule.getInstance().getById(tileId)
+            .map(TileEntityType::getTileEntityType)
+            .orElse(null);
         if (tileClass == null) {
             return Optional.empty();
         }
@@ -582,14 +585,14 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        SpongeBlockSnapshot that = (SpongeBlockSnapshot) o;
+        final SpongeBlockSnapshot that = (SpongeBlockSnapshot) o;
         return this.changeFlag == that.changeFlag &&
                Objects.equal(this.extendedState, that.extendedState) &&
                Objects.equal(this.worldUniqueId, that.worldUniqueId) &&

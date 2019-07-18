@@ -26,11 +26,21 @@ package org.spongepowered.common.mixin.core.server;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.world.storage.ISaveHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+
+import java.io.File;
 
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor {
 
     @Accessor("dataFixer") DataFixer accessor$getDataFixer();
+
+    @Accessor("serverThread") Thread accessor$getServerThread();
+
+    @Accessor("anvilFile") File accessor$getAnvilFile();
+
+    @Invoker("setResourcePackFromWorld") void accessor$setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
 }

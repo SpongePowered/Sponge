@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.tileentity.CommandBlockBaseLogicAccessor;
 
 import java.util.Optional;
 
@@ -42,28 +43,28 @@ public class EntityCommandValueProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected Value<String> constructValue(String actualValue) {
+    protected Value<String> constructValue(final String actualValue) {
         return new SpongeValue<>(Keys.COMMAND, actualValue);
     }
 
     @Override
-    protected boolean set(EntityMinecartCommandBlock container, String value) {
-        container.getCommandBlockLogic().commandStored = value;
+    protected boolean set(final EntityMinecartCommandBlock container, final String value) {
+        ((CommandBlockBaseLogicAccessor) container.getCommandBlockLogic()).accessor$setCommandStored(value);
         return true;
     }
 
     @Override
-    protected Optional<String> getVal(EntityMinecartCommandBlock container) {
-        return Optional.ofNullable(container.getCommandBlockLogic().commandStored);
+    protected Optional<String> getVal(final EntityMinecartCommandBlock container) {
+        return Optional.of(container.getCommandBlockLogic().getCommand());
     }
 
     @Override
-    protected ImmutableValue<String> constructImmutableValue(String value) {
+    protected ImmutableValue<String> constructImmutableValue(final String value) {
         return constructValue(value).asImmutable();
     }
 

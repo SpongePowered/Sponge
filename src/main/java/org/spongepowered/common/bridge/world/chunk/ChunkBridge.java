@@ -32,6 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.gen.IChunkGenerator;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Direction;
@@ -129,4 +130,9 @@ public interface ChunkBridge {
     void bridge$setTileEntity(BlockPos targetPos, TileEntity added);
 
     Chunk[] bridge$getNeighborArray();
+
+    /**
+     * To be removed with Mixin 0.8
+     */
+    void accessor$populate(IChunkGenerator generator);
 }

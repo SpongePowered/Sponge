@@ -43,8 +43,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
+import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreboardBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
+import org.spongepowered.common.mixin.core.scoreboard.ScorePlayerTeamAccessor;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.text.SpongeTexts;
@@ -190,11 +192,11 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
             throw new IllegalArgumentException("A team with the name \'" +spongeTeam.getName() + "\' already exists!");
         }
 
-        if (team.scoreboard != null) {
+        if (((ScorePlayerTeamBridge) team).bridge$getScoreboard() != null) {
             throw new IllegalArgumentException("The passed in team is already registered to a scoreboard!");
         }
 
-        team.scoreboard = this;
+        ((ScorePlayerTeamBridge) team).bridge$setScoreboard(this);
         ((ScoreboardBridge) this).bridge$getTeams().put(team.getName(), team);
 
         for (final String entry: team.getMembershipCollection()) {

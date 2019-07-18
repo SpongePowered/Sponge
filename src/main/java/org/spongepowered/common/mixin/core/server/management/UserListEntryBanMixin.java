@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.management;
 
-import net.minecraft.server.management.UserListEntry;
 import net.minecraft.server.management.UserListEntryBan;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -45,12 +44,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(UserListEntryBan.class)
-public abstract class UserListEntryBanMixin<T> extends UserListEntry<T> implements BanUserListEntryBridge {
-
-    @SuppressWarnings("WeakerAccess")
-    public UserListEntryBanMixin(final T p_i1146_1_) {
-        super(p_i1146_1_);
-    }
+public abstract class UserListEntryBanMixin<T> extends UserListEntryMixin<T> implements BanUserListEntryBridge {
 
     @Shadow @Final @Nullable protected String reason;
     @Shadow @Final protected String bannedBy;
