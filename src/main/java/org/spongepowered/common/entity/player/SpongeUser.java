@@ -145,9 +145,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     public void invalidate() {
         this.nbt = null;
 
-        ((CustomDataHolderBridge) this).getFailedData().clear();
-        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) this).getCustomManipulators()) {
-            ((CustomDataHolderBridge) this).removeCustom((Class<? extends DataManipulator<?, ?>>) manipulator.getClass());
+        ((CustomDataHolderBridge) this).bridge$getFailedData().clear();
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) this).bridge$getCustomManipulators()) {
+            ((CustomDataHolderBridge) this).bridge$removeCustom((Class<? extends DataManipulator<?, ?>>) manipulator.getClass());
         }
     }
 
@@ -591,8 +591,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     public void save() {
         Preconditions.checkState(isInitialized(), "User {} is not initialized", this.profile.getId());
-        final SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
-        final File dataFile = new File(saveHandler.playersDirectory, getUniqueId() + ".dat");
+        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
+        final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), getUniqueId() + ".dat");
         NBTTagCompound tag;
         try {
             tag = CompressedStreamTools.readCompressed(new FileInputStream(dataFile));

@@ -219,7 +219,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
         } else if (this instanceof CustomDataHolderBridge) {
-            final DataTransactionResult result = ((CustomDataHolderBridge) holder).offerCustom(valueContainer, function);
+            final DataTransactionResult result = ((CustomDataHolderBridge) holder).bridge$offerCustom(valueContainer, function);
             SpongeTimings.dataOfferManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
