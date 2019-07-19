@@ -65,4 +65,6 @@ public interface WorldAccessor {
      */
     @Accessor("processingLoadedTiles") boolean accessor$getProcessingLoadedTiles();
 
+    @Invoker("isOutsideBuildHeight") boolean accessor$getIsOutsideBuildHeight(BlockPos pos);
+
 }

@@ -49,7 +49,7 @@ import org.spongepowered.common.mixin.core.entity.EntityMixin;
 @Mixin(EntityFallingBlock.class)
 public abstract class EntityFallingBlockMixin extends EntityMixin {
 
-    @Shadow public IBlockState fallTile;
+    @Shadow private IBlockState fallTile;
 
     /**
      * @author gabizou - January 9th, 2018 - 1.12.2

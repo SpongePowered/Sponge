@@ -32,7 +32,7 @@ import org.spongepowered.common.bridge.entity.AggressiveBridge;
 @Mixin(EntityPigZombie.class)
 public abstract class EntityPigZombieMixin extends EntityMobMixin implements AggressiveBridge {
 
-    @Shadow public int angerLevel;
+    @Shadow private int angerLevel;
     @Shadow public abstract boolean isAngry();
 
     @Override

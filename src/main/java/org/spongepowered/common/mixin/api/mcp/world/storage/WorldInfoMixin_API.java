@@ -74,7 +74,7 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = WorldProperties.class, prefix = "worldproperties$"))
 public abstract class WorldInfoMixin_API implements WorldProperties {
 
-    @Shadow public long randomSeed;
+    @Shadow private long randomSeed;
     @Shadow private WorldType terrainType;
     @Shadow private String generatorOptions;
     @Shadow private int spawnX;
@@ -97,7 +97,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Shadow private boolean hardcore;
     @Shadow private boolean allowCommands;
     @Shadow private boolean initialized;
-    @Shadow public EnumDifficulty difficulty;
+    @Shadow private EnumDifficulty difficulty;
     @Shadow private boolean difficultyLocked;
     @Shadow private double borderCenterX;
     @Shadow private double borderCenterZ;

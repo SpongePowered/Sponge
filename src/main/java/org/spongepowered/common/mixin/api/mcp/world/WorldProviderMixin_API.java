@@ -38,7 +38,7 @@ import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 @Mixin(WorldProvider.class)
 public abstract class WorldProviderMixin_API implements Dimension {
 
-    @Shadow public WorldType terrainType;
+    @Shadow private WorldType terrainType;
     @Shadow protected World world;
     @Shadow public abstract net.minecraft.world.DimensionType getDimensionType();
     @Shadow public abstract boolean canRespawnHere();
@@ -46,6 +46,7 @@ public abstract class WorldProviderMixin_API implements Dimension {
     @Shadow public abstract boolean doesWaterVaporize();
     @Shadow public abstract boolean isNether();
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public DimensionType getType() {
         return (DimensionType) (Object) this.getDimensionType();

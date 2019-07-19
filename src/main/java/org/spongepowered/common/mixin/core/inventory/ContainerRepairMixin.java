@@ -62,7 +62,7 @@ public abstract class ContainerRepairMixin extends ContainerMixin implements Len
     @Shadow @Final private IInventory outputSlot;
     @Shadow public int maximumCost;
     @Shadow private int materialCost;
-    @Shadow @Final public IInventory inputSlots;
+    @Shadow @Final private IInventory inputSlots;
 
     @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {

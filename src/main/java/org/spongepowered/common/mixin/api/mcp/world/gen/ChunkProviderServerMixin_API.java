@@ -46,8 +46,8 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(ChunkProviderServer.class)
 public abstract class ChunkProviderServerMixin_API implements WorldStorage {
 
-    @Shadow @Final public WorldServer world;
-    @Shadow @Final public IChunkLoader chunkLoader;
+    @Shadow @Final private WorldServer world;
+    @Shadow @Final private IChunkLoader chunkLoader;
 
     @Shadow public abstract Chunk loadChunk(int x, int z);
 

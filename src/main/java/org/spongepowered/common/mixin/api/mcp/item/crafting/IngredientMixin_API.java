@@ -41,14 +41,14 @@ import java.util.stream.Collectors;
 @Implements(@Interface(iface = org.spongepowered.api.item.recipe.crafting.Ingredient.class, prefix = "ingredient$"))
 public abstract class IngredientMixin_API {
 
-    @Shadow @Final protected ItemStack[] matchingStacks;
+    @Shadow @Final private ItemStack[] matchingStacks;
     @Shadow public abstract boolean apply(ItemStack p_apply_1_);
 
     public List<org.spongepowered.api.item.inventory.ItemStackSnapshot> ingredient$displayedItems() {
-        return Arrays.stream(matchingStacks).map(ItemStackUtil::snapshotOf).collect(Collectors.toList());
+        return Arrays.stream(this.matchingStacks).map(ItemStackUtil::snapshotOf).collect(Collectors.toList());
     }
 
-    public boolean ingredient$test(org.spongepowered.api.item.inventory.ItemStack itemStack) {
+    public boolean ingredient$test(final org.spongepowered.api.item.inventory.ItemStack itemStack) {
         return this.apply(ItemStackUtil.toNative(itemStack));
     }
 

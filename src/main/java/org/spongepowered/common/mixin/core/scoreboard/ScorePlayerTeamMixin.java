@@ -35,6 +35,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -53,20 +54,11 @@ import java.util.stream.Collectors;
 @Mixin(ScorePlayerTeam.class)
 public abstract class ScorePlayerTeamMixin extends net.minecraft.scoreboard.Team implements TeamBridge {
 
-    @Shadow @Nullable private Scoreboard scoreboard;
-    @Shadow private String name;
-    @Shadow private Set<String> membershipSet;
+    @Shadow @Final @Nullable private Scoreboard scoreboard;
     @Shadow private String displayName;
     @Shadow private TextFormatting color;
     @Shadow private String prefix;
     @Shadow private String suffix;
-    @Shadow private boolean allowFriendlyFire;
-    @Shadow private boolean canSeeFriendlyInvisibles;
-    @Shadow private net.minecraft.scoreboard.Team.EnumVisible nameTagVisibility;
-    @Shadow private net.minecraft.scoreboard.Team.EnumVisible deathMessageVisibility;
-    @Shadow private net.minecraft.scoreboard.Team.CollisionRule collisionRule;
-
-    @Shadow public abstract void setAllowFriendlyFire(boolean friendlyFire);
 
     @SuppressWarnings("NullableProblems") @MonotonicNonNull private Text bridge$displayName;
     @SuppressWarnings("NullableProblems") @MonotonicNonNull private Text bridge$Prefix;

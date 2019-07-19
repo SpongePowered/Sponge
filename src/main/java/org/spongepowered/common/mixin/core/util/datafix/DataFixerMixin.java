@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 @Mixin(DataFixer.class)
 public abstract class DataFixerMixin {
 
-    @Shadow @Final public int version;
+    @Shadow @Final private int version;
 
     // TODO this version needs to be updated every version
     @ModifyConstant(

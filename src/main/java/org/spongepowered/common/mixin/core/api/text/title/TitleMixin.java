@@ -38,17 +38,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @Mixin(value = Title.class, remap = false)
 public abstract class TitleMixin implements TitleBridge {
 
-    @Shadow @Final protected Optional<Text> title;
-    @Shadow @Final protected Optional<Text> subtitle;
-    @Shadow @Final protected Optional<Text> actionBar;
-    @Shadow @Final protected Optional<Integer> fadeIn;
-    @Shadow @Final protected Optional<Integer> stay;
-    @Shadow @Final protected Optional<Integer> fadeOut;
-    @Shadow @Final protected boolean clear;
-    @Shadow @Final protected boolean reset;
+    @Shadow @Final Optional<Text> title;
+    @Shadow @Final Optional<Text> subtitle;
+    @Shadow @Final Optional<Text> actionBar;
+    @Shadow @Final Optional<Integer> fadeIn;
+    @Shadow @Final Optional<Integer> stay;
+    @Shadow @Final Optional<Integer> fadeOut;
+    @Shadow @Final boolean clear;
+    @Shadow @Final boolean reset;
 
     private List<SPacketTitle> packets;
 

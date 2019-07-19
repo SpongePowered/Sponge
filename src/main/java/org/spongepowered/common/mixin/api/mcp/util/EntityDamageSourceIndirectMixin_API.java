@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.util;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -35,7 +36,7 @@ import javax.annotation.Nullable;
 @Mixin(value = EntityDamageSourceIndirect.class)
 public abstract class EntityDamageSourceIndirectMixin_API extends EntityDamageSourceMixin_API implements IndirectEntityDamageSource {
 
-    @Shadow @Nullable protected Entity indirectEntity;
+    @Shadow @Final @Nullable private Entity indirectEntity;
 
     @Override
     public org.spongepowered.api.entity.Entity getIndirectSource() {

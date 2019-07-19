@@ -37,16 +37,16 @@ import org.spongepowered.common.bridge.api.text.TextBridge;
 @Mixin(value = TranslatableText.class, remap = false)
 public abstract class TranslatableTextMixin extends TextMixin {
 
-    @Shadow @Final protected Translation translation;
-    @Shadow @Final protected ImmutableList<Object> arguments;
+    @Shadow @Final Translation translation;
+    @Shadow @Final ImmutableList<Object> arguments;
 
     @Override
     protected TextComponentBase createComponent() {
         return new TextComponentTranslation(this.translation.getId(), unwrapArguments(this.arguments));
     }
 
-    private Object[] unwrapArguments(ImmutableList<Object> args) {
-        Object[] result = new Object[args.size()];
+    private Object[] unwrapArguments(final ImmutableList<Object> args) {
+        final Object[] result = new Object[args.size()];
         for (int i = 0; i < args.size(); i++) {
             final Object arg = args.get(i);
             if (arg instanceof TextBridge) {

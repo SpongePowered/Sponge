@@ -71,7 +71,7 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
 
     @Shadow private int careerId; // careerId
     @Shadow private int careerLevel; // careerLevel
-    @Shadow @Nullable public MerchantRecipeList buyingList; // buyingList
+    @Shadow @Nullable private MerchantRecipeList buyingList; // buyingList
     @Shadow @Final private InventoryBasic villagerInventory; // villagerInventory
 
     @Shadow public abstract void setProfession(int professionId); // setProfession

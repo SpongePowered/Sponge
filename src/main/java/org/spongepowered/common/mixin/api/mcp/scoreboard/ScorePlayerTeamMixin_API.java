@@ -31,10 +31,12 @@ import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.scoreboard.TeamBridge;
 import org.spongepowered.common.text.SpongeTexts;
@@ -50,13 +52,9 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = Team.class, prefix = "team$"))
 public abstract class ScorePlayerTeamMixin_API implements Team {
 
-    @Nullable @Shadow public Scoreboard scoreboard;
-    @Shadow public String name;
-    @Shadow public Set<String> membershipSet;
-    @Nullable @Shadow public String displayName;
-    @Shadow public TextFormatting color;
-    @Shadow public String prefix;
-    @Shadow public String suffix;
+    @Nullable @Shadow @Final @Mutable private Scoreboard scoreboard;
+    @Shadow @Final private String name;
+    @Shadow @Final private Set<String> membershipSet;
 
     @Shadow public abstract void shadow$setAllowFriendlyFire(boolean friendlyFire);
     @Shadow public abstract void setSeeFriendlyInvisiblesEnabled(boolean friendlyInvisibles);

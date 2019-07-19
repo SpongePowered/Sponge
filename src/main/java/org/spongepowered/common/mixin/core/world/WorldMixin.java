@@ -41,15 +41,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.asm.lib.Opcodes;
@@ -59,7 +56,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -71,6 +67,7 @@ import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
@@ -79,7 +76,6 @@ import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.mixin.tileentityactivation.WorldServerMixin_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -105,17 +101,17 @@ public abstract class WorldMixin implements WorldBridge {
     @Shadow @Final public List<EntityPlayer> playerEntities;
     @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
     @Shadow @Final public List<net.minecraft.entity.Entity> weatherEffects;
-    @Shadow @Final public List<net.minecraft.entity.Entity> unloadedEntityList;
+    @Shadow @Final protected List<net.minecraft.entity.Entity> unloadedEntityList;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tickableTileEntities;
-    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
-    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
-    @Shadow protected int[] lightUpdateBlockList; // Elevated to protected for subclass mixins to access when they're separated by package
-    @Shadow public boolean processingLoadedTiles;
+    @Shadow @Final private List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
+    @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
+    @SuppressWarnings("ShadowModifiers") @Shadow protected int[] lightUpdateBlockList; // Elevated to protected for subclass mixins to access when they're separated by package
+    @Shadow private boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
     @Shadow protected IChunkProvider chunkProvider;
-    @Shadow @Final public net.minecraft.world.border.WorldBorder worldBorder;
+    @Shadow @Final private net.minecraft.world.border.WorldBorder worldBorder;
     @Shadow protected int updateLCG;
 
     @Shadow protected abstract void tickPlayers();
@@ -135,7 +131,6 @@ public abstract class WorldMixin implements WorldBridge {
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
     @Shadow protected abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
-    @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
     @Shadow protected abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
@@ -540,7 +535,7 @@ public abstract class WorldMixin implements WorldBridge {
      * @return True if the block position is outside build height
      */
     @Overwrite
-    public boolean isOutsideBuildHeight(final BlockPos pos) { // isOutsideBuildHeight
+    private boolean isOutsideBuildHeight(final BlockPos pos) { // isOutsideBuildHeight
         return ((BlockPosBridge) pos).bridge$isInvalidYPosition();
     }
 
@@ -589,6 +584,12 @@ public abstract class WorldMixin implements WorldBridge {
                 this.notifyLightSet(pos);
             }
         }
+    }
+
+    @Inject(method = "isAreaLoaded(IIIIIIZ)Z", at = @At("HEAD"), cancellable = true)
+    protected void impl$useWorldServerMethodForAvoidingLookups(final int xStart, final int yStart, final int zStart, final int xEnd, final int yEnd, final int zEnd, final boolean allowEmpty,
+        final CallbackInfoReturnable<Boolean> cir) {
+        // DO NOTHING ON NON-SERVER WORLDS
     }
 
 

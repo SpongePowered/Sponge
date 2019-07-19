@@ -83,44 +83,15 @@ import javax.annotation.Nullable;
 @Mixin(WorldInfo.class)
 public abstract class WorldInfoMixin implements WorldInfoBridge {
 
-    @Shadow public long randomSeed;
     @Shadow private WorldType terrainType;
-    @Shadow private String generatorOptions;
     @Shadow private int spawnX;
     @Shadow private int spawnY;
     @Shadow private int spawnZ;
-    @Shadow private long totalTime;
-    @Shadow private long worldTime;
-    @Shadow private long lastTimePlayed;
-    @Shadow private long sizeOnDisk;
-    @Shadow private NBTTagCompound playerTag;
     @Shadow private String levelName;
-    @Shadow private int saveVersion;
-    @Shadow private int cleanWeatherTime;
-    @Shadow private boolean raining;
-    @Shadow private int rainTime;
-    @Shadow private boolean thundering;
-    @Shadow private int thunderTime;
     @Shadow private GameType gameType;
-    @Shadow private boolean mapFeaturesEnabled;
     @Shadow private boolean hardcore;
-    @Shadow private boolean allowCommands;
-    @Shadow private boolean initialized;
-    @Shadow public EnumDifficulty difficulty;
-    @Shadow private boolean difficultyLocked;
-    @Shadow private double borderCenterX;
-    @Shadow private double borderCenterZ;
-    @Shadow private double borderSize;
-    @Shadow private long borderSizeLerpTime;
-    @Shadow private double borderSizeLerpTarget;
-    @Shadow private double borderSafeZone;
-    @Shadow private double borderDamagePerBlock;
-    @Shadow private int borderWarningDistance;
-    @Shadow private int borderWarningTime;
-    @Shadow private GameRules gameRules;
+    @Shadow private EnumDifficulty difficulty;
     @Shadow public abstract void setDifficulty(EnumDifficulty newDifficulty);
-
-    @Shadow public abstract NBTTagCompound cloneNBTCompound(@Nullable NBTTagCompound nbt);
 
     private final NBTTagList impl$playerUniqueIdNbt = new NBTTagList();
     private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
@@ -132,7 +103,6 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     private DimensionType impl$dimensionType = DimensionTypes.OVERWORLD;
     private NBTTagCompound impl$spongeRootLevelNbt = new NBTTagCompound();
     private NBTTagCompound impl$spongeNbt = new NBTTagCompound();
-    private SerializationBehavior impl$serializationBehavior = SerializationBehaviors.AUTOMATIC;
     @Nullable private UUID impl$uuid;
     @Nullable private Integer impl$dimensionId;
     @Nullable private SpongeConfig<WorldConfig> impl$worldConfig;

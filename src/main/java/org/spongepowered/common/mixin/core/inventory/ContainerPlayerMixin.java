@@ -47,7 +47,7 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLens
 @Mixin(ContainerPlayer.class)
 public abstract class ContainerPlayerMixin extends ContainerMixin implements ContainerPlayerBridge, LensProviderBridge {
 
-    @Shadow @Final public EntityPlayer player;
+    @Shadow @Final private EntityPlayer player;
 
     private int impl$offHandSlot = -1;
 

@@ -67,52 +67,19 @@ import javax.annotation.Nullable;
 @Mixin(value = EntityLivingBase.class, priority = 999)
 public abstract class EntityLivingBaseMixin_API extends EntityMixin_API implements Living {
 
-    @Shadow @Nullable public EntityLivingBase revengeTarget;
+    @Shadow @Nullable private EntityLivingBase revengeTarget;
     @Shadow protected float lastDamage;
 
     @Shadow public abstract void setHealth(float health);
-    @Shadow public abstract void setLastAttackedEntity(net.minecraft.entity.Entity entity);
     @Shadow public abstract void setRotationYawHead(float rotation);
     @Shadow public abstract void setRenderYawOffset(float offset);
-    @Shadow public abstract void knockBack(net.minecraft.entity.Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);
-    @Shadow public abstract void shadow$setRevengeTarget(EntityLivingBase livingBase);
-    @Shadow public abstract void setAbsorptionAmount(float amount);
     @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
-    @Shadow public abstract void setSprinting(boolean sprinting);
-    @Shadow public abstract void resetActiveHand();
-    @Shadow public abstract int getItemInUseCount();
-    @Shadow public abstract float getAbsorptionAmount();
     @Shadow public abstract float getHealth();
     @Shadow public abstract float getMaxHealth();
     @Shadow public abstract float getRotationYawHead();
-    @Shadow public abstract boolean isPotionActive(Potion potion);
-    @Shadow public abstract boolean isOnLadder();
-    @Shadow public abstract boolean canBlockDamageSource(DamageSource p_184583_1_);
-    @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow public abstract ItemStack getHeldItem(EnumHand hand);
     @Shadow public abstract ItemStack getHeldItemMainhand();
-    @Shadow public abstract CombatTracker getCombatTracker();
-    @Shadow @Nullable public abstract EntityLivingBase getAttackingEntity();
-    @Shadow public abstract Random getRNG();
-    @Shadow public void onKillCommand() { }
-    @Shadow public abstract AbstractAttributeMap getAttributeMap();
-    @Shadow public abstract EnumHand getActiveHand();
-    @Shadow protected abstract void onDeathUpdate();
-    @Shadow protected abstract void markVelocityChanged();
-    @Shadow protected abstract void damageShield(float p_184590_1_);
-    @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
-    @Shadow protected abstract void blockUsingShield(EntityLivingBase p_190629_1_);
-    @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
-    @Shadow protected abstract int getExperiencePoints(EntityPlayer attackingPlayer);
-    @Shadow protected abstract float getSoundVolume();
-    @Shadow protected abstract float getSoundPitch();
-    @Shadow protected abstract boolean canDropLoot();
-    @Shadow protected abstract SoundEvent getDeathSound();
-    @Shadow private boolean checkTotemDeathProtection(DamageSource p_190628_1_) {
-        return false; // SHADOWED
-    }
-    @Shadow public abstract boolean attemptTeleport(double x, double y, double z);
 
     @Override
     public Vector3d getHeadRotation() {

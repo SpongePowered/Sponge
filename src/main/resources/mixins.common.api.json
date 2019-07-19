@@ -239,8 +239,6 @@
         "mcp.network.PacketBufferMixin_API",
         "mcp.network.ServerStatusResponse$VersionMixin_API",
         "mcp.network.ServerStatusResponseMixin_API",
-        "mcp.network.rcon.RConConsoleSourceMixin_API",
-        "mcp.network.rcon.RConThreadClientMixin_API",
         "mcp.potion.PotionEffectMixin_API",
         "mcp.potion.PotionMixin_API",
         "mcp.potion.PotionTypeMixin_API",
@@ -250,7 +248,6 @@
         "mcp.scoreboard.ServerScoreboardMixin_API",
         "mcp.scoreboard.Team$CollisionRuleMixin_API",
         "mcp.scoreboard.Team$EnumVisibleMixin_API",
-        "mcp.server.DedicatedServerMixin_API",
         "mcp.server.MinecraftServerMixin_API",
         "mcp.server.management.PlayerProfileCacheMixin_API",
         "mcp.server.management.UserListBansEntryMixin_API",
@@ -364,5 +361,10 @@
         "mcp.world.storage.WorldInfoMixin_API",
         "service.permission.SubjectMixin_API",
         "world.extent.ExtentMixin_API"
+    ],
+    "server": [
+        "mcp.network.rcon.RConConsoleSourceMixin_API",
+        "mcp.network.rcon.RConThreadClientMixin_API",
+        "mcp.server.DedicatedServerMixin_API"
     ]
 }

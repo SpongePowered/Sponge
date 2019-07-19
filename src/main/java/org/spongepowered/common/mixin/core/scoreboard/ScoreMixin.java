@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.scoreboard;
 
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.Scoreboard;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,7 +42,7 @@ import javax.annotation.Nullable;
 @Mixin(Score.class)
 public abstract class ScoreMixin implements ScoreBridge {
 
-    @Shadow public Scoreboard scoreboard;
+    @Shadow @Final private Scoreboard scoreboard;
 
     @Nullable private SpongeScore impl$spongeScore;
 

@@ -43,14 +43,14 @@ import javax.annotation.Nullable;
 @Mixin(EntityThrowable.class)
 public abstract class EntityThrowableMixin extends EntityMixin {
 
-    @Shadow public EntityLivingBase thrower;
+    @Shadow protected EntityLivingBase thrower;
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
     @Nullable
     public ProjectileSource projectileSource;
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, ((Projectile) this));
     }

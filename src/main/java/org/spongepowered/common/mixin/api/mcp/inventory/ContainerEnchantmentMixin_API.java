@@ -45,8 +45,8 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(ContainerEnchantment.class)
 public abstract class ContainerEnchantmentMixin_API implements SingleBlockCarrier {
 
-    @Shadow @Final public net.minecraft.world.World world;
-    @Shadow @Final public BlockPos position;
+    @Shadow @Final private net.minecraft.world.World world;
+    @Shadow @Final private BlockPos position;
 
     @Override
     public Location<World> getLocation() {

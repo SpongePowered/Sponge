@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
 @Mixin(EntityThrowable.class)
 public abstract class EntityThrowableMixin_API extends EntityMixin_API implements Projectile {
 
-    @Shadow private EntityLivingBase thrower;
+    @Shadow protected EntityLivingBase thrower;
     @Shadow private String throwerName;
     @Shadow public abstract EntityLivingBase getThrower();
 

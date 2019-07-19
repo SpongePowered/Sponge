@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(value = LiteralText.class, remap = false)
 public abstract class LiteralTextMixin extends TextMixin {
 
-    @Shadow @Final protected String content;
+    @Shadow @Final String content;
 
     @Override
     protected TextComponentBase createComponent() {

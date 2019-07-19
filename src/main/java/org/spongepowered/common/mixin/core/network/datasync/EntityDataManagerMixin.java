@@ -54,7 +54,7 @@ public abstract class EntityDataManagerMixin {
     @Shadow @Final @Mutable private Map < Integer, EntityDataManager.DataEntry<? >> entries = new Int2ObjectOpenHashMap<>();
 
     // The rest is actually used in the overwrite below.
-    @Shadow @Final protected Entity entity;
+    @Shadow @Final private Entity entity;
     @Shadow private boolean dirty;
 
     @Shadow protected abstract <T> EntityDataManager.DataEntry<T> getEntry(DataParameter<T> key);

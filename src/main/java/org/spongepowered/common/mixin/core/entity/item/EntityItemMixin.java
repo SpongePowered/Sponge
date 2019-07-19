@@ -50,7 +50,7 @@ public abstract class EntityItemMixin extends EntityMixin implements ItemEntityB
 
     private static final int MAGIC_PREVIOUS = -1;
     @Shadow private int pickupDelay;
-    @Shadow public int age;
+    @Shadow private int age;
     @Shadow public abstract ItemStack getItem();
     /**
      * A simple cached value of the merge radius for this item.

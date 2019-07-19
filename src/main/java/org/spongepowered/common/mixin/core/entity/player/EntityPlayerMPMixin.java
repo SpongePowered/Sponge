@@ -161,7 +161,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Shadow @Final public MinecraftServer server;
     @Shadow @Final public PlayerInteractionManager interactionManager;
     @Shadow public NetHandlerPlayServer connection;
-    @Shadow public int lastExperience;
+    @Shadow private int lastExperience;
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
     @Shadow public boolean isChangingQuantityOnly;

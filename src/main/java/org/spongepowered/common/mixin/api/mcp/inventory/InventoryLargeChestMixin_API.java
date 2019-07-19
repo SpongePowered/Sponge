@@ -47,8 +47,8 @@ import java.util.Optional;
 @Mixin(InventoryLargeChest.class)
 public abstract class InventoryLargeChestMixin_API implements CarriedInventory<MultiBlockCarrier>, MultiBlockCarrier {
 
-    @Shadow @Final public ILockableContainer upperChest;
-    @Shadow @Final public ILockableContainer lowerChest;
+    @Shadow @Final private ILockableContainer upperChest;
+    @Shadow @Final private ILockableContainer lowerChest;
 
     @Override
     public Optional<MultiBlockCarrier> getCarrier() {

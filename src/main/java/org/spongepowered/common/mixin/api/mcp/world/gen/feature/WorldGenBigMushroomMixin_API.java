@@ -57,7 +57,7 @@ import javax.annotation.Nullable;
 @Mixin(WorldGenBigMushroom.class)
 public abstract class WorldGenBigMushroomMixin_API extends WorldGenerator implements BigMushroom, PopulatorObject {
 
-    @Shadow @Final public Block mushroomType;
+    @Shadow @Final private Block mushroomType;
 
     private final WeightedTable<PopulatorObject> api$types = new WeightedTable<>();
     @Nullable private Function<Location<Extent>, PopulatorObject> api$override = null;

@@ -225,7 +225,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
     @Shadow private int updateEntityTick;
 
     @Shadow protected void saveLevel() throws MinecraftException { }
-    @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
+    @Shadow private boolean fireBlockEvent(final BlockEventData event) { return false; }// shadowed
     @Shadow protected abstract void createBonusChest();
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
     @Shadow public abstract ChunkProviderServer getChunkProvider();
@@ -948,7 +948,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         return TrackingUtil.fireMinecraftBlockEvent(worldIn, event);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes", "ConstantConditions"})
     @Override
     @Nullable
     protected net.minecraft.tileentity.TileEntity getTileEntityForRemoval(final World thisWorld, final BlockPos pos) {
@@ -962,7 +962,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         // from the world before we are able to capture it.
         net.minecraft.tileentity.TileEntity tileEntity =  this.proxyBlockAccess.getTileEntity(pos);
         if (tileEntity == null && !this.proxyBlockAccess.isTileEntityRemoved(pos)) {
-            tileEntity = this.onChunkGetTileDuringRemoval(pos);
+            tileEntity = SpongeImplHooks.onChunkGetTileDuringRemoval((WorldServer) (Object) this, pos);
         }
 
 
@@ -1468,32 +1468,6 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         } else {
             // Sponge - reroute to the PhaseTracker
             return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), Blocks.AIR.getDefaultState(), BlockChangeFlags.ALL);
-        }
-    }
-
-    private net.minecraft.tileentity.TileEntity onChunkGetTileDuringRemoval(final BlockPos pos) {
-
-        if (this.isOutsideBuildHeight(pos)) {
-            return null;
-        } else {
-            net.minecraft.tileentity.TileEntity tileentity2 = null;
-
-            if (this.processingLoadedTiles) {
-                tileentity2 = ((WorldAccessor) this).accessPendingTileEntityAt(pos);
-            }
-
-            if (tileentity2 == null) {
-                // Sponge - Instead of creating the tile entity, just check if it's there. If the
-                // tile entity doesn't exist, don't create it since we're about to just wholesale remove it...
-                // tileentity2 = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
-                tileentity2 = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
-            }
-
-            if (tileentity2 == null) {
-                tileentity2 =  ((WorldAccessor) this).accessPendingTileEntityAt(pos);
-            }
-
-            return tileentity2;
         }
     }
 
@@ -2209,9 +2183,11 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
      * @return If the chunks for the area are loaded
      */
     @Override
-    public boolean isAreaLoaded(int xStart, final int yStart, int zStart, int xEnd, final int yEnd, int zEnd, final boolean allowEmpty) {
+    protected void impl$useWorldServerMethodForAvoidingLookups(int xStart, final int yStart, int zStart, int xEnd, final int yEnd, int zEnd, final boolean allowEmpty,
+        final CallbackInfoReturnable<Boolean> cir) {
         if (yEnd < 0 || yStart > 255) {
-            return false;
+            cir.setReturnValue(false);
+            return;
         }
 
         xStart = xStart >> 4;
@@ -2221,23 +2197,27 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
 
         final net.minecraft.world.chunk.Chunk base = ((ChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(xStart, zStart);
         if (base == null) {
-            return false;
+            cir.setReturnValue(false);
+            return;
         }
 
         ChunkBridge currentColumn = (ChunkBridge) base;
         for (int i = xStart; i <= xEnd; i++) {
             if (currentColumn == null) {
-                return false;
+                cir.setReturnValue(false);
+                return;
             }
 
             ChunkBridge currentRow = currentColumn;
             for (int j = zStart; j <= zEnd; j++) {
                 if (currentRow == null) {
-                    return false;
+                    cir.setReturnValue(false);
+                    return;
                 }
 
                 if (!allowEmpty && ((net.minecraft.world.chunk.Chunk) currentRow).isEmpty()) {
-                    return false;
+                    cir.setReturnValue(false);
+                    return;
                 }
 
                 currentRow = (ChunkBridge) currentRow.bridge$getNeighborChunk(1);
@@ -2246,7 +2226,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
             currentColumn = (ChunkBridge) currentColumn.bridge$getNeighborChunk(2);
         }
 
-        return true;
+        cir.setReturnValue(true);
     }
 
     @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V", remap = false))
@@ -2517,7 +2497,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
     }
 
     @Override
-    public void bridge$setWeatherStartTime(long start) {
+    public void bridge$setWeatherStartTime(final long start) {
         this.impl$weatherStartTime = start;
     }
 }

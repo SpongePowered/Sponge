@@ -82,11 +82,11 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
     private long impl$chunkUnloadDelay = Constants.World.DEFAULT_CHUNK_UNLOAD_DELAY;
     private int impl$maxChunkUnloads = Constants.World.MAX_CHUNK_UNLOADS;
 
-    @Shadow @Final public WorldServer world;
-    @Shadow @Final public IChunkLoader chunkLoader;
-    @Shadow public IChunkGenerator chunkGenerator;
+    @Shadow @Final private WorldServer world;
+    @Shadow @Final private IChunkLoader chunkLoader;
+    @Shadow @Final @Mutable private IChunkGenerator chunkGenerator;
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Shadow @Final @Mutable public Long2ObjectMap<Chunk> loadedChunks = new CachedLong2ObjectMap();
+    @Shadow @Final @Mutable private Long2ObjectMap<Chunk> loadedChunks = new CachedLong2ObjectMap();
 
     @Shadow @Nullable public abstract Chunk getLoadedChunk(int x, int z);
     @Shadow @Nullable public abstract Chunk loadChunk(int x, int z);
@@ -112,7 +112,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
     }
 
     @Override
-    public void accessor$setChunkGenerator(IChunkGenerator spongeGen) {
+    public void accessor$setChunkGenerator(final IChunkGenerator spongeGen) {
         this.chunkGenerator = spongeGen;
     }
 

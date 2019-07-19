@@ -50,7 +50,7 @@ import javax.annotation.Nullable;
 @Mixin(Slot.class)
 public abstract class SlotMixin implements InventoryAdapter, InventoryAdapterBridge {
 
-    @Shadow @Final public int slotIndex;
+    @Shadow @Final private int slotIndex;
     @Shadow @Final public IInventory inventory;
 
     @Override

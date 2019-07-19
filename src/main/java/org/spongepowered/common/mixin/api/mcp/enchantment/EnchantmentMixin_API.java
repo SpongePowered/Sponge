@@ -53,7 +53,7 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     @Shadow public abstract int getMaxLevel();
     @Shadow public abstract int getMinEnchantability(int level);
     @Shadow public abstract int getMaxEnchantability(int level);
-    @Shadow public abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
+    @Shadow protected abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract boolean isTreasureEnchantment();
     @Shadow public abstract boolean shadow$isCurse();

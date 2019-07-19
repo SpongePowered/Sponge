@@ -43,7 +43,7 @@ import org.spongepowered.common.bridge.world.WorldProviderBridge;
 @Mixin(WorldProvider.class)
 public abstract class WorldProviderMixin implements Dimension, WorldProviderBridge {
 
-    @Shadow public WorldType terrainType;
+    @Shadow private WorldType terrainType;
     @Shadow protected World world;
     @Shadow public abstract net.minecraft.world.DimensionType getDimensionType();
     @Shadow public abstract boolean canRespawnHere();

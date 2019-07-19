@@ -40,7 +40,9 @@ import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Mushroom;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
 
@@ -54,7 +56,7 @@ import javax.annotation.Nullable;
 @Mixin(WorldGenBush.class)
 public abstract class WorldGenBushMixin_API extends WorldGenerator implements Mushroom {
 
-    @Shadow public BlockBush block;
+    @Shadow @Final @Mutable private BlockBush block;
 
     @Nullable private Function<Location<Extent>, MushroomType> api$override = null;
     private final ChanceTable<MushroomType> api$types = new ChanceTable<>();

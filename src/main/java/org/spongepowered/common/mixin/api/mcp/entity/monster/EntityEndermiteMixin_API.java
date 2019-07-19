@@ -41,7 +41,7 @@ import java.util.List;
 @Mixin(EntityEndermite.class)
 public abstract class EntityEndermiteMixin_API extends EntityMobMixin_API implements Endermite {
 
-    @Shadow public int lifetime;
+    @Shadow private int lifetime;
 
     @Override
     public ExpirableData getExpirableData() {

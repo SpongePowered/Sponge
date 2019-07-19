@@ -41,7 +41,7 @@ import javax.annotation.Nullable;
 public abstract class EntityArrowMixin_API extends EntityMixin_API implements Arrow {
 
     @Shadow public Entity shootingEntity;
-    @Shadow public double damage;
+    @Shadow private double damage;
 
     // Not all ProjectileSources are entities (e.g. BlockProjectileSource).
     // This field is used to store a ProjectileSource that isn't an entity.

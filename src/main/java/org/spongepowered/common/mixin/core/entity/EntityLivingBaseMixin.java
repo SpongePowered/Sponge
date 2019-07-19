@@ -127,7 +127,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
     @Shadow public int maxHurtTime;
     @Shadow public float attackedAtYaw;
     @Shadow public float limbSwingAmount;
-    @Shadow public boolean dead;
+    @Shadow protected boolean dead;
     @Shadow protected int idleTime;
     @Shadow protected int scoreValue;
     @Shadow protected int recentlyHit;
@@ -153,7 +153,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
     @Shadow public abstract float getMaxHealth();
     @Shadow public abstract boolean isPotionActive(Potion potion);
     @Shadow public abstract boolean isOnLadder();
-    @Shadow public abstract boolean canBlockDamageSource(DamageSource p_184583_1_);
+    @Shadow protected abstract boolean canBlockDamageSource(DamageSource p_184583_1_);
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow public abstract ItemStack getHeldItem(EnumHand hand);

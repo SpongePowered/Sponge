@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 @Mixin(ScoreObjective.class)
 public abstract class ScoreObjectiveMixin implements ScoreObjectiveBridge {
 
-    @Shadow @Final public Scoreboard scoreboard;
+    @Shadow @Final private Scoreboard scoreboard;
 
     @Nullable private SpongeObjective impl$spongeScoreboard;
 

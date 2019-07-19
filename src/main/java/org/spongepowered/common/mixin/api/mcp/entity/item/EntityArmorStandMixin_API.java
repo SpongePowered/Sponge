@@ -55,10 +55,10 @@ import java.util.Map;
 @Implements(@Interface(iface = ArmorStand.class, prefix = "armor$"))
 public abstract class EntityArmorStandMixin_API extends EntityLivingBaseMixin_API implements ArmorStand {
 
-    @Shadow public Rotations leftArmRotation;
-    @Shadow public Rotations rightArmRotation;
-    @Shadow public Rotations leftLegRotation;
-    @Shadow public Rotations rightLegRotation;
+    @Shadow private Rotations leftArmRotation;
+    @Shadow private Rotations rightArmRotation;
+    @Shadow private Rotations leftLegRotation;
+    @Shadow private Rotations rightLegRotation;
 
     @Shadow public abstract boolean getShowArms(); // getShowArms
     @Shadow public abstract boolean hasNoBasePlate(); // hasNoBasePlate

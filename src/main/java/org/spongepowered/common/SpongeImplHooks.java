@@ -97,6 +97,7 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.block.BlockFireAccessor;
+import org.spongepowered.common.mixin.core.world.WorldAccessor;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
@@ -708,5 +709,30 @@ public final class SpongeImplHooks {
 
     public static void setCapabilitiesFromSpongeBuilder(final ItemStack stack, final NBTTagCompound compoundTag) {
 
+    }
+
+    public static TileEntity onChunkGetTileDuringRemoval(final WorldServer worldServer, final BlockPos pos) {
+        if (((WorldAccessor) worldServer).accessor$getIsOutsideBuildHeight(pos)) {
+            return null;
+        } else {
+            TileEntity tileentity2 = null;
+
+            if (((WorldAccessor) worldServer).accessor$getProcessingLoadedTiles()) {
+                tileentity2 = ((WorldAccessor) worldServer).accessPendingTileEntityAt(pos);
+            }
+
+            if (tileentity2 == null) {
+                // Sponge - Instead of creating the tile entity, just check if it's there. If the
+                // tile entity doesn't exist, don't create it since we're about to just wholesale remove it...
+                // tileentity2 = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
+                tileentity2 = worldServer.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
+            }
+
+            if (tileentity2 == null) {
+                tileentity2 =  ((WorldAccessor) worldServer).accessPendingTileEntityAt(pos);
+            }
+
+            return tileentity2;
+        }
     }
 }

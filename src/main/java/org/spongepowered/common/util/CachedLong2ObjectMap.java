@@ -35,7 +35,7 @@ public class CachedLong2ObjectMap<V extends CacheKeyed> extends Long2ObjectOpenH
     @Nullable private V lastRetrievedValue = null;
 
     @Override
-    public V get(long key) {
+    public V get(final long key) {
         if (this.lastRetrievedValue != null && key == this.lastRetrievedValue.cache$getCacheKey()) {
             return this.lastRetrievedValue;
         }
@@ -43,7 +43,7 @@ public class CachedLong2ObjectMap<V extends CacheKeyed> extends Long2ObjectOpenH
     }
 
     @Override
-    public V remove(long key) {
+    public V remove(final long key) {
         if (this.lastRetrievedValue != null && key == this.lastRetrievedValue.cache$getCacheKey()) {
             this.lastRetrievedValue = null;
         }
@@ -51,7 +51,7 @@ public class CachedLong2ObjectMap<V extends CacheKeyed> extends Long2ObjectOpenH
     }
 
     @Override
-    public boolean containsKey(long key) {
+    public boolean containsKey(final long key) {
         return this.get(key) != null;
     }
 }

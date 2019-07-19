@@ -47,10 +47,10 @@ import javax.annotation.Nullable;
 @Mixin(PlayerChunkMapEntry.class)
 public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBridge {
 
-    @Shadow @Final public PlayerChunkMap playerChunkMap;
-    @Shadow @Final public ChunkPos pos;
-    @Shadow public int changes;
-    @Shadow public int changedSectionFilter;
+    @Shadow @Final private PlayerChunkMap playerChunkMap;
+    @Shadow @Final private ChunkPos pos;
+    @Shadow private int changes;
+    @Shadow private int changedSectionFilter;
     @Shadow public abstract void sendPacket(Packet<?> packetIn);
 
     @Shadow @Final private List<EntityPlayerMP> players;

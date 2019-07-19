@@ -47,14 +47,15 @@ import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Optional;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @Mixin(value = Text.class, remap = false)
 public abstract class TextMixin implements TextBridge {
 
-    @Shadow @Final protected TextFormat format;
-    @Shadow @Final protected ImmutableList<Text> children;
-    @Shadow @Final protected Optional<ClickAction<?>> clickAction;
-    @Shadow @Final protected Optional<HoverAction<?>> hoverAction;
-    @Shadow @Final protected Optional<ShiftClickAction<?>> shiftClickAction;
+    @Shadow @Final TextFormat format;
+    @Shadow @Final ImmutableList<Text> children;
+    @Shadow @Final Optional<ClickAction<?>> clickAction;
+    @Shadow @Final Optional<HoverAction<?>> hoverAction;
+    @Shadow @Final Optional<ShiftClickAction<?>> shiftClickAction;
 
     private ITextComponent component;
     private String json;

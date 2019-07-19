@@ -55,23 +55,23 @@ public abstract class EntityEnderPearlMixin extends EntityThrowableMixin {
 
     @ModifyArg(method = "onImpact",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    private float onAttackEntityFrom(float damage) {
+    private float onAttackEntityFrom(final float damage) {
         return (float) this.damageAmount;
     }
 
     @SuppressWarnings("deprecation")
     @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isPlayerSleeping()Z"))
-    private boolean onEnderPearlImpact(EntityPlayerMP player) {
+    private boolean onEnderPearlImpact(final EntityPlayerMP player) {
         if (player.isPlayerSleeping()) {
             return true;
         }
 
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.ENTITY_TELEPORT);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (Player) player);
             frame.addContext(EventContextKeys.THROWER, (Player) player); // TODO - remove in API 8/1.13
 
-            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, ((org.spongepowered.api.entity.Entity) this).getLocation());
+            final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, ((org.spongepowered.api.entity.Entity) this).getLocation());
             if (event.isCancelled()) {
                 return true;
             }
@@ -81,7 +81,7 @@ public abstract class EntityEnderPearlMixin extends EntityThrowableMixin {
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
             this.damageAmount = compound.getDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
@@ -89,7 +89,7 @@ public abstract class EntityEnderPearlMixin extends EntityThrowableMixin {
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         compound.setDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
     }
@@ -100,7 +100,7 @@ public abstract class EntityEnderPearlMixin extends EntityThrowableMixin {
      */
     @Override
     @Nullable
-    public Entity changeDimension(int dimensionIn) {
+    public Entity changeDimension(final int dimensionIn) {
         final Entity entity = super.changeDimension(dimensionIn);
 
         if (entity instanceof EntityEnderPearl) {

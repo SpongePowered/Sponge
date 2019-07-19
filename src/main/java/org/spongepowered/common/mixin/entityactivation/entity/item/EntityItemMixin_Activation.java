@@ -38,7 +38,7 @@ public abstract class EntityItemMixin_Activation extends EntityMixin_Activation 
     @Shadow public abstract ItemStack getItem();
 
     @Shadow private int pickupDelay;
-    @Shadow public int age;
+    @Shadow private int age;
 
     @Override
     public void activation$inactiveTick() {

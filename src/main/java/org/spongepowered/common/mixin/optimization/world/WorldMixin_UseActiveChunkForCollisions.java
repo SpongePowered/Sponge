@@ -41,9 +41,9 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 @Mixin(value = World.class, priority = 1500)
 public abstract class WorldMixin_UseActiveChunkForCollisions {
 
-    @Shadow public boolean isFlammableWithin(AxisAlignedBB bb) { return false; } // shadow
+    @Shadow public boolean isFlammableWithin(final AxisAlignedBB bb) { return false; } // shadow
 
-    @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
+    @Shadow protected abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
 
     @Redirect(method = "isFlammableWithin", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(IIIIIIZ)Z"))
     private boolean activeCollision$IgnoreIsAreaLoaded(final World world, final int xStart, final int yStart, final int zStart,

@@ -49,7 +49,7 @@ import java.util.Set;
 public abstract class BlockRedstoneWireMixin_Eigen extends Block {
 
     @Shadow @Final private Set<BlockPos> blocksNeedingUpdate;
-    @Shadow public boolean canProvidePower;
+    @Shadow private boolean canProvidePower;
     @Shadow protected abstract int getMaxCurrentStrength(World worldIn, BlockPos pos, int strength);
 
     protected BlockRedstoneWireMixin_Eigen(Material materialIn) {

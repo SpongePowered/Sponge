@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.server.management;
 
 import net.minecraft.server.management.UserList;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,9 +43,9 @@ import java.util.List;
 @Mixin(UserList.class)
 public abstract class UserListMixin {
 
-    @Shadow private static Logger LOGGER;
-    @Shadow public File saveFile;
-    @Shadow public abstract String getObjectKey(Object obj);
+    @Shadow @Final public static Logger LOGGER;
+    @Shadow @Final private File saveFile;
+    @Shadow protected abstract String getObjectKey(Object obj);
 
     @Redirect(method = "removeExpired", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false))
     private boolean impl$fixAddingToList(final List<Object> list, final Object object) {

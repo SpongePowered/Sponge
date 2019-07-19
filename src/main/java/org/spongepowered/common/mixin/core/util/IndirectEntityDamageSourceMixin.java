@@ -28,7 +28,9 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -40,9 +42,8 @@ import javax.annotation.Nullable;
 @Mixin(value = EntityDamageSourceIndirect.class, priority = 992)
 public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSourceMixin {
 
-    @Shadow @Nullable protected Entity indirectEntity;
+    @Shadow @Final @Mutable @Nullable private Entity indirectEntity;
 
-    @Shadow @Nullable public abstract Entity getTrueSource();
     @Shadow @Nullable public abstract Entity getImmediateSource();
 
     @Nullable private User impl$owner;

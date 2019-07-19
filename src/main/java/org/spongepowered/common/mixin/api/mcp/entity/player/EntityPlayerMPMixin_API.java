@@ -163,9 +163,9 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     @Shadow public abstract Entity getSpectatingEntity();
     @Shadow public abstract void setSpectatingEntity(Entity entity);
 
-    private boolean sleepingIgnored;
-    private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
-    @Nullable private WorldBorder worldBorder;
+    private boolean api$sleepingIgnored;
+    private TabList api$tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
+    @Nullable private WorldBorder api$worldBorder;
 
     @Override
     public GameProfile getProfile() {
@@ -209,7 +209,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public void sendMessage(final ChatType type, final Text message) {
-        if (this.isFake) {
+        if (this.impl$isFake) {
             // Don't bother sending messages to fake players
             return;
         }
@@ -226,7 +226,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public void sendBookView(final BookView bookView) {
-        if (this.isFake) {
+        if (this.impl$isFake) {
             // Don't bother sending messages to fake players
             return;
         }
@@ -235,7 +235,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public void sendTitle(final Title title) {
-        if (this.isFake) {
+        if (this.impl$isFake) {
             // Don't bother sending messages to fake players
             return;
         }
@@ -244,7 +244,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position) {
-        if (this.isFake) {
+        if (this.impl$isFake) {
             // Don't bother sending messages to fake players
             return;
         }
@@ -253,7 +253,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position, final int radius) {
-        if (this.isFake) {
+        if (this.impl$isFake) {
             // Don't bother sending messages to fake players
             return;
         }
@@ -460,12 +460,12 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public boolean isSleepingIgnored() {
-        return this.sleepingIgnored;
+        return this.api$sleepingIgnored;
     }
 
     @Override
     public void setSleepingIgnored(final boolean sleepingIgnored) {
-        this.sleepingIgnored = sleepingIgnored;
+        this.api$sleepingIgnored = sleepingIgnored;
     }
 
     @Override
@@ -484,7 +484,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public TabList getTabList() {
-        return this.tabList;
+        return this.api$tabList;
     }
 
     @Override
@@ -601,22 +601,22 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public Optional<WorldBorder> getWorldBorder() {
-        return Optional.ofNullable(this.worldBorder);
+        return Optional.ofNullable(this.api$worldBorder);
     }
 
     @Override
     public void setWorldBorder(@Nullable final WorldBorder border, final Cause cause) {
-        if (this.worldBorder == border) {
+        if (this.api$worldBorder == border) {
             return; //do not fire an event since nothing would have changed
         }
-        if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.worldBorder), Optional.ofNullable(border), this))) {
-            if (this.worldBorder != null) { //is the world border about to be unset?
-                ((WorldBorderBridge) this.worldBorder).bridge$getListeners().remove(((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
+        if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.api$worldBorder), Optional.ofNullable(border), this))) {
+            if (this.api$worldBorder != null) { //is the world border about to be unset?
+                ((WorldBorderBridge) this.api$worldBorder).bridge$getListeners().remove(((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
             }
-            this.worldBorder = border;
-            if (this.worldBorder != null) {
-                ((net.minecraft.world.border.WorldBorder) this.worldBorder).addListener(((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener());
-                this.connection.sendPacket(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) this.worldBorder, SPacketWorldBorder.Action.INITIALIZE));
+            this.api$worldBorder = border;
+            if (this.api$worldBorder != null) {
+                ((net.minecraft.world.border.WorldBorder) this.api$worldBorder).addListener(((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener());
+                this.connection.sendPacket(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) this.api$worldBorder, SPacketWorldBorder.Action.INITIALIZE));
             } else { //unset the border if null
                 this.connection.sendPacket(new SPacketWorldBorder(this.world.getWorldBorder(), SPacketWorldBorder.Action.INITIALIZE));
             }

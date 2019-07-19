@@ -40,16 +40,16 @@ import java.util.List;
 @Mixin(TileEntityHopper.class)
 public abstract class TileEntityHopperMixin_API extends TileEntityLockableLootMixin_API<Hopper> implements Hopper {
 
-    @Shadow public int transferCooldown;
+    @Shadow private int transferCooldown;
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
+        final DataContainer container = super.toContainer();
         return container.set(Constants.TileEntity.Hopper.TRANSFER_COOLDOWN, this.transferCooldown);
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(final List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         get(CooldownData.class).ifPresent(manipulators::add);
     }

@@ -38,7 +38,7 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge_AsyncLighting;
 @Mixin(value = ChunkProviderServer.class, priority = 1002)
 public abstract class ChunkProviderServerMixin_Async_Lighting {
 
-    @Shadow @Final public WorldServer world;
+    @Shadow @Final private WorldServer world;
 
     @Dynamic
     @Redirect(method = "tick",
