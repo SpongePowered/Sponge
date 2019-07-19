@@ -159,8 +159,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         }
 
         // Note: Uses the overworld's player data
-        SaveHandler saveHandler = (SaveHandler) worldServer.get().getSaveHandler();
-        File file = new File(saveHandler.playersDirectory, this.profile.getId().toString() + ".dat");
+        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) worldServer.get().getSaveHandler();
+        final File file = new File(saveHandler.accessor$getPlayersDirectory(), this.profile.getId().toString() + ".dat");
         if (!file.exists()) {
             return;
         }
