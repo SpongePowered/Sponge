@@ -28,10 +28,12 @@ import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.SPacketChangeGameState;
 import net.minecraft.network.play.server.SPacketEntityEffect;
 import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
@@ -50,6 +52,7 @@ import net.minecraft.server.management.UserListIPBans;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
@@ -68,6 +71,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
@@ -101,6 +105,7 @@ import org.spongepowered.common.service.ban.SpongeUserListBans;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.whitelist.SpongeUserListWhitelist;
 import org.spongepowered.common.text.chat.ChatUtil;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -202,7 +207,37 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Player player = (Player) playerIn;
         final Transform<World> fromTransform = player.getTransform();
         WorldServer worldServer = this.server.getWorld(targetDimension);
-        Transform<World> toTransform = new Transform<>(EntityUtil.getPlayerRespawnLocation(playerIn, worldServer), Vector3d.ZERO, Vector3d.ZERO);
+        final Location<World> toLocation;
+        final Location<World> temp = ((World) playerIn.world).getSpawnLocation();
+        boolean tempIsBedSpawn = false;
+        if (worldServer == null) { // Target world doesn't exist? Use global
+            toLocation = temp;
+        } else {
+            final Dimension toDimension = (Dimension) worldServer.provider;
+            int toDimensionId = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
+            // Cannot respawn in requested world, use the fallback dimension for
+            // that world. (Usually overworld unless a mod says otherwise).
+            if (!toDimension.allowsPlayerRespawns()) {
+                toDimensionId = SpongeImplHooks.getRespawnDimension((WorldProvider) toDimension, playerIn);
+                worldServer = worldServer.getMinecraftServer().getWorld(toDimensionId);
+            }
+
+            Vector3d targetSpawnVec = VecHelper.toVector3d(worldServer.getSpawnPoint());
+            final BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, toDimensionId);
+            if (bedPos != null) { // Player has a bed
+                final boolean forceBedSpawn = SpongeImplHooks.isSpawnForced(playerIn, toDimensionId);
+                final BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(worldServer, bedPos, forceBedSpawn);
+                if (bedSpawnLoc != null) { // The bed exists and is not obstructed
+                    tempIsBedSpawn = true;
+                    targetSpawnVec = new Vector3d(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D);
+                } else { // Bed invalid
+                    playerIn.connection.sendPacket(new SPacketChangeGameState(0, 0.0F));
+                }
+            }
+            toLocation = new Location<>((World) worldServer, targetSpawnVec);
+        }
+
+        Transform<World> toTransform = new Transform<>(toLocation, Vector3d.ZERO, Vector3d.ZERO);
         targetDimension = ((ServerWorldBridge) toTransform.getExtent()).bridge$getDimensionId();
         Location<World> location = toTransform.getLocation();
 
@@ -257,7 +292,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         // Sponge - Vanilla does this before recreating the player entity. However, we need to determine the bed location
         // before respawning the player, so we know what dimension to spawn them into. This means that the bed location must be copied
         // over to the new player
-        if (bedPos != null && EntityUtil.tempIsBedSpawn) {
+        if (bedPos != null && tempIsBedSpawn) {
             newPlayer.setSpawnPoint(bedPos, playerIn.isSpawnForced());
         }
 
@@ -279,8 +314,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         // ### PHASE 4 ### Fire event and set new location on the player
         Sponge.getCauseStackManager().pushCause(newPlayer);
         final RespawnPlayerEvent event = SpongeEventFactory.createRespawnPlayerEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform,
-                toTransform, (Player) playerIn, (Player) newPlayer, EntityUtil.tempIsBedSpawn, !conqueredEnd);
-        EntityUtil.tempIsBedSpawn = false;
+                toTransform, (Player) playerIn, (Player) newPlayer, tempIsBedSpawn, !conqueredEnd);
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         ((EntityBridge) player).bridge$setLocationAndAngles(event.getToTransform());

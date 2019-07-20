@@ -721,7 +721,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             }
         }
         // Sponge - Redirect server sided code to handle through the PhaseTracker
-        return EntityUtil.entityOnDropItem((Entity) (Object) this, stack, offsetY);
+        return EntityUtil.entityOnDropItem((Entity) (Object) this, stack, offsetY, ((Entity) (Object) this).posX, ((Entity) (Object) this).posZ);
     }
 
     @Nullable

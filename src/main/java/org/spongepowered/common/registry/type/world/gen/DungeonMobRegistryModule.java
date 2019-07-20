@@ -34,6 +34,7 @@ import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.mixin.core.world.gen.feature.WorldGenDungeonsAccessor;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
@@ -79,7 +80,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
     public void put(final EntityType type, final int weight) {
         remove(type);
 
-        this.dungeonMobs.add(new WeightedSerializableObject<>(EntityUtil.archetype(type), weight));
+        this.dungeonMobs.add(new WeightedSerializableObject<>(new SpongeEntityArchetypeBuilder().type(type).build(), weight));
         this.presentTypes.add(type);
     }
 

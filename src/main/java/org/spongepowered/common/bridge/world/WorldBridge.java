@@ -45,4 +45,6 @@ public interface WorldBridge {
 
     void bridge$clearFakeCheck();
 
+    boolean bridge$isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
+
 }

@@ -33,6 +33,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.mixin.core.world.WorldServerMixin;
 
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ import java.util.Optional;
 public abstract class WorldServerMixin_UseActiveChunkForCollisions extends WorldMixin_UseActiveChunkForCollisions {
 
     @Override
-    public boolean isFlammableWithin(AxisAlignedBB bb) {
+    public boolean isFlammableWithin(final AxisAlignedBB bb) {
         if (((WorldBridge) this).bridge$isFake()) {
             return super.isFlammableWithin(bb);
         }
@@ -58,7 +59,7 @@ public abstract class WorldServerMixin_UseActiveChunkForCollisions extends World
             final int yEnd = MathHelper.ceil(bb.maxY);
             final int zStart = MathHelper.floor(bb.minZ);
             final int zEnd = MathHelper.ceil(bb.maxZ);
-            if (!this.isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd, true)) {
+            if (!((WorldBridge) this).bridge$isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd, true)) {
                 return false;
             }
         }

@@ -35,7 +35,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeHorseColor;
 import org.spongepowered.common.entity.SpongeHorseStyle;
 import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
@@ -57,7 +56,7 @@ public class HorseColorValueProcessor extends AbstractSpongeValueProcessor<Entit
     @Override
     protected boolean set(EntityHorse container, HorseColor value) {
         final SpongeHorseStyle style = (SpongeHorseStyle) HorseStyleRegistryModule.getHorseStyle(container);
-        container.setHorseVariant(EntityUtil.getHorseInternalVariant((SpongeHorseColor) value, style));
+        container.setHorseVariant(((SpongeHorseColor) value).getBitMask() | style.getBitMask());
         return true;
     }
 

@@ -110,11 +110,12 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -127,6 +128,7 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -488,7 +490,77 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         }
         // Sponge Start - redirect to our handling to capture and throw events.
         if (!((WorldBridge) this.world).bridge$isFake()) {
-            return EntityUtil.playerDropItem(this, droppedItem, dropAround, traceItem);
+            ((PlayerEntityBridge) this).bridge$shouldRestoreInventory(false);
+            final EntityPlayer player = (EntityPlayer) (PlayerEntityBridge) this;
+
+            final double posX1 = player.posX;
+            final double posY1 = player.posY - 0.3 + player.getEyeHeight();
+            final double posZ1 = player.posZ;
+            // Now the real fun begins.
+            final ItemStack item;
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(droppedItem);
+            final List<ItemStackSnapshot> original = new ArrayList<>();
+            original.add(snapshot);
+
+            final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
+            @SuppressWarnings("RawTypeCanBeGeneric") final IPhaseState currentState = phaseContext.state;
+
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+
+                item = SpongeCommonEventFactory.throwDropItemAndConstructEvent((EntityPlayer) (PlayerEntityBridge) this, posX1, posY1, posZ1, snapshot, original, frame);
+
+                if (item == null || item.isEmpty()) {
+                    return null;
+                }
+
+
+                // Here is where we would potentially perform item pre-merging (merge the item stacks with previously captured item stacks
+                // and only if those stacks can be stacked (count increased). Otherwise, we'll just continue to throw the entity item.
+                // For now, due to refactoring a majority of all of this code, pre-merging is disabled entirely.
+
+                final EntityItem entityitem = new EntityItem(player.world, posX1, posY1, posZ1, droppedItem);
+                entityitem.setPickupDelay(40);
+
+                if (traceItem) {
+                    entityitem.setThrower(player.getName());
+                }
+
+                final Random random = player.getRNG();
+                if (dropAround) {
+                    final float f = random.nextFloat() * 0.5F;
+                    final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
+                    entityitem.motionX = -MathHelper.sin(f1) * f;
+                    entityitem.motionZ = MathHelper.cos(f1) * f;
+                    entityitem.motionY = 0.20000000298023224D;
+                } else {
+                    float f2 = 0.3F;
+                    entityitem.motionX = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+                    entityitem.motionZ = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+                    entityitem.motionY = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
+                    final float f3 = random.nextFloat() * ((float) Math.PI * 2F);
+                    f2 = 0.02F * random.nextFloat();
+                    entityitem.motionX += Math.cos(f3) * f2;
+                    entityitem.motionY += (random.nextFloat() - random.nextFloat()) * 0.1F;
+                    entityitem.motionZ += Math.sin(f3) * f2;
+                }
+                // FIFTH - Capture the entity maybe?
+                if (currentState.spawnItemOrCapture(phaseContext, (EntityPlayer) (PlayerEntityBridge) this, entityitem)) {
+                    return entityitem;
+                }
+                // TODO - Investigate whether player drops are adding to the stat list in captures.
+                final ItemStack stack = entityitem.getItem();
+                player.world.spawnEntity(entityitem);
+
+                if (traceItem) {
+                    if (!stack.isEmpty()) {
+                        player.addStat(StatList.getDroppedObjectStats(stack.getItem()), droppedItem.getCount());
+                    }
+
+                    player.addStat(StatList.DROP);
+                }
+
+                return entityitem;
+            }
         }
         // Sponge end
         final double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();

@@ -30,35 +30,26 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.EntityTracker;
-import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecartTNT;
-import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.server.SPacketChangeGameState;
-import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketEntityEffect;
 import net.minecraft.network.play.server.SPacketEntityProperties;
 import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketServerDifficulty;
-import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -72,26 +63,19 @@ import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.api.entity.living.Humanoid;
-import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
-import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.World;
@@ -107,6 +91,7 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -115,13 +100,8 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.InvokingTeleporterContext;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.EntityAccessor;
-import org.spongepowered.common.mixin.core.entity.EntityHangingAccessor;
 import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
-import org.spongepowered.common.mixin.core.entity.EntityTrackerAccessor;
-import org.spongepowered.common.mixin.core.entity.EntityTrackerEntryAccessor;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
@@ -153,10 +133,8 @@ public final class EntityUtil {
     private EntityUtil() {
     }
 
-    private static final Predicate<Entity> TRACEABLE = Predicates.and(NOT_SPECTATING,
+    @SuppressWarnings("Guava") private static final Predicate<Entity> TRACEABLE = Predicates.and(NOT_SPECTATING,
       entity -> entity != null && entity.canBeCollidedWith());
-
-    public static final Function<Humanoid, EntityPlayer> HUMANOID_TO_PLAYER = (humanoid) -> humanoid instanceof EntityPlayer ? (EntityPlayer) humanoid : null;
 
     @Nullable
     public static Entity transferEntityToWorld(final Entity entity, @Nullable MoveEntityEvent.Teleport event,
@@ -700,10 +678,6 @@ public final class EntityUtil {
         }
     }
 
-    public static int getHorseInternalVariant(final SpongeHorseColor color, final SpongeHorseStyle style) {
-        return color.getBitMask() | style.getBitMask();
-    }
-
     public static boolean processEntitySpawnsFromEvent(final SpawnEntityEvent event, final Supplier<Optional<User>> entityCreatorSupplier) {
         boolean spawnedAny = false;
         for (final org.spongepowered.api.entity.Entity entity : event.getEntities()) {
@@ -780,62 +754,52 @@ public final class EntityUtil {
 
         final Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
         final double blockDistance = (blockRay != null) ? blockRay.hitVec.distanceTo(traceStart) : traceDistance;
-        final EntityUtil.EntityTrace entityRay = EntityUtil.rayTraceEntities(source, traceDistance, partialTicks, blockDistance, traceStart);
-
-        if (entityRay.entity != null && (entityRay.distance < blockDistance || blockRay == null)) {
-            return entityRay.asRayTraceResult();
-        }
-
-        return blockRay;
-    }
-
-    private static EntityUtil.EntityTrace rayTraceEntities(final Entity source, final double traceDistance, final float partialTicks, final double blockDistance, final Vec3d traceStart) {
-        final EntityUtil.EntityTrace trace = new EntityUtil.EntityTrace(blockDistance);
+        final EntityTrace trace = new EntityTrace(blockDistance);
 
         final Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
         final Vec3d traceEnd = traceStart.add(lookDir);
 
-        for (final Entity entity : EntityUtil.getTraceEntities(source, traceDistance, lookDir, EntityUtil.TRACEABLE)) {
+        final AxisAlignedBB boundingBox = source.getEntityBoundingBox();
+        final AxisAlignedBB traceBox = boundingBox.expand(lookDir.x, lookDir.y, lookDir.z);
+        final List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.grow(1.0F, 1.0F, 1.0F), EntityUtil.TRACEABLE);
+        for (final Entity entity : entities) {
             final AxisAlignedBB entityBB = entity.getEntityBoundingBox().grow(entity.getCollisionBorderSize());
-            final RayTraceResult entityRay = entityBB.calculateIntercept(traceStart, traceEnd);
+            final RayTraceResult entityRay1 = entityBB.calculateIntercept(traceStart, traceEnd);
 
             if (entityBB.contains(traceStart)) {
                 if (trace.distance >= 0.0D) {
                     trace.entity = entity;
-                    trace.location = entityRay == null ? traceStart : entityRay.hitVec;
+                    trace.location = entityRay1 == null ? traceStart : entityRay1.hitVec;
                     trace.distance = 0.0D;
                 }
                 continue;
             }
 
-            if (entityRay == null) {
+            if (entityRay1 == null) {
                 continue;
             }
 
-            final double distanceToEntity = traceStart.distanceTo(entityRay.hitVec);
+            final double distanceToEntity = traceStart.distanceTo(entityRay1.hitVec);
 
             if (distanceToEntity < trace.distance || trace.distance == 0.0D) {
                 if (entity.getLowestRidingEntity() == source.getLowestRidingEntity()) {
                     if (trace.distance == 0.0D) {
                         trace.entity = entity;
-                        trace.location = entityRay.hitVec;
+                        trace.location = entityRay1.hitVec;
                     }
                 } else {
                     trace.entity = entity;
-                    trace.location = entityRay.hitVec;
+                    trace.location = entityRay1.hitVec;
                     trace.distance = distanceToEntity;
                 }
             }
         }
 
-        return trace;
-    }
+        if (trace.entity != null && (trace.distance < blockDistance || blockRay == null)) {
+            return trace.asRayTraceResult();
+        }
 
-    private static List<Entity> getTraceEntities(final Entity source, final double traceDistance, final Vec3d dir, final Predicate<Entity> filter) {
-        final AxisAlignedBB boundingBox = source.getEntityBoundingBox();
-        final AxisAlignedBB traceBox = boundingBox.expand(dir.x, dir.y, dir.z);
-        final List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.grow(1.0F, 1.0F, 1.0F), filter);
-        return entities;
+        return blockRay;
     }
 
     @Nullable
@@ -857,123 +821,6 @@ public final class EntityUtil {
         final double interpY = entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks + entity.getEyeHeight();
         final double interpZ = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks;
         return new Vec3d(interpX, interpY, interpZ);
-    }
-
-    public static boolean refreshPainting(final EntityPainting painting, final EntityPainting.EnumArt art) {
-        final EntityPainting.EnumArt oldArt = painting.art;
-        painting.art = art;
-        ((EntityHangingAccessor) painting).accessor$updateFacingWithBoundingBox(painting.facingDirection);
-        if (!painting.onValidSurface()) {
-            painting.art = oldArt;
-            ((EntityHangingAccessor) painting).accessor$updateFacingWithBoundingBox(painting.facingDirection);
-            return false;
-        }
-
-        final EntityTracker paintingTracker = ((WorldServer) painting.world).getEntityTracker();
-        final EntityTrackerEntry paintingEntry = ((EntityTrackerAccessor) paintingTracker).accessor$getTrackedEntityTable().lookup(painting.getEntityId());
-        final List<EntityPlayerMP> playerMPs = new ArrayList<>();
-        for (final EntityPlayerMP player : ((EntityTrackerEntryAccessor) paintingEntry).accessor$getTrackingPlayers()) {
-            final SPacketDestroyEntities packet = new SPacketDestroyEntities(painting.getEntityId());
-            player.connection.sendPacket(packet);
-            playerMPs.add(player);
-        }
-        for (final EntityPlayerMP playerMP : playerMPs) {
-            SpongeImpl.getGame().getScheduler().createTaskBuilder()
-                    .delayTicks(SpongeImpl.getGlobalConfigAdapter().getConfig().getEntity().getPaintingRespawnDelaly())
-                    .execute(() -> {
-                        final SPacketSpawnPainting packet = new SPacketSpawnPainting(painting);
-                        playerMP.connection.sendPacket(packet);
-                    })
-                    .submit(SpongeImpl.getPlugin());
-        }
-        return true;
-    }
-
-    public static List<EntityHanging> findHangingEntities(final WorldServer worldIn, final BlockPos pos) {
-        return worldIn.getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(pos, pos).grow(1.1D, 1.1D, 1.1D),
-                entityIn -> {
-                    if (entityIn == null) {
-                        return false;
-                    }
-
-                    final BlockPos entityPos = entityIn.getPosition();
-                    // Hanging Neighbor Entity
-                    if (entityPos.equals(pos.add(0, 1, 0))) {
-                        return true;
-                    }
-
-                    // Check around source block
-                    final EnumFacing entityFacing = entityIn.getHorizontalFacing();
-
-                    if (entityFacing == EnumFacing.NORTH) {
-                        return entityPos.equals(pos.add(Constants.Entity.HANGING_OFFSET_NORTH));
-                    } else if (entityFacing == EnumFacing.SOUTH) {
-                        return entityIn.getPosition().equals(pos.add(Constants.Entity.HANGING_OFFSET_SOUTH));
-                    } else if (entityFacing == EnumFacing.WEST) {
-                        return entityIn.getPosition().equals(pos.add(Constants.Entity.HANGING_OFFSET_WEST));
-                    } else if (entityFacing == EnumFacing.EAST) {
-                        return entityIn.getPosition().equals(pos.add(Constants.Entity.HANGING_OFFSET_EAST));
-                    }
-                    return false;
-                });
-    }
-
-    // A temporary variable to transfer the 'isBedSpawn' variable between
-    // getPlayerRespawnLocation and recreatePlayerEntity
-    public static boolean tempIsBedSpawn = false;
-
-    // Internal to PlayerListMixin. has side effects
-    public static Location<World> getPlayerRespawnLocation(final EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
-        final Location<World> location = ((World) playerIn.world).getSpawnLocation();
-        tempIsBedSpawn = false;
-        if (targetWorld == null) { // Target world doesn't exist? Use global
-            return location;
-        }
-
-        final Dimension toDimension = (Dimension) targetWorld.provider;
-        int toDimensionId = ((ServerWorldBridge) targetWorld).bridge$getDimensionId();
-        // Cannot respawn in requested world, use the fallback dimension for
-        // that world. (Usually overworld unless a mod says otherwise).
-        if (!toDimension.allowsPlayerRespawns()) {
-            toDimensionId = SpongeImplHooks.getRespawnDimension((WorldProvider) toDimension, playerIn);
-            targetWorld = targetWorld.getMinecraftServer().getWorld(toDimensionId);
-        }
-
-        Vector3d targetSpawnVec = VecHelper.toVector3d(targetWorld.getSpawnPoint());
-        final BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, toDimensionId);
-        if (bedPos != null) { // Player has a bed
-            final boolean forceBedSpawn = SpongeImplHooks.isSpawnForced(playerIn, toDimensionId);
-            final BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(targetWorld, bedPos, forceBedSpawn);
-            if (bedSpawnLoc != null) { // The bed exists and is not obstructed
-                tempIsBedSpawn = true;
-                targetSpawnVec = new Vector3d(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D);
-            } else { // Bed invalid
-                playerIn.connection.sendPacket(new SPacketChangeGameState(0, 0.0F));
-            }
-        }
-        return new Location<>((World) targetWorld, targetSpawnVec);
-    }
-
-    public static Living fromNativeToLiving(final Entity entity) {
-        if (!(entity instanceof Living)) {
-            throw new IllegalArgumentException("Entity is incompatible with SpongeAPI Living interface: " + entity);
-        }
-        return (Living) entity;
-    }
-
-    /**
-     * A simple redirected static util method for {@link Entity#entityDropItem(ItemStack, float)}.
-     * What this does is ensures that any possibly required wrapping of captured drops is performed.
-     * Likewise, it ensures that the phase state is set up appropriately.
-     *
-     * @param entity The entity dropping the item
-     * @param itemStack The itemstack to spawn
-     * @param offsetY The offset y coordinate
-     * @return The item entity
-     */
-    @Nullable
-    public static EntityItem entityOnDropItem(final Entity entity, final ItemStack itemStack, final float offsetY) {
-        return entityOnDropItem(entity, itemStack, offsetY, entity.posX, entity.posZ);
     }
 
     /**
@@ -1011,7 +858,7 @@ public final class EntityUtil {
         // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             // Perform the event throws first, if they return false, return null
-            item = throwDropItemAndConstructEvent(entity, posX, posY, posZ, snapshot, original, frame);
+            item = SpongeCommonEventFactory.throwDropItemAndConstructEvent(entity, posX, posY, posZ, snapshot, original, frame);
 
             if (item == null || item.isEmpty()) {
                 return null;
@@ -1032,153 +879,6 @@ public final class EntityUtil {
             EntityUtil.processEntitySpawn((org.spongepowered.api.entity.Entity) entityitem, Optional::empty);
             return entityitem;
         }
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Nullable
-    public static EntityItem playerDropItem(final PlayerEntityBridge mixinPlayer, final ItemStack droppedItem, final boolean dropAround, final boolean traceItem) {
-        mixinPlayer.bridge$shouldRestoreInventory(false);
-        final EntityPlayer player = (EntityPlayer) mixinPlayer;
-
-        final double posX = player.posX;
-        final double posY = player.posY - 0.3 + player.getEyeHeight();
-        final double posZ = player.posZ;
-        // Now the real fun begins.
-        final ItemStack item;
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(droppedItem);
-        final List<ItemStackSnapshot> original = new ArrayList<>();
-        original.add(snapshot);
-
-        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
-        @SuppressWarnings("RawTypeCanBeGeneric") final IPhaseState currentState = phaseContext.state;
-
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-
-            item = throwDropItemAndConstructEvent((EntityPlayer) mixinPlayer, posX, posY, posZ, snapshot, original, frame);
-
-            if (item == null || item.isEmpty()) {
-                return null;
-            }
-
-
-            // Here is where we would potentially perform item pre-merging (merge the item stacks with previously captured item stacks
-            // and only if those stacks can be stacked (count increased). Otherwise, we'll just continue to throw the entity item.
-            // For now, due to refactoring a majority of all of this code, pre-merging is disabled entirely.
-
-            final EntityItem entityitem = new EntityItem(player.world, posX, posY, posZ, droppedItem);
-            entityitem.setPickupDelay(40);
-
-            if (traceItem) {
-                entityitem.setThrower(player.getName());
-            }
-
-            final Random random = player.getRNG();
-            if (dropAround) {
-                final float f = random.nextFloat() * 0.5F;
-                final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
-                entityitem.motionX = -MathHelper.sin(f1) * f;
-                entityitem.motionZ = MathHelper.cos(f1) * f;
-                entityitem.motionY = 0.20000000298023224D;
-            } else {
-                float f2 = 0.3F;
-                entityitem.motionX = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
-                entityitem.motionZ = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
-                entityitem.motionY = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
-                final float f3 = random.nextFloat() * ((float) Math.PI * 2F);
-                f2 = 0.02F * random.nextFloat();
-                entityitem.motionX += Math.cos(f3) * f2;
-                entityitem.motionY += (random.nextFloat() - random.nextFloat()) * 0.1F;
-                entityitem.motionZ += Math.sin(f3) * f2;
-            }
-            // FIFTH - Capture the entity maybe?
-            if (currentState.spawnItemOrCapture(phaseContext, (EntityPlayer) mixinPlayer, entityitem)) {
-                return entityitem;
-            }
-            // TODO - Investigate whether player drops are adding to the stat list in captures.
-            final ItemStack itemstack = dropItemAndGetStack(player, entityitem);
-
-            if (traceItem) {
-                if (!itemstack.isEmpty()) {
-                    player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
-                }
-
-                player.addStat(StatList.DROP);
-            }
-
-            return entityitem;
-        }
-    }
-
-    /**
-     * @author gabizou - April 19th, 2018
-     * Creates two events here:
-     * - {@link DropItemEvent}
-     * - {@link ConstructEntityEvent}
-     *
-     * This is to reduce the code size from normal entity drops and player drops.
-     * While player drops usually require performing position and motion modifications,
-     * we return the item stack if it is to be thrown (this allows the event to have a
-     * say in what item is dropped).
-     *
-     * @param entity The entity throwing the item
-     * @param posX The position x for the item stack to spawn
-     * @param posY The position y for the item stack to spawn
-     * @param posZ The position z for the item stack to spawn
-     * @param snapshot The item snapshot of the item to drop
-     * @param original The original list to be used
-     * @param frame
-     * @return The item if it is to be spawned, null if to be ignored
-     */
-    @Nullable
-    public static ItemStack throwDropItemAndConstructEvent(final Entity entity, final double posX, final double posY,
-        final double posZ, final ItemStackSnapshot snapshot, final List<ItemStackSnapshot> original, final CauseStackManager.StackFrame frame) {
-        final PlayerEntityBridge mixinPlayer;
-        if (entity instanceof PlayerEntityBridge) {
-            mixinPlayer = (PlayerEntityBridge) entity;
-        } else {
-            mixinPlayer = null;
-        }
-        final ItemStack item;
-
-        frame.pushCause(entity);
-
-        // FIRST we want to throw the DropItemEvent.PRE
-        final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(),
-            ImmutableList.of(snapshot), original);
-        SpongeImpl.postEvent(dropEvent);
-        if (dropEvent.isCancelled()) {
-            if (mixinPlayer != null) {
-                mixinPlayer.bridge$shouldRestoreInventory(true);
-            }
-            return null;
-        }
-        if (dropEvent.getDroppedItems().isEmpty()) {
-            return null;
-        }
-
-        // SECOND throw the ConstructEntityEvent
-        final Transform<World> suggested = new Transform<>((World) entity.world, new Vector3d(posX, posY, posZ));
-        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, suggested);
-        frame.removeContext(EventContextKeys.SPAWN_TYPE);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            // Make sure the player is restoring inventories
-            if (mixinPlayer != null) {
-                mixinPlayer.bridge$shouldRestoreInventory(true);
-            }
-            return null;
-        }
-
-        item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
-        if (item == null) {
-            // Make sure the player is restoring inventories
-            if (mixinPlayer != null) {
-                mixinPlayer.bridge$shouldRestoreInventory(true);
-            }
-            return null;
-        }
-        return item;
     }
 
 
@@ -1217,12 +917,6 @@ public final class EntityUtil {
         return new Vector3d(x, y, z);
     }
 
-    private static ItemStack dropItemAndGetStack(final EntityPlayer player, final EntityItem item) {
-        final ItemStack stack = item.getItem();
-        player.world.spawnEntity(item);
-        return stack;
-    }
-
     @SuppressWarnings("unchecked")
     public static Optional<EntityType> fromNameToType(final String name) {
         // EntityList includes all forge mods with *unedited* entity names
@@ -1243,8 +937,4 @@ public final class EntityUtil {
         return Optional.of(EntityTypeRegistryModule.getInstance().getForClass((Class<? extends Entity>) clazz));
     }
 
-    // I'm lazy, but this is better than using the convenience method
-    public static EntityArchetype archetype(final EntityType type) {
-        return new SpongeEntityArchetypeBuilder().type(type).build();
-    }
 }

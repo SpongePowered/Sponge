@@ -177,6 +177,8 @@ public abstract class WorldMixin implements WorldBridge {
     @Shadow public abstract WorldBorder getWorldBorder();
     @Shadow public boolean canSeeSky(final BlockPos pos) { return false; } // Shadowed
     @Shadow public abstract long getTotalWorldTime();
+    @Shadow private boolean isAreaLoaded(
+        final int xStart, final int yStart, final int zStart, final int xEnd, final int yEnd, final int zEnd, final boolean allowEmpty) { return false; } // SHADOWED
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
                                                                      + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
@@ -592,6 +594,11 @@ public abstract class WorldMixin implements WorldBridge {
         // DO NOTHING ON NON-SERVER WORLDS
     }
 
+    @Override
+    public boolean bridge$isAreaLoaded(
+        final int xStart, final int yStart, final int zStart, final int xEnd, final int yEnd, final int zEnd, final boolean allowEmpty) {
+        return this.isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd, allowEmpty);
+    }
 
     /**
      * @author gabizou - August 4th, 2016

@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -83,8 +84,7 @@ public abstract class ContainerRepairMixin extends ContainerMixin implements Len
 
     @Inject(method = "updateRepairOutput", at = @At(value = "RETURN"))
     private void impl$throwUpdateAnvilEvent(final CallbackInfo ci) {
-
-        if (!ShouldFire.UPDATE_ANVIL_EVENT) {
+        if (!ShouldFire.UPDATE_ANVIL_EVENT || !SpongeImplHooks.isMainThread()) {
             return;
         }
 

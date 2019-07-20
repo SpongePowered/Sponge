@@ -33,6 +33,8 @@ import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.CombatEntry;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
@@ -54,6 +56,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.mixin.core.util.CombatEntryAccessor;
 import org.spongepowered.common.mixin.core.util.CombatTrackerAccessor;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -86,16 +89,16 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void unwind(EntityTickContext phaseContext) {
+    public void unwind(final EntityTickContext phaseContext) {
         final Entity tickingEntity = phaseContext.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(tickingEntity);
             this.processCaptures(tickingEntity, phaseContext, frame);
         }
     }
 
-    protected void processCaptures(Entity tickingEntity, EntityTickContext phaseContext, CauseStackManager.StackFrame frame) {
+    protected void processCaptures(final Entity tickingEntity, final EntityTickContext phaseContext, final CauseStackManager.StackFrame frame) {
         phaseContext.addNotifierAndOwnerToCauseStack(frame);
         // If we're doing bulk captures for blocks, go ahead and do them. otherwise continue with entity checks
         if (phaseContext.allowsBulkBlockCaptures()) {
@@ -113,7 +116,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     final List<Entity> nonExp = new ArrayList<>(entities.size());
                     final List<Entity> breeding = new ArrayList<>(entities.size());
                     final List<Entity> projectile = new ArrayList<>(entities.size());
-                    for (Entity entity : entities) {
+                    for (final Entity entity : entities) {
                         if (entity instanceof EntityXPOrb) {
                             experience.add(entity);
                         } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
@@ -157,7 +160,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         phaseContext.getCapturedItemsSupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
                     final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                    for (EntityItem entity : entities) {
+                    for (final EntityItem entity : entities) {
                         capturedEntities.add((Entity) entity);
                     }
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -169,7 +172,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         phaseContext.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(map -> {
                 final List<SpongeBlockSnapshot> capturedBlocks = phaseContext.getCapturedOriginalBlocksChanged();
-                for (SpongeBlockSnapshot snapshot : capturedBlocks) {
+                for (final SpongeBlockSnapshot snapshot : capturedBlocks) {
                     final BlockPos blockPos = snapshot.getBlockPos();
                     final Collection<EntityItem> entityItems = map.get(blockPos);
                     if (!entityItems.isEmpty()) {
@@ -219,10 +222,10 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     }
 
-    private void appendContextOfPossibleEntityDeath(Entity tickingEntity, CauseStackManager.StackFrame frame) {
+    private void appendContextOfPossibleEntityDeath(final Entity tickingEntity, final CauseStackManager.StackFrame frame) {
         if (EntityUtil.isEntityDead((net.minecraft.entity.Entity) tickingEntity)) {
             if (tickingEntity instanceof EntityLivingBase) {
-                CombatEntry entry = ((CombatTrackerAccessor) ((EntityLivingBase) tickingEntity).getCombatTracker()).accessor$getBestCombatEntry();
+                final CombatEntry entry = ((CombatTrackerAccessor) ((EntityLivingBase) tickingEntity).getCombatTracker()).accessor$getBestCombatEntry();
                 if (entry != null) {
                     if (((CombatEntryAccessor) entry).accessor$getDamageSrc() != null) {
                         frame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE,
@@ -239,12 +242,39 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> transaction,
-        EntityTickContext context) {
+    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<BlockSnapshot> transaction,
+        final EntityTickContext context) {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-            for (EntityHanging entityHanging : EntityUtil.findHangingEntities((WorldServer) tickingEntity.getWorld(), blockPos)) {
+            final List<EntityHanging> hangingEntities = ((WorldServer) tickingEntity.getWorld())
+                .getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(blockPos, blockPos).grow(1.1D, 1.1D, 1.1D),
+                    entityIn -> {
+                        if (entityIn == null) {
+                            return false;
+                        }
+
+                        final BlockPos entityPos = entityIn.getPosition();
+                        // Hanging Neighbor Entity
+                        if (entityPos.equals(blockPos.add(0, 1, 0))) {
+                            return true;
+                        }
+
+                        // Check around source block
+                        final EnumFacing entityFacing = entityIn.getHorizontalFacing();
+
+                        if (entityFacing == EnumFacing.NORTH) {
+                            return entityPos.equals(blockPos.add(Constants.Entity.HANGING_OFFSET_NORTH));
+                        } else if (entityFacing == EnumFacing.SOUTH) {
+                            return entityIn.getPosition().equals(blockPos.add(Constants.Entity.HANGING_OFFSET_SOUTH));
+                        } else if (entityFacing == EnumFacing.WEST) {
+                            return entityIn.getPosition().equals(blockPos.add(Constants.Entity.HANGING_OFFSET_WEST));
+                        } else if (entityFacing == EnumFacing.EAST) {
+                            return entityIn.getPosition().equals(blockPos.add(Constants.Entity.HANGING_OFFSET_EAST));
+                        }
+                        return false;
+                    });
+            for (final EntityHanging entityHanging : hangingEntities) {
                 if (entityHanging instanceof EntityItemFrame) {
                     final EntityItemFrame itemFrame = (EntityItemFrame) entityHanging;
                     if (!itemFrame.isDead) {
@@ -257,7 +287,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public void appendContextPreExplosion(ExplosionContext explosionContext, EntityTickContext context) {
+    public void appendContextPreExplosion(final ExplosionContext explosionContext, final EntityTickContext context) {
         if (!context.applyNotifierIfAvailable(explosionContext::owner)) {
             context.applyOwnerIfAvailable(explosionContext::owner);
         }
@@ -265,7 +295,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(EntityTickContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final EntityTickContext context, final Entity entity, final int chunkX, final int chunkZ) {
         // Always need our source
         final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
@@ -287,7 +317,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         }
         // It kinda sucks we have to make the cause frame here, but if we're already here, we are
         // effectively already going to throw an event, and we're configured not to bulk capture.
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             context.addNotifierAndOwnerToCauseStack(frame);
             frame.pushCause(tickingEntity);
             if (entity instanceof EntityXPOrb) {
@@ -340,7 +370,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
      * @return True if bulk block captures are usable for this entity type (default true)
      */
     @Override
-    public boolean doesBulkBlockCapture(EntityTickContext context) {
+    public boolean doesBulkBlockCapture(final EntityTickContext context) {
         return context.allowsBulkBlockCaptures();
     }
 
@@ -350,7 +380,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
      * @return True if block events are to be tracked by the specific type of entity (default is true)
      */
     @Override
-    public boolean doesBlockEventTracking(EntityTickContext context) {
+    public boolean doesBlockEventTracking(final EntityTickContext context) {
         return context.allowsBlockEvents();
     }
 }

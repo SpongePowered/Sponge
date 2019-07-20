@@ -66,6 +66,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.explosive.Explosive;
@@ -88,6 +89,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
+import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
@@ -127,6 +129,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
@@ -1507,7 +1510,7 @@ public class SpongeCommonEventFactory {
                 final Human humanoid = (Human) entity;
                 event = SpongeEventFactory.createChangeEntityEquipmentEventTargetHumanoid(cause, humanoid, slot, transaction);
             } else {
-                final Living living = EntityUtil.fromNativeToLiving(entity);
+                final Living living = (Living) entity;
                 event = SpongeEventFactory.createChangeEntityEquipmentEventTargetLiving(cause, living, slot, transaction);
             }
             SpongeImpl.postEvent(event);
@@ -1528,5 +1531,77 @@ public class SpongeCommonEventFactory {
             return Optional.of((net.minecraft.world.Explosion) explosion);
         }
         return Optional.empty();
+    }
+
+    /**
+     * @author gabizou - April 19th, 2018
+     * Creates two events here:
+     * - {@link DropItemEvent}
+     * - {@link ConstructEntityEvent}
+     *
+     * This is to reduce the code size from normal entity drops and player drops.
+     * While player drops usually require performing position and motion modifications,
+     * we return the item stack if it is to be thrown (this allows the event to have a
+     * say in what item is dropped).
+     *
+     * @param entity The entity throwing the item
+     * @param posX The position x for the item stack to spawn
+     * @param posY The position y for the item stack to spawn
+     * @param posZ The position z for the item stack to spawn
+     * @param snapshot The item snapshot of the item to drop
+     * @param original The original list to be used
+     * @param frame
+     * @return The item if it is to be spawned, null if to be ignored
+     */
+    @Nullable
+    public static ItemStack throwDropItemAndConstructEvent(final net.minecraft.entity.Entity entity, final double posX, final double posY,
+        final double posZ, final ItemStackSnapshot snapshot, final List<ItemStackSnapshot> original, final CauseStackManager.StackFrame frame) {
+        final PlayerEntityBridge mixinPlayer;
+        if (entity instanceof PlayerEntityBridge) {
+            mixinPlayer = (PlayerEntityBridge) entity;
+        } else {
+            mixinPlayer = null;
+        }
+        final ItemStack item;
+
+        frame.pushCause(entity);
+
+        // FIRST we want to throw the DropItemEvent.PRE
+        final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(),
+            ImmutableList.of(snapshot), original);
+        SpongeImpl.postEvent(dropEvent);
+        if (dropEvent.isCancelled()) {
+            if (mixinPlayer != null) {
+                mixinPlayer.bridge$shouldRestoreInventory(true);
+            }
+            return null;
+        }
+        if (dropEvent.getDroppedItems().isEmpty()) {
+            return null;
+        }
+
+        // SECOND throw the ConstructEntityEvent
+        final Transform<World> suggested = new Transform<>((World) entity.world, new Vector3d(posX, posY, posZ));
+        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, suggested);
+        frame.removeContext(EventContextKeys.SPAWN_TYPE);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            // Make sure the player is restoring inventories
+            if (mixinPlayer != null) {
+                mixinPlayer.bridge$shouldRestoreInventory(true);
+            }
+            return null;
+        }
+
+        item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
+        if (item == null) {
+            // Make sure the player is restoring inventories
+            if (mixinPlayer != null) {
+                mixinPlayer.bridge$shouldRestoreInventory(true);
+            }
+            return null;
+        }
+        return item;
     }
 }

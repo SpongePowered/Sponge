@@ -171,25 +171,6 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
         this.currentItem = itemIndex;
     }
 
-    /**
-     * @author blood - October 7th, 2015
-     * @reason Prevents inventory from being cleared until after events.
-     */
-    @Overwrite
-    public void dropAllItems() { // dropAllItems
-        for (final NonNullList<ItemStack> aitemstack : this.allInventories)
-        {
-            for (int i = 0; i < aitemstack.size(); ++i)
-            {
-                if (!aitemstack.get(i).isEmpty())
-                {
-                    this.player.dropItem(aitemstack.get(i), true, false);
-                    //aitemstack[i] = null; // Sponge - we handle this after calling the death event
-                }
-            }
-        }
-    }
-
     @Override
     public int bridge$getFirstAvailableSlot(final ItemStack itemstack) {
         for (int i = 0; i < this.mainInventory.size(); ++i) {

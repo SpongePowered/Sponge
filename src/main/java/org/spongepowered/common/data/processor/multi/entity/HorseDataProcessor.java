@@ -35,7 +35,6 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHorseDat
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeHorseColor;
 import org.spongepowered.common.entity.SpongeHorseStyle;
 import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
@@ -65,7 +64,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
         SpongeHorseColor horseColor = (SpongeHorseColor) keyValues.get(Keys.HORSE_COLOR);
         SpongeHorseStyle horseStyle = (SpongeHorseStyle) keyValues.get(Keys.HORSE_STYLE);
 
-        int variant = EntityUtil.getHorseInternalVariant(horseColor, horseStyle);
+        int variant = horseColor.getBitMask() | horseStyle.getBitMask();
 
         entity.setHorseVariant(variant);
 

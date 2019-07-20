@@ -43,7 +43,8 @@ public abstract class WorldMixin_UseActiveChunkForCollisions {
 
     @Shadow public boolean isFlammableWithin(final AxisAlignedBB bb) { return false; } // shadow
 
-    @Shadow protected abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
+    @Shadow private boolean isAreaLoaded(
+        final int xStart, final int yStart, final int zStart, final int xEnd, final int yEnd, final int zEnd, final boolean allowEmpty) { return false; } // SHADOW
 
     @Redirect(method = "isFlammableWithin", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(IIIIIIZ)Z"))
     private boolean activeCollision$IgnoreIsAreaLoaded(final World world, final int xStart, final int yStart, final int zStart,

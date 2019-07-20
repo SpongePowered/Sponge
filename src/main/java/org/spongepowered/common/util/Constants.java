@@ -44,7 +44,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
-import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.net.InetSocketAddress;
@@ -530,7 +530,7 @@ public final class Constants {
             public static final short DEFAULT_REQUIRED_PLAYER_RANGE = 16;
             public static final short DEFAULT_SPAWN_RANGE = 4;
             public static final WeightedSerializableObject<EntityArchetype> DEFAULT_NEXT_ENTITY_TO_SPAWN = new WeightedSerializableObject<>
-                    (EntityUtil.archetype(Constants.Catalog.DEFAULT_SPAWNER_ENTITY), 1);
+                    (new SpongeEntityArchetypeBuilder().type(Catalog.DEFAULT_SPAWNER_ENTITY).build(), 1);
             public static final String SPAWNABLE_ENTITY_TAG = "EntityTag";
         }
 

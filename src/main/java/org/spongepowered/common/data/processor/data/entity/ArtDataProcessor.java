@@ -24,7 +24,13 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import net.minecraft.entity.EntityTracker;
+import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.SPacketDestroyEntities;
+import net.minecraft.network.play.server.SPacketSpawnPainting;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArtData;
@@ -33,14 +39,19 @@ import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.mixin.core.entity.EntityHangingAccessor;
+import org.spongepowered.common.mixin.core.entity.EntityTrackerAccessor;
+import org.spongepowered.common.mixin.core.entity.EntityTrackerEntryAccessor;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPainting, Art, Value<Art>, ArtData, ImmutableArtData> {
@@ -49,21 +60,48 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
         super(EntityPainting.class, Keys.ART);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    protected boolean set(EntityPainting entity, Art value) {
+    protected boolean set(final EntityPainting entity, final Art value) {
         if (!entity.world.isRemote) {
-            return EntityUtil.refreshPainting(entity, (EntityPainting.EnumArt) (Object) value);
+            final EntityPainting.EnumArt oldArt = entity.art;
+            entity.art = (EntityPainting.EnumArt) (Object) value;
+            ((EntityHangingAccessor) entity).accessor$updateFacingWithBoundingBox(entity.facingDirection);
+            if (!entity.onValidSurface()) {
+                entity.art = oldArt;
+                ((EntityHangingAccessor) entity).accessor$updateFacingWithBoundingBox(entity.facingDirection);
+                return false;
+            }
+
+            final EntityTracker paintingTracker = ((WorldServer) entity.world).getEntityTracker();
+            final EntityTrackerEntry paintingEntry = ((EntityTrackerAccessor) paintingTracker).accessor$getTrackedEntityTable().lookup(entity.getEntityId());
+            final List<EntityPlayerMP> playerMPs = new ArrayList<>();
+            for (final EntityPlayerMP player : ((EntityTrackerEntryAccessor) paintingEntry).accessor$getTrackingPlayers()) {
+                final SPacketDestroyEntities packet = new SPacketDestroyEntities(entity.getEntityId());
+                player.connection.sendPacket(packet);
+                playerMPs.add(player);
+            }
+            for (final EntityPlayerMP playerMP : playerMPs) {
+                SpongeImpl.getGame().getScheduler().createTaskBuilder()
+                        .delayTicks(SpongeImpl.getGlobalConfigAdapter().getConfig().getEntity().getPaintingRespawnDelaly())
+                        .execute(() -> {
+                            final SPacketSpawnPainting packet = new SPacketSpawnPainting(entity);
+                            playerMP.connection.sendPacket(packet);
+                        })
+                        .submit(SpongeImpl.getPlugin());
+            }
+            return true;
         }
         return true;
     }
 
     @Override
-    protected Optional<Art> getVal(EntityPainting entity) {
+    protected Optional<Art> getVal(final EntityPainting entity) {
         return Optional.of((Art) (Object) entity.art);
     }
 
     @Override
-    protected ImmutableValue<Art> constructImmutableValue(Art value) {
+    protected ImmutableValue<Art> constructImmutableValue(final Art value) {
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, this.key, value, Constants.Catalog.DEFAULT_ART);
     }
 
@@ -73,12 +111,12 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
     }
 
     @Override
-    protected Value<Art> constructValue(Art actualValue) {
+    protected Value<Art> constructValue(final Art actualValue) {
         return new SpongeValue<>(Keys.ART, Constants.Catalog.DEFAULT_ART, actualValue);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

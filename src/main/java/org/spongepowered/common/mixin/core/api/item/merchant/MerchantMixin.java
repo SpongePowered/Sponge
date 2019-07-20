@@ -39,7 +39,6 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.util.VecHelper;
 
 import javax.annotation.Nullable;
@@ -54,7 +53,9 @@ public interface MerchantMixin extends Merchant {
 
     @Nullable
     default EntityPlayer imerchant$getCustomer() {
-        return this.getCustomer().map(EntityUtil.HUMANOID_TO_PLAYER).orElse(null);
+        return (EntityPlayer) this.getCustomer()
+            .filter(humanoid -> humanoid instanceof EntityPlayer)
+            .orElse(null);
     }
 
     @Nullable
