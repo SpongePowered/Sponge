@@ -403,6 +403,7 @@
         "util.DamageSourceMixin",
         "util.EntityDamageSourceIndirectAccessor",
         "util.EntityDamageSourceMixin",
+        "util.EnumFacingMixin",
         "util.FoodStatsAccessor",
         "util.IndirectEntityDamageSourceMixin",
         "util.PacketThreadUtil$1Mixin",

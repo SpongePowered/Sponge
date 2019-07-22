@@ -29,14 +29,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntityCommandBlock;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.context.Contextual;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.service.permission.SubjectReference;
-import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,16 +39,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeInternalListeners;
-import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.bridge.command.CommandSenderBridge;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
@@ -68,7 +60,7 @@ import javax.annotation.Nullable;
 public abstract class SubjectMixin implements CommandSourceBridge, SubjectBridge {
 
     @Nullable
-    private SubjectReference thisSubject;
+    private SubjectReference impl$subjectReference;
 
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     private void subjectConstructor(final CallbackInfo ci) {
@@ -79,7 +71,7 @@ public abstract class SubjectMixin implements CommandSourceBridge, SubjectBridge
 
     @Override
     public void bridge$setSubject(final SubjectReference subj) {
-        this.thisSubject = subj;
+        this.impl$subjectReference = subj;
     }
 
     @Override
@@ -90,12 +82,12 @@ public abstract class SubjectMixin implements CommandSourceBridge, SubjectBridge
 
     @Override
     public Optional<Subject> bridge$resolveOptional() {
-        if (this.thisSubject == null) {
+        if (this.impl$subjectReference == null) {
             final Optional<PermissionService> serv = SpongeImpl.getGame().getServiceManager().provide(PermissionService.class);
             serv.ifPresent(permissionService -> new SubjectSettingCallback(this).test(permissionService));
         }
 
-        return Optional.ofNullable(this.thisSubject).map(SubjectReference::resolve).map(CompletableFuture::join);
+        return Optional.ofNullable(this.impl$subjectReference).map(SubjectReference::resolve).map(CompletableFuture::join);
     }
 
     @Override

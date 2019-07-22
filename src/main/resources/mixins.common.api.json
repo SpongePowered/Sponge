@@ -81,7 +81,6 @@
         "mcp.block.properties.PropertyIntegerMixin_API",
         "mcp.block.state.IBlockStateMixin_API",
         "mcp.block.state.StateImplementationMixin_API",
-        "mcp.command.SubjectMixin_API",
         "mcp.enchantment.EnchantmentMixin_API",
         "mcp.entity.EntityAgeableMixin_API",
         "mcp.entity.EntityAreaEffectCloudMixin_API",

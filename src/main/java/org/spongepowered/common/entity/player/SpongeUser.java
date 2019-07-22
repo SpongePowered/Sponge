@@ -65,7 +65,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -390,7 +389,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         spongeCompound.removeTag(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
 
         final NBTTagList spawnList = new NBTTagList();
-        for (final Entry<UUID, RespawnLocation> entry : this.spawnLocations.entrySet()) {
+        for (final Map.Entry<UUID, RespawnLocation> entry : this.spawnLocations.entrySet()) {
             final RespawnLocation respawn = entry.getValue();
 
             final NBTTagCompound spawnCompound = new NBTTagCompound();
@@ -418,7 +417,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             compound.setTag(Constants.Forge.FORGE_DATA, forgeCompound);
         }
 
-        CustomDataNbtUtil.writeCustomData(spongeCompound, ((DataHolder) this));
+        CustomDataNbtUtil.writeCustomData(spongeCompound, (DataHolder) this);
     }
 
     @Override
@@ -473,7 +472,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     @SuppressWarnings("rawtypes")
     @Override
     public CarriedInventory<?> getInventory() {
-        return this.getForInventory(Player::getInventory, u -> ((CarriedInventory) u.inventory));
+        return this.getForInventory(Player::getInventory, u -> (CarriedInventory) u.inventory);
     }
 
     @Override
@@ -500,10 +499,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     @Override
     public Map<UUID, RespawnLocation> bridge$getBedlocations() {
         final Optional<Player> player = this.self.getPlayer();
-        if (player.isPresent()) {
-            return ((BedLocationsBridge) player.get()).bridge$getBedlocations();
-        }
-        return this.spawnLocations;
+        return player
+            .map(value -> ((BedLocationsBridge) value).bridge$getBedlocations())
+            .orElse(this.spawnLocations);
     }
 
     @Override
@@ -559,14 +557,14 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     // Helpers for UserInventory
 
-    private <T> T getForInventory(final Function<Player, T> playerFunction, final Function<SpongeUser, T> userFunction) {
+    private <T> T getForInventory(final Function<? super Player, ? extends T> playerFunction, final Function<? super SpongeUser, T> userFunction) {
         if (this.self.getPlayer().isPresent()) {
             return playerFunction.apply(this.self.getPlayer().get());
         }
         return userFunction.apply(this.loadInventory()); // Load Inventory if not yet loaded
     }
 
-    private void setForInventory(final Consumer<Player> playerFunction, final Consumer<SpongeUser> userFunction) {
+    private void setForInventory(final Consumer<? super Player> playerFunction, final Consumer<? super SpongeUser> userFunction) {
         if (this.self.getPlayer().isPresent()) {
             playerFunction.accept(this.self.getPlayer().get());
             return;
