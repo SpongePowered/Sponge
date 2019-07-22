@@ -507,18 +507,10 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer()) {
             compound.setBoolean(Constants.Sponge.Entity.CAN_GRIEF, ((GrieferBridge) this).bridge$CanGrief());
         }
-        if (this.vanish$isVanished) {
-            compound.setBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
-            if (this.vanish$isUncollideable()) {
-                compound.setBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, true);
-            }
-            if (this.vanish$isUntargetable()) {
-                compound.setBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, true);
-            }
-        }
-        if (this.isInvisible()) {
-            compound.setBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
-        }
+        compound.setBoolean(Constants.Sponge.Entity.IS_VANISHED, this.vanish$isVanished());
+        compound.setBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, this.vanish$isUncollideable());
+        compound.setBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, this.vanish$isUntargetable());
+        compound.setBoolean(Constants.Sponge.Entity.IS_INVISIBLE, this.isInvisible());
     }
 
     @Override
