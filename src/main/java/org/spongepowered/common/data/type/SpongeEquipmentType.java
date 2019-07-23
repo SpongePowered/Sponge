@@ -38,7 +38,7 @@ public class SpongeEquipmentType extends SpongeCatalogType implements EquipmentT
     }
 
     public EntityEquipmentSlot[] getSlots() {
-        return slots;
+        return this.slots;
     }
 
 }

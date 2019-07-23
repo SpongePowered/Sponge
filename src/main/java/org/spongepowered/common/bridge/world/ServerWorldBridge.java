@@ -31,7 +31,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -49,8 +48,6 @@ import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
-import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -132,7 +129,7 @@ public interface ServerWorldBridge {
 
     long bridge$getChunkUnloadDelay();
 
-    net.minecraft.world.Explosion bridge$triggerInternalExplosion(Explosion explosion, Function<net.minecraft.world.Explosion, PhaseContext<?>> contextCreator);
+    net.minecraft.world.Explosion bridge$triggerInternalExplosion(Explosion explosion, Function<? super net.minecraft.world.Explosion, ? extends PhaseContext<?>> contextCreator);
 
     void bridge$doChunkGC();
 

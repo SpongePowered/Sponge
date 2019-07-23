@@ -27,13 +27,12 @@ package org.spongepowered.common.mixin.core.world;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundEvent;
@@ -43,12 +42,13 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,7 +62,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
@@ -73,10 +72,8 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.mixin.tileentityactivation.WorldServerMixin_TileEntityActivation;
+import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.util.ArrayList;
@@ -102,10 +99,10 @@ public abstract class WorldMixin implements WorldBridge {
     @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
     @Shadow @Final public List<net.minecraft.entity.Entity> weatherEffects;
     @Shadow @Final protected List<net.minecraft.entity.Entity> unloadedEntityList;
-    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
-    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tickableTileEntities;
-    @Shadow @Final private List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
-    @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
+    @Shadow @Final public List<TileEntity> loadedTileEntityList;
+    @Shadow @Final public List<TileEntity> tickableTileEntities;
+    @Shadow @Final private List<TileEntity> tileEntitiesToBeRemoved;
+    @Shadow @Final private List<TileEntity> addedTileEntityList;
     @SuppressWarnings("ShadowModifiers") @Shadow protected int[] lightUpdateBlockList; // Elevated to protected for subclass mixins to access when they're separated by package
     @Shadow private boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
@@ -125,19 +122,19 @@ public abstract class WorldMixin implements WorldBridge {
     @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
     @Shadow protected abstract int getRawLight(BlockPos pos, EnumSkyBlock lightType);
     @Shadow public abstract int getSkylightSubtracted();
-    @Shadow @Nullable public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
+    @Shadow @Nullable public abstract Chunk getChunk(BlockPos pos);
     @Shadow public abstract WorldInfo getWorldInfo();
     @Shadow public abstract boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos);
-    @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
+    @Shadow public abstract boolean addTileEntity(TileEntity tile);
     @Shadow protected abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
     @Shadow protected abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
-    @Shadow public void markChunkDirty(final BlockPos pos, final net.minecraft.tileentity.TileEntity unusedTileEntity){};
+    @Shadow public void markChunkDirty(final BlockPos pos, final TileEntity unusedTileEntity){};
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract Biome getBiome(BlockPos pos);
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(int chunkX, int chunkZ);
+    @Shadow public abstract Chunk getChunk(int chunkX, int chunkZ);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class <? extends T > clazz, AxisAlignedBB aabb,
@@ -166,7 +163,7 @@ public abstract class WorldMixin implements WorldBridge {
     @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
     @Shadow public abstract void notifyLightSet(BlockPos pos);
-    @Shadow @Nullable private net.minecraft.tileentity.TileEntity getPendingTileEntityAt(final BlockPos p_189508_1_) {
+    @Shadow @Nullable private TileEntity getPendingTileEntityAt(final BlockPos p_189508_1_) {
         return null; // Shadowed
     }
     @Shadow public abstract int getHeight(int x, int z);
@@ -179,6 +176,8 @@ public abstract class WorldMixin implements WorldBridge {
     @Shadow public abstract long getTotalWorldTime();
     @Shadow private boolean isAreaLoaded(
         final int xStart, final int yStart, final int zStart, final int xEnd, final int yEnd, final int zEnd, final boolean allowEmpty) { return false; } // SHADOWED
+    @Shadow public void updateEntities() { }
+    @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos);
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
                                                                      + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
@@ -227,7 +226,7 @@ public abstract class WorldMixin implements WorldBridge {
      */
     @Nullable
     @Redirect(method = "removeTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getTileEntity(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/tileentity/TileEntity;"))
-    protected net.minecraft.tileentity.TileEntity getTileEntityForRemoval(final net.minecraft.world.World world, final BlockPos pos) {
+    protected TileEntity getTileEntityForRemoval(final net.minecraft.world.World world, final BlockPos pos) {
         return world.getTileEntity(pos); // Overridden in WorldServerMixin
     }
 
@@ -258,7 +257,7 @@ public abstract class WorldMixin implements WorldBridge {
         locals = LocalCapture.CAPTURE_FAILEXCEPTION,
         cancellable = true
     )
-    protected void onCheckTileEntityForRemoval(final BlockPos pos, final CallbackInfo ci, final net.minecraft.tileentity.TileEntity found, final net.minecraft.world.World thisWorld, final BlockPos samePos) {
+    protected void onCheckTileEntityForRemoval(final BlockPos pos, final CallbackInfo ci, final TileEntity found, final net.minecraft.world.World thisWorld, final BlockPos samePos) {
 
     }
 
@@ -275,7 +274,7 @@ public abstract class WorldMixin implements WorldBridge {
      * @return The processing tiles field, used as a hook
      */
     @Redirect(method = "setTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;isInvalid()Z"))
-    protected boolean onSetTileEntityForCapture(final net.minecraft.tileentity.TileEntity tileEntity, final BlockPos pos, final net.minecraft.tileentity.TileEntity sameEntity) {
+    protected boolean onSetTileEntityForCapture(final TileEntity tileEntity, final BlockPos pos, final TileEntity sameEntity) {
         return tileEntity.isInvalid();
     }
 
@@ -295,6 +294,7 @@ public abstract class WorldMixin implements WorldBridge {
         this.impl$hasChecked = false;
     }
 
+    @SuppressWarnings("Guava")
     @Redirect(method = "isAnyPlayerWithinRangeAt", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     private boolean onIsAnyPlayerWithinRangePredicate(final com.google.common.base.Predicate<EntityPlayer> predicate, final Object object) {
         final EntityPlayer player = (EntityPlayer) object;
@@ -306,16 +306,11 @@ public abstract class WorldMixin implements WorldBridge {
     private List<net.minecraft.entity.Entity> filterInvisibile(final net.minecraft.world.World world, final net.minecraft.entity.Entity entityIn,
         final AxisAlignedBB axisAlignedBB) {
         final List<net.minecraft.entity.Entity> entities = world.getEntitiesWithinAABBExcludingEntity(entityIn, axisAlignedBB);
-        final Iterator<net.minecraft.entity.Entity> iterator = entities.iterator();
-        while (iterator.hasNext()) {
-            final net.minecraft.entity.Entity entity = iterator.next();
-            if (((VanishingBridge) entity).vanish$isVanished() && ((VanishingBridge) entity).vanish$isUncollideable()) {
-                iterator.remove();
-            }
-        }
+        entities.removeIf(entity -> ((VanishingBridge) entity).vanish$isVanished() && ((VanishingBridge) entity).vanish$isUncollideable());
         return entities;
     }
 
+    @SuppressWarnings("Guava")
     @Redirect(method = "getClosestPlayer(DDDDLcom/google/common/base/Predicate;)Lnet/minecraft/entity/player/EntityPlayer;", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     private boolean onGetClosestPlayerCheck(final com.google.common.base.Predicate<net.minecraft.entity.Entity> predicate, final Object entityPlayer) {
         return predicate.apply((EntityPlayer) entityPlayer) && !((VanishingBridge) entityPlayer).vanish$isVanished();
@@ -361,25 +356,22 @@ public abstract class WorldMixin implements WorldBridge {
             at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false),
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/World;tickableTileEntities:Ljava/util/List;"),
                            to =   @At(value = "FIELD", target = "Lnet/minecraft/world/World;isRemote:Z")))
-    private boolean onAddTileEntity(final List<net.minecraft.tileentity.TileEntity> list, final Object tile) {
-        if (!this.bridge$isFake() && !canTileUpdate((net.minecraft.tileentity.TileEntity) tile)) {
+    private boolean onAddTileEntity(final List<? super TileEntity> list, final Object tile) {
+        if (!this.bridge$isFake() && !canTileUpdate((TileEntity) tile)) {
             return false;
         }
 
-        return list.add((net.minecraft.tileentity.TileEntity) tile);
+        return list.add((TileEntity) tile);
     }
 
-    private boolean canTileUpdate(final net.minecraft.tileentity.TileEntity tile) {
-        final TileEntity spongeTile = (TileEntity) tile;
-        if (spongeTile.getType() != null && !((SpongeTileEntityType) spongeTile.getType()).canTick()) {
-            return false;
-        }
-
-        return true;
+    @SuppressWarnings("ConstantConditions")
+    private boolean canTileUpdate(final TileEntity tile) {
+        final org.spongepowered.api.block.tileentity.TileEntity spongeTile = (org.spongepowered.api.block.tileentity.TileEntity) tile;
+        return spongeTile.getType() == null || ((SpongeTileEntityType) spongeTile.getType()).canTick();
     }
 
     @Inject(method = "getPlayerEntityByUUID", at = @At("HEAD"), cancellable = true)
-    private void onGetPlayerEntityByUUID(final UUID uuid, final CallbackInfoReturnable<UUID> cir) {
+    private void onGetPlayerEntityByUUID(@Nullable final UUID uuid, final CallbackInfoReturnable<UUID> cir) {
         // avoid crashing server if passed a null UUID
         if (uuid == null) {
             cir.setReturnValue(null);
@@ -398,7 +390,7 @@ public abstract class WorldMixin implements WorldBridge {
     @Inject(method = "getRawLight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState" +
             "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"), cancellable = true)
     protected void impl$getRawLightWithoutMarkingChunkActive(final BlockPos pos, final EnumSkyBlock enumSkyBlock, final CallbackInfoReturnable<Integer> cir) {
-        final net.minecraft.world.chunk.Chunk chunk;
+        final Chunk chunk;
         chunk = this.getChunk(pos);
         if (chunk == null || chunk.unloadQueued) {
             cir.setReturnValue(0);
@@ -420,72 +412,62 @@ public abstract class WorldMixin implements WorldBridge {
             // Sponge end
             return Blocks.AIR.getDefaultState();
         }
-        final net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
+        final Chunk chunk = this.getChunk(pos);
         return chunk.getBlockState(pos);
     }
 
-    /**
-     * @author gabizou - August 4th, 2016
-     * @author bloodmc - May 10th, 2017 - Added async check
-     * @reason Rewrites the check to be inlined to {@link BlockPosBridge}.
-     *
-     * @param pos The position
-     * @return The tile entity at the desired position, or else null
-     */
-    @Overwrite
-    @Nullable
-    public net.minecraft.tileentity.TileEntity getTileEntity(final BlockPos pos) {
-        // Sponge - Replace with inlined method
-        //  if (this.isOutsideBuildHeight(pos)) // Vanilla
-        if (((BlockPosBridge) pos).bridge$isInvalidYPosition()) {
-            return null;
-            // Sponge End
-        } else {
-            net.minecraft.tileentity.TileEntity tileentity = null;
+    @Redirect(method = "getTileEntity",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;isOutsideBuildHeight(Lnet/minecraft/util/math/BlockPos;)Z"))
+    private boolean impl$useInlinedMethodInsteadisoutsideBuildHeight(final World world, final BlockPos pos) {
+        return ((BlockPosBridge) pos).bridge$isInvalidYPosition();
+    }
 
-            // Sponge - Don't create or obtain pending tileentity async, simply check if TE exists in chunk
-            // Mods such as pixelmon call this method async, so this is a temporary workaround until fixed
-            if (!this.bridge$isFake() && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-                return this.getChunk(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
-            }
-            if (this.isTileMarkedForRemoval(pos) && !this.bridge$isFake()) {
-                if (PhaseTracker.getInstance().getCurrentState().allowsGettingQueuedRemovedTiles()) {
-                    return this.getQueuedRemovedTileFromProxy(pos);
-                }
-                return null;
-            }
-            tileentity = this.getProcessingTileFromProxy(pos);
-            if (tileentity != null) {
-                return tileentity;
-            }
-            // Sponge end
-
-            if (this.processingLoadedTiles) {
-                tileentity = this.getPendingTileEntityAt(pos);
-            }
-
-            if (tileentity == null) {
-                 tileentity = this.getChunk(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.IMMEDIATE);
-                 // Sponge - Make sure the tile entity is not actually marked for being "empty"
-                if (this.isTileMarkedAsNull(pos, tileentity)) {
-                    tileentity = null;
-                }
-            }
-
-            if (tileentity == null) {
-                tileentity = this.getPendingTileEntityAt(pos);
-            }
-
-            return tileentity;
+    @Inject(method = "getTileEntity", at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;processingLoadedTiles:Z"), cancellable = true)
+    private void impl$checkForAsync(final BlockPos pos, final CallbackInfoReturnable<TileEntity> cir) {
+        // Sponge - Don't create or obtain pending tileentity async, simply check if TE exists in chunk
+        // Mods such as pixelmon call this method async, so this is a temporary workaround until fixed
+        if (!this.bridge$isFake() && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            cir.setReturnValue(this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK));
+            return;
         }
+        if (this.isTileMarkedForRemoval(pos) && !this.bridge$isFake()) {
+            if (PhaseTracker.getInstance().getCurrentState().allowsGettingQueuedRemovedTiles()) {
+                cir.setReturnValue(this.getQueuedRemovedTileFromProxy(pos));
+                return;
+            }
+            cir.setReturnValue(null);
+        }
+
+    }
+
+    /**
+     * @author gabizou - Sometime in 2019 - 1.12
+     * @reason Because the {@link SpongeProxyBlockAccess} can have different
+     * ways a {@link TileEntity} can exist and not exist, depending on the time
+     * that this method is called, we need to also check that the tile entity at
+     * the chunk is actually marked as null.
+     *
+     * @param chunk
+     * @param pos
+     * @param creationMode
+     * @return
+     */
+    @Redirect(method = "getTileEntity", at = @At(
+        value = "INVOKE",
+        target = "Lnet/minecraft/world/chunk/Chunk;getTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/chunk/Chunk$EnumCreateEntityType;)Lnet/minecraft/tileentity/TileEntity;"))
+    @Nullable
+    TileEntity impl$getTileOrNullIfMarkedForRemoval(final Chunk chunk, final BlockPos pos, final Chunk.EnumCreateEntityType creationMode) {
+        return chunk.getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
     }
 
     @Nullable
-    protected net.minecraft.tileentity.TileEntity getQueuedRemovedTileFromProxy(final BlockPos pos) {
+    protected TileEntity getQueuedRemovedTileFromProxy(final BlockPos pos) {
         return null;
     }
 
-    protected boolean isTileMarkedAsNull(final BlockPos pos, final net.minecraft.tileentity.TileEntity tileentity) {
+    protected boolean isTileMarkedAsNull(final BlockPos pos, @Nullable final TileEntity tileentity) {
         return false;
     }
 
@@ -494,7 +476,7 @@ public abstract class WorldMixin implements WorldBridge {
     }
 
     @Nullable
-    protected net.minecraft.tileentity.TileEntity getProcessingTileFromProxy(final BlockPos pos) {
+    protected TileEntity getProcessingTileFromProxy(final BlockPos pos) {
         return null;
     }
 
@@ -561,7 +543,7 @@ public abstract class WorldMixin implements WorldBridge {
             // Sponge End
             return type.defaultLightValue;
         } else {
-            final net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
+            final Chunk chunk = this.getChunk(pos);
             return chunk.getLightFor(type, pos);
         }
     }
@@ -581,7 +563,7 @@ public abstract class WorldMixin implements WorldBridge {
         if (((BlockPosBridge) pos).bridge$isValidPosition()) { // Sponge - Replace with inlined method to check
             // Sponge End
             if (this.isBlockLoaded(pos)) {
-                final net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
+                final Chunk chunk = this.getChunk(pos);
                 chunk.setLightFor(type, pos, lightValue);
                 this.notifyLightSet(pos);
             }
@@ -607,6 +589,7 @@ public abstract class WorldMixin implements WorldBridge {
      * @param bbox The AABB to check
      * @return True if the AABB collides with a block
      */
+    @SuppressWarnings("ConstantConditions")
     @Overwrite
     public boolean collidesWithAnyBlock(final AxisAlignedBB bbox) {
         final List<AxisAlignedBB> list = Lists.<AxisAlignedBB>newArrayList();
@@ -632,16 +615,14 @@ public abstract class WorldMixin implements WorldBridge {
                                 // if (k1 < -30000000 || k1 >= 30000000 || l1 < -30000000 || l1 >= 30000000) // Vanilla
                                 if (!((BlockPosBridge) (Object) blockpos$pooledmutableblockpos).bridge$isValidXZPosition()) {
                                     // Sponge End
-                                    final boolean flag1 = true;
-                                    return flag1;
+                                    return true;
                                 }
 
                                 final IBlockState iblockstate = this.getBlockState(blockpos$pooledmutableblockpos);
                                 iblockstate.addCollisionBoxToList((net.minecraft.world.World) (Object) this, blockpos$pooledmutableblockpos, bbox, list, (net.minecraft.entity.Entity) null, false);
 
                                 if (!list.isEmpty()) {
-                                    final boolean flag = true;
-                                    return flag;
+                                    return true;
                                 }
                             }
                         }
@@ -655,264 +636,353 @@ public abstract class WorldMixin implements WorldBridge {
         }
     }
 
+    @Inject(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V",
+            shift = At.Shift.AFTER), // Basically, we want to position after the startSection
+        slice = @Slice(
+            from = @At(value = "CONSTANT", args = "stringValue=global"),
+            to = @At(value = "FIELD", target = "Lnet/minecraft/world/World;weatherEffects:Ljava/util/List;", ordinal = 0)
+        )
+    )
+    void impl$startEntityGlobalTimings(final CallbackInfo ci) {
+        // this.profiler startSection("global");
 
-    /**
-     * @author blood
-     * @author gabizou - Ported to 1.9.4 - replace direct field calls to overriden methods in WorldServerMixin
-     *
-     * @reason Add timing hooks in various areas. This method shouldn't be touched by mods/forge alike
-     */
-    @Overwrite
-    public void updateEntities() {
-        this.profiler.startSection("entities");
-        this.profiler.startSection("global");
-        this.startEntityGlobalTimings(); // Sponge
+        // Sponge -- inject here
 
-
-        for (int i = 0; i < this.weatherEffects.size(); ++i) {
-            final net.minecraft.entity.Entity entity = this.weatherEffects.get(i);
-
-            try {
-                ++entity.ticksExisted;
-                entity.onUpdate();
-            } catch (Throwable throwable2) {
-                this.stopTimingForWeatherEntityTickCrash(entity); // Sponge - end the entity timing
-                final CrashReport crashreport = CrashReport.makeCrashReport(throwable2, "Ticking entity");
-                final CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being ticked");
-
-                if (entity == null) {
-                    crashreportcategory.addCrashSection("Entity", "~~NULL~~");
-                } else {
-                    entity.addEntityCrashInfo(crashreportcategory);
-                }
-
-                SpongeImplHooks.onEntityError(entity, crashreport);
-            }
-
-            if (entity.isDead) {
-                this.weatherEffects.remove(i--);
-            }
-        }
-
-        this.stopEntityTickTimingStartEntityRemovalTiming(); // Sponge
-        this.profiler.endStartSection("remove");
-        this.loadedEntityList.removeAll(this.unloadedEntityList);
-
-        for (int k = 0; k < this.unloadedEntityList.size(); ++k) {
-            final net.minecraft.entity.Entity entity1 = this.unloadedEntityList.get(k);
-            // Sponge start - use cached chunk
-            // int j = entity1.chunkCoordX;
-            // int k1 = entity1.chunkCoordZ;
-
-            final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((ActiveChunkReferantBridge) entity1).bridge$getActiveChunk();
-            if (activeChunk != null) {
-                activeChunk.removeEntity(entity1);
-            }
-            // Sponge end
-        }
-
-        for (int l = 0; l < this.unloadedEntityList.size(); ++l) {
-            this.onEntityRemoved(this.unloadedEntityList.get(l));
-        }
-
-        this.unloadedEntityList.clear();
-        this.stopEntityRemovalTiming(); // Sponge
-        this.tickPlayers();
-        this.profiler.endStartSection("regular");
-        this.entityActivationCheck();
-
-        for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1) {
-            final net.minecraft.entity.Entity entity2 = this.loadedEntityList.get(i1);
-            final net.minecraft.entity.Entity entity3 = entity2.getRidingEntity();
-
-            if (entity3 != null) {
-                if (!entity3.isDead && entity3.isPassenger(entity2)) {
-                    continue;
-                }
-
-                entity2.dismountRidingEntity();
-            }
-
-            this.profiler.startSection("tick");
-            this.startEntityTickTiming(); // Sponge
-
-            if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
-                try {
-                    SpongeImplHooks.onEntityTickStart(entity2);
-                    this.updateEntity(entity2);
-                    SpongeImplHooks.onEntityTickEnd(entity2);
-                } catch (Throwable throwable1) {
-                    this.stopTimingTickEntityCrash(entity2); // Sponge
-                    final CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
-                    final CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Entity being ticked");
-                    entity2.addEntityCrashInfo(crashreportcategory1);
-                    SpongeImplHooks.onEntityError(entity2, crashreport1);
-                }
-            }
-
-            this.stopEntityTickSectionBeforeRemove(); // Sponge
-            this.profiler.endSection();
-            this.profiler.startSection("remove");
-            this.startEntityRemovalTick(); // Sponge
-
-            if (entity2.isDead) {
-                // Sponge start - use cached chunk
-                final int l1 = entity2.chunkCoordX;
-                final int i2 = entity2.chunkCoordZ;
-
-                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((ActiveChunkReferantBridge) entity2).bridge$getActiveChunk();
-                if (activeChunk == null) {
-                    this.getChunk(l1, i2).removeEntity(entity2);
-                } else {
-                    activeChunk.removeEntity(entity2);
-                }
-                // Sponge end
-
-                this.loadedEntityList.remove(i1--);
-                this.onEntityRemoved(entity2);
-            }
-
-            this.stopEntityRemovalTiming(); // Sponge
-            this.profiler.endSection();
-        }
-
-         this.profiler.endStartSection("blockEntities");
-        spongeTileEntityActivation();
-        this.processingLoadedTiles = true;
-        final Iterator<net.minecraft.tileentity.TileEntity> iterator = this.tickableTileEntities.iterator();
-
-        while (iterator.hasNext()) {
-            this.startTileTickTimer(); // Sponge
-            final net.minecraft.tileentity.TileEntity tileentity = iterator.next();
-
-            if (!tileentity.isInvalid() && tileentity.hasWorld()) {
-                final BlockPos blockpos = tileentity.getPos();
-
-                if (((TileEntityBridge) tileentity).bridge$shouldTick() && this.worldBorder.contains(blockpos)) { // Sponge
-                    try {
-                        this.profiler.func_194340_a(() -> String.valueOf(net.minecraft.tileentity.TileEntity.getKey(tileentity.getClass())));
-                        SpongeImplHooks.onTETickStart(tileentity);
-                        ((ITickable) tileentity).update();
-                        this.profiler.endSection();
-                        SpongeImplHooks.onTETickEnd(tileentity);
-                    } catch (Throwable throwable) {
-                        this.stopTimingTickTileEntityCrash(tileentity); // Sponge
-                        final CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
-                        final CrashReportCategory crashreportcategory2 = crashreport2.makeCategory("Block entity being ticked");
-                        tileentity.addInfoToCrashReport(crashreportcategory2);
-                        SpongeImplHooks.onTileEntityError(tileentity, crashreport2);
-                    }
-                }
-            }
-
-            this.stopTileEntityAndStartRemoval(); // Sponge
-
-            if (tileentity.isInvalid()) {
-                iterator.remove();
-                this.loadedTileEntityList.remove(tileentity);
-                // Sponge start - use cached chunk
-                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((ActiveChunkReferantBridge) tileentity).bridge$getActiveChunk();
-                if (activeChunk != null) {
-                    //this.getChunk(tileentity.getPos()).bridge$removeTileEntity(tileentity.getPos());
-                    //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desynced
-                    if (activeChunk.getTileEntity(tileentity.getPos(), net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK) == tileentity) {
-                        activeChunk.removeTileEntity(tileentity.getPos());
-                    }
-                }
-                // Sponge end
-            }
-
-            this.stopTileEntityRemovelInWhile(); // Sponge
-        }
-
-        if (!this.tileEntitiesToBeRemoved.isEmpty()) {
-            // Sponge start - use forge hook
-            for (final Object tile : this.tileEntitiesToBeRemoved) {
-               SpongeImplHooks.onTileChunkUnload(((net.minecraft.tileentity.TileEntity)tile));
-            }
-            // Sponge end
-
-            // forge: faster "contains" makes this removal much more efficient
-            final java.util.Set<net.minecraft.tileentity.TileEntity> remove = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
-            remove.addAll(this.tileEntitiesToBeRemoved);
-            this.tickableTileEntities.removeAll(remove);
-            this.loadedTileEntityList.removeAll(remove);
-            this.tileEntitiesToBeRemoved.clear();
-        }
-
-        if (!this.bridge$isFake()) {
-            try (final PhaseContext<?> context = BlockPhase.State.TILE_CHUNK_UNLOAD.createPhaseContext().source(this)) {
-                context.buildAndSwitch();
-                this.startPendingTileEntityTimings(); // Sponge
-            }
-        }
-
-        this.processingLoadedTiles = false;  //FML Move below remove to prevent CMEs
-         this.profiler.endStartSection("pendingBlockEntities");
-
-        if (!this.addedTileEntityList.isEmpty()) {
-            for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1) {
-                final net.minecraft.tileentity.TileEntity tileentity1 = this.addedTileEntityList.get(j1);
-
-                if (!tileentity1.isInvalid()) {
-                    if (!this.loadedTileEntityList.contains(tileentity1)) {
-                        this.addTileEntity(tileentity1);
-                    }
-
-                    if (this.isBlockLoaded(tileentity1.getPos())) {
-                        final net.minecraft.world.chunk.Chunk chunk = this.getChunk(tileentity1.getPos());
-                        final IBlockState iblockstate = chunk.getBlockState(tileentity1.getPos());
-                        chunk.addTileEntity(tileentity1.getPos(), tileentity1);
-                        this.notifyBlockUpdate(tileentity1.getPos(), iblockstate, iblockstate, 3);
-                    }
-                }
-            }
-
-            this.addedTileEntityList.clear();
-        }
-
-        this.endPendingTileEntities(); // Sponge
-        this.profiler.endSection();
-        this.profiler.endSection();
+        // for (int i = 0; i < this.weatherEffects.size(); ++i) {
     }
 
-    /**
-     * Overridden in {@link WorldServerMixin_TileEntityActivation}
-     */
-    public void spongeTileEntityActivation() {
+    @Inject(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;",
+            ordinal = 0
+        ),
+        locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    void impl$stopTimingForWeatherEntityTickCrash(final CallbackInfo ci, final int index, final Entity entity, final Throwable throwable) {
+        // catch (final Throwable throwable2) {
+        // sponge - inject here
+        // final CrashReport crashreport = CrashReport.makeCrashReport(throwable2, "Ticking entity");
+    }
+
+    @Inject(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V",
+            shift = At.Shift.BEFORE,
+            by = 2
+        ),
+        slice = @Slice(
+            from = @At(value = "CONSTANT", args = "stringValue=remove"),
+            to = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/world/World;unloadedEntityList:Ljava/util/List;",
+                opcode = Opcodes.GETFIELD,
+                ordinal = 0)
+        )
+    )
+    void impl$stopEntityTickTiming(final CallbackInfo ci) {
+         // Sponge -- inject here
+        // this.profiler.endStartSection("remove");
+    }
+
+    @Redirect(method = "updateEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;addedToChunk:Z"))
+    private boolean impl$ReturnFalseUseActiveChunkReferant(final Entity entity) {
+        // Sponge start - use cached chunk
+        // int j = entity1.chunkCoordX;
+        // int k1 = entity1.chunkCoordZ;
+
+        // Sponge start - use cached chunk
+        final int l1 = entity.chunkCoordX;
+        final int i2 = entity.chunkCoordZ;
+
+        final Chunk activeChunk = (Chunk) ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();
+        if (activeChunk == null) {
+            this.getChunk(l1, i2).removeEntity(entity);
+        } else {
+            activeChunk.removeEntity(entity);
+        }
+        // Sponge end
+        //if (entity1.addedToChunk && this.isChunkLoaded(j, k1, true))
+        //{
+        //    this.getChunk(j, k1).removeEntity(entity1);
+        //}
+        // Sponge end
+        // Always return false to avoid the rest of the if statement. we handle it in the active chunk check above.
+        return false;
+    }
+
+    @Inject(method = "updateEntities",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;tickPlayers()V"))
+    void impl$stopEntityRemovalTiming(final CallbackInfo ci) {
+        // this.unloadedEntityList.clear();
+        // Sponge -- inject here
+        // this.tickPlayers();
+    }
+
+    @Inject(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V",
+            shift = At.Shift.AFTER
+        ),
+        slice = @Slice(
+            from = @At(value = "CONSTANT", args = "stringValue=regular"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getRidingEntity()Lnet/minecraft/entity/Entity;")
+        )
+    )
+    protected void impl$entityActivationCheck(final CallbackInfo ci) {
+        //this.profiler.endStartSection("regular");
+        // Sponge -- inject here
+
+        // for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1) {
+    }
+
+    @Inject(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V",
+            shift = At.Shift.AFTER // We want to inject after the start section call.
+        ),
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;dismountRidingEntity()V"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;updateEntity(Lnet/minecraft/entity/Entity;)V")
+        )
+    )
+    void impl$startEntityTickingForTick(final CallbackInfo ci) {
+        // this.profiler.startSection("tick");
+        // Sponge -- inject here
+
+        // if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
+    }
+
+    @Inject(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"),
+        slice = @Slice(
+            from = @At(value = "CONSTANT", args = "stringValue=Ticking entity", ordinal = 1),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;addEntityCrashInfo(Lnet/minecraft/crash/CrashReportCategory;)V", ordinal = 1)
+        ),
+        locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    void impl$stopEntityAndThrowInfo(final CallbackInfo ci, final int index, final Entity ticking, @Nullable final Entity riding, final Throwable throwable) {
+        // } catch (final Throwable throwable1) {
+        // Sponge -- inject here
+        // final CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
+    }
+
+    @Inject(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/profiler/Profiler;endSection()V",
+            shift = At.Shift.BEFORE,
+            by = 2 // Allows us to inject before calling `this.profiler`
+        ),
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;updateEntity(Lnet/minecraft/entity/Entity;)V"),
+            to = @At(value = "CONSTANT", args = "stringValue=remove", ordinal = 1)
+        )
+    )
+    void impl$startEntityRemovalTiming(final CallbackInfo callbackInfo) {
+        // Sponge -- inject here
+        // this.profiler.endSection();
+        // this.profiler.startSection("remove");
+
+        // if (entity2.isDead) {
+    }
+
+    @Inject(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/profiler/Profiler;endSection()V",
+            shift = At.Shift.BEFORE,
+            by = 2),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/world/World;onEntityRemoved(Lnet/minecraft/entity/Entity;)V",
+                ordinal = 1),
+            to = @At(
+                value = "CONSTANT",
+                args = "stringValue=blockEntities")
+        )
+    )
+    void impl$stopRemovalTimingAfterentityRemovals(final CallbackInfo ci) {
+            // this.onEntityRemoved(entity2);
+        // }
+        // Sponge -- inject here
+        // this.profiler.endSection();
+    }
+
+    @Inject(method = "updateEntities",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;processingLoadedTiles:Z", opcode = Opcodes.PUTFIELD),
+        slice = @Slice(
+            from = @At(value = "CONSTANT", args = "stringValue=blockEntities"),
+            // This is slightly ambiguous due to the nature of forge moving tile removals
+            // before `this.processingLoadedTiles`, so we have to directly target an after instruction
+            // being hasWorld since that is guaranteed to be called before `this.processingLoadedTiles = false`
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;hasWorld()Z")
+        )
+    )
+    protected void impl$tileActivationStart(final CallbackInfo callbackInfo) {
+        //this.profiler.endStartSection("blockEntities");
+        // Sponge -- inject here
+        // this.processingLoadedTiles = true;
+    }
+
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"),
+        slice = @Slice(
+            // Again, just like above, forge moves the removal of invalid tiles,
+            // so we have to target the field getter for the iterator the second time, always, instead
+            // of attempting to use the `this.processingLoadedTiles = true` assignment, because forge moves
+            // the block of tile entity removal code after the field assignment
+            from = @At(value = "FIELD",
+                target = "Lnet/minecraft/world/World;tickableTileEntities:Ljava/util/List;",
+                opcode = Opcodes.GETFIELD,
+                ordinal = 1),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;hasWorld()Z")
+        )
+    )
+    void impl$startTileTickTimer(final CallbackInfo ci) {
+        // while (iterator.hasNext()) {
+        // Sponge -- inject here
+        // final TileEntity tileentity = iterator.next();
+    }
+
+    @Inject(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"
+        ),
+        slice = @Slice(
+            from = @At(value = "CONSTANT", args = "stringValue=Ticking block entity"),
+            to = @At(value = "CONSTANT", args = "stringValue=Block entity being ticked")
+        ),
+        locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    void impl$stopTileTickCrash(final CallbackInfo ci, final Iterator<TileEntity> iterator, final TileEntity tickingTile,
+        final BlockPos pos, final Throwable throwable) {
+        // } catch (final Throwable throwable) {
+        // Sponge -- inject here
+            // final CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
+    }
+
+
+    @Redirect(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/tileentity/TileEntity;hasWorld()Z"
+        )
+    )
+    private boolean impl$checkIfTileHasActiveChunk(final TileEntity tileEntity) {
+        return tileEntity.hasWorld() && ((TileEntityBridge) tileEntity).bridge$shouldTick();
 
     }
 
-    public void entityActivationCheck() {
-        // Overridden in WorldServerMixin_Activation
+    // This would be in common, but Forge rewrites isBlockLoaded(BlockPos) to isBlockLoaded(BlockPos,boolean)....
+//    @Redirect(method = "updateEntities",
+//        at = @At(
+//            value = "INVOKE",
+//            target = "Lnet/minecraft/world/World;isBlockLoaded(Lnet/minecraft/util/math/BlockPos;)Z"),
+//        slice = @Slice(
+//            from = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;isInvalid()Z", ordinal = 0),
+//            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;contains(Lnet/minecraft/util/math/BlockPos;)Z")
+//        )
+//    )
+//    @Group(name = "isBlockLoadedTargetingUpdateEntities", min = 1)
+//    private boolean impl$useTileActiveChunk(final World world, final BlockPos pos) {
+//        return true; // If we got to here, we already have the method `bridge$shouldTick()` passing
+//    }
+
+    @Inject(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/tileentity/TileEntity;isInvalid()Z",
+            shift = At.Shift.BEFORE,
+            by = 1
+        ),
+        slice = @Slice(
+            from = @At(value = "CONSTANT", args = "stringValue=Block entity being ticked"),
+            to = @At(value = "INVOKE", target = "Ljava/util/Iterator;remove()V")
+        )
+    )
+    void impl$stopTileTickAndStartRemoval(final CallbackInfo callbackInfo) {
+        // Sponge - inject here
+
+        // if (tileentity.isInvalid()) {
+        //     iterator.remove();
     }
 
-    protected void startEntityGlobalTimings() { }
+    @Redirect(method = "updateEntities",
+        at = @At(value = "INVOKE", target = "Ljava/util/List;remove(Ljava/lang/Object;)Z"))
+    private boolean impl$removeTileFromLoadedList(final List<?> loadedTileEntityList, final Object tile) {
+        final boolean remove = loadedTileEntityList.remove(tile);
+        final TileEntity tileEntity = (TileEntity) tile;
+        // Sponge start - use cached chunk
+        final Chunk activeChunk = (Chunk) ((ActiveChunkReferantBridge) tileEntity).bridge$getActiveChunk();
+        if (activeChunk != null) {
+            //this.getChunk(tileentity.getPos()).removeTileEntity(tileentity.getPos());
+            //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desynced
+            if (activeChunk.getTileEntity(tileEntity.getPos(), Chunk.EnumCreateEntityType.CHECK) == tileEntity) {
+                activeChunk.removeTileEntity(tileEntity.getPos());
+            }
+        }
+        // Sponge end
 
-    protected void stopTimingForWeatherEntityTickCrash(final net.minecraft.entity.Entity updatingEntity) { }
+        return remove;
 
-    protected void stopEntityTickTimingStartEntityRemovalTiming() { }
+    }
 
-    protected void stopEntityRemovalTiming() { }
+    @Redirect(method = "updateEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;isBlockLoaded(Lnet/minecraft/util/math/BlockPos;)Z"),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Ljava/util/Iterator;remove()V",
+                remap = false),
+            to = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/world/chunk/Chunk;removeTileEntity(Lnet/minecraft/util/math/BlockPos;)V")
+        )
+    )
+    private boolean impl$ignoreisBlockLoaded(final World self, final BlockPos pos) {
+        return false;
+    }
 
-    protected void startEntityTickTiming() { }
+    @Redirect(method = "updateEntities",
+        at = @At(value = "INVOKE", target = "Ljava/util/Iterator;hasNext()Z"),
+        slice = @Slice(
+            from = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/world/World;tickableTileEntities:Ljava/util/List;",
+                ordinal = 1
+            ),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;hasWorld()Z")
+        )
+    )
+    boolean impl$stopTileRemovalTimingIfHasNext(final Iterator<TileEntity> iterator) {
+        // We override to stop timing if it's been flipped
+        return iterator.hasNext();
+    }
 
-    protected void stopTimingTickEntityCrash(final net.minecraft.entity.Entity updatingEntity) { }
+    @Inject(method = "updateEntities", at = @At(value = "CONSTANT", args = "stringValue=pendingBlockEntities", shift = At.Shift.BEFORE, by = 2))
+    void impl$startPendingBlockEntities(final CallbackInfo callbackInfo) {
+        // this.processingLoadedTiles = false;
+        // Sponge - Inject here, we start timings
+        // this.profiler.endStartSection("pendingBlockEntities");
+    }
 
-    protected void stopEntityTickSectionBeforeRemove() { }
-
-    protected void startEntityRemovalTick() { }
-
-    protected void startTileTickTimer() { }
-
-    protected void stopTimingTickTileEntityCrash(final net.minecraft.tileentity.TileEntity updatingTileEntity) { }
-
-    protected void stopTileEntityAndStartRemoval() { }
-
-    protected void stopTileEntityRemovelInWhile() { }
-
-    protected void startPendingTileEntityTimings() {}
-
-    protected void endPendingTileEntities() { }
+    @Inject(method = "updateEntities", at = @At("TAIL"))
+    void impl$endPendingTileEntities(final CallbackInfo ci) {
+        // this.profiler.endSection();
+        // this.profiler.endSection();
+        // Sponge - here we turn off timings
+    }
 
 }

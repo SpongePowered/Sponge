@@ -1518,14 +1518,15 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static Optional<net.minecraft.world.Explosion> detonateExplosive(ExplosiveBridge explosiveBridge, Explosion.Builder builder) {
-        DetonateExplosiveEvent event = SpongeEventFactory.createDetonateExplosiveEvent(
+    public static Optional<net.minecraft.world.Explosion> detonateExplosive(final ExplosiveBridge explosiveBridge, final Explosion.Builder builder) {
+        final DetonateExplosiveEvent event = SpongeEventFactory.createDetonateExplosiveEvent(
                 Sponge.getCauseStackManager().getCurrentCause(), builder, builder.build(), (Explosive) explosiveBridge
         );
         if (!Sponge.getEventManager().post(event)) {
-            Explosion explosion = event.getExplosionBuilder().build();
+            final Explosion explosion = event.getExplosionBuilder().build();
             if (explosion.getRadius() > 0) {
-                ((ServerWorldBridge) ((Explosive) explosiveBridge).getWorld()).bridge$triggerInternalExplosion(explosion,
+                ((ServerWorldBridge) ((Explosive) explosiveBridge).getWorld())
+                    .bridge$triggerInternalExplosion(explosion,
                         e -> GeneralPhase.State.EXPLOSION.createPhaseContext().explosion(e));
             }
             return Optional.of((net.minecraft.world.Explosion) explosion);

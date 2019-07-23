@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.entityactivation.world;
 
 import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
 import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRange;
 
@@ -33,7 +34,7 @@ import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRa
 public abstract class WorldServerMixin_Activation extends WorldMixin {
 
     @Override
-    public void entityActivationCheck() {
+    protected void impl$entityActivationCheck(final CallbackInfo ci) {
         EntityActivationRange.activateEntities(((net.minecraft.world.World) (Object) this));
     }
 

@@ -206,17 +206,17 @@ class TimingHandler implements Timing {
     }
 
     boolean isTimed() {
-        return timed;
+        return this.timed;
     }
 
     public boolean isEnabled() {
-        return enabled;
+        return this.enabled;
     }
 
     TimingData[] cloneChildren() {
-        final TimingData[] clonedChildren = new TimingData[children.size()];
+        final TimingData[] clonedChildren = new TimingData[this.children.size()];
         int i = 0;
-        for (TimingData child : children.values()) {
+        for (TimingData child : this.children.values()) {
             clonedChildren[i++] = child.clone();
         }
         return clonedChildren;

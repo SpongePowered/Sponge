@@ -290,7 +290,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
 
         final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Forge.FORGE_DATA).getCompoundTag(Constants.Sponge.SPONGE_DATA);
-        CustomDataNbtUtil.readCustomData(spongeCompound, ((DataHolder) this));
+        CustomDataNbtUtil.readCustomData(spongeCompound, (DataHolder) this);
         //if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
         //    ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
         //}
@@ -594,7 +594,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             for (final EntityEquipmentSlot slot : slots) {
                 this.setItemStackToSlot(slot, ItemStackUtil.toNative(item));
                 // TODO check canequip
-                return;
+                return
+                    ;
             }
         }
     }
