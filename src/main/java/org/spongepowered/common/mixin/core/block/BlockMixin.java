@@ -61,11 +61,11 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -78,6 +78,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.BlockTrackerCategory;
 import org.spongepowered.common.config.category.BlockTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -88,6 +89,7 @@ import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -158,7 +160,8 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     }
 
     @Inject(method = "dropBlockAsItem", at = @At("HEAD"), cancellable = true)
-    private void checkBlockDropForTransactions(final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, final int fortune, final CallbackInfo ci) {
+    private void checkBlockDropForTransactions(final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, final int fortune,
+        final CallbackInfo ci) {
         if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }
@@ -168,67 +171,81 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         }
     }
 
+
     /**
-     * @author gabizou - April 19th, 2018
-     * @reason With the amount of redirects and events needed to be thrown here,
-     * we overwrite the method in it's entirety (also bypassing forge's block captures
-     * to sync up with sponge's captures).
+     * @author gabizou - July 23rd, 2019 - 1.12
+     * @reason Because adding a few redirects for the massive if
+     * statement is less performant than doing the fail fast check
+     * of "is main thread or are we restoring", before we reach the
+     * {@link net.minecraft.world.World#isRemote} check or
+     * {@link ItemStack#isEmpty()} check, we can eliminate a larger
+     * majority of the hooks that would otherwise be required for
+     * doing an overwrite of this method.
      *
-     * @param worldIn
-     * @param pos
-     * @param stack
+     * @param worldIn The world
+     * @param pos The position
+     * @param stack The stack
+     * @param ci Callbackinfo to cancel if we're not on the main thread or we're restoring
      */
-    @Overwrite
-    public static void spawnAsEntity(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack) {
-        // Sponge Start - short circuit up top to reduce indentation as necessary
-        final boolean doTileDrops = worldIn.getGameRules().getBoolean("doTileDrops");
-
-        if (worldIn.isRemote || !SpongeImplHooks.isMainThread() || stack.isEmpty() || !doTileDrops || SpongeImplHooks.isRestoringBlocks(worldIn)) {
-            return;
+    @Inject(method = "spawnAsEntity", at = @At("HEAD"), cancellable = true)
+    private static void impl$checkMainThreadAndRestoring(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
+        final CallbackInfo ci) {
+        if (!SpongeImplHooks.isMainThread() || PhaseTracker.getInstance().getCurrentState().isRestoring()) {
+            ci.cancel();
         }
-        // Double check we aren't performing drops during restores.
-        if (PhaseTracker.getInstance().getCurrentState().isRestoring()) {
-            return;
-        }
-        // Sponge Start - make some of these local variables so we have them prepped already.
-        final double xOffset = (double) (worldIn.rand.nextFloat() * 0.5F) + 0.25D;
-        final double yOffset = (double) (worldIn.rand.nextFloat() * 0.5F) + 0.25D;
-        final double zOffset = (double) (worldIn.rand.nextFloat() * 0.5F) + 0.25D;
-        final double xPos = (double) pos.getX() + xOffset;
-        final double yPos = (double) pos.getY() + yOffset;
-        final double zPos = (double) pos.getZ() + zOffset;
+    }
 
-        // TODO - Determine whether DropItemEvent.Pre is supposed to spawn here.
-
-        // Go ahead and throw the construction event
-        final Transform<World> position = new Transform<>((World) worldIn, new Vector3d(xPos, yPos, zPos));
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(worldIn.getBlockState(pos));
-            final ConstructEntityEvent.Pre eventPre = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, position);
-            SpongeImpl.postEvent(eventPre);
-            if (eventPre.isCancelled()) {
-                return;
-            }
-        }
-        final EntityItem entityitem = new EntityItem(worldIn, xPos, yPos, zPos, stack);
-        entityitem.setDefaultPickupDelay();
+    // Please, for the love of all that is good, do NOT re-order the following two injections, if you do, you end up causing errors
+    // from Mixin complaining about a leaked CallbackInfo. More can be read here: https://github.com/SpongePowered/Mixin/issues/337
+    @Inject(method = "spawnAsEntity",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDefaultPickupDelay()V", shift = At.Shift.AFTER),
+        locals = LocalCapture.CAPTURE_FAILHARD,
+        cancellable = true)
+    private static void impl$attemptCaptureOrAllowSpawn(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
+        final CallbackInfo ci, final float unused, final double xOffset, final double yOffset, final double zOffset,
+        final EntityItem toSpawn) {
         // Sponge Start - Tell the phase state to track this position, and then unset it.
         final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
 
         if (context.allowsBulkEntityCaptures() && context.allowsBlockPosCapturing()) {
             context.getCaptureBlockPos().setPos(pos);
-            worldIn.spawnEntity(entityitem);
+            worldIn.spawnEntity(toSpawn);
             context.getCaptureBlockPos().setPos(null);
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "spawnAsEntity",
+        at = @At(value = "NEW", target = "net/minecraft/entity/item/EntityItem"),
+        cancellable = true,
+        locals = LocalCapture.CAPTURE_FAILHARD)
+    private static void impl$throwConstructPreEvent(
+        final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack, final CallbackInfo ci,
+        final float unused, final double xOffset, final double yOffset, final double zOffset) {
+        if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             return;
         }
-        // Sponge End - if we're not capturing positions, then just go ahead and proceed as normal
-        worldIn.spawnEntity(entityitem);
-
+        final double xPos = (double) pos.getX() + xOffset;
+        final double yPos = (double) pos.getY() + yOffset;
+        final double zPos = (double) pos.getZ() + zOffset;
+        // Go ahead and throw the construction event
+        final Transform<World> position = new Transform<>((World) worldIn, new Vector3d(xPos, yPos, zPos));
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(worldIn.getBlockState(pos));
+            final ConstructEntityEvent.Pre
+                eventPre =
+                SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, position);
+            SpongeImpl.postEvent(eventPre);
+            if (eventPre.isCancelled()) {
+                ci.cancel();
+            }
+        }
     }
 
     // This method can be called directly by pistons, mods, etc. so the hook must go here
-    @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
-    private void onDropBlockAsItemWithChanceHead(final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, final float chance, final int fortune,
+    @Inject(method = "dropBlockAsItemWithChance", at = @At("HEAD"), cancellable = true)
+    private void onDropBlockAsItemWithChanceHead(final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state,
+        final float chance, final int fortune,
         final CallbackInfo ci) {
         if (!((WorldBridge) worldIn).bridge$isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
             if (PhaseTracker.getInstance().getCurrentState().isRestoring()) {
@@ -323,10 +340,10 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     }
 
     /**
-     * Used to determine if this block should fire 
+     * Used to determine if this block should fire
      * sponge events during WorldServer#addBlockEvent.
      */
-    @Override 
+    @Override
     public boolean bridge$shouldFireBlockEvents() {
         return this.impl$shouldFireBlockEvents;
     }
@@ -367,9 +384,9 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         }
 
         // Determine if this block needs to be handled during WorldServer#addBlockEvent
-        if (((Block) (Object) this) instanceof BlockMobSpawner || ((Block) (Object) this) instanceof BlockEnderChest
-            || ((Block) (Object) this) instanceof BlockChest || ((Block) (Object) this) instanceof BlockShulkerBox
-            || ((Block) (Object) this)instanceof BlockEndGateway || ((Block) (Object) this) instanceof BlockBeacon) {
+        if ((Block) (Object) this instanceof BlockMobSpawner || (Block) (Object) this instanceof BlockEnderChest
+            || (Block) (Object) this instanceof BlockChest || (Block) (Object) this instanceof BlockShulkerBox
+            || (Block) (Object) this instanceof BlockEndGateway || (Block) (Object) this instanceof BlockBeacon) {
             this.impl$shouldFireBlockEvents = false;
         }
         // Determine which blocks can avoid executing un-needed event logic
@@ -391,10 +408,10 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
             if (clazz.equals(Block.class)) {
                 this.impl$hasCollideLogic = false;
             }
-        } catch (NoClassDefFoundError err) {
+        } catch (final NoClassDefFoundError err) {
             //noinspection EqualsBetweenInconvertibleTypes
             this.impl$hasCollideLogic = !this.getClass().equals(Block.class);
-        } catch (Throwable ex) {
+        } catch (final Throwable ex) {
             // ignore
         }
 
@@ -406,10 +423,10 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
             if (clazz.equals(Block.class)) {
                 this.impl$hasCollideWithStateLogic = false;
             }
-        } catch (NoClassDefFoundError err) {
+        } catch (final NoClassDefFoundError err) {
             //noinspection EqualsBetweenInconvertibleTypes
             this.impl$hasCollideWithStateLogic = !this.getClass().equals(Block.class);
-        } catch (Throwable ex) {
+        } catch (final Throwable ex) {
             // ignore
         }
         // neighborChanged
@@ -418,7 +435,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
             final Class<?>[] argTypes = {IBlockState.class, net.minecraft.world.World.class, BlockPos.class, Block.class, BlockPos.class};
             final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             this.impl$hasNeighborOverride = !clazz.equals(Block.class);
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             if (e instanceof NoClassDefFoundError) {
                 // fall back to checking if class equals Block.
                 // Fixes https://github.com/SpongePowered/SpongeForge/issues/2770
@@ -432,15 +449,15 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
             this.impl$allowsEntityBulkCapture = false;
             this.impl$allowsBlockEventCreation = false;
             this.impl$allowsEntityEventCreation = false;
-            blockTrackerModCat.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.impl$allowsBlockBulkCapture);
-            blockTrackerModCat.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.impl$allowsEntityBulkCapture);
-            blockTrackerModCat.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> this.impl$allowsBlockEventCreation);
-            blockTrackerModCat.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> this.impl$allowsEntityEventCreation);
+            blockTrackerModCat.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> this.impl$allowsBlockBulkCapture);
+            blockTrackerModCat.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> this.impl$allowsEntityBulkCapture);
+            blockTrackerModCat.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> this.impl$allowsBlockEventCreation);
+            blockTrackerModCat.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> this.impl$allowsEntityEventCreation);
         } else {
-            this.impl$allowsBlockBulkCapture = blockTrackerModCat.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
-            this.impl$allowsEntityBulkCapture = blockTrackerModCat.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
-            this.impl$allowsBlockEventCreation = blockTrackerModCat.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> true);
-            this.impl$allowsEntityEventCreation = blockTrackerModCat.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.impl$allowsBlockBulkCapture = blockTrackerModCat.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> true);
+            this.impl$allowsEntityBulkCapture = blockTrackerModCat.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> true);
+            this.impl$allowsBlockEventCreation = blockTrackerModCat.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> true);
+            this.impl$allowsEntityEventCreation = blockTrackerModCat.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> true);
         }
 
         if (blockTrackerCat.autoPopulateData()) {
