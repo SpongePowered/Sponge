@@ -82,7 +82,8 @@ public class SpongeObjective implements Objective {
 
     private void updateDisplayName() {
         for (final ScoreObjective objective: this.objectives.values()) {
-            objective.setDisplayName(SpongeTexts.toLegacy(this.displayName));
+            ((ScoreObjectiveAccessor) objective).accessor$setDisplayName(SpongeTexts.toLegacy(this.displayName));
+            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().onObjectiveDisplayNameChanged(objective);
         }
     }
 
@@ -106,7 +107,8 @@ public class SpongeObjective implements Objective {
     @SuppressWarnings("ConstantConditions")
     private void updateDisplayMode() {
         for (final ScoreObjective objective: this.objectives.values()) {
-            objective.setRenderType((IScoreCriteria.EnumRenderType) (Object) this.displayMode);
+            ((ScoreObjectiveAccessor) objective).accessor$setRenderType((IScoreCriteria.EnumRenderType) (Object) this.displayMode);
+            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().onObjectiveDisplayNameChanged(objective);
         }
     }
 
