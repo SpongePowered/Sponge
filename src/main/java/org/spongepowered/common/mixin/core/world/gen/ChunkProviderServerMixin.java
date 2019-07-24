@@ -31,6 +31,7 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
@@ -42,7 +43,6 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -186,7 +186,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/chunk/Chunk;populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V",
-            shift = Shift.AFTER))
+            shift = At.Shift.AFTER))
     private void impl$EndTerrainGenerationPhase(final int x, final int z, final CallbackInfoReturnable<Chunk> ci) {
         PhaseTracker.getInstance().getCurrentContext().close();
     }
@@ -196,13 +196,13 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
             value = "INVOKE",
             target = "Lnet/minecraft/crash/CrashReportCategory;addCrashSection(Ljava/lang/String;Ljava/lang/Object;)V",
             ordinal = 2,
-            shift = Shift.AFTER
+            shift = At.Shift.AFTER
         ),
         locals = LocalCapture.CAPTURE_FAILHARD
     )
     private void impl$StopGenerationPhaseFromError(final int x, final int z, final CallbackInfoReturnable<Chunk> cir, final Chunk ungenerated,
         final long chunkIndex, final Throwable error, final CrashReport report, final CrashReportCategory chunkGenerationCategory,
-        final ChunkProviderServer provider, final int someVar, final int someOther) {
+        final IChunkGenerator provider, final int someVar, final int someOther) {
 
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         report.makeCategoryDepth("Current PhaseState", 1)
