@@ -509,15 +509,6 @@ public final class WorldManager {
             return false;
         }
 
-        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
-
-        if (globalConfigAdapter.getConfig().getModules().useOptimizations() &&
-                globalConfigAdapter.getConfig().getOptimizations().useAsyncLighting()) {
-
-            // The world is unloading - there's no point in running any more lighting tasks
-            ((ServerWorldBridge_AsyncLighting) worldServer).asyncLightingBridge$getLightingExecutor().shutdownNow();
-        }
-
         // Vanilla sometimes doesn't remove player entities from world first
         if (!isShuttingDown) {
             if (!worldServer.playerEntities.isEmpty()) {
@@ -531,6 +522,8 @@ public final class WorldManager {
                 }
             }
         }
+
+        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
 
         try (final PhaseContext<?> ignored = GeneralPhase.State.WORLD_UNLOAD.createPhaseContext().source(worldServer)) {
             ignored.buildAndSwitch();
@@ -557,6 +550,12 @@ public final class WorldManager {
             } finally {
                 SpongeImpl.getLogger().info("Unloading world [{}] ({}/{})", worldServer.getWorldInfo().getWorldName(),
                     ((org.spongepowered.api.world.World) worldServer).getDimension().getType().getId(), dimensionId);
+
+                // Stop the lighting executor only when the world is going to unload - there's no point in running any more lighting tasks.
+                if (globalConfigAdapter.getConfig().getModules().useOptimizations() && globalConfigAdapter.getConfig().getOptimizations().useAsyncLighting()) {
+                    ((ServerWorldBridge_AsyncLighting) worldServer).asyncLightingBridge$getLightingExecutor().shutdownNow();
+                }
+
                 worldByDimensionId.remove(dimensionId);
                 weakWorldByWorld.remove(worldServer);
                 ((MinecraftServerBridge) server).bridge$removeWorldTickTimes(dimensionId);
