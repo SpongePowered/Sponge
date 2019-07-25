@@ -172,6 +172,26 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     }
 
 
+    // Please, for the love of all that is good, do NOT re-order the following two injections, if you do, you end up causing errors
+    // from Mixin complaining about a leaked CallbackInfo. More can be read here: https://github.com/SpongePowered/Mixin/issues/337
+    @Inject(method = "spawnAsEntity",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDefaultPickupDelay()V", shift = At.Shift.AFTER),
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        cancellable = true)
+    private static void impl$attemptCaptureOrAllowSpawn(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
+        final CallbackInfo ci, final float unused, final double xOffset, final double yOffset, final double zOffset,
+        final EntityItem toSpawn) {
+        // Sponge Start - Tell the phase state to track this position, and then unset it.
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+
+        if (context.allowsBulkEntityCaptures() && context.allowsBlockPosCapturing()) {
+            context.getCaptureBlockPos().setPos(pos);
+            worldIn.spawnEntity(toSpawn);
+            context.getCaptureBlockPos().setPos(null);
+            ci.cancel();
+        }
+    }
+
     /**
      * @author gabizou - July 23rd, 2019 - 1.12
      * @reason Because adding a few redirects for the massive if
@@ -195,30 +215,13 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         }
     }
 
-    // Please, for the love of all that is good, do NOT re-order the following two injections, if you do, you end up causing errors
-    // from Mixin complaining about a leaked CallbackInfo. More can be read here: https://github.com/SpongePowered/Mixin/issues/337
-    @Inject(method = "spawnAsEntity",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDefaultPickupDelay()V", shift = At.Shift.AFTER),
-        locals = LocalCapture.CAPTURE_FAILHARD,
-        cancellable = true)
-    private static void impl$attemptCaptureOrAllowSpawn(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
-        final CallbackInfo ci, final float unused, final double xOffset, final double yOffset, final double zOffset,
-        final EntityItem toSpawn) {
-        // Sponge Start - Tell the phase state to track this position, and then unset it.
-        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
-
-        if (context.allowsBulkEntityCaptures() && context.allowsBlockPosCapturing()) {
-            context.getCaptureBlockPos().setPos(pos);
-            worldIn.spawnEntity(toSpawn);
-            context.getCaptureBlockPos().setPos(null);
-            ci.cancel();
-        }
-    }
-
     @Inject(method = "spawnAsEntity",
         at = @At(value = "NEW", target = "net/minecraft/entity/item/EntityItem"),
         cancellable = true,
-        locals = LocalCapture.CAPTURE_FAILHARD)
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        require = 0,
+        expect = 0
+    )
     private static void impl$throwConstructPreEvent(
         final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack, final CallbackInfo ci,
         final float unused, final double xOffset, final double yOffset, final double zOffset) {

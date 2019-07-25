@@ -43,6 +43,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Surrogate;
@@ -203,7 +204,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
     )
     private void impl$StopGenerationPhaseFromError(final int x, final int z, final CallbackInfoReturnable<Chunk> cir, final Chunk ungenerated,
         final long chunkIndex, final Throwable error, final CrashReport report, final CrashReportCategory chunkGenerationCategory,
-        final IChunkGenerator provider, final int someVar, final int someOther) {
+        @Coerce final Object provider, final int someVar, final int someOther) {
 
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         report.makeCategoryDepth("Current PhaseState", 1)
@@ -211,24 +212,14 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
 
                 final PrettyPrinter printer = new PrettyPrinter(50);
                 PhaseTracker.CONTEXT_PRINTER.accept(printer, currentContext);
-                final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                printer.print(new PrintStream(stream));
-
-                return stream.toString();
+                try (final PrintStream stream = new PrintStream(new ByteArrayOutputStream())) {
+                    printer.print(stream);
+                    return stream.toString();
+                }
             });
         // Since we still want to complete the phase in the case we can recover, we still must close the current context.
         currentContext.close();
     }
-
-    @Surrogate
-    private void impl$StopGenerationPhaseFromError(final int x, final int z, final CallbackInfoReturnable<Chunk> cir, final Chunk ungenerated,
-        final long chunkIndex, final Throwable error, final CrashReport report, final CrashReportCategory chunkGenerationCategory,
-        final ChunkProviderServer provider, final int someVar, final int someOther) {
-
-        this.impl$StopGenerationPhaseFromError(x,z, cir, ungenerated, chunkIndex, error, report, chunkGenerationCategory, (IChunkGenerator) provider, someVar, someOther);
-    }
-
-
 
     private boolean impl$canDenyChunkRequest() {
         if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {

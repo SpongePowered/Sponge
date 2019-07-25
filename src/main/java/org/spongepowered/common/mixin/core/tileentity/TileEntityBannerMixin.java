@@ -90,9 +90,10 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
             for (int i = 0; i < this.patterns.tagCount(); i++) {
                 final NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
                 final String patternId = tagCompound.getString(Constants.TileEntity.Banner.BANNER_PATTERN_ID);
+                final int patternColor = tagCompound.getInteger(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR);
                 this.impl$patternLayers.add(new SpongePatternLayer(
-                    SpongeImpl.getRegistry().getType(BannerPatternShape.class, patternId).get(),
-                    registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR)).getName()).get()));
+                    registry.getType(BannerPatternShape.class, patternId).get(),
+                    registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(patternColor).getName()).get()));
             }
         }
         this.impl$markDirtyAndUpdate();

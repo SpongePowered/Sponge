@@ -27,10 +27,15 @@ package org.spongepowered.common.launch;
 import static org.spongepowered.common.SpongeImpl.ECOSYSTEM_ID;
 
 import net.minecraft.launchwrapper.Launch;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.launch.MixinBootstrap;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.asm.util.VersionNumber;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.launch.transformer.SpongeSuperclassRegistry;
+import org.spongepowered.common.mixin.handler.TerminateVM;
 import org.spongepowered.common.util.PathTokens;
 
 import java.io.File;
@@ -136,6 +141,21 @@ public class SpongeLaunch {
         Mixins.addConfiguration("mixins.common.tileentityactivation.json");
         Mixins.addConfiguration("mixins.common.tracking.json");
         Mixins.addConfiguration("mixins.common.vanilla-command.json");
+        final VersionNumber environment = VersionNumber.parse(MixinEnvironment.getCurrentEnvironment().getVersion());
+        final VersionNumber required = VersionNumber.parse("0.7.11");
+        if (required.compareTo(environment) > 0) {
+            new PrettyPrinter(60).add("Old Mixin Version Loaded!").centre().hr()
+                .add("Hey, sorry, but Sponge requires a newer version of Mixin being loaded, and unfortunately\n"
+                     + "with an older version, nothing will work as it should. Please rename the sponge jar to load\n"
+                     + "earlier than other coremods, so that Sponge's Mixin version will be loaded (they're backwards\n"
+                     + "compatible, but not forwards compatible). We're sorry for the inconvenience, but this is all\n"
+                     + "that we can do.")
+                .add()
+                .add("%s : %s", "Current Loaded Mixin", environment.toString())
+                .add("%s : %s", "Required Mixin Version", required.toString())
+                .log(SpongeImpl.getLogger(), Level.FATAL);
+            TerminateVM.terminate("org.spongepowered.core", -1);
+        }
     }
 
     public static void setupSuperClassTransformer() {
