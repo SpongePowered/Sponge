@@ -1138,7 +1138,6 @@ public final class WorldManager {
 
     public static void adjustWorldForDifficulty(final WorldServer worldServer, EnumDifficulty difficulty, final boolean isCustom) {
         final MinecraftServer server = SpongeImpl.getServer();
-        final boolean alreadySet = ((WorldInfoBridge) worldServer.getWorldInfo()).bridge$hasCustomDifficulty();
 
         if (worldServer.getWorldInfo().isHardcoreModeEnabled()) {
             difficulty = EnumDifficulty.HARD;
@@ -1149,12 +1148,10 @@ public final class WorldManager {
             worldServer.setAllowedSpawnTypes(server.allowSpawnMonsters(), server.getCanSpawnAnimals());
         }
 
-        if (!alreadySet) {
-            if (!isCustom) {
-                ((WorldInfoBridge) worldServer.getWorldInfo()).bridge$forceSetDifficulty(difficulty);
-            } else {
-                worldServer.getWorldInfo().setDifficulty(difficulty);
-            }
+        if (isCustom) {
+            worldServer.getWorldInfo().setDifficulty(difficulty);
+        } else if (!((WorldInfoBridge) worldServer.getWorldInfo()).bridge$hasCustomDifficulty()) {
+            ((WorldInfoBridge) worldServer.getWorldInfo()).bridge$forceSetDifficulty(difficulty);
         }
     }
 

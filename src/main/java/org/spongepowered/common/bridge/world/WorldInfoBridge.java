@@ -87,5 +87,7 @@ public interface WorldInfoBridge {
      */
     void bridge$forceSetDifficulty(EnumDifficulty difficulty);
 
+    void bridge$updatePlayersForDifficulty();
+
     void bridge$saveConfig();
 }

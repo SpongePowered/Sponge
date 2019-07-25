@@ -227,7 +227,6 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @SuppressWarnings("RedundantCast")
     @Inject(method = "setDifficulty", at = @At("HEAD"), cancellable = true)
     private void onSetDifficultyVanilla(@Nullable final EnumDifficulty newDifficulty, final CallbackInfo ci) {
-        this.impl$hasCustomDifficulty = true;
         if (newDifficulty == null) {
             // This is an error from someone
             new PrettyPrinter(60).add("Null Difficulty being set!").centre().hr()
@@ -241,15 +240,10 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
             return;
         }
 
-        // If the difficulty is set, we need to sync it to the players in the world attached to the worldinfo (if any)
-        WorldManager.getWorlds()
-          .stream()
-          .filter(world -> world.getWorldInfo() == (WorldInfo) (Object) this)
-          .flatMap(world -> world.playerEntities.stream())
-          .filter(player -> player instanceof EntityPlayerMP)
-          .map(player -> (EntityPlayerMP) player)
-          .forEach(player -> player.connection.sendPacket(new SPacketServerDifficulty(newDifficulty, ((WorldInfo) (Object) this).isDifficultyLocked
-            ())));
+        this.impl$hasCustomDifficulty = true;
+        this.difficulty = newDifficulty;
+
+        this.bridge$updatePlayersForDifficulty();
     }
 
     @Override
@@ -260,6 +254,20 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Override
     public void bridge$forceSetDifficulty(final EnumDifficulty difficulty) {
         this.difficulty = difficulty;
+
+        this.bridge$updatePlayersForDifficulty();
+    }
+
+    @Override
+    public void bridge$updatePlayersForDifficulty() {
+        WorldManager.getWorlds()
+                .stream()
+                .filter(world -> world.getWorldInfo() == (WorldInfo) (Object) this)
+                .flatMap(world -> world.playerEntities.stream())
+                .filter(player -> player instanceof EntityPlayerMP)
+                .map(player -> (EntityPlayerMP) player)
+                .forEach(player -> player.connection.sendPacket(new SPacketServerDifficulty(this.difficulty, ((WorldInfo) (Object) this).isDifficultyLocked
+                        ())));
     }
 
     private void setDoesGenerateBonusChest(final boolean state) {
