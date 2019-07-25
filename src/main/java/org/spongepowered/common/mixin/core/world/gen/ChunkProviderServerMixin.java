@@ -45,6 +45,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -218,6 +219,16 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
         // Since we still want to complete the phase in the case we can recover, we still must close the current context.
         currentContext.close();
     }
+
+    @Surrogate
+    private void impl$StopGenerationPhaseFromError(final int x, final int z, final CallbackInfoReturnable<Chunk> cir, final Chunk ungenerated,
+        final long chunkIndex, final Throwable error, final CrashReport report, final CrashReportCategory chunkGenerationCategory,
+        final ChunkProviderServer provider, final int someVar, final int someOther) {
+
+        this.impl$StopGenerationPhaseFromError(x,z, cir, ungenerated, chunkIndex, error, report, chunkGenerationCategory, (IChunkGenerator) provider, someVar, someOther);
+    }
+
+
 
     private boolean impl$canDenyChunkRequest() {
         if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
