@@ -450,7 +450,7 @@ public final class WorldManager {
         } else if (((WorldInfoBridge) worldInfo).bridge$getDimensionId() == null
                 //|| ((WorldInfoBridge) worldInfo).bridge$bridge$getDimensionId() == Integer.MIN_VALUE // TODO: Evaulate all uses of Integer.MIN_VALUE for dimension ids
                 || getWorldByDimensionId(((WorldInfoBridge) worldInfo).bridge$getDimensionId()).isPresent()) {
-            // DimensionID is null or 0 or the dimensionID is already assinged to a loaded world
+            // DimensionID is null or 0 or the dimensionID is already assigned to a loaded world
             ((WorldInfoBridge) worldInfo).bridge$setDimensionId(WorldManager.getNextFreeDimensionId());
         }
         ((WorldProperties) worldInfo).setGeneratorType(archetype.getGeneratorType());
@@ -498,7 +498,6 @@ public final class WorldManager {
         unloadQueue.add(worldServer);
     }
 
-    // TODO Result
     public static boolean unloadWorld(final WorldServer worldServer, final boolean checkConfig, final boolean isShuttingDown) {
         checkNotNull(worldServer);
 
@@ -636,10 +635,13 @@ public final class WorldManager {
             }
         }
 
-        // TODO: Evaulate all uses of Integer.MIN_VALUE for dimension ids
-        if (((WorldInfoBridge) properties).bridge$getDimensionId() == null /*|| ((WorldInfoBridge) properties).bridge$bridge$getDimensionId() == Integer.MIN_VALUE*/) {
-            ((WorldInfoBridge) properties).bridge$setDimensionId(getNextFreeDimensionId());
+        Integer dimensionId = ((WorldInfoBridge) properties).bridge$getDimensionId();
+
+        if (dimensionId == null || dimensionId == Integer.MIN_VALUE) {
+            dimensionId = getNextFreeDimensionId();
+            ((WorldInfoBridge) properties).bridge$setDimensionId(dimensionId);
         }
+
         setUuidOnProperties(getCurrentSavesDirectory().get(), properties);
         registerWorldProperties(properties);
 
@@ -648,11 +650,10 @@ public final class WorldManager {
 
         // check if enabled
         if (!((WorldProperties) worldInfo).isEnabled()) {
-            SpongeImpl.getLogger().error("Unable to load world [{}]. It is disabled.", worldName);
+            SpongeImpl.getLogger().error("Unable to load world [{}] ({}/{}). It is disabled.", properties.getWorldName(), properties.getDimensionType().getId(), dimensionId);
             return Optional.empty();
         }
 
-        final int dimensionId = ((WorldInfoBridge) properties).bridge$getDimensionId();
         registerDimension(dimensionId, (DimensionType) (Object) properties.getDimensionType());
         registerDimensionPath(dimensionId, worldFolder);
         SpongeImpl.getLogger().info("Loading world [{}] ({}/{})", properties.getWorldName(), properties.getDimensionType().getId(), dimensionId);
@@ -679,7 +680,7 @@ public final class WorldManager {
                 if (Files.notExists(actualPathLink)) {
                     Files.createDirectories(actualPathLink);
                 } else if (!Files.isDirectory(actualPathLink)) {
-                    throw new IOException("Saves directory [" + currentSavesDir + "] symlinked to [" + actualPathLink + "] is not a directory!");
+                    throw new IOException("Saves directory [" + currentSavesDir + "] symlink to [" + actualPathLink + "] is not a directory!");
                 }
             } else {
                 Files.createDirectories(currentSavesDir);
@@ -781,12 +782,6 @@ public final class WorldManager {
                 SpongeImpl.getLogger().error("UUID [{}] has already been registered by world [{}] but is attempting to be registered by world [{}]."
                     + " This means worlds have been copied outside of Sponge. Skipping world load...", uniqueId, previousWorldForUUID, worldInfo.getWorldName());
                 continue;
-            }
-
-
-            // Safety check to ensure the world info has the dimension id set
-            if (((WorldInfoBridge) worldInfo).bridge$getDimensionId() == null) {
-                ((WorldInfoBridge) worldInfo).bridge$setDimensionId(dimensionId);
             }
 
             // Keep the LevelName in the LevelInfo up to date with the directory name
@@ -999,26 +994,29 @@ public final class WorldManager {
                     continue;
                 }
 
-                final int dimensionId = spongeDataCompound.getInteger(Constants.Sponge.World.DIMENSION_ID);
+                spongeDataCompound = DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeDataCompound);
 
-                // TODO: Evaulate all uses of Integer.MIN_VALUE for dimension ids
-                /*if (dimensionId == Integer.MIN_VALUE) {
-                    // temporary fix for existing worlds created with wrong dimension id
-                    dimensionId = WorldManager.getNextFreeDimensionId();
-                }*/
+                final int dimensionId = spongeDataCompound.getInteger(Constants.Sponge.World.DIMENSION_ID);
                 // We do not handle Vanilla dimensions, skip them
                 if (dimensionId == 0 || dimensionId == -1 || dimensionId == 1) {
                     continue;
                 }
 
-                spongeDataCompound = DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeDataCompound);
+                if (dimensionId == Integer.MIN_VALUE) {
+                    continue;
+                }
+
+                if (!spongeDataCompound.hasUniqueId(Constants.UUID)) {
+                    SpongeImpl.getLogger().error("World [{}] ({}) has no valid unique identifier. Report this to Sponge ASAP.", worldFolderName, dimensionId);
+                    continue;
+                }
 
                 String dimensionTypeId = "overworld";
 
                 if (spongeDataCompound.hasKey(Constants.Sponge.World.DIMENSION_TYPE)) {
                     dimensionTypeId = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
                 } else {
-                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has no specified dimension type. Defaulting to [{}}]...", worldFolderName,
+                    SpongeImpl.getLogger().warn("World [{}] ({}) has no specified dimension type. Defaulting to [{}}]...", worldFolderName,
                             dimensionId, DimensionTypes.OVERWORLD.getName());
                 }
 
@@ -1026,17 +1024,11 @@ public final class WorldManager {
                 final org.spongepowered.api.world.DimensionType dimensionType
                         = Sponge.getRegistry().getType(org.spongepowered.api.world.DimensionType.class, dimensionTypeId).orElse(null);
                 if (dimensionType == null) {
-                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Skipping...",
-                            worldFolderName, dimensionId);
+                    SpongeImpl.getLogger().warn("World [{}] ({}) has specified dimension type that is not registered. Skipping...", worldFolderName, dimensionId);
                     continue;
                 }
 
                 spongeDataCompound.setString(Constants.Sponge.World.DIMENSION_TYPE, dimensionTypeId);
-                if (!spongeDataCompound.hasUniqueId(Constants.UUID)) {
-                    SpongeImpl.getLogger().error("World [{}] (DIM{}) has no valid unique identifier. This is a critical error and should be reported"
-                            + " to Sponge ASAP.", worldFolderName, dimensionId);
-                    continue;
-                }
 
                 worldFolderByDimensionId.put(dimensionId, worldFolderName);
                 registerDimensionPath(dimensionId, rootPath.resolve(worldFolderName));
@@ -1209,12 +1201,13 @@ public final class WorldManager {
 
             final WorldInfo info = new WorldInfo(this.oldInfo);
             info.setWorldName(this.newName);
-            ((WorldInfoBridge) info).bridge$setDimensionId(getNextFreeDimensionId());
-            ((WorldInfoBridge) info).bridge$setUniqueId(UUID.randomUUID());
-            ((WorldInfoBridge) info).bridge$createWorldConfig();
-            registerWorldProperties((WorldProperties) info);
+
+            ((WorldInfoBridge) info).bridge$setDimensionId(Integer.MIN_VALUE);
+            ((WorldInfoBridge) info).bridge$setUniqueId(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+
             new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), this.newName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer())
                     .saveWorldInfo(info);
+
             return Optional.of((WorldProperties) info);
         }
     }
