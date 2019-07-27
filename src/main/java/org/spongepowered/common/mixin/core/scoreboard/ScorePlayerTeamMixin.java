@@ -81,6 +81,15 @@ public abstract class ScorePlayerTeamMixin extends net.minecraft.scoreboard.Team
         this.bridge$Color = TextColorRegistryModule.enumChatColor.get(this.color);
     }
 
+    @Redirect(method = "*",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
+    private void impl$nullCheckScoreboard(@Nullable final Scoreboard scoreboard, final ScorePlayerTeam team) {
+        if (scoreboard != null) {
+            scoreboard.broadcastTeamInfoUpdate(team);
+        }
+    }
+
     @Override
     public Text bridge$getDisplayName() {
         return this.bridge$displayName;
@@ -145,65 +154,31 @@ public abstract class ScorePlayerTeamMixin extends net.minecraft.scoreboard.Team
     }
 
 
-    @Redirect(method = "setDisplayName",
+    @Inject(method = "setDisplayName",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
-    private void impl$doTeamUpdateForDisplayName(final Scoreboard scoreboard, final ScorePlayerTeam team, final String name) {
+    private void impl$doTeamUpdateForDisplayName(final String name, final CallbackInfo ci) {
         this.bridge$displayName = SpongeTexts.fromLegacy(name);
-        this.impl$doTeamUpdate();
     }
 
-    @Redirect(method = "setPrefix",
+    @Inject(method = "setPrefix",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
-    private void impl$doTeamUpdateForPrefix(final Scoreboard scoreboard, final ScorePlayerTeam team, final String prefix) {
+    private void impl$doTeamUpdateForPrefix(final String prefix, final CallbackInfo callbackInfo) {
         this.bridge$Prefix = SpongeTexts.fromLegacy(prefix);
-        this.impl$doTeamUpdate();
     }
 
 
-    @Redirect(method = "setSuffix",
+    @Inject(method = "setSuffix",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
-    private void impl$doTeamUpdateForSuffix(final Scoreboard scoreboard, final ScorePlayerTeam team, final String suffix) {
+    private void impl$doTeamUpdateForSuffix(final String suffix, final CallbackInfo ci) {
         this.bridge$Suffix = SpongeTexts.fromLegacy(suffix);
-        this.impl$doTeamUpdate();
     }
 
-    @Redirect(method = "setAllowFriendlyFire",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
-    private void impl$doTeamUpdateForFriendlyFire(final Scoreboard scoreboard, final ScorePlayerTeam team) {
-        this.impl$doTeamUpdate();
-    }
-
-    @Redirect(method = "setSeeFriendlyInvisiblesEnabled",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
-    private void impl$doTeamUpdateForInvisibility(final Scoreboard scoreboard, final ScorePlayerTeam team) {
-        this.impl$doTeamUpdate();
-    }
-
-    @Redirect(method = "setNameTagVisibility",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
-    private void impl$doTeamUpdateForTagVisibility(final Scoreboard scoreboard, final ScorePlayerTeam team) {
-        this.impl$doTeamUpdate();
-    }
-
-    @Redirect(method = "setDeathMessageVisibility",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
-    private void impl$doTeamUpdateForDeathVisibility(final Scoreboard scoreboard, final ScorePlayerTeam team) {
-        this.impl$doTeamUpdate();
-    }
 
     @Inject(method = "setColor", at = @At("RETURN"))
     private void impl$doTeamUpdateForFormat(final TextFormatting format, final CallbackInfo ci) {
