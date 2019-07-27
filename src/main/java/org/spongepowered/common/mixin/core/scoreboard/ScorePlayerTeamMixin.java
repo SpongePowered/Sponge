@@ -35,6 +35,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -156,16 +157,20 @@ public abstract class ScorePlayerTeamMixin extends net.minecraft.scoreboard.Team
 
     @Inject(method = "setDisplayName",
         at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
+            value = "FIELD",
+            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;displayName:Ljava/lang/String;",
+            opcode = Opcodes.PUTFIELD,
+            shift = At.Shift.AFTER))
     private void impl$doTeamUpdateForDisplayName(final String name, final CallbackInfo ci) {
         this.bridge$displayName = SpongeTexts.fromLegacy(name);
     }
 
     @Inject(method = "setPrefix",
         at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
+            value = "FIELD",
+            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;prefix:Ljava/lang/String;",
+            opcode = Opcodes.PUTFIELD,
+            shift = At.Shift.AFTER))
     private void impl$doTeamUpdateForPrefix(final String prefix, final CallbackInfo callbackInfo) {
         this.bridge$Prefix = SpongeTexts.fromLegacy(prefix);
     }
@@ -173,8 +178,11 @@ public abstract class ScorePlayerTeamMixin extends net.minecraft.scoreboard.Team
 
     @Inject(method = "setSuffix",
         at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
+            value = "FIELD",
+            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;suffix:Ljava/lang/String;",
+            opcode = Opcodes.PUTFIELD,
+            shift = At.Shift.AFTER
+        ))
     private void impl$doTeamUpdateForSuffix(final String suffix, final CallbackInfo ci) {
         this.bridge$Suffix = SpongeTexts.fromLegacy(suffix);
     }
