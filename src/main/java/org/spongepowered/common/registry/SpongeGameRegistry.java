@@ -289,12 +289,12 @@ public class SpongeGameRegistry implements GameRegistry {
         for (RegistryModule module : REGISTRIES) {
             addToGraph(module, graph);
         }
-        if (MODULES != null && ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
-            MODULES.addAll(ORDERED_MODULES);
-        }
         ORDERED_MODULES.clear();
         try {
             ORDERED_MODULES.addAll(TopologicalOrder.createOrderedLoad(graph));
+            if (MODULES != null) {
+                MODULES.addAll(ORDERED_MODULES);
+            }
         } catch (CyclicGraphException e) {
             StringBuilder msg = new StringBuilder();
             msg.append("Registry module dependencies are cyclical!\n");
