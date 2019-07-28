@@ -61,6 +61,7 @@ import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -368,6 +369,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((org.spongepowered.api.world.World) worldServer).spawnEntity(spongeEntity);
         this.playerEntityList.add(newPlayer);
         newPlayer.connection.sendPacket(new SPacketPlayerListItem(SPacketPlayerListItem.Action.UPDATE_GAME_MODE, newPlayer));
+        for (DataManipulator<?, ?> container : ((Player) playerIn).getContainers()) {
+            ((Player) newPlayer).offer(container);
+        }
         this.uuidToPlayerMap.put(newPlayer.getUniqueID(), newPlayer);
         newPlayer.addSelfToInternalCraftingInventory();
 
