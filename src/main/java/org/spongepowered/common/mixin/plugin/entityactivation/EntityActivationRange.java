@@ -389,7 +389,7 @@ public class EntityActivationRange {
      */
     public static boolean checkIfActive(final Entity entity) {
         // Never safe to skip fireworks or entities not yet added to chunk
-        if (entity.world.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
+        if (entity instanceof EntityPlayer || entity.world.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
             return true;
         }
         final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();

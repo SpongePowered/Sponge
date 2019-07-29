@@ -71,10 +71,14 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
+import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.world.SpongeEmptyChunk;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -89,6 +93,7 @@ public abstract class WorldMixin implements WorldBridge {
 
     private boolean impl$isDefinitelyFake = false;
     private boolean impl$hasChecked = false;
+    @Nullable private SpongeEmptyChunk impl$emptyChunk;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -178,6 +183,8 @@ public abstract class WorldMixin implements WorldBridge {
         final int xStart, final int yStart, final int zStart, final int xEnd, final int yEnd, final int zEnd, final boolean allowEmpty) { return false; } // SHADOWED
     @Shadow public void updateEntities() { }
     @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos);
+
+    @Shadow public abstract IChunkProvider shadow$getChunkProvider();
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
                                                                      + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
@@ -351,6 +358,83 @@ public abstract class WorldMixin implements WorldBridge {
     protected void onCallEntityRidingUpdate(final net.minecraft.entity.Entity entity) {
         entity.updateRidden();
     }
+
+    @Redirect(method = "updateEntityWithOptionalForce",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;addedToChunk:Z", opcode = Opcodes.GETFIELD),
+        slice = @Slice(
+            from = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;chunkCoordX:I", opcode = Opcodes.GETFIELD, ordinal = 0),
+            to = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;chunkCoordX:I", opcode = Opcodes.GETFIELD, ordinal = 1)
+        )
+    )
+    private boolean impl$returnTrueToAddedToChunkForMovingEntities(final Entity entity) {
+        // Sponge start - Remove active chunk and re-assign new Active Chunk
+        final Chunk activeChunk = (Chunk) ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();
+        if (activeChunk != null) {
+            activeChunk.removeEntityAtIndex(entity, entity.chunkCoordY);
+        }
+        final int l = MathHelper.floor(entity.posX / 16.0D);
+        final int j1 = MathHelper.floor(entity.posZ / 16.0D);
+        final ChunkBridge newChunk = (ChunkBridge) ((ChunkProviderBridge) this.shadow$getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(l, j1);
+        final boolean isPositionDirty = entity.setPositionNonDirty();
+        if (newChunk == null || (!isPositionDirty && newChunk.bridge$isQueuedForUnload() && !newChunk.bridge$isPersistedChunk())) {
+            entity.addedToChunk = false;
+        } else {
+            ((net.minecraft.world.chunk.Chunk) newChunk).addEntity(entity);
+        }
+        // Sponge end
+        return false; // Always return false, because we handle re-assigning the chunk owning the entity in the above block
+    }
+
+    @Redirect(method = "updateEntityWithOptionalForce",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isChunkLoaded(IIZ)Z"),
+        slice = @Slice(
+            from = @At(value = "CONSTANT", args = "doubleValue=16.0D"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;removeEntityAtIndex(Lnet/minecraft/entity/Entity;I)V")
+        )
+    )
+    private boolean impl$returnFalseForChunkLoadedToAvoidIf(final World world, final int x, final int z, final boolean allowEmpty) {
+        return false;
+    }
+
+    @Redirect(method = "updateEntityWithOptionalForce",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isChunkLoaded(IIZ)Z"),
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setPositionNonDirty()Z"),
+            to = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;addedToChunk:Z", opcode = Opcodes.PUTFIELD)
+        )
+    )
+    private boolean impl$returnChunkLoadedAlways(final World world, final int x, final int z, final boolean allowEmpty) {
+        return true;
+    }
+
+    @Redirect(method = "updateEntityWithOptionalForce",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getChunk(II)Lnet/minecraft/world/chunk/Chunk;"),
+        slice = @Slice(
+            from = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;addedToChunk:Z", opcode = Opcodes.PUTFIELD),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;addEntity(Lnet/minecraft/entity/Entity;)V")
+        )
+    )
+    private Chunk impl$returnEmptyChunk(final World world, final int chunkX, final int chunkZ) {
+        if (this.impl$emptyChunk == null) {
+            this.impl$emptyChunk = new SpongeEmptyChunk((World) (Object) this, 0, 0);
+        }
+        return this.impl$emptyChunk;
+    }
+
+
+    @Inject(method = "updateEntityWithOptionalForce",
+        at = @At(value = "FIELD",
+            target = "Lnet/minecraft/entity/Entity;ticksExisted:I",
+            opcode = Opcodes.PUTFIELD,
+            shift = At.Shift.AFTER
+        )
+    )
+    private void impl$increaseActivatedEntityTicks(final Entity entityIn, final boolean forceUpdate, final CallbackInfo ci) {
+        // ++entityIn.ticksExisted;
+        ++TimingHistory.activatedEntityTicks; // Sponge
+    }
+
+
 
     @Redirect(method = "addTileEntity",
             at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false),

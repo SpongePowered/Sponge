@@ -2346,41 +2346,64 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
     }
 
     @Override
-    void impl$endPendingTileEntities(CallbackInfo ci) {
+    void impl$endPendingTileEntities(final CallbackInfo ci) {
         this.impl$timings.tileEntityPending.stopTiming();
         TimingHistory.tileEntityTicks += this.loadedTileEntityList.size();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = "ldc=tickPending") )
+    @Inject(method = "tick",
+        at = @At(value = "INVOKE_STRING",
+            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V",
+            args = "ldc=tickPending",
+            shift = At.Shift.AFTER))
     private void onBeginTickBlockUpdate(final CallbackInfo ci) {
         this.impl$timings.scheduledBlocks.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = "ldc=tickBlocks") )
+    @Inject(method = "tick",
+        at = @At(value = "INVOKE_STRING",
+            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V",
+            args = "ldc=tickBlocks",
+            shift = At.Shift.AFTER))
     private void onAfterTickBlockUpdate(final CallbackInfo ci) {
         this.impl$timings.scheduledBlocks.stopTiming();
         this.impl$timings.updateBlocks.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = "ldc=chunkMap") )
+    @Inject(method = "tick",
+        at = @At(value = "INVOKE_STRING",
+            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V",
+            args = "ldc=chunkMap",
+            shift = At.Shift.AFTER))
     private void onBeginUpdateBlocks(final CallbackInfo ci) {
         this.impl$timings.updateBlocks.stopTiming();
         this.impl$timings.doChunkMap.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = "ldc=village") )
+    @Inject(method = "tick",
+        at = @At(value = "INVOKE_STRING",
+            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V",
+            args = "ldc=village",
+            shift = At.Shift.AFTER))
     private void onBeginUpdateVillage(final CallbackInfo ci) {
         this.impl$timings.doChunkMap.stopTiming();
         this.impl$timings.doVillages.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = "ldc=portalForcer"))
+    @Inject(method = "tick",
+        at = @At(value = "INVOKE_STRING",
+            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V",
+            args = "ldc=portalForcer",
+            shift = At.Shift.AFTER))
     private void onBeginUpdatePortal(final CallbackInfo ci) {
         this.impl$timings.doVillages.stopTiming();
         this.impl$timings.doPortalForcer.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/profiler/Profiler;endSection()V"))
+    @Inject(method = "tick",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/profiler/Profiler;endSection()V",
+            shift = At.Shift.AFTER))
     private void onEndUpdatePortal(final CallbackInfo ci) {
         this.impl$timings.doPortalForcer.stopTiming();
     }
@@ -2388,22 +2411,34 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
     /**
      * Seriously, this was stupid.
      */
-    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/BlockPos;add(III)Lnet/minecraft/util/math/BlockPos;"))
+    @Redirect(method = "tickUpdates",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/BlockPos;add(III)Lnet/minecraft/util/math/BlockPos;"))
     private BlockPos redirectNeedlessBlockPosObjectCreation(final BlockPos pos, final int x, final int y, final int z) {
         return pos;
     }
 
-    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;scheduleUpdate(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;I)V"))
+    @Redirect(method = "tickUpdates",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/WorldServer;scheduleUpdate(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;I)V"))
     private void redirectDontRescheduleBlockUpdates(final WorldServer worldServer, final BlockPos pos, final Block blockIn, final int delay) {
     }
 
     // TIMINGS
-    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V", args = "ldc=cleaning"))
+    @Inject(method = "tickUpdates",
+        at = @At(value = "INVOKE_STRING",
+            target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V",
+            args = "ldc=cleaning",
+            shift = At.Shift.AFTER))
     private void onTickUpdatesCleanup(final boolean flag, final CallbackInfoReturnable<Boolean> cir) {
         this.impl$timings.scheduledBlocksCleanup.startTiming();
     }
 
-    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V", args = "ldc=ticking"))
+    @Inject(method = "tickUpdates",
+        at = @At(value = "INVOKE_STRING",
+            target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V",
+            args = "ldc=ticking",
+            shift = At.Shift.BEFORE,
+            by = 2))
     private void onTickUpdatesTickingStart(final boolean flag, final CallbackInfoReturnable<Boolean> cir) {
         this.impl$timings.scheduledBlocksCleanup.stopTiming();
         this.impl$timings.scheduledBlocksTicking.startTiming();

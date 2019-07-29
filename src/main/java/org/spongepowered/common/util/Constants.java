@@ -92,10 +92,10 @@ public final class Constants {
         // General DataQueries
         public static final DataQuery UNSAFE_NBT = of("UnsafeData");
         public static final DataQuery DATA_MANIPULATORS = of("Data");
-        @Deprecated public static final DataQuery DATA_CLASS = DataQuery.of(Sponge.CUSTOM_DATA_CLASS);
-        public static final DataQuery DATA_ID = DataQuery.of(Sponge.MANIPULATOR_ID);
+        @Deprecated public static final DataQuery DATA_CLASS = DataQuery.of(Constants.Sponge.CUSTOM_DATA_CLASS);
+        public static final DataQuery DATA_ID = DataQuery.of(Constants.Sponge.MANIPULATOR_ID);
         public static final DataQuery FAILED_SERIALIZED_DATA = of("DataUnableToDeserialize");
-        public static final DataQuery INTERNAL_DATA = DataQuery.of(Sponge.CUSTOM_DATA);
+        public static final DataQuery INTERNAL_DATA = DataQuery.of(Constants.Sponge.CUSTOM_DATA);
         // Snapshots
         public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
         public static final DataQuery SNAPSHOT_TILE_DATA = of("TileEntityData");
@@ -117,9 +117,9 @@ public final class Constants {
          * Serialize this BlockPos into a short value
          */
         public static short blockPosToShort(final BlockPos pos) {
-            short serialized = (short) setNibble(0, pos.getX() & Chunk.XZ_MASK, 0, Chunk.NUM_XZ_BITS);
-            serialized = (short) setNibble(serialized, pos.getY() & Chunk.Y_SHORT_MASK, 1, Chunk.NUM_SHORT_Y_BITS);
-            serialized = (short) setNibble(serialized, pos.getZ() & Chunk.XZ_MASK, 3, Chunk.NUM_XZ_BITS);
+            short serialized = (short) setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+            serialized = (short) setNibble(serialized, pos.getY() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
+            serialized = (short) setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
             return serialized;
         }
 
@@ -127,9 +127,9 @@ public final class Constants {
          * Serialize this BlockPos into an int value
          */
         public static int blockPosToInt(final BlockPos pos) {
-            int serialized = setNibble(0, pos.getX() & Chunk.XZ_MASK, 0, Chunk.NUM_XZ_BITS);
-            serialized = setNibble(serialized, pos.getY() & Chunk.Y_INT_MASK, 1, Chunk.NUM_INT_Y_BITS);
-            serialized = setNibble(serialized, pos.getZ() & Chunk.XZ_MASK, 7, Chunk.NUM_XZ_BITS);
+            int serialized = setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+            serialized = setNibble(serialized, pos.getY() & Constants.Chunk.Y_INT_MASK, 1, Constants.Chunk.NUM_INT_Y_BITS);
+            serialized = setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 7, Constants.Chunk.NUM_XZ_BITS);
             return serialized;
         }
 
@@ -355,48 +355,48 @@ public final class Constants {
 
         public static final int MAX_STRING_LENGTH = Constants.Networking.MAX_STRING_LENGTH_BYTES >> 2;
         // Inventory static fields
-        public final static int MAGIC_CLICK_OUTSIDE_SURVIVAL = -999;
-        public final static int MAGIC_CLICK_OUTSIDE_CREATIVE = -1;
+        public static final int MAGIC_CLICK_OUTSIDE_SURVIVAL = -999;
+        public static final int MAGIC_CLICK_OUTSIDE_CREATIVE = -1;
         // Flag masks
-        public final static int MASK_NONE              = 0x00000;
-        public final static int MASK_OUTSIDE           = 0x30000;
-        public final static int MASK_MODE              = 0x0FE00;
-        public final static int MASK_DRAGDATA          = 0x001F8;
-        public final static int MASK_BUTTON            = 0x00007;
+        public static final int MASK_NONE              = 0x00000;
+        public static final int MASK_OUTSIDE           = 0x30000;
+        public static final int MASK_MODE              = 0x0FE00;
+        public static final int MASK_DRAGDATA          = 0x001F8;
+        public static final int MASK_BUTTON            = 0x00007;
         // Mask presets
-        public final static int MASK_ALL               = MASK_OUTSIDE | MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
-        public final static int MASK_NORMAL            = MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
-        public final static int MASK_DRAG              = MASK_OUTSIDE | MASK_NORMAL;
+        public static final int MASK_ALL               = MASK_OUTSIDE | MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
+        public static final int MASK_NORMAL            = MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
+        public static final int MASK_DRAG              = MASK_OUTSIDE | MASK_NORMAL;
         // Click location semaphore flags
-        public final static int CLICK_INSIDE_WINDOW    = 0x01 << 16; // << 0
-        public final static int CLICK_OUTSIDE_WINDOW   = 0x01 << 16 << 1;
-        public final static int CLICK_ANYWHERE         = CLICK_INSIDE_WINDOW | CLICK_OUTSIDE_WINDOW;
+        public static final int CLICK_INSIDE_WINDOW    = 0x01 << 16; // << 0
+        public static final int CLICK_OUTSIDE_WINDOW   = 0x01 << 16 << 1;
+        public static final int CLICK_ANYWHERE         = CLICK_INSIDE_WINDOW | CLICK_OUTSIDE_WINDOW;
         // Modes flags
-        public final static int MODE_CLICK             = 0x01 << 9 << ClickType.PICKUP.ordinal();
-        public final static int MODE_SHIFT_CLICK       = 0x01 << 9 << ClickType.QUICK_MOVE.ordinal();
-        public final static int MODE_HOTBAR            = 0x01 << 9 << ClickType.SWAP.ordinal();
-        public final static int MODE_PICKBLOCK         = 0x01 << 9 << ClickType.CLONE.ordinal();
-        public final static int MODE_DROP              = 0x01 << 9 << ClickType.THROW.ordinal();
-        public final static int MODE_DRAG              = 0x01 << 9 << ClickType.QUICK_CRAFT.ordinal();
-        public final static int MODE_DOUBLE_CLICK      = 0x01 << 9 << ClickType.PICKUP_ALL.ordinal();
+        public static final int MODE_CLICK             = 0x01 << 9 << ClickType.PICKUP.ordinal();
+        public static final int MODE_SHIFT_CLICK       = 0x01 << 9 << ClickType.QUICK_MOVE.ordinal();
+        public static final int MODE_HOTBAR            = 0x01 << 9 << ClickType.SWAP.ordinal();
+        public static final int MODE_PICKBLOCK         = 0x01 << 9 << ClickType.CLONE.ordinal();
+        public static final int MODE_DROP              = 0x01 << 9 << ClickType.THROW.ordinal();
+        public static final int MODE_DRAG              = 0x01 << 9 << ClickType.QUICK_CRAFT.ordinal();
+        public static final int MODE_DOUBLE_CLICK      = 0x01 << 9 << ClickType.PICKUP_ALL.ordinal();
         // Drag mode flags, bitmasked from button and only set if MODE_DRAG
-        public final static int DRAG_MODE_PRIMARY_BUTTON = 0x01 << 6; // << 0
-        public final static int DRAG_MODE_SECONDARY_BUTTON = 0x01 << 6 << 1;
-        public final static int DRAG_MODE_MIDDLE_BUTTON = 0x01 << 6 << 2;
-        public final static int DRAG_MODE_ANY          = DRAG_MODE_PRIMARY_BUTTON | DRAG_MODE_SECONDARY_BUTTON | DRAG_MODE_MIDDLE_BUTTON;
+        public static final int DRAG_MODE_PRIMARY_BUTTON = 0x01 << 6; // << 0
+        public static final int DRAG_MODE_SECONDARY_BUTTON = 0x01 << 6 << 1;
+        public static final int DRAG_MODE_MIDDLE_BUTTON = 0x01 << 6 << 2;
+        public static final int DRAG_MODE_ANY          = DRAG_MODE_PRIMARY_BUTTON | DRAG_MODE_SECONDARY_BUTTON | DRAG_MODE_MIDDLE_BUTTON;
         // Drag status flags, bitmasked from button and only set if MODE_DRAG
-        public final static int DRAG_STATUS_STARTED    = 0x01 << 3; // << 0;
-        public final static int DRAG_STATUS_ADD_SLOT   = 0x01 << 3 << 1;
-        public final static int DRAG_STATUS_STOPPED    = 0x01 << 3 << 2;
+        public static final int DRAG_STATUS_STARTED    = 0x01 << 3; // << 0;
+        public static final int DRAG_STATUS_ADD_SLOT   = 0x01 << 3 << 1;
+        public static final int DRAG_STATUS_STOPPED    = 0x01 << 3 << 2;
         // Buttons flags, only set if *not* MODE_DRAG
-        public final static int BUTTON_PRIMARY         = 0x01 /* << 0 */; // << 0
-        public final static int BUTTON_SECONDARY       = 0x01 /* << 0 */ << 1;
-        public final static int BUTTON_MIDDLE          = 0x01 /* << 0 */ << 2;
+        public static final int BUTTON_PRIMARY         = 0x01 /* << 0 */; // << 0
+        public static final int BUTTON_SECONDARY       = 0x01 /* << 0 */ << 1;
+        public static final int BUTTON_MIDDLE          = 0x01 /* << 0 */ << 2;
         // Only use these with data from the actual packet. DO NOT
         // use them as enum constant values (the 'stateId')
-        public final static int PACKET_BUTTON_PRIMARY_ID = 0;
-        public final static int PACKET_BUTTON_SECONDARY_ID = 0;
-        public final static int PACKET_BUTTON_MIDDLE_ID = 0;
+        public static final int PACKET_BUTTON_PRIMARY_ID = 0;
+        public static final int PACKET_BUTTON_SECONDARY_ID = 0;
+        public static final int PACKET_BUTTON_MIDDLE_ID = 0;
         public static final InetSocketAddress LOCALHOST = InetSocketAddress.createUnresolved("127.0.0.1", 0);
 
         public static final class Packets {
@@ -530,7 +530,7 @@ public final class Constants {
             public static final short DEFAULT_REQUIRED_PLAYER_RANGE = 16;
             public static final short DEFAULT_SPAWN_RANGE = 4;
             public static final WeightedSerializableObject<EntityArchetype> DEFAULT_NEXT_ENTITY_TO_SPAWN = new WeightedSerializableObject<>
-                    (new SpongeEntityArchetypeBuilder().type(Catalog.DEFAULT_SPAWNER_ENTITY).build(), 1);
+                    (new SpongeEntityArchetypeBuilder().type(Constants.Catalog.DEFAULT_SPAWNER_ENTITY).build(), 1);
             public static final String SPAWNABLE_ENTITY_TAG = "EntityTag";
         }
 
