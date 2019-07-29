@@ -199,15 +199,19 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static void callDropItemDrop(final List<EntityItem> items, final PhaseContext<?> context) {
+    public static void callDropItemDrop(EntityPlayerMP player, final List<EntityItem> items,
+            final PhaseContext<?> context) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             final ArrayList<Entity> entities = new ArrayList<>();
             for (final EntityItem item : items) {
                 entities.add((Entity) item);
             }
+            // Creative doesn't inform server of cursor status so there is no way of knowing
+            final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
             final DropItemEvent.Dispense dispense =
-                SpongeEventFactory.createDropItemEventDispense(frame.getCurrentCause(), entities);
+                SpongeEventFactory.createClickInventoryEventDropOutsideCreative(frame.getCurrentCause(), cursorTransaction, entities,
+                        Optional.empty(), ((org.spongepowered.api.item.inventory.Container) player.openContainer), Collections.emptyList());
             SpongeImpl.postEvent(dispense);
             if (!dispense.isCancelled()) {
                 EntityUtil.processEntitySpawnsFromEvent(context, dispense);

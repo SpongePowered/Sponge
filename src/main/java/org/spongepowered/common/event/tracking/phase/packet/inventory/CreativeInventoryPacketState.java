@@ -53,7 +53,7 @@ public final class CreativeInventoryPacketState extends BasicPacketState {
             .acceptAndClearIfNotEmpty(items -> {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame.pushCause(player);
-                    SpongeCommonEventFactory.callDropItemDrop(items, context);
+                    SpongeCommonEventFactory.callDropItemDrop(player, items, context);
                 }
             });
     }
