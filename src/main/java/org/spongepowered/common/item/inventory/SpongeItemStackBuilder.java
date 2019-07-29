@@ -32,8 +32,11 @@ import static org.spongepowered.common.data.util.ItemsHelper.validateData;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -64,6 +67,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -281,6 +285,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count, damage);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            fixEnchantmentData(itemType, compound);
             itemStack.setTagCompound(compound);
         }
         if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
@@ -336,5 +341,30 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         }
 
         return stack;
+    }
+
+    /**
+     * Fixes enchantment data by explicitly setting short values
+     * See {@link EnchantmentHelper#setEnchantments}
+     *
+     * @param itemType the item type
+     * @param compound the itemstacks NBTTagCompound
+     */
+    public static void fixEnchantmentData(ItemType itemType, NBTTagCompound compound) {
+        NBTTagList nbttaglist;
+        if (itemType == Items.ENCHANTED_BOOK) {
+            nbttaglist = compound.getTagList(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
+        } else {
+            nbttaglist = compound.getTagList(Constants.Item.ITEM_ENCHANTMENT_LIST, Constants.NBT.TAG_COMPOUND);
+        }
+        for (int i = 0; i < nbttaglist.tagCount(); ++i)
+        {
+            NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
+            short id = nbttagcompound.getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
+            short lvl = nbttagcompound.getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
+
+            nbttagcompound.setShort(Constants.Item.ITEM_ENCHANTMENT_ID, id);
+            nbttagcompound.setShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, lvl);
+        }
     }
 }
