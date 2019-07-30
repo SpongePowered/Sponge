@@ -353,8 +353,9 @@ public final class WorldManager {
         worldPropertiesByFolderName.put(properties.getWorldName(), properties);
         worldPropertiesByWorldUuid.put(properties.getUniqueId(), properties);
         worldUuidByFolderName.put(properties.getWorldName(), properties.getUniqueId());
-        worldFolderByDimensionId.put(((WorldInfoBridge) properties).bridge$getDimensionId(), properties.getWorldName());
-        usedDimensionIds.add(((WorldInfoBridge) properties).bridge$getDimensionId());
+        final Integer dimensionId = ((WorldInfoBridge) properties).bridge$getDimensionId();
+        worldFolderByDimensionId.put(dimensionId, properties.getWorldName());
+        usedDimensionIds.add(dimensionId);
     }
 
     public static void unregisterWorldProperties(final WorldProperties properties, final boolean freeDimensionId) {
@@ -362,9 +363,10 @@ public final class WorldManager {
         worldPropertiesByFolderName.remove(properties.getWorldName());
         worldPropertiesByWorldUuid.remove(properties.getUniqueId());
         worldUuidByFolderName.remove(properties.getWorldName());
-        worldFolderByDimensionId.remove(((WorldInfoBridge) properties).bridge$getDimensionId());
-        if (((WorldInfoBridge) properties).bridge$getDimensionId() != null && freeDimensionId) {
-            usedDimensionIds.remove(((WorldInfoBridge) properties).bridge$getDimensionId());
+        final Integer dimensionId = ((WorldInfoBridge) properties).bridge$getDimensionId();
+        worldFolderByDimensionId.remove(dimensionId);
+        if (dimensionId != null && freeDimensionId) {
+            usedDimensionIds.remove(dimensionId.intValue());
         }
     }
 
@@ -767,6 +769,9 @@ public final class WorldManager {
                 ((WorldInfoBridge) worldInfo).bridge$setDimensionType(apiDimensionType);
                 ((WorldInfoBridge) worldInfo).bridge$createWorldConfig();
                 ((WorldProperties) worldInfo).setGenerateSpawnOnLoad(((DimensionTypeBridge) (Object) dimensionType).bridge$shouldGenerateSpawnOnLoad());
+                if (((WorldInfoBridge) worldInfo).bridge$getDimensionId() == null) {
+                    ((WorldInfoBridge) worldInfo).bridge$setDimensionId(dimensionId);
+                }
             }
 
             // Safety check to ensure we'll get a unique id no matter what
