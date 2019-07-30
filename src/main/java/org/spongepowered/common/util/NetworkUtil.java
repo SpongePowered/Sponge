@@ -151,8 +151,7 @@ public final class NetworkUtil {
         final GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
         final String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
         playerprofilecache.addEntry(gameprofile);
-        ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("test");
-
+        
         // Sponge start - save changes to offline User before reading player data
         final SpongeUser user = (SpongeUser) ((ServerPlayerEntityBridge) playerIn).bridge$getUserObject();
         if (SpongeUser.dirtyUsers.contains(user)) {
