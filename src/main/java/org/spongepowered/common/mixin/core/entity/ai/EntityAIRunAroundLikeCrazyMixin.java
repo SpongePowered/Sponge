@@ -28,12 +28,17 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.EntityAIRunAroundLikeCrazy;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.animal.Horse;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 
 @Mixin(EntityAIRunAroundLikeCrazy.class)
@@ -60,6 +65,12 @@ public abstract class EntityAIRunAroundLikeCrazyMixin extends EntityAIBaseMixin 
                 int j = this.horseHost.getMaxTemper();
 
                 if (j > 0 && this.horseHost.getRNG().nextInt(j) < i) {
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        frame.pushCause(entity);
+                        if (SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (Horse) this.horseHost))) {
+                            return;
+                        }
+                    }
                     this.horseHost.setTamedBy((EntityPlayer)entity);
                     this.horseHost.world.setEntityState(this.horseHost, (byte)7);
                     return;
