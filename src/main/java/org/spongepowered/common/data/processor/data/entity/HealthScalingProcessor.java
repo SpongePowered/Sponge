@@ -59,11 +59,6 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<En
             return false;
         }
         final ServerPlayerEntityBridge mixinPlayer = (ServerPlayerEntityBridge) dataHolder;
-        if (value == 20D) {
-            mixinPlayer.bridge$setHealthScale(20);
-            mixinPlayer.bridge$setHealthScaled(true);
-            return true;
-        }
         mixinPlayer.bridge$setHealthScale(value);
         return true;
     }
@@ -79,7 +74,7 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<En
         return SpongeValueFactory.boundedBuilder(Keys.HEALTH_SCALE)
                 .minimum(1D)
                 .maximum((double) Float.MAX_VALUE)
-                .defaultValue(20D)
+                .defaultValue(1D)
                 .actualValue(value)
                 .build()
                 .asImmutable();
@@ -90,7 +85,7 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<En
         return SpongeValueFactory.boundedBuilder(Keys.HEALTH_SCALE)
                 .minimum(1D)
                 .maximum((double) Float.MAX_VALUE)
-                .defaultValue(20D)
+                .defaultValue(1D)
                 .actualValue(actualValue)
                 .build();
     }
@@ -101,8 +96,7 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<En
             return DataTransactionResult.failNoData();
         }
         final ImmutableValue<Double> current = constructImmutableValue(((ServerPlayerEntityBridge) container).bridge$getHealthScale());
-        ((ServerPlayerEntityBridge) container).bridge$setHealthScale(20D);
-        ((ServerPlayerEntityBridge) container).bridge$setHealthScaled(false);
+        ((ServerPlayerEntityBridge) container).bridge$setHealthScale(1D);
         return DataTransactionResult.successRemove(current);
     }
 }

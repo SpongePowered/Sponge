@@ -178,18 +178,15 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     private Scoreboard impl$spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
     @Nullable private EntityPlayerMP impl$delegate;
     @Nullable private Vector3d impl$velocityOverride = null;
-    private boolean impl$healthScaling = false;
     private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
     private final PlayerOwnBorderListener borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
     private boolean keepInventory = false;
-    private float cachedHealth = -1;
-    private float cachedScaledHealth = -1;
     @Nullable private Text displayName = null;
 
     @Override
     public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        if (this.impl$healthScaling) {
+        if (bridge$isHealthScaled()) {
             compound.setDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE, this.impl$healthScale);
         }
     }
@@ -198,7 +195,6 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey(Constants.Sponge.Entity.Player.HEALTH_SCALE, Constants.NBT.TAG_DOUBLE)) {
-            this.impl$healthScaling = true;
             this.impl$healthScale = compound.getDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE);
         }
     }
@@ -782,7 +778,6 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         checkArgument(scale > 0, "Health scale must be greater than 0!");
         checkArgument(scale < Float.MAX_VALUE, "Health scale cannot exceed Float.MAX_VALUE!");
         this.impl$healthScale = scale;
-        this.impl$healthScaling = true;
         bridge$refreshScaledHealth();
     }
 
@@ -808,41 +803,28 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @Override
     public void bridge$injectScaledHealth(final Collection<IAttributeInstance> set, final boolean force) {
-        if (!this.impl$healthScaling && !force) {
+        if (!bridge$isHealthScaled() && !force) {
             return;
         }
         // We need to remove the existing attribute instance for max health, since it's not always going to be the
         // same as SharedMonsterAttributes.MAX_HEALTH
-        @Nullable Collection<AttributeModifier> modifiers = null;
-        boolean foundMax = false; // Sometimes the max health isn't modified and no longer dirty
         for (final Iterator<IAttributeInstance> iter = set.iterator(); iter.hasNext(); ) {
             final IAttributeInstance dirtyInstance = iter.next();
             if ("generic.maxHealth".equals(dirtyInstance.getAttribute().getName())) {
-                foundMax = true;
-                modifiers = dirtyInstance.getModifiers();
                 iter.remove();
                 break;
             }
         }
-        if (!foundMax) {
-            // Means we didn't find the max health attribute and need to fetch the modifiers from
-            // the cached map because it wasn't marked dirty for some reason
-            modifiers = this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getModifiers();
-        }
 
         // We now re-create a new ranged attribute for our desired max health
         final RangedAttribute maxHealth =
-            new RangedAttribute(null, "generic.maxHealth", this.impl$healthScaling ? this.impl$healthScale : getMaxHealth(), 0.0D, Float.MAX_VALUE);
+            new RangedAttribute(null, "generic.maxHealth", getMaxHealth() / this.impl$healthScale, 0.0D, Float.MAX_VALUE);
         maxHealth.setDescription("Max Health");
         maxHealth.setShouldWatch(true); // needs to be watched
 
         final ModifiableAttributeInstance attribute = new ModifiableAttributeInstance(this.getAttributeMap(), maxHealth);
 
-        if (!modifiers.isEmpty()) {
-            modifiers.forEach(attribute::applyModifier);
-        }
         set.add(attribute);
-
     }
 
     @Override
@@ -852,49 +834,12 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @Override
     public float bridge$getInternalScaledHealth() {
-        if (this.impl$healthScaling) {
-            // Micro-optimization so we don't have to recalculate it all the time
-            if (this.cachedHealth != -1 && this.getHealth() == this.cachedHealth) {
-                if (this.cachedScaledHealth != -1) {
-                    return this.cachedScaledHealth;
-                }
-            }
-            this.cachedHealth = this.getHealth();
-            // Because attribute modifiers from mods can add onto health and multiply health, we
-            // need to replicate what the mod may be trying to represent, regardless whether the health scale
-            // says to show only x hearts.
-            final IAttributeInstance maxAttribute = this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
-            double modifiedScale = (float) this.impl$healthScale;
-            // Apply additive modifiers
-            for (final AttributeModifier attributemodifier : maxAttribute.getModifiersByOperation(0)) {
-                modifiedScale += attributemodifier.getAmount();
-            }
-
-
-            // Apply
-            for (final AttributeModifier attributemodifier1 : maxAttribute.getModifiersByOperation(1)) {
-                modifiedScale += modifiedScale * attributemodifier1.getAmount();
-            }
-
-            for (final AttributeModifier attributemodifier2 : maxAttribute.getModifiersByOperation(2)) {
-                modifiedScale *= 1.0D + attributemodifier2.getAmount();
-            }
-
-            final float maxHealth = getMaxHealth();
-            this.cachedScaledHealth = (float) ((this.cachedHealth / maxHealth) * modifiedScale);
-            return this.cachedScaledHealth;
-        }
-        return getHealth();
+        return (float) (getHealth() / this.impl$healthScale);
     }
 
     @Override
     public boolean bridge$isHealthScaled() {
-        return this.impl$healthScaling;
-    }
-
-    @Override
-    public void bridge$setHealthScaled(final boolean scaled) {
-        this.impl$healthScaling = scaled;
+        return this.impl$healthScale != 1;
     }
 
     @Override
