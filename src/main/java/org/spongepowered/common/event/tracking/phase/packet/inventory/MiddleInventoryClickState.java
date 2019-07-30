@@ -44,12 +44,17 @@ import javax.annotation.Nullable;
 public final class MiddleInventoryClickState extends BasicInventoryPacketState {
 
     public MiddleInventoryClickState() {
-        super(Constants.Networking.MODE_CLICK | Constants.Networking.MODE_PICKBLOCK | Constants.Networking.BUTTON_MIDDLE | Constants.Networking.CLICK_INSIDE_WINDOW | Constants.Networking.CLICK_OUTSIDE_WINDOW);
+        super(Constants.Networking.MODE_CLICK
+              | Constants.Networking.BUTTON_PRIMARY // The primary is set if the pick block is used as a different button mapping.
+              | Constants.Networking.BUTTON_MIDDLE
+              | Constants.Networking.MODE_PICKBLOCK
+              | Constants.Networking.CLICK_INSIDE_WINDOW
+              | Constants.Networking.CLICK_OUTSIDE_WINDOW);
     }
 
     @Override
-    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
+    public ClickInventoryEvent createInventoryEvent(final EntityPlayerMP playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
+            final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable final Slot slot) {
         return SpongeEventFactory.createClickInventoryEventMiddle(Sponge.getCauseStackManager().getCurrentCause(), transaction,
                 Optional.ofNullable(slot), openContainer, slotTransactions);
     }
