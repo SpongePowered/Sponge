@@ -769,7 +769,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         return bridge$getInternalScaledHealth();
     }
 
-    @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 0))
+    @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 1))
     private void updateHealthPriorToArmor(final CallbackInfo ci) {
         bridge$refreshScaledHealth();
     }
