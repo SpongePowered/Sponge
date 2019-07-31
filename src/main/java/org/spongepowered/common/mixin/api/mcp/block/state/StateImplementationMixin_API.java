@@ -35,6 +35,7 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateBase;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.IStringSerializable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -94,7 +95,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public BlockState cycleValue(Key<? extends BaseValue<? extends Cycleable<?>>> key) {
+    public BlockState cycleValue(final Key<? extends BaseValue<? extends Cycleable<?>>> key) {
         final Optional<Cycleable<?>> optional = get((Key) key);
         return optional
             .map(Cycleable::cycleNext)
@@ -112,7 +113,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     }
 
     @Override
-    public BlockSnapshot snapshotFor(Location<World> location) {
+    public BlockSnapshot snapshotFor(final Location<World> location) {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
             .blockState((IBlockState) (Object) this)
             .position(location.getBlockPosition())
@@ -120,7 +121,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
         if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {
             final TileEntity tileEntity = location.getTileEntity()
                 .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
-            for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators()) {
+            for (final DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators()) {
                 builder.add(manipulator);
             }
             final NBTTagCompound compound = new NBTTagCompound();
@@ -148,11 +149,11 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
             this.manipulators = ImmutableList.copyOf(((BlockBridge) this.block).bridge$getManipulators(this));
         }
         if (this.keyMap == null) {
-            ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
-            ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
-            ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-            for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
-                for (ImmutableValue<?> value : manipulator.getValues()) {
+            final ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
+            final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
+            final ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
+            for (final ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
+                for (final ImmutableValue<?> value : manipulator.getValues()) {
                     builder.put(value.getKey(), value.get());
                     valueBuilder.add(value);
                     keyBuilder.add(value.getKey());
@@ -167,8 +168,8 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
-        for (ImmutableDataManipulator<?, ?> manipulator : this.getManipulators()) {
+    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> get(final Class<T> containerClass) {
+        for (final ImmutableDataManipulator<?, ?> manipulator : this.getManipulators()) {
             if (containerClass.isInstance(manipulator)) {
                 return Optional.of((T) manipulator);
             }
@@ -178,8 +179,8 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
-        for (ImmutableDataManipulator<?, ?> manipulator : this.getManipulators()) {
+    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
+        for (final ImmutableDataManipulator<?, ?> manipulator : this.getManipulators()) {
             if (containerClass.isInstance(manipulator)) {
                 return Optional.of(((T) manipulator));
             }
@@ -188,19 +189,19 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     }
 
     @Override
-    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    public boolean supports(final Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         return ((BlockBridge) this.block).bridge$supports(containerClass);
     }
 
     @Override
-    public <E> Optional<BlockState> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
+    public <E> Optional<BlockState> transform(final Key<? extends BaseValue<E>> key, final Function<E, E> function) {
         return this.get(checkNotNull(key, "Key cannot be null!")) // If we don't have a value for the key, we don't support it.
             .map(checkNotNull(function, "Function cannot be null!"))
             .map(newVal -> with(key, newVal).orElse(this)); // We can either return this value or the updated value, but not an empty
     }
 
     @Override
-    public <E> Optional<BlockState> with(Key<? extends BaseValue<E>> key, E value) {
+    public <E> Optional<BlockState> with(final Key<? extends BaseValue<E>> key, final E value) {
         if (!supports(key)) {
             return Optional.empty();
         }
@@ -209,13 +210,13 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<BlockState> with(BaseValue<?> value) {
+    public Optional<BlockState> with(final BaseValue<?> value) {
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
     }
 
     @SuppressWarnings({"unchecked"})
     @Override
-    public Optional<BlockState> with(ImmutableDataManipulator<?, ?> valueContainer) {
+    public Optional<BlockState> with(final ImmutableDataManipulator<?, ?> valueContainer) {
         if (supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
             return ((BlockBridge) this.block).bridge$getStateWithData(this, valueContainer);
         }
@@ -223,9 +224,9 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     }
 
     @Override
-    public Optional<BlockState> with(Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
+    public Optional<BlockState> with(final Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
         BlockState state = this;
-        for (ImmutableDataManipulator<?, ?> manipulator : valueContainers) {
+        for (final ImmutableDataManipulator<?, ?> manipulator : valueContainers) {
             final Optional<BlockState> optional = state.with(manipulator);
             if (optional.isPresent()) {
                 state = optional.get();
@@ -237,18 +238,18 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     }
 
     @Override
-    public Optional<BlockState> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    public Optional<BlockState> without(final Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         return Optional.empty(); // By default, all manipulators have to have the manipulator if it exists, we can't remove data.
     }
 
     @Override
-    public BlockState merge(BlockState that) {
+    public BlockState merge(final BlockState that) {
         if (!getType().equals(that.getType())) {
             return this;
         }
         BlockState temp = this;
-        for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
-            Optional<BlockState> optional = temp.with(manipulator);
+        for (final ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
+            final Optional<BlockState> optional = temp.with(manipulator);
             if (optional.isPresent()) {
                 temp = optional.get();
             } else {
@@ -259,14 +260,14 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     }
 
     @Override
-    public BlockState merge(BlockState that, MergeFunction function) {
+    public BlockState merge(final BlockState that, final MergeFunction function) {
         if (!getType().equals(that.getType())) {
             return this;
         }
         BlockState temp = this;
-        for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
-            @Nullable ImmutableDataManipulator<?, ?> old = temp.get(manipulator.getClass()).orElse(null);
-            Optional<BlockState> optional = temp.with(checkNotNull(function.merge(old, manipulator)));
+        for (final ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
+            @Nullable final ImmutableDataManipulator<?, ?> old = temp.get(manipulator.getClass()).orElse(null);
+            final Optional<BlockState> optional = temp.with(checkNotNull(function.merge(old, manipulator)));
             if (optional.isPresent()) {
                 temp = optional.get();
             } else {
@@ -278,7 +279,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
+    public <T extends Property<?, ?>> Optional<T> getProperty(final Class<T> propertyClass) {
         return Optional.ofNullable((T) this.getSpongeInternalProperties().get(propertyClass));
     }
 
@@ -301,15 +302,15 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> get(final Key<? extends BaseValue<E>> key) {
         return Optional.ofNullable((E) this.getKeyMap().get(key));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+    public <E, V extends BaseValue<E>> Optional<V> getValue(final Key<V> key) {
         checkNotNull(key);
-        for (ImmutableValue<?> value : this.getValues()) {
+        for (final ImmutableValue<?> value : this.getValues()) {
             if (value.getKey().equals(key)) {
                 return Optional.of((V) value.asMutable());
             }
@@ -318,7 +319,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     }
 
     @Override
-    public boolean supports(Key<?> key) {
+    public boolean supports(final Key<?> key) {
         return this.getKeys().contains(checkNotNull(key));
     }
 
@@ -371,15 +372,17 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
         return this.id;
     }
 
-    private void impl$generateIdFromParentBlock(Block block) {
-        StringBuilder builder = new StringBuilder();
+    private void impl$generateIdFromParentBlock(final Block block) {
+        final StringBuilder builder = new StringBuilder();
         builder.append(((BlockType) block).getId());
         if (!this.properties.isEmpty()) {
             builder.append('[');
-            Joiner joiner = Joiner.on(',');
-            List<String> propertyValues = new ArrayList<>();
-            for (Map.Entry<IProperty<?>, Comparable<?>> entry : this.properties.entrySet()) {
-                propertyValues.add(entry.getKey().getName() + "=" + entry.getValue());
+            final Joiner joiner = Joiner.on(',');
+            final List<String> propertyValues = new ArrayList<>();
+            for (final Map.Entry<IProperty<?>, Comparable<?>> entry : this.properties.entrySet()) {
+                final Comparable<?> value = entry.getValue();
+                final String stringValue = (value instanceof IStringSerializable) ? ((IStringSerializable) value).getName() : value.toString();
+                propertyValues.add(entry.getKey().getName() + "=" + stringValue);
             }
             builder.append(joiner.join(propertyValues));
             builder.append(']');
