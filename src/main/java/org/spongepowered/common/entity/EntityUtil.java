@@ -308,11 +308,12 @@ public final class EntityUtil {
         return toReturn;
     }
 
+    @Nullable
     public static EntityPlayerMP transferPlayerToWorld(final EntityPlayerMP player, @Nullable MoveEntityEvent.Teleport event,
         @Nullable WorldServer toWorld,  @Nullable final ForgeITeleporterBridge teleporter) {
 
         if (player.world.isRemote || player.isDead) {
-            return player;
+            return null;
         }
 
         final PlayerList playerList = SpongeImpl.getServer().getPlayerList();
@@ -328,14 +329,14 @@ public final class EntityUtil {
         // Assume portal
         if (event == null) {
             if (toWorld == null || teleporter == null) {
-                return player;
+                return null;
             }
 
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                 final InvokingTeleporterContext context = createInvokingTeleporterPhase(player, toWorld, teleporter)) {
 
                 if (!context.getDidPort()) {
-                    return player;
+                    return null;
                 }
 
                 frame.pushCause(context.getTeleporter());
@@ -363,7 +364,7 @@ public final class EntityUtil {
                         ((EntityBridge) player).bridge$setLocationAndAngles(fromTransform);
                     }
 
-                    return player;
+                    return null;
                 } else {
                     toTransform = event.getToTransform();
                     toWorld = (WorldServer) toTransform.getExtent();
@@ -381,7 +382,7 @@ public final class EntityUtil {
                         context.getCapturedBlockSupplier().restoreOriginals();
 
                         ((EntityBridge) player).bridge$setLocationAndAngles(toTransform);
-                        return player;
+                        return null;
                     }
 
                     // If we don't use the portal agent clear out the portal blocks that
@@ -401,14 +402,14 @@ public final class EntityUtil {
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
 
-                            return player;
+                            return null;
                         }
                     }
                 }
             }
             // Make sure no one else besides me is stupid enough to pass a cancelled event to this....
         } else if (event.isCancelled()) {
-            return player;
+            return null;
         } else {
             toTransform = event.getToTransform();
             toWorld = (WorldServer) toTransform.getExtent();
@@ -435,8 +436,6 @@ public final class EntityUtil {
                 player.interactionManager.getGameType()));
         }
 
-        // TODO I can easily support switching gamemodes per world here but need to actually have worlds inherit server gamemode
-        // TODO if they have none set..
         player.connection.sendPacket(new SPacketRespawn(toClientDimId, toWorld.getDifficulty(), toWorld.getWorldType(),
             player.interactionManager.getGameType()));
 
