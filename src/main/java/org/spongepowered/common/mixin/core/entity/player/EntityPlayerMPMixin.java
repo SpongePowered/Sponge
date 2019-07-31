@@ -179,6 +179,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Nullable private EntityPlayerMP impl$delegate;
     @Nullable private Vector3d impl$velocityOverride = null;
     private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
+    private float impl$cachedHealth = -1;
     private final PlayerOwnBorderListener borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
     private boolean keepInventory = false;
     @Nullable private Text displayName = null;
@@ -778,6 +779,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         checkArgument(scale > 0, "Health scale must be greater than 0!");
         checkArgument(scale < Float.MAX_VALUE, "Health scale cannot exceed Float.MAX_VALUE!");
         this.impl$healthScale = scale;
+        this.impl$cachedHealth = -1;
         bridge$refreshScaledHealth();
     }
 
@@ -787,43 +789,50 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         // of modifying the attribute instances themselves, we bypass other potentially detrimental logi
         // that would otherwise break the actual health scaling.
         final Set<IAttributeInstance> dirtyInstances = ((AttributeMap) this.getAttributeMap()).getDirtyInstances();
-        bridge$injectScaledHealth(dirtyInstances, true);
+        bridge$injectScaledHealth(dirtyInstances);
 
         // Send the new information to the client.
-        sendHealthUpdate();
+        this.connection.sendPacket(new SPacketUpdateHealth(bridge$getInternalScaledHealth(), getFoodStats().getFoodLevel(), getFoodStats().getSaturationLevel()));
         this.connection.sendPacket(new SPacketEntityProperties(this.getEntityId(), dirtyInstances));
         // Reset the dirty instances since they've now been manually updated on the client.
         dirtyInstances.clear();
 
     }
 
-    private void sendHealthUpdate() {
-        this.connection.sendPacket(new SPacketUpdateHealth(bridge$getInternalScaledHealth(), getFoodStats().getFoodLevel(), getFoodStats().getSaturationLevel()));
-    }
-
     @Override
-    public void bridge$injectScaledHealth(final Collection<IAttributeInstance> set, final boolean force) {
-        if (!bridge$isHealthScaled() && !force) {
-            return;
-        }
+    public void bridge$injectScaledHealth(final Collection<IAttributeInstance> set) {
         // We need to remove the existing attribute instance for max health, since it's not always going to be the
         // same as SharedMonsterAttributes.MAX_HEALTH
+        @Nullable Collection<AttributeModifier> modifiers = null;
+        boolean foundMax = false; // Sometimes the max health isn't modified and no longer dirty
         for (final Iterator<IAttributeInstance> iter = set.iterator(); iter.hasNext(); ) {
             final IAttributeInstance dirtyInstance = iter.next();
             if ("generic.maxHealth".equals(dirtyInstance.getAttribute().getName())) {
+                foundMax = true;
+                modifiers = dirtyInstance.getModifiers();
                 iter.remove();
                 break;
             }
         }
+        if (!foundMax) {
+            // Means we didn't find the max health attribute and need to fetch the modifiers from
+            // the cached map because it wasn't marked dirty for some reason
+            modifiers = this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getModifiers();
+        }
 
         // We now re-create a new ranged attribute for our desired max health
+        double defaultt = bridge$isHealthScaled() ? this.impl$healthScale : this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getBaseValue();
+
         final RangedAttribute maxHealth =
-            new RangedAttribute(null, "generic.maxHealth", getMaxHealth() / this.impl$healthScale, 0.0D, Float.MAX_VALUE);
+            new RangedAttribute(null, "generic.maxHealth", defaultt, 0.0D, Float.MAX_VALUE);
         maxHealth.setDescription("Max Health");
         maxHealth.setShouldWatch(true); // needs to be watched
 
         final ModifiableAttributeInstance attribute = new ModifiableAttributeInstance(this.getAttributeMap(), maxHealth);
 
+        if (!modifiers.isEmpty()) {
+            modifiers.forEach(attribute::applyModifier);
+        }
         set.add(attribute);
     }
 
@@ -834,12 +843,38 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @Override
     public float bridge$getInternalScaledHealth() {
-        return (float) (getHealth() / this.impl$healthScale);
+        if (!bridge$isHealthScaled()) {
+            return getHealth();
+        }
+        if (this.impl$cachedHealth != -1) {
+            return this.impl$cachedHealth;
+        }
+        // Because attribute modifiers from mods can add onto health and multiply health, we
+        // need to replicate what the mod may be trying to represent, regardless whether the health scale
+        // says to show only x hearts.
+        final IAttributeInstance maxAttribute = this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
+        double modifiedScale = (float) this.impl$healthScale;
+        // Apply additive modifiers
+        for (final AttributeModifier attributemodifier : maxAttribute.getModifiersByOperation(0)) {
+            modifiedScale += attributemodifier.getAmount();
+        }
+
+        for (final AttributeModifier attributemodifier1 : maxAttribute.getModifiersByOperation(1)) {
+            modifiedScale += modifiedScale * attributemodifier1.getAmount();
+        }
+
+        for (final AttributeModifier attributemodifier2 : maxAttribute.getModifiersByOperation(2)) {
+            modifiedScale *= 1.0D + attributemodifier2.getAmount();
+        }
+
+        final float maxHealth = getMaxHealth();
+        this.impl$cachedHealth = (float) ((getHealth() / maxHealth) * modifiedScale);
+        return this.impl$cachedHealth;
     }
 
     @Override
     public boolean bridge$isHealthScaled() {
-        return this.impl$healthScale != 1;
+        return this.impl$healthScale != Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
     }
 
     @Override

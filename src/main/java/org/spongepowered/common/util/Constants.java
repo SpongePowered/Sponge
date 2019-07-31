@@ -772,7 +772,7 @@ public final class Constants {
             public static final double MINIMUM_EXHAUSTION = 0;
             public static final double DEFAULT_SATURATION = 0;
             public static final int DEFAULT_FOOD_LEVEL = 20;
-            public static final int DEFAULT_HEALTH_SCALE = 1;
+            public static final double DEFAULT_HEALTH_SCALE = 20D;
             public static final String IS_FLYING = "flying";
             public static final String INVENTORY = "Inventory";
             public static final String INVULNERABLE = "Invulnerable";

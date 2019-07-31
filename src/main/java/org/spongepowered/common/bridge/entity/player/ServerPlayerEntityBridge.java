@@ -91,7 +91,7 @@ public interface ServerPlayerEntityBridge {
 
     void bridge$refreshScaledHealth();
 
-    void bridge$injectScaledHealth(Collection<IAttributeInstance> set, boolean b);
+    void bridge$injectScaledHealth(Collection<IAttributeInstance> set);
 
     void updateDataManagerForScaledHealth();
 
