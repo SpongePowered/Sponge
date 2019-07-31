@@ -218,6 +218,7 @@ public final class WorldManager {
         if (dimensionTypeByDimensionId.containsKey(dimensionId)) {
             return;
         }
+
         dimensionTypeByDimensionId.put(dimensionId, type);
         if (dimensionId >= 0) {
             usedDimensionIds.add(dimensionId);
@@ -1008,6 +1009,15 @@ public final class WorldManager {
                 }
 
                 if (dimensionId == Integer.MIN_VALUE) {
+                    continue;
+                }
+
+                if (dimensionTypeByDimensionId.containsKey(dimensionId)) {
+                    SpongeImpl.getLogger().warn("World [{}] ({}) is attempting to be registered as an " +
+                                    "existing dimension but it's dimension id has already been registered for folder " +
+                                    "[{}]. This means the world has been copied outside of Sponge. This is not a " +
+                                    "supported configuration.", worldFolderName, dimensionId, worldFolderByDimensionId
+                            .get(dimensionId));
                     continue;
                 }
 
