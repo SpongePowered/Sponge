@@ -60,7 +60,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
     private static final NbtTranslator instance = new NbtTranslator();
     private static final TypeToken<NBTTagCompound> TOKEN = TypeToken.of(NBTTagCompound.class);
-    public static final String BOOLEAN_IDENTIFER = "$Boolean";
+    public static final String BOOLEAN_IDENTIFIER = "$Boolean";
 
     public static NbtTranslator getInstance() {
         return instance;
@@ -88,7 +88,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 containerToCompound(container.getView(entry.getKey()).get(), inner);
                 compound.setTag(key, inner);
             } else if (value instanceof Boolean) {
-                compound.setTag(key + BOOLEAN_IDENTIFER, new NBTTagByte(((Boolean) value) ? (byte) 1 : 0));
+                compound.setTag(key + BOOLEAN_IDENTIFIER, new NBTTagByte(((Boolean) value) ? (byte) 1 : 0));
             } else {
                 compound.setTag(key, getBaseFromObject(value));
             }
@@ -156,7 +156,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
                 if (entry.getKey() instanceof DataQuery) {
                     if (entry.getValue() instanceof Boolean) {
-                        compound.setBoolean(((DataQuery) entry.getKey()).asString('.') + BOOLEAN_IDENTIFER, (Boolean) entry.getValue());
+                        compound.setBoolean(((DataQuery) entry.getKey()).asString('.') + BOOLEAN_IDENTIFIER, (Boolean) entry.getValue());
                     } else {
                         compound.setTag(((DataQuery) entry.getKey()).asString('.'), getBaseFromObject(entry.getValue()));
                     }
@@ -191,8 +191,8 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         checkArgument(type > Constants.NBT.TAG_END && type <= Constants.NBT.TAG_INT_ARRAY);
         switch (type) {
             case Constants.NBT.TAG_BYTE:
-                if (key.contains(BOOLEAN_IDENTIFER)) {
-                    view.set(of(key.replace(BOOLEAN_IDENTIFER, "")), (((NBTTagByte) base).getByte() != 0));
+                if (key.contains(BOOLEAN_IDENTIFIER)) {
+                    view.set(of(key.replace(BOOLEAN_IDENTIFIER, "")), (((NBTTagByte) base).getByte() != 0));
                 } else {
                     view.set(of(key), ((NBTTagByte) base).getByte());
                 }
