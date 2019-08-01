@@ -410,7 +410,10 @@ public abstract class WorldMixin implements WorldBridge {
     @Redirect(method = "updateEntityWithOptionalForce",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getChunk(II)Lnet/minecraft/world/chunk/Chunk;"),
         slice = @Slice(
-            from = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;addedToChunk:Z", opcode = Opcodes.PUTFIELD),
+            // Note- we cannot specify the slice to use the entity.addedToChunk putfield because in production/vanilla
+            //   that label/block is after the chunk.addEntity label/block, causing a slice index exception.
+            //   see https://i.imgur.com/CNnbj3y.png
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setPositionNonDirty()Z"),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;addEntity(Lnet/minecraft/entity/Entity;)V")
         )
     )
