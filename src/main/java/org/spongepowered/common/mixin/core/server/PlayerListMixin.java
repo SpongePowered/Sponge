@@ -64,6 +64,8 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
@@ -438,11 +440,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Inject(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At("HEAD"))
     private void onPlayerLogOut(final EntityPlayerMP player, final CallbackInfo ci) {
-        // Synchronise with user object
-        final NBTTagCompound nbt = new NBTTagCompound();
-        player.writeToNBT(nbt);
-        ((SpongeUser) ((ServerPlayerEntityBridge) player).bridge$getUserObject()).readFromNbt(nbt);
-
         // Remove player reference from scoreboard
         ((ServerScoreboardBridge) ((Player) player).getScoreboard()).bridge$removePlayer(player, false);
     }
@@ -524,11 +521,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Overwrite
     public void sendMessage(final ITextComponent component, final boolean isSystem) {
         ChatUtil.sendMessage(component, MessageChannel.TO_ALL, (CommandSource) this.server, !isSystem);
-    }
-
-    @Inject(method = "createPlayerForUser", at = @At("RETURN"), cancellable = true)
-    private void impl$forceRecreateUser(final CallbackInfoReturnable<EntityPlayerMP> cir) {
-        ((ServerPlayerEntityBridge) cir.getReturnValue()).bridge$forceRecreateUser();
     }
 
     @Override

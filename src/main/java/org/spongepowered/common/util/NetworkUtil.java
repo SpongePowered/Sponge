@@ -157,6 +157,8 @@ public final class NetworkUtil {
         final SpongeUser user = (SpongeUser) ((ServerPlayerEntityBridge) playerIn).bridge$getUserObject();
         if (SpongeUser.dirtyUsers.contains(user)) {
             user.save();
+        } else {
+            user.invalidate();
         }
         // Sponge end
 

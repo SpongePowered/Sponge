@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
@@ -33,11 +34,13 @@ import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.ArmorEquipable;
@@ -51,6 +54,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.player.BedLocationsBridge;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
@@ -64,6 +68,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -105,9 +112,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     private boolean isVanishCollide;
     private boolean isVanishTarget;
 
-    private SpongeUserInventory inventory; // lazy load when accessing inventory
-    private InventoryEnderChest enderChest; // lazy load when accessing inventory
-    private NBTTagCompound nbt = new NBTTagCompound();
+    @Nullable private SpongeUserInventory inventory; // lazy load when accessing inventory
+    @Nullable private InventoryEnderChest enderChest; // lazy load when accessing inventory
+    @Nullable private NBTTagCompound nbt;
 
     public SpongeUser(final GameProfile profile) {
         this.profile = profile;
@@ -115,6 +122,55 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     private void reset() {
         this.spawnLocations.clear();
+    }
+
+    public boolean isInitialized() {
+        return this.nbt != null;
+    }
+
+    public DataHolder getDataHolder(boolean markDirty) {
+        if (this.self.isOnline()) {
+            return this.self.getPlayer().get();
+        }
+        if (!isInitialized()) {
+            initialize();
+        }
+        if (markDirty) {
+            markDirty();
+        }
+        return (DataHolder) this;
+    }
+
+    public void invalidate() {
+        this.nbt = null;
+
+        ((CustomDataHolderBridge) this).bridge$getFailedData().clear();
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) this).bridge$getCustomManipulators()) {
+            ((CustomDataHolderBridge) this).bridge$removeCustom((Class<? extends DataManipulator<?, ?>>) manipulator.getClass());
+        }
+    }
+
+    public void initialize() {
+        this.nbt = new NBTTagCompound();
+        Optional<WorldServer> worldServer = WorldManager.getWorldByDimensionId(0);
+        if (!worldServer.isPresent()) {
+            return;
+        }
+
+        // Note: Uses the overworld's player data
+        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) worldServer.get().getSaveHandler();
+        final File file = new File(saveHandler.accessor$getPlayersDirectory(), this.profile.getId().toString() + ".dat");
+        if (!file.exists()) {
+            return;
+        }
+
+        try {
+            try (FileInputStream in = new FileInputStream(file)) {
+                readFromNbt(CompressedStreamTools.readCompressed(in));
+            }
+        } catch (IOException e) {
+            SpongeImpl.getLogger().warn("Corrupt user file {}", file, e);
+        }
     }
 
     public void readFromNbt(final NBTTagCompound compound) {
@@ -412,10 +468,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         if (this.isInvisible) {
             spongeCompound.setBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
         }
-        if (!spongeCompound.isEmpty()) {
-            forgeCompound.setTag(Constants.Sponge.SPONGE_DATA, spongeCompound);
-            compound.setTag(Constants.Forge.FORGE_DATA, forgeCompound);
-        }
+        
+	forgeCompound.setTag(Constants.Sponge.SPONGE_DATA, spongeCompound);
+        compound.setTag(Constants.Forge.FORGE_DATA, forgeCompound);
 
         CustomDataNbtUtil.writeCustomData(spongeCompound, (DataHolder) this);
     }
@@ -533,23 +588,21 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void save() {
+        Preconditions.checkState(isInitialized(), "User {} is not initialized", this.profile.getId());
         final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
         final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), getUniqueId() + ".dat");
         NBTTagCompound tag;
-        if (dataFile.isFile()) {
-            try {
-                tag = CompressedStreamTools.readCompressed(new FileInputStream(dataFile));
-            } catch (IOException ignored) {
-                // Nevermind
-                tag = new NBTTagCompound();
-            }
-        } else {
+        try {
+            tag = CompressedStreamTools.readCompressed(new FileInputStream(dataFile));
+        } catch (IOException ignored) {
+            // Nevermind
             tag = new NBTTagCompound();
         }
         writeToNbt(tag);
         try (final FileOutputStream out = new FileOutputStream(dataFile)) {
             CompressedStreamTools.writeCompressed(tag, out);
             dirtyUsers.remove(this);
+            invalidate();
         } catch (IOException e) {
             SpongeImpl.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
         }
@@ -621,4 +674,20 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeUser other = (SpongeUser) obj;
+        return this.profile.getId().equals(other.profile.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.profile.getId().hashCode();
+    }
 }

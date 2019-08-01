@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.entity.living.player.User;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -65,16 +66,20 @@ public abstract class DataHolderMixin_API implements DataHolder {
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> get(final Class<T> containerClass) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
-        ;
         SpongeTimings.dataGetManipulator.startTimingIfSync();
+        boolean isUser = ((Object) this) instanceof SpongeUser;
+        DataHolder holder = this;
+        if (isUser) {
+            holder = ((SpongeUser) holder).getDataHolder(false);
+        }
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(containerClass);
         if (optional.isPresent()) {
-            final Optional<?> from = optional.get().from(this);
+            final Optional<?> from = optional.get().from(holder);
             SpongeTimings.dataGetManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return (Optional<T>) from;
         } else if (this instanceof CustomDataHolderBridge) {
-            final Optional<T> custom = ((CustomDataHolderBridge) this).bridge$getCustom(containerClass);
+            final Optional<T> custom = ((CustomDataHolderBridge) holder).bridge$getCustom(containerClass);
             SpongeTimings.dataGetManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return custom;
@@ -89,14 +94,19 @@ public abstract class DataHolderMixin_API implements DataHolder {
     public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataGetOrCreateManipulator.startTimingIfSync();
+        boolean isUser = ((Object) this) instanceof SpongeUser;
+        DataHolder holder = this;
+        if (isUser) {
+            holder = ((SpongeUser) holder).getDataHolder(false);
+        }
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(containerClass);
         if (optional.isPresent()) {
-            final Optional<T> created = (Optional<T>) optional.get().createFrom(this);
+            final Optional<T> created = (Optional<T>) optional.get().createFrom(holder);
             SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return created;
         } else if (this instanceof CustomDataHolderBridge) {
-            final Optional<T> custom = ((CustomDataHolderBridge) this).bridge$getCustom(containerClass);
+            final Optional<T> custom = ((CustomDataHolderBridge) holder).bridge$getCustom(containerClass);
             if (custom.isPresent()) {
                 SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
                 TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
@@ -108,9 +118,9 @@ public abstract class DataHolderMixin_API implements DataHolder {
                     + containerClass.getName());
             final T manipulator = (T) builder.get().create();
             // Basically at this point, it's up to plugins to validate whether it's supported
-            final Optional<T> other = manipulator.fill(this).map(customManipulator -> (T) customManipulator);
-            if ((Object) this instanceof SpongeUser) {
-                ((SpongeUser) (Object) this).markDirty();
+            final Optional<T> other = manipulator.fill(holder).map(customManipulator -> (T) customManipulator);
+            if (isUser) {
+                ((SpongeUser) holder).markDirty();
             }
             SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
@@ -125,16 +135,21 @@ public abstract class DataHolderMixin_API implements DataHolder {
     public boolean supports(final Class<? extends DataManipulator<?, ?>> holderClass) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataSupportsManipulator.startTimingIfSync();
+        boolean isUser = ((Object) this) instanceof SpongeUser;
+        DataHolder holder = this;
+        if (isUser) {
+            holder = ((SpongeUser) holder).getDataHolder(false);
+        }
 
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(holderClass);
         if (optional.isPresent()) {
-            final boolean supports = optional.get().supports(this);
+            final boolean supports = optional.get().supports(holder);
             SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return supports;
         }
         if (this instanceof CustomDataHolderBridge) {
-            final Optional<?> custom = ((CustomDataHolderBridge) this).bridge$getCustom(holderClass);
+            final Optional<?> custom = ((CustomDataHolderBridge) holder).bridge$getCustom(holderClass);
             if (custom.isPresent()) {
                 SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
                 TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
@@ -146,7 +161,10 @@ public abstract class DataHolderMixin_API implements DataHolder {
                     + holderClass.getName());
             final DataManipulator<?, ?> manipulator = builder.get().create();
             // Basically at this point, it's up to plugins to validate whether it's supported
-            final boolean present = manipulator.fill(this).isPresent();
+            final boolean present = manipulator.fill(holder).isPresent();
+            if (isUser) {
+                ((SpongeUser) holder).markDirty();
+            }
             SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return present;
@@ -162,17 +180,19 @@ public abstract class DataHolderMixin_API implements DataHolder {
     public <E> DataTransactionResult offer(final Key<? extends BaseValue<E>> key, final E value) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataOfferKey.startTimingIfSync();
+        boolean isUser = ((Object) this) instanceof SpongeUser;
+        DataHolder holder = this;
+        if (isUser) {
+            holder = ((SpongeUser) holder).getDataHolder(true);
+        }
         final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = DataUtil.getBaseValueProcessor(key);
         if (optional.isPresent()) {
-            final DataTransactionResult result = optional.get().offerToStore(this, value);
+            final DataTransactionResult result = optional.get().offerToStore(holder, value);
             SpongeTimings.dataOfferKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
         } else if (this instanceof CustomDataHolderBridge) {
-            final DataTransactionResult result = ((CustomDataHolderBridge) this).bridge$offerCustom(key, value);
-            if ((Object) this instanceof SpongeUser) {
-                ((SpongeUser) (Object) this).markDirty();
-            }
+            final DataTransactionResult result = ((CustomDataHolderBridge) holder).bridge$offerCustom(key, value);
             SpongeTimings.dataOfferKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
@@ -187,17 +207,19 @@ public abstract class DataHolderMixin_API implements DataHolder {
     public DataTransactionResult offer(final DataManipulator<?, ?> valueContainer, final MergeFunction function) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataOfferManipulator.startTimingIfSync();
+        boolean isUser = ((Object) this) instanceof SpongeUser;
+        DataHolder holder = this;
+        if (isUser) {
+            holder = ((SpongeUser) holder).getDataHolder(true);
+        }
         final Optional<DataProcessor> optional = DataUtil.getWildDataProcessor(valueContainer.getClass());
         if (optional.isPresent()) {
-            final DataTransactionResult result = optional.get().set(this, valueContainer, checkNotNull(function));
+            final DataTransactionResult result = optional.get().set(holder, valueContainer, checkNotNull(function));
             SpongeTimings.dataOfferManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
         } else if (this instanceof CustomDataHolderBridge) {
-            final DataTransactionResult result = ((CustomDataHolderBridge) this).bridge$offerCustom(valueContainer, function);
-            if ((Object) this instanceof SpongeUser) {
-                ((SpongeUser) (Object) this).markDirty();
-            }
+            final DataTransactionResult result = ((CustomDataHolderBridge) holder).bridge$offerCustom(valueContainer, function);
             SpongeTimings.dataOfferManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
@@ -247,18 +269,20 @@ public abstract class DataHolderMixin_API implements DataHolder {
     public DataTransactionResult remove(final Class<? extends DataManipulator<?, ?>> containerClass) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataRemoveManipulator.startTimingIfSync();
+        boolean isUser = ((Object) this) instanceof SpongeUser;
+        DataHolder holder = this;
+        if (isUser) {
+            holder = ((SpongeUser) holder).getDataHolder(true);
+        }
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getWildProcessor(containerClass);
         if (optional.isPresent()) {
-            final DataTransactionResult result = optional.get().remove(this);
+            final DataTransactionResult result = optional.get().remove(holder);
             SpongeTimings.dataRemoveManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
 
             return result;
         } else if (this instanceof CustomDataHolderBridge) {
-            final DataTransactionResult result = ((CustomDataHolderBridge) this).bridge$removeCustom(containerClass);
-            if ((Object) this instanceof SpongeUser) {
-                ((SpongeUser) (Object) this).markDirty();
-            }
+            final DataTransactionResult result = ((CustomDataHolderBridge) holder).bridge$removeCustom(containerClass);
             SpongeTimings.dataRemoveManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
@@ -273,17 +297,19 @@ public abstract class DataHolderMixin_API implements DataHolder {
     public DataTransactionResult remove(final Key<?> key) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataRemoveKey.startTimingIfSync();
+        boolean isUser = ((Object) this) instanceof SpongeUser;
+        DataHolder holder = this;
+        if (isUser) {
+            holder = ((SpongeUser) holder).getDataHolder(true);
+        }
         final Optional<ValueProcessor<?, ?>> optional = DataUtil.getWildValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
-            final DataTransactionResult result = optional.get().removeFrom(this);
-            if ((Object) this instanceof SpongeUser) {
-                ((SpongeUser) (Object) this).markDirty();
-            }
+            final DataTransactionResult result = optional.get().removeFrom(holder);
             SpongeTimings.dataRemoveKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
         } else if (this instanceof CustomDataHolderBridge) {
-            final DataTransactionResult result = ((CustomDataHolderBridge) this).bridge$removeCustom(key);
+            final DataTransactionResult result = ((CustomDataHolderBridge) holder).bridge$removeCustom(key);
             SpongeTimings.dataRemoveKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
@@ -324,14 +350,19 @@ public abstract class DataHolderMixin_API implements DataHolder {
     public <E> Optional<E> get(final Key<? extends BaseValue<E>> key) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataGetByKey.startTimingIfSync();
+        boolean isUser = ((Object) this) instanceof SpongeUser;
+        DataHolder holder = this;
+        if (isUser) {
+            holder = ((SpongeUser) holder).getDataHolder(false);
+        }
         final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = DataUtil.getBaseValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
-            final Optional<E> value = optional.get().getValueFromContainer(this);
+            final Optional<E> value = optional.get().getValueFromContainer(holder);
             SpongeTimings.dataGetByKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return value;
         } else if (this instanceof CustomDataHolderBridge) {
-            final Optional<E> custom = ((CustomDataHolderBridge) this).bridge$getCustom(key);
+            final Optional<E> custom = ((CustomDataHolderBridge) holder).bridge$getCustom(key);
             SpongeTimings.dataGetByKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return custom;
@@ -345,14 +376,19 @@ public abstract class DataHolderMixin_API implements DataHolder {
     public <E, V extends BaseValue<E>> Optional<V> getValue(final Key<V> key) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataGetValue.startTimingIfSync();
+        boolean isUser = ((Object) this) instanceof SpongeUser;
+        DataHolder holder = this;
+        if (isUser) {
+            holder = ((SpongeUser) holder).getDataHolder(false);
+        }
         final Optional<ValueProcessor<E, V>> optional = DataUtil.getValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
-            final Optional<V> value = optional.get().getApiValueFromContainer(this);
+            final Optional<V> value = optional.get().getApiValueFromContainer(holder);
             SpongeTimings.dataGetValue.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return value;
         } else if (this instanceof CustomDataHolderBridge) {
-            final Optional<V> customValue = ((CustomDataHolderBridge) this).bridge$getCustomValue(key);
+            final Optional<V> customValue = ((CustomDataHolderBridge) holder).bridge$getCustomValue(key);
             SpongeTimings.dataGetValue.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return customValue;
@@ -366,15 +402,20 @@ public abstract class DataHolderMixin_API implements DataHolder {
     public boolean supports(final Key<?> key) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataSupportsKey.startTimingIfSync();
+        boolean isUser = ((Object) this) instanceof SpongeUser;
+        DataHolder holder = this;
+        if (isUser) {
+            holder = ((SpongeUser) holder).getDataHolder(false);
+        }
         final Optional<ValueProcessor<?, ?>> optional = DataUtil.getWildValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
-            final boolean supports = optional.get().supports(this);
+            final boolean supports = optional.get().supports(holder);
             SpongeTimings.dataSupportsKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return supports;
         }
         if (this instanceof CustomDataHolderBridge) {
-            final boolean customSupport = ((CustomDataHolderBridge) this).bridge$supportsCustom(key);
+            final boolean customSupport = ((CustomDataHolderBridge) holder).bridge$supportsCustom(key);
             SpongeTimings.dataSupportsKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return customSupport;
