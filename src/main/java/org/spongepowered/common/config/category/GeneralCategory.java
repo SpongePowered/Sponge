@@ -40,7 +40,7 @@ public class GeneralCategory extends ConfigCategory {
     @Setting(value = "config-dir", comment = "The directory for Sponge plugin configurations, relative to the  \n"
                                            + "execution root or specified as an absolute path. \n"
                                            + "Note that the default: \"${CANONICAL_GAME_DIR}/config\" \n"
-                                           + "is going to use the \"plugins\" directory in the root game directory. \n"
+                                           + "is going to use the \"config\" directory in the root game directory. \n"
                                            + "If you wish for plugin configs to reside within a child of the configuration \n"
                                            + "directory, change the value to, for example, \"${CANONICAL_CONFIG_DIR}/sponge/plugins\". \n"
                                            + "Note: It is not recommended to set this to \"${CANONICAL_CONFIG_DIR}/sponge\", as there is \n"

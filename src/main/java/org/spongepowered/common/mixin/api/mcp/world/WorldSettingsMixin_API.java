@@ -124,7 +124,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     @Override
     public SerializationBehavior getSerializationBehavior() {
-        return ((WorldSettingsBridge) this).bridg$getSerializationBehavior();
+        return ((WorldSettingsBridge) this).bridge$getSerializationBehavior();
     }
 
     @Override

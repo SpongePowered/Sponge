@@ -176,7 +176,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Override
-    public SerializationBehavior bridg$getSerializationBehavior() {
+    public SerializationBehavior bridge$getSerializationBehavior() {
         return this.serializationBehavior;
     }
 

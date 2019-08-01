@@ -130,7 +130,7 @@ import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
-public class DataRegistrar {
+public final class DataRegistrar {
 
     @SuppressWarnings("unchecked")
     public static void setupSerialization() {
