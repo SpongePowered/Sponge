@@ -179,7 +179,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Nullable private EntityPlayerMP impl$delegate;
     @Nullable private Vector3d impl$velocityOverride = null;
     private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
-    private float impl$cachedHealth = -1;
+    private float impl$cachedModifiedHealth = -1;
     private final PlayerOwnBorderListener borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
     private boolean keepInventory = false;
     @Nullable private Text displayName = null;
@@ -779,7 +779,8 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         checkArgument(scale > 0, "Health scale must be greater than 0!");
         checkArgument(scale < Float.MAX_VALUE, "Health scale cannot exceed Float.MAX_VALUE!");
         this.impl$healthScale = scale;
-        this.impl$cachedHealth = -1;
+        this.impl$cachedModifiedHealth = -1;
+        this.lastHealth = -1.0F;
         bridge$refreshScaledHealth();
     }
 
@@ -846,30 +847,28 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         if (!bridge$isHealthScaled()) {
             return getHealth();
         }
-        if (this.impl$cachedHealth != -1) {
-            return this.impl$cachedHealth;
-        }
-        // Because attribute modifiers from mods can add onto health and multiply health, we
-        // need to replicate what the mod may be trying to represent, regardless whether the health scale
-        // says to show only x hearts.
-        final IAttributeInstance maxAttribute = this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
-        double modifiedScale = (float) this.impl$healthScale;
-        // Apply additive modifiers
-        for (final AttributeModifier attributemodifier : maxAttribute.getModifiersByOperation(0)) {
-            modifiedScale += attributemodifier.getAmount();
-        }
+        if (this.impl$cachedModifiedHealth == -1) {
+            // Because attribute modifiers from mods can add onto health and multiply health, we
+            // need to replicate what the mod may be trying to represent, regardless whether the health scale
+            // says to show only x hearts.
+            final IAttributeInstance maxAttribute = this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
+            double modifiedScale = this.impl$healthScale;
+            // Apply additive modifiers
+            for (final AttributeModifier attributemodifier : maxAttribute.getModifiersByOperation(0)) {
+                modifiedScale += attributemodifier.getAmount();
+            }
 
-        for (final AttributeModifier attributemodifier1 : maxAttribute.getModifiersByOperation(1)) {
-            modifiedScale += modifiedScale * attributemodifier1.getAmount();
-        }
+            for (final AttributeModifier attributemodifier1 : maxAttribute.getModifiersByOperation(1)) {
+                modifiedScale += modifiedScale * attributemodifier1.getAmount();
+            }
 
-        for (final AttributeModifier attributemodifier2 : maxAttribute.getModifiersByOperation(2)) {
-            modifiedScale *= 1.0D + attributemodifier2.getAmount();
-        }
+            for (final AttributeModifier attributemodifier2 : maxAttribute.getModifiersByOperation(2)) {
+                modifiedScale *= 1.0D + attributemodifier2.getAmount();
+            }
 
-        final float maxHealth = getMaxHealth();
-        this.impl$cachedHealth = (float) ((getHealth() / maxHealth) * modifiedScale);
-        return this.impl$cachedHealth;
+            this.impl$cachedModifiedHealth = (float) modifiedScale;
+        }
+        return (getHealth() / getMaxHealth()) * this.impl$cachedModifiedHealth;
     }
 
     @Override
