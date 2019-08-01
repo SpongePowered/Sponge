@@ -54,7 +54,7 @@ public interface WorldSettingsBridge {
 
     DataContainer bridge$getGeneratorSettings();
 
-    SerializationBehavior bridg$getSerializationBehavior();
+    SerializationBehavior bridge$getSerializationBehavior();
 
     boolean bridge$doesKeepSpawnLoaded();
 
