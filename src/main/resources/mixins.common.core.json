@@ -448,7 +448,6 @@
         "world.WorldTypeAccessor",
         "world.WorldTypeMixin",
         "world.biome.BiomeDecoratorAccessor",
-        "world.biome.BiomeDecoratorMixin",
         "world.biome.BiomeDesertMixin",
         "world.biome.BiomeEndMixin",
         "world.biome.BiomeForestMixin",
