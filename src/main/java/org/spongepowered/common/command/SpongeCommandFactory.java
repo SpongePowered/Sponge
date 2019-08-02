@@ -26,12 +26,15 @@ package org.spongepowered.common.command;
 
 import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
 import static org.spongepowered.api.command.args.GenericArguments.choices;
+import static org.spongepowered.api.command.args.GenericArguments.choicesInsensitive;
 import static org.spongepowered.api.command.args.GenericArguments.dimension;
 import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
 import static org.spongepowered.api.command.args.GenericArguments.flags;
 import static org.spongepowered.api.command.args.GenericArguments.literal;
+import static org.spongepowered.api.command.args.GenericArguments.onlyOne;
 import static org.spongepowered.api.command.args.GenericArguments.optional;
 import static org.spongepowered.api.command.args.GenericArguments.optionalWeak;
+import static org.spongepowered.api.command.args.GenericArguments.plugin;
 import static org.spongepowered.api.command.args.GenericArguments.seq;
 import static org.spongepowered.api.command.args.GenericArguments.string;
 import static org.spongepowered.api.command.args.GenericArguments.world;
@@ -168,7 +171,7 @@ public class SpongeCommandFactory {
     private static final Text PAGE_KEY = Text.of("page");
     private static final Text COMMAND_KEY = Text.of("command");
     private static final Text PLUGIN_KEY = Text.of("plugin");
-    private static final Text ENABLED_KEY = Text.of("enabled");
+    private static final Text COLLECTION_STATE_KEY = Text.of("enabled");
     private static final CommandElement COMMAND_ARGUMENT = new CommandElement(COMMAND_KEY) {
 
         @Nullable
