@@ -89,11 +89,9 @@ public interface ServerPlayerEntityBridge {
 
     boolean bridge$isHealthScaled();
 
-    void bridge$setHealthScaled(boolean scaled);
-
     void bridge$refreshScaledHealth();
 
-    void bridge$injectScaledHealth(Collection<IAttributeInstance> set, boolean b);
+    void bridge$injectScaledHealth(Collection<IAttributeInstance> set);
 
     void updateDataManagerForScaledHealth();
 

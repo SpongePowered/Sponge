@@ -178,18 +178,16 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     private Scoreboard impl$spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
     @Nullable private EntityPlayerMP impl$delegate;
     @Nullable private Vector3d impl$velocityOverride = null;
-    private boolean impl$healthScaling = false;
     private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
+    private float impl$cachedModifiedHealth = -1;
     private final PlayerOwnBorderListener borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
     private boolean keepInventory = false;
-    private float cachedHealth = -1;
-    private float cachedScaledHealth = -1;
     @Nullable private Text displayName = null;
 
     @Override
     public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        if (this.impl$healthScaling) {
+        if (bridge$isHealthScaled()) {
             compound.setDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE, this.impl$healthScale);
         }
     }
@@ -198,7 +196,6 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey(Constants.Sponge.Entity.Player.HEALTH_SCALE, Constants.NBT.TAG_DOUBLE)) {
-            this.impl$healthScaling = true;
             this.impl$healthScale = compound.getDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE);
         }
     }
@@ -753,7 +750,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         return bridge$getInternalScaledHealth();
     }
 
-    @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 0))
+    @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 1))
     private void updateHealthPriorToArmor(final CallbackInfo ci) {
         bridge$refreshScaledHealth();
     }
@@ -763,7 +760,8 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         checkArgument(scale > 0, "Health scale must be greater than 0!");
         checkArgument(scale < Float.MAX_VALUE, "Health scale cannot exceed Float.MAX_VALUE!");
         this.impl$healthScale = scale;
-        this.impl$healthScaling = true;
+        this.impl$cachedModifiedHealth = -1;
+        this.lastHealth = -1.0F;
         bridge$refreshScaledHealth();
     }
 
@@ -773,25 +771,18 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         // of modifying the attribute instances themselves, we bypass other potentially detrimental logi
         // that would otherwise break the actual health scaling.
         final Set<IAttributeInstance> dirtyInstances = ((AttributeMap) this.getAttributeMap()).getDirtyInstances();
-        bridge$injectScaledHealth(dirtyInstances, true);
+        bridge$injectScaledHealth(dirtyInstances);
 
         // Send the new information to the client.
-        sendHealthUpdate();
+        this.connection.sendPacket(new SPacketUpdateHealth(bridge$getInternalScaledHealth(), getFoodStats().getFoodLevel(), getFoodStats().getSaturationLevel()));
         this.connection.sendPacket(new SPacketEntityProperties(this.getEntityId(), dirtyInstances));
         // Reset the dirty instances since they've now been manually updated on the client.
         dirtyInstances.clear();
 
     }
 
-    private void sendHealthUpdate() {
-        this.connection.sendPacket(new SPacketUpdateHealth(bridge$getInternalScaledHealth(), getFoodStats().getFoodLevel(), getFoodStats().getSaturationLevel()));
-    }
-
     @Override
-    public void bridge$injectScaledHealth(final Collection<IAttributeInstance> set, final boolean force) {
-        if (!this.impl$healthScaling && !force) {
-            return;
-        }
+    public void bridge$injectScaledHealth(final Collection<IAttributeInstance> set) {
         // We need to remove the existing attribute instance for max health, since it's not always going to be the
         // same as SharedMonsterAttributes.MAX_HEALTH
         @Nullable Collection<AttributeModifier> modifiers = null;
@@ -812,8 +803,10 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         }
 
         // We now re-create a new ranged attribute for our desired max health
+        double defaultt = bridge$isHealthScaled() ? this.impl$healthScale : this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getBaseValue();
+
         final RangedAttribute maxHealth =
-            new RangedAttribute(null, "generic.maxHealth", this.impl$healthScaling ? this.impl$healthScale : getMaxHealth(), 0.0D, Float.MAX_VALUE);
+            new RangedAttribute(null, "generic.maxHealth", defaultt, 0.0D, Float.MAX_VALUE);
         maxHealth.setDescription("Max Health");
         maxHealth.setShouldWatch(true); // needs to be watched
 
@@ -823,7 +816,6 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             modifiers.forEach(attribute::applyModifier);
         }
         set.add(attribute);
-
     }
 
     @Override
@@ -833,26 +825,20 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @Override
     public float bridge$getInternalScaledHealth() {
-        if (this.impl$healthScaling) {
-            // Micro-optimization so we don't have to recalculate it all the time
-            if (this.cachedHealth != -1 && this.getHealth() == this.cachedHealth) {
-                if (this.cachedScaledHealth != -1) {
-                    return this.cachedScaledHealth;
-                }
-            }
-            this.cachedHealth = this.getHealth();
+        if (!bridge$isHealthScaled()) {
+            return getHealth();
+        }
+        if (this.impl$cachedModifiedHealth == -1) {
             // Because attribute modifiers from mods can add onto health and multiply health, we
             // need to replicate what the mod may be trying to represent, regardless whether the health scale
             // says to show only x hearts.
             final IAttributeInstance maxAttribute = this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
-            double modifiedScale = (float) this.impl$healthScale;
+            double modifiedScale = this.impl$healthScale;
             // Apply additive modifiers
             for (final AttributeModifier attributemodifier : maxAttribute.getModifiersByOperation(0)) {
                 modifiedScale += attributemodifier.getAmount();
             }
 
-
-            // Apply
             for (final AttributeModifier attributemodifier1 : maxAttribute.getModifiersByOperation(1)) {
                 modifiedScale += modifiedScale * attributemodifier1.getAmount();
             }
@@ -861,21 +847,14 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
                 modifiedScale *= 1.0D + attributemodifier2.getAmount();
             }
 
-            final float maxHealth = getMaxHealth();
-            this.cachedScaledHealth = (float) ((this.cachedHealth / maxHealth) * modifiedScale);
-            return this.cachedScaledHealth;
+            this.impl$cachedModifiedHealth = (float) modifiedScale;
         }
-        return getHealth();
+        return (getHealth() / getMaxHealth()) * this.impl$cachedModifiedHealth;
     }
 
     @Override
     public boolean bridge$isHealthScaled() {
-        return this.impl$healthScaling;
-    }
-
-    @Override
-    public void bridge$setHealthScaled(final boolean scaled) {
-        this.impl$healthScaling = scaled;
+        return this.impl$healthScale != Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
     }
 
     @Override
