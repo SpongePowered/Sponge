@@ -25,6 +25,7 @@
 package org.spongepowered.common.util.metric;
 
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.category.MetricsCategory;
@@ -36,8 +37,20 @@ public class SpongeMetricsConfigManager implements MetricsConfigManager {
 
     @Override
     public boolean areMetricsEnabled(final PluginContainer container) {
-        final MetricsCategory metricsCategory = SpongeImpl.getGlobalConfigAdapter().getConfig().getMetricsCategory();
-        return metricsCategory.getPluginPermission(container).orElseGet(metricsCategory::isGloballyEnabled);
+        final Tristate pluginState = this.getCollectionState(container);
+        return pluginState == Tristate.TRUE
+          || (this.getGlobalCollectionState() == Tristate.TRUE && pluginState == Tristate.UNDEFINED);
     }
 
+    @Override
+    public Tristate getGlobalCollectionState() {
+        final MetricsCategory metricsCategory = SpongeImpl.getGlobalConfigAdapter().getConfig().getMetricsCategory();
+        return metricsCategory.getGlobalCollectionState();
+    }
+
+    @Override
+    public Tristate getCollectionState(final PluginContainer container) {
+        final MetricsCategory metricsCategory = SpongeImpl.getGlobalConfigAdapter().getConfig().getMetricsCategory();
+        return metricsCategory.getCollectionState(container);
+    }
 }
