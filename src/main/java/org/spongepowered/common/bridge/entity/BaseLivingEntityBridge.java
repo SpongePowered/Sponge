@@ -29,7 +29,6 @@ import net.minecraft.util.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +49,8 @@ public interface BaseLivingEntityBridge {
     void bridge$applyArmorDamage(EntityLivingBase entityLivingBase, DamageSource source, DamageEntityEvent entityEvent, DamageModifier modifier);
 
     boolean bridge$hookModAttack(EntityLivingBase entityLivingBase, DamageSource source, float amount);
+
+    float bridge$applyModDamagePost(EntityLivingBase entityLivingBase, DamageSource source, float damage);
 
     void bridge$resetDeathEventsPosted();
 

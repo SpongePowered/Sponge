@@ -641,6 +641,8 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
 
                 damage = (float) event.getFinalDamage();
 
+                damage = this.bridge$applyModDamagePost((EntityLivingBase) (Object) this, damageSource, damage);
+
                 // Helmet
                 final ItemStack helmet = this.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
                 // We still sanity check if a mod is calling to damage the entity with an anvil or falling block
@@ -829,6 +831,12 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
             DamageEventHandler.acceptArmorModifier((EntityLivingBase) (Object) this, source, modifier, entityEvent.getDamage(modifier));
         }
     }
+
+    @Override
+    public float bridge$applyModDamagePost(final EntityLivingBase entityLivingBase, final DamageSource source, final float damage) {
+        return damage;
+    }
+
 
     @Override
     public boolean bridge$hookModAttack(final EntityLivingBase entityLivingBase, final DamageSource source, final float amount) {
