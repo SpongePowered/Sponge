@@ -155,14 +155,15 @@ public final class InventoryUtil {
         } else if (base instanceof Entity) {
             final String id = ((Entity) base).getType().getId();
             final String pluginId = id.substring(0, id.indexOf(":"));
-            container = Sponge.getPluginManager().getPlugin(pluginId)
-                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for entity " + id + " (" + base.getClass().getName() +
-                            ")"));
+            container = Sponge.getPluginManager().getPlugin(pluginId).orElseGet(() -> {
+                SpongeImpl.getLogger().debug("Unknown plugin for [{}]", base);
+                return SpongeImpl.getMinecraftPlugin(); 
+            });
         } else if (base instanceof SpongeUser) {
             container = SpongeImpl.getMinecraftPlugin();
         } else {
             container = Sponge.getPluginManager().getPlugin(SpongeImplHooks.getModIdFromClass(base.getClass())).orElseGet(() -> {
-                SpongeImpl.getLogger().warn("Unknown plugin for " + base);
+                SpongeImpl.getLogger().debug("Unknown plugin for [{}]", base);
                 return SpongeImpl.getMinecraftPlugin();
             });
         }
