@@ -58,8 +58,8 @@ public class CollisionModCategory extends ConfigCategory {
             this.blockList.put("wooden_pressure_plate", 1);
             this.entityList.put("thrownpotion", -1);
         } else if (modId.equals("botania")) {
-            this.entityList.put("botaniaspark", -1);
-            this.entityList.put("botaniacorporeaspark", -1);
+            this.entityList.put("spark", -1);
+            this.entityList.put("corporeaspark", -1);
         }
     }
 
