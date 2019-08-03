@@ -66,21 +66,21 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
     }
 
     @Override
-    default BlockState withExtendedProperties(Location<World> location) {
+    default BlockState withExtendedProperties(final Location<World> location) {
         return (BlockState) this.getActualState((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
 
     }
 
     @Override
-    default BlockState cycleValue(Key<? extends BaseValue<? extends Cycleable<?>>> key) {
+    default BlockState cycleValue(final Key<? extends BaseValue<? extends Cycleable<?>>> key) {
         return this;
     }
 
 
     @SuppressWarnings({"unchecked"})
     @Override
-    default <T extends Comparable<T>> Optional<T> getTraitValue(BlockTrait<T> blockTrait) {
-        for (Map.Entry<IProperty<?>, Comparable<?>> entry : getProperties().entrySet()) {
+    default <T extends Comparable<T>> Optional<T> getTraitValue(final BlockTrait<T> blockTrait) {
+        for (final Map.Entry<IProperty<?>, Comparable<?>> entry : getProperties().entrySet()) {
             //noinspection EqualsBetweenInconvertibleTypes
             if (entry.getKey() == blockTrait) {
                 return Optional.of((T) entry.getValue());
@@ -91,8 +91,8 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
 
     @SuppressWarnings("rawtypes")
     @Override
-    default Optional<BlockTrait<?>> getTrait(String blockTrait) {
-        for (IProperty property : getProperties().keySet()) {
+    default Optional<BlockTrait<?>> getTrait(final String blockTrait) {
+        for (final IProperty property : getProperties().keySet()) {
             if (property.getName().equalsIgnoreCase(blockTrait)) {
                 return Optional.of((BlockTrait<?>) property);
             }
@@ -102,10 +102,10 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
 
     @SuppressWarnings({"rawtypes", "unchecked", "RedundantCast"})
     @Override
-    default Optional<BlockState> withTrait(BlockTrait<?> trait, Object value) {
+    default Optional<BlockState> withTrait(final BlockTrait<?> trait, final Object value) {
         if (value instanceof String) {
             Comparable foundValue = null;
-            for (Comparable comparable : trait.getPossibleValues()) {
+            for (final Comparable comparable : trait.getPossibleValues()) {
                 if (comparable.toString().equals(value)) {
                     foundValue = comparable;
                     break;
@@ -141,14 +141,14 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
 
     @Override
     default String getId() {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         builder.append(((BlockType) getBlock()).getId());
         final ImmutableMap<IProperty<?>, Comparable<?>> properties =  this.getProperties();
         if (!properties.isEmpty()) {
             builder.append('[');
-            Joiner joiner = Joiner.on(',');
-            List<String> propertyValues = new ArrayList<>();
-            for (Map.Entry<IProperty<?>, Comparable<?>> entry : properties.entrySet()) {
+            final Joiner joiner = Joiner.on(',');
+            final List<String> propertyValues = new ArrayList<>();
+            for (final Map.Entry<IProperty<?>, Comparable<?>> entry : properties.entrySet()) {
                 propertyValues.add(entry.getKey().getName() + "=" + entry.getValue());
             }
             builder.append(joiner.join(propertyValues));
@@ -163,7 +163,7 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
     }
 
     @Override
-    default <T extends Property<?, ?>> Optional<T> getProperty(Direction direction, Class<T> clazz) {
+    default <T extends Property<?, ?>> Optional<T> getProperty(final Direction direction, final Class<T> clazz) {
         return Optional.empty();
     }
 
@@ -185,57 +185,57 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
     }
 
     @Override
-    default <T extends ImmutableDataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
+    default <T extends ImmutableDataManipulator<?, ?>> Optional<T> get(final Class<T> containerClass) {
         return Optional.empty();
     }
 
     @Override
-    default <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
+    default <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
         return Optional.empty();
     }
 
     @Override
-    default boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    default boolean supports(final Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         return false;
     }
 
     @Override
-    default <E> Optional<BlockState> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
+    default <E> Optional<BlockState> transform(final Key<? extends BaseValue<E>> key, final Function<E, E> function) {
         return Optional.empty();
     }
 
     @Override
-    default <E> Optional<BlockState> with(Key<? extends BaseValue<E>> key, E value) {
+    default <E> Optional<BlockState> with(final Key<? extends BaseValue<E>> key, final E value) {
         return Optional.empty();
     }
 
     @Override
-    default Optional<BlockState> with(BaseValue<?> value) {
+    default Optional<BlockState> with(final BaseValue<?> value) {
         return Optional.empty();
     }
 
     @Override
-    default Optional<BlockState> with(ImmutableDataManipulator<?, ?> valueContainer) {
+    default Optional<BlockState> with(final ImmutableDataManipulator<?, ?> valueContainer) {
         return Optional.empty();
     }
 
     @Override
-    default Optional<BlockState> with(Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
+    default Optional<BlockState> with(final Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
         return Optional.empty();
     }
 
     @Override
-    default Optional<BlockState> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    default Optional<BlockState> without(final Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         return Optional.empty();
     }
 
     @Override
-    default BlockState merge(BlockState that) {
+    default BlockState merge(final BlockState that) {
         return this;
     }
 
     @Override
-    default BlockState merge(BlockState that, MergeFunction function) {
+    default BlockState merge(final BlockState that, final MergeFunction function) {
         return this;
     }
 
@@ -245,7 +245,7 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
     }
 
     @Override
-    default <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
+    default <T extends Property<?, ?>> Optional<T> getProperty(final Class<T> propertyClass) {
         return Optional.empty();
     }
 
@@ -255,17 +255,17 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
     }
 
     @Override
-    default <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    default <E> Optional<E> get(final Key<? extends BaseValue<E>> key) {
         return Optional.empty();
     }
 
     @Override
-    default <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+    default <E, V extends BaseValue<E>> Optional<V> getValue(final Key<V> key) {
         return Optional.empty();
     }
 
     @Override
-    default boolean supports(Key<?> key) {
+    default boolean supports(final Key<?> key) {
         return false;
     }
 

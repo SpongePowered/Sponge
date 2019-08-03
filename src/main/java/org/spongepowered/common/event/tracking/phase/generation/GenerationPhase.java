@@ -60,6 +60,8 @@ public final class GenerationPhase {
 
         public static final IPhaseState<GenericGenerationContext> TERRAIN_GENERATION = new TerrainGenerationState();
 
+        public static final IPhaseState<GenerationCompatibileContext> GENERATION_COMPATIBILITY = new GenerationCompatibilityState();
+
         static {
             ((GeneralGenerationPhaseState<?>) POPULATOR_RUNNING)
                     .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
@@ -68,6 +70,16 @@ public final class GenerationPhase {
                     .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
                     .addCompatibleState(GeneralPhase.Post.UNWINDING)
                     .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
+                    .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
+                    .bake();
+            ((GeneralGenerationPhaseState<?>) GENERATION_COMPATIBILITY)
+                    .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
+                    .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
+                    .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
+                    .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
+                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
+                    .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
+                    .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
                     .bake();
             ((GeneralGenerationPhaseState<?>) TERRAIN_GENERATION)
                     .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
@@ -76,6 +88,7 @@ public final class GenerationPhase {
                     .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
                     .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
                     .addCompatibleState(GeneralPhase.Post.UNWINDING)
+                    .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
                     .bake();
             ((GeneralGenerationPhaseState<?>) CHUNK_REGENERATING)
                     .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
@@ -83,6 +96,7 @@ public final class GenerationPhase {
                     .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
                     .addCompatibleState(State.WORLD_SPAWNER_SPAWNING)
                     .addCompatibleState(State.POPULATOR_RUNNING)
+                    .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
                     .addCompatibleState(GeneralPhase.Post.UNWINDING)
                     .bake();
         }

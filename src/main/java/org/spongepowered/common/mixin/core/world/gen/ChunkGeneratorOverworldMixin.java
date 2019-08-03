@@ -71,13 +71,11 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 @Mixin(ChunkGeneratorOverworld.class)
-public abstract class ChunkGeneratorOverworldMixin implements IChunkProvider, PopulatorProviderBridge, ChunkGeneratorOverworldBridge {
+public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderBridge, ChunkGeneratorOverworldBridge {
 
     @Shadow @Final private boolean mapFeaturesEnabled;
     @Shadow @Final private net.minecraft.world.World world;
     @Shadow @Nullable private ChunkGeneratorSettings settings;
-    @Shadow @Final private Random rand;
-
     @Shadow @Final private MapGenBase caveGenerator;
     @Shadow @Final private MapGenStronghold strongholdGenerator;
     @Shadow @Final private MapGenVillage villageGenerator;
@@ -88,13 +86,11 @@ public abstract class ChunkGeneratorOverworldMixin implements IChunkProvider, Po
     @Shadow @Final private WoodlandMansion woodlandMansionGenerator;
     @Shadow private Biome[] biomesForGeneration;
 
-    @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);
-
     @Nullable private BiomeGenerator impl$biomegen;
     private boolean impl$isVanilla = WorldGenConstants.isValid((IChunkGenerator) this, GenerationPopulator.class);
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onConstruct(final net.minecraft.world.World worldIn, final long p_i45636_2_, final boolean p_i45636_4_, final String p_i45636_5_, final CallbackInfo ci) {
+    private void impl$setSettings(final net.minecraft.world.World worldIn, final long p_i45636_2_, final boolean p_i45636_4_, final String p_i45636_5_, final CallbackInfo ci) {
         if (this.settings == null) {
             this.settings = new ChunkGeneratorSettings.Factory().build();
         }

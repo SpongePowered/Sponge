@@ -149,4 +149,6 @@ public interface ServerWorldBridge {
     long bridge$getWeatherStartTime();
 
     void bridge$setWeatherStartTime(long start);
+
+    void bridge$setProviderGenerator(SpongeChunkGenerator newGenerator);
 }

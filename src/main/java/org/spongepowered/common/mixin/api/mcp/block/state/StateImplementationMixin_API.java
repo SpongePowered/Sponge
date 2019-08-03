@@ -86,12 +86,12 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     // implementation can pose during start up, or whether game state
     // can affect the various systems in place (i.e. we sometimes can't load certain
     // systems before other registries have finished registering their stuff)
-    @Nullable private ImmutableSet<ImmutableValue<?>> values;
-    @Nullable private ImmutableSet<Key<?>> keys;
-    @Nullable private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
-    @Nullable private ImmutableMap<Key<?>, Object> keyMap;
-    @Nullable private ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> dataProperties;
-    @Nullable private String id;
+    @Nullable private ImmutableSet<ImmutableValue<?>> api$values;
+    @Nullable private ImmutableSet<Key<?>> api$keys;
+    @Nullable private ImmutableList<ImmutableDataManipulator<?, ?>> api$manipulators;
+    @Nullable private ImmutableMap<Key<?>, Object> api$keyMap;
+    @Nullable private ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> api$dataProperties;
+    @Nullable private String api$id;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
@@ -138,32 +138,32 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @Nullable
     private ImmutableMap<Key<?>, Object> getKeyMap() {
-        if (this.keyMap == null) {
+        if (this.api$keyMap == null) {
             lazyLoadManipulatorsAndKeys();
         }
-        return this.keyMap;
+        return this.api$keyMap;
     }
 
     private ImmutableList<ImmutableDataManipulator<?, ?>> lazyLoadManipulatorsAndKeys() {
-        if (this.manipulators == null) {
-            this.manipulators = ImmutableList.copyOf(((BlockBridge) this.block).bridge$getManipulators(this));
+        if (this.api$manipulators == null) {
+            this.api$manipulators = ImmutableList.copyOf(((BlockBridge) this.block).bridge$getManipulators(this));
         }
-        if (this.keyMap == null) {
+        if (this.api$keyMap == null) {
             final ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
             final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
             final ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-            for (final ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
+            for (final ImmutableDataManipulator<?, ?> manipulator : this.api$manipulators) {
                 for (final ImmutableValue<?> value : manipulator.getValues()) {
                     builder.put(value.getKey(), value.get());
                     valueBuilder.add(value);
                     keyBuilder.add(value.getKey());
                 }
             }
-            this.values = valueBuilder.build();
-            this.keys = keyBuilder.build();
-            this.keyMap = builder.build();
+            this.api$values = valueBuilder.build();
+            this.api$keys = keyBuilder.build();
+            this.api$keyMap = builder.build();
         }
-        return this.manipulators;
+        return this.api$manipulators;
     }
 
     @SuppressWarnings("unchecked")
@@ -289,10 +289,10 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     }
 
     private ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> getSpongeInternalProperties() {
-        if (this.dataProperties == null) {
-            this.dataProperties = ((BlockBridge) this.block).bridge$getProperties(this);
+        if (this.api$dataProperties == null) {
+            this.api$dataProperties = ((BlockBridge) this.block).bridge$getProperties(this);
         }
-        return this.dataProperties;
+        return this.api$dataProperties;
     }
 
     @Override
@@ -330,18 +330,18 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @Override
     public Set<Key<?>> getKeys() {
-        if (this.keys == null) {
+        if (this.api$keys == null) {
             lazyLoadManipulatorsAndKeys();
         }
-        return this.keys;
+        return this.api$keys;
     }
 
     @Override
     public Set<ImmutableValue<?>> getValues() {
-        if (this.values == null) {
+        if (this.api$values == null) {
             lazyLoadManipulatorsAndKeys();
         }
-        return this.values;
+        return this.api$values;
     }
 
     @Override
@@ -358,18 +358,18 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @Override
     public String getId() {
-        if (this.id == null) {
+        if (this.api$id == null) {
             impl$generateIdFromParentBlock(this.block);
         }
-        return this.id;
+        return this.api$id;
     }
 
     @Override
     public String getName() {
-        if (this.id == null) {
+        if (this.api$id == null) {
             impl$generateIdFromParentBlock(this.block);
         }
-        return this.id;
+        return this.api$id;
     }
 
     private void impl$generateIdFromParentBlock(final Block block) {
@@ -387,6 +387,6 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
             builder.append(joiner.join(propertyValues));
             builder.append(']');
         }
-        this.id = builder.toString();
+        this.api$id = builder.toString();
     }
 }

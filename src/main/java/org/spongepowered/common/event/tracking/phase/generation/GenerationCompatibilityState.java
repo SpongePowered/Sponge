@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-public class BasicGenerationState extends GeneralGenerationPhaseState<GenericGenerationContext> {
+final class GenerationCompatibilityState extends GeneralGenerationPhaseState<GenerationCompatibileContext> {
 
-    public BasicGenerationState(String id) {
-        super(id);
+    GenerationCompatibilityState() {
+        super("COMPATIBILITY_POPULATOR");
     }
 
     @Override
-    public GenericGenerationContext createPhaseContext() {
-        return new GenericGenerationContext(this)
-                .addCaptures();
+    public GenerationCompatibileContext createPhaseContext() {
+        return new GenerationCompatibileContext(this)
+            .addBlockCaptures()
+            .addEntityCaptures();
     }
-
 }

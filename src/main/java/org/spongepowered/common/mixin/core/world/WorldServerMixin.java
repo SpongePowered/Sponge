@@ -413,16 +413,19 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         this.impl$spongegen.setGenerationPopulators(newGenerator.getGenerationPopulators());
         this.impl$spongegen.setPopulators(newGenerator.getPopulators());
         this.impl$spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
-
-        final ChunkProviderServer chunkProviderServer = this.getChunkProvider();
-        // TODO - Migrate to ChunkProviderServerAccessor with Mixin 0.8<
-        ((ServerChunkProviderBridge) chunkProviderServer).accessor$setChunkGenerator(this.impl$spongegen);
+        this.bridge$setProviderGenerator(this.impl$spongegen);
     }
 
     @Override
     public SpongeChunkGenerator bridge$createChunkGenerator(final SpongeWorldGenerator newGenerator) {
         return new SpongeChunkGenerator((net.minecraft.world.World) (Object) this, newGenerator.getBaseGenerationPopulator(),
                 newGenerator.getBiomeGenerator());
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void bridge$setProviderGenerator(final SpongeChunkGenerator newGenerator) {
+        ((ServerChunkProviderBridge) this.chunkProvider).accessor$setChunkGenerator(newGenerator);
     }
 
     @Override

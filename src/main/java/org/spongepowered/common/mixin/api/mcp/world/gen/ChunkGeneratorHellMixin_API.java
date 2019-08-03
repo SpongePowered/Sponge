@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen;
 
-import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkGeneratorHell;
 import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
@@ -37,18 +35,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.gen.PopulatorProviderBridge;
 
-import java.util.Random;
-
 @Mixin(ChunkGeneratorHell.class)
-public abstract class ChunkGeneratorHellMixin_API implements IChunkProvider, PopulatorProviderBridge {
+public abstract class ChunkGeneratorHellMixin_API implements PopulatorProviderBridge {
 
     @Shadow @Final private boolean generateStructures;
-    @Shadow @Final private Random rand;
-    @Shadow @Final private net.minecraft.world.World world;
     @Shadow @Final private MapGenNetherBridge genNetherBridge;
     @Shadow @Final private MapGenBase genNetherCaves;
-    @Shadow public abstract void prepareHeights(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
-    @Shadow public abstract void buildSurfaces(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
 
     @Override
     public void bridge$addPopulators(final WorldGenerator generator) {

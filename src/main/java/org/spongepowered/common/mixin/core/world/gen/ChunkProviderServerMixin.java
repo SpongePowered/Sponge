@@ -30,6 +30,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
@@ -45,6 +46,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -78,7 +80,7 @@ import javax.annotation.Nullable;
 @Mixin(ChunkProviderServer.class)
 public abstract class ChunkProviderServerMixin implements ServerChunkProviderBridge, ChunkProviderBridge {
 
-    private SpongeEmptyChunk impl$EMPTY_CHUNK;
+    @Nullable private SpongeEmptyChunk impl$EMPTY_CHUNK;
     private boolean impl$denyChunkRequests = true;
     private boolean impl$forceChunkRequests = false;
     private long impl$chunkUnloadDelay = Constants.World.DEFAULT_CHUNK_UNLOAD_DELAY;
@@ -92,8 +94,6 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
 
     @Shadow @Nullable public abstract Chunk getLoadedChunk(int x, int z);
     @Shadow @Nullable public abstract Chunk loadChunk(int x, int z);
-    @Shadow protected abstract Chunk loadChunkFromFile(int x, int z);
-    @Shadow public abstract Chunk provideChunk(int x, int z);
     @Shadow protected abstract void saveChunkExtraData(Chunk chunkIn);
     @Shadow protected abstract void saveChunkData(Chunk chunkIn);
 
