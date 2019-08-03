@@ -41,7 +41,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntityItem.class)
 public abstract class EntityItemMixin_API extends EntityMixin_API implements Item {
@@ -69,7 +69,7 @@ public abstract class EntityItemMixin_API extends EntityMixin_API implements Ite
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getItemData());
     }

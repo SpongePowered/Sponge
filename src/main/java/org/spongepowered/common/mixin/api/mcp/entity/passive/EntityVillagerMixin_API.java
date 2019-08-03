@@ -46,7 +46,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityAgeableMixin_API;
 import org.spongepowered.common.util.Constants;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -90,7 +90,7 @@ public abstract class EntityVillagerMixin_API extends EntityAgeableMixin_API imp
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getCareerData());
     }

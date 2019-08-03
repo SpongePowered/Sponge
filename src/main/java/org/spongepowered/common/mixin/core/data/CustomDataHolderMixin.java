@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -131,7 +132,7 @@ public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
     }
 
     @Override
-    public List<DataManipulator<?, ?>> bridge$getCustomManipulators() {
+    public Collection<DataManipulator<?, ?>> bridge$getCustomManipulators() {
         return this.impl$manipulators.stream().map(DataManipulator::copy).collect(Collectors.toList());
     }
 

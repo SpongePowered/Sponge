@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJohnnyData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntityVindicator.class)
 public abstract class EntityVindicatorMixin_API extends EntityMobMixin_API implements Vindicator {
@@ -47,7 +47,7 @@ public abstract class EntityVindicatorMixin_API extends EntityMobMixin_API imple
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeJohnnyData(this.johnny));
     }

@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import java.util.List;
+import java.util.Collection;
 
 // TODO 1.9: Refactor this for boat overhaul
 @Mixin(EntityBoat.class)
@@ -51,7 +51,7 @@ public abstract class EntityBoatMixin_API extends EntityMixin_API implements Boa
     private double unoccupiedDecelerationSpeed = 0.8D;
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         final EntityBoat.Type boatType = this.getBoatType();
         if (boatType == EntityBoat.Type.OAK) {

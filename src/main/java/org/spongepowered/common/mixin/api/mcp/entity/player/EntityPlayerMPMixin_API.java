@@ -529,7 +529,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(final List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getJoinData());
         manipulators.add(getGameModeData());

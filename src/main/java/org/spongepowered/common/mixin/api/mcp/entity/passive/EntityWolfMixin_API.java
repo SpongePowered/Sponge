@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityAgeableMixin_API;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntityWolf.class)
 public abstract class EntityWolfMixin_API extends EntityAgeableMixin_API implements Wolf {
@@ -41,7 +41,7 @@ public abstract class EntityWolfMixin_API extends EntityAgeableMixin_API impleme
     @Shadow public abstract boolean shadow$isAngry();
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(get(SittingData.class).get());
         manipulators.add(new SpongeAggressiveData(this.shadow$isAngry()));

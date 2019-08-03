@@ -42,7 +42,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 import org.spongepowered.common.util.Constants;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 @Mixin(EntityShulker.class)
@@ -76,7 +76,7 @@ public abstract class EntityShulkerMixin_API extends EntityGolemMixin_API implem
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(final List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getDyeData());
         manipulators.add(getDirectionalData());

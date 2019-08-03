@@ -652,7 +652,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         return this.getValue(Keys.HAS_GRAVITY).get();
     }
 
-    protected void spongeApi$supplyVanillaManipulators(final List<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         this.get(VehicleData.class).ifPresent(manipulators::add);
         if (this.fire > 0) {
             manipulators.add(this.get(IgniteableData.class).get());

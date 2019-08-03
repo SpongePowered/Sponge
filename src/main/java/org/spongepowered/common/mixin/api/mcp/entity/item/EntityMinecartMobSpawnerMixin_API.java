@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.EntityMinecartMobSpawner;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
-import net.minecraft.tileentity.TileEntityMobSpawner;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.entity.vehicle.minecart.MobSpawnerMinecart;
@@ -36,9 +35,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.tileentity.MobSpawnerBaseLogicBridge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
-import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntityMinecartMobSpawner.class)
 public abstract class EntityMinecartMobSpawnerMixin_API extends EntityMinecartMixin_API implements MobSpawnerMinecart {
@@ -73,7 +71,7 @@ public abstract class EntityMinecartMobSpawnerMixin_API extends EntityMinecartMi
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(final List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getSpawnerData());
     }

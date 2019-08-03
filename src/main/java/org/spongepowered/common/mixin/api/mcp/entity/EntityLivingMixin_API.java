@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -94,7 +94,7 @@ public abstract class EntityLivingMixin_API extends EntityLivingBaseMixin_API im
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getAgentData());
     }

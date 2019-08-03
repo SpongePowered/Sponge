@@ -36,7 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressive
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntityPigZombie.class)
 public abstract class EntityPigZombieMixin_API extends EntityZombieMixin_API implements ZombiePigman {
@@ -61,7 +61,7 @@ public abstract class EntityPigZombieMixin_API extends EntityZombieMixin_API imp
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getAngerData());
         manipulators.add(new SpongeAggressiveData(isAngry()));

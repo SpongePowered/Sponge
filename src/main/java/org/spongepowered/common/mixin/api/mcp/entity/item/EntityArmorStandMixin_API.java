@@ -48,7 +48,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 @Mixin(EntityArmorStand.class)
@@ -110,7 +110,7 @@ public abstract class EntityArmorStandMixin_API extends EntityLivingBaseMixin_AP
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getBodyPartRotationalData());
         manipulators.add(getArmorStandData());

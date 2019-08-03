@@ -30,13 +30,13 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
 import org.spongepowered.api.entity.living.monster.Enderman;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntityEnderman.class)
 public abstract class EntityEndermanMixin_API extends EntityMobMixin_API implements Enderman {
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(get(ScreamingData.class).get());
     }

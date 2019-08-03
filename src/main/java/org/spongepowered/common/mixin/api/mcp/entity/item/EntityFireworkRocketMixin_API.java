@@ -39,7 +39,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkEffectDat
 import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntityFireworkRocket.class)
 public abstract class EntityFireworkRocketMixin_API extends EntityMixin_API implements Firework {
@@ -68,7 +68,7 @@ public abstract class EntityFireworkRocketMixin_API extends EntityMixin_API impl
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(this.getFireworkData());
     }
