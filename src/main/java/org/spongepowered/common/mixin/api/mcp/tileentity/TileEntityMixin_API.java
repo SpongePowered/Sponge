@@ -116,7 +116,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
 
     @Override
     public void setRawData(DataView container) throws InvalidDataException {
-
+        throw new UnsupportedOperationException(); // TODO Data API
     }
 
     @Override

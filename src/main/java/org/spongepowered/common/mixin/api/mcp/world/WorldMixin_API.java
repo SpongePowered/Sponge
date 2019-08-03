@@ -1144,11 +1144,11 @@ public abstract class WorldMixin_API implements World {
 
     @Override
     public boolean validateRawData(int x, int y, int z, DataView container) {
-        return false; // todo
+        throw new UnsupportedOperationException(); // TODO Data API
     }
 
     @Override
     public void setRawData(int x, int y, int z, DataView container) throws InvalidDataException {
-        // todo
+        throw new UnsupportedOperationException(); // TODO Data API
     }
 }

@@ -439,12 +439,12 @@ public abstract class DataHolderMixin_API implements DataHolder {
 
     @Override
     public boolean validateRawData(final DataView container) {
-        return false;
+        throw new UnsupportedOperationException(); // TODO Data API
     }
 
     @Override
     public void setRawData(final DataView container) throws InvalidDataException {
-
+        throw new UnsupportedOperationException(); // TODO Data API
     }
 
     @Override
