@@ -204,7 +204,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
         }
         ((ItemBridge) item).bridge$gatherManipulators((net.minecraft.item.ItemStack) (Object) this, manipulators);
         if (((CustomDataHolderBridge) this).bridge$hasManipulators()) {
-            final List<DataManipulator<?, ?>> customManipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
+            final Collection<DataManipulator<?, ?>> customManipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
             manipulators.addAll(customManipulators);
         }
         return manipulators;
