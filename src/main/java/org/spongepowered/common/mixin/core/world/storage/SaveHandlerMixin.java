@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
@@ -55,6 +56,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
@@ -121,26 +123,73 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
 
     private void impl$saveSpongeDatData(final WorldInfo info) {
         try {
-            final File spongeFile1 = new File(this.worldDirectory, "level_sponge.dat_new");
-            final File spongeFile2 = new File(this.worldDirectory, "level_sponge.dat_old");
-            final File spongeFile3 = new File(this.worldDirectory, "level_sponge.dat");
-            try (final FileOutputStream stream = new FileOutputStream(spongeFile1)) {
-                CompressedStreamTools.writeCompressed(((WorldInfoBridge) info).bridge$getSpongeRootLevelNbt(), stream);
+            // If the returned NBT is empty, then we should warn the user.
+            NBTTagCompound spongeRootLevelNBT = ((WorldInfoBridge) info).bridge$getSpongeRootLevelNbt();
+            if (spongeRootLevelNBT.isEmpty()) {
+                Integer dimensionId = ((WorldInfoBridge) info).bridge$getDimensionId();
+                String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
+
+                // We should warn the user about the NBT being empty, but not saving it.
+                new PrettyPrinter().add("Sponge Root Level NBT for world %s is empty!", info.getWorldName()).centre().hr()
+                        .add("When trying to save Sponge data for the world %s, an empty NBT compound was provided. The old Sponge data file was "
+                                        + "left intact.",
+                                info.getWorldName())
+                        .add()
+                        .add("The following information may be useful in debugging:")
+                        .add()
+                        .add("UUID: ", ((WorldInfoBridge) info).bridge$getAssignedId())
+                        .add("Dimension ID: ", dimensionIdString)
+                        .add("Is Modded: ", ((WorldInfoBridge) info).bridge$getIsMod())
+                        .add("Valid flag: ", ((WorldInfoBridge) info).bridge$isValid())
+                        .add()
+                        .add("Stack trace:")
+                        .add(new Exception())
+                        .print(System.err);
+                return;
             }
-            if (spongeFile2.exists()) {
-                spongeFile2.delete();
+
+            final File newDataFile = new File(this.worldDirectory, "level_sponge.dat_new");
+            final File oldDataFile = new File(this.worldDirectory, "level_sponge.dat_old");
+            final File dataFile = new File(this.worldDirectory, "level_sponge.dat");
+            try (final FileOutputStream stream = new FileOutputStream(newDataFile)) {
+                CompressedStreamTools.writeCompressed(spongeRootLevelNBT, stream);
             }
 
-            spongeFile3.renameTo(spongeFile2);
+            // Before we continue, is the file zero length?
+            if (newDataFile.length() == 0) {
+                Integer dimensionId = ((WorldInfoBridge) info).bridge$getDimensionId();
+                String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
+                // Then we just delete the file and tell the user that we didn't save properly.
+                new PrettyPrinter().add("Zero length level_sponge.dat file was created for %s!", info.getWorldName()).centre().hr()
+                        .add("When saving the data file for the world %s, a zero length file was written. Sponge has discarded this file.",
+                                info.getWorldName())
+                        .add()
+                        .add("The following information may be useful in debugging:")
+                        .add()
+                        .add("UUID: ", ((WorldInfoBridge) info).bridge$getAssignedId())
+                        .add("Dimension ID: ", dimensionIdString)
+                        .add("Is Modded: ", ((WorldInfoBridge) info).bridge$getIsMod())
+                        .add("Valid flag: ", ((WorldInfoBridge) info).bridge$isValid())
+                        .add()
+                        .add("Stack trace:")
+                        .add(new Exception())
+                        .print(System.err);
+                newDataFile.delete();
+                return;
+            }
+            if (dataFile.exists()) {
+                if (oldDataFile.exists()) {
+                    oldDataFile.delete();
+                }
 
-            if (spongeFile3.exists()) {
-                spongeFile3.delete();
+                dataFile.renameTo(oldDataFile);
+                dataFile.delete();
             }
 
-            spongeFile1.renameTo(spongeFile3);
+            newDataFile.renameTo(dataFile);
 
-            if (spongeFile1.exists()) {
-                spongeFile1.delete();
+            if (newDataFile.exists()) {
+                newDataFile.delete();
             }
         } catch (Exception exception) {
             exception.printStackTrace();
