@@ -22,21 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity;
+package org.spongepowered.common.bridge.entity.item;
 
-public interface ItemEntityBridge {
+import net.minecraft.entity.Entity;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.World;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 
-    boolean bridge$infinitePickupDelay();
+import javax.annotation.Nullable;
 
-    int bridge$getPickupDelay();
+public interface EntityLargeFireballBridge {
 
-    void bridge$setPickupDelay(int delay, boolean infinite);
+    @Nullable
+    Explosion bridge$throwExplosionEventAndExplode(World worldObj, @Nullable Entity nil,
+        double x, double y, double z, float strength, boolean flaming, boolean smoking);
 
-    boolean bridge$infiniteDespawnDelay();
 
-    int bridge$getDespawnDelay();
-
-    void bridge$setDespawnDelay(int delay);
-
-    void bridge$setDespawnDelay(int delay, boolean infinite);
 }

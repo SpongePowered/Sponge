@@ -129,8 +129,8 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
@@ -960,7 +960,7 @@ public class SpongeCommonEventFactory {
         final boolean messageCancelled = false;
 
         if (entity instanceof EntityPlayerMP) {
-            originalChannel = channel = ((ServerPlayerEntityBridge) entity).bridge$getDeathMessageChannel();
+            originalChannel = channel = ((EntityPlayerMPBridge) entity).bridge$getDeathMessageChannel();
         } else {
             originalChannel = MessageChannel.TO_NONE;
             channel = MessageChannel.TO_NONE;
@@ -1213,7 +1213,7 @@ public class SpongeCommonEventFactory {
 
         try {
             if (displayName != null) {
-                ((ServerPlayerEntityBridge) player).bridge$setContainerDisplay(displayName);
+                ((EntityPlayerMPBridge) player).bridge$setContainerDisplay(displayName);
             }
             if (inventory instanceof IInteractionObject) {
                 final String guiId = ((IInteractionObject) inventory).getGuiID();
@@ -1246,7 +1246,7 @@ public class SpongeCommonEventFactory {
             }
         } finally {
             if (displayName != null) {
-                ((ServerPlayerEntityBridge) player).bridge$setContainerDisplay(null);
+                ((EntityPlayerMPBridge) player).bridge$setContainerDisplay(null);
             }
         }
 
@@ -1561,9 +1561,9 @@ public class SpongeCommonEventFactory {
     @Nullable
     public static ItemStack throwDropItemAndConstructEvent(final net.minecraft.entity.Entity entity, final double posX, final double posY,
         final double posZ, final ItemStackSnapshot snapshot, final List<ItemStackSnapshot> original, final CauseStackManager.StackFrame frame) {
-        final PlayerEntityBridge mixinPlayer;
-        if (entity instanceof PlayerEntityBridge) {
-            mixinPlayer = (PlayerEntityBridge) entity;
+        final EntityPlayerBridge mixinPlayer;
+        if (entity instanceof EntityPlayerBridge) {
+            mixinPlayer = (EntityPlayerBridge) entity;
         } else {
             mixinPlayer = null;
         }

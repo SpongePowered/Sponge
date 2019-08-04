@@ -22,22 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity.item;
+package org.spongepowered.common.bridge.entity.monster;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
-import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
+import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.util.Direction;
 
-import javax.annotation.Nullable;
+public interface EntityShulkerBridge {
 
-public interface WitherSkullEntityBridge {
+    DyeColor bridge$getColor();
 
-    @Nullable
-    Explosion bridge$CreateAndProcessExplosionEvent(net.minecraft.world.World worldObj, Entity self, double x,
-        double y, double z, float strength, boolean flaming,
-        boolean smoking);
+    void bridge$setColor(DyeColor color);
 
+    Direction bridge$getDirection();
 
+    void bridge$setDirection(Direction direction);
 }

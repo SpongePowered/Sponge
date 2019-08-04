@@ -64,7 +64,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.LensProviderBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
@@ -343,7 +343,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     private EntityItem impl$RestoreOnDrag(final EntityPlayer player, final ItemStack itemStackIn, final boolean unused) {
         final ItemStackSnapshot original = ItemStackUtil.snapshotOf(itemStackIn);
         final EntityItem entityItem = player.dropItem(itemStackIn, unused);
-        if (!((PlayerEntityBridge) player).bridge$shouldRestoreInventory()) {
+        if (!((EntityPlayerBridge) player).bridge$shouldRestoreInventory()) {
             return entityItem;
         }
         if (entityItem  == null) {
@@ -361,7 +361,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     @Nullable
     private EntityItem impl$restoreOnDragSplit(final EntityPlayer player, final ItemStack itemStackIn, final boolean unused) {
         final EntityItem entityItem = player.dropItem(itemStackIn, unused);
-        if (!((PlayerEntityBridge) player).bridge$shouldRestoreInventory()) {
+        if (!((EntityPlayerBridge) player).bridge$shouldRestoreInventory()) {
             return entityItem;
         }
         if (entityItem  == null) {
@@ -375,7 +375,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
             player.inventory.setItemStack(original);
             ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(-1, -1, original));
         }
-        ((PlayerEntityBridge) player).bridge$shouldRestoreInventory(false);
+        ((EntityPlayerBridge) player).bridge$shouldRestoreInventory(false);
         return entityItem;
     }
 
@@ -385,10 +385,10 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
             target = "Lnet/minecraft/entity/player/InventoryPlayer;setItemStack(Lnet/minecraft/item/ItemStack;)V",
             ordinal = 1))
     private void impl$ClearOnSlot(final InventoryPlayer inventoryPlayer, final ItemStack itemStackIn) {
-        if (!this.impl$dropCancelled || !((PlayerEntityBridge) inventoryPlayer.player).bridge$shouldRestoreInventory()) {
+        if (!this.impl$dropCancelled || !((EntityPlayerBridge) inventoryPlayer.player).bridge$shouldRestoreInventory()) {
             inventoryPlayer.setItemStack(itemStackIn);
         }
-        ((PlayerEntityBridge) inventoryPlayer.player).bridge$shouldRestoreInventory(false);
+        ((EntityPlayerBridge) inventoryPlayer.player).bridge$shouldRestoreInventory(false);
         this.impl$dropCancelled = false;
     }
 
@@ -409,7 +409,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/EntityItem;", ordinal = 3))
     private EntityItem onThrowClick(final EntityPlayer player, final ItemStack itemStackIn, final boolean unused) {
         final EntityItem entityItem = player.dropItem(itemStackIn, true);
-        if (entityItem == null && ((PlayerEntityBridge) player).bridge$shouldRestoreInventory()) {
+        if (entityItem == null && ((EntityPlayerBridge) player).bridge$shouldRestoreInventory()) {
             final ItemStack original = ItemStackUtil.toNative(this.impl$itemStackSnapshot.createStack());
             this.impl$lastSlotUsed.putStack(original);
             player.openContainer.detectAndSendChanges();
@@ -418,7 +418,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
         }
         this.impl$itemStackSnapshot = ItemStackSnapshot.NONE;
         this.impl$lastSlotUsed = null;
-        ((PlayerEntityBridge) player).bridge$shouldRestoreInventory(false);
+        ((EntityPlayerBridge) player).bridge$shouldRestoreInventory(false);
         return entityItem;
     }
 

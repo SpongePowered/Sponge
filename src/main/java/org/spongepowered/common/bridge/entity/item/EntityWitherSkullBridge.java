@@ -24,13 +24,20 @@
  */
 package org.spongepowered.common.bridge.entity.item;
 
-import net.minecraft.entity.EntityLivingBase;
-import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.DamageSource;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.World;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 
-public interface TNTPrimedEntityBridge {
+import javax.annotation.Nullable;
 
-    void bridge$setDetonator(EntityLivingBase detonator);
+public interface EntityWitherSkullBridge {
 
-    boolean bridge$isExploding();
+    @Nullable
+    Explosion bridge$CreateAndProcessExplosionEvent(net.minecraft.world.World worldObj, Entity self, double x,
+        double y, double z, float strength, boolean flaming,
+        boolean smoking);
+
 
 }

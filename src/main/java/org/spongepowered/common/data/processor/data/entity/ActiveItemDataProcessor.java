@@ -32,13 +32,11 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ActiveItemData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeActiveItemData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.Optional;

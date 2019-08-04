@@ -64,7 +64,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.VanishingBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -305,7 +305,7 @@ public abstract class WorldMixin implements WorldBridge {
     @Redirect(method = "isAnyPlayerWithinRangeAt", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     private boolean onIsAnyPlayerWithinRangePredicate(final com.google.common.base.Predicate<EntityPlayer> predicate, final Object object) {
         final EntityPlayer player = (EntityPlayer) object;
-        return !(player.isDead || !((PlayerEntityBridge) player).bridge$affectsSpawning()) && predicate.apply(player);
+        return !(player.isDead || !((EntityPlayerBridge) player).bridge$affectsSpawning()) && predicate.apply(player);
     }
 
     // For invisibility

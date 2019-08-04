@@ -84,10 +84,10 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
-import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
+import org.spongepowered.common.bridge.entity.LivingEntityBaseBridge;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
@@ -120,7 +120,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(value = EntityLivingBase.class, priority = 999)
-public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseLivingEntityBridge {
+public abstract class EntityLivingBaseMixin extends EntityMixin implements LivingEntityBaseBridge {
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
@@ -894,7 +894,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
             return; // Ignore Equipment on player spawn/respawn
         }
         final ItemStack after = this.getItemStackFromSlot(entityEquipmentSlot);
-        final EntityLivingBase entity = (EntityLivingBase) (BaseLivingEntityBridge) this;
+        final EntityLivingBase entity = (EntityLivingBase) (LivingEntityBaseBridge) this;
         if (!ItemStack.areItemStacksEqual(after, before)) {
             final InventoryAdapter slotAdapter;
             if (entity instanceof EntityPlayerMP) {
@@ -942,8 +942,8 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
 
     @Redirect(method = "onDeathUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getExperiencePoints(Lnet/minecraft/entity/player/EntityPlayer;)I"))
     private int onGetExperiencePoints(final EntityLivingBase entity, final EntityPlayer attackingPlayer) {
-        if (entity instanceof PlayerEntityBridge) {
-            if (((PlayerEntityBridge) entity).bridge$keepInventory()) {
+        if (entity instanceof EntityPlayerBridge) {
+            if (((EntityPlayerBridge) entity).bridge$keepInventory()) {
                 return 0;
             }
         }
@@ -959,8 +959,8 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements BaseL
 
     @Inject(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;resetActiveHand()V"))
     private void updateHealthForUseFinish(final CallbackInfo ci) {
-        if (this instanceof ServerPlayerEntityBridge) {
-            ((ServerPlayerEntityBridge) this).bridge$refreshScaledHealth();
+        if (this instanceof EntityPlayerMPBridge) {
+            ((EntityPlayerMPBridge) this).bridge$refreshScaledHealth();
         }
     }
 

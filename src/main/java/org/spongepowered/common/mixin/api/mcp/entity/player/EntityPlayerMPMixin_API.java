@@ -106,7 +106,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.packet.ResourcePackBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
@@ -169,12 +169,12 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public GameProfile getProfile() {
-        return ((ServerPlayerEntityBridge) this).bridge$getUser().getProfile();
+        return ((EntityPlayerMPBridge) this).bridge$getUser().getProfile();
     }
 
     @Override
     public boolean isOnline() {
-        return ((ServerPlayerEntityBridge) this).bridge$getUser().isOnline();
+        return ((EntityPlayerMPBridge) this).bridge$getUser().isOnline();
     }
 
     @Override
@@ -189,7 +189,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public int getViewDistance() {
-        return ((ServerPlayerEntityBridge) this).bridge$getViewDistance();
+        return ((EntityPlayerMPBridge) this).bridge$getViewDistance();
     }
 
     @Override
@@ -204,7 +204,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public Set<SkinPart> getDisplayedSkinParts() {
-        return ((ServerPlayerEntityBridge) this).bridge$getSkinParts();
+        return ((EntityPlayerMPBridge) this).bridge$getSkinParts();
     }
 
     @Override
@@ -289,7 +289,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public String getIdentifier() {
-        return ((ServerPlayerEntityBridge) this).bridge$getUser().getIdentifier();
+        return ((EntityPlayerMPBridge) this).bridge$getUser().getIdentifier();
     }
 
     @Override
@@ -351,12 +351,12 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public void setScoreboard(final Scoreboard scoreboard) {
-        if (((ServerPlayerEntityBridge) this).bridge$hasDelegate()) {
-            ((Player) ((ServerPlayerEntityBridge) this).bridge$getDelegate()).setScoreboard(scoreboard);
+        if (((EntityPlayerMPBridge) this).bridge$hasDelegate()) {
+            ((Player) ((EntityPlayerMPBridge) this).bridge$getDelegate()).setScoreboard(scoreboard);
         }
-        ((ServerScoreboardBridge) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).bridge$removePlayer((EntityPlayerMP) (Object) this, true);
-        ((ServerPlayerEntityBridge) this).bridge$replaceScoreboard(scoreboard);
-        ((ServerScoreboardBridge) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).bridge$addPlayer((EntityPlayerMP) (Object) this, true);
+        ((ServerScoreboardBridge) ((EntityPlayerMPBridge) this).bridge$getScoreboard()).bridge$removePlayer((EntityPlayerMP) (Object) this, true);
+        ((EntityPlayerMPBridge) this).bridge$replaceScoreboard(scoreboard);
+        ((ServerScoreboardBridge) ((EntityPlayerMPBridge) this).bridge$getScoreboard()).bridge$addPlayer((EntityPlayerMP) (Object) this, true);
     }
 
     @Override
@@ -366,7 +366,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public Scoreboard getScoreboard() {
-        return ((ServerPlayerEntityBridge) this).bridge$getScoreboard();
+        return ((EntityPlayerMPBridge) this).bridge$getScoreboard();
     }
 
     @Override
@@ -470,8 +470,8 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public Vector3d getVelocity() {
-        if (((ServerPlayerEntityBridge) this).bridge$getVelocityOverride() != null) {
-            return ((ServerPlayerEntityBridge) this).bridge$getVelocityOverride();
+        if (((EntityPlayerMPBridge) this).bridge$getVelocityOverride() != null) {
+            return ((EntityPlayerMPBridge) this).bridge$getVelocityOverride();
         }
         return super.getVelocity();
     }
@@ -611,11 +611,11 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         }
         if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.api$worldBorder), Optional.ofNullable(border), this))) {
             if (this.api$worldBorder != null) { //is the world border about to be unset?
-                ((WorldBorderBridge) this.api$worldBorder).bridge$getListeners().remove(((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
+                ((WorldBorderBridge) this.api$worldBorder).bridge$getListeners().remove(((EntityPlayerMPBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
             }
             this.api$worldBorder = border;
             if (this.api$worldBorder != null) {
-                ((net.minecraft.world.border.WorldBorder) this.api$worldBorder).addListener(((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener());
+                ((net.minecraft.world.border.WorldBorder) this.api$worldBorder).addListener(((EntityPlayerMPBridge) this).bridge$getWorldBorderListener());
                 this.connection.sendPacket(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) this.api$worldBorder, SPacketWorldBorder.Action.INITIALIZE));
             } else { //unset the border if null
                 this.connection.sendPacket(new SPacketWorldBorder(this.world.getWorldBorder(), SPacketWorldBorder.Action.INITIALIZE));

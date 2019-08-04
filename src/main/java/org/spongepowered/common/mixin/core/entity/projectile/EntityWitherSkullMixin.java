@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.bridge.entity.item.WitherSkullEntityBridge;
+import org.spongepowered.common.bridge.entity.item.EntityWitherSkullBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
@@ -50,7 +50,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityWitherSkull.class)
-public abstract class EntityWitherSkullMixin extends EntityFireballMixin implements WitherSkullEntityBridge, ExplosiveBridge {
+public abstract class EntityWitherSkullMixin extends EntityFireballMixin implements EntityWitherSkullBridge, ExplosiveBridge {
 
     private int explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
     private float impl$damage = 0.0f;

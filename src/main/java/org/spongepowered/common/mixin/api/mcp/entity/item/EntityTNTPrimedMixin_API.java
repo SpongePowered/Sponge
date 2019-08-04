@@ -37,7 +37,7 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.item.TNTPrimedEntityBridge;
+import org.spongepowered.common.bridge.entity.item.EntityTNTPrimedBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
@@ -84,7 +84,7 @@ public abstract class EntityTNTPrimedMixin_API extends EntityMixin_API implement
 
     @Override
     public boolean isPrimed() {
-        return this.fuse > 0 && this.fuse < this.fuseDuration && !this.isDead || ((TNTPrimedEntityBridge) this).bridge$isExploding();
+        return this.fuse > 0 && this.fuse < this.fuseDuration && !this.isDead || ((EntityTNTPrimedBridge) this).bridge$isExploding();
     }
 
     @Override

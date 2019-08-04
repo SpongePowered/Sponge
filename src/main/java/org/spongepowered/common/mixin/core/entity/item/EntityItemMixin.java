@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.entity.ItemEntityBridge;
+import org.spongepowered.common.bridge.entity.EntityItemBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
@@ -46,7 +46,7 @@ import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 
 @Mixin(EntityItem.class)
-public abstract class EntityItemMixin extends EntityMixin implements ItemEntityBridge {
+public abstract class EntityItemMixin extends EntityMixin implements EntityItemBridge {
 
     private static final int MAGIC_PREVIOUS = -1;
     @Shadow private int pickupDelay;

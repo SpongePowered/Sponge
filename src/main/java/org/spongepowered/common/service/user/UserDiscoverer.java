@@ -29,7 +29,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.server.management.UserListBans;
@@ -37,7 +36,6 @@ import net.minecraft.server.management.UserListEntry;
 import net.minecraft.server.management.UserListEntryBan;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
-import net.minecraft.util.ReportedException;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.Sponge;
@@ -45,15 +43,13 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.mixin.core.server.management.UserLIstEntryAccessor;
 import org.spongepowered.common.mixin.core.server.management.UserListAccessor;
 import org.spongepowered.common.mixin.core.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -257,7 +253,7 @@ class UserDiscoverer {
         // Although the player itself could be returned here (as Player extends
         // User), a plugin is more likely to cache the User object and we don't
         // want the player entity to be cached.
-        final ServerPlayerEntityBridge player = (ServerPlayerEntityBridge) playerList.getPlayerByUUID(uniqueId);
+        final EntityPlayerMPBridge player = (EntityPlayerMPBridge) playerList.getPlayerByUUID(uniqueId);
         if (player != null) {
             // If we're getting the online player, we want their current user,
             // rather than something that is recreated and may be out of sync

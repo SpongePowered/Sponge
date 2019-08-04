@@ -71,7 +71,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -161,7 +161,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
         if (isCancelled) {
 
             final IBlockState state = this.player.world.getBlockState(pos);
-            ((ServerPlayerEntityBridge) this.player).bridge$sendBlockChange(pos, state);
+            ((EntityPlayerMPBridge) this.player).bridge$sendBlockChange(pos, state);
             this.player.world.notifyBlockUpdate(pos, this.player.world.getBlockState(pos), state, 3);
             return;
         }

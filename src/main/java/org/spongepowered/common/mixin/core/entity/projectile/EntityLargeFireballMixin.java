@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.bridge.entity.item.LargeFireballEntityBridge;
+import org.spongepowered.common.bridge.entity.item.EntityLargeFireballBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
@@ -50,7 +50,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityLargeFireball.class)
-public abstract class EntityLargeFireballMixin extends EntityFireballMixin implements LargeFireballEntityBridge, ExplosiveBridge {
+public abstract class EntityLargeFireballMixin extends EntityFireballMixin implements EntityLargeFireballBridge, ExplosiveBridge {
 
     @Shadow public int explosionPower;
 

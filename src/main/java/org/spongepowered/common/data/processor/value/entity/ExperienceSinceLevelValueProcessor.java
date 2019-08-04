@@ -32,8 +32,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 
 import java.util.Optional;
 
@@ -63,14 +63,14 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
         while (value >= container.xpBarCap()) {
             value -= container.xpBarCap();
         }
-        ((PlayerEntityBridge) container).bridge$setExperienceSinceLevel(value);
-        ((ServerPlayerEntityBridge) container).bridge$refreshExp();
+        ((EntityPlayerBridge) container).bridge$setExperienceSinceLevel(value);
+        ((EntityPlayerMPBridge) container).bridge$refreshExp();
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(EntityPlayer container) {
-        return Optional.of(((PlayerEntityBridge) container).bridge$getExperienceSinceLevel());
+        return Optional.of(((EntityPlayerBridge) container).bridge$getExperienceSinceLevel());
     }
 
     @Override

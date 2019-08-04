@@ -118,13 +118,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
-import org.spongepowered.common.bridge.scoreboard.TeamBridge;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -156,7 +155,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayerMP.class)
-public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements SubjectBridge, ServerPlayerEntityBridge, CommandSenderBridge,
+public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements SubjectBridge, EntityPlayerMPBridge, CommandSenderBridge,
     CommandSourceBridge {
 
     @Shadow @Final public MinecraftServer server;
@@ -324,7 +323,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean keepInventory(final GameRules gameRules, final String key, final EntityPlayerMP corpse, final boolean keepEverything) {
-        final boolean keep = ((PlayerEntityBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
+        final boolean keep = ((EntityPlayerBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
         if (!keep) {
             // Copy corpse inventory to respawned player
             this.inventory.copyInventory(corpse.inventory);

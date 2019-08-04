@@ -33,12 +33,12 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.monster.ShulkerEntityBridge;
+import org.spongepowered.common.bridge.entity.monster.EntityShulkerBridge;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.mixin.core.entity.EntityLivingMixin;
 
 @Mixin(EntityShulker.class)
-public abstract class EntityShulkerMixin extends EntityLivingMixin implements ShulkerEntityBridge {
+public abstract class EntityShulkerMixin extends EntityLivingMixin implements EntityShulkerBridge {
 
     @Shadow @Final protected static DataParameter<Byte> COLOR;
 

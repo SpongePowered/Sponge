@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.bridge.entity.BaseLivingEntityBridge;
+import org.spongepowered.common.bridge.entity.LivingEntityBaseBridge;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 
 import java.util.Optional;
@@ -117,7 +117,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
             if (value.floatValue() <= 0.0F) {
                 livingbase.attackEntityFrom(DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE, 1000F);
             } else {
-                ((BaseLivingEntityBridge) livingbase).bridge$resetDeathEventsPosted();
+                ((LivingEntityBaseBridge) livingbase).bridge$resetDeathEventsPosted();
             }
             return builder.success(newHealthValue).replace(oldHealthValue).result(DataTransactionResult.Type.SUCCESS).build();
         }

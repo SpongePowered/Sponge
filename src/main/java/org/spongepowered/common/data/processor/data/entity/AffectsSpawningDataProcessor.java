@@ -36,7 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAffectsSpa
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 
 import java.util.Optional;
 
@@ -49,13 +49,13 @@ public class AffectsSpawningDataProcessor extends
 
     @Override
     protected boolean set(EntityPlayerMP entity, Boolean value) {
-        ((PlayerEntityBridge) entity).bridge$setAffectsSpawning(value);
+        ((EntityPlayerBridge) entity).bridge$setAffectsSpawning(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityPlayerMP entity) {
-        return Optional.of(((PlayerEntityBridge) entity).bridge$affectsSpawning());
+        return Optional.of(((EntityPlayerBridge) entity).bridge$affectsSpawning());
     }
 
     @Override

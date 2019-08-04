@@ -92,7 +92,6 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -103,7 +102,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -135,7 +134,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayer.class)
-public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements PlayerEntityBridge, LocationTargetingBridge {
+public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements EntityPlayerBridge, LocationTargetingBridge {
 
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
@@ -491,8 +490,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         }
         // Sponge Start - redirect to our handling to capture and throw events.
         if (!((WorldBridge) this.world).bridge$isFake()) {
-            ((PlayerEntityBridge) this).bridge$shouldRestoreInventory(false);
-            final EntityPlayer player = (EntityPlayer) (PlayerEntityBridge) this;
+            ((EntityPlayerBridge) this).bridge$shouldRestoreInventory(false);
+            final EntityPlayer player = (EntityPlayer) (EntityPlayerBridge) this;
 
             final double posX1 = player.posX;
             final double posY1 = player.posY - 0.3 + player.getEyeHeight();
@@ -508,7 +507,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
-                item = SpongeCommonEventFactory.throwDropItemAndConstructEvent((EntityPlayer) (PlayerEntityBridge) this, posX1, posY1, posZ1, snapshot, original, frame);
+                item = SpongeCommonEventFactory.throwDropItemAndConstructEvent((EntityPlayer) (EntityPlayerBridge) this, posX1, posY1, posZ1, snapshot, original, frame);
 
                 if (item == null || item.isEmpty()) {
                     return null;
@@ -545,7 +544,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                     entityitem.motionZ += Math.sin(f3) * f2;
                 }
                 // FIFTH - Capture the entity maybe?
-                if (currentState.spawnItemOrCapture(phaseContext, (EntityPlayer) (PlayerEntityBridge) this, entityitem)) {
+                if (currentState.spawnItemOrCapture(phaseContext, (EntityPlayer) (EntityPlayerBridge) this, entityitem)) {
                     return entityitem;
                 }
                 // TODO - Investigate whether player drops are adding to the stat list in captures.

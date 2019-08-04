@@ -64,8 +64,6 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
@@ -87,12 +85,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.packet.WorldBorderPacketBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
@@ -299,8 +296,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             newPlayer.setSpawnPoint(bedPos, playerIn.isSpawnForced());
         }
 
-        ((ServerPlayerEntityBridge) newPlayer).bridge$setScoreboardOnRespawn(((Player) playerIn).getScoreboard());
-        ((ServerPlayerEntityBridge) playerIn).bridge$removeScoreboardOnRespawn();
+        ((EntityPlayerMPBridge) newPlayer).bridge$setScoreboardOnRespawn(((Player) playerIn).getScoreboard());
+        ((EntityPlayerMPBridge) playerIn).bridge$removeScoreboardOnRespawn();
 
         for (final String s : playerIn.getTags()) {
             newPlayer.addTag(s);
@@ -309,7 +306,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         this.setPlayerGameTypeBasedOnOther(newPlayer, playerIn, worldServer);
         newPlayer.setSneaking(false);
 
-        ((ServerPlayerEntityBridge) playerIn).bridge$setDelegateAfterRespawn(newPlayer);
+        ((EntityPlayerMPBridge) playerIn).bridge$setDelegateAfterRespawn(newPlayer);
 
         // update to safe location
         toTransform = toTransform.setLocation(location);
@@ -344,7 +341,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final int dimensionId = WorldManager.getClientDimensionId(newPlayer, worldServer);
 
         // Send dimension registration
-        if (((ServerPlayerEntityBridge) newPlayer).bridge$usesCustomClient()) {
+        if (((EntityPlayerMPBridge) newPlayer).bridge$usesCustomClient()) {
             WorldManager.sendDimensionRegistration(newPlayer, worldServer.provider);
         } else {
             // Force vanilla client to refresh its chunk cache if same dimension type
@@ -384,7 +381,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         for (final PotionEffect potioneffect : newPlayer.getActivePotionEffects()) {
             newPlayer.connection.sendPacket(new SPacketEntityEffect(newPlayer.getEntityId(), potioneffect));
         }
-        ((ServerPlayerEntityBridge) newPlayer).bridge$refreshScaledHealth();
+        ((EntityPlayerMPBridge) newPlayer).bridge$refreshScaledHealth();
         newPlayer.connection.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
         SpongeCommonEventFactory.callPostPlayerRespawnEvent(newPlayer, conqueredEnd);
 

@@ -37,7 +37,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDespawnD
 import org.spongepowered.api.data.manipulator.mutable.entity.DespawnDelayData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDespawnDelayData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.bridge.entity.ItemEntityBridge;
+import org.spongepowered.common.bridge.entity.EntityItemBridge;
 
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +55,7 @@ public final class DespawnDelayDataProcessor extends AbstractEntityDataProcessor
 
     @Override
     protected boolean set(EntityItem container, Map<Key<?>, Object> keyValues) {
-        ((ItemEntityBridge) container).bridge$setDespawnDelay(
+        ((EntityItemBridge) container).bridge$setDespawnDelay(
                 (Integer) keyValues.get(Keys.DESPAWN_DELAY),
                 (Boolean) keyValues.get(Keys.INFINITE_DESPAWN_DELAY)
         );
@@ -65,8 +65,8 @@ public final class DespawnDelayDataProcessor extends AbstractEntityDataProcessor
     @Override
     protected Map<Key<?>, ?> getValues(EntityItem container) {
         return ImmutableMap.<Key<?>, Object> builder()
-                .put(Keys.DESPAWN_DELAY, ((ItemEntityBridge) container).bridge$getDespawnDelay())
-                .put(Keys.INFINITE_DESPAWN_DELAY, ((ItemEntityBridge) container).bridge$infiniteDespawnDelay())
+                .put(Keys.DESPAWN_DELAY, ((EntityItemBridge) container).bridge$getDespawnDelay())
+                .put(Keys.INFINITE_DESPAWN_DELAY, ((EntityItemBridge) container).bridge$infiniteDespawnDelay())
                 .build();
     }
 

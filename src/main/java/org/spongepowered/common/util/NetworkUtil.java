@@ -67,7 +67,7 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.mixin.core.server.PlayerListAccessor;
@@ -153,7 +153,7 @@ public final class NetworkUtil {
         playerprofilecache.addEntry(gameprofile);
         
         // Sponge start - save changes to offline User before reading player data
-        final SpongeUser user = (SpongeUser) ((ServerPlayerEntityBridge) playerIn).bridge$getUserObject();
+        final SpongeUser user = (SpongeUser) ((EntityPlayerMPBridge) playerIn).bridge$getUserObject();
         if (SpongeUser.dirtyUsers.contains(user)) {
             user.save();
         } else {
@@ -307,7 +307,7 @@ public final class NetworkUtil {
         // This allows #getWorldScoreboard to function
         // as normal, without causing issues when it is initialized on the client.
 
-        ((ServerPlayerEntityBridge) playerIn).bridge$initScoreboard();
+        ((EntityPlayerMPBridge) playerIn).bridge$initScoreboard();
 
         for (final PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
             handler.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));

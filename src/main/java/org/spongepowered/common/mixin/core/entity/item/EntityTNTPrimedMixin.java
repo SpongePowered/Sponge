@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.entity.item.TNTPrimedEntityBridge;
+import org.spongepowered.common.bridge.entity.item.EntityTNTPrimedBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -52,7 +52,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityTNTPrimed.class)
-public abstract class EntityTNTPrimedMixin extends EntityMixin implements TNTPrimedEntityBridge, FusedExplosiveBridge, ExplosiveBridge {
+public abstract class EntityTNTPrimedMixin extends EntityMixin implements EntityTNTPrimedBridge, FusedExplosiveBridge, ExplosiveBridge {
 
     @Shadow private int fuse;
 

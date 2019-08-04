@@ -22,12 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity.item;
+package org.spongepowered.common.bridge.entity.player;
 
-import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 
-public interface MinecartEntityBridge {
+import java.util.UUID;
 
-    Vector3d bridge$getAirboneVelocityModifier();
+import javax.annotation.Nullable;
 
+public interface EntityPlayerBridge {
+
+    @Nullable BlockPos bridge$getBedLocation(int dim);
+
+    boolean bridge$isSpawnForced(int dim);
+
+    /**
+     * {@link EntityPlayer#addExperienceLevel(int)} doesn't update the total
+     * experience. This recalculates it for plugins to properly make use of it.
+     */
+    void bridge$recalculateTotalExperience();
+
+    boolean bridge$affectsSpawning();
+
+    void bridge$setAffectsSpawning(boolean affectsSpawning);
+
+    boolean bridge$keepInventory();
+
+    void bridge$shouldRestoreInventory(boolean flag);
+
+    boolean bridge$shouldRestoreInventory();
+
+    int bridge$getExperienceSinceLevel();
+
+    void bridge$setExperienceSinceLevel(int experience);
 }

@@ -37,7 +37,7 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectional
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.entity.monster.ShulkerEntityBridge;
+import org.spongepowered.common.bridge.entity.monster.EntityShulkerBridge;
 
 import java.util.Optional;
 
@@ -50,13 +50,13 @@ public class ShulkerDirectionalDataProcessor extends AbstractEntitySingleDataPro
 
     @Override
     protected boolean set(EntityShulker dataHolder, Direction value) {
-        ((ShulkerEntityBridge) dataHolder).bridge$setDirection(value);
+        ((EntityShulkerBridge) dataHolder).bridge$setDirection(value);
         return true;
     }
 
     @Override
     protected Optional<Direction> getVal(EntityShulker dataHolder) {
-        return Optional.ofNullable(((ShulkerEntityBridge) dataHolder).bridge$getDirection());
+        return Optional.ofNullable(((EntityShulkerBridge) dataHolder).bridge$getDirection());
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ShulkerDirectionalDataProcessor extends AbstractEntitySingleDataPro
 
     @Override
     public boolean supports(EntityShulker dataHolder) {
-        return dataHolder instanceof ShulkerEntityBridge;
+        return dataHolder instanceof EntityShulkerBridge;
     }
 
     @Override

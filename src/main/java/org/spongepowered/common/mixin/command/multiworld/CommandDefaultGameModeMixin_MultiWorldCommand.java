@@ -33,7 +33,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 
 @Mixin(CommandDefaultGameMode.class)
 public abstract class CommandDefaultGameModeMixin_MultiWorldCommand {
@@ -56,7 +56,7 @@ public abstract class CommandDefaultGameModeMixin_MultiWorldCommand {
 
         if (server.getForceGamemode()) {
             for (final EntityPlayer player : world.playerEntities) {
-                if (!((ServerPlayerEntityBridge) player).bridge$hasForcedGamemodeOverridePermission()) {
+                if (!((EntityPlayerMPBridge) player).bridge$hasForcedGamemodeOverridePermission()) {
                     player.setGameType(type);
                 }
             }

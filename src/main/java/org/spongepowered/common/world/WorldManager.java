@@ -67,7 +67,7 @@ import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.integrated.IntegratedServerBridge;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
@@ -1303,7 +1303,7 @@ public final class WorldManager {
     }
 
     public static int getClientDimensionId(final EntityPlayerMP player, final World world) {
-        if (!((ServerPlayerEntityBridge) player).bridge$usesCustomClient()) {
+        if (!((EntityPlayerMPBridge) player).bridge$usesCustomClient()) {
             final DimensionType type = world.provider.getDimensionType();
             if (type == DimensionType.OVERWORLD) {
                 return 0;

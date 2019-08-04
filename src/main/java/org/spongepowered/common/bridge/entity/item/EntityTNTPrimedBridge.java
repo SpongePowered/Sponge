@@ -22,36 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity;
+package org.spongepowered.common.bridge.entity.item;
 
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.DamageSource;
-import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
-import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 
-import java.util.List;
-import java.util.Optional;
+public interface EntityTNTPrimedBridge {
 
-// in 1.14, this can be named MobEntityBridge.
-public interface BaseLivingEntityBridge {
+    void bridge$setDetonator(EntityLivingBase detonator);
 
-    boolean bridge$damageEntityHook(DamageSource damageSource, float damage);
-
-    int bridge$getMaxAir();
-
-    void bridge$setMaxAir(int max);
-
-    Optional<List<DamageFunction>> bridge$provideArmorModifiers(EntityLivingBase entityLivingBase, DamageSource source, double damage);
-
-    float bridge$applyModDamage(EntityLivingBase entityLivingBase, DamageSource source, float damage);
-
-    void bridge$applyArmorDamage(EntityLivingBase entityLivingBase, DamageSource source, DamageEntityEvent entityEvent, DamageModifier modifier);
-
-    boolean bridge$hookModAttack(EntityLivingBase entityLivingBase, DamageSource source, float amount);
-
-    float bridge$applyModDamagePost(EntityLivingBase entityLivingBase, DamageSource source, float damage);
-
-    void bridge$resetDeathEventsPosted();
+    boolean bridge$isExploding();
 
 }

@@ -85,7 +85,7 @@ import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.command.SpongeCommandFactory;
 import org.spongepowered.common.entity.SpongeProfession;
@@ -431,11 +431,11 @@ public final class SpongeImplHooks {
     }
 
     public static BlockPos getBedLocation(final EntityPlayer playerIn, final int dimension) {
-        return ((PlayerEntityBridge) playerIn).bridge$getBedLocation(dimension);
+        return ((EntityPlayerBridge) playerIn).bridge$getBedLocation(dimension);
     }
 
     public static boolean isSpawnForced(final EntityPlayer playerIn, final int dimension) {
-        return ((PlayerEntityBridge) playerIn).bridge$isSpawnForced(dimension);
+        return ((EntityPlayerBridge) playerIn).bridge$isSpawnForced(dimension);
     }
 
     public static Inventory toInventory(final Object inventory, @Nullable final Object forgeItemHandler) {
