@@ -36,7 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableD
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntityEndermite.class)
 public abstract class EntityEndermiteMixin_API extends EntityMobMixin_API implements Endermite {
@@ -59,7 +59,7 @@ public abstract class EntityEndermiteMixin_API extends EntityMobMixin_API implem
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getExpirableData());
     }

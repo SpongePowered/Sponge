@@ -39,7 +39,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeShearedDat
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntitySheep.class)
 public abstract class EntitySheepMixin_API extends EntityAnimalMixin_API implements Sheep {
@@ -58,7 +58,7 @@ public abstract class EntitySheepMixin_API extends EntityAnimalMixin_API impleme
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getDyeData());
         manipulators.add(new SpongeShearedData(getSheared()));

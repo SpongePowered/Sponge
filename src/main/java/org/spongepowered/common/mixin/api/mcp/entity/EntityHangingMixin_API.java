@@ -38,7 +38,7 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectional
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 
@@ -58,7 +58,7 @@ public abstract class EntityHangingMixin_API extends EntityMixin_API implements 
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getDirectionalData());
     }

@@ -38,7 +38,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityHangingMixin_API;
 import org.spongepowered.common.util.Constants;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntityPainting.class)
 public abstract class EntityPaintingMixin_API extends EntityHangingMixin_API implements Painting {
@@ -56,7 +56,7 @@ public abstract class EntityPaintingMixin_API extends EntityHangingMixin_API imp
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getArtData());
     }

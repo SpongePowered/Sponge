@@ -43,6 +43,7 @@ import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -251,7 +252,7 @@ public class CustomDataNbtUtil {
 
     public static void writeCustomData(final NBTTagCompound compound, final DataHolder dataHolder) {
         if (dataHolder instanceof CustomDataHolderBridge) {
-            final List<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) dataHolder).bridge$getCustomManipulators();
+            final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) dataHolder).bridge$getCustomManipulators();
             if (!manipulators.isEmpty()) {
                 final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(manipulators);
                 final NBTTagList manipulatorTagList = new NBTTagList();

@@ -39,7 +39,7 @@ import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
 import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 import org.spongepowered.common.util.Constants;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntityHorse.class)
 public abstract class EntityHorseMixin_API extends AbstractHorseMixin_API implements RideableHorse {
@@ -60,7 +60,7 @@ public abstract class EntityHorseMixin_API extends AbstractHorseMixin_API implem
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getHorseData());
     }

@@ -36,7 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mixin(EntityXPOrb.class)
 public abstract class EntityXPOrbMixin_API extends EntityMixin_API implements ExperienceOrb {
@@ -59,7 +59,7 @@ public abstract class EntityXPOrbMixin_API extends EntityMixin_API implements Ex
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(final List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(experienceHeld());
     }

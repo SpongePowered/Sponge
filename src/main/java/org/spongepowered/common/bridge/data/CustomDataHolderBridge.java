@@ -36,6 +36,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +56,7 @@ public interface CustomDataHolderBridge {
 
     <E, V extends BaseValue<E>> Optional<V> bridge$getCustomValue(Key<V> key);
 
-    List<DataManipulator<?, ?>> bridge$getCustomManipulators();
+    Collection<DataManipulator<?, ?>> bridge$getCustomManipulators();
 
     <E> DataTransactionResult bridge$offerCustom(Key<? extends BaseValue<E>> key, E value);
 

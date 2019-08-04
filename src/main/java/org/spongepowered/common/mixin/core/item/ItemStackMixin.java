@@ -53,6 +53,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -176,7 +177,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public List<DataManipulator<?, ?>> bridge$getCustomManipulators() {
+    public Collection<DataManipulator<?, ?>> bridge$getCustomManipulators() {
         return this.manipulators.stream()
             .map(DataManipulator::copy)
             .collect(Collectors.toList());
