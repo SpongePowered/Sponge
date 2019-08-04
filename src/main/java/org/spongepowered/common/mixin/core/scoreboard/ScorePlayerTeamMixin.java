@@ -38,28 +38,31 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.scoreboard.TeamBridge;
+import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
 import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mixin(ScorePlayerTeam.class)
-public abstract class ScorePlayerTeamMixin extends net.minecraft.scoreboard.Team implements TeamBridge {
+public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
 
-    @Shadow @Final @Nullable private Scoreboard scoreboard;
+    // TODO Mixin (0.8) - Remove when we can use accessor mixins in other mixins
+    @Shadow @Final @Mutable @Nullable private Scoreboard scoreboard;
     @Shadow private String displayName;
     @Shadow private TextFormatting color;
     @Shadow private String prefix;
     @Shadow private String suffix;
+    @Shadow public abstract Collection<String> getMembershipCollection();
 
     @SuppressWarnings("NullableProblems") @MonotonicNonNull private Text bridge$displayName;
     @SuppressWarnings("NullableProblems") @MonotonicNonNull private Text bridge$Prefix;
@@ -89,6 +92,57 @@ public abstract class ScorePlayerTeamMixin extends net.minecraft.scoreboard.Team
         if (scoreboard != null) {
             scoreboard.broadcastTeamInfoUpdate(team);
         }
+    }
+
+    @Inject(method = "setDisplayName",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;displayName:Ljava/lang/String;",
+            opcode = Opcodes.PUTFIELD,
+            shift = At.Shift.AFTER))
+    private void impl$doTeamUpdateForDisplayName(final String name, final CallbackInfo ci) {
+        this.bridge$displayName = SpongeTexts.fromLegacy(name);
+    }
+
+    @Inject(method = "setPrefix",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;prefix:Ljava/lang/String;",
+            opcode = Opcodes.PUTFIELD,
+            shift = At.Shift.AFTER))
+    private void impl$doTeamUpdateForPrefix(final String prefix, final CallbackInfo callbackInfo) {
+        this.bridge$Prefix = SpongeTexts.fromLegacy(prefix);
+    }
+
+    @Inject(method = "setSuffix",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;suffix:Ljava/lang/String;",
+            opcode = Opcodes.PUTFIELD,
+            shift = At.Shift.AFTER
+        ))
+    private void impl$doTeamUpdateForSuffix(final String suffix, final CallbackInfo ci) {
+        this.bridge$Suffix = SpongeTexts.fromLegacy(suffix);
+    }
+
+    @Inject(method = "setColor", at = @At("RETURN"))
+    private void impl$doTeamUpdateForFormat(final TextFormatting format, final CallbackInfo ci) {
+        this.bridge$Color = TextColorRegistryModule.enumChatColor.get(format);
+        // This isn't called by Vanilla, so we inject the call ourselves.
+        this.impl$doTeamUpdate();
+    }
+
+    // TODO Mixin (0.8) - Remove when we can use accessor mixins in other mixins
+    @Nullable
+    @Override
+    public Scoreboard bridge$getScoreboard() {
+        return this.scoreboard;
+    }
+
+    // TODO Mixin (0.8) - Remove when we can use accessor mixins in other mixins
+    @Override
+    public void bridge$setScoreboard(@Nullable Scoreboard scoreboard) {
+        this.scoreboard = scoreboard;
     }
 
     @Override
@@ -140,58 +194,12 @@ public abstract class ScorePlayerTeamMixin extends net.minecraft.scoreboard.Team
     }
 
     @Override
-    public TextColor bridge$getColor() {
-        return this.bridge$Color;
-    }
-
-    @Override
     public void bridge$setColor(TextColor color) {
         if (color.equals(TextColors.NONE)) {
             color = TextColors.RESET;
         }
         this.bridge$Color = color;
         this.color = ((SpongeTextColor) color).getHandle();
-        this.impl$doTeamUpdate();
-    }
-
-
-    @Inject(method = "setDisplayName",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;displayName:Ljava/lang/String;",
-            opcode = Opcodes.PUTFIELD,
-            shift = At.Shift.AFTER))
-    private void impl$doTeamUpdateForDisplayName(final String name, final CallbackInfo ci) {
-        this.bridge$displayName = SpongeTexts.fromLegacy(name);
-    }
-
-    @Inject(method = "setPrefix",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;prefix:Ljava/lang/String;",
-            opcode = Opcodes.PUTFIELD,
-            shift = At.Shift.AFTER))
-    private void impl$doTeamUpdateForPrefix(final String prefix, final CallbackInfo callbackInfo) {
-        this.bridge$Prefix = SpongeTexts.fromLegacy(prefix);
-    }
-
-
-    @Inject(method = "setSuffix",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;suffix:Ljava/lang/String;",
-            opcode = Opcodes.PUTFIELD,
-            shift = At.Shift.AFTER
-        ))
-    private void impl$doTeamUpdateForSuffix(final String suffix, final CallbackInfo ci) {
-        this.bridge$Suffix = SpongeTexts.fromLegacy(suffix);
-    }
-
-
-    @Inject(method = "setColor", at = @At("RETURN"))
-    private void impl$doTeamUpdateForFormat(final TextFormatting format, final CallbackInfo ci) {
-        this.bridge$Color = TextColorRegistryModule.enumChatColor.get(format);
-        // This isn't called by Vanilla, so we inject the call ourselves.
         this.impl$doTeamUpdate();
     }
 
@@ -209,7 +217,7 @@ public abstract class ScorePlayerTeamMixin extends net.minecraft.scoreboard.Team
     @Override
     public MessageChannel bridge$getNonTeamChannel() {
         return MessageChannel.fixed(Sponge.getGame().getServer().getOnlinePlayers().stream()
-                .filter(player -> ((EntityPlayerMP) player).getTeam() != this)
+                .filter(player -> ((EntityPlayerMP) player).getTeam() != (Object) this)
                 .collect(Collectors.toSet()));
     }
 }

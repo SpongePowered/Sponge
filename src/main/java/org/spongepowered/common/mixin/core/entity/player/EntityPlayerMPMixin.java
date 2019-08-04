@@ -122,6 +122,7 @@ import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.scoreboard.TeamBridge;
 import org.spongepowered.common.entity.living.human.EntityHuman;
@@ -530,9 +531,9 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
             if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
                 if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
-                    return ((TeamBridge) team).bridge$getTeamChannel(player);
+                    return ((ScorePlayerTeamBridge) team).bridge$getTeamChannel(player);
                 } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
-                    return ((TeamBridge) team).bridge$getNonTeamChannel();
+                    return ((ScorePlayerTeamBridge) team).bridge$getNonTeamChannel();
                 }
             } else {
                 return ((Player) this).getMessageChannel();

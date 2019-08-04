@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
 import org.spongepowered.common.bridge.scoreboard.TeamBridge;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -68,10 +69,6 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
     @Shadow public abstract net.minecraft.scoreboard.Team.EnumVisible shadow$getDeathMessageVisibility();
     @Shadow public abstract net.minecraft.scoreboard.Team.CollisionRule shadow$getCollisionRule();
     @Shadow public abstract Collection<String> getMembershipCollection();
-    @Shadow public abstract String shadow$getSuffix();
-    @Shadow public abstract String shadow$getPrefix();
-    @Shadow public abstract @Nullable String shadow$getDisplayName();
-    @Shadow public abstract TextFormatting shadow$getColor();
 
     @Intrinsic
     public String team$getName() {
@@ -80,12 +77,12 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
 
     @Override
     public Text getDisplayName() {
-        return ((TeamBridge) this).bridge$getDisplayName();
+        return ((ScorePlayerTeamBridge) this).bridge$getDisplayName();
     }
 
     @Override
     public void setDisplayName(final Text text) {
-        ((TeamBridge) this).bridge$setDisplayName(text);
+        ((ScorePlayerTeamBridge) this).bridge$setDisplayName(text);
     }
 
     @Override
@@ -95,29 +92,29 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
 
     @Override
     public void setColor(final TextColor color) {
-        ((TeamBridge) this).bridge$setColor(color);
+        ((ScorePlayerTeamBridge) this).bridge$setColor(color);
     }
 
     @Override
     public Text getPrefix() {
-        return ((TeamBridge) this).bridge$getPrefix();
+        return ((ScorePlayerTeamBridge) this).bridge$getPrefix();
     }
 
     @Override
     public void setPrefix(final Text prefix) {
-        ((TeamBridge) this).bridge$setPrefix(prefix);
+        ((ScorePlayerTeamBridge) this).bridge$setPrefix(prefix);
     }
 
     @Override
     public Text getSuffix() {
-        return ((TeamBridge) this).bridge$getSuffix();
+        return ((ScorePlayerTeamBridge) this).bridge$getSuffix();
     }
 
     @Shadow public abstract void setColor(TextFormatting color);
 
     @Override
     public void setSuffix(final Text suffix) {
-        ((TeamBridge) this).bridge$setSuffix(suffix);
+        ((ScorePlayerTeamBridge) this).bridge$setSuffix(suffix);
     }
 
     @Override

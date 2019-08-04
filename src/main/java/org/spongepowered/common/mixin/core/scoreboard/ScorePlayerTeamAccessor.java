@@ -37,5 +37,4 @@ public interface ScorePlayerTeamAccessor {
     @Accessor("scoreboard") @Nullable Scoreboard accessor$getScoreboard();
 
     @Accessor("scoreboard") void accessor$setScoreboard(@Nullable Scoreboard scoreboard);
-
 }

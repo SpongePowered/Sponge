@@ -24,32 +24,9 @@
  */
 package org.spongepowered.common.bridge.scoreboard;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColor;
-
-import javax.annotation.Nullable;
 
 public interface TeamBridge {
 
-    Text bridge$getDisplayName();
-
-    void bridge$setDisplayName(Text text);
-
-    Text bridge$getPrefix();
-
-    void bridge$setPrefix(Text text);
-
-    Text bridge$getSuffix();
-
-    void bridge$setSuffix(Text suffix);
-
     TextColor bridge$getColor();
-
-    void bridge$setColor(TextColor color);
-
-    MessageChannel bridge$getTeamChannel(EntityPlayerMP player);
-
-    MessageChannel bridge$getNonTeamChannel();
 }
