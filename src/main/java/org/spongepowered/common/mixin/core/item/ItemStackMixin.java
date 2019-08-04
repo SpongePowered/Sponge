@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -39,9 +40,15 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
@@ -62,6 +69,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     @Shadow public abstract boolean hasTagCompound();
     @Shadow public abstract void setTagCompound(@Nullable NBTTagCompound compound);
 
+    @Shadow private NBTTagCompound stackTagCompound;
     private List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
     private List<DataView> failedData = new ArrayList<>();
 
@@ -239,6 +247,45 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
             .filter(manipulator -> manipulator.supports(key))
             .findFirst()
             .flatMap(supported -> supported.getValue(key));
+    }
+
+    // Add our manipulators when creating copies from this ItemStack:
+    @Inject(method = "copy", at = @At("RETURN"))
+    private void onCopy(CallbackInfoReturnable<ItemStack> info) {
+        final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
+        if (this.bridge$hasManipulators()) { // no manipulators? no problem.
+            for (DataManipulator<?, ?> manipulator : this.manipulators) {
+                ((CustomDataHolderBridge) itemStack).bridge$offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
+            }
+        }
+    }
+
+    @Inject(method = "splitStack", at = @At("RETURN"))
+    private void onSplit(int amount, CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
+        final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
+        if (this.bridge$hasManipulators()) {
+            for (DataManipulator<?, ?> manipulator : this.manipulators) {
+                ((CustomDataHolderBridge) itemStack).bridge$offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
+            }
+        }
+    }
+
+    // Read custom data from nbt
+    @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
+    private void onRead(NBTTagCompound compound, CallbackInfo info) {
+        if (hasTagCompound() && getTagCompound().hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+            CustomDataNbtUtil.readCustomData(getTagCompound().getCompoundTag(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
+        }
+    }
+
+    @Inject(method = "setTagCompound", at = @At("RETURN"))
+    private void onSet(NBTTagCompound compound, CallbackInfo callbackInfo) {
+        if (this.stackTagCompound != compound) {
+            this.manipulators.clear();
+        }
+        if (hasTagCompound() && getTagCompound().hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+            CustomDataNbtUtil.readCustomData(getTagCompound().getCompoundTag(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
+        }
     }
 
 }
