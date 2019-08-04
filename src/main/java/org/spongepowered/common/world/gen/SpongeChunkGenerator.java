@@ -74,7 +74,7 @@ import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.TimingBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
 import org.spongepowered.common.bridge.world.gen.FlaggedPopulatorBridge;
@@ -152,7 +152,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                 chunkGeneratorName = "chunkGenerator (" + base.getClass().getName() + ")";
             }
             this.chunkGeneratorTiming =
-                    SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((ServerWorldBridge) world).bridge$getTimingsHandler().chunkPopulate);
+                    SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((WorldServerBridge) world).bridge$getTimingsHandler().chunkPopulate);
         }
 
     }
@@ -293,7 +293,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public void populate(int chunkX, int chunkZ) {
-        ServerWorldBridge world = (ServerWorldBridge) this.world;
+        WorldServerBridge world = (WorldServerBridge) this.world;
         world.bridge$getTimingsHandler().chunkPopulate.startTimingIfSync();
         this.chunkGeneratorTiming.startTimingIfSync();
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();

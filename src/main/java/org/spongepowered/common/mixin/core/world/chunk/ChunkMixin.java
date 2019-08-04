@@ -68,8 +68,8 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.util.CacheKeyed;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.util.CacheKeyBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -99,7 +99,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.chunk.Chunk.class)
-public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
+public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Shadow @Final private World world;
     @Shadow @Final public int x;
@@ -139,11 +139,6 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
     @Override
     public net.minecraft.world.chunk.Chunk[] bridge$getNeighborArray() {
         return this.impl$neighbors;
-    }
-
-    @Override
-    public long cache$getCacheKey() {
-        return this.impl$cacheKey;
     }
 
     @Override
@@ -393,7 +388,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
         final IPhaseState state = isFake ? null : peek.state;
         final SpongeBlockSnapshot snapshot = (isFake || (!ShouldFire.CHANGE_BLOCK_EVENT || !state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag))) ? null : createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
         final BlockTransaction.ChangeBlock transaction;
-        final ServerWorldBridge mixinWorld = isFake ? null : (ServerWorldBridge) this.world;
+        final WorldServerBridge mixinWorld = isFake ? null : (WorldServerBridge) this.world;
 
         final int modifiedY = yPos & 15;
 
@@ -504,7 +499,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
         // Sponge Start - Handle block physics only if we're actually the server world
         if (!isFake && currentState != newState) {
             // Reset the proxy access or add to the proxy state during processing.
-            ((ServerWorldBridge) this.world).bridge$getProxyAccess().onChunkChanged(pos, newState);
+            ((WorldServerBridge) this.world).bridge$getProxyAccess().onChunkChanged(pos, newState);
         }
         if (!isFake && currentBlock != newBlock) {
             final boolean isBulkCapturing = ShouldFire.CHANGE_BLOCK_EVENT && state.doesBulkBlockCapture(peek);
@@ -813,5 +808,10 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyed {
                 .add("World", this.world)
                 .add("Position", this.x + this.z)
                 .toString();
+    }
+
+    @Override
+    public long bridge$getCacheKey() {
+        return this.impl$cacheKey;
     }
 }

@@ -64,7 +64,7 @@ import javax.annotation.Nullable;
  */
 @NonnullByDefault
 @Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class,
-        SpongeUser.class}, targets = CommandSenderBridge.SIGN_CLICK_SENDER)
+        SpongeUser.class}, targets = "net/minecraft/tileentity/TileEntitySign$1")
 public abstract class SubjectMixin_API implements Subject {
 
     @Override

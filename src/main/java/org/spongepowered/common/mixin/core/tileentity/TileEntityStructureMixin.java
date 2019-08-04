@@ -32,11 +32,11 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.tileentity.StructureBlockEntityBridge;
+import org.spongepowered.common.bridge.tileentity.TileEntityStructureBridge;
 import org.spongepowered.common.util.VecHelper;
 
 @Mixin(TileEntityStructure.class)
-public abstract class TileEntityStructureMixin extends TileEntityMixin implements StructureBlockEntityBridge {
+public abstract class TileEntityStructureMixin extends TileEntityMixin implements TileEntityStructureBridge {
 
     @Shadow private String author;
     @Shadow private BlockPos position;

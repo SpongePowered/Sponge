@@ -50,15 +50,13 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
-import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
@@ -93,7 +91,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         if (!playerMP.world.isBlockLoaded(target)) {
             context.targetBlock(BlockSnapshot.NONE);
         } else {
-            context.targetBlock(((ServerWorldBridge) playerMP.world).bridge$createSnapshot(target, BlockChangeFlags.NONE));
+            context.targetBlock(((WorldServerBridge) playerMP.world).bridge$createSnapshot(target, BlockChangeFlags.NONE));
         }
         context.handUsed(HandTypes.MAIN_HAND);
     }

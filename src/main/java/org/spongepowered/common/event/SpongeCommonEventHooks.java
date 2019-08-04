@@ -27,7 +27,7 @@ package org.spongepowered.common.event;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.world.chunk.LoadChunkEvent;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 
 public class SpongeCommonEventHooks {
 
@@ -38,7 +38,7 @@ public class SpongeCommonEventHooks {
             return;
         }
 
-        final ServerWorldBridge worldServer = (ServerWorldBridge) event.getTargetChunk().getWorld();
+        final WorldServerBridge worldServer = (WorldServerBridge) event.getTargetChunk().getWorld();
         worldServer.bridge$incrementChunkLoadCount();
     }
 }

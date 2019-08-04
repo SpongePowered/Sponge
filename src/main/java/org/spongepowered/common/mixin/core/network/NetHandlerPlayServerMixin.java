@@ -124,7 +124,7 @@ import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.bridge.packet.ResourcePackBridge;
+import org.spongepowered.common.bridge.packet.SPacketResourcePackSendBridge;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
@@ -208,7 +208,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             while (now == this.field_194404_h || this.impl$customKeepAliveCallbacks.containsKey(now)) {
                 now--;
             }
-            final ResourcePack resourcePack = ((ResourcePackBridge) packet).bridge$getSpongePack();
+            final ResourcePack resourcePack = ((SPacketResourcePackSendBridge) packet).bridge$getSpongePack();
             this.impl$numResourcePacksInTransit.incrementAndGet();
             this.impl$customKeepAliveCallbacks.put(now, () -> {
                 this.impl$lastReceivedPack = resourcePack; // TODO do something with the old value

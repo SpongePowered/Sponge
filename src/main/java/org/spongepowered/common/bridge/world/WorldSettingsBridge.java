@@ -72,8 +72,6 @@ public interface WorldSettingsBridge {
 
     void bridge$setName(String name);
 
-    boolean isFromBuilder();
-
     void bridge$setDimensionType(DimensionType dimensionType);
 
     void bridge$setDifficulty(Difficulty difficulty);
@@ -99,8 +97,6 @@ public interface WorldSettingsBridge {
     void bridge$setGenerateBonusChest(boolean state);
 
     void bridge$setPortalAgentType(PortalAgentType type);
-
-    void bridge$fromBuilder(boolean state);
 
     void bridge$setRandomSeed(boolean state);
 

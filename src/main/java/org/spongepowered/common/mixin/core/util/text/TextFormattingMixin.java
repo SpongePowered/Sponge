@@ -35,9 +35,6 @@ public class TextFormattingMixin implements TextFormattingBridge {
 
     @Shadow @Final private String name;
     @Shadow @Final private char formattingCode;
-    @Shadow @Final private boolean fancyStyling;
-    @Shadow @Final private String controlString;
-    @Shadow @Final private int colorIndex;
 
     @Override
     public String bridge$getName() {
@@ -47,20 +44,5 @@ public class TextFormattingMixin implements TextFormattingBridge {
     @Override
     public char bridge$getFormattingCode() {
         return this.formattingCode;
-    }
-
-    @Override
-    public boolean bridge$getFancyStyling() {
-        return this.fancyStyling;
-    }
-
-    @Override
-    public String bridge$getControlString() {
-        return this.controlString;
-    }
-
-    @Override
-    public int bridge$getColorIndex() {
-        return this.colorIndex;
     }
 }

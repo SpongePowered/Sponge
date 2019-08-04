@@ -33,5 +33,4 @@ public interface DataParameterBridge<T> {
     void bridge$setDataConverter(DataParameterConverter<T> converter);
 
     Optional<DataParameterConverter<T>> bridge$getDataConverter();
-
 }

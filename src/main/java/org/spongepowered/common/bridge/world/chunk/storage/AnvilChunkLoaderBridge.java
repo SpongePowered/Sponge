@@ -34,5 +34,4 @@ public interface AnvilChunkLoaderBridge {
     boolean bridge$chunkExists(World world, int x, int z);
 
     Path bridge$getWorldDir();
-
 }

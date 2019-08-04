@@ -192,7 +192,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         nonExpEntities.add(entity);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(tickingTile.getLocatableBlock());
-            frame.addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.getTickedSpawnType());
+            frame.addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.bridge$getTickedSpawnType());
             context.addNotifierAndOwnerToCauseStack(frame);
             return SpongeCommonEventFactory.callSpawnEntity(nonExpEntities, context);
 

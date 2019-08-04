@@ -39,11 +39,11 @@ public class TileEntityHopperMixin_HopperOptimization extends TileEntityMixin_Ho
         at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
     private static void hopper$FlipMarkUpdateWhenInserting(final IInventory iInventory, final int index, final ItemStack stack) {
         if (iInventory instanceof HopperOptimizationBridge) {
-            ((HopperOptimizationBridge) iInventory).hopper$setCancelDirtyUpdate(true);
+            ((HopperOptimizationBridge) iInventory).hopperBridge$setCancelDirtyUpdate(true);
         }
         iInventory.setInventorySlotContents(index, stack);
         if (iInventory instanceof HopperOptimizationBridge) {
-            ((HopperOptimizationBridge) iInventory).hopper$setCancelDirtyUpdate(false);
+            ((HopperOptimizationBridge) iInventory).hopperBridge$setCancelDirtyUpdate(false);
         }
     }
 

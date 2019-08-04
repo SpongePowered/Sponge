@@ -30,8 +30,7 @@ import net.minecraft.world.World;
 
 public interface BlockJukeboxBridge {
 
+    // TODO Mixin 0.8
     @Deprecated
-    void bridge$dropRecordItem(World worldIn, BlockPos pos, IBlockState state);
-
-
+    void accessor$dropRecordItem(World worldIn, BlockPos pos, IBlockState state);
 }

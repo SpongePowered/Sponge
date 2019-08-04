@@ -28,13 +28,13 @@ import com.mojang.authlib.GameProfile;
 
 import java.util.Date;
 
-/**
- * Can be converted to an Accessor Mixin, but waiting on a mixin issue to be updated.
- */
 public interface PlayerProfileCacheEntryBridge {
 
-    GameProfile bridge$getProfile();
+    // TODO Mixin 0.8
+    @Deprecated
+    GameProfile accessor$getProfile();
 
-    Date bridge$getExpirationDate();
-
+    // TODO Mixin 0.8
+    @Deprecated
+    Date accessor$getExpirationDate();
 }

@@ -30,18 +30,17 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.bridge.data.VanishingBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<VanishingBridge, Boolean, Value<Boolean>> {
+public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<VanishableBridge, Boolean, Value<Boolean>> {
 
     public VanishCollisionValueProcessor() {
-        super(VanishingBridge.class, Keys.VANISH_IGNORES_COLLISION);
+        super(VanishableBridge.class, Keys.VANISH_IGNORES_COLLISION);
     }
 
     @Override
@@ -50,20 +49,20 @@ public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected boolean set(final VanishingBridge container, final Boolean value) {
+    protected boolean set(final VanishableBridge container, final Boolean value) {
         if (container instanceof Entity && ((Entity) container).world.isRemote) {
             return false;
         }
-        if (!container.vanish$isVanished()) {
+        if (!container.bridge$isVanished()) {
             return false;
         }
-        container.vanish$setUncollideable(value);
+        container.bridge$setUncollideable(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(final VanishingBridge container) {
-        return Optional.of(container.vanish$isUncollideable());
+    protected Optional<Boolean> getVal(final VanishableBridge container) {
+        return Optional.of(container.bridge$isUncollideable());
     }
 
     @Override

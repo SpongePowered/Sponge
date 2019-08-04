@@ -42,12 +42,12 @@ public abstract class PlayerProfileCache$ProfileEntryMixin implements PlayerProf
     @Shadow public abstract Date getExpirationDate();
 
     @Override
-    public GameProfile bridge$getProfile() {
+    public GameProfile accessor$getProfile() {
         return this.getGameProfile();
     }
 
     @Override
-    public Date bridge$getExpirationDate() {
+    public Date accessor$getExpirationDate() {
         return this.getExpirationDate();
     }
 

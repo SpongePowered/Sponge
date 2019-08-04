@@ -37,7 +37,7 @@ public abstract class BlockStainedGlassMixin extends BlockMixin implements Dyeab
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$SetPropertyOnInit(final Material material, final CallbackInfo ci) {
-        this.bridge$SetColorPropertyEnum(BlockStainedGlass.COLOR);
+        this.bridge$setColorPropertyEnum(BlockStainedGlass.COLOR);
     }
 
 }

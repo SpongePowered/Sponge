@@ -145,14 +145,14 @@ import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
 import org.spongepowered.common.bridge.world.WorldTypeBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
 import org.spongepowered.common.bridge.world.gen.PopulatorProviderBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
@@ -201,7 +201,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 @Mixin(WorldServer.class)
-public abstract class WorldServerMixin extends WorldMixin implements ServerWorldBridge {
+public abstract class WorldServerMixin extends WorldMixin implements WorldServerBridge {
 
     private final Map<net.minecraft.entity.Entity, Vector3d> impl$rotationUpdates = new HashMap<>();
     @Nullable private SpongeChunkGenerator impl$spongegen;
@@ -340,7 +340,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         }
 
         if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END))
-            || (((ServerChunkProviderBridge) (((WorldServer) (Object) this)).getChunkProvider()).accessor$getChunkGenerator() instanceof ChunkGeneratorEnd)) {
+            || (((ChunkProviderServerBridge) (((WorldServer) (Object) this)).getChunkProvider()).accessor$getChunkGenerator() instanceof ChunkGeneratorEnd)) {
             this.worldInfo.setSpawn(new BlockPos(100, 50, 0));
             ci.cancel();
         }
@@ -365,7 +365,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         if (this.getChunkProvider() != null) {
             final int maxChunkUnloads = worldCategory.getMaxChunkUnloads();
             ((ChunkProviderBridge) this.getChunkProvider()).bridge$setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
-            ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$setDenyChunkRequests(worldCategory.getDenyChunkRequests());
+            ((ChunkProviderServerBridge) this.getChunkProvider()).bridge$setDenyChunkRequests(worldCategory.getDenyChunkRequests());
             for (final net.minecraft.entity.Entity entity : this.loadedEntityList) {
                 if (entity instanceof ActivationCapability) {
                     ((ActivationCapability) entity).activation$requiresActivationCacheRefresh(true);
@@ -425,7 +425,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
     @SuppressWarnings("deprecation")
     @Override
     public void bridge$setProviderGenerator(final SpongeChunkGenerator newGenerator) {
-        ((ServerChunkProviderBridge) this.chunkProvider).accessor$setChunkGenerator(newGenerator);
+        ((ChunkProviderServerBridge) this.chunkProvider).accessor$setChunkGenerator(newGenerator);
     }
 
     @Override
@@ -455,13 +455,13 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
     public SpongeWorldGenerator bridge$createWorldGenerator(final String settings) {
         final WorldServer worldServer = (WorldServer) (Object) this;
         final WorldType worldType = worldServer.getWorldType();
-        final IChunkGenerator chunkGenerator = ((WorldTypeBridge) worldType).bridge$getChvunkGenerator()
+        final IChunkGenerator chunkGenerator = ((WorldTypeBridge) worldType).bridge$getChunkGenerator()
             .map(func -> func.apply(worldServer, settings))
             .orElseGet(() -> {
-                final IChunkGenerator current = ((ServerChunkProviderBridge) this.getChunkProvider()).accessor$getChunkGenerator();
+                final IChunkGenerator current = ((ChunkProviderServerBridge) this.getChunkProvider()).accessor$getChunkGenerator();
                 if (current == null) {
                     final WorldProvider worldProvider = worldServer.provider;
-                    ((WorldProviderBridge) worldProvider).bridge$setGeneratorSettings(settings);
+                    ((WorldProviderBridge) worldProvider).accessor$setGeneratorSettings(settings);
                     return worldProvider.createChunkGenerator();
                 }
                 return current;
@@ -881,17 +881,17 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         }
 
         if (((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
-            blockEvent.setBridge$sourceUser(currentContext.getActiveUser());
+            blockEvent.bridge$setSourceUser(currentContext.getActiveUser());
             if (SpongeImplHooks.hasBlockTileEntity(blockIn, getBlockState(pos))) {
-                blockEvent.setBridge$TileEntity((org.spongepowered.api.block.tileentity.TileEntity) getTileEntity(pos));
+                blockEvent.bridge$setTileEntity((org.spongepowered.api.block.tileentity.TileEntity) getTileEntity(pos));
             }
-            if (blockEvent.getBridge$TileEntity() == null) {
+            if (blockEvent.bridge$getTileEntity() == null) {
                 final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
                     .world(((org.spongepowered.api.world.World) this))
                     .position(pos.getX(), pos.getY(), pos.getZ())
                     .state((BlockState) this.getBlockState(pos))
                     .build();
-                blockEvent.setBridge$TickingLocatable(locatable);
+                blockEvent.bridge$setTickingLocatable(locatable);
             }
         }
 
@@ -1982,12 +1982,12 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
         }
         // ExtraUtilities 2 expects to get the proper chunk while mining or it gets stuck in infinite loop
         // TODO add TE config to disable/enable chunk loads
-        final boolean forceChunkRequests = ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$getForceChunkRequests();
+        final boolean forceChunkRequests = ((ChunkProviderServerBridge) this.getChunkProvider()).bridge$getForceChunkRequests();
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> currentState = phaseTracker.getCurrentState();
         final boolean entered = currentState == TickPhase.Tick.TILE_ENTITY;
         if (entered) {
-            ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$setForceChunkRequests(true);
+            ((ChunkProviderServerBridge) this.getChunkProvider()).bridge$setForceChunkRequests(true);
         }
         try {
             // Proxies have block changes for bulk special captures
@@ -1999,7 +1999,7 @@ public abstract class WorldServerMixin extends WorldMixin implements ServerWorld
             return chunk.getBlockState(pos);
         } finally {
             if (entered) {
-                ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$setForceChunkRequests(forceChunkRequests);
+                ((ChunkProviderServerBridge) this.getChunkProvider()).bridge$setForceChunkRequests(forceChunkRequests);
             }
         }
     }

@@ -29,5 +29,4 @@ import com.flowpowered.math.vector.Vector3d;
 public interface EntityMinecartBridge {
 
     Vector3d bridge$getAirboneVelocityModifier();
-
 }

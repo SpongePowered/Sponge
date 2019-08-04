@@ -26,14 +26,12 @@ package org.spongepowered.common.bridge.tileentity;
 
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 
 public interface TileEntityBridge {
 
     void bridge$markDirty();
 
-    // Tracking
-    default SpawnType getTickedSpawnType() {
+    default SpawnType bridge$getTickedSpawnType() {
         return SpawnTypes.BLOCK_SPAWNING;
     }
 

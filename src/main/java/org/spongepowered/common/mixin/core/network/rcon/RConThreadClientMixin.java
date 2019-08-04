@@ -233,34 +233,4 @@ public abstract class RConThreadClientMixin extends RConThreadBase implements RC
     public void bridge$setLoggedIn(boolean loggedIn) {
         this.loggedIn = loggedIn;
     }
-
-    @Override
-    public Socket bridge$getClientSocket() {
-        return this.clientSocket;
-    }
-
-    @Override
-    public void bridge$setClientSocket(Socket clientSocket) {
-        this.clientSocket = clientSocket;
-    }
-
-    @Override
-    public byte[] bridge$getBuffer() {
-        return this.buffer;
-    }
-
-    @Override
-    public void bridge$setBuffer(byte[] buffer) {
-        this.buffer = buffer;
-    }
-
-    @Override
-    public String bridge$getRconPassword() {
-        return this.rconPassword;
-    }
-
-    @Override
-    public void bridge$setRconPassword(String rconPassword) {
-        this.rconPassword = rconPassword;
-    }
 }

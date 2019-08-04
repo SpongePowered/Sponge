@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.bridge.tileentity.BeaconTileEntityBridge;
+import org.spongepowered.common.bridge.tileentity.TileEntityBeaconBridge;
 
 import java.util.Optional;
 
@@ -55,7 +55,7 @@ public class BeaconSecondaryEffectValueProcessor
         if (container.getField(0) != 4) {
             return false;
         }
-        ((BeaconTileEntityBridge) container).bridge$forceSetSecondaryEffect((Potion) value.orElse(null));
+        ((TileEntityBeaconBridge) container).bridge$forceSetSecondaryEffect((Potion) value.orElse(null));
         container.markDirty();
         return true;
     }

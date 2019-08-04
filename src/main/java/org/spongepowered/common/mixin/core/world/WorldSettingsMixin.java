@@ -80,7 +80,6 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     private boolean generateSpawnOnLoad = false;
     private boolean pvpEnabled = true;
     private boolean generateBonusChest = false;
-    private boolean fromBuilder = false;
     @Nullable private PortalAgentType portalAgentType;
     private Collection<WorldGeneratorModifier> generatorModifiers = ImmutableList.of();
     private boolean seedRandomized = false;
@@ -234,11 +233,6 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Override
-    public boolean isFromBuilder() {
-        return this.fromBuilder;
-    }
-
-    @Override
     public void bridge$setDimensionType(DimensionType dimensionType) {
         this.dimensionType = dimensionType;
     }
@@ -307,11 +301,6 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     @Override
     public void bridge$setGenerateBonusChest(boolean state) {
         this.generateBonusChest = state;
-    }
-
-    @Override
-    public void bridge$fromBuilder(boolean state) {
-        this.fromBuilder = state;
     }
 
     @Override

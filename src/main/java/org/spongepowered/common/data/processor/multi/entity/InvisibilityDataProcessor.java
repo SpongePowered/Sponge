@@ -33,20 +33,18 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableInvisibilityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
-import org.spongepowered.common.bridge.data.VanishingBridge;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeInvisibilityData;
-import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 
 import java.util.Map;
 import java.util.Optional;
 
 public class InvisibilityDataProcessor
-        extends AbstractMultiDataSingleTargetProcessor<VanishingBridge, InvisibilityData, ImmutableInvisibilityData> {
+        extends AbstractMultiDataSingleTargetProcessor<VanishableBridge, InvisibilityData, ImmutableInvisibilityData> {
 
     public InvisibilityDataProcessor() {
-        super(VanishingBridge.class);
+        super(VanishableBridge.class);
     }
 
     @Override
@@ -55,12 +53,12 @@ public class InvisibilityDataProcessor
     }
 
     @Override
-    protected boolean doesDataExist(VanishingBridge dataHolder) {
+    protected boolean doesDataExist(VanishableBridge dataHolder) {
         return true;
     }
 
     @Override
-    protected boolean set(VanishingBridge dataHolder, Map<Key<?>, Object> keyValues) {
+    protected boolean set(VanishableBridge dataHolder, Map<Key<?>, Object> keyValues) {
         if (dataHolder instanceof Entity && ((Entity) dataHolder).world.isRemote) {
             return false;
         }
@@ -68,23 +66,23 @@ public class InvisibilityDataProcessor
         final boolean collision = (Boolean) keyValues.get(Keys.VANISH_IGNORES_COLLISION);
         final boolean untargetable = (Boolean) keyValues.get(Keys.VANISH_PREVENTS_TARGETING);
         final boolean vanish = (Boolean) keyValues.get(Keys.VANISH);
-        dataHolder.vanish$setInvisible(invis);
+        dataHolder.bridge$setInvisible(invis);
         if (vanish) {
-            dataHolder.vanish$setVanished(true);
-            dataHolder.vanish$setUncollideable(collision);
-            dataHolder.vanish$setUntargetable(untargetable);
+            dataHolder.bridge$setVanished(true);
+            dataHolder.bridge$setUncollideable(collision);
+            dataHolder.bridge$setUntargetable(untargetable);
         } else {
-            dataHolder.vanish$setVanished(false);
+            dataHolder.bridge$setVanished(false);
         }
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(VanishingBridge dataHolder) {
-        return ImmutableMap.of(Keys.INVISIBLE, dataHolder.vanish$isInvisible(),
-                Keys.VANISH, dataHolder.vanish$isVanished(),
-                Keys.VANISH_IGNORES_COLLISION, dataHolder.vanish$isUncollideable(),
-                Keys.VANISH_PREVENTS_TARGETING, dataHolder.vanish$isUntargetable());
+    protected Map<Key<?>, ?> getValues(VanishableBridge dataHolder) {
+        return ImmutableMap.of(Keys.INVISIBLE, dataHolder.bridge$isInvisible(),
+                Keys.VANISH, dataHolder.bridge$isVanished(),
+                Keys.VANISH_IGNORES_COLLISION, dataHolder.bridge$isUncollideable(),
+                Keys.VANISH_PREVENTS_TARGETING, dataHolder.bridge$isUntargetable());
     }
 
     @Override

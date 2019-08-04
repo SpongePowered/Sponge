@@ -54,7 +54,7 @@ public abstract class DyeableBlockMixin extends BlockMixin implements DyeableBlo
     private PropertyEnum<EnumDyeColor> bridge$ColorProperty;
 
     @Override
-    public void bridge$SetColorPropertyEnum(final PropertyEnum<EnumDyeColor> property) {
+    public void bridge$setColorPropertyEnum(final PropertyEnum<EnumDyeColor> property) {
         this.bridge$ColorProperty = property;
     }
 

@@ -39,5 +39,4 @@ public interface WorldGeneratorBridge {
     boolean birdge$isWood(IBlockState state, World worldIn, BlockPos pos);
 
     boolean bridge$canSustainPlant(Block block, World worldIn, BlockPos pos, EnumFacing direction, Block plant);
-
 }

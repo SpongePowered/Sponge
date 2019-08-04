@@ -26,9 +26,5 @@ package org.spongepowered.common.bridge.optimization;
 
 public interface HopperOptimizationBridge {
 
-    boolean hopper$getCancelDirtyUpdate();
-
-    void hopper$setCancelDirtyUpdate(boolean canMarkDirty);
-
-
+    void hopperBridge$setCancelDirtyUpdate(boolean canMarkDirty);
 }

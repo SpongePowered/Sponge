@@ -56,7 +56,6 @@ import java.util.stream.Collectors;
 @Mixin(ScorePlayerTeam.class)
 public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
 
-    // TODO Mixin (0.8) - Remove when we can use accessor mixins in other mixins
     @Shadow @Final @Mutable @Nullable private Scoreboard scoreboard;
     @Shadow private String displayName;
     @Shadow private TextFormatting color;
@@ -135,13 +134,13 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
     // TODO Mixin (0.8) - Remove when we can use accessor mixins in other mixins
     @Nullable
     @Override
-    public Scoreboard bridge$getScoreboard() {
+    public Scoreboard accessor$getScoreboard() {
         return this.scoreboard;
     }
 
     // TODO Mixin (0.8) - Remove when we can use accessor mixins in other mixins
     @Override
-    public void bridge$setScoreboard(@Nullable Scoreboard scoreboard) {
+    public void accessor$setScoreboard(@Nullable Scoreboard scoreboard) {
         this.scoreboard = scoreboard;
     }
 

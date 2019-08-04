@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.tileentity.BeaconTileEntityBridge;
+import org.spongepowered.common.bridge.tileentity.TileEntityBeaconBridge;
 import org.spongepowered.common.bridge.data.CustomNameableBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
@@ -45,7 +45,7 @@ import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 import javax.annotation.Nullable;
 
 @Mixin(TileEntityBeacon.class)
-public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin implements CustomNameableBridge, BeaconTileEntityBridge {
+public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin implements CustomNameableBridge, TileEntityBeaconBridge {
 
     @Shadow private Potion primaryEffect;
     @Shadow private Potion secondaryEffect;

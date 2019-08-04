@@ -33,9 +33,14 @@ import org.spongepowered.api.text.format.TextColor;
 
 public interface ScorePlayerTeamBridge extends TeamBridge {
 
-    @Nullable Scoreboard bridge$getScoreboard();
+    // TODO Mixin 0.8
+    @Deprecated
+    @Nullable
+    Scoreboard accessor$getScoreboard();
 
-    void bridge$setScoreboard(@Nullable Scoreboard scoreboard);
+    // TODO Mixin 0.8
+    @Deprecated
+    void accessor$setScoreboard(@Nullable Scoreboard scoreboard);
 
     Text bridge$getDisplayName();
 

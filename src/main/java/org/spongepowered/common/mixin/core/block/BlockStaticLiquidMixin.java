@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -61,7 +61,7 @@ public class BlockStaticLiquidMixin {
     private boolean impl$CheckEventsBeforeSpreadingFire(final World world, final BlockPos pos, final IBlockState blockState) {
         if (!ShouldFire.CHANGE_BLOCK_EVENT_PRE) { // If we're not throwing events... well..
             if (!((WorldBridge) world).bridge$isFake()) {
-                return PhaseTracker.getInstance().setBlockState(((ServerWorldBridge) world), pos, blockState, BlockChangeFlags.ALL);
+                return PhaseTracker.getInstance().setBlockState(((WorldServerBridge) world), pos, blockState, BlockChangeFlags.ALL);
             }
             return world.setBlockState(pos, blockState);
         }
@@ -74,7 +74,7 @@ public class BlockStaticLiquidMixin {
             final List<Location<org.spongepowered.api.world.World>> locations = Collections.singletonList(location);
             final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), locations);
             if (!SpongeImpl.postEvent(event)) {
-                return PhaseTracker.getInstance().setBlockState((ServerWorldBridge) world, pos, blockState, BlockChangeFlags.ALL);
+                return PhaseTracker.getInstance().setBlockState((WorldServerBridge) world, pos, blockState, BlockChangeFlags.ALL);
             }
             return false;
         }

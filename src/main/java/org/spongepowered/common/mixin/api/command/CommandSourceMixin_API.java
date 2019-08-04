@@ -44,7 +44,7 @@ import org.spongepowered.common.text.SpongeTexts;
 import java.util.Optional;
 
 @Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class},
-        targets = CommandSenderBridge.SIGN_CLICK_SENDER, priority = 899) // Allows for other implementations of CommandSource to override/write
+        targets = "net/minecraft/tileentity/TileEntitySign$1", priority = 899) // Allows for other implementations of CommandSource to override/write
 public abstract class CommandSourceMixin_API implements CommandSource {
 
     private MessageChannel channel = MessageChannel.TO_ALL;

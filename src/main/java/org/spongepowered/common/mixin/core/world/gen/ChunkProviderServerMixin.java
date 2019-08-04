@@ -30,9 +30,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
@@ -46,20 +44,18 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -78,7 +74,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 
 @Mixin(ChunkProviderServer.class)
-public abstract class ChunkProviderServerMixin implements ServerChunkProviderBridge, ChunkProviderBridge {
+public abstract class ChunkProviderServerMixin implements ChunkProviderServerBridge, ChunkProviderBridge {
 
     @Nullable private SpongeEmptyChunk impl$EMPTY_CHUNK;
     private boolean impl$denyChunkRequests = true;
@@ -106,7 +102,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
         this.impl$EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
         final WorldCategory worldCategory = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld();
 
-        ((ServerWorldBridge) worldObjIn).bridge$updateConfigCache();
+        ((WorldServerBridge) worldObjIn).bridge$updateConfigCache();
 
         this.impl$denyChunkRequests = worldCategory.getDenyChunkRequests();
         this.impl$chunkUnloadDelay = worldCategory.getChunkUnloadDelay() * 1000;
@@ -168,7 +164,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
         }
 
         if (chunk == null) {
-            chunk = this.impl$loadChunkForce(x, z);
+            chunk = this.bridge$loadChunkForce(x, z);
         }
 
         return chunk;
@@ -273,7 +269,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
     {
         if (!this.world.disableLevelSaving && !((WorldBridge) this.world).bridge$isFake())
         {
-            ((ServerWorldBridge) this.world).bridge$getTimingsHandler().doChunkUnload.startTiming();
+            ((WorldServerBridge) this.world).bridge$getTimingsHandler().doChunkUnload.startTiming();
             final Iterator<Chunk> iterator = this.loadedChunks.values().iterator();
             int chunksUnloaded = 0;
             final long now = System.currentTimeMillis();
@@ -294,7 +290,7 @@ public abstract class ChunkProviderServerMixin implements ServerChunkProviderBri
                     chunksUnloaded++;
                 }
             }
-            ((ServerWorldBridge) this.world).bridge$getTimingsHandler().doChunkUnload.stopTiming();
+            ((WorldServerBridge) this.world).bridge$getTimingsHandler().doChunkUnload.stopTiming();
         }
 
         this.chunkLoader.chunkTick();

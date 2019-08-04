@@ -30,7 +30,8 @@ import net.minecraft.world.chunk.IBlockStatePalette;
 public interface BlockStateContainerBridge {
 
     int bridge$getBits();
-    IBlockStatePalette bridge$getPalette();
-    BitArray bridge$getStorage();
 
+    IBlockStatePalette bridge$getPalette();
+
+    BitArray bridge$getStorage();
 }

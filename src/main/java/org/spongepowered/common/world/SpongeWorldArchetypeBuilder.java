@@ -275,7 +275,6 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         spongeSettings.bridge$setPVPEnabled(this.pvpEnabled);
         spongeSettings.bridge$setCommandsAllowed(this.commandsAllowed);
         spongeSettings.bridge$setGenerateBonusChest(this.generateBonusChest);
-        spongeSettings.bridge$fromBuilder(true);
         spongeSettings.bridge$setPortalAgentType(this.portalAgentType);
         spongeSettings.bridge$setRandomSeed(this.seedRandomized);
         Sponge.getRegistry().register(WorldArchetype.class, (WorldArchetype) (Object) settings);

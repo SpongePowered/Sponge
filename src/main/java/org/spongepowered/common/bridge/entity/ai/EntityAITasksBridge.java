@@ -45,5 +45,4 @@ public interface EntityAITasksBridge {
     boolean bridge$initialized();
 
     void bridge$setInitialized(boolean initialized);
-
 }

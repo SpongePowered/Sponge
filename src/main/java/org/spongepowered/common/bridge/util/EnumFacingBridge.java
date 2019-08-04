@@ -28,7 +28,7 @@ import net.minecraft.util.math.Vec3i;
 
 public interface EnumFacingBridge {
 
+    // TODO Mixin 0.8
     @Deprecated
     Vec3i bridge$getDirectionVec();
-
 }

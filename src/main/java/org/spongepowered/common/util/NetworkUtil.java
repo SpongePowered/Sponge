@@ -68,7 +68,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.mixin.core.server.PlayerListAccessor;
 import org.spongepowered.common.text.SpongeTexts;
@@ -163,7 +163,7 @@ public final class NetworkUtil {
 
         final NBTTagCompound nbttagcompound = playerList.readPlayerDataFromFile(playerIn);
         WorldServer worldServer = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().getWorld(playerIn.dimension);
-        final int actualDimensionId = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
+        final int actualDimensionId = ((WorldServerBridge) worldServer).bridge$getDimensionId();
         final BlockPos spawnPos;
         // Join data
         final Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.getUniqueID());
@@ -236,7 +236,7 @@ public final class NetworkUtil {
         final float pitch = (float) loginEvent.getToTransform().getPitch();
         final float yaw = (float) loginEvent.getToTransform().getYaw();
 
-        playerIn.dimension = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
+        playerIn.dimension = ((WorldServerBridge) worldServer).bridge$getDimensionId();
         playerIn.setWorld(worldServer);
         playerIn.interactionManager.setWorld((WorldServer) playerIn.world);
         playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
@@ -289,7 +289,7 @@ public final class NetworkUtil {
         // Sponge start - add world name to message
         ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.getName(), s1, playerIn.getEntityId(),
             worldServer.getWorldInfo().getWorldName(), ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(),
-            ((ServerWorldBridge) worldServer).bridge$getDimensionId(), playerIn.posX, playerIn.posY, playerIn.posZ);
+            ((WorldServerBridge) worldServer).bridge$getDimensionId(), playerIn.posX, playerIn.posY, playerIn.posZ);
         // Sponge end
 
         playerList.updateTimeAndWeatherForPlayer(playerIn, worldServer);

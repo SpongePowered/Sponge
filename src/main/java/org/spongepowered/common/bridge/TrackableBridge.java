@@ -44,5 +44,6 @@ public interface TrackableBridge {
      * trackable types have that information tracked through
      * their parent type (such as {@link SpongeEntityType}.
      */
-    default void bridge$refreshTrackerStates() { }
+    default void bridge$refreshTrackerStates() {
+    }
 }

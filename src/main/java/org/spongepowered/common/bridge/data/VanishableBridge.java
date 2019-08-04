@@ -22,21 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.block.tile;
+package org.spongepowered.common.bridge.data;
 
-import org.spongepowered.api.data.meta.PatternLayer;
-import org.spongepowered.api.data.type.DyeColor;
+public interface VanishableBridge {
 
-import java.util.List;
+    boolean bridge$isInvisible();
 
-public interface TileEntityBannerBridge {
+    void bridge$setInvisible(boolean invisible);
 
-    List<PatternLayer> bridge$getLayers();
+    boolean bridge$isVanished();
 
-    void bridge$setLayers(List<PatternLayer> layers);
+    void bridge$setVanished(boolean vanished);
 
-    DyeColor bridge$getBaseColor();
+    boolean bridge$isUncollideable();
 
-    void bridge$setBaseColor(DyeColor baseColor);
+    void bridge$setUncollideable(boolean uncollideable);
 
+    boolean bridge$isUntargetable();
+
+    void bridge$setUntargetable(boolean untargetable);
 }

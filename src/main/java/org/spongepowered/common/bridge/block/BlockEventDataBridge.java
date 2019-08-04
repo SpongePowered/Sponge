@@ -32,16 +32,15 @@ import javax.annotation.Nullable;
 
 public interface BlockEventDataBridge {
 
-    @Nullable LocatableBlock getBridge$TickingLocatable();
+    @Nullable LocatableBlock bridge$getTickingLocatable();
 
-    @Nullable TileEntity getBridge$TileEntity();
+    @Nullable TileEntity bridge$getTileEntity();
 
-    @Nullable User getBridge$sourceUser();
+    @Nullable User bridge$getSourceUser();
 
-    void setBridge$TickingLocatable(@Nullable LocatableBlock tickBlock);
+    void bridge$setTickingLocatable(@Nullable LocatableBlock tickBlock);
 
-    void setBridge$TileEntity(@Nullable TileEntity bridge$TileEntity);
+    void bridge$setTileEntity(@Nullable TileEntity bridge$TileEntity);
 
-    void setBridge$sourceUser(@Nullable User user);
-
+    void bridge$setSourceUser(@Nullable User user);
 }

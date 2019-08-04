@@ -30,14 +30,7 @@ public interface TextBridge {
 
     ITextComponent bridge$toComponent();
 
-    String bridge$toPlain();
-
-    String bridge$toPlainSingle();
-
     String bridge$toJson();
 
     String bridge$toLegacy(char code);
-
-    String bridge$toLegacySingle(char code);
-
 }

@@ -32,5 +32,4 @@ public interface ChunkGeneratorOverworldBridge {
     void bridge$setBiomeGenerator(BiomeGenerator biomes);
 
     Biome[] bridge$getBiomesForGeneration(final int x, final int z);
-    
 }

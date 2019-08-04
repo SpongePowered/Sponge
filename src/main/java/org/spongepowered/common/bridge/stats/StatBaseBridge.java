@@ -31,5 +31,4 @@ public interface StatBaseBridge {
     String bridge$getUnderlyingId();
 
     NumberFormat bridge$getFormat();
-
 }

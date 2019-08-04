@@ -29,6 +29,5 @@ import net.minecraft.item.EnumDyeColor;
 
 public interface DyeableBlockBridge {
 
-    void bridge$SetColorPropertyEnum(PropertyEnum<EnumDyeColor> property);
-
+    void bridge$setColorPropertyEnum(PropertyEnum<EnumDyeColor> property);
 }

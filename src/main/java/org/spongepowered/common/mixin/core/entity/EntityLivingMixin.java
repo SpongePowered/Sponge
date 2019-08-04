@@ -56,9 +56,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.data.VanishingBridge;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
+import org.spongepowered.common.bridge.entity.ai.EntityAIBasesBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -117,7 +117,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
                     task.priority, task.priority, (Goal<? extends Agent>) tasks, (Agent) this, (AITask<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
-                ((EntityGoalBridge) task.action).bridge$setGoal(null);
+                ((EntityAIBasesBridge) task.action).bridge$setGoal(null);
                 taskItr.remove();
             }
         }
@@ -222,7 +222,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     private void onSetAttackTarget(@Nullable final EntityLivingBase entitylivingbaseIn, final CallbackInfo ci) {
         if (!this.world.isRemote && ShouldFire.SET_A_I_TARGET_EVENT) {
             if (entitylivingbaseIn != null) {
-                if (((VanishingBridge) entitylivingbaseIn).vanish$isVanished() && ((VanishingBridge) entitylivingbaseIn).vanish$isUntargetable()) {
+                if (((VanishableBridge) entitylivingbaseIn).bridge$isVanished() && ((VanishableBridge) entitylivingbaseIn).bridge$isUntargetable()) {
                     this.attackTarget = null;
                     ci.cancel();
                 } else {
@@ -248,7 +248,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     @Overwrite
     public EntityLivingBase getAttackTarget() {
         if (this.attackTarget != null) {
-            if (((VanishingBridge) this.attackTarget).vanish$isVanished() && ((VanishingBridge) this.attackTarget).vanish$isUntargetable()) {
+            if (((VanishableBridge) this.attackTarget).bridge$isVanished() && ((VanishableBridge) this.attackTarget).bridge$isUntargetable()) {
                 this.attackTarget = null;
             }
         }

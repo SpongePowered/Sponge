@@ -108,7 +108,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.bridge.packet.ResourcePackBridge;
+import org.spongepowered.common.bridge.packet.SPacketResourcePackSendBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.WorldBorderBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
@@ -449,7 +449,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     @Override
     public void sendResourcePack(final ResourcePack pack) {
         final SPacketResourcePackSend packet = new SPacketResourcePackSend();
-        ((ResourcePackBridge) packet).bridge$setSpongePack(pack);
+        ((SPacketResourcePackSendBridge) packet).bridge$setSpongePack(pack);
         this.connection.sendPacket(packet);
     }
 
@@ -476,7 +476,6 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         return super.getVelocity();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return (CarriedInventory<? extends Carrier>) this.inventory;
@@ -510,12 +509,6 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
         return timeSinceFirstJoined.getSeconds() > 0;
     }
-
-    // TODO implement with contextual data
-//    @Override
-//    public DisplayNameData getDisplayNameData() {
-//        return null;
-//    }
 
     @Override
     public GameModeData getGameModeData() {
@@ -611,7 +604,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         }
         if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.api$worldBorder), Optional.ofNullable(border), this))) {
             if (this.api$worldBorder != null) { //is the world border about to be unset?
-                ((WorldBorderBridge) this.api$worldBorder).bridge$getListeners().remove(((EntityPlayerMPBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
+                ((WorldBorderBridge) this.api$worldBorder).accessor$getListeners().remove(((EntityPlayerMPBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
             }
             this.api$worldBorder = border;
             if (this.api$worldBorder != null) {
@@ -658,6 +651,4 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         final World loaded = Sponge.getServer().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
         return this.setLocation(new Location<>(loaded, position));
     }
-
-
 }

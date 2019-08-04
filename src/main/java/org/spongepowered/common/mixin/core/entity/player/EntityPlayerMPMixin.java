@@ -361,16 +361,6 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public void bridge$forceRecreateUser() {
-        final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
-        if (!(service instanceof SpongeUserStorageService)) {
-            SpongeImpl.getLogger().error("Not re-creating User object for player {}, as UserStorageServer has been replaced with {}", this.shadow$getName(), service);
-        } else {
-            this.impl$user = ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.getGameProfile());
-        }
-    }
-
-    @Override
     public Optional<User> bridge$getBackingUser() {
         // may be null during initialization, mainly used to avoid potential stack overflow with #bridge$getUserObject
         return Optional.ofNullable(this.impl$user);
@@ -458,14 +448,6 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Override
     public Tristate bridge$permDefault(final String permission) {
         return ((SubjectBridge) this.impl$user).bridge$permDefault(permission);
-    }
-
-    @Override
-    public void refreshXpHealthAndFood() {
-        this.lastExperience = -1;
-        this.lastHealth = -1.0F;
-        this.lastFoodLevel = -1;
-        bridge$refreshScaledHealth();
     }
 
     @Override
@@ -855,11 +837,6 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Override
     public boolean bridge$isHealthScaled() {
         return this.impl$healthScale != Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
-    }
-
-    @Override
-    public void updateDataManagerForScaledHealth() {
-        this.dataManager.set(EntityLivingBase.HEALTH, bridge$getInternalScaledHealth());
     }
 
     @Redirect(method = "readEntityFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getForceGamemode()Z"))

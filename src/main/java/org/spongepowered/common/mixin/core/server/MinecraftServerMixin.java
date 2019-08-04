@@ -75,10 +75,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -210,7 +210,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
             return;
         }
 
-        final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) worldServer.getChunkProvider();
+        final ChunkProviderServerBridge chunkProviderServer = (ChunkProviderServerBridge) worldServer.getChunkProvider();
         chunkProviderServer.bridge$setForceChunkRequests(true);
 
         try (final GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
@@ -220,7 +220,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
             int i = 0;
             this.setUserMessage("menu.generatingTerrain");
             LOGGER.info("Preparing start region for world {} ({}/{})", worldServer.getWorldInfo().getWorldName(),
-                ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(), ((ServerWorldBridge) worldServer).bridge$getDimensionId());
+                ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(), ((WorldServerBridge) worldServer).bridge$getDimensionId());
             final BlockPos blockpos = worldServer.getSpawnPoint();
             long j = MinecraftServer.getCurrentTimeMillis();
             for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
@@ -365,7 +365,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
             // Return overworld provider
             return ((net.minecraft.world.World) Sponge.getServer().getWorlds().iterator().next()).provider;
         }
-        this.dimensionId = ((ServerWorldBridge) world).bridge$getDimensionId();
+        this.dimensionId = ((WorldServerBridge) world).bridge$getDimensionId();
         return world.provider;
     }
 

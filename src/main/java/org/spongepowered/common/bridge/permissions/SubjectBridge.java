@@ -42,8 +42,6 @@ public interface SubjectBridge {
 
     void bridge$setSubject(SubjectReference subj);
 
-    CompletableFuture<Subject> bridge$loadInternalSubject();
-
     String bridge$getSubjectCollectionIdentifier();
 
     Tristate bridge$permDefault(String permission);

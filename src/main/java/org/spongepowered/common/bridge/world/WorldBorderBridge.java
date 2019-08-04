@@ -30,11 +30,8 @@ import java.util.List;
 
 public interface WorldBorderBridge {
 
-    /**
-     * Pending Mixin 0.8, to be used with WorldBridgeAccessor instead
-     * @return
-     */
+    // TODO Mixin 0.8
     @Deprecated
-    List<IBorderListener> bridge$getListeners();
+    List<IBorderListener> accessor$getListeners();
 
 }

@@ -31,5 +31,4 @@ public interface HoverEventBridge {
     HoverAction<?> bridge$getHandle();
 
     void bridge$setHandle(HoverAction<?> handle);
-
 }

@@ -44,5 +44,4 @@ public interface ITextComponentBridge {
     String bridge$toLegacySingle(char code);
 
     Text bridge$toText();
-
 }

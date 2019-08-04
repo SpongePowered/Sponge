@@ -74,5 +74,4 @@ public interface FusedExplosiveBridge {
             Sponge.getEventManager().post(event);
         }
     }
-
 }

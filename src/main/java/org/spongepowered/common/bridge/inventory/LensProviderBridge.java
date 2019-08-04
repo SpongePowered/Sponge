@@ -34,5 +34,4 @@ public interface LensProviderBridge {
     Lens bridge$rootLens(Fabric fabric, InventoryAdapter adapter);
 
     SlotProvider bridge$slotProvider(Fabric fabric, InventoryAdapter adapter);
-    
 }

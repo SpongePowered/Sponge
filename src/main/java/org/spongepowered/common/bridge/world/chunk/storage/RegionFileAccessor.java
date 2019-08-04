@@ -35,32 +35,5 @@ import java.util.List;
 @Mixin(RegionFile.class)
 public interface RegionFileAccessor {
 
-    @Accessor("fileName") File accessor$getFileName();
-
-    @Accessor("fileName") void accessor$setFileName(File fileName);
-
-    @Accessor("dataFile") RandomAccessFile accessor$getDataFile();
-
-    @Accessor("dataFile") void accessor$setDataFile(RandomAccessFile dataFile);
-
     @Accessor("offsets") int[] accessor$getOffsets();
-
-    @Accessor("offsets") void accessor$setOffsets(int[] offsets);
-
-    @Accessor("chunkTimestamps") int[] accessor$getChunkTimestamps();
-
-    @Accessor("chunkTimestamps") void accessor$setChunkTimestamps(int[] chunkTimestamps);
-
-    @Accessor("sectorFree") List<Boolean> accessor$getSectorFree();
-
-    @Accessor("sectorFree") void accessor$setSectorFree(List<Boolean> sectorFree);
-
-    @Accessor("sizeDelta") int accessor$getSizeDelta();
-
-    @Accessor("sizeDelta") void accessor$setSizeDelta(int sizeDelta);
-
-    @Accessor("lastModified") long accessor$getLastModified();
-
-    @Accessor("lastModified") void accessor$setLastModified(long lastModified);
-
 }

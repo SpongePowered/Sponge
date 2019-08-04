@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.command.CommandSenderBridge;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 
-@Mixin(targets = CommandSenderBridge.SIGN_CLICK_SENDER)
+@Mixin(targets = "net/minecraft/tileentity/TileEntitySign$1")
 public abstract class TileEntitySign$1Mixin implements CommandSenderBridge, CommandSourceBridge {
 
     @Shadow public abstract String shadow$getName();

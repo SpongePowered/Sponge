@@ -34,5 +34,4 @@ public interface ServerScoreboardBridge extends ScoreboardBridge {
     void bridge$removePlayer(EntityPlayerMP player, boolean sendPackets);
 
     void bridge$sendToPlayers(Packet<?> packet);
-
 }

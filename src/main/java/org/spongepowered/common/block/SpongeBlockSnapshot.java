@@ -36,7 +36,6 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
@@ -60,7 +59,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -176,7 +175,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
 
         final WorldServer world = (WorldServer) optionalWorld.get();
-        final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) world;
+        final WorldServerBridge mixinWorldServer = (WorldServerBridge) world;
         // We need to deterministically define the context as nullable if we don't need to enter.
         // this way we guarantee an exit.
         try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext()) {

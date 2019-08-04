@@ -28,7 +28,7 @@ public interface PlayerChunkMapBridge {
 
     boolean bridge$isChunkInUse(int x, int z);
 
+    // TODO Mixin 0.8
     @Deprecated
-    int bridge$getViewDistance();
-
+    int accessor$getViewDistance();
 }

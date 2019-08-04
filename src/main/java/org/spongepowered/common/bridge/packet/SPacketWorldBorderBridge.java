@@ -22,24 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity.ai;
+package org.spongepowered.common.bridge.packet;
 
-import net.minecraft.entity.EntityLivingBase;
-import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.task.AITaskType;
+public interface SPacketWorldBorderBridge {
 
-import java.util.Optional;
-
-import javax.annotation.Nullable;
-
-public interface EntityGoalBridge {
-
-    void bridge$setType(AITaskType type);
-
-    Optional<Goal<?>> bridge$getAIGoal();
-
-    void bridge$setGoal(@Nullable Goal<?> owner);
-
-    AITaskType bridge$getType();
-
+    void bridge$changeCoordinatesForNether();
 }

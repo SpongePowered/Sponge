@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.command.CommandSenderBridge;
 
-@Mixin(targets = CommandSenderBridge.COMMAND_BLOCK_SENDER)
+@Mixin(targets = "net/minecraft/tileentity/TileEntityCommandBlock$1")
 public abstract class TileEntityCommandBlock$1Mixin implements CommandSenderBridge {
 
     @Shadow(aliases = {"field_145767_a", "this$0"}) @Final private TileEntityCommandBlock field_145767_a;

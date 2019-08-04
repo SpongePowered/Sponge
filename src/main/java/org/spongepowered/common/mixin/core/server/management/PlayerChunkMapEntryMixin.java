@@ -76,7 +76,7 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     }
 
     @Override
-    public List<EntityPlayerMP> bridge$getPlayers() {
+    public List<EntityPlayerMP> accessor$getPlayers() {
         return this.players;
     }
 

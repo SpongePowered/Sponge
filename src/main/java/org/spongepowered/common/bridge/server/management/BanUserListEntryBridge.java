@@ -36,5 +36,4 @@ public interface BanUserListEntryBridge {
     Optional<Text> bridge$getSource();
 
     Optional<CommandSource> bridge$getCmdSource();
-
 }

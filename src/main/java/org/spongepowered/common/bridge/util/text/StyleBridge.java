@@ -50,7 +50,4 @@ public interface StyleBridge {
     HoverEvent bridge$getHoverEvent();
 
     String bridge$getInsertion();
-
-
-
 }

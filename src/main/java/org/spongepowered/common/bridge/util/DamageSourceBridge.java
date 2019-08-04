@@ -33,11 +33,18 @@ public interface DamageSourceBridge {
     void bridge$resetDamageType();
 
     void bridge$setLava();
+
     void bridge$setFireSource();
+
     void bridge$setLightningSource();
+
     void bridge$setHotFloorSource();
+
     void bridge$setFireworksSource();
+
     void bridge$setFallingBlockSource();
+
     void bridge$setAnvilSource();
+
     void bridge$setCactusSource();
 }

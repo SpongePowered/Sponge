@@ -32,7 +32,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -136,7 +136,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public void appendNotifierPreBlockTick(ServerWorldBridge mixinWorld, BlockPos pos, G context, BlockTickContext phaseContext) {
+    public void appendNotifierPreBlockTick(WorldServerBridge mixinWorld, BlockPos pos, G context, BlockTickContext phaseContext) {
 
     }
 

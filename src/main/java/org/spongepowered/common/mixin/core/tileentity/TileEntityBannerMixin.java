@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
-import org.spongepowered.common.bridge.block.tile.TileEntityBannerBridge;
+import org.spongepowered.common.bridge.tileentity.TileEntityBannerBridge;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NonNullArrayList;

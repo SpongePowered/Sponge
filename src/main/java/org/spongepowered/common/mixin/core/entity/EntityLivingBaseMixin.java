@@ -586,7 +586,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
     private void spawnItemParticle(final World world, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord, final double zCoord, final double xOffset,
             final double yOffset, final double zOffset, final int ... p_175688_14_) {
-        if (!this.vanish$isVanished()) {
+        if (!this.bridge$isVanished()) {
             this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }
@@ -849,14 +849,14 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
      */
     @Overwrite
     public boolean canBeCollidedWith() {
-        return !(this.vanish$isVanished() && this.vanish$isUncollideable()) && !this.isDead;
+        return !(this.bridge$isVanished() && this.bridge$isUncollideable()) && !this.isDead;
     }
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDIDDDD[I)V"))
     private void spongeSpawnParticleForFallState(
         final WorldServer worldServer, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord,
             final double zCoord, final int numberOfParticles, final double xOffset, final double yOffset, final double zOffset, final double particleSpeed, final int... extraArgs) {
-        if (!this.vanish$isVanished()) {
+        if (!this.bridge$isVanished()) {
             worldServer.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, extraArgs);
         }
 

@@ -38,7 +38,7 @@ import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
-import org.spongepowered.common.bridge.block.tile.TileEntityBannerBridge;
+import org.spongepowered.common.bridge.tileentity.TileEntityBannerBridge;
 
 import java.util.List;
 import java.util.Map;

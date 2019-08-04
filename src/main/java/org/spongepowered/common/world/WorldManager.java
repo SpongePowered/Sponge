@@ -71,12 +71,12 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.integrated.IntegratedServerBridge;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge_AsyncLighting;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge_AsyncLighting;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.GlobalConfig;
@@ -135,13 +135,13 @@ public final class WorldManager {
     private static final Comparator<WorldServer>
             WORLD_SERVER_COMPARATOR =
             (world1, world2) -> {
-                final int world1DimId = ((ServerWorldBridge) world1).bridge$getDimensionId();
+                final int world1DimId = ((WorldServerBridge) world1).bridge$getDimensionId();
 
                 if (world2 == null) {
                     return world1DimId;
                 }
 
-                final int world2DimId = ((ServerWorldBridge) world2).bridge$getDimensionId();
+                final int world2DimId = ((WorldServerBridge) world2).bridge$getDimensionId();
                 return world1DimId - world2DimId;
             };
 
@@ -537,7 +537,7 @@ public final class WorldManager {
                 return false;
             }
 
-            final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
+            final WorldServerBridge mixinWorldServer = (WorldServerBridge) worldServer;
             final int dimensionId = mixinWorldServer.bridge$getDimensionId();
 
             try {
@@ -555,7 +555,7 @@ public final class WorldManager {
 
                 // Stop the lighting executor only when the world is going to unload - there's no point in running any more lighting tasks.
                 if (globalConfigAdapter.getConfig().getModules().useOptimizations() && globalConfigAdapter.getConfig().getOptimizations().useAsyncLighting()) {
-                    ((ServerWorldBridge_AsyncLighting) worldServer).asyncLightingBridge$getLightingExecutor().shutdownNow();
+                    ((WorldServerBridge_AsyncLighting) worldServer).asyncLightingBridge$getLightingExecutor().shutdownNow();
                 }
 
                 worldByDimensionId.remove(dimensionId);
@@ -861,7 +861,7 @@ public final class WorldManager {
             worldServer.getWorldInfo().setGameType(server.getGameType());
         }
 
-        ((ServerChunkProviderBridge) worldServer.getChunkProvider()).bridge$setForceChunkRequests(true);
+        ((ChunkProviderServerBridge) worldServer.getChunkProvider()).bridge$setForceChunkRequests(true);
         try {
             SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(),
                 (org.spongepowered.api.world.World) worldServer));
@@ -882,7 +882,7 @@ public final class WorldManager {
 
             return worldServer;
         } finally {
-            ((ServerChunkProviderBridge) worldServer.getChunkProvider()).bridge$setForceChunkRequests(false);
+            ((ChunkProviderServerBridge) worldServer.getChunkProvider()).bridge$setForceChunkRequests(false);
         }
     }
 
@@ -926,7 +926,7 @@ public final class WorldManager {
         final List<WorldServer> worlds = new ArrayList<>(worldByDimensionId.values());
         final Iterator<WorldServer> iterator = worlds.iterator();
         while(iterator.hasNext()) {
-            final ServerWorldBridge mixinWorld = (ServerWorldBridge) iterator.next();
+            final WorldServerBridge mixinWorld = (WorldServerBridge) iterator.next();
             final int dimensionId = mixinWorld.bridge$getDimensionId();
             if (vanillaWorldIds.contains(dimensionId)) {
                 iterator.remove();
@@ -1314,7 +1314,7 @@ public final class WorldManager {
             return 1;
         }
 
-        return ((ServerWorldBridge) world).bridge$getDimensionId();
+        return ((WorldServerBridge) world).bridge$getDimensionId();
     }
 
     public static boolean isKnownWorld(final WorldServer world) {

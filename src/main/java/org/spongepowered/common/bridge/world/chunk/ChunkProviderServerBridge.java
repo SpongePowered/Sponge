@@ -44,24 +44,18 @@ import javax.annotation.Nullable;
  * Specific bridge for the {@link ChunkProviderServer}, with a direct
  * pairing to {@link WorldServer} as a hard requirement.
  */
-public interface ServerChunkProviderBridge {
+public interface ChunkProviderServerBridge {
 
-    /**
-     * To be moved to ChunkProviderServerAccessor when Mixin 0.8 is available
-     */
+    // TODO Mixin 0.8
     @Nullable
     @Deprecated
     IChunkGenerator accessor$getChunkGenerator();
 
-    /**
-     * To be moved to ChunkProviderServerAccessor when Mixin 0.8 is available
-     */
+    // TODO Mixin 0.8
     @Deprecated
     void accessor$setChunkGenerator(IChunkGenerator spongeGen);
 
-    /**
-     * To be moved to ChunkProviderServerAccessor when Mixin 0.8 is available
-     */
+    // TODO Mixin 0.8
     @Deprecated
     Long2ObjectMap<Chunk> accessor$getLoadedChunks();
 
@@ -84,12 +78,8 @@ public interface ServerChunkProviderBridge {
      * and SpongeVanilla has to use this specially from it's own
      * ported implementation.
      *
-     * @param x
-     * @param z
      * @return The chunk loaded forcefully
      * look at ChunkProviderServerMixin#impl$ProvideChunkForced(Chunk, int, int)
      */
-    Chunk impl$loadChunkForce(final int x, final int z);
-
-
+    Chunk bridge$loadChunkForce(final int x, final int z);
 }

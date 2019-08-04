@@ -36,7 +36,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 
 import java.util.Collection;
@@ -57,8 +56,6 @@ public interface EntityPlayerMPBridge {
 
     User bridge$getUserObject();
 
-    void bridge$forceRecreateUser();
-
     void bridge$setVelocityOverride(@Nullable Vector3d velocity);
 
     void bridge$sendBlockChange(BlockPos pos, IBlockState state);
@@ -70,8 +67,6 @@ public interface EntityPlayerMPBridge {
     void bridge$removeScoreboardOnRespawn();
 
     void bridge$setScoreboardOnRespawn(Scoreboard scoreboard);
-
-    void refreshXpHealthAndFood();
 
     void bridge$restorePacketItem(EnumHand hand);
 
@@ -93,8 +88,6 @@ public interface EntityPlayerMPBridge {
 
     void bridge$injectScaledHealth(Collection<IAttributeInstance> set);
 
-    void updateDataManagerForScaledHealth();
-
     boolean bridge$hasForcedGamemodeOverridePermission();
 
     void bridge$setContainerDisplay(Text displayName);
@@ -108,6 +101,7 @@ public interface EntityPlayerMPBridge {
     Set<SkinPart> bridge$getSkinParts();
 
     User bridge$getUser();
+
     boolean bridge$hasDelegate();
 
     @Nullable

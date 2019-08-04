@@ -38,5 +38,4 @@ public interface BiomeBridge {
     String bridge$getModId();
 
     void bridge$buildPopulators(World world, SpongeBiomeGenerationSettings gensettings);
-
 }

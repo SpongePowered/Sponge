@@ -33,5 +33,4 @@ public interface LocationTargetingBridge {
     Vector3d bridge$getTargetedLocation();
 
     void bridge$setTargetedLocation(@Nullable Vector3d vec);
-
 }

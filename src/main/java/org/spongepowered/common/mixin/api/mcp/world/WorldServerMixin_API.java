@@ -84,12 +84,12 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
@@ -157,15 +157,15 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public WorldGenerator getWorldGenerator() {
-        return ((ServerWorldBridge) this).bridge$getSpongeGenerator();
+        return ((WorldServerBridge) this).bridge$getSpongeGenerator();
     }
 
     @Override
     public ScheduledBlockUpdate addScheduledUpdate(final int x, final int y, final int z, final int priority, final int ticks) {
         final BlockPos pos = new BlockPos(x, y, z);
         this.updateBlockTick(pos, getBlockState(pos).getBlock(), ticks, priority);
-        final ScheduledBlockUpdate sbu = ((ServerWorldBridge) this).bridge$getScheduledBlockUpdate();
-        ((ServerWorldBridge) this).bridge$setScheduledBlockUpdate(null);
+        final ScheduledBlockUpdate sbu = ((WorldServerBridge) this).bridge$getScheduledBlockUpdate();
+        ((WorldServerBridge) this).bridge$setScheduledBlockUpdate(null);
         return sbu;
     }
 
@@ -250,9 +250,9 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             }
 
             final ChunkProviderServer chunkProviderServer = (ChunkProviderServer) chunk.getWorld().getChunkProvider();
-            ((ServerChunkProviderBridge) chunkProviderServer).bridge$unloadChunkAndSave(chunk);
+            ((ChunkProviderServerBridge) chunkProviderServer).bridge$unloadChunkAndSave(chunk);
             // TODO - Move to accessor with Mixin 0.8
-            final net.minecraft.world.chunk.Chunk newChunk = ((ServerChunkProviderBridge) chunkProviderServer).accessor$getChunkGenerator().generateChunk(cx, cz);
+            final net.minecraft.world.chunk.Chunk newChunk = ((ChunkProviderServerBridge) chunkProviderServer).accessor$getChunkGenerator().generateChunk(cx, cz);
             final PlayerChunkMapEntry playerChunk = ((WorldServer) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
             if (playerChunk != null) {
                 ((PlayerChunkMapEntryBridge) playerChunk).bridge$setChunk(newChunk);
@@ -260,9 +260,9 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
             if (newChunk != null) {
                 final WorldServer world = (WorldServer) newChunk.getWorld();
-                ((ServerChunkProviderBridge) world.getChunkProvider()).accessor$getLoadedChunks().put(ChunkPos.asLong(cx, cz), newChunk);
+                ((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getLoadedChunks().put(ChunkPos.asLong(cx, cz), newChunk);
                 newChunk.onLoad();
-                ((ChunkBridge) newChunk).accessor$populate(((ServerChunkProviderBridge) world.getChunkProvider()).accessor$getChunkGenerator());
+                ((ChunkBridge) newChunk).accessor$populate(((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getChunkGenerator());
                 for (final net.minecraft.entity.Entity entity: entityList) {
                     newChunk.addEntity(entity);
                 }
@@ -273,7 +273,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
                 final PlayerChunkMapEntry playerChunkMapEntry = ((WorldServer) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
                 if (playerChunkMapEntry != null) {
-                    final List<EntityPlayerMP> chunkPlayers = ((PlayerChunkMapEntryBridge) playerChunkMapEntry).bridge$getPlayers();
+                    final List<EntityPlayerMP> chunkPlayers = ((PlayerChunkMapEntryBridge) playerChunkMapEntry).accessor$getPlayers();
                     // We deliberately send two packets, to avoid sending a 'fullChunk' packet
                     // (a changedSectionFilter of 65535). fullChunk packets cause the client to
                     // completely overwrite its current chunk with a new chunk instance. This causes
@@ -513,7 +513,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     private void apiImpl$stopSounds(@Nullable final SoundType sound, @Nullable final SoundCategory category) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
-                SoundEffectHelper.createStopSoundPacket(sound, category), ((ServerWorldBridge) this).bridge$getDimensionId());
+                SoundEffectHelper.createStopSoundPacket(sound, category), ((WorldServerBridge) this).bridge$getDimensionId());
     }
 
     @Override
@@ -538,7 +538,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             final double z = position.getZ();
 
             for (final Packet<?> packet : packets) {
-                playerList.sendToAllNearExcept(null, x, y, z, radius, ((ServerWorldBridge) this).bridge$getDimensionId(), packet);
+                playerList.sendToAllNearExcept(null, x, y, z, radius, ((WorldServerBridge) this).bridge$getDimensionId(), packet);
             }
         }
     }
@@ -555,7 +555,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     private void api$playRecord(final Vector3i position, @Nullable final RecordType recordType) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
-                SpongeRecordType.createPacket(position, recordType), ((ServerWorldBridge) this).bridge$getDimensionId());
+                SpongeRecordType.createPacket(position, recordType), ((WorldServerBridge) this).bridge$getDimensionId());
     }
 
     @Override
@@ -589,7 +589,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public long getRunningDuration() {
-        return this.worldInfo.getWorldTotalTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime();
+        return this.worldInfo.getWorldTotalTime() - ((WorldServerBridge) this).bridge$getWeatherStartTime();
     }
 
     @Override
@@ -599,7 +599,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public void setWeather(final Weather weather, final long duration) {
-        ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
+        ((WorldServerBridge) this).bridge$setPreviousWeather(this.getWeather());
         if (weather.equals(Weathers.CLEAR)) {
             this.worldInfo.setCleanWeatherTime((int) duration);
             this.worldInfo.setRainTime(0);
@@ -625,7 +625,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     @Override
     public int getViewDistance() {
         // TODO - Mixin 0.8 accessors
-        return ((PlayerChunkMapBridge) this.playerChunkMap).bridge$getViewDistance();
+        return ((PlayerChunkMapBridge) this.playerChunkMap).accessor$getViewDistance();
     }
 
     @SuppressWarnings("deprecation")
@@ -634,7 +634,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         this.playerChunkMap.setPlayerViewRadius(viewDistance);
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.getWorldInfo()).bridge$getConfigAdapter();
         // don't use the parameter, use the field that has been clamped
-        configAdapter.getConfig().getWorld().setViewDistance(((PlayerChunkMapBridge) this.playerChunkMap).bridge$getViewDistance());
+        configAdapter.getConfig().getWorld().setViewDistance(((PlayerChunkMapBridge) this.playerChunkMap).accessor$getViewDistance());
         configAdapter.save();
     }
 

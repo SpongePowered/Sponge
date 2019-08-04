@@ -35,5 +35,4 @@ public interface TrackedInventoryBridge {
     boolean bridge$capturingInventory();
 
     void bridge$setCaptureInventory(boolean flag);
-
 }

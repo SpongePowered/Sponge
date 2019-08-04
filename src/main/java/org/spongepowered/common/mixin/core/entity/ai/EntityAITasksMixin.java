@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
+import org.spongepowered.common.bridge.entity.ai.EntityAIBasesBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.bridge.entity.ai.EntityAITasksBridge;
 
@@ -79,7 +79,7 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
      */
     @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z", remap = false))
     private boolean onAddEntityTask(final Set<EntityAITasks.EntityAITaskEntry> set, final Object entry, final int priority, final EntityAIBase base) {
-        ((EntityGoalBridge) base).bridge$setGoal((Goal<?>) this);
+        ((EntityAIBasesBridge) base).bridge$setGoal((Goal<?>) this);
         if (!ShouldFire.A_I_TASK_EVENT_ADD || this.owner == null || ((EntityBridge) this.owner).bridge$isConstructing()) {
             // Event is fired in bridge$fireConstructors
             return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
@@ -88,7 +88,7 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
                 (Goal<?>) this, (Agent) this.owner, (AITask<?>) base);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
-            ((EntityGoalBridge) base).bridge$setGoal(null);
+            ((EntityAIBasesBridge) base).bridge$setGoal(null);
             return false;
         }
         return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));

@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.command.CommandSenderBridge;
 
 @NonnullByDefault
-@Mixin(targets = CommandSenderBridge.COMMAND_MINECART_SENDER)
+@Mixin(targets = "net.minecraft.entity.item.EntityMinecartCommandBlock$1")
 public abstract class EntityMinecartCommandBlock$1Mixin implements CommandSenderBridge, ICommandSender {
 
     @Override

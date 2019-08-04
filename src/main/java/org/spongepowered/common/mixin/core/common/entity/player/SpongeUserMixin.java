@@ -32,14 +32,14 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
-import org.spongepowered.common.bridge.data.VanishingBridge;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 
 import java.util.Optional;
 
 @Mixin(value = SpongeUser.class, remap = false)
-public abstract class SpongeUserMixin implements SubjectBridge, InvulnerableTrackedBridge, VanishingBridge {
+public abstract class SpongeUserMixin implements SubjectBridge, InvulnerableTrackedBridge, VanishableBridge {
 
 
     @Shadow private boolean invulnerable;
@@ -67,10 +67,10 @@ public abstract class SpongeUserMixin implements SubjectBridge, InvulnerableTrac
     }
 
     @Override
-    public void vanish$setVanished(final boolean vanished) {
+    public void bridge$setVanished(final boolean vanished) {
         final Optional<Player> playerOpt = ((User) this).getPlayer();
         if (playerOpt.isPresent()) {
-            ((VanishingBridge) playerOpt.get()).vanish$setVanished(vanished);
+            ((VanishableBridge) playerOpt.get()).bridge$setVanished(vanished);
             return;
         }
         this.isVanished = vanished;
@@ -78,50 +78,50 @@ public abstract class SpongeUserMixin implements SubjectBridge, InvulnerableTrac
     }
 
     @Override
-    public boolean vanish$isVanished() {
-        return ((User) this).getPlayer().map(player -> ((VanishingBridge) player).vanish$isVanished()).orElseGet(() -> this.isVanished);
+    public boolean bridge$isVanished() {
+        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isVanished()).orElseGet(() -> this.isVanished);
     }
 
     @Override
-    public boolean vanish$isInvisible() {
-        return ((User) this).getPlayer().map(player -> ((VanishingBridge) player).vanish$isInvisible()).orElseGet(() -> this.isInvisible);
+    public boolean bridge$isInvisible() {
+        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isInvisible()).orElseGet(() -> this.isInvisible);
     }
 
     @Override
-    public void vanish$setInvisible(final boolean invisible) {
+    public void bridge$setInvisible(final boolean invisible) {
         final Optional<Player> player = ((User) this).getPlayer();
         if (player.isPresent()) {
-            ((VanishingBridge) player.get()).vanish$setInvisible(invisible);
+            ((VanishableBridge) player.get()).bridge$setInvisible(invisible);
             return;
         }
         this.isInvisible = invisible;
     }
 
     @Override
-    public boolean vanish$isUncollideable() {
-        return ((User) this).getPlayer().map(player -> ((VanishingBridge) player).vanish$isUncollideable()).orElseGet(() -> this.isVanishCollide);
+    public boolean bridge$isUncollideable() {
+        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isUncollideable()).orElseGet(() -> this.isVanishCollide);
     }
 
     @Override
-    public void vanish$setUncollideable(final boolean uncollideable) {
+    public void bridge$setUncollideable(final boolean uncollideable) {
         final Optional<Player> player = ((User) this).getPlayer();
         if (player.isPresent()) {
-            ((VanishingBridge) player.get()).vanish$setUncollideable(uncollideable);
+            ((VanishableBridge) player.get()).bridge$setUncollideable(uncollideable);
             return;
         }
         this.isVanishCollide = uncollideable;
     }
 
     @Override
-    public boolean vanish$isUntargetable() {
-        return ((User) this).getPlayer().map(player -> ((VanishingBridge) player).vanish$isUntargetable()).orElseGet(() -> this.isVanishTarget);
+    public boolean bridge$isUntargetable() {
+        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isUntargetable()).orElseGet(() -> this.isVanishTarget);
     }
 
     @Override
-    public void vanish$setUntargetable(final boolean untargetable) {
+    public void bridge$setUntargetable(final boolean untargetable) {
         final Optional<Player> player = ((User) this).getPlayer();
         if (player.isPresent()) {
-            ((VanishingBridge) player.get()).vanish$setUntargetable(untargetable);
+            ((VanishableBridge) player.get()).bridge$setUntargetable(untargetable);
             return;
         }
         this.isVanishTarget = untargetable;

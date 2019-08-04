@@ -95,7 +95,7 @@ public abstract class WorldTypeMixin implements WorldTypeBridge {
     }
 
     @Override
-    public Optional<BiFunction<World, String, IChunkGenerator>> bridge$getChvunkGenerator() {
+    public Optional<BiFunction<World, String, IChunkGenerator>> bridge$getChunkGenerator() {
         return Optional.ofNullable(this.impl$chunkGenerator);
     }
 

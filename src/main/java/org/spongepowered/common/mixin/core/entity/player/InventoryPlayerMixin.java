@@ -172,33 +172,6 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
     }
 
     @Override
-    public int bridge$getFirstAvailableSlot(final ItemStack itemstack) {
-        for (int i = 0; i < this.mainInventory.size(); ++i) {
-            int stackSize = itemstack.getCount();
-
-            if (this.mainInventory.get(i).getCount() == 0) {
-                // empty slot
-                return i;
-            }
-
-            if (this.mainInventory.get(i).getItem() == itemstack.getItem() && this.mainInventory.get(i).isStackable() && this.mainInventory.get(i).getCount() < this.mainInventory
-                    .get(i).getMaxStackSize() && this.mainInventory.get(i).getCount() < this.getInventoryStackLimit() && (!this.mainInventory.get(i).getHasSubtypes() || this.mainInventory
-                                                                                                                                                                                    .get(i).getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.mainInventory
-                    .get(i), itemstack)) {
-                stackSize -= (this.mainInventory.get(i).getMaxStackSize() < this.getInventoryStackLimit() ? this.mainInventory.get(i).getMaxStackSize() : this.getInventoryStackLimit()) - this.mainInventory
-                        .get(i).getCount();
-            }
-
-            if (stackSize <= 0) {
-                // available space in slot
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    @Override
     public List<SlotTransaction> bridge$getCapturedSlotTransactions() {
         return this.impl$capturedTransactions;
     }

@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -55,7 +55,7 @@ public abstract class BlockFireMixin extends BlockMixin {
         if (!((WorldBridge) world).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.FIRE_SPREAD, (org.spongepowered.api.world.World) world);
-                if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, pos).isCancelled()) {
+                if (SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) world, pos).isCancelled()) {
                     return false;
                 }
             }
@@ -74,7 +74,7 @@ public abstract class BlockFireMixin extends BlockMixin {
     private void impl$onCatchFirePreCheck(
         final World world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
         if (!world.isRemote) {
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, pos).isCancelled()) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }
         }
@@ -90,7 +90,7 @@ public abstract class BlockFireMixin extends BlockMixin {
     private void impl$onCatchFirePreCheckOther(
         final World world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
         if (!world.isRemote) {
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, pos).isCancelled()) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }
         }

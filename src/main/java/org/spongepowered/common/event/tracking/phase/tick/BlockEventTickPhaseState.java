@@ -64,11 +64,11 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             super.getFrameModifier().andThen((frame, context) -> {
                 final BlockEventDataBridge blockEventData = context.getSource(BlockEventDataBridge.class).orElse(null);
                 if (blockEventData != null) {
-                    if (blockEventData.getBridge$TileEntity() != null) {
-                        frame.pushCause(blockEventData.getBridge$TileEntity());
-                    } else if (blockEventData.getBridge$TickingLocatable() != null) {
-                        frame.pushCause(blockEventData.getBridge$TickingLocatable());
-                        frame.addContext(EventContextKeys.BLOCK_EVENT_PROCESS, blockEventData.getBridge$TickingLocatable());
+                    if (blockEventData.bridge$getTileEntity() != null) {
+                        frame.pushCause(blockEventData.bridge$getTileEntity());
+                    } else if (blockEventData.bridge$getTickingLocatable() != null) {
+                        frame.pushCause(blockEventData.bridge$getTickingLocatable());
+                        frame.addContext(EventContextKeys.BLOCK_EVENT_PROCESS, blockEventData.bridge$getTickingLocatable());
                     }
                 }
             });

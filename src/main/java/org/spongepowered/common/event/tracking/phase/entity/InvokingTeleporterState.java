@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.entity;
 
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 
 public final class InvokingTeleporterState extends EntityPhaseState<InvokingTeleporterContext> {
 
@@ -53,7 +53,7 @@ public final class InvokingTeleporterState extends EntityPhaseState<InvokingTele
     public boolean spawnEntityOrCapture(InvokingTeleporterContext context, Entity entity, int chunkX, int chunkZ) {
         final WorldServer worldServer = context.getTargetWorld();
         // Allowed to use the force spawn because it's the same "entity"
-        ((ServerWorldBridge) worldServer).bridge$forceSpawnEntity((net.minecraft.entity.Entity) entity);
+        ((WorldServerBridge) worldServer).bridge$forceSpawnEntity((net.minecraft.entity.Entity) entity);
         return true;
     }
 

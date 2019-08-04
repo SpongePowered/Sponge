@@ -30,18 +30,4 @@ public interface TextFormattingBridge {
 
     /** The formatting code that produces this format. */
     char bridge$getFormattingCode();
-
-    boolean bridge$getFancyStyling();
-
-    /**
-     * The control string (section sign + formatting code) that can be inserted into client-side text to display
-     * subsequent text in this format.
-     */
-    String bridge$getControlString();
-
-    /** The numerical index that represents this color */
-    int bridge$getColorIndex();
-
-
-
 }

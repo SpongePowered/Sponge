@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.block.tile.TileEntityBannerBridge;
+import org.spongepowered.common.bridge.tileentity.TileEntityBannerBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;

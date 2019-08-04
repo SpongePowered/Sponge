@@ -60,8 +60,6 @@ public interface ContainerBridge {
 
     Slot bridge$getContainerSlot(int slot);
 
-    void bridge$setPlugin(PluginContainer plugin);
-
     void bridge$setShiftCrafting(boolean flag);
 
     boolean bridge$isShiftCrafting();
@@ -83,5 +81,4 @@ public interface ContainerBridge {
     boolean bridge$isInUse();
 
     boolean bridge$capturePossible();
-
 }

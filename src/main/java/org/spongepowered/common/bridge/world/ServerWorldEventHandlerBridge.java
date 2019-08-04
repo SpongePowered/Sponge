@@ -33,5 +33,4 @@ public interface ServerWorldEventHandlerBridge {
 
     void bridge$playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category, double x, double y, double z,
         float volume, float pitch);
-
 }

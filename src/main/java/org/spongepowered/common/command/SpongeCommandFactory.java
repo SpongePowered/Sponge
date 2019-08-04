@@ -94,11 +94,10 @@ import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.command.args.FilteredPluginsCommandElement;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.MetricsCategory;
 import org.spongepowered.common.config.type.ConfigBase;
@@ -109,8 +108,6 @@ import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.mixin.core.world.WorldAccessor;
-import org.spongepowered.common.mixin.core.world.WorldServerAccessor;
-import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.File;
@@ -408,7 +405,7 @@ public class SpongeCommandFactory {
                     if (((WorldBridge) worldserver).bridge$isFake() || worldserver.getWorldInfo() == null) {
                         return Text.of(NEWLINE_TEXT, "Fake world");
                     }
-                    return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(((ServerWorldBridge) worldserver).bridge$getDimensionId()), NEWLINE_TEXT,
+                    return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(((WorldServerBridge) worldserver).bridge$getDimensionId()), NEWLINE_TEXT,
                         key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), NEWLINE_TEXT,
                         key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), NEWLINE_TEXT,
                         key("Entities: "), value(worldserver.loadedEntityList.size()), NEWLINE_TEXT,
@@ -860,11 +857,11 @@ public class SpongeCommandFactory {
     }
 
     private static void printWorldTickTime(final CommandSource src, final World world) {
-        final long[] worldTickTimes = ((MinecraftServerBridge) SpongeImpl.getServer()).bridge$getWorldTickTimes(((ServerWorldBridge) world).bridge$getDimensionId());
+        final long[] worldTickTimes = ((MinecraftServerBridge) SpongeImpl.getServer()).bridge$getWorldTickTimes(((WorldServerBridge) world).bridge$getDimensionId());
         final double worldMeanTickTime = mean(worldTickTimes) * 1.0e-6d;
         final double worldTps = Math.min(1000.0 / worldMeanTickTime, 20);
         src.sendMessage(Text.of("World [", TextColors.DARK_GREEN, world.getName(), TextColors.RESET, "] (",
-            ((ServerWorldBridge) world).bridge$getDimensionId(),
+            ((WorldServerBridge) world).bridge$getDimensionId(),
             ") TPS: ", TextColors.LIGHT_PURPLE,
             THREE_DECIMAL_DIGITS_FORMATTER.format(worldTps), TextColors.RESET,  ", Mean: ", TextColors.RED,
             THREE_DECIMAL_DIGITS_FORMATTER.format(worldMeanTickTime), "ms"));

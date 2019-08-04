@@ -35,7 +35,7 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.world.ServerWorldBridge_AsyncLighting;
+import org.spongepowered.common.bridge.world.WorldServerBridge_AsyncLighting;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge_AsyncLighting;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
@@ -50,7 +50,7 @@ import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
 
 @Mixin(value = WorldServer.class)
-public abstract class WorldServerMixin_Async_Lighting extends WorldMixin implements ServerWorldBridge_AsyncLighting {
+public abstract class WorldServerMixin_Async_Lighting extends WorldMixin implements WorldServerBridge_AsyncLighting {
 
     private ExecutorService asyncLightingImpl$lightExecutorService =
                 Executors.newFixedThreadPool(SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().getAsyncLightingCategory().getNumThreads(), new ThreadFactoryBuilder().setNameFormat("Sponge - Async Light Thread").build());

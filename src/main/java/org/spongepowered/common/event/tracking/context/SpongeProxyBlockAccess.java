@@ -40,7 +40,7 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -71,7 +71,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     @Nullable private Deque<BlockTransaction> processingStack;
     private boolean isNeighbor = false;
 
-    public SpongeProxyBlockAccess(final ServerWorldBridge worldServer) {
+    public SpongeProxyBlockAccess(final WorldServerBridge worldServer) {
         this.processingWorld = ((WorldServer) worldServer);
     }
 
@@ -99,7 +99,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             }
         }
         if (b && this.processingTransaction != null) {
-            PhaseTracker.getInstance().setBlockState((ServerWorldBridge) this.processingWorld, pos, state, BlockChangeFlags.NONE);
+            PhaseTracker.getInstance().setBlockState((WorldServerBridge) this.processingWorld, pos, state, BlockChangeFlags.NONE);
         }
         return this;
     }
@@ -474,8 +474,8 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         }
     }
 
-    public ServerWorldBridge getWorld() {
-        return (ServerWorldBridge) this.processingWorld;
+    public WorldServerBridge getWorld() {
+        return (WorldServerBridge) this.processingWorld;
     }
 
     public void addToPrinter(final PrettyPrinter printer) {

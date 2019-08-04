@@ -38,5 +38,4 @@ public interface EntityVillagerBridge {
     Optional<Profession> bridge$getProfessionOptional();
 
     void bridge$setProfession(Profession profession);
-
 }

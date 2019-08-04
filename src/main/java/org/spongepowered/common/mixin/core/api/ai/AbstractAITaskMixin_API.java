@@ -30,7 +30,7 @@ import org.spongepowered.api.entity.ai.task.AbstractAITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
+import org.spongepowered.common.bridge.entity.ai.EntityAIBasesBridge;
 
 import java.util.Optional;
 
@@ -47,7 +47,7 @@ public abstract class AbstractAITaskMixin_API<O extends Agent> implements AITask
     @Override
     @Overwrite
     public final Optional<Goal<O>> getGoal() {
-        return (Optional<Goal<O>>) (Optional<?>) ((EntityGoalBridge) this).bridge$getAIGoal();
+        return (Optional<Goal<O>>) (Optional<?>) ((EntityAIBasesBridge) this).bridge$getAIGoal();
     }
 
 }

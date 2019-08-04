@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
 
 import javax.annotation.Nullable;
@@ -49,18 +49,18 @@ public abstract class ServerWorldEventHandlerMixin implements ServerWorldEventHa
 
     @Redirect(method = "playSoundToAllNearExcept", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int getDimensionForPlayingSound(DimensionType dimensionType) {
-        return ((ServerWorldBridge) this.world).bridge$getDimensionId();
+        return ((WorldServerBridge) this.world).bridge$getDimensionId();
     }
 
     @Redirect(method = "playEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int getDimensionForSoundEffects(DimensionType dimensionType) {
-        return ((ServerWorldBridge) this.world).bridge$getDimensionId();
+        return ((WorldServerBridge) this.world).bridge$getDimensionId();
     }
 
     @Override
     public void bridge$playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category, double x, double y, double z,
             float volume, float pitch) {
         this.server.getPlayerList().sendToAllNearExcept(player, x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D,
-                ((ServerWorldBridge) this.world).bridge$getDimensionId(), new SPacketCustomSound(soundIn, category, x, y, z, volume, pitch));
+                ((WorldServerBridge) this.world).bridge$getDimensionId(), new SPacketCustomSound(soundIn, category, x, y, z, volume, pitch));
     }
 }

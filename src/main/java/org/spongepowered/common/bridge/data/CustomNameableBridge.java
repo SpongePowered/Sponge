@@ -27,5 +27,4 @@ package org.spongepowered.common.bridge.data;
 public interface CustomNameableBridge {
 
     void bridge$setCustomDisplayName(String string);
-
 }

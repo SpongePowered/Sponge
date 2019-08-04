@@ -38,5 +38,4 @@ public interface FlaggedPopulatorBridge {
     default void bridge$populate(final World world, final Extent extent, final Random rand, final ImmutableBiomeVolume virtualBiomes, final List<String> flags) {
         bridge$populate(world, extent, rand, flags);
     }
-
 }

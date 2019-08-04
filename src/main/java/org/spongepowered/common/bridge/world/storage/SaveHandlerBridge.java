@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.bridge.world.storage;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 
 import java.io.File;
@@ -34,8 +32,6 @@ import java.io.IOException;
 public interface SaveHandlerBridge {
 
     void bridge$loadSpongeDatData(WorldInfo info) throws IOException;
-
-    void bridge$loadDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound);
 
     File bridge$getSpongeWorldDirectory();
 }

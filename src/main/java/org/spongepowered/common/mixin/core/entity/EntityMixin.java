@@ -85,12 +85,12 @@ import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
-import org.spongepowered.common.bridge.data.VanishingBridge;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -113,7 +113,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishingBridge, InvulnerableTrackedBridge, TimingBridge {
+public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge, TimingBridge {
 
     // @formatter:off
     protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((Entity) (Object) this).getClass());
@@ -193,8 +193,8 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void impl$UpdateDimension(final Entity self, final int dimensionId, final net.minecraft.world.World worldIn) {
-        if (worldIn instanceof ServerWorldBridge) {
-            self.dimension = ((ServerWorldBridge) worldIn).bridge$getDimensionId();
+        if (worldIn instanceof WorldServerBridge) {
+            self.dimension = ((WorldServerBridge) worldIn).bridge$getDimensionId();
         } else {
             self.dimension = dimensionId;
         }
@@ -383,7 +383,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
         if (this.world != transform.getExtent()) {
             this.world = (net.minecraft.world.World) transform.getExtent();
-            this.dimension = ((ServerWorldBridge) this.world).bridge$getDimensionId();
+            this.dimension = ((WorldServerBridge) this.world).bridge$getDimensionId();
         }
     }
 
@@ -484,12 +484,12 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(Constants.Sponge.Entity.CAN_GRIEF));
         }
         if (compound.hasKey(Constants.Sponge.Entity.IS_VANISHED, Constants.NBT.TAG_BYTE)) {
-            this.vanish$setVanished(compound.getBoolean(Constants.Sponge.Entity.IS_VANISHED));
-            this.vanish$setUncollideable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE));
-            this.vanish$setUntargetable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE));
+            this.bridge$setVanished(compound.getBoolean(Constants.Sponge.Entity.IS_VANISHED));
+            this.bridge$setUncollideable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE));
+            this.bridge$setUntargetable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE));
         }
         if (compound.hasKey(Constants.Sponge.Entity.IS_INVISIBLE, Constants.NBT.TAG_BYTE)) {
-            this.vanish$setInvisible(compound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE));
+            this.bridge$setInvisible(compound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE));
         }
     }
 
@@ -507,9 +507,9 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer()) {
             compound.setBoolean(Constants.Sponge.Entity.CAN_GRIEF, ((GrieferBridge) this).bridge$CanGrief());
         }
-        compound.setBoolean(Constants.Sponge.Entity.IS_VANISHED, this.vanish$isVanished());
-        compound.setBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, this.vanish$isUncollideable());
-        compound.setBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, this.vanish$isUntargetable());
+        compound.setBoolean(Constants.Sponge.Entity.IS_VANISHED, this.bridge$isVanished());
+        compound.setBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, this.bridge$isUncollideable());
+        compound.setBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, this.bridge$isUntargetable());
         compound.setBoolean(Constants.Sponge.Entity.IS_INVISIBLE, this.isInvisible());
     }
 
@@ -580,44 +580,44 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
 
     @Override
-    public boolean vanish$isInvisible() {
+    public boolean bridge$isInvisible() {
         return this.isInvisible();
     }
 
     @Override
-    public void vanish$setInvisible(final boolean invisible) {
+    public void bridge$setInvisible(final boolean invisible) {
         this.setInvisible(invisible);
     }
 
     @Override
-    public boolean vanish$isVanished() {
+    public boolean bridge$isVanished() {
         return this.vanish$isVanished;
     }
 
     @Override
-    public void vanish$setVanished(final boolean vanished) {
+    public void bridge$setVanished(final boolean vanished) {
         this.vanish$isVanished = vanished;
         this.vanish$pendingVisibilityUpdate = true;
         this.vanish$visibilityTicks = 20;
     }
 
     @Override
-    public boolean vanish$isUncollideable() {
+    public boolean bridge$isUncollideable() {
         return this.vanish$collision;
     }
 
     @Override
-    public void vanish$setUncollideable(final boolean prevents) {
+    public void bridge$setUncollideable(final boolean prevents) {
         this.vanish$collision = prevents;
     }
 
     @Override
-    public boolean vanish$isUntargetable() {
+    public boolean bridge$isUntargetable() {
         return this.vanish$untargetable;
     }
 
     @Override
-    public void vanish$setUntargetable(final boolean untargetable) {
+    public void bridge$setUntargetable(final boolean untargetable) {
         this.vanish$untargetable = untargetable;
     }
 
@@ -634,7 +634,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @Redirect(method = "applyEntityCollision", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;noClip:Z", opcode = Opcodes.GETFIELD))
     private boolean spongeApplyEntityCollisionCheckVanish(final Entity entity) {
-        return entity.noClip || ((VanishingBridge) entity).vanish$isVanished();
+        return entity.noClip || ((VanishableBridge) entity).bridge$isVanished();
     }
 
     @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))

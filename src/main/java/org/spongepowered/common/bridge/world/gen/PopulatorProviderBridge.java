@@ -29,5 +29,4 @@ import org.spongepowered.api.world.gen.WorldGenerator;
 public interface PopulatorProviderBridge {
 
     void bridge$addPopulators(WorldGenerator generator);
-    
 }

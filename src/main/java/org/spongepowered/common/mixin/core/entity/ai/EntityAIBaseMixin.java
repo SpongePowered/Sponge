@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
+import org.spongepowered.common.bridge.entity.ai.EntityAIBasesBridge;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
 
 import java.util.Optional;
@@ -40,7 +40,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityAIBase.class)
-public abstract class EntityAIBaseMixin implements EntityGoalBridge {
+public abstract class EntityAIBaseMixin implements EntityAIBasesBridge {
 
     private AITaskType impl$type;
     private Optional<Goal<?>> impl$owner = Optional.empty();

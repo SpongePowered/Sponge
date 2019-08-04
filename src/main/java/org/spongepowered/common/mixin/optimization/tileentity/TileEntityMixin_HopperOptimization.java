@@ -37,12 +37,7 @@ public class TileEntityMixin_HopperOptimization implements HopperOptimizationBri
     private boolean hopper$shouldCancelDirtyUpdate = false;
 
     @Override
-    public boolean hopper$getCancelDirtyUpdate() {
-        return this.hopper$shouldCancelDirtyUpdate;
-    }
-
-    @Override
-    public void hopper$setCancelDirtyUpdate(final boolean canMarkDirty) {
+    public void hopperBridge$setCancelDirtyUpdate(final boolean canMarkDirty) {
         this.hopper$shouldCancelDirtyUpdate = canMarkDirty;
     }
 

@@ -29,5 +29,4 @@ import java.net.InetAddress;
 public interface IPBanUserLIstEntryBridge {
 
     InetAddress bridge$getAddress();
-
 }

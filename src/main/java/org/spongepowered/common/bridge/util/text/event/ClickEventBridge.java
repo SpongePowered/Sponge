@@ -31,5 +31,4 @@ public interface ClickEventBridge {
     ClickAction<?> bridge$getHandle();
 
     void bridge$setHandle(ClickAction<?> handle);
-
 }

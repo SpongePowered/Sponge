@@ -31,13 +31,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.packet.ResourcePackBridge;
+import org.spongepowered.common.bridge.packet.SPacketResourcePackSendBridge;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import java.net.URISyntaxException;
 
 @Mixin(SPacketResourcePackSend.class)
-public abstract class SPacketResourcePackSendMixin implements ResourcePackBridge {
+public abstract class SPacketResourcePackSendMixin implements SPacketResourcePackSendBridge {
 
     @Shadow private String url;
     @Shadow private String hash;

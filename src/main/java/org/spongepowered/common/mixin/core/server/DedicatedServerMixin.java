@@ -25,13 +25,11 @@
 package org.spongepowered.common.mixin.core.server;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.PropertyManager;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -45,10 +43,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-
-import java.net.InetSocketAddress;
-import java.util.Optional;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin extends MinecraftServerMixin {
@@ -97,7 +92,7 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
         final IPhaseState<?> phaseState = PhaseTracker.getInstance().getCurrentState();
         if (!phaseState.isInteraction()) {
             // TODO BLOCK_PROTECTED flag
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos, playerIn).isCancelled()) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) worldIn, pos, playerIn).isCancelled()) {
                 return true;
             }
         }

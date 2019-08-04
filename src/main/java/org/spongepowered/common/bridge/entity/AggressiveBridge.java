@@ -29,5 +29,4 @@ public interface AggressiveBridge {
     boolean bridge$isAngry();
 
     void bridge$setAngry(boolean angry);
-
 }

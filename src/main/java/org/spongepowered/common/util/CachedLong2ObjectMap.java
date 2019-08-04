@@ -25,18 +25,18 @@
 package org.spongepowered.common.util;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import org.spongepowered.common.bridge.util.CacheKeyed;
+import org.spongepowered.common.bridge.util.CacheKeyBridge;
 
 import javax.annotation.Nullable;
 
-public class CachedLong2ObjectMap<V extends CacheKeyed> extends Long2ObjectOpenHashMap<V> {
+public class CachedLong2ObjectMap<V extends CacheKeyBridge> extends Long2ObjectOpenHashMap<V> {
 
     private static final long serialVersionUID = 190617916448550012L;
     @Nullable private V lastRetrievedValue = null;
 
     @Override
     public V get(final long key) {
-        if (this.lastRetrievedValue != null && key == this.lastRetrievedValue.cache$getCacheKey()) {
+        if (this.lastRetrievedValue != null && key == this.lastRetrievedValue.bridge$getCacheKey()) {
             return this.lastRetrievedValue;
         }
         return this.lastRetrievedValue = super.get(key);
@@ -44,7 +44,7 @@ public class CachedLong2ObjectMap<V extends CacheKeyed> extends Long2ObjectOpenH
 
     @Override
     public V remove(final long key) {
-        if (this.lastRetrievedValue != null && key == this.lastRetrievedValue.cache$getCacheKey()) {
+        if (this.lastRetrievedValue != null && key == this.lastRetrievedValue.bridge$getCacheKey()) {
             this.lastRetrievedValue = null;
         }
         return super.remove(key);

@@ -43,7 +43,4 @@ public interface ServerStatusResponseBridge {
     ServerStatusResponse.Players bridge$getPlayerBackup();
 
     void bridge$setPlayerBackup(@Nullable ServerStatusResponse.Players players);
-
-
-
 }

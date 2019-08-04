@@ -34,10 +34,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.data.processor.common.SkullUtils;
-import org.spongepowered.common.bridge.tileentity.SkullBlockEntityBridge;
+import org.spongepowered.common.bridge.tileentity.TileEntitySkullBridge;
 
 @Mixin(TileEntitySkull.class)
-public abstract class TileEntitySkullMixin extends TileEntityMixin implements SkullBlockEntityBridge {
+public abstract class TileEntitySkullMixin extends TileEntityMixin implements TileEntitySkullBridge {
 
     @Shadow private com.mojang.authlib.GameProfile playerProfile;
     @Shadow private int skullType;
@@ -80,7 +80,7 @@ public abstract class TileEntitySkullMixin extends TileEntityMixin implements Sk
             } else {
                 Sponge.getServer().getGameProfileManager().get(profile.getName().get()).handle((newProfile, thrown) -> {
                     if (newProfile != null) {
-                        ((SkullBlockEntityBridge) this).bridge$setPlayerProfile((GameProfile) newProfile, false);
+                        ((TileEntitySkullBridge) this).bridge$setPlayerProfile((GameProfile) newProfile, false);
                         ((TileEntityBridge) this).bridge$markDirty();
                     } else {
                         SpongeImpl.getLogger().warn("Could not update player GameProfile for Skull: ",

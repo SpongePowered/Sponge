@@ -35,7 +35,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 
 import java.util.List;
 import java.util.Optional;
@@ -140,7 +140,8 @@ public interface BlockBridge {
     ImmutableMap<Class<? extends Property<?,?>>,Property<?,?>> bridge$getProperties(IBlockState mixinStateImplementation);
 
     void bridge$initializeTrackerState();
-    default BiConsumer<CauseStackManager.StackFrame, ServerWorldBridge> bridge$getTickFrameModifier() {
+
+    default BiConsumer<CauseStackManager.StackFrame, WorldServerBridge> bridge$getTickFrameModifier() {
         return (frame, world) -> {};
     }
 }

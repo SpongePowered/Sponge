@@ -39,7 +39,7 @@ public class WorldBorderMixin implements WorldBorderBridge {
     @Shadow @Final private List<IBorderListener> listeners;
 
     @Override
-    public List<IBorderListener> bridge$getListeners() {
+    public List<IBorderListener> accessor$getListeners() {
         return this.listeners;
     }
 }

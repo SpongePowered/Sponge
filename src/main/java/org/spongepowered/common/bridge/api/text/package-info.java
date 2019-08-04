@@ -22,14 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.tileentity;
-
-import net.minecraft.potion.Potion;
-
-public interface BeaconTileEntityBridge {
-
-    void bridge$forceSetPrimaryEffect(Potion potion);
-
-    void bridge$forceSetSecondaryEffect(Potion potion);
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.bridge.api.text;

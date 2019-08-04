@@ -32,5 +32,4 @@ public interface ActiveChunkReferantBridge {
     ChunkBridge bridge$getActiveChunk();
 
     void bridge$setActiveChunk(@Nullable ChunkBridge chunk);
-
 }

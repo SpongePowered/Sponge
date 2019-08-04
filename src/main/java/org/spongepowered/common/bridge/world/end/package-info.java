@@ -22,35 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.tileentity;
-
-import com.flowpowered.math.vector.Vector3i;
-import org.spongepowered.api.data.type.StructureMode;
-
-public interface StructureBlockEntityBridge {
-
-    String bridge$getAuthor();
-
-    void bridge$setAuthor(String author);
-
-    boolean bridge$shouldIgnoreEntities();
-
-    float bridge$getIntegrity();
-
-    StructureMode bridge$getMode();
-
-    void bridge$setMode(StructureMode mode);
-
-    Vector3i bridge$getPosition();
-
-    void bridge$setPosition(Vector3i position);
-
-    boolean bridge$shouldShowAir();
-
-    boolean bridge$shouldShowBoundingBox();
-
-    Vector3i bridge$getSize();
-
-    void bridge$setSize(Vector3i size);
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.bridge.world.end;

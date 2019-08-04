@@ -62,12 +62,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.data.VanishingBridge;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
@@ -291,7 +291,7 @@ public abstract class WorldMixin implements WorldBridge {
         if (this.impl$hasChecked) {
             return this.impl$isDefinitelyFake;
         }
-        this.impl$isDefinitelyFake = this.isRemote || this.worldInfo == null || this.worldInfo.getWorldName() == null || !(this instanceof ServerWorldBridge);
+        this.impl$isDefinitelyFake = this.isRemote || this.worldInfo == null || this.worldInfo.getWorldName() == null || !(this instanceof WorldServerBridge);
         this.impl$hasChecked = true;
         return this.impl$isDefinitelyFake;
     }
@@ -313,20 +313,20 @@ public abstract class WorldMixin implements WorldBridge {
     private List<net.minecraft.entity.Entity> filterInvisibile(final net.minecraft.world.World world, final net.minecraft.entity.Entity entityIn,
         final AxisAlignedBB axisAlignedBB) {
         final List<net.minecraft.entity.Entity> entities = world.getEntitiesWithinAABBExcludingEntity(entityIn, axisAlignedBB);
-        entities.removeIf(entity -> ((VanishingBridge) entity).vanish$isVanished() && ((VanishingBridge) entity).vanish$isUncollideable());
+        entities.removeIf(entity -> ((VanishableBridge) entity).bridge$isVanished() && ((VanishableBridge) entity).bridge$isUncollideable());
         return entities;
     }
 
     @SuppressWarnings("Guava")
     @Redirect(method = "getClosestPlayer(DDDDLcom/google/common/base/Predicate;)Lnet/minecraft/entity/player/EntityPlayer;", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     private boolean onGetClosestPlayerCheck(final com.google.common.base.Predicate<net.minecraft.entity.Entity> predicate, final Object entityPlayer) {
-        return predicate.apply((EntityPlayer) entityPlayer) && !((VanishingBridge) entityPlayer).vanish$isVanished();
+        return predicate.apply((EntityPlayer) entityPlayer) && !((VanishableBridge) entityPlayer).bridge$isVanished();
     }
 
     @Inject(method = "playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", at = @At("HEAD"), cancellable = true)
     private void spongePlaySoundAtEntity(final EntityPlayer entity, final double x, final double y, final double z, final SoundEvent name, final net.minecraft.util.SoundCategory category, final float volume, final float pitch, final CallbackInfo callbackInfo) {
         if (entity instanceof EntityBridge) {
-            if (((VanishingBridge) entity).vanish$isVanished()) {
+            if (((VanishableBridge) entity).bridge$isVanished()) {
                 callbackInfo.cancel();
             }
         }

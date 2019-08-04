@@ -131,8 +131,7 @@ public interface ChunkBridge {
 
     Chunk[] bridge$getNeighborArray();
 
-    /**
-     * To be removed with Mixin 0.8
-     */
+    // TODO Mixin 0.8
+    @Deprecated
     void accessor$populate(IChunkGenerator generator);
 }

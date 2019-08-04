@@ -84,7 +84,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
@@ -449,7 +449,7 @@ public final class EntityUtil {
             toWorld.updateEntityWithOptionalForce(player, false);
         }
 
-        player.dimension = ((ServerWorldBridge) toWorld).bridge$getDimensionId();
+        player.dimension = ((WorldServerBridge) toWorld).bridge$getDimensionId();
         player.setWorld(toWorld);
 
         // preparePlayer
@@ -510,7 +510,7 @@ public final class EntityUtil {
         final Transform<World> fromTransform = sEntity.getTransform();
         final WorldServer fromWorld = ((WorldServer) entity.world);
 
-        int toDimensionId = ((ServerWorldBridge) toWorld).bridge$getDimensionId();
+        int toDimensionId = ((WorldServerBridge) toWorld).bridge$getDimensionId();
 
         // Entering End Portal in End goes to Overworld in Vanilla
         if (toDimensionId == 1 && fromWorld.provider instanceof WorldProviderEnd) {
@@ -709,7 +709,7 @@ public final class EntityUtil {
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
-                    ((ServerWorldBridge) entityToSpawn.world).bridge$forceSpawnEntity(entityToSpawn);
+                    ((WorldServerBridge) entityToSpawn.world).bridge$forceSpawnEntity(entityToSpawn);
                     return true;
                 }
             }
@@ -722,7 +722,7 @@ public final class EntityUtil {
                 }
             });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        ((ServerWorldBridge) entity.getWorld()).bridge$forceSpawnEntity((Entity) entity);
+        ((WorldServerBridge) entity.getWorld()).bridge$forceSpawnEntity((Entity) entity);
         return true;
     }
 

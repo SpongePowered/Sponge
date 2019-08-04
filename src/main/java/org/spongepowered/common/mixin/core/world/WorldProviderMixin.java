@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
 
 @Mixin(WorldProvider.class)
@@ -85,7 +85,7 @@ public abstract class WorldProviderMixin implements Dimension, WorldProviderBrid
     }
 
     @Override
-    public void bridge$setGeneratorSettings(final String generatorSettings) {
+    public void accessor$setGeneratorSettings(final String generatorSettings) {
         this.generatorSettings = generatorSettings;
     }
 
@@ -113,7 +113,7 @@ public abstract class WorldProviderMixin implements Dimension, WorldProviderBrid
     public boolean canDropChunk(final int x, final int z) {
         final boolean isSpawnChunk = this.world.isSpawnChunk(x, z);
 
-        return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.provider.getDimensionType(), ((ServerWorldBridge) this.world)
+        return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.provider.getDimensionType(), ((WorldServerBridge) this.world)
                 .bridge$getDimensionId());
     }
 }

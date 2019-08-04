@@ -31,5 +31,4 @@ import javax.annotation.Nullable;
 public interface WorldGenDoublePlantBridge {
 
     void bridge$setCurrentExtent(@Nullable Extent extent);
-
 }

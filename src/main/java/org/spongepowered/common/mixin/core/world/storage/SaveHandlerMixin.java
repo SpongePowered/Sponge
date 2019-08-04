@@ -196,15 +196,6 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
         }
     }
 
-    @Override
-    public void bridge$loadDimensionAndOtherData(final SaveHandler handler, final WorldInfo info, final NBTTagCompound compound) {
-        // Preserve dimension data from Sponge
-        final NBTTagCompound customWorldDataCompound = compound.getCompoundTag("Forge");
-        if (customWorldDataCompound.hasKey("DimensionData")) {
-            WorldManager.loadDimensionDataMap(customWorldDataCompound.getCompoundTag("DimensionData"));
-        }
-    }
-
     private void impl$saveDimensionAndOtherData(final SaveHandler handler, final WorldInfo info, final NBTTagCompound compound) {
         // Only save dimension data to root world
         if (this.worldDirectory.getParentFile() == null

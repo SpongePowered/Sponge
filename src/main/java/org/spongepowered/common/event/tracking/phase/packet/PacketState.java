@@ -39,7 +39,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -97,7 +97,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
 
     @Override
     public void appendNotifierToBlockEvent(P context, PhaseContext<?> currentContext,
-        ServerWorldBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
+                                           WorldServerBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
 
     }
 

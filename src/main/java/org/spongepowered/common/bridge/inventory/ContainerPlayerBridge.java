@@ -27,5 +27,4 @@ package org.spongepowered.common.bridge.inventory;
 public interface ContainerPlayerBridge {
 
     int bridge$getOffHandSlot();
-
 }

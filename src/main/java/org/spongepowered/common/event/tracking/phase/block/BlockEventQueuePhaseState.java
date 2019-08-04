@@ -36,14 +36,14 @@ public class BlockEventQueuePhaseState extends BlockPhaseState {
     public final BiConsumer<StackFrame, GeneralizedContext> FRAME_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
         final BlockEventDataBridge blockEventData = context.getSource(BlockEventDataBridge.class).orElse(null);
         if (blockEventData != null) {
-            if (blockEventData.getBridge$TileEntity() != null) {
-                frame.pushCause(blockEventData.getBridge$TileEntity());
+            if (blockEventData.bridge$getTileEntity() != null) {
+                frame.pushCause(blockEventData.bridge$getTileEntity());
             }
-            if (blockEventData.getBridge$TickingLocatable() != null) {
-                if (blockEventData.getBridge$TileEntity() == null) {
-                    frame.pushCause(blockEventData.getBridge$TickingLocatable());
+            if (blockEventData.bridge$getTickingLocatable() != null) {
+                if (blockEventData.bridge$getTileEntity() == null) {
+                    frame.pushCause(blockEventData.bridge$getTickingLocatable());
                 }
-                frame.addContext(EventContextKeys.BLOCK_EVENT_QUEUE, blockEventData.getBridge$TickingLocatable());
+                frame.addContext(EventContextKeys.BLOCK_EVENT_QUEUE, blockEventData.bridge$getTickingLocatable());
             }
         }
     });

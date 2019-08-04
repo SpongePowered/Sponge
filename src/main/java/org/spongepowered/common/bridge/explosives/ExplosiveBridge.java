@@ -33,5 +33,4 @@ public interface ExplosiveBridge {
     Optional<Integer> bridge$getExplosionRadius();
 
     void bridge$setExplosionRadius(@Nullable Integer radius);
-
 }

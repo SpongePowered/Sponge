@@ -24,13 +24,7 @@
  */
 package org.spongepowered.common.bridge.entity.player;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
-import org.spongepowered.common.item.inventory.adapter.impl.DefaultImplementedInventoryAdapter;
-
-import java.util.List;
 
 public interface InventoryPlayerBridge {
 
@@ -44,14 +38,6 @@ public interface InventoryPlayerBridge {
      *      server
      */
     void bridge$setSelectedItem(int itemIndex, boolean notify);
-
-    /**
-     * Gets the first available slot id for itemstack.
-     *
-     * @param itemstack The itemstack attempting to be stored
-     * @return The slot id or -1 if no slot found.
-     */
-    int bridge$getFirstAvailableSlot(ItemStack itemstack);
 
     /**
      * Cleanup dirty Inventory State. E.g. after changes made through a scheduled task.

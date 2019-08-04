@@ -32,7 +32,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -73,7 +73,7 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
     }
 
     @Override
-    public void appendNotifierPreBlockTick(ServerWorldBridge mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
+    public void appendNotifierPreBlockTick(WorldServerBridge mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
         if (this == TickPhase.Tick.BLOCK || this == TickPhase.Tick.RANDOM_BLOCK) {
 
         }

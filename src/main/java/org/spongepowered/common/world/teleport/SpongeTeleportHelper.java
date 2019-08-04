@@ -37,7 +37,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,7 +64,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             filters.add(TeleportHelperFilters.CONFIG);
         }
 
-        final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge)((net.minecraft.world.WorldServer) world).getChunkProvider();
+        final ChunkProviderServerBridge chunkProviderServer = (ChunkProviderServerBridge)((net.minecraft.world.WorldServer) world).getChunkProvider();
         final boolean previous = chunkProviderServer.bridge$getForceChunkRequests();
         chunkProviderServer.bridge$setForceChunkRequests(true);
 

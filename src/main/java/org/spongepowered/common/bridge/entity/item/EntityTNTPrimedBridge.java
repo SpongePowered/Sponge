@@ -32,5 +32,4 @@ public interface EntityTNTPrimedBridge {
     void bridge$setDetonator(EntityLivingBase detonator);
 
     boolean bridge$isExploding();
-
 }

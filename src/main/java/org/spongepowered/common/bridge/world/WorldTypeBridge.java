@@ -36,8 +36,9 @@ public interface WorldTypeBridge {
 
     Optional<Function<World, BiomeProvider>> bridge$getBiomeProvider();
 
-    Optional<BiFunction<World, String, IChunkGenerator>> bridge$getChvunkGenerator();
+    Optional<BiFunction<World, String, IChunkGenerator>> bridge$getChunkGenerator();
 
     void bridge$setChunkGenerator(BiFunction<World, String, IChunkGenerator> function);
+
     void bridge$setBiomeProvider(Function<World, BiomeProvider> function);
 }

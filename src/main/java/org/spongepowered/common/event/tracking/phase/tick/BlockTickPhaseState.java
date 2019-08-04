@@ -44,7 +44,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -63,7 +63,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         super.getFrameModifier().andThen((frame, context) ->
             {
                 frame.pushCause(this.getLocatableBlockSourceFromContext(context));
-                context.tickingBlock.bridge$getTickFrameModifier().accept(frame, (ServerWorldBridge) context.world);
+                context.tickingBlock.bridge$getTickFrameModifier().accept(frame, (WorldServerBridge) context.world);
             }
         );
     private final String desc;

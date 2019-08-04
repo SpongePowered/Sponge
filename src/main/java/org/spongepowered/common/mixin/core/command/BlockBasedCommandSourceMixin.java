@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
 @NonnullByDefault
-@Mixin(value = {TileEntityCommandBlock.class, EntityMinecartCommandBlock.class}, targets = CommandSenderBridge.SIGN_CLICK_SENDER, priority = 999)
+@Mixin(value = {TileEntityCommandBlock.class, EntityMinecartCommandBlock.class}, targets = "net/minecraft/tileentity/TileEntitySign$1", priority = 999)
 public abstract class BlockBasedCommandSourceMixin implements CommandSourceBridge, CommandBlockSource, SubjectBridge {
 
     @Override

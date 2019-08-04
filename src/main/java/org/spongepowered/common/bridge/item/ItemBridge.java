@@ -32,5 +32,4 @@ import java.util.List;
 public interface ItemBridge {
 
     void bridge$gatherManipulators(ItemStack itemStack, List<DataManipulator<?, ?>> list);
-
 }

@@ -48,5 +48,4 @@ public interface DimensionTypeBridge {
     void setShouldLoadSpawn(boolean keepSpawnLoaded);
 
     String bridge$getSanitizedId();
-
 }

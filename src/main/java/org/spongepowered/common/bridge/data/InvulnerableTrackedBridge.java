@@ -29,5 +29,4 @@ public interface InvulnerableTrackedBridge {
     void bridge$setInvulnerable(boolean value);
 
     boolean bridge$getIsInvulnerable();
-
 }

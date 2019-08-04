@@ -49,5 +49,4 @@ public interface InventoryAdapterBridge {
     PluginContainer bridge$getPlugin();
 
     void bridge$setPlugin(PluginContainer container);
-
 }

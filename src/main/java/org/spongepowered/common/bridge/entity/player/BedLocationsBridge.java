@@ -37,5 +37,4 @@ public interface BedLocationsBridge {
     Map<UUID, RespawnLocation> bridge$getBedlocations();
 
     ImmutableMap<UUID, RespawnLocation> bridge$removeAllBeds();
-
 }

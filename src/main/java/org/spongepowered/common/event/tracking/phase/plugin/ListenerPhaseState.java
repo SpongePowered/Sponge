@@ -30,7 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -66,7 +66,7 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
 
     @Override
     public void appendNotifierToBlockEvent(L context, PhaseContext<?> currentContext,
-        ServerWorldBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
+                                           WorldServerBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
 
     }
 

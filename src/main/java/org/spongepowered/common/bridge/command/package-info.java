@@ -22,9 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.packet;
-
-public interface WorldBorderPacketBridge {
-
-    void bridge$changeCoordinatesForNether();
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.bridge.command;

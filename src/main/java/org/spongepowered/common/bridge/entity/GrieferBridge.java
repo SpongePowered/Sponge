@@ -35,5 +35,4 @@ public interface GrieferBridge {
     default boolean bridge$isGriefer() {
         return !(this instanceof EntityPlayerMP);
     }
-
 }

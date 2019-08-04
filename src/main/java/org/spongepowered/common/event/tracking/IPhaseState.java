@@ -61,7 +61,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCauseStackManager;
@@ -213,7 +213,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * </p>
      *
      * <p>Note that the {@link PhaseTracker} is only provided for easy access
-     * to the {@link WorldServer}, {@link ServerWorldBridge}, and
+     * to the {@link WorldServer}, {@link WorldServerBridge}, and
      * {@link World} instances.</p>
      *
      * @param phaseContext The context of the current state being unwound
@@ -722,7 +722,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param context The context
      * @param phaseContext the block tick context being entered
      */
-    default void appendNotifierPreBlockTick(ServerWorldBridge mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
+    default void appendNotifierPreBlockTick(WorldServerBridge mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
         final Chunk chunk = ((WorldServer) mixinWorld).getChunk(pos);
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
@@ -740,7 +740,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param blockEvent
      */
     default void appendNotifierToBlockEvent(C context, PhaseContext<?> currentContext,
-        ServerWorldBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
+                                            WorldServerBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
 
     }
 
@@ -811,8 +811,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default void capturesNeighborNotifications(C context, ServerWorldBridge mixinWorld, BlockPos notifyPos, Block sourceBlock,
-        IBlockState iblockstate, BlockPos sourcePos) {
+    default void capturesNeighborNotifications(C context, WorldServerBridge mixinWorld, BlockPos notifyPos, Block sourceBlock,
+                                               IBlockState iblockstate, BlockPos sourcePos) {
     }
     /**
      * Specifically captures a block change by {@link ChunkMixin#bridge$setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)}
@@ -842,7 +842,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return null;
 
     }
-    default void captureTileEntityReplacement(C currentContext, ServerWorldBridge mixinWorldServer, BlockPos pos, @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
+    default void captureTileEntityReplacement(C currentContext, WorldServerBridge mixinWorldServer, BlockPos pos, @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
         // Default, do nothing.
 
     }

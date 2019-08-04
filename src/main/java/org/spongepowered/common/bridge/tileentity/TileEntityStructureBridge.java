@@ -22,21 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.bridge.tileentity;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.chunk.Chunk;
+import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.api.data.type.StructureMode;
 
-import java.util.List;
-import java.util.concurrent.ExecutorService;
+public interface TileEntityStructureBridge {
 
-public interface ServerWorldBridge_AsyncLighting {
+    String bridge$getAuthor();
 
-    boolean asyncLightingBridge$updateLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk);
+    void bridge$setAuthor(String author);
 
-    boolean asyncLightingBridge$checkLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk, List<Chunk> neighbors);
+    boolean bridge$shouldIgnoreEntities();
 
-    ExecutorService asyncLightingBridge$getLightingExecutor();
+    float bridge$getIntegrity();
 
+    StructureMode bridge$getMode();
+
+    void bridge$setMode(StructureMode mode);
+
+    Vector3i bridge$getPosition();
+
+    void bridge$setPosition(Vector3i position);
+
+    boolean bridge$shouldShowAir();
+
+    boolean bridge$shouldShowBoundingBox();
+
+    Vector3i bridge$getSize();
+
+    void bridge$setSize(Vector3i size);
 }

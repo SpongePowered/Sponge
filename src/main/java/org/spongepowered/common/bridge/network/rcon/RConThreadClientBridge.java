@@ -24,28 +24,9 @@
  */
 package org.spongepowered.common.bridge.network.rcon;
 
-import java.net.Socket;
-
 public interface RConThreadClientBridge {
 
-    /** True if the client has succefssfully logged into the RCon, otherwise false */
     boolean bridge$getLoggedIn();
 
     void bridge$setLoggedIn(boolean loggedIn);
-
-    /** The client's Socket connection */
-    Socket bridge$getClientSocket();
-
-    void bridge$setClientSocket(Socket clientSocket);
-
-    /** A buffer for incoming Socket data */
-    byte[] bridge$getBuffer();
-
-    void bridge$setBuffer(byte[] buffer);
-
-    /** The RCon password */
-    String bridge$getRconPassword();
-
-    void bridge$setRconPassword(String rconPassword);
-
 }

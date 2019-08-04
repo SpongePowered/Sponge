@@ -27,5 +27,4 @@ package org.spongepowered.common.bridge.network;
 public interface NetHandlerLoginServerBridge {
 
     boolean bridge$fireAuthEvent();
-
 }

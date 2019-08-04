@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.command.CommandSenderBridge;
 import org.spongepowered.common.command.WrapperCommandSource;
 
-@Mixin(targets = CommandSenderBridge.SIGN_CLICK_SENDER)
+@Mixin(targets = "net/minecraft/tileentity/TileEntitySign$1")
 public abstract class TileEntitySign$1Mixin_API implements SignSource {
 
     @Shadow(aliases = {"this$0", "field_174795_a"})

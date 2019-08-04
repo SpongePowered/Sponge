@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
@@ -87,7 +87,7 @@ public class ChunkMixin_Collisions {
     }
 
     private <T extends Entity> boolean collisionsImpl$allowEntityCollision(final List<T> listToFill) {
-        if (this.world instanceof ServerWorldBridge) {
+        if (this.world instanceof WorldServerBridge) {
             if (PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
                 // allow explosions
                 return true;

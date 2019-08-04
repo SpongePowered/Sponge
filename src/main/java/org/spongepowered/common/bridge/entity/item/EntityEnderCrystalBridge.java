@@ -36,6 +36,4 @@ public interface EntityEnderCrystalBridge {
     @Nullable
     Explosion bridge$ThrowEventWithDetonation(World world, @Nullable Entity nil, double x,
         double y, double z, boolean smoking, @Nullable DamageSource source);
-
-
 }

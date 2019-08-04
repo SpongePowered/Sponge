@@ -134,7 +134,7 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -506,11 +506,11 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos) {
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(final WorldServerBridge worldIn, final BlockPos pos) {
         return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
     }
 
-    public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos, final Object source) {
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(final WorldServerBridge worldIn, final BlockPos pos, final Object source) {
         return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
     }
 
@@ -523,7 +523,7 @@ public class SpongeCommonEventFactory {
      * @param source The source of event
      * @return The event
      */
-    private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final ImmutableList<Location<World>> locations, @Nullable Object source) {
+    private static ChangeBlockEvent.Pre callChangeBlockEventPre(final WorldServerBridge worldIn, final ImmutableList<Location<World>> locations, @Nullable Object source) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
             if (source == null) {
@@ -622,7 +622,7 @@ public class SpongeCommonEventFactory {
      * @return if the event was cancelled
      */
     public static boolean handlePistonEvent(
-        final ServerWorldBridge world, final WorldServer.ServerBlockEventList list, final Object obj, final BlockPos pos, final Block blockIn,
+            final WorldServerBridge world, final WorldServer.ServerBlockEventList list, final Object obj, final BlockPos pos, final Block blockIn,
             final int eventId, final int eventParam) {
         final boolean extending = (eventId == 0);
         final IBlockState blockstate = ((net.minecraft.world.World) world).getBlockState(pos);
@@ -1529,7 +1529,7 @@ public class SpongeCommonEventFactory {
         if (!Sponge.getEventManager().post(event)) {
             final Explosion explosion = event.getExplosionBuilder().build();
             if (explosion.getRadius() > 0) {
-                ((ServerWorldBridge) ((Explosive) explosiveBridge).getWorld())
+                ((WorldServerBridge) ((Explosive) explosiveBridge).getWorld())
                     .bridge$triggerInternalExplosion(explosion,
                         e -> GeneralPhase.State.EXPLOSION.createPhaseContext().explosion(e));
             }

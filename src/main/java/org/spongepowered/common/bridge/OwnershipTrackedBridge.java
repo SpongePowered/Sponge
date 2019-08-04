@@ -70,5 +70,4 @@ public interface OwnershipTrackedBridge {
     void tracked$setNotifier(@Nullable User user);
 
     void tracked$setTrackedUUID(PlayerTracker.Type type, @Nullable UUID uuid);
-
 }

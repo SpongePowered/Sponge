@@ -24,48 +24,17 @@
  */
 package org.spongepowered.common.bridge.tileentity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.WeightedSpawnerEntity;
-
-import java.util.List;
-
 public interface MobSpawnerBaseLogicBridge {
 
     int bridge$getSpawnDelay();
 
     void bridge$setSpawnDelay(int spawnDelay);
 
-    List<WeightedSpawnerEntity> bridge$getPotentialSpawns();
-
-    void bridge$setPotentialSpawns(List<WeightedSpawnerEntity> potentialSpawns);
-
-    WeightedSpawnerEntity bridge$getSpawnData();
-
-    void bridge$setSpawnData(WeightedSpawnerEntity spawnData);
-
-    double bridge$getMobRotation();
-
-    void bridge$setMobRotation(double mobRotation);
-
-    double bridge$getPrevMobRotation();
-
-    void bridge$setPrevMobRotation(double prevMobRotation);
-
     int bridge$getMinSpawnDelay();
-
-    void bridge$setMinSpawnDelay(int minSpawnDelay);
 
     int bridge$getMaxSpawnDelay();
 
-    void bridge$setMaxSpawnDelay(int maxSpawnDelay);
-
     int bridge$getSpawnCount();
-
-    void bridge$setSpawnCount(int spawnCount);
-
-    Entity bridge$getCachedEntity();
-
-    void bridge$setCachedEntity(Entity cachedEntity);
 
     int bridge$getMaxNearbyEntities();
 
@@ -73,9 +42,5 @@ public interface MobSpawnerBaseLogicBridge {
 
     int bridge$getActivatingRangeFromPlayer();
 
-    void bridge$setActivatingRangeFromPlayer(int activatingRangeFromPlayer);
-
     int bridge$getSpawnRange();
-
-    void bridge$setSpawnRange(int spawnRange);
 }

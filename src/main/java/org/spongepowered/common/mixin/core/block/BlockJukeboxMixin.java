@@ -36,11 +36,10 @@ import org.spongepowered.common.bridge.block.BlockJukeboxBridge;
 @Mixin(BlockJukebox.class)
 public abstract class BlockJukeboxMixin implements BlockJukeboxBridge {
 
-
     @Shadow protected abstract void dropRecord(World worldIn, BlockPos pos, IBlockState state);
 
     @Override
-    public void bridge$dropRecordItem(final World worldIn, final BlockPos pos, final IBlockState state) {
+    public void accessor$dropRecordItem(final World worldIn, final BlockPos pos, final IBlockState state) {
         dropRecord(worldIn, pos, state);
     }
 }

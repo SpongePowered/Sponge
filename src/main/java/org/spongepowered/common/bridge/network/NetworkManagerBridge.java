@@ -39,6 +39,4 @@ public interface NetworkManagerBridge {
     MinecraftVersion bridge$getVersion();
 
     void bridge$setVersion(int version);
-
-
 }

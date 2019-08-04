@@ -104,7 +104,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
@@ -379,7 +379,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
      */
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"))
     private void spongePlaySound(final World world, final EntityPlayer player, final double d1, final double d2, final double d3, final SoundEvent sound, final SoundCategory category, final float volume, final float pitch) {
-        if (!this.vanish$isVanished()) {
+        if (!this.bridge$isVanished()) {
             this.world.playSound(player, d1, d2, d3, sound, category, volume, pitch);
         }
     }
@@ -448,7 +448,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
                 // Then go ahead and call the event and return if it was cancelled
                 // if it was cancelled, then there should be no changes needed to roll back
-                return !SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) this.world, pos, this).isCancelled();
+                return !SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) this.world, pos, this).isCancelled();
             }
         }
         // Otherwise, if all else is ignored, or we're not throwing events, we're just going to return the

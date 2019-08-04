@@ -22,15 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.tileentity;
+package org.spongepowered.common.bridge.world;
 
-import com.mojang.authlib.GameProfile;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.chunk.Chunk;
 
-import javax.annotation.Nullable;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
 
-public interface SkullBlockEntityBridge {
+public interface WorldServerBridge_AsyncLighting {
 
-    void bridge$setPlayerProfile(GameProfile mcProfile, boolean update);
+    boolean asyncLightingBridge$updateLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk);
 
+    boolean asyncLightingBridge$checkLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk, List<Chunk> neighbors);
+
+    ExecutorService asyncLightingBridge$getLightingExecutor();
 }

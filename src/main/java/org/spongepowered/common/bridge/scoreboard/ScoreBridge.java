@@ -31,5 +31,4 @@ public interface ScoreBridge {
     void bridge$setSpongeScore(SpongeScore score);
 
     SpongeScore bridge$getSpongeScore();
-
 }

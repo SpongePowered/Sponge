@@ -38,5 +38,4 @@ public interface ChunkBridge_AsyncLighting extends ChunkBridge {
     void asyncLightingBridge$setLightUpdateTime(long time);
 
     Set<Short> asyncLightingBridge$getQueuedLightingUpdates(EnumSkyBlock type);
-
 }

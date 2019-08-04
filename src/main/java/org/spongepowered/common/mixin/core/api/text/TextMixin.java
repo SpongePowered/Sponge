@@ -111,16 +111,6 @@ public abstract class TextMixin implements TextBridge {
         return getHandle().createCopy(); // Mutable instances are not nice :(
     }
 
-    @Override
-    public String bridge$toPlain() {
-        return ((ITextComponentBridge) getHandle()).bridge$toPlain();
-    }
-
-    @Override
-    public String bridge$toPlainSingle() {
-        return getHandle().getUnformattedComponentText();
-    }
-
     /**
      * @author gabizou - June 30th, 2019 - 1.12.2
      * @reason After splitting mixins and providing bridges with proper prefixes,
@@ -159,10 +149,5 @@ public abstract class TextMixin implements TextBridge {
     @Override
     public String bridge$toLegacy(char code) {
         return ((ITextComponentBridge) getHandle()).bridge$toLegacy(code);
-    }
-
-    @Override
-    public String bridge$toLegacySingle(char code) {
-        return ((ITextComponentBridge) getHandle()).bridge$toLegacySingle(code);
     }
 }

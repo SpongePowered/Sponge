@@ -66,14 +66,9 @@ import javax.annotation.Nullable;
 public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBridge {
 
     @Shadow private int spawnDelay;
-    @Shadow @Final @Mutable private List<WeightedSpawnerEntity> potentialSpawns;
-    @Shadow private WeightedSpawnerEntity spawnData;
-    @Shadow private double mobRotation;
-    @Shadow private double prevMobRotation;
     @Shadow private int minSpawnDelay;
     @Shadow private int maxSpawnDelay;
     @Shadow private int spawnCount;
-    @Shadow private Entity cachedEntity;
     @Shadow private int maxNearbyEntities;
     @Shadow private int activatingRangeFromPlayer;
     @Shadow private int spawnRange;
@@ -178,53 +173,8 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
     }
 
     @Override
-    public List<WeightedSpawnerEntity> bridge$getPotentialSpawns() {
-        return this.potentialSpawns;
-    }
-
-    @Override
-    public void bridge$setPotentialSpawns(final List<WeightedSpawnerEntity> potentialSpawns) {
-        this.potentialSpawns = potentialSpawns;
-    }
-
-    @Override
-    public WeightedSpawnerEntity bridge$getSpawnData() {
-        return this.spawnData;
-    }
-
-    @Override
-    public void bridge$setSpawnData(final WeightedSpawnerEntity spawnData) {
-        this.spawnData = spawnData;
-    }
-
-    @Override
-    public double bridge$getMobRotation() {
-        return this.mobRotation;
-    }
-
-    @Override
-    public void bridge$setMobRotation(final double mobRotation) {
-        this.mobRotation = mobRotation;
-    }
-
-    @Override
-    public double bridge$getPrevMobRotation() {
-        return this.prevMobRotation;
-    }
-
-    @Override
-    public void bridge$setPrevMobRotation(final double prevMobRotation) {
-        this.prevMobRotation = prevMobRotation;
-    }
-
-    @Override
     public int bridge$getMinSpawnDelay() {
         return this.minSpawnDelay;
-    }
-
-    @Override
-    public void bridge$setMinSpawnDelay(final int minSpawnDelay) {
-        this.minSpawnDelay = minSpawnDelay;
     }
 
     @Override
@@ -233,28 +183,8 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
     }
 
     @Override
-    public void bridge$setMaxSpawnDelay(final int maxSpawnDelay) {
-        this.maxSpawnDelay = maxSpawnDelay;
-    }
-
-    @Override
     public int bridge$getSpawnCount() {
         return this.spawnCount;
-    }
-
-    @Override
-    public void bridge$setSpawnCount(final int spawnCount) {
-        this.spawnCount = spawnCount;
-    }
-
-    @Override
-    public Entity bridge$getCachedEntity() {
-        return this.cachedEntity;
-    }
-
-    @Override
-    public void bridge$setCachedEntity(final Entity cachedEntity) {
-        this.cachedEntity = cachedEntity;
     }
 
     @Override
@@ -273,17 +203,7 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
     }
 
     @Override
-    public void bridge$setActivatingRangeFromPlayer(final int activatingRangeFromPlayer) {
-        this.activatingRangeFromPlayer = activatingRangeFromPlayer;
-    }
-
-    @Override
     public int bridge$getSpawnRange() {
         return this.spawnRange;
-    }
-
-    @Override
-    public void bridge$setSpawnRange(final int spawnRange) {
-        this.spawnRange = spawnRange;
     }
 }

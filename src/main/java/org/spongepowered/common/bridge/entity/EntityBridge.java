@@ -27,20 +27,11 @@ package org.spongepowered.common.bridge.entity;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
-import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
-
-import java.util.Optional;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 

@@ -33,7 +33,6 @@ import org.spongepowered.api.event.entity.DamageEntityEvent;
 import java.util.List;
 import java.util.Optional;
 
-// in 1.14, this can be named MobEntityBridge.
 public interface LivingEntityBaseBridge {
 
     boolean bridge$damageEntityHook(DamageSource damageSource, float damage);
@@ -53,5 +52,4 @@ public interface LivingEntityBaseBridge {
     float bridge$applyModDamagePost(EntityLivingBase entityLivingBase, DamageSource source, float damage);
 
     void bridge$resetDeathEventsPosted();
-
 }

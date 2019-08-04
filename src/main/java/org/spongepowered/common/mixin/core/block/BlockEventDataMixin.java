@@ -48,34 +48,34 @@ public abstract class BlockEventDataMixin implements BlockEventDataBridge {
 
     @Nullable
     @Override
-    public LocatableBlock getBridge$TickingLocatable() {
+    public LocatableBlock bridge$getTickingLocatable() {
         return this.bridge$TickingBlock;
     }
 
     @Override
-    public void setBridge$TickingLocatable(@Nullable final LocatableBlock tickBlock) {
+    public void bridge$setTickingLocatable(@Nullable final LocatableBlock tickBlock) {
         this.bridge$TickingBlock = tickBlock;
     }
 
     @Nullable
     @Override
-    public TileEntity getBridge$TileEntity() {
+    public TileEntity bridge$getTileEntity() {
         return this.bridge$TileEntity;
     }
 
     @Override
-    public void setBridge$TileEntity(@Nullable final TileEntity bridge$TileEntity) {
+    public void bridge$setTileEntity(@Nullable final TileEntity bridge$TileEntity) {
         this.bridge$TileEntity = bridge$TileEntity;
     }
 
     @Nullable
     @Override
-    public User getBridge$sourceUser() {
+    public User bridge$getSourceUser() {
         return this.bridge$sourceUser;
     }
 
     @Override
-    public void setBridge$sourceUser(@Nullable final User user) {
+    public void bridge$setSourceUser(@Nullable final User user) {
         this.bridge$sourceUser = user;
     }
 

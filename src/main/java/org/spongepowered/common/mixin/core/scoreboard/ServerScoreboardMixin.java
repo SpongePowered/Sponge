@@ -112,7 +112,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Override
     public void removeTeam(final ScorePlayerTeam team) {
         super.removeTeam(team);
-        ((ScorePlayerTeamBridge) team).bridge$setScoreboard(null);
+        ((ScorePlayerTeamBridge) team).accessor$setScoreboard(null);
     }
 
     @Override

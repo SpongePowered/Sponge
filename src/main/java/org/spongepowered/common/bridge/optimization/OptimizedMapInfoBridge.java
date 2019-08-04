@@ -29,5 +29,4 @@ public interface OptimizedMapInfoBridge {
     void mapOptimizationBridge$setValid(boolean valid);
 
     boolean mapOptimizationBridge$isValid();
-
 }

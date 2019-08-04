@@ -32,7 +32,7 @@ import net.minecraft.server.management.PlayerList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 
 @Mixin(CommandSetDefaultSpawnpoint.class)
 public abstract class CommandSetDefaultSpawnpointMixin_MultiWorldCommand {
@@ -42,7 +42,7 @@ public abstract class CommandSetDefaultSpawnpointMixin_MultiWorldCommand {
             target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     private void multiWorldCommand$onSendSpawnPointPacket(final PlayerList playerList, final Packet<?> packet, final MinecraftServer server,
         final ICommandSender sender, final String[] args) {
-        playerList.sendPacketToAllPlayersInDimension(packet, ((ServerWorldBridge) sender.getEntityWorld()).bridge$getDimensionId());
+        playerList.sendPacketToAllPlayersInDimension(packet, ((WorldServerBridge) sender.getEntityWorld()).bridge$getDimensionId());
     }
 
 }

@@ -36,6 +36,4 @@ public interface EntityLargeFireballBridge {
     @Nullable
     Explosion bridge$throwExplosionEventAndExplode(World worldObj, @Nullable Entity nil,
         double x, double y, double z, float strength, boolean flaming, boolean smoking);
-
-
 }

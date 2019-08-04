@@ -40,5 +40,4 @@ public interface NetworkManagerBridge_Bungee {
     Property[] bungeeBridge$getSpoofedProfile();
 
     void bungeeBridge$setSpoofedProfile(Property[] profile);
-
 }

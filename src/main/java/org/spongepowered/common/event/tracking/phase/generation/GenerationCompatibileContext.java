@@ -25,11 +25,9 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 

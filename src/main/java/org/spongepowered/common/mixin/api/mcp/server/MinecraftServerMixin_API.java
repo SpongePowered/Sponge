@@ -59,7 +59,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.world.WorldManager;
@@ -245,7 +245,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
     @Override
     public boolean unloadWorld(final World world) {
         // API is not allowed to unload overworld
-        return ((ServerWorldBridge) world).bridge$getDimensionId() != 0 && WorldManager.unloadWorld((WorldServer) world, false, false);
+        return ((WorldServerBridge) world).bridge$getDimensionId() != 0 && WorldManager.unloadWorld((WorldServer) world, false, false);
 
     }
 

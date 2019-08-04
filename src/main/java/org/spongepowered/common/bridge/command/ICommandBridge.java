@@ -31,5 +31,4 @@ public interface ICommandBridge {
     void bridge$setExpandedSelector(boolean expandedSelector);
 
     void bridge$updateNamespacedAlias(String ownerId);
-
 }

@@ -22,13 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.packet;
+package org.spongepowered.common.bridge.tileentity;
 
-import org.spongepowered.api.resourcepack.ResourcePack;
+import net.minecraft.potion.Potion;
 
-public interface ResourcePackBridge {
+public interface TileEntityBeaconBridge {
 
-    ResourcePack bridge$getSpongePack();
+    void bridge$forceSetPrimaryEffect(Potion potion);
 
-    void bridge$setSpongePack(ResourcePack pack);
+    void bridge$forceSetSecondaryEffect(Potion potion);
 }

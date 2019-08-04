@@ -37,7 +37,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.block.BlockJukeboxBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.block.BlockJukeboxAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -67,7 +66,7 @@ public abstract class TileEntityJukeboxMixin_API extends TileEntityMixin_API imp
         final IBlockState block = this.world.getBlockState(this.pos);
         if (block.getBlock() == Blocks.JUKEBOX) {
             // TODO - Mixin 0.8 accessors
-            ((BlockJukeboxBridge) block.getBlock()).bridge$dropRecordItem(this.world, this.pos, block);
+            ((BlockJukeboxBridge) block.getBlock()).accessor$dropRecordItem(this.world, this.pos, block);
             this.world.setBlockState(this.pos, block.withProperty(BlockJukebox.HAS_RECORD, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }

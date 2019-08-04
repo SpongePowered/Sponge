@@ -41,7 +41,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.ServerWorldBridge_AsyncLighting;
+import org.spongepowered.common.bridge.world.WorldServerBridge_AsyncLighting;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge_AsyncLighting;
@@ -99,7 +99,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
     private void asyncLighting$initializeFields(final World worldIn, final int x, final int z, final CallbackInfo ci) {
         this.asyncLighting$isServerChunk = !((WorldBridge) worldIn).bridge$isFake();
         if (this.asyncLighting$isServerChunk) {
-            this.asyncLighting$lightExecutorService = ((ServerWorldBridge_AsyncLighting) worldIn).asyncLightingBridge$getLightingExecutor();
+            this.asyncLighting$lightExecutorService = ((WorldServerBridge_AsyncLighting) worldIn).asyncLightingBridge$getLightingExecutor();
         }
     }
 
@@ -651,7 +651,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
                 if (chunk == null) {
                     continue;
                 }
-                ((ServerWorldBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumSkyBlock.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
+                ((WorldServerBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumSkyBlock.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
             }
         }
 
@@ -671,7 +671,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
             return false;
         }
 
-        return ((ServerWorldBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(lightType, pos, (Chunk)(Object) chunk);
+        return ((WorldServerBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(lightType, pos, (Chunk)(Object) chunk);
     }
 
     private boolean asyncLighting$checkWorldLight(final BlockPos pos) {
@@ -694,10 +694,10 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
 
         if (this.world.provider.hasSkyLight())
         {
-            flag = ((ServerWorldBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumSkyBlock.SKY, pos, (Chunk) (Object) chunk);
+            flag = ((WorldServerBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumSkyBlock.SKY, pos, (Chunk) (Object) chunk);
         }
 
-        flag = flag | ((ServerWorldBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumSkyBlock.BLOCK, pos, (Chunk)(Object) chunk);
+        flag = flag | ((WorldServerBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumSkyBlock.BLOCK, pos, (Chunk)(Object) chunk);
         return flag;
     }
 

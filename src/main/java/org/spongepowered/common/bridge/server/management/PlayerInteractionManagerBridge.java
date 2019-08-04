@@ -33,5 +33,4 @@ public interface PlayerInteractionManagerBridge {
     boolean bridge$isLastInteractItemOnBlockCancelled();
 
     void bridge$setLastInteractItemOnBlockCancelled(boolean lastInteractItemOnBlockCancelled);
-
 }

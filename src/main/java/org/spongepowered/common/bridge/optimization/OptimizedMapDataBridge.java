@@ -31,8 +31,7 @@ import net.minecraft.world.storage.MapData;
 import org.spongepowered.common.config.category.OptimizationCategory;
 
 /**
- * Only used for the {@link OptimizationCategory#useMapOptimization()}
- * mixins targeting {@link MapData}.
+ * Only used for the {@link OptimizationCategory#useMapOptimization()} mixins targeting {@link MapData}.
  */
 public interface OptimizedMapDataBridge {
 
@@ -43,5 +42,4 @@ public interface OptimizedMapDataBridge {
     void mapOptimizationBridge$updateItemFrameDecoration(EntityItemFrame frame);
 
     void mapOptimizationBridge$removeItemFrame(EntityItemFrame frame);
-
 }

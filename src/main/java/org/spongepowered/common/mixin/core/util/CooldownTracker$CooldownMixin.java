@@ -32,13 +32,7 @@ import org.spongepowered.common.bridge.util.CooldownTracker$CooldownBridge;
 @Mixin(targets = "net/minecraft/util/CooldownTracker$Cooldown")
 public class CooldownTracker$CooldownMixin implements CooldownTracker$CooldownBridge {
 
-    @Shadow @Final int createTicks;
     @Shadow @Final int expireTicks;
-
-    @Override
-    public int bridge$getCreateTicks() {
-        return this.createTicks;
-    }
 
     @Override
     public int bridge$getExpireTicks() {

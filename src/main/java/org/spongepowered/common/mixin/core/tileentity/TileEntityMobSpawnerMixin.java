@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Mixin;
 public abstract class TileEntityMobSpawnerMixin extends TileEntityMixin {
 
     @Override
-    public SpawnType getTickedSpawnType() {
+    public SpawnType bridge$getTickedSpawnType() {
         return SpawnTypes.MOB_SPAWNER;
     }
 }

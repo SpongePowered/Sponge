@@ -40,5 +40,4 @@ public interface DataCompoundHolder {
         }
         return data.getCompoundTag(Constants.Sponge.SPONGE_DATA);
     }
-
 }
