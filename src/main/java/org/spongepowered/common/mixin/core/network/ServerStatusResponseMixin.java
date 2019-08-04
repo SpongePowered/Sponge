@@ -114,6 +114,11 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
     @Override
     public void setFavicon(@Nullable final Favicon favicon) {
         this.impl$faviconHandle = favicon;
+        if (favicon != null) {
+            this.favicon = ((SpongeFavicon) favicon).getEncoded();
+        } else {
+            this.favicon = null;
+        }
     }
 
     @Override
