@@ -26,10 +26,12 @@ package org.spongepowered.common.mixin.core.world;
 
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockJukebox;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
@@ -44,11 +46,23 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.tileentity.Jukebox;
+import org.spongepowered.api.data.property.item.RecordProperty;
+import org.spongepowered.api.effect.sound.SoundCategory;
+import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.effect.sound.SoundTypes;
+import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.sound.PlaySoundEvent;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -74,15 +88,19 @@ import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeEmptyChunk;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -324,10 +342,67 @@ public abstract class WorldMixin implements WorldBridge {
     }
 
     @Inject(method = "playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", at = @At("HEAD"), cancellable = true)
-    private void spongePlaySoundAtEntity(final EntityPlayer entity, final double x, final double y, final double z, final SoundEvent name, final net.minecraft.util.SoundCategory category, final float volume, final float pitch, final CallbackInfo callbackInfo) {
+    private void impl$spongePlaySoundAtEntity(final EntityPlayer entity, final double x, final double y, final double z, final SoundEvent name, final net.minecraft.util.SoundCategory category, final float volume, final float pitch, final CallbackInfo callbackInfo) {
         if (entity instanceof EntityBridge) {
             if (((VanishableBridge) entity).bridge$isVanished()) {
                 callbackInfo.cancel();
+            }
+        }
+        if(!callbackInfo.isCancelled() && !bridge$isFake() && ShouldFire.PLAY_SOUND_EVENT_AT_ENTITY) {
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                final PlaySoundEvent.AtEntity event = SpongeCommonEventFactory.callPlaySoundAtEntityEvent(frame.getCurrentCause(),
+                        (Player) entity, new Location<>((org.spongepowered.api.world.World) this, x, y, z),
+                        (SoundCategory) (Object) category, (SoundType) name, pitch, volume);
+                if (event.isCancelled()) {
+                    callbackInfo.cancel();
+                }
+            }
+        }
+    }
+
+    @Inject(method = "playBroadcastSound(ILnet/minecraft/util/math/BlockPos;I)V", at = @At("HEAD"), cancellable = true)
+    private void impl$throwBroadcastSoundEvent(int effectID, BlockPos pos, int soundData, CallbackInfo callbackInfo) {
+        if(!this.bridge$isFake() && ShouldFire.PLAY_SOUND_EVENT_BROADCAST) {
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                final PlaySoundEvent.Broadcast event;
+                if (effectID == Constants.WorldEvents.PLAY_WITHER_SPAWN_EVENT) {
+                    event = SpongeCommonEventFactory.callPlaySoundBroadcastEvent(frame.getCurrentCause(), (org.spongepowered.api.world.World) this, pos, SoundTypes.ENTITY_WITHER_SPAWN, 1.0F, 1.0F);
+                } else if (effectID == Constants.WorldEvents.PLAY_ENDERDRAGON_DEATH_EVENT) {
+                    event = SpongeCommonEventFactory.callPlaySoundBroadcastEvent(frame.getCurrentCause(), (org.spongepowered.api.world.World) this, pos, SoundTypes.ENTITY_ENDERDRAGON_DEATH, 1.0F, 5.0F);
+                } else if (effectID == Constants.WorldEvents.PLAY_BLOCK_END_PORTAL_SPAWN_EVENT) {
+                    event = SpongeCommonEventFactory.callPlaySoundBroadcastEvent(frame.getCurrentCause(), (org.spongepowered.api.world.World) this, pos, SoundTypes.BLOCK_END_PORTAL_SPAWN, 1.0F, 1.0F);
+                } else {
+                    SpongeImpl.getLogger().error("Failed to get SoundType for broadcast sound effectID: " + effectID);
+                    return;
+                }
+                if (event.isCancelled()) {
+                    callbackInfo.cancel();
+                }
+            }
+        }
+    }
+
+    @Inject(method = "playEvent(Lnet/minecraft/entity/player/EntityPlayer;ILnet/minecraft/util/math/BlockPos;I)V", at = @At("HEAD"), cancellable = true)
+    private void impl$throwRecordPlayEvent(EntityPlayer player, int type, BlockPos pos, int data, CallbackInfo callbackInfo) {
+        if(!this.bridge$isFake() && type == Constants.WorldEvents.PLAY_RECORD_EVENT && ShouldFire.PLAY_SOUND_EVENT_RECORD) {
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                TileEntity tileEntity = this.getTileEntity(pos);
+                if(tileEntity instanceof BlockJukebox.TileEntityJukebox) {
+                    BlockJukebox.TileEntityJukebox jukebox = (BlockJukebox.TileEntityJukebox) tileEntity;
+                    ItemStack record = jukebox.getRecord();
+                    if(!record.isEmpty()) {
+                        Optional<RecordProperty> recordProperty = ((org.spongepowered.api.item.inventory.ItemStack) record).getProperty(RecordProperty.class);
+                        if(!recordProperty.isPresent()) {
+                            //Safeguard for https://github.com/SpongePowered/SpongeCommon/issues/2337
+                            return;
+                        }
+                        final RecordType recordType = recordProperty.get().getValue();
+                        final PlaySoundEvent.Record event = data == 0 ? SpongeCommonEventFactory.callPlaySoundRecordStopEvent(frame.getCurrentCause(), (Jukebox) jukebox, recordType) : SpongeCommonEventFactory.callPlaySoundRecordStartEvent(frame.getCurrentCause(), (Jukebox) jukebox, recordType);
+                        if (event.isCancelled()) {
+                            callbackInfo.cancel();
+                        }
+                    }
+                }
             }
         }
     }

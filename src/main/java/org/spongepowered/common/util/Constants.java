@@ -295,9 +295,16 @@ public final class Constants {
 
         public static final String SELECTOR_PERMISSION = "minecraft.selector";
     }
+
+    /**
+     * https://wiki.vg/Protocol#Effect
+     */
     public static final class WorldEvents {
 
         public static final int PLAY_RECORD_EVENT = 1010;
+        public static final int PLAY_WITHER_SPAWN_EVENT = 1023;
+        public static final int PLAY_ENDERDRAGON_DEATH_EVENT = 1028;
+        public static final int PLAY_BLOCK_END_PORTAL_SPAWN_EVENT = 1038;
 
     }
     public static final class World {

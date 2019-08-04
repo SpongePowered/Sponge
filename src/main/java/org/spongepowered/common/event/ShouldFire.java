@@ -109,4 +109,9 @@ public class ShouldFire {
     public static boolean BREED_ENTITY_EVENT_FIND_MATE = false;
     public static boolean BREED_ENTITY_EVENT_BREED = false;
     public static boolean CHANGE_GAME_MODE_EVENT_TARGET_PLAYER = false;
+
+    public static boolean PLAY_SOUND_EVENT_AT_ENTITY = false;
+    public static boolean PLAY_SOUND_EVENT_RECORD = false;
+    public static boolean PLAY_SOUND_EVENT_BROADCAST = false;
+
 }
