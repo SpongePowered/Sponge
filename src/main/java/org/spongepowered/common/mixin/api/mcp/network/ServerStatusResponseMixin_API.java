@@ -93,11 +93,6 @@ public abstract class ServerStatusResponseMixin_API implements ClientPingServerE
     @Override
     public void setFavicon(@Nullable final Favicon favicon) {
         ((ServerStatusResponseBridge) this).setFavicon(favicon);
-        if (favicon != null) {
-            this.favicon = ((SpongeFavicon) favicon).getEncoded();
-        } else {
-            this.favicon = null;
-        }
     }
 
 }
