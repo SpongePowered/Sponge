@@ -266,6 +266,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
         String s = String.format("%1$"+indent+"s", "");
+        if (this.stackTrace != null) {
+            printer.add(s + "StackTrace On Entry")
+                .add(this.stackTrace);
+        }
         if (this.owner != null) {
             printer.add(s + "- %s: %s", "Owner", this.owner);
         }

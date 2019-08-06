@@ -168,6 +168,7 @@ import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.generation.GenericGenerationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
@@ -217,6 +218,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     private boolean impl$weatherIceAndSnowEnabled = true;
     private int impl$dimensionId;
     @Nullable private NextTickListEntry impl$tmpScheduledObj;
+    @Nullable private GenericGenerationContext impl$spawnGenerationContext;
 
     @Shadow @Final private MinecraftServer server;
     @Shadow @Final private PlayerChunkMap playerChunkMap;
@@ -245,8 +247,8 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onConstruct(final MinecraftServer server, final ISaveHandler saveHandlerIn, @Nullable WorldInfo info, final int dimensionId,
-        final Profiler profilerIn, final CallbackInfo callbackInfo) {
+    private void impl$initializeSpongeFields(final MinecraftServer server, final ISaveHandler saveHandlerIn, @Nullable WorldInfo info,
+        final int dimensionId, final Profiler profilerIn, final CallbackInfo callbackInfo) {
         if (info == null) {
             SpongeImpl.getLogger().warn("World constructed without a WorldInfo! This will likely cause problems. Subsituting dummy info.",
                     new RuntimeException("Stack trace:"));
@@ -285,7 +287,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/MapStorage"))
-    private MapStorage onCreateMapStorage(final ISaveHandler saveHandler) {
+    private MapStorage impl$createMapStorageIfOverworldOrGetOverworldMapStorage(final ISaveHandler saveHandler) {
         final WorldServer overWorld = WorldManager.getWorldByDimensionId(0).orElse(null);
         // if overworld has loaded, use its mapstorage
         if (this.impl$dimensionId != 0 && overWorld != null) {
@@ -300,38 +302,46 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     // Worlds other than the Overworld have scoreboard created, but they are never used. Therefore, we need to ensure that these unused scoreboards
     // are not saved into the global MapStorage when non-Overworld worlds are initialized.
 
-    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/MapStorage;setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
-    private void onMapStorageSetData(final MapStorage storage, final String name, final WorldSavedData data) {
-        if (name.equals("scoreboard") && this.impl$dimensionId != 0) {
+    @Redirect(method = "init",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/storage/MapStorage;setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
+    private void impl$onlySaveScoreboardIfDim0OrMapData(final MapStorage storage, final String name, final WorldSavedData data) {
+        if ("scoreboard".equals(name) && this.impl$dimensionId != 0) {
             return;
         }
         storage.setData(name, data);
     }
 
-    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/ScoreboardSaveData;setScoreboard(Lnet/minecraft/scoreboard/Scoreboard;)V"))
-    private void onSetSaveDataScoreboard(final ScoreboardSaveData scoreboardSaveData, final Scoreboard scoreboard) {
+    @Redirect(method = "init",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/scoreboard/ScoreboardSaveData;setScoreboard(Lnet/minecraft/scoreboard/Scoreboard;)V"))
+    private void impl$saveScoreboardOnlyIfDim0(final ScoreboardSaveData scoreboardSaveData, final Scoreboard scoreboard) {
         if (this.impl$dimensionId != 0) {
             return;
         }
         scoreboardSaveData.setScoreboard(scoreboard);
     }
 
-    @Inject(method = "createSpawnPosition", at = @At(value = "HEAD"))
-    private void onCreateBonusChest(final CallbackInfo ci) {
-        GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
-                .source(this)
-                .buildAndSwitch();
+    @Inject(method = "initialize",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/WorldServer;createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V"))
+    private void impl$startGeneration(final WorldSettings settings, final CallbackInfo ci) {
+        this.impl$spawnGenerationContext = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
+            .source(this)
+            .buildAndSwitch();
     }
 
-
-    @Inject(method = "createSpawnPosition", at = @At(value = "RETURN"))
-    private void onCreateBonusChestEnd(final CallbackInfo ci) {
-        PhaseTracker.getInstance().getCurrentContext().close();
+    @Inject(method = "initialize",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/WorldServer;createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V",
+            shift = At.Shift.AFTER))
+    private void impl$endSpawnGeneration(final WorldSettings settings, final CallbackInfo ci) {
+        this.impl$spawnGenerationContext.close();
     }
 
-    @SuppressWarnings("deprecation")
-    @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
-    private void onCreateSpawnPosition(final WorldSettings settings, final CallbackInfo ci) {
+    // TODO - Migrate the terrain generation injections to try-catch wrappers with Mixin 0.8.x when trycatch is added.
+    @Inject(method = "createSpawnPosition", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$cancelBonusChestIfTheEnd(final WorldSettings settings, final CallbackInfo ci) {
         final GeneratorType generatorType = (GeneratorType) settings.getTerrainType();
 
         // Allow bonus chest generation for non-Overworld worlds
@@ -344,10 +354,11 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             this.worldInfo.setSpawn(new BlockPos(100, 50, 0));
             ci.cancel();
         }
+
     }
 
     @Redirect(method = "createSpawnPosition", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldSettings;isBonusChestEnabled()Z"))
-    private boolean onIsBonusChestEnabled(final WorldSettings settings) {
+    private boolean impl$checkIfBonusChestIsEnabledFromProperties(final WorldSettings settings) {
         return ((org.spongepowered.api.world.World) this).getProperties().doesGenerateBonusChest();
     }
 
