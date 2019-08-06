@@ -128,6 +128,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
@@ -140,6 +141,7 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.inventory.UpdateAnvilEventCost;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -523,7 +525,7 @@ public class SpongeCommonEventFactory {
      * @param source The source of event
      * @return The event
      */
-    private static ChangeBlockEvent.Pre callChangeBlockEventPre(final WorldServerBridge worldIn, final ImmutableList<Location<World>> locations, @Nullable Object source) {
+    @SuppressWarnings("unchecked") private static ChangeBlockEvent.Pre callChangeBlockEventPre(final WorldServerBridge worldIn, final ImmutableList<Location<World>> locations, @Nullable Object source) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
             if (source == null) {
@@ -543,6 +545,12 @@ public class SpongeCommonEventFactory {
             final User owner = phaseContext.getOwner().orElse((User) player);
             if (owner != null) {
                 frame.addContext(EventContextKeys.OWNER, owner);
+            }
+
+            if (!((IPhaseState) phaseContext.state).shouldProvideModifiers(phaseContext)) {
+                phaseContext.getSource(BlockBridge.class).ifPresent(bridge -> {
+                    bridge.bridge$getTickFrameModifier().accept(frame, worldIn);
+                });
             }
 
             phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
