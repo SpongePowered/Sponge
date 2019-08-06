@@ -58,6 +58,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -860,6 +861,11 @@ public abstract class WorldMixin implements WorldBridge {
         // } catch (final Throwable throwable1) {
         // Sponge -- inject here
         // final CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
+    }
+
+    @Surrogate
+    void impl$stopEntityAndThrowInfo(final CallbackInfo ci, final int index, final Entity ticking, final Throwable throwable) {
+        this.impl$stopEntityAndThrowInfo(ci, index, ticking, null, throwable);
     }
 
     @Inject(method = "updateEntities",
