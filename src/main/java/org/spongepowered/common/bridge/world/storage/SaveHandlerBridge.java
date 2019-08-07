@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.bridge.world.storage;
 
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 
 import java.io.File;
@@ -34,4 +36,16 @@ public interface SaveHandlerBridge {
     void bridge$loadSpongeDatData(WorldInfo info) throws IOException;
 
     File bridge$getSpongeWorldDirectory();
+
+    /**
+     * Used by the SaveHandler, and in SaveHandlerMixin_Vanilla
+     * to load sponge specific data. Since Forge has some handling
+     * already for this, we still have to provide this hook for
+     * SpongeVanilla to take advantage.
+     *
+     * @param handler The save handler instance
+     * @param info The world info
+     * @param compound The compound
+     */
+    void bridge$loadDimensionAndOtherData(final SaveHandler handler, final WorldInfo info, final NBTTagCompound compound);
 }

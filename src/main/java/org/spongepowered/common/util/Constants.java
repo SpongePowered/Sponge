@@ -30,9 +30,12 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.inventory.ClickType;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.storage.SaveHandler;
+import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataQuery;
@@ -45,6 +48,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
+import org.spongepowered.common.mixin.core.world.storage.SaveHandlerMixin;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.net.InetSocketAddress;
@@ -203,6 +207,9 @@ public final class Constants {
             public static final String PORTAL_AGENT_TYPE = "portalAgentType";
             public static final String WORLD_SERIALIZATION_BEHAVIOR = "serializationBehavior";
             public static final DataQuery WORLD_CUSTOM_SETTINGS = DataQuery.of("customSettings");
+            public static final String LEVEL_SPONGE_DAT = "level_sponge.dat";
+            public static final String LEVEL_SPONGE_DAT_OLD = "level_sponge.dat_old";
+            public static final String LEVEL_SPONGE_DAT_NEW = "level_sponge.dat_new";
         }
         public static final class Schematic {
 
@@ -324,6 +331,12 @@ public final class Constants {
         public static final int MAX_CHUNK_UNLOADS = 100;
         public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
         public static final int CHUNK_UNLOAD_DELAY = 30000;
+        /**
+         * Used by SpongeVanilla to load the Forge dimension data information.
+         * See {@link org.spongepowered.common.util.Constants.Forge#DIMENSION_DATA}
+         * usage in {@link SaveHandlerMixin#bridge$loadDimensionAndOtherData(SaveHandler, WorldInfo, NBTTagCompound)}.
+         */
+        public static final String DIMENSION_DATA = "Data";
 
         public static final class Teleporter {
 
@@ -880,6 +893,8 @@ public final class Constants {
          * with Forge.
          */
         public static final String USED_DIMENSION_IDS = "UsedIDs";
+        public static final String DIMENSION_DATA = "DimensionData";
+        public static final String FORGE_DIMENSION_DATA_TAG = "Forge";
     }
 
     public static final class Bukkit {
