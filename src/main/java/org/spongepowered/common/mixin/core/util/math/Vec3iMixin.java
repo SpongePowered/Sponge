@@ -43,7 +43,7 @@ public abstract class Vec3iMixin implements BlockPosBridge {
 
     @Override
     public boolean bridge$isValidPosition() {
-        return this.x >= -30000000 && this.z >= -30000000 && this.x < 30000000 && this.z < 30000000 && this.y >= 0 && this.y < 256;
+        return this.x >= -30000000 && this.z >= -30000000 && this.x < 30000000 && this.z < 30000000 && this.y >= 0 && this.y < 1024;
     }
 
     @Override
@@ -53,6 +53,6 @@ public abstract class Vec3iMixin implements BlockPosBridge {
 
     @Override
     public boolean bridge$isInvalidYPosition() {
-        return this.y < 0 || this.y >= 256;
+        return this.y < 0 || this.y >= 1024;
     }
 }
