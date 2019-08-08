@@ -27,26 +27,21 @@ package org.spongepowered.common.registry.type.effect;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemRecord;
 import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.effect.sound.record.RecordTypes;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.RegistrationPhase;
-import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.mixin.core.item.ItemRecordAccessor;
+import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.util.Collection;
@@ -104,6 +99,17 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Rec
                 this.add(new SpongeRecordType(key, recordItem.getTranslationKey(), (ItemType) recordItem, (SoundType) ((ItemRecordAccessor) recordItem).accessor$getSoundEvent()));
             }
         }
+
+        RegistryHelper.mapFields(RecordTypes.class, fieldName -> {
+            final String name = fieldName.toLowerCase(Locale.ENGLISH);
+            if (name.equals("thirteen")) {
+                return this.mappings.get("minecraft:record_13");
+            } else if (name.equals("eleven")) {
+                return this.mappings.get("minecraft:record_11");
+            }
+            final RecordType recordType = this.mappings.get("minecraft:record_" + name);
+            return recordType;
+        });
     }
 
 }
