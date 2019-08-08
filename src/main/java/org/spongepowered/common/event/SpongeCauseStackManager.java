@@ -77,7 +77,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
      * the stack iteration from the bottom of the stack
      * to the top when pushing frames.
      */
-    private Deque<Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>>> phaseContextProviders = new ArrayDeque<>();
+    private Deque<PhaseContext<?>> phaseContextProviders = new ArrayDeque<>();
 
     @Inject
     private SpongeCauseStackManager() { }
@@ -111,6 +111,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         return this.cached_cause;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void checkProviders() {
         // Seriously, ok so, uh...
         if (!this.pendingProviders.compareAndSet(true, false)) {
@@ -120,10 +121,10 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         // to properly mimic as though the frames were created at the time of the
         // phase switches. It does not help the debugging of cause frames
         // except for this method call-point.
-        for (Iterator<Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>>> iterator = this.phaseContextProviders.descendingIterator(); iterator.hasNext(); ) {
-            final Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>> tuple = iterator.next();
+        for (final Iterator<PhaseContext<?>> iterator = this.phaseContextProviders.descendingIterator(); iterator.hasNext(); ) {
+            final PhaseContext<?> tuple = iterator.next();
             final StackFrame frame = pushCauseFrame(); // these should auto close
-            tuple.getSecond().accept(frame, tuple.getFirst()); // The frame will be auto closed by the phase context
+            ((BiConsumer) tuple.state.getFrameModifier()).accept(frame, tuple); // The frame will be auto closed by the phase context
         }
         // Clear the list since everything is now loaded.
         // PhaseStates will handle automatically closing their frames
@@ -142,7 +143,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     }
 
     @Override
-    public CauseStackManager pushCause(Object obj) {
+    public CauseStackManager pushCause(final Object obj) {
         enforceMainThread();
         checkNotNull(obj, "obj");
         this.cached_cause = null;
@@ -188,7 +189,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     }
 
     @Override
-    public void popCauses(int n) {
+    public void popCauses(final int n) {
         enforceMainThread();
         for (int i = 0; i < n; i++) {
             popCause();
@@ -205,11 +206,11 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     public StackFrame pushCauseFrame() {
         enforceMainThread();
         // Ensure duplicate causes will be correctly sized.
-        int size = this.cause.size();
+        final int size = this.cause.size();
         if (this.duplicateCauses.length <= size) {
             this.duplicateCauses = Arrays.copyOf(this.duplicateCauses, (int) (size * 1.5));
         }
-        CauseStackFrameImpl frame = new CauseStackFrameImpl(this.min_depth, this.duplicateCauses[size]);
+        final CauseStackFrameImpl frame = new CauseStackFrameImpl(this.min_depth, this.duplicateCauses[size]);
         this.frames.push(frame);
         this.min_depth = size;
         if (DEBUG_CAUSE_FRAMES) {
@@ -222,10 +223,10 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     }
 
     @Override
-    public void popCauseFrame(StackFrame oldFrame) {
+    public void popCauseFrame(final StackFrame oldFrame) {
         enforceMainThread();
         checkNotNull(oldFrame, "oldFrame");
-        CauseStackFrameImpl frame = this.frames.peek();
+        final CauseStackFrameImpl frame = this.frames.peek();
         if (frame != oldFrame) {
             // If the given frame is not the top frame then some form of
             // corruption of the stack has occured and we do our best to correct
@@ -236,7 +237,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             // to simply throw an error.
             int offset = -1;
             int i = 0;
-            for (CauseStackFrameImpl f : this.frames) {
+            for (final CauseStackFrameImpl f : this.frames) {
                 if (f == oldFrame) {
                     offset = i;
                     break;
@@ -265,7 +266,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             }
 
             while (offset >= 0) {
-                CauseStackFrameImpl f = this.frames.peek();
+                final CauseStackFrameImpl f = this.frames.peek();
                 if (DEBUG_CAUSE_FRAMES && offset > 0) {
                     printer.add("   Stack frame in position %n :", offset);
                     printer.add(f.stack_debug);
@@ -285,14 +286,14 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         // Remove new values
         boolean ctx_invalid = false;
         if (frame.hasNew()) {
-            for (EventContextKey<?> key : frame.getNew()) {
+            for (final EventContextKey<?> key : frame.getNew()) {
                 this.ctx.remove(key);
             }
             ctx_invalid = true;
         }
         // Restore old values
         if (frame.hasStoredValues()) {
-            for (Map.Entry<EventContextKey<?>, Object> e : frame.getStoredValues()) {
+            for (final Map.Entry<EventContextKey<?>, Object> e : frame.getStoredValues()) {
                 this.ctx.put(e.getKey(), e.getValue());
             }
             ctx_invalid = true;
@@ -302,7 +303,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         }
         // If there were any objects left on the stack then we pop them off
         while (this.cause.size() > this.min_depth) {
-            int index = this.cause.size();
+            final int index = this.cause.size();
 
             // Then, only pop the potential duplicate causes (if any) if and only if
             // there was a duplicate cause pushed prior to the frame being popped.
@@ -318,7 +319,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             this.cached_cause = null;
         }
         this.min_depth = frame.old_min_depth;
-        int size = this.cause.size();
+        final int size = this.cause.size();
         if (this.duplicateCauses.length > size) {
             // Then set the last cause index to whatever the size of the entry was at the time.
             this.duplicateCauses[size] = frame.lastCauseSize;
@@ -326,14 +327,14 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     }
 
     @Override
-    public <T> CauseStackManager addContext(EventContextKey<T> key, T value) {
+    public <T> CauseStackManager addContext(final EventContextKey<T> key, final T value) {
         enforceMainThread();
         checkNotNull(key, "key");
         checkNotNull(value, "value");
         this.cached_ctx = null;
-        Object existing = this.ctx.put(key, value);
+        final Object existing = this.ctx.put(key, value);
         if (!this.frames.isEmpty()) {
-            CauseStackFrameImpl frame = this.frames.peek();
+            final CauseStackFrameImpl frame = this.frames.peek();
             if (existing == null) {
                 frame.markNew(key);
             } else if (!frame.isNew(key) && !frame.isStored(key)) {
@@ -345,7 +346,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> getContext(EventContextKey<T> key) {
+    public <T> Optional<T> getContext(final EventContextKey<T> key) {
         enforceMainThread();
         checkNotNull(key, "key");
         return Optional.ofNullable((T) this.ctx.get(key));
@@ -353,13 +354,13 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> removeContext(EventContextKey<T> key) {
+    public <T> Optional<T> removeContext(final EventContextKey<T> key) {
         enforceMainThread();
         checkNotNull(key, "key");
         this.cached_ctx = null;
-        Object existing = this.ctx.remove(key);
+        final Object existing = this.ctx.remove(key);
         if (existing != null && !this.frames.isEmpty()) {
-            CauseStackFrameImpl frame = this.frames.peek();
+            final CauseStackFrameImpl frame = this.frames.peek();
             if (!frame.isNew(key)) {
                 frame.store(key, existing);
             }
@@ -367,24 +368,24 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         return Optional.ofNullable((T) existing);
     }
 
-    public int registerPhaseContextProvider(PhaseContext<?> context, BiConsumer<StackFrame, PhaseContext<?>> consumer) {
-        checkNotNull(consumer, "Consumer");
+    public int registerPhaseContextProvider(final PhaseContext<?> context) {
+        checkNotNull(context.state.getFrameModifier(), "Consumer");
         // Reset our cached objects
         this.pendingProviders.compareAndSet(false, true); //I Reset the cache
         this.cached_cause = null; // Reset the cache
         this.cached_ctx = null; // Reset the cache
         // Since we cannot rely on the PhaseStack being tied to this stack of providers,
         // we have to make the tuple to tie the phase context to provide the consumer.
-        this.phaseContextProviders.push(Tuple.of(context, consumer));
+        this.phaseContextProviders.push(context);
         return this.phaseContextProviders.size();
     }
 
-    public void popFrameMutator(PhaseContext<?> context) {
-        final Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>> peek = this.phaseContextProviders.peek();
+    public void popFrameMutator(final PhaseContext<?> context) {
+        final PhaseContext<?> peek = this.phaseContextProviders.peek();
         if (peek == null) {
             return;
         }
-        if (peek.getFirst() != context) {
+        if (peek != context) {
             // there's an exception to be thrown or printed out at least, basically a copy of popFrame.
             System.err.println("oops. corrupted phase context providers!");
         }
@@ -408,12 +409,12 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
         public Exception stack_debug = null;
 
-        public CauseStackFrameImpl(int old_depth, int size) {
+        public CauseStackFrameImpl(final int old_depth, final int size) {
             this.old_min_depth = old_depth;
             this.lastCauseSize = size;
         }
 
-        public boolean isStored(EventContextKey<?> key) {
+        public boolean isStored(final EventContextKey<?> key) {
             return this.stored_ctx_values != null && this.stored_ctx_values.containsKey(key);
         }
 
@@ -425,14 +426,14 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             return this.stored_ctx_values != null && !this.stored_ctx_values.isEmpty();
         }
 
-        public void store(EventContextKey<?> key, Object existing) {
+        public void store(final EventContextKey<?> key, final Object existing) {
             if (this.stored_ctx_values == null) {
                 this.stored_ctx_values = new HashMap<>();
             }
             this.stored_ctx_values.put(key, existing);
         }
 
-        public boolean isNew(EventContextKey<?> key) {
+        public boolean isNew(final EventContextKey<?> key) {
             return this.new_ctx_values != null && this.new_ctx_values.contains(key);
         }
 
@@ -444,7 +445,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             return this.new_ctx_values != null && !this.new_ctx_values.isEmpty();
         }
 
-        public void markNew(EventContextKey<?> key) {
+        public void markNew(final EventContextKey<?> key) {
             if (this.new_ctx_values == null) {
                 this.new_ctx_values = new HashSet<>();
             }
@@ -462,7 +463,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         }
 
         @Override
-        public StackFrame pushCause(Object obj) {
+        public StackFrame pushCause(final Object obj) {
             Sponge.getCauseStackManager().pushCause(obj);
             return this;
         }
@@ -473,13 +474,13 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         }
 
         @Override
-        public <T> StackFrame addContext(EventContextKey<T> key, T value) {
+        public <T> StackFrame addContext(final EventContextKey<T> key, final T value) {
             Sponge.getCauseStackManager().addContext(key, value);
             return this;
         }
 
         @Override
-        public <T> Optional<T> removeContext(EventContextKey<T> key) {
+        public <T> Optional<T> removeContext(final EventContextKey<T> key) {
             return Sponge.getCauseStackManager().removeContext(key);
         }
 

@@ -241,7 +241,6 @@ public final class PhaseTracker {
         checkNotNull(state, "State cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
-        final IPhaseState<?> currentState = this.stack.peek().state;
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
             if (this.stack.size() > 6) {
                 if (this.stack.checkForRunaways(state, phaseContext)) {
@@ -252,7 +251,7 @@ public final class PhaseTracker {
         }
 
         if (Sponge.isServerAvailable() && ((IPhaseState) state).shouldProvideModifiers(phaseContext)) {
-            SpongeImpl.getCauseStackManager().registerPhaseContextProvider(phaseContext, ((IPhaseState) state).getFrameModifier());
+            SpongeImpl.getCauseStackManager().registerPhaseContextProvider(phaseContext);
         }
         this.stack.push(state, phaseContext);
     }
