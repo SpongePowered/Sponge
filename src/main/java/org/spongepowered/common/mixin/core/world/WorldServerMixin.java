@@ -1274,7 +1274,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         final List<Entity> entityList = new ArrayList<>();
         for (final net.minecraft.entity.Entity entity : entities) {
             // Make sure no entities load in invalid positions
-            if (((BlockPosBridge) entity.getPosition()).bridge$isInvalidYPosition()) {
+            if (!((BlockPosBridge) entity.getPosition()).bridge$isValidXZPosition() || entity.posY < 0) {
                 entity.setDead();
                 continue;
             }
