@@ -127,6 +127,7 @@ public abstract class BlockDispenserMixin extends BlockMixin {
     @Inject(method = "dispense", at = @At(value = "RETURN"))
     private void impl$CloseContextOnDispensing(final World worldIn, final BlockPos pos, final CallbackInfo ci) {
         this.impl$context.close();
+        this.impl$context = PhaseContext.empty();
     }
 
     @Inject(method = "dispense",
