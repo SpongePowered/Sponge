@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemRecord;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.record.RecordType;
@@ -64,7 +65,11 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Rec
     }
 
     public Optional<RecordType> getByItem(Item itemType) {
-        return Optional.of(mappings.get(Item.REGISTRY.getNameForObject(itemType).toString()));
+        final ResourceLocation resourceLocation = Item.REGISTRY.getNameForObject(itemType);
+        if (resourceLocation == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(mappings.get(resourceLocation.toString()));
     }
 
     @Override
