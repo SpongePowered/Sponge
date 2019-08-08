@@ -2343,6 +2343,12 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Override
+    void impl$stopTileTickCrash(final CallbackInfo ci, final Iterator<TileEntity> iterator, final TileEntity tickingTile,
+                                final Throwable throwable) {
+        ((TimingBridge) tickingTile).bridge$getTimingsHandler().stopTiming();
+    }
+
+    @Override
     void impl$stopTileTickAndStartRemoval(final CallbackInfo callbackInfo) {
         this.impl$timings.tileEntityTick.stopTiming();
         this.impl$timings.tileEntityRemoval.startTiming();

@@ -964,6 +964,13 @@ public abstract class WorldMixin implements WorldBridge {
             // final CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
     }
 
+    @Surrogate
+        // BlockPos seems to only exist during development
+    void impl$stopTileTickCrash(final CallbackInfo ci, final Iterator<TileEntity> iterator, final TileEntity tickingTile, final Throwable throwable) {
+        // } catch (final Throwable throwable) {
+        // Sponge -- inject here
+        // final CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
+    }
 
     @Redirect(method = "updateEntities",
         at = @At(
