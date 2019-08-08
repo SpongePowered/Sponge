@@ -31,7 +31,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -39,7 +39,7 @@ public class SetSerializer implements TypeSerializer<Set<?>> {
 
     @Override
     public Set<?> deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-        return new LinkedHashSet<>(value.getList(getInnerToken(type)));
+        return new HashSet<>(value.getList(getInnerToken(type)));
     }
 
     @Override
