@@ -24,13 +24,21 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityFireball;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAccelerationData;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
+
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 
@@ -39,7 +47,15 @@ public abstract class EntityFireballMixin_API extends EntityMixin_API implements
 
     @Shadow @Nullable public EntityLivingBase shootingEntity;
 
+    @Shadow public double accelerationX;
+    @Shadow public double accelerationY;
+    @Shadow public double accelerationZ;
     @Nullable private ProjectileSource projectileSource = null;
+
+    @Override
+    public Value<Vector3d> acceleration() {
+        return new SpongeValue<>(Keys.ACCELERATION, new Vector3d(this.accelerationX, this.accelerationY, this.accelerationZ));
+    }
 
     @Override
     public ProjectileSource getShooter() {
@@ -55,13 +71,19 @@ public abstract class EntityFireballMixin_API extends EntityMixin_API implements
     }
 
     @Override
-    public void setShooter(ProjectileSource shooter) {
+    public void setShooter(final ProjectileSource shooter) {
         this.projectileSource = shooter;
         if (shooter instanceof EntityLivingBase) {
             this.shootingEntity = (EntityLivingBase) shooter;
         } else {
             this.shootingEntity = null;
         }
+    }
+
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        manipulators.add(new SpongeAccelerationData(this.accelerationX, this.accelerationY, this.accelerationZ));
     }
 
 }

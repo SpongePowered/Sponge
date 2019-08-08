@@ -152,6 +152,14 @@ public final class Constants {
             public static final DataQuery VELOCITY_Y = of("Y");
             public static final DataQuery VELOCITY_Z = of("Z");
         }
+
+        public static final class AccelerationData {
+
+            public static final DataQuery ACCELERATION_X = of("X");
+            public static final DataQuery ACCELERATION_Y = of("Y");
+            public static final DataQuery ACCELERATION_Z = of("Z");
+        }
+
         public static final class EntityArchetype {
 
             public static final String REQUIRES_EXTRA_INITIAL_SPAWN = "RequireInitialSpawn";
