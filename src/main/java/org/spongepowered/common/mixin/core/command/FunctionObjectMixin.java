@@ -37,7 +37,7 @@ import java.util.Map;
 public abstract class FunctionObjectMixin {
 
     @Redirect(method = "create", at = @At(value = "INVOKE", target = "Ljava/util/Map;containsKey(Ljava/lang/Object;)Z", remap = false))
-    private static boolean impl$checkForAlias(final Map<String, ICommand> unused, final Object name) {
-        return Sponge.getCommandManager().containsAlias((String) name);
+    private static boolean impl$checkForAlias(final Map<String, ICommand> vanillaCommands, final Object name) {
+        return Sponge.getCommandManager().containsAlias((String) name) || vanillaCommands.containsKey(name);
     }
 }
