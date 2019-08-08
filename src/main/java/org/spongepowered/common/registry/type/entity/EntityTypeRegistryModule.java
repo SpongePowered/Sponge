@@ -225,8 +225,9 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
             this.entityTypeMappings.put(entityType.getId(), entityType);
             return entityType;
         });
+        // Won't be needed in the future
         this.entityTypeMappings.put("minecraft:ozelot", this.entityTypeMappings.get("minecraft:ocelot"));
-
+        this.entityTypeMappings.put("minecraft:primed_tnt", this.entityTypeMappings.get("minecraft:tnt"));
     }
 
     @Override
