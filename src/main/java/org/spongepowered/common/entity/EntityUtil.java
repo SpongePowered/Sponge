@@ -82,6 +82,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
@@ -931,6 +932,17 @@ public final class EntityUtil {
             return Optional.empty();
         }
         return Optional.of(EntityTypeRegistryModule.getInstance().getForClass((Class<? extends Entity>) clazz));
+    }
+
+    public static boolean isUntargetable(Entity from, Entity target) {
+        if (((VanishableBridge) target).bridge$isVanished() && ((VanishableBridge) target).bridge$isUntargetable()) {
+            return true;
+        }
+        // Temporary fix for https://bugs.mojang.com/browse/MC-149563
+        if (from.world != target.world) {
+            return true;
+        }
+        return false;
     }
 
 }

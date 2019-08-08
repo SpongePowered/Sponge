@@ -56,14 +56,14 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.ai.EntityAIBasesBridge;
+import org.spongepowered.common.bridge.entity.ai.EntityAITasksBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.bridge.entity.ai.EntityAITasksBridge;
 
 import java.util.Iterator;
 
@@ -220,19 +220,21 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
      */
     @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
     private void onSetAttackTarget(@Nullable final EntityLivingBase entitylivingbaseIn, final CallbackInfo ci) {
-        if (!this.world.isRemote && ShouldFire.SET_A_I_TARGET_EVENT) {
-            if (entitylivingbaseIn != null) {
-                if (((VanishableBridge) entitylivingbaseIn).bridge$isVanished() && ((VanishableBridge) entitylivingbaseIn).bridge$isUntargetable()) {
-                    this.attackTarget = null;
-                    ci.cancel();
-                } else {
-                    final SetAITargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) entitylivingbaseIn, (Agent) this);
-                    if (event.isCancelled()) {
-                        ci.cancel();
-                    } else {
-                        this.attackTarget = ((EntityLivingBase) event.getTarget().orElse(null));
-                    }
-                }
+        if (this.world.isRemote || entitylivingbaseIn == null) {
+            return;
+        }
+        //noinspection ConstantConditions
+        if (EntityUtil.isUntargetable((net.minecraft.entity.Entity) (Object) this, entitylivingbaseIn)) {
+            this.attackTarget = null;
+            ci.cancel();
+            return;
+        }
+        if (ShouldFire.SET_A_I_TARGET_EVENT) {
+            final SetAITargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) entitylivingbaseIn, (Agent) this);
+            if (event.isCancelled()) {
+                ci.cancel();
+            } else {
+                this.attackTarget = ((EntityLivingBase) event.getTarget().orElse(null));
             }
         }
     }
@@ -248,7 +250,8 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     @Overwrite
     public EntityLivingBase getAttackTarget() {
         if (this.attackTarget != null) {
-            if (((VanishableBridge) this.attackTarget).bridge$isVanished() && ((VanishableBridge) this.attackTarget).bridge$isUntargetable()) {
+            //noinspection ConstantConditions
+            if (EntityUtil.isUntargetable((net.minecraft.entity.Entity) (Object) this, this.attackTarget)) {
                 this.attackTarget = null;
             }
         }
