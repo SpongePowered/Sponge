@@ -160,6 +160,11 @@ public class SpongeProxySource implements ProxySource, CommandSourceBridge {
     }
 
     @Override
+    public int getPermission(Set<Context> contexts, String permission) {
+        return this.subjectDelegate.getPermission(contexts, permission);
+    }
+
+    @Override
     public boolean isChildOf(SubjectReference parent) {
         return this.subjectDelegate.isChildOf(parent);
     }

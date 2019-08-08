@@ -39,8 +39,8 @@ public abstract class TileEntitySignMixin extends TileEntityMixin implements Sub
     }
 
     @Override
-    public Tristate bridge$permDefault(String permission) {
-        return Tristate.TRUE;
+    public int bridge$permDefault(String permission) {
+        return 1;
     }
 
 }

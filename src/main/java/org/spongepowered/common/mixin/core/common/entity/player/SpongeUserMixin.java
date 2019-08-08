@@ -133,8 +133,8 @@ public abstract class SpongeUserMixin implements SubjectBridge, InvulnerableTrac
     }
 
     @Override
-    public Tristate bridge$permDefault(final String permission) {
-        return Tristate.FALSE;
+    public int bridge$permDefault(final String permission) {
+        return -1;
     }
 
     @Override

@@ -84,8 +84,8 @@ public abstract class RConConsoleSourceMixin implements ICommandSender, CommandS
     }
 
     @Override
-    public Tristate bridge$permDefault(final String permission) {
-        return Tristate.TRUE;
+    public int bridge$permDefault(final String permission) {
+        return 1;
     }
 
     @Override

@@ -54,7 +54,7 @@ public final class AndPermissionLevelSubject extends SpongeBaseSubject {
         CommandPermissions.populateMinecraftPermissions(opLevelSubject, this.opLevelData);
         for (Map.Entry<String, Boolean> permission : ImmutableSet.copyOf(this.opLevelData.getPermissions(SubjectData.GLOBAL_CONTEXT).entrySet())) {
             if (permission.getValue()) {
-                this.opLevelData.setPermission(SubjectData.GLOBAL_CONTEXT, permission.getKey(), Tristate.UNDEFINED);
+                this.opLevelData.setPermission(SubjectData.GLOBAL_CONTEXT, permission.getKey(), 0);
             }
         }
     }

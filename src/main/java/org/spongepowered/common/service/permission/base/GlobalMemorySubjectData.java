@@ -54,7 +54,16 @@ public class GlobalMemorySubjectData extends MemorySubjectData {
     }
 
     @Override
+    @Deprecated
     public CompletableFuture<Boolean> setPermission(Set<Context> contexts, String permission, Tristate value) {
+        if (!contexts.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
+        }
+        return super.setPermission(contexts, permission, value);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> setPermission(Set<Context> contexts, String permission, int value) {
         if (!contexts.isEmpty()) {
             return CompletableFuture.completedFuture(false);
         }

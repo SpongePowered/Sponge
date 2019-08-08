@@ -31,7 +31,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.Contextual;
-import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
@@ -39,24 +38,13 @@ import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeInternalListeners;
-import org.spongepowered.common.bridge.command.CommandSenderBridge;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nullable;
 
 /**
  * Mixin to provide a common implementation of subject that refers to the
@@ -103,23 +91,31 @@ public abstract class SubjectMixin_API implements Subject {
     }
 
     @Override
+    @Deprecated
     public Tristate getPermissionValue(final Set<Context> contexts, final String permission) {
         return ((SubjectBridge) this).bridge$resolveOptional()
             .map(subject -> subject.getPermissionValue(contexts, permission))
-            .orElseGet(() -> ((SubjectBridge) this).bridge$permDefault(permission));
+            .orElseGet(() -> Tristate.fromInt(((SubjectBridge) this).bridge$permDefault(permission)));
+    }
+
+    @Override
+    public int getPermission(final Set<Context> contexts, final String permission) {
+        return ((SubjectBridge) this).bridge$resolveOptional()
+                .map(subject -> subject.getPermission(contexts, permission))
+                .orElseGet(() -> ((SubjectBridge) this).bridge$permDefault(permission));
     }
 
     @Override
     public boolean hasPermission(final Set<Context> contexts, final String permission) {
         return ((SubjectBridge) this).bridge$resolveOptional()
             .map(subject -> {
-                final Tristate ret = subject.getPermissionValue(contexts, permission);
-                if (ret == Tristate.UNDEFINED) {
-                    return ((SubjectBridge) this).bridge$permDefault(permission).asBoolean();
+                final int ret = subject.getPermission(contexts, permission);
+                if (ret == 0) {
+                    return ((SubjectBridge) this).bridge$permDefault(permission);
                 }
-                return ret.asBoolean();
+                return ret;
             })
-            .orElseGet(() -> ((SubjectBridge) this).bridge$permDefault(permission).asBoolean());
+            .orElseGet(() -> ((SubjectBridge) this).bridge$permDefault(permission)) > 0;
     }
 
     @Override

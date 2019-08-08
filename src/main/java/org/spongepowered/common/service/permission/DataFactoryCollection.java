@@ -123,14 +123,14 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public Tristate getPermissionValue(Set<Context> contexts, String permission) {
-            Tristate ret = super.getPermissionValue(contexts, permission);
+        public int getPermission(Set<Context> contexts, String permission) {
+            int ret = super.getPermission(contexts, permission);
 
-            if (ret == Tristate.UNDEFINED) {
+            if (ret == 0) {
                 ret = getDataPermissionValue(DataFactoryCollection.this.getDefaults().getTransientSubjectData(), permission);
             }
 
-            if (ret == Tristate.UNDEFINED) {
+            if (ret == 0) {
                 ret = getDataPermissionValue(DataFactoryCollection.this.service.getDefaults().getTransientSubjectData(), permission);
             }
             return ret;

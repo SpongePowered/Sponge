@@ -26,6 +26,7 @@ package org.spongepowered.common.service.permission;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import com.google.gson.internal.$Gson$Types;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -78,15 +79,29 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
+    @Deprecated
     public Map<Subject, Boolean> getAssignedSubjects(String identifier) {
         SubjectCollection subjects = this.permissionService.get(identifier);
         return subjects.getLoadedWithPermission(this.id);
     }
 
     @Override
+    @Deprecated
     public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(String type) {
         SubjectCollection subjects = this.permissionService.get(type);
         return subjects.getAllWithPermission(this.id);
+    }
+
+    @Override
+    public CompletableFuture<Map<SubjectReference, Integer>> findAssignedSubjectValues(String collectionIdentifier) {
+        return this.permissionService.get(collectionIdentifier)
+                .getAllWithPermissionValue(this.id);
+    }
+
+    @Override
+    public Map<Subject, Integer> getAssignedSubjectValues(String collectionIdentifier) {
+        return this.permissionService.get(collectionIdentifier)
+                .getLoadedWithPermissionValue(this.id);
     }
 
     @Override
@@ -128,7 +143,7 @@ class SpongePermissionDescription implements PermissionDescription {
         private final PluginContainer owner;
         private String id;
         @Nullable private Text description;
-        private final Map<String, Tristate> roleAssignments = new LinkedHashMap<>();
+        private final Map<String, Integer> roleAssignments = new LinkedHashMap<>();
 
         Builder(SpongePermissionService permissionService, PluginContainer owner) {
             super();
@@ -151,7 +166,7 @@ class SpongePermissionDescription implements PermissionDescription {
         @Override
         public Builder assign(String role, boolean value) {
             Preconditions.checkNotNull(role, "role");
-            this.roleAssignments.put(role, Tristate.fromBoolean(value));
+            this.roleAssignments.put(role, value ? 1: -1);
             return this;
         }
 
@@ -164,7 +179,7 @@ class SpongePermissionDescription implements PermissionDescription {
 
             // Set role-templates
             SpongeSubjectCollection subjects = this.permissionService.get(PermissionService.SUBJECTS_ROLE_TEMPLATE);
-            for (Entry<String, Tristate> assignment : this.roleAssignments.entrySet()) {
+            for (Entry<String, Integer> assignment : this.roleAssignments.entrySet()) {
                 Subject subject = subjects.get(assignment.getKey());
                 subject.getTransientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, this.id, assignment.getValue());
             }

@@ -72,16 +72,16 @@ public final class CommandPermissions {
 
     public static void populateNonCommandPermissions(SubjectData data, BiFunction<Integer, String, Boolean> testPermission) {
         if (testPermission.apply(COMMAND_BLOCK_LEVEL, COMMAND_BLOCK_COMMAND)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, COMMAND_BLOCK_PERMISSION, Tristate.TRUE);
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, COMMAND_BLOCK_PERMISSION, 1);
         }
         if (testPermission.apply(SELECTOR_LEVEL, SELECTOR_COMMAND)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, SELECTOR_PERMISSION, Tristate.TRUE);
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, SELECTOR_PERMISSION, 1);
         }
         if (testPermission.apply(SPONGE_HELP_LEVEL, SPONGE_HELP_COMMAND)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, SPONGE_HELP_PERMISSION, Tristate.TRUE);
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, SPONGE_HELP_PERMISSION, 1);
         }
         if (testPermission.apply(LoginPermissions.BYPASS_WHITELIST_LEVEL, LoginPermissions.BYPASS_WHITELIST_PERMISSION)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, LoginPermissions.BYPASS_WHITELIST_PERMISSION, Tristate.TRUE);
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, LoginPermissions.BYPASS_WHITELIST_PERMISSION, 1);
         }
     }
 
@@ -93,7 +93,7 @@ public final class CommandPermissions {
             if (command.getCallable() instanceof MinecraftCommandWrapper) {
                 MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
                 data.setPermission(SubjectData.GLOBAL_CONTEXT, wrapper.getCommandPermission(),
-                        Tristate.fromBoolean(wrapper.command.checkPermission(sender.getServer(), sender)));
+                        wrapper.command.checkPermission(sender.getServer(), sender) ? 1 : -1);
             }
         }
     }

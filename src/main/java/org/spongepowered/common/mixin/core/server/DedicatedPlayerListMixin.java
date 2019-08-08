@@ -65,12 +65,12 @@ public abstract class DedicatedPlayerListMixin extends PlayerList {
         final PermissionService permissionService = Sponge.getServiceManager().provideUnchecked(PermissionService.class);
         final Subject subject = permissionService.getUserSubjects()
                 .getSubject(profile.getId().toString()).orElse(permissionService.getDefaults());
-        final Tristate tristate = subject.getPermissionValue(SubjectData.GLOBAL_CONTEXT, LoginPermissions.BYPASS_PLAYER_LIMIT_PERMISSION);
+        final int permResult = subject.getPermission(SubjectData.GLOBAL_CONTEXT, LoginPermissions.BYPASS_PLAYER_LIMIT_PERMISSION);
         // Use the op list if the permission isn't overridden for the subject and
         // if we are still using the default permission service
-        if (tristate == Tristate.UNDEFINED && permissionService instanceof SpongePermissionService) {
+        if (permResult == 0 && permissionService instanceof SpongePermissionService) {
             return;
         }
-        ci.setReturnValue(tristate.asBoolean());
+        ci.setReturnValue(permResult > 0);
     }
 }

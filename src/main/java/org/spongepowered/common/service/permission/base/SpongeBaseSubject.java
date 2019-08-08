@@ -60,16 +60,22 @@ public abstract class SpongeBaseSubject implements Subject {
 
     @Override
     public Tristate getPermissionValue(Set<Context> contexts, String permission) {
+        return Tristate.fromInt(getPermission(contexts, permission));
+    }
+
+    @Override
+    public int getPermission(Set<Context> contexts, String permission) {
         return getDataPermissionValue(getTransientSubjectData(), permission);
     }
 
-    protected Tristate getDataPermissionValue(MemorySubjectData subject, String permission) {
-        Tristate res = subject.getNodeTree(SubjectData.GLOBAL_CONTEXT).get(permission);
+    protected int getDataPermissionValue(MemorySubjectData subject, String permission) {
+        int res = subject.getWeightedNodeTree(SubjectData.GLOBAL_CONTEXT).get(permission);
 
-        if (res == Tristate.UNDEFINED) {
+        if (res == 0) { // TODO: This doesn't really take into account weight (a higher weight parent should override a lower weight child)
+                        // TODO: but if you care about that you should get a real permissions plugin.
             for (SubjectReference parent : subject.getParents(SubjectData.GLOBAL_CONTEXT)) {
-                res = parent.resolve().join().getPermissionValue(SubjectData.GLOBAL_CONTEXT, permission);
-                if (res != Tristate.UNDEFINED) {
+                res = parent.resolve().join().getPermission(SubjectData.GLOBAL_CONTEXT, permission);
+                if (res != 0) {
                     return res;
                 }
             }

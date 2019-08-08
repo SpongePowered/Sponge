@@ -446,7 +446,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public Tristate bridge$permDefault(final String permission) {
+    public int bridge$permDefault(final String permission) {
         return ((SubjectBridge) this.impl$user).bridge$permDefault(permission);
     }
 

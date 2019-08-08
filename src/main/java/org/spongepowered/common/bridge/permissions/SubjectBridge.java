@@ -44,5 +44,5 @@ public interface SubjectBridge {
 
     String bridge$getSubjectCollectionIdentifier();
 
-    Tristate bridge$permDefault(String permission);
+    int bridge$permDefault(String permission);
 }

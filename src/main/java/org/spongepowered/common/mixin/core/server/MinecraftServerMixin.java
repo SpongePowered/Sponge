@@ -148,8 +148,8 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     }
 
     @Override
-    public Tristate bridge$permDefault(final String permission) {
-        return Tristate.TRUE;
+    public int bridge$permDefault(final String permission) {
+        return 1;
     }
 
     @Override

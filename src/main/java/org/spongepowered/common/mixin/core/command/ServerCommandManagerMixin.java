@@ -208,10 +208,10 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
             }
             if (service instanceof SpongePermissionService) {
                 ((SpongePermissionService) service).getGroupForOpLevel(opLevel).getTransientSubjectData()
-                    .setPermission(SubjectData.GLOBAL_CONTEXT, cmd.getCommandPermission(), Tristate.TRUE);
+                    .setPermission(SubjectData.GLOBAL_CONTEXT, cmd.getCommandPermission(), 1);
             } else if (opLevel == 0) {
                 service.getDefaults().getTransientSubjectData()
-                    .setPermission(SubjectData.GLOBAL_CONTEXT, cmd.getCommandPermission(), Tristate.TRUE);
+                    .setPermission(SubjectData.GLOBAL_CONTEXT, cmd.getCommandPermission(), 1);
             }
         }
     }

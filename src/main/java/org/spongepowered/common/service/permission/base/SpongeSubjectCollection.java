@@ -95,6 +95,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
     }
 
     @Override
+    @Deprecated
     public Map<Subject, Boolean> getLoadedWithPermission(String permission) {
         final Map<Subject, Boolean> ret = new HashMap<>();
         for (Subject subj : getLoadedSubjects()) {
@@ -107,6 +108,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
     }
 
     @Override
+    @Deprecated
     public Map<Subject, Boolean> getLoadedWithPermission(Set<Context> contexts, String permission) {
         final Map<Subject, Boolean> ret = new HashMap<>();
         for (Subject subj : getLoadedSubjects()) {
@@ -119,6 +121,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
     }
 
     @Override
+    @Deprecated
     public CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(String permission) {
         return CompletableFuture.completedFuture(getLoadedWithPermission(permission).entrySet().stream()
                 .collect(Collectors.toMap(
@@ -129,8 +132,54 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
     }
 
     @Override
+    @Deprecated
     public CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(Set<Context> contexts, String permission) {
         return CompletableFuture.completedFuture(getLoadedWithPermission(contexts, permission).entrySet().stream()
+                .collect(Collectors.toMap(
+                        e -> e.getKey().asSubjectReference(),
+                        Map.Entry::getValue)
+                )
+        );
+    }
+
+    @Override
+    public Map<Subject, Integer> getLoadedWithPermissionValue(String permission) {
+        final Map<Subject, Integer> ret = new HashMap<>();
+        for (Subject subj : getLoadedSubjects()) {
+            int state = subj.getPermission(subj.getActiveContexts(), permission);
+            if (state != 0) {
+                ret.put(subj, state);
+            }
+
+        }
+        return Collections.unmodifiableMap(ret);
+    }
+
+    @Override
+    public Map<Subject, Integer> getLoadedWithPermissionValue(Set<Context> contexts, String permission) {
+        final Map<Subject, Integer> ret = new HashMap<>();
+        for (Subject subj : getLoadedSubjects()) {
+            int state = subj.getPermission(contexts, permission);
+            if (state != 0) {
+                ret.put(subj, state);
+            }
+        }
+        return Collections.unmodifiableMap(ret);
+    }
+
+    @Override
+    public CompletableFuture<Map<SubjectReference, Integer>> getAllWithPermissionValue(String permission) {
+        return CompletableFuture.completedFuture(getLoadedWithPermissionValue(permission).entrySet().stream()
+                .collect(Collectors.toMap(
+                        e -> e.getKey().asSubjectReference(),
+                        Map.Entry::getValue)
+                )
+        );
+    }
+
+    @Override
+    public CompletableFuture<Map<SubjectReference, Integer>> getAllWithPermissionValue(Set<Context> contexts, String permission) {
+        return CompletableFuture.completedFuture(getLoadedWithPermissionValue(contexts, permission).entrySet().stream()
                 .collect(Collectors.toMap(
                         e -> e.getKey().asSubjectReference(),
                         Map.Entry::getValue)
