@@ -22,23 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.property.store.item;
+package org.spongepowered.common.mixin.core.item;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.property.item.RecordProperty;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
-import org.spongepowered.common.registry.type.effect.RecordTypeRegistryModule;
+import net.minecraft.item.ItemRecord;
+import net.minecraft.util.SoundEvent;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+import java.util.Map;
 
-public class RecordPropertyStore extends AbstractItemStackPropertyStore<RecordProperty> {
+@Mixin(ItemRecord.class)
+public interface ItemRecordAccessor {
 
-    @Override
-    protected Optional<RecordProperty> getFor(ItemStack itemStack) {
-        return RecordTypeRegistryModule.getInstance()
-                .getByItem(itemStack.getItem())
-                .map(RecordProperty::new);
-    }
+    @Accessor("RECORDS") Map<SoundEvent, ItemRecord> accessor$getRecords();
+
+    @Accessor("sound") SoundEvent accessor$getSoundEvent();
+
 }

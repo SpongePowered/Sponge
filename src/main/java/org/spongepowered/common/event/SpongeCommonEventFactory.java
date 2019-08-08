@@ -31,6 +31,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
+import net.minecraft.block.BlockJukebox;
 import net.minecraft.block.state.BlockPistonStructureHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -53,6 +54,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IInteractionObject;
@@ -61,10 +63,17 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.tileentity.Jukebox;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.property.item.RecordProperty;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.effect.sound.SoundCategories;
+import org.spongepowered.api.effect.sound.SoundCategory;
+import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.effect.sound.SoundTypes;
+import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Item;
@@ -105,6 +114,7 @@ import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
 import org.spongepowered.api.event.message.MessageEvent;
+import org.spongepowered.api.event.sound.PlaySoundEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
@@ -136,6 +146,7 @@ import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -153,8 +164,11 @@ import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.api.mcp.tileentity.TileEntityJukeboxMixin_API;
+import org.spongepowered.common.mixin.core.world.WorldMixin;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
@@ -201,7 +215,7 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static void callDropItemDrop(EntityPlayerMP player, final List<EntityItem> items,
+    public static void callDropItemDrop(final EntityPlayerMP player, final List<EntityItem> items,
             final PhaseContext<?> context) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -1616,5 +1630,54 @@ public class SpongeCommonEventFactory {
             return null;
         }
         return item;
+    }
+
+    @Nullable
+    public static PlaySoundEvent.Broadcast callPlaySoundBroadcastEvent(final CauseStackManager.StackFrame frame, final WorldBridge bridge,
+        final BlockPos pos, final int effectID) {
+        final SoundType soundType;
+        final float volume;
+        if (effectID == Constants.WorldEvents.PLAY_WITHER_SPAWN_EVENT) {
+            soundType = SoundTypes.ENTITY_WITHER_SPAWN;
+            volume = 1.0F;
+        } else if (effectID == Constants.WorldEvents.PLAY_ENDERDRAGON_DEATH_EVENT) {
+            soundType = SoundTypes.ENTITY_ENDERDRAGON_DEATH;
+            volume = 5.0F;
+        } else if (effectID == Constants.WorldEvents.PLAY_BLOCK_END_PORTAL_SPAWN_EVENT) {
+            soundType = SoundTypes.BLOCK_END_PORTAL_SPAWN;
+            volume = 1.0F;
+        } else {
+            return null;
+        }
+        final Location<World> location = new Location<>((World) bridge, pos.getX(), pos.getY(), pos.getZ());
+        final PlaySoundEvent.Broadcast event = SpongeEventFactory.createPlaySoundEventBroadcast(frame.getCurrentCause(), location,
+            SoundCategories.HOSTILE, soundType, 1.0F, volume);
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
+    public static PlaySoundEvent.Record callPlaySoundRecordEvent(final Cause cause, final BlockJukebox.TileEntityJukebox jukebox,
+        final RecordType recordType, final int data) {
+        final Jukebox apiJuke = (Jukebox) jukebox;
+        final Location<World> location = apiJuke.getLocation();
+        final PlaySoundEvent.Record
+            event =
+            data == 0 ? SpongeEventFactory
+                .createPlaySoundEventRecordStart(cause, apiJuke, location, recordType, SoundCategories.RECORD, recordType.getSound(), 1.0F, 4.0F)
+                      : SpongeEventFactory
+                .createPlaySoundEventRecordStop(cause, apiJuke, location, recordType, SoundCategories.RECORD, recordType.getSound(), 1.0F, 4.0F);
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public static PlaySoundEvent.AtEntity callPlaySoundAtEntityEvent(final Cause cause, @Nullable final EntityPlayer entity,
+        final WorldBridge worldMixin, final double x, final double y, final double z, final net.minecraft.util.SoundCategory category,
+        final SoundEvent name, final float pitch, final float volume) {
+        final Location<World> location = new Location<>((World) worldMixin, x, y, z);
+        final PlaySoundEvent.AtEntity event = SpongeEventFactory.createPlaySoundEventAtEntity(cause, location, Optional.ofNullable(entity),
+            (SoundCategory) (Object) category, (SoundType) name, pitch, volume);
+        SpongeImpl.postEvent(event);
+        return event;
     }
 }

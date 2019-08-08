@@ -298,6 +298,7 @@
         "item.ItemToolAccessor",
         "item.ItemWritableBookMixin",
         "item.ItemWrittenBookMixin",
+        "item.ItemRecordAccessor",
         "item.crafting.FurnaceRecipesMixin",
         "item.crafting.IngredientAccessor",
         "item.crafting.ShapedRecipesAccessor",

@@ -27,10 +27,12 @@ package org.spongepowered.common.effect.record;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.item.Item;
 import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -44,17 +46,17 @@ public class SpongeRecordType extends SpongeCatalogType.Translatable implements 
      */
     private static final int EFFECT_ID = 1010;
 
-    private final int internalId;
+    private final ItemType recordItem;
     private final SoundType soundType;
 
-    public SpongeRecordType(String id, String translation, int internalId, SoundType soundType) {
+    public SpongeRecordType(String id, String translation, ItemType recordItem, SoundType soundType) {
         super(id, new SpongeTranslation(translation));
-        this.internalId = internalId;
+        this.recordItem = recordItem;
         this.soundType = soundType;
     }
 
     public int getInternalId() {
-        return this.internalId;
+        return Item.REGISTRY.getIDForObject((Item) recordItem);
     }
 
     @Override
