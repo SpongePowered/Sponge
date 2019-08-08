@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value;
 
+import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -52,7 +53,9 @@ public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected boolean set(final TileEntityMobSpawnerAccessor container, final WeightedTable<EntityArchetype> value) {
-        SpawnerUtils.setEntities((MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic(), value);
+        final MobSpawnerBaseLogicAccessor logic = (MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic();
+        SpawnerUtils.setEntities(logic, value);
+        SpawnerUtils.setNextEntity((MobSpawnerBaseLogic) logic, SpawnerUtils.getNextEntity(logic));
         return true;
     }
 
