@@ -30,6 +30,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -40,14 +41,12 @@ import java.util.Map;
 @Mixin(CooldownTracker.class)
 public abstract class CooldownTrackerMixin implements CooldownTrackerBridge {
 
-    private boolean impl$lastSetCooldownResult;
+    private int impl$lastSetCooldownResult;
 
     @Inject(
             method = "setCooldown",
             at = @At(
-                    value = "INVOKE",
-                    shift = At.Shift.BEFORE,
-                    target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                    value = "HEAD",
                     remap = false
             ),
             locals = LocalCapture.CAPTURE_FAILHARD,
@@ -55,9 +54,21 @@ public abstract class CooldownTrackerMixin implements CooldownTrackerBridge {
     )
     private void impl$throwEventOnSetAndTrackResult(final Item item, final int ticks, final CallbackInfo ci) {
         this.impl$lastSetCooldownResult = this.impl$throwSetCooldownEvent((ItemType) item, ticks);
-        if (!this.impl$lastSetCooldownResult) {
+        if (this.impl$lastSetCooldownResult == -1) {
             ci.cancel();
         }
+    }
+
+    @ModifyVariable(
+            method = "setCooldown",
+            at = @At(
+                    value = "HEAD",
+                    remap = false
+            ),
+            argsOnly = true
+    )
+    private int impl$setResultOfEvent(int ticks) {
+        return this.impl$lastSetCooldownResult;
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Map$Entry;getKey()Ljava/lang/Object;", remap = false))
@@ -66,8 +77,8 @@ public abstract class CooldownTrackerMixin implements CooldownTrackerBridge {
         return entry.getKey();
     }
 
-    protected boolean impl$throwSetCooldownEvent(final ItemType type, final int ticks) {
-        return true;
+    protected int impl$throwSetCooldownEvent(final ItemType type, final int ticks) {
+        return 0;
     }
 
     protected void impl$throwEndCooldownEvent(final ItemType type) {
@@ -76,6 +87,6 @@ public abstract class CooldownTrackerMixin implements CooldownTrackerBridge {
 
     @Override
     public boolean bridge$getSetCooldownResult() {
-        return this.impl$lastSetCooldownResult;
+        return this.impl$lastSetCooldownResult != -1;
     }
 }

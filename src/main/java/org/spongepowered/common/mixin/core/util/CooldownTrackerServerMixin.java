@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.util;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.util.CooldownTrackerServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
@@ -36,19 +37,30 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.OptionalInt;
+
 @Mixin(CooldownTrackerServer.class)
 public abstract class CooldownTrackerServerMixin extends CooldownTrackerMixin {
 
     @Shadow @Final private EntityPlayerMP player;
 
+    @Shadow protected abstract void notifyOnSet(Item itemIn, int ticksIn);
+
     @Override
-    protected boolean impl$throwSetCooldownEvent(final ItemType type, final int ticks) {
+    protected int impl$throwSetCooldownEvent(final ItemType type, final int ticks) {
         if (ticks == 0) {
-            return true;
+            return 0;
         }
+        final OptionalInt beforeCooldown = ((CooldownTracker) this).getCooldown(type);
         final CooldownEvent.Set event = SpongeEventFactory.createCooldownEventSet(Sponge.getCauseStackManager().getCurrentCause(),
-                ticks, ticks, type, ((CooldownTracker) this).getCooldown(type), (Player) this.player);
-        return !Sponge.getEventManager().post(event);
+                ticks, ticks, type, beforeCooldown, (Player) this.player);
+
+        if (Sponge.getEventManager().post(event)) {
+            notifyOnSet((Item) type, beforeCooldown.orElse(0));
+            return -1;
+        } else {
+            return event.getNewCooldown();
+        }
     }
 
     @Override
