@@ -274,7 +274,7 @@ public final class PhaseTracker {
         if (isEmpty) {
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
-            this.printEmptyStackOnCompletion();
+            this.printEmptyStackOnCompletion(currentContext);
             return;
         }
 
@@ -395,7 +395,7 @@ public final class PhaseTracker {
         }
     }
 
-    private void printEmptyStackOnCompletion() {
+    private void printEmptyStackOnCompletion(PhaseContext<?> context) {
         if (this.hasPrintedEmptyOnce) {
             // We want to only mention it once that we are completing an
             // empty state, of course something is bound to break, but
@@ -411,7 +411,9 @@ public final class PhaseTracker {
                                 + " is required on the issue tracker on GitHub.").hr()
                 .add("StackTrace:")
                 .add(new Exception())
-                .add();
+                .add("Phase being completed:");
+        PHASE_PRINTER.accept(printer, context);
+        printer.add();
         this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
         if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
