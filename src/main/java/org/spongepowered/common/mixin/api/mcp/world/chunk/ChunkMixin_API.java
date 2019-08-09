@@ -167,6 +167,17 @@ public abstract class ChunkMixin_API implements Chunk {
         return chunk != null;
     }
 
+    @Override
+    public boolean unloadChunk() {
+        if (((ChunkBridge) this).bridge$isPersistedChunk()) {
+            return false;
+        }
+        // Spawn point checks occur in queueUnload() and are reflected in
+        // this.unloadQueued.
+        ((WorldServer) this.world).getChunkProvider().queueUnload((net.minecraft.world.chunk.Chunk) (Object) this);
+        return this.unloadQueued;
+    }
+
     @SuppressWarnings("deprecation")
     @Override
     public int getInhabittedTime() {
