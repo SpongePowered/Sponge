@@ -66,10 +66,13 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.Jukebox;
+import org.spongepowered.api.block.tileentity.Note;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.data.type.InstrumentType;
+import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.effect.sound.SoundCategories;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -1741,4 +1744,12 @@ public class SpongeCommonEventFactory {
         SpongeImpl.postEvent(event);
         return event;
     }
+
+    public static PlaySoundEvent.NoteBlock callPlaySoundNoteBLockEvent(final Cause cause, final World world, Note note, final BlockPos pos, final SoundEvent soundEvent, final InstrumentType instrument, final NotePitch notePitch, final Float pitch) {
+        final Location<World> location = new Location<>(world, pos.getX(), pos.getY(), pos.getZ());
+        final PlaySoundEvent.NoteBlock event = SpongeEventFactory.createPlaySoundEventNoteBlock(cause, instrument, location, note, notePitch, SoundCategories.RECORD, (SoundType)soundEvent, pitch, 3.0F);
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
 }

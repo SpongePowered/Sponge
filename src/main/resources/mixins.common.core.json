@@ -95,6 +95,7 @@
         "block.BlockMixin",
         "block.BlockMyceliumMixin",
         "block.BlockNetherWartMixin",
+        "block.BlockNoteMixin",
         "block.BlockNoteAccessor",
         "block.BlockPaneMixin",
         "block.BlockPistonBaseMixin",
