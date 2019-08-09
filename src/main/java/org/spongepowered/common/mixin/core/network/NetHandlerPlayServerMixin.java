@@ -60,6 +60,7 @@ import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
+import net.minecraft.network.play.client.CPacketSpectate;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
@@ -126,6 +127,7 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.packet.SPacketResourcePackSendBridge;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -171,6 +173,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     @Nullable private ResourcePack impl$lastReceivedPack, lastAcceptedPack;
     private final AtomicInteger impl$numResourcePacksInTransit = new AtomicInteger();
     private final LongObjectHashMap<Runnable> impl$customKeepAliveCallbacks = new LongObjectHashMap<>();
+    private Transform<World> impl$spectatingTeleportLocation;
 
     @Override
     public void bridge$captureCurrentPlayerPosition() {
@@ -486,6 +489,62 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             }
         }
         return playerMP.queuedEndExit;
+    }
+
+    @Inject(
+            method = "handleSpectate",
+            at = @At(
+                    value = "FIELD",
+                    target = "Lnet/minecraft/entity/Entity;world:Lnet/minecraft/world/World;",
+                    ordinal = 0
+            ),
+            locals = LocalCapture.CAPTURE_FAILHARD,
+            cancellable = true
+    )
+    private void impl$onSpectateTeleportCallMoveEvent(CPacketSpectate packetIn, CallbackInfo ci, Entity spectatingEntity) {
+        final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(
+                this.player,
+                spectatingEntity.posX,
+                spectatingEntity.posY,
+                spectatingEntity.posZ,
+                spectatingEntity.rotationYaw,
+                spectatingEntity.rotationPitch);
+        if (event.isCancelled()) {
+            ci.cancel();
+        } else {
+            this.impl$spectatingTeleportLocation = event.getToTransform();
+        }
+    }
+
+    @Redirect(method = "handleSpectate", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;world:Lnet/minecraft/world/World;", ordinal = 1))
+    private net.minecraft.world.World impl$onSpectateGetEntityWorld(Entity entity) {
+        return (net.minecraft.world.World) this.impl$spectatingTeleportLocation.getExtent();
+    }
+
+    @Inject(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getServerWorld()Lnet/minecraft/world/WorldServer;", ordinal = 1), cancellable = true)
+    private void impl$cancelIfSameWorld(CallbackInfo ci) {
+        if (this.player.getServerWorld() == (WorldServer) this.impl$spectatingTeleportLocation.getExtent()) {
+            final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
+            player.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
+            ci.cancel();
+        }
+    }
+
+    @Redirect(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setLocationAndAngles(DDDFF)V"))
+    private void impl$onSpectateLocationAndAnglesUpdate(EntityPlayerMP player, double x, double y, double z, float yaw, float pitch) {
+        player.dimension = ((WorldServer) this.impl$spectatingTeleportLocation.getExtent()).provider.getDimensionType().getId();
+        final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
+        player.setLocationAndAngles(
+                position.getX(), position.getY(), position.getZ(),
+                (float) this.impl$spectatingTeleportLocation.getYaw(),
+                (float) this.impl$spectatingTeleportLocation.getPitch()
+        );
+    }
+
+    @Redirect(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setPositionAndUpdate(DDD)V"))
+    private void impl$onSpectatePositionUpdate(EntityPlayerMP player, double x, double y, double z) {
+        final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
+        player.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
     }
 
     /**
