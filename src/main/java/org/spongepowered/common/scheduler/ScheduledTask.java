@@ -183,7 +183,9 @@ public class ScheduledTask implements Task {
     }
 
     void setState(ScheduledTaskState state) {
-        this.state = state;
+        if (this.state != ScheduledTaskState.CANCELED) {
+            this.state = state;
+        }
     }
 
     @Override
