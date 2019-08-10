@@ -60,17 +60,31 @@ import javax.annotation.Nullable;
 public final class SpongeCauseStackManager implements CauseStackManager {
 
     private static final boolean DEBUG_CAUSE_FRAMES = Boolean.parseBoolean(System.getProperty("sponge.debugcauseframes", "false"));
-    public static final int MAX_POOL_SIZE;
+    private static final String INITIAL_POOL_SIZE_PROPERTY =  "sponge.cause.initialFramePoolSize";
+    private static final String MAX_POOL_SIZE_PROPERTY =  "sponge.cause.maxFramePoolSize";
+
+    private static final int INITIAL_POOL_SIZE;
+    private static final int MAX_POOL_SIZE;
 
     static {
-        int maxPoolSize = 50;
+        int initialPoolSize = 50;
+        int maxPoolSize = 100;
         try {
-            maxPoolSize = Integer.parseInt(System.getProperty("sponge.cause.framePoolSize", "50"));
+            initialPoolSize = Integer.parseInt(System.getProperty(INITIAL_POOL_SIZE_PROPERTY, "50"));
         } catch (NumberFormatException ex) {
-            SpongeImpl.getLogger().warn("sponge.cause.framePoolSize must be an integer, was set to {}. Defaulting to 50.",
-                    System.getProperty("sponge.cause.framePoolSize"));
+            SpongeImpl.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 50.",
+                    INITIAL_POOL_SIZE_PROPERTY,
+                    System.getProperty(INITIAL_POOL_SIZE_PROPERTY));
+        }
+        try {
+            maxPoolSize = Integer.parseInt(System.getProperty(MAX_POOL_SIZE_PROPERTY, "100"));
+        } catch (NumberFormatException ex) {
+            SpongeImpl.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 100.",
+                    MAX_POOL_SIZE_PROPERTY,
+                    System.getProperty(MAX_POOL_SIZE_PROPERTY));
         }
         MAX_POOL_SIZE = Math.max(0, maxPoolSize);
+        INITIAL_POOL_SIZE = Math.max(0, Math.min(MAX_POOL_SIZE, initialPoolSize));
     }
 
     private final Deque<Object> cause = Queues.newArrayDeque();
@@ -96,7 +110,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
     @Inject
     private SpongeCauseStackManager() {
-        for (int i = 0; i < MAX_POOL_SIZE; i++) {
+        for (int i = 0; i < INITIAL_POOL_SIZE; i++) {
             this.framePool.push(new CauseStackFrameImpl());
         }
     }
