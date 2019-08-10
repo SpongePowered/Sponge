@@ -1097,8 +1097,13 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @Override
     TileEntity impl$getTileOrNullIfMarkedForRemoval(final Chunk chunk, final BlockPos pos, final Chunk.EnumCreateEntityType creationMode) {
         // Sponge - Make sure the tile entity is not actually marked for being "empty"
-        final boolean isTileNull = !this.bridge$isFake() && this.proxyBlockAccess.hasTileEntity(pos) && this.proxyBlockAccess.getTileEntity(pos) == null;
-        return isTileNull ? null : super.impl$getTileOrNullIfMarkedForRemoval(chunk, pos, creationMode);
+        if (this.bridge$isFake()) {
+            return super.impl$getTileOrNullIfMarkedForRemoval(chunk, pos, creationMode);
+        }
+        if (this.proxyBlockAccess.hasTileEntity(pos)) {
+            return this.proxyBlockAccess.getTileEntity(pos);
+        }
+        return super.impl$getTileOrNullIfMarkedForRemoval(chunk, pos, creationMode);
     }
 
     @Override
