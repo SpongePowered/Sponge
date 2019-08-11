@@ -276,6 +276,7 @@
         "inventory.ContainerAccessor",
         "inventory.ContainerBrewingStandAccessor",
         "inventory.ContainerDispenserAccessor",
+        "inventory.ContainerEnchantmentMixin",
         "inventory.ContainerFurnaceAccessor",
         "inventory.ContainerHopperAccessor",
         "inventory.ContainerHorseChestMixin",

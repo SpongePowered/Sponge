@@ -154,6 +154,7 @@ import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
+import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
 import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
@@ -315,6 +316,7 @@ public final class CommonModuleRegistry {
                 .registerBuilderSupplier(SmeltingRecipe.Builder.class, SpongeSmeltingRecipeBuilder::new)
                 .registerBuilderSupplier(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
                 .registerBuilderSupplier(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
+                .registerBuilderSupplier(Enchantment.RandomListBuilder.class, SpongeRandomEnchantmentListBuilder::new)
                 .registerBuilderSupplier(Key.Builder.class, SpongeKeyBuilder::new)
                 .registerBuilderSupplier(Advancement.Builder.class, SpongeAdvancementBuilder::new)
                 .registerBuilderSupplier(AdvancementTree.Builder.class, SpongeAdvancementTreeBuilder::new)

@@ -34,6 +34,7 @@ import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.BlockJukebox;
 import net.minecraft.block.state.BlockPistonStructureHelper;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityItem;
@@ -41,6 +42,7 @@ import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerEnchantment;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.inventory.IInventory;
@@ -66,7 +68,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.Jukebox;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.property.item.RecordProperty;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.effect.sound.SoundCategories;
@@ -110,11 +111,13 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
+import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
@@ -145,8 +148,8 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -158,14 +161,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
+import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.api.mcp.tileentity.TileEntityJukeboxMixin_API;
-import org.spongepowered.common.mixin.core.world.WorldMixin;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
@@ -1542,6 +1544,65 @@ public class SpongeCommonEventFactory {
             SpongeImpl.postEvent(event);
             return event;
         }
+    }
+
+
+    public static int callEnchantEventLevelRequirement(ContainerEnchantment container, int seed, int option, int power, ItemStack itemStack, int levelRequirement) {
+        org.spongepowered.api.item.inventory.Container enchantContainer = ContainerUtil.fromNative(container);
+
+        EnchantItemEvent.CalculateLevelRequirement event =
+                SpongeEventFactory.createEnchantItemEventCalculateLevelRequirement(Sponge.getCauseStackManager().getCurrentCause(),
+                        levelRequirement, levelRequirement, ItemStackUtil.snapshotOf(itemStack), enchantContainer, option, power, seed);
+
+        SpongeImpl.postEvent(event);
+
+        return event.getLevelRequirement();
+    }
+
+    public static List<EnchantmentData> callEnchantEventEnchantmentList(ContainerEnchantment container,
+            int seed, ItemStack itemStack, int option, int level, List<EnchantmentData> list) {
+
+        List<Enchantment> enchList = Collections.unmodifiableList(SpongeRandomEnchantmentListBuilder.fromNative(list));
+
+        org.spongepowered.api.item.inventory.Container enchantContainer = ContainerUtil.fromNative(container);
+
+        EnchantItemEvent.CalculateEnchantment event =
+                SpongeEventFactory.createEnchantItemEventCalculateEnchantment(Sponge.getCauseStackManager().getCurrentCause(),
+                        enchList, enchList, ItemStackUtil.snapshotOf(itemStack), enchantContainer, level, option, seed);
+
+        SpongeImpl.postEvent(event);
+
+        if (event.getEnchantments() != event.getOriginalEnchantments()) {
+            return SpongeRandomEnchantmentListBuilder.toNative(event.getEnchantments());
+        }
+        return list;
+    }
+
+    public static EnchantItemEvent.Post callEnchantEventEnchantPost(EntityPlayer playerIn, ContainerEnchantment container,
+            SlotTransaction enchantedItem, SlotTransaction lapisItem, int option, int seed) {
+        org.spongepowered.api.item.inventory.Container enchantContainer = ContainerUtil.fromNative(container);
+
+        ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(playerIn.inventory.getItemStack());
+        Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(cursor, cursor);
+
+        List<SlotTransaction> slotTrans = new ArrayList<>();
+        slotTrans.add(lapisItem);
+        slotTrans.add(enchantedItem);
+
+        EnchantItemEvent.Post event =
+                SpongeEventFactory.createEnchantItemEventPost(Sponge.getCauseStackManager().getCurrentCause(),
+                       cursorTrans, enchantedItem.getSlot(), Optional.empty(), enchantContainer, slotTrans, option, seed);
+
+        SpongeImpl.postEvent(event);
+
+        PacketPhaseUtil.handleSlotRestore(playerIn, container, event.getTransactions(), event.isCancelled());
+        if (event.isCancelled() || !event.getCursorTransaction().isValid()) {
+            PacketPhaseUtil.handleCustomCursor(playerIn, event.getCursorTransaction().getOriginal());
+        } else if (event.getCursorTransaction().getCustom().isPresent()) {
+            PacketPhaseUtil.handleCustomCursor(playerIn, event.getCursorTransaction().getFinal());
+        }
+
+        return event;
     }
 
     public static Optional<net.minecraft.world.Explosion> detonateExplosive(final ExplosiveBridge explosiveBridge, final Explosion.Builder builder) {
