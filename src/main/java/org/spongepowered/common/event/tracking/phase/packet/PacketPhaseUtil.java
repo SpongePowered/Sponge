@@ -107,10 +107,12 @@ public final class PacketPhaseUtil {
         }
     }
 
-    public static void handleCustomCursor(final EntityPlayerMP player, final ItemStackSnapshot customCursor) {
+    public static void handleCustomCursor(final EntityPlayer player, final ItemStackSnapshot customCursor) {
         final ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
         player.inventory.setItemStack(cursor);
-        player.connection.sendPacket(new SPacketSetSlot(-1, -1, cursor));
+        if (player instanceof EntityPlayerMP) {
+            ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(-1, -1, cursor));
+        }
     }
 
     public static void validateCapturedTransactions(final int slotId, final Container openContainer, final List<SlotTransaction> capturedTransactions) {
