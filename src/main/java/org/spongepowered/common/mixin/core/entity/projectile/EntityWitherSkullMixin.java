@@ -26,12 +26,14 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.health.HealingTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -39,9 +41,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.item.EntityWitherSkullBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 
@@ -66,6 +70,18 @@ public abstract class EntityWitherSkullMixin extends EntityFireballMixin impleme
             return Constants.Entity.WitherSkull.DEFAULT_WITHER_CREATED_SKULL_DAMAGE;
         }
         return Constants.Entity.WitherSkull.DEFAULT_NO_SOURCE_SKULL_DAMAGE;
+    }
+
+    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;heal(F)V"))
+    private void impl$wrapHealing(EntityLivingBase entityLivingBase, float healAmount) {
+        if (!SpongeImplHooks.isMainThread() || this.world.isRemote || !ShouldFire.REGAIN_HEALTH_EVENT) {
+            entityLivingBase.heal(healAmount);
+            return;
+        }
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.HEALING_TYPE, HealingTypes.UNDEAD);
+            entityLivingBase.heal(healAmount);
+        }
     }
 
     @Override

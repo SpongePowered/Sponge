@@ -27,7 +27,11 @@ package org.spongepowered.common.mixin.core.entity.boss;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.EntityWither;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.monster.Wither;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.health.HealingTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -38,9 +42,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.monster.EntityMobMixin;
 import org.spongepowered.common.util.Constants;
@@ -145,8 +151,10 @@ public abstract class EntityWitherMixin extends EntityMobMixin implements FusedE
         ((Wither) this).prime();
     }
 
-    @Redirect(method = "updateAITasks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;newExplosion"
-                                                                            + "(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;"))
+    @Redirect(method = "updateAITasks",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;newExplosion(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;"))
+    @Nullable
     private net.minecraft.world.Explosion spongeImpl$UseSpongeExplosion(final net.minecraft.world.World worldObj, final Entity self, final double x,
                                                       final double y, final double z, final float strength, final boolean flaming,
                                                       final boolean smoking) {
@@ -158,6 +166,19 @@ public abstract class EntityWitherMixin extends EntityMobMixin implements FusedE
                 .shouldPlaySmoke(smoking)
                 .shouldBreakBlocks(smoking && ((GrieferBridge) this).bridge$CanGrief()))
                 .orElse(null);
+    }
+
+    @Redirect(method = "updateAITasks", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/EntityWither;heal(F)V"))
+    private void impl$wrapHealingWithContext(EntityWither entityWither, float healAmount) {
+        if (this.world.isRemote || !SpongeImplHooks.isMainThread() || !ShouldFire.REGAIN_HEALTH_EVENT) {
+            this.heal(healAmount);
+            return;
+        }
+
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.HEALING_TYPE, HealingTypes.BOSS);
+            this.heal(healAmount);
+        }
     }
 
 }

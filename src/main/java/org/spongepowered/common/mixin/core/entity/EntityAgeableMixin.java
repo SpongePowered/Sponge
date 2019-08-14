@@ -40,7 +40,7 @@ import org.spongepowered.common.event.ShouldFire;
 import java.util.Optional;
 
 @Mixin(EntityAgeable.class)
-public abstract class EntityAgeableMixin extends EntityMixin {
+public abstract class EntityAgeableMixin extends EntityLivingMixin {
 
     @Inject(method = "setGrowingAge", at = @At("RETURN"))
     private void callReadyToMateOnAgeUp(final int age, final CallbackInfo ci) {

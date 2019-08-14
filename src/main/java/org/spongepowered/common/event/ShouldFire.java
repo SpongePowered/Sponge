@@ -26,6 +26,7 @@ package org.spongepowered.common.event;
 
 public class ShouldFire {
 
+    public static boolean REGAIN_HEALTH_EVENT = false;
     public static boolean PLAYER_CHANGE_CLIENT_SETTINGS_EVENT = false;
     public static boolean CONSTRUCT_ENTITY_EVENT_PRE = false;
 

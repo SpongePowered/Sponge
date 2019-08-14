@@ -31,12 +31,18 @@ import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.entity.boss.dragon.phase.PhaseHover;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.Vec3d;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.health.HealingTypes;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.mixin.core.entity.EntityLivingMixin;
 
 import javax.annotation.Nullable;
@@ -69,7 +75,7 @@ public abstract class EntityDragonMixin extends EntityLivingMixin {
         ),
         require = 0 // Forge rewrites the material request to block.isAir
     )
-    private Block spongeImpl$onCanGrief(IBlockState state) {
+    private Block impl$onCanGrief(final IBlockState state) {
         return ((GrieferBridge) this).bridge$CanGrief() ? state.getBlock() : Blocks.AIR;
     }
 
@@ -81,12 +87,29 @@ public abstract class EntityDragonMixin extends EntityLivingMixin {
      */
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/dragon/phase/IPhase;getTargetLocation()Lnet/minecraft/util/math/Vec3d;"))
     @Nullable
-    private Vec3d spongeImpl$getTargetLocationOrNull(IPhase iPhase) {
-        Vec3d target = iPhase.getTargetLocation();
+    private Vec3d impl$getTargetLocationOrNull(final IPhase iPhase) {
+        final Vec3d target = iPhase.getTargetLocation();
         if (target != null && target.x == this.posX && target.z == this.posZ) {
             return null; // Skips the movement code
         }
         return target;
+    }
+
+    @Redirect(method = "updateDragonEnderCrystal",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/EntityDragon;setHealth(F)V"),
+        slice = @Slice(
+            from = @At("HEAD"),
+            to = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", remap = false)
+        )
+    )
+    private void impl$addBossHealingContext(final EntityDragon entityDragon, final float health) {
+        if (this.world.isRemote || !ShouldFire.REGAIN_HEALTH_EVENT || !SpongeImplHooks.isMainThread()) {
+            this.setHealth(health);
+        }
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.HEALING_TYPE, HealingTypes.BOSS);
+            this.heal(1f);
+        }
     }
 
 }

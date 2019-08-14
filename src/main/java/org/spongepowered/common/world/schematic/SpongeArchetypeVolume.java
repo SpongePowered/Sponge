@@ -130,8 +130,12 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
 
     @Override
     public void apply(Location<World> location, BlockChangeFlag changeFlag) {
+        final World world = location.getExtent();
         this.backing.getBlockWorker().iterate((v, x, y, z) -> {
-            location.getExtent().setBlock(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBlock(x, y, z), changeFlag);
+            final int posX = x + location.getBlockX();
+            final int posY = y + location.getBlockY();
+            final int posZ = z + location.getBlockZ();
+            world.setBlock(posX, posY, posZ, v.getBlock(x, y, z), changeFlag.withPhysics(false));
         });
         for (Vector3i pos : this.tiles.keySet()) {
             TileEntityArchetype archetype = this.tiles.get(pos);

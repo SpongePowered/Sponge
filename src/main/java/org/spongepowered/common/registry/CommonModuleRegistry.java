@@ -74,6 +74,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.*;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.api.event.cause.entity.health.HealingType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.extra.fluid.FluidStack;
@@ -353,6 +354,7 @@ public final class CommonModuleRegistry {
                 .registerModule(DamageModifierType.class, new DamageModifierTypeRegistryModule())
                 .registerModule(new DamageSourceRegistryModule())
                 .registerModule(DamageType.class, new DamageTypeRegistryModule())
+                .registerModule(HealingType.class, new HealingTypeRegistryModule())
                 .registerModule(DataFormat.class, new DataFormatRegistryModule())
                 .registerModule(DataTranslator.class, DataTranslatorRegistryModule.getInstance())
                 .registerModule(Difficulty.class, DifficultyRegistryModule.getInstance())

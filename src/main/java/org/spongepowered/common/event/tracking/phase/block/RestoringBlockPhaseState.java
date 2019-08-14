@@ -101,4 +101,48 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
         return false;
     }
 
+    @Override
+    public boolean tracksBlockSpecificDrops(GeneralizedContext context) {
+        return false;
+    }
+
+    @Override
+    public boolean tracksEntitySpecificDrops() {
+        return false;
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops(GeneralizedContext context) {
+        return false;
+    }
+
+    @Override
+    public boolean doesDropEventTracking(GeneralizedContext context) {
+        return false;
+    }
+
+    @Override
+    public boolean ignoresScheduledUpdates() {
+        return false;
+    }
+
+    @Override
+    public boolean tracksTileEntityChanges(GeneralizedContext currentContext) {
+        return false;
+    }
+
+    @Override
+    public boolean hasSpecificBlockProcess(GeneralizedContext context) {
+        return false;
+    }
+
+    @Override
+    public boolean doesCaptureNeighborNotifications(GeneralizedContext context) {
+        return false;
+    }
+
+    @Override
+    public boolean allowsGettingQueuedRemovedTiles() {
+        return false;
+    }
 }

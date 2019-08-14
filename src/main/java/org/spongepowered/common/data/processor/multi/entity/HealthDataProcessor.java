@@ -55,14 +55,14 @@ public class HealthDataProcessor extends AbstractEntityDataProcessor<EntityLivin
     }
 
     @Override
-    protected boolean doesDataExist(EntityLivingBase entity) {
+    protected boolean doesDataExist(final EntityLivingBase entity) {
         return true;
     }
 
     @Override
-    protected boolean set(EntityLivingBase entity, Map<Key<?>, Object> keyValues) {
+    protected boolean set(final EntityLivingBase entity, final Map<Key<?>, Object> keyValues) {
         entity.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(((Double) keyValues.get(Keys.MAX_HEALTH)).floatValue());
-        float health = ((Double) keyValues.get(Keys.HEALTH)).floatValue();
+        final float health = ((Double) keyValues.get(Keys.HEALTH)).floatValue();
         entity.setHealth(health);
         if (health == 0) {
             entity.attackEntityFrom(DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE, 10000F);
@@ -71,7 +71,7 @@ public class HealthDataProcessor extends AbstractEntityDataProcessor<EntityLivin
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityLivingBase entity) {
+    protected Map<Key<?>, ?> getValues(final EntityLivingBase entity) {
         final double health = entity.getHealth();
         final double maxHealth = entity.getMaxHealth();
         return ImmutableMap.<Key<?>, Object>of(Keys.HEALTH, health,
@@ -79,7 +79,7 @@ public class HealthDataProcessor extends AbstractEntityDataProcessor<EntityLivin
     }
 
     @Override
-    public Optional<HealthData> fill(DataContainer container, HealthData healthData) {
+    public Optional<HealthData> fill(final DataContainer container, final HealthData healthData) {
         if (!container.contains(Keys.MAX_HEALTH.getQuery()) || !container.contains(Keys.HEALTH.getQuery())) {
             return Optional.empty();
         }
@@ -89,7 +89,7 @@ public class HealthDataProcessor extends AbstractEntityDataProcessor<EntityLivin
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult remove(final DataHolder dataHolder) {
         return DataTransactionResult.builder().result(DataTransactionResult.Type.FAILURE).build();
     }
 

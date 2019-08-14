@@ -28,6 +28,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemFood;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
@@ -40,6 +42,8 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.health.HealingTypes;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
@@ -56,6 +60,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.ai.EntityAIBasesBridge;
 import org.spongepowered.common.bridge.entity.ai.EntityAITasksBridge;
@@ -79,6 +84,8 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     @Shadow public abstract boolean isAIDisabled();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashHolder();
     @Shadow protected abstract void initEntityAI();
+
+    @Shadow protected abstract boolean processInteract(EntityPlayer player, EnumHand hand);
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
     private void spongeImpl$initializeAI(final EntityLiving this$0) {
@@ -134,6 +141,23 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
             if(event.isCancelled()) {
                 ci.setReturnValue(false);
             }
+        }
+    }
+
+    @Redirect(method = "processInitialInteract",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/EntityLiving;processInteract(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/EnumHand;)Z")
+    )
+    private boolean impl$wrapInteractWithPotentialHealth(EntityLiving entityLiving, EntityPlayer player, EnumHand hand) {
+        if (!SpongeImplHooks.isMainThread() || !ShouldFire.REGAIN_HEALTH_EVENT) {
+            return this.processInteract(player, hand);
+        }
+        final ItemStack heldItem = player.getHeldItem(hand);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            if (!heldItem.isEmpty() && heldItem.getItem() instanceof ItemFood) {
+                frame.addContext(EventContextKeys.HEALING_TYPE, HealingTypes.FOOD);
+            }
+            return this.processInteract(player, hand);
         }
     }
 

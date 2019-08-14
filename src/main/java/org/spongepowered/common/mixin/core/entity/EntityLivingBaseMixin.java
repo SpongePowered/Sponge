@@ -55,6 +55,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -63,9 +64,11 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
+import org.spongepowered.api.event.cause.entity.health.HealingTypes;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.RegainHealthEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -75,6 +78,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -90,6 +94,7 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
@@ -177,6 +182,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Shadow private boolean checkTotemDeathProtection(final DamageSource p_190628_1_) {
         return false; // SHADOWED
     }
+    @Shadow public abstract void heal(float healAmount);
 
     private int impl$deathEventsPosted;
     private int impl$maxAir = Constants.Sponge.Entity.DEFAULT_MAX_AIR;
@@ -694,6 +700,31 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             }
         }
         return false;
+    }
+
+    @ModifyArg(method = "heal", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;setHealth(F)V"))
+    private float impl$throwHealingEvent(float newHealth, float amountToHeal) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
+            return newHealth;
+        }
+        if (!SpongeImplHooks.isMainThread()) {
+            return newHealth;
+        }
+        if (!ShouldFire.REGAIN_HEALTH_EVENT) {
+            return newHealth;
+        }
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            if (!frame.getCurrentContext().containsKey(EventContextKeys.HEALING_TYPE)) {
+                frame.addContext(EventContextKeys.HEALING_TYPE, HealingTypes.GENERIC);
+            }
+            final float currentHealth = this.getHealth();
+            RegainHealthEvent event = SpongeEventFactory.createRegainHealthEvent(frame.getCurrentCause(), (Living) this, amountToHeal);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return currentHealth;
+            }
+            return (float) (currentHealth + event.getAmountToRegain());
+        }
     }
 
     /**

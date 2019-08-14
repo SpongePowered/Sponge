@@ -38,6 +38,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.api.event.cause.entity.health.HealingType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -117,6 +118,7 @@ public final class EventContextKeysModule
         this.createKey("sponge:decay_event", "Decay Event", ChangeBlockEvent.Decay.class);
         this.createKey("sponge:grow_event", "Decay Event", ChangeBlockEvent.Grow.class);
         this.createKey("sponge:growth_origin", "Growth Origin", BlockSnapshot.class);
+        this.createKey("sponge:healing_type", "Healing Type", HealingType.class);
     }
 
     private void createKey(String id, String name, Class<?> usedClass) {

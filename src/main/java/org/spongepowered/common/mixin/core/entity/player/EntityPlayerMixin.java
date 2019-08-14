@@ -83,6 +83,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
+import org.spongepowered.api.event.cause.entity.health.HealingTypes;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.ChangeEntityExperienceEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
@@ -176,11 +177,12 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         return false;
     }
 
-    private boolean affectsSpawning = true;
-    private Vector3d targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
-    private boolean dontRecalculateExperience;
-    private boolean shouldRestoreInventory = false;
-    protected final boolean isFake = SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this);
+    private boolean impl$affectsSpawning = true;
+    private Vector3d impl$targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
+    private boolean impl$dontRecalculateExperience;
+    private boolean impl$houldRestoreInventory = false;
+    protected final boolean impl$isFake = SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this);
+    @Nullable private CauseStackManager.StackFrame impl$foodStatsUpdateFrame = null;
 
 
 
@@ -203,7 +205,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
     @Override
     public void bridge$recalculateTotalExperience() {
-        if (!this.dontRecalculateExperience) {
+        if (!this.impl$dontRecalculateExperience) {
             boolean isInaccurate = ExperienceHolderUtils.getLevelForExp(this.experienceTotal) != this.experienceLevel;
             if (!isInaccurate) {
                 final float experienceLess = (this.bridge$getExperienceSinceLevel() - 0.5f) / this.xpBarCap();
@@ -230,7 +232,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
-        if (!this.dontRecalculateExperience) {
+        if (!this.impl$dontRecalculateExperience) {
             final int newLevel = Math.max(this.experienceLevel + levels, 0);
             postEventAndUpdateExperience(ExperienceHolderUtils.xpAtLevel(newLevel)
                     + (int) (this.experience * ExperienceHolderUtils.getExpBetweenLevels(newLevel)));
@@ -295,11 +297,11 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                 event.getFinalData().set(Keys.EXPERIENCE_LEVEL, finalLevel);
             }
             if (finalLevel != this.experienceLevel) {
-                this.dontRecalculateExperience = true;
+                this.impl$dontRecalculateExperience = true;
                 try {
                     addExperienceLevel(finalLevel - this.experienceLevel);
                 } finally {
-                    this.dontRecalculateExperience = false;
+                    this.impl$dontRecalculateExperience = false;
                 }
             }
         }
@@ -384,27 +386,78 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         }
     }
 
+    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;heal(F)V"))
+    private void impl$addContextForHealing(final EntityPlayer entityPlayer, final float healAmount) {
+        if (!SpongeImplHooks.isMainThread() || this.world.isRemote || !ShouldFire.REGAIN_HEALTH_EVENT) {
+            this.heal(healAmount);
+            return;
+        }
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.HEALING_TYPE, HealingTypes.DIFFICULTY);
+            this.heal(healAmount);
+        }
+    }
+
+    /**
+     * @author gabizou - August 13th, 2019 - 1.12.2
+     * @reason Due to some popular mods existing that take advantage of
+     * health regeneration reworking, we need to allow food stats to be
+     * redirected by other mods. More importantly, we would be otherwise
+     * adding a single redirect, but necessitated by AppleCore, we must
+     * inject before and after.
+     */
+    @Inject(method = "onUpdate",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/util/FoodStats;onUpdate(Lnet/minecraft/entity/player/EntityPlayer;)V"))
+    private void impl$addFoodUpdateHealthContext(final CallbackInfo ci) {
+        if (!ShouldFire.REGAIN_HEALTH_EVENT || !SpongeImplHooks.isMainThread()) {
+            return;
+        }
+        this.impl$foodStatsUpdateFrame = Sponge.getCauseStackManager().pushCauseFrame();
+        this.impl$foodStatsUpdateFrame.addContext(EventContextKeys.HEALING_TYPE, HealingTypes.FOOD);
+    }
+
+    /**
+     * @author gabizou - August 13th, 2019 - 1.12.2
+     * @reason Due to some popular mods existing that take advantage of
+     * health regeneration reworking, we need to allow food stats to be
+     * redirected by other mods. More importantly, we would be otherwise
+     * adding a single redirect, but necessitated by AppleCore, we must
+     * inject before and after.
+     */
+    @Inject(method = "onUpdate",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/util/FoodStats;onUpdate(Lnet/minecraft/entity/player/EntityPlayer;)V",
+            shift = At.Shift.AFTER
+        )
+    )
+    private void impl$pruneContextForFoodHealth(final CallbackInfo ci) {
+        if (this.impl$foodStatsUpdateFrame != null) {
+            this.impl$foodStatsUpdateFrame.close();
+        }
+    }
+
+
     @Override
     public boolean bridge$affectsSpawning() {
-        return this.affectsSpawning && !this.isSpectator();
+        return this.impl$affectsSpawning && !this.isSpectator();
     }
 
     @Override
     public void bridge$setAffectsSpawning(final boolean affectsSpawning) {
-        this.affectsSpawning = affectsSpawning;
+        this.impl$affectsSpawning = affectsSpawning;
     }
 
     @Override
     public Vector3d bridge$getTargetedLocation() {
-        return this.targetedLocation;
+        return this.impl$targetedLocation;
     }
 
     @Override
     public void bridge$setTargetedLocation(@Nullable final Vector3d vec) {
-        this.targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.world.getSpawnPoint());
+        this.impl$targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.world.getSpawnPoint());
         //noinspection ConstantConditions
         if (!((EntityPlayer) (Object) this instanceof EntityPlayerMP)) {
-            this.world.setSpawnPoint(VecHelper.toBlockPos(this.targetedLocation));
+            this.world.setSpawnPoint(VecHelper.toBlockPos(this.impl$targetedLocation));
         }
     }
 
@@ -987,12 +1040,12 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
     @Override
     public void bridge$shouldRestoreInventory(final boolean restore) {
-        this.shouldRestoreInventory = restore;
+        this.impl$houldRestoreInventory = restore;
     }
 
     @Override
     public boolean bridge$shouldRestoreInventory() {
-        return this.shouldRestoreInventory;
+        return this.impl$houldRestoreInventory;
     }
 
     @Override

@@ -50,7 +50,6 @@ public class BlockTickContext extends LocationBasedTickContext<BlockTickContext>
             final LocatableBlock locatableBlock = (LocatableBlock) owner;
             final Block block = ((IBlockState) locatableBlock.getBlockState()).getBlock();
             this.tickingBlock = (BlockBridge) block;
-            this.providesModifier = !(block instanceof BlockDynamicLiquid);
             this.world = locatableBlock.getWorld();
             if (block instanceof TrackableBridge) {
                 final TrackableBridge trackable = (TrackableBridge) block;

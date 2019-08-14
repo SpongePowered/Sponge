@@ -369,7 +369,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Override
     public User bridge$getUserObject() {
         final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
-        if (this.isFake) { // Fake players are recogizeable through the field set up with bridge$isFake.
+        if (this.impl$isFake) { // Fake players are recogizeable through the field set up with bridge$isFake.
             return service.getOrCreate(SpongeUserStorageService.FAKEPLAYER_PROFILE);
         }
         return service.getOrCreate((GameProfile) this.getGameProfile());
@@ -418,7 +418,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
      */
     @Overwrite
     public void sendMessage(final ITextComponent component) {
-        if (this.isFake) {
+        if (this.impl$isFake) {
             // Don't bother sending messages to fake players
             return;
         }

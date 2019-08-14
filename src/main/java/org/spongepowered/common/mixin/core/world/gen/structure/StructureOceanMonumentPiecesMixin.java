@@ -22,47 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.passive;
+package org.spongepowered.common.mixin.core.world.gen.structure;
 
-import net.minecraft.entity.passive.AbstractHorse;
-import net.minecraft.inventory.ContainerHorseChest;
+import net.minecraft.entity.monster.EntityElderGuardian;
+import net.minecraft.world.gen.structure.StructureOceanMonumentPieces;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.health.HealingTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.inventory.ContainerHorseChestBridge;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.mixin.core.entity.EntityAgeableMixin;
 
-@Mixin(AbstractHorse.class)
-public abstract class AbstractHorseMixin extends EntityAgeableMixin {
+@Mixin(StructureOceanMonumentPieces.Piece.class)
+public class StructureOceanMonumentPiecesMixin {
 
-    @Shadow protected ContainerHorseChest horseChest;
-
-    @Inject(method = "initHorseChest", at = @At("RETURN"))
-    private void impl$setContainerCarrier(final CallbackInfo ci) {
-        if (this.horseChest instanceof ContainerHorseChestBridge) {
-            ((ContainerHorseChestBridge) this.horseChest).bridge$setCarrier((Horse) this);
-        }
-    }
-
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/AbstractHorse;heal(F)V"))
-    private void impl$addHealingContext(AbstractHorse abstractHorse, float healAmount) {
-        if (!ShouldFire.REGAIN_HEALTH_EVENT || this.world.isRemote || !SpongeImplHooks.isMainThread()) {
-            this.heal(healAmount);
+    @Redirect(method = "spawnElder", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityElderGuardian;heal(F)V"))
+    private void impl$addBossToHealthContext(final EntityElderGuardian entityElderGuardian, final float healAmount) {
+        if (entityElderGuardian.world.isRemote || !ShouldFire.REGAIN_HEALTH_EVENT || !SpongeImplHooks.isMainThread()) {
+            entityElderGuardian.heal(healAmount);
             return;
         }
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.HEALING_TYPE, HealingTypes.FOOD);
-            this.heal(healAmount);
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.HEALING_TYPE, HealingTypes.BOSS);
+            entityElderGuardian.heal(healAmount);
         }
     }
+
 }
