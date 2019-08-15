@@ -390,12 +390,12 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "onUpdate", at = @At("RETURN"))
-    private void spongeOnUpdate(final CallbackInfo callbackInfo) {
+    private void impl$updateVanishState(final CallbackInfo callbackInfo) {
         if (this.vanish$pendingVisibilityUpdate && !this.world.isRemote) {
             final EntityTracker entityTracker = ((WorldServer) this.world).getEntityTracker();
             // TODO - remove once Mixin 0.8 fixes accessors
             final EntityTrackerEntry lookup = entityTracker.trackedEntityHashTable.lookup(this.getEntityId());
-            if (this.vanish$visibilityTicks % 4 == 0) {
+            if (lookup != null && this.vanish$visibilityTicks % 4 == 0) {
                 if (this.vanish$isVanished) {
                     for (final EntityPlayerMP entityPlayerMP : lookup.trackingPlayers) { // TODO - remove once Mixin 0.8 fixes accessors
                         entityPlayerMP.connection.sendPacket(new SPacketDestroyEntities(this.getEntityId()));
@@ -507,10 +507,14 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer()) {
             compound.setBoolean(Constants.Sponge.Entity.CAN_GRIEF, ((GrieferBridge) this).bridge$CanGrief());
         }
-        compound.setBoolean(Constants.Sponge.Entity.IS_VANISHED, this.bridge$isVanished());
-        compound.setBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, this.bridge$isUncollideable());
-        compound.setBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, this.bridge$isUntargetable());
-        compound.setBoolean(Constants.Sponge.Entity.IS_INVISIBLE, this.isInvisible());
+        if (this.bridge$isVanished()) {
+            compound.setBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
+            compound.setBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, this.bridge$isUncollideable());
+            compound.setBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, this.bridge$isUntargetable());
+        }
+        if (this.isInvisible()) {
+            compound.setBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
+        }
     }
 
     @Override
