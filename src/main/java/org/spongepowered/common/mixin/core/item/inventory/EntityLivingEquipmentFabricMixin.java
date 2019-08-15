@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -38,7 +37,7 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import java.util.Collection;
 import java.util.Collections;
 
-@Mixin(EntityLiving.class)
+@Mixin(EntityLivingBase.class)
 public abstract class EntityLivingEquipmentFabricMixin implements Fabric, InventoryBridge {
 
     @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
