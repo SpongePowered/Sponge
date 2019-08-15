@@ -504,8 +504,8 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      */
     protected void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         CustomDataNbtUtil.writeCustomData(compound, (org.spongepowered.api.entity.Entity) this);
-        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer()) {
-            compound.setBoolean(Constants.Sponge.Entity.CAN_GRIEF, ((GrieferBridge) this).bridge$CanGrief());
+        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && ((GrieferBridge) this).bridge$CanGrief()) {
+            compound.setBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
         }
         if (this.bridge$isVanished()) {
             compound.setBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
@@ -603,6 +603,16 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         this.vanish$isVanished = vanished;
         this.vanish$pendingVisibilityUpdate = true;
         this.vanish$visibilityTicks = 20;
+        if (this instanceof DataCompoundHolder && ((DataCompoundHolder) this).data$hasSpongeCompound()) {
+            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            if (vanished) {
+                spongeData.setBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
+            } else {
+                spongeData.removeTag(Constants.Sponge.Entity.IS_VANISHED);
+                spongeData.removeTag(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
+                spongeData.removeTag(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
+            }
+        }
     }
 
     @Override

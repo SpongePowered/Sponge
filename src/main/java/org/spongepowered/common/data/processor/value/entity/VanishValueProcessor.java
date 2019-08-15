@@ -43,12 +43,12 @@ public class VanishValueProcessor extends AbstractSpongeValueProcessor<Vanishabl
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Value<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<>(Keys.VANISH, false, actualValue);
     }
 
     @Override
-    protected boolean set(VanishableBridge container, Boolean value) {
+    protected boolean set(final VanishableBridge container, final Boolean value) {
         if (container instanceof net.minecraft.entity.Entity && ((net.minecraft.entity.Entity) container).world.isRemote) {
             return false;
         }
@@ -57,17 +57,17 @@ public class VanishValueProcessor extends AbstractSpongeValueProcessor<Vanishabl
     }
 
     @Override
-    protected Optional<Boolean> getVal(VanishableBridge container) {
+    protected Optional<Boolean> getVal(final VanishableBridge container) {
         return Optional.of(container.bridge$isVanished());
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.VANISH, false, value);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

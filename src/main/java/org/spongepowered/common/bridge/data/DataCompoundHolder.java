@@ -33,6 +33,10 @@ public interface DataCompoundHolder {
 
     NBTTagCompound data$getRootCompound();
 
+    default boolean data$hasSpongeCompound() {
+        return this.data$hasRootCompound() && this.data$getRootCompound().hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
+    }
+
     default NBTTagCompound data$getSpongeCompound() {
         final NBTTagCompound data = this.data$getRootCompound();
         if (!data.hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {

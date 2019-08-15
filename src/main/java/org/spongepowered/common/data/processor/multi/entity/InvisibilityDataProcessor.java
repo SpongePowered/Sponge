@@ -53,12 +53,12 @@ public class InvisibilityDataProcessor
     }
 
     @Override
-    protected boolean doesDataExist(VanishableBridge dataHolder) {
+    protected boolean doesDataExist(final VanishableBridge dataHolder) {
         return true;
     }
 
     @Override
-    protected boolean set(VanishableBridge dataHolder, Map<Key<?>, Object> keyValues) {
+    protected boolean set(final VanishableBridge dataHolder, final Map<Key<?>, Object> keyValues) {
         if (dataHolder instanceof Entity && ((Entity) dataHolder).world.isRemote) {
             return false;
         }
@@ -78,7 +78,7 @@ public class InvisibilityDataProcessor
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(VanishableBridge dataHolder) {
+    protected Map<Key<?>, ?> getValues(final VanishableBridge dataHolder) {
         return ImmutableMap.of(Keys.INVISIBLE, dataHolder.bridge$isInvisible(),
                 Keys.VANISH, dataHolder.bridge$isVanished(),
                 Keys.VANISH_IGNORES_COLLISION, dataHolder.bridge$isUncollideable(),
@@ -86,7 +86,7 @@ public class InvisibilityDataProcessor
     }
 
     @Override
-    public Optional<InvisibilityData> fill(DataContainer container, InvisibilityData invisibilityData) {
+    public Optional<InvisibilityData> fill(final DataContainer container, final InvisibilityData invisibilityData) {
         final boolean vanished = container.getBoolean(Keys.VANISH.getQuery()).orElse(false);
         final boolean invisible = container.getBoolean(Keys.INVISIBLE.getQuery()).orElse(false);
         final boolean collision = container.getBoolean(Keys.VANISH_IGNORES_COLLISION.getQuery()).orElse(false);
@@ -99,7 +99,7 @@ public class InvisibilityDataProcessor
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult remove(final DataHolder dataHolder) {
         return DataTransactionResult.failNoData();
     }
 }
