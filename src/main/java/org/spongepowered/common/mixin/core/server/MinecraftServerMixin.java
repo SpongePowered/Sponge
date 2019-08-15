@@ -75,6 +75,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.bridge.world.WorldProviderBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
@@ -433,11 +434,11 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
                     }
                     if (log) {
                         LOGGER.info("Auto-saving chunks for level \'" + world.getWorldInfo().getWorldName() + "\'/"
-                                + world.provider.getDimensionType().getId());
+                                + ((WorldServerBridge) world).bridge$getDimensionId());
                     }
                 } else if (log) {
                     LOGGER.info("Saving chunks for level \'" + world.getWorldInfo().getWorldName() + "\'/"
-                        + world.provider.getDimensionType().getId());
+                        + ((WorldServerBridge) world).bridge$getDimensionId());
                 }
 
                 // Sponge end

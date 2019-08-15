@@ -41,11 +41,7 @@ import net.minecraft.entity.item.EntityMinecartTNT;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.server.SPacketEntityEffect;
-import net.minecraft.network.play.server.SPacketEntityProperties;
-import net.minecraft.network.play.server.SPacketEntityStatus;
-import net.minecraft.network.play.server.SPacketRespawn;
-import net.minecraft.network.play.server.SPacketServerDifficulty;
+import net.minecraft.network.play.server.*;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
@@ -413,6 +409,8 @@ public final class EntityUtil {
             toWorld = (WorldServer) toTransform.getExtent();
         }
 
+        WorldManager.sendDimensionRegistration(player, toWorld.provider);
+
         final int fromClientDimId = WorldManager.getClientDimensionId(player, fromWorld);
         final int toClientDimId = WorldManager.getClientDimensionId(player, toWorld);
 
@@ -437,6 +435,9 @@ public final class EntityUtil {
         player.connection.sendPacket(new SPacketRespawn(toClientDimId, toWorld.getDifficulty(), toWorld.getWorldType(),
             player.interactionManager.getGameType()));
 
+        player.dimension = ((WorldServerBridge) toWorld).bridge$getDimensionId();
+        player.setWorld(toWorld);
+
         playerList.updatePermissionLevel(player);
 
         fromWorld.removeEntityDangerously(player);
@@ -449,9 +450,6 @@ public final class EntityUtil {
             toWorld.spawnEntity(player);
             toWorld.updateEntityWithOptionalForce(player, false);
         }
-
-        player.dimension = ((WorldServerBridge) toWorld).bridge$getDimensionId();
-        player.setWorld(toWorld);
 
         // preparePlayer
         fromWorld.getPlayerChunkMap().removePlayer(player);
@@ -475,6 +473,8 @@ public final class EntityUtil {
         player.interactionManager.setWorld(toWorld);
         playerList.updateTimeAndWeatherForPlayer(player, toWorld);
         playerList.syncPlayerInventory(player);
+
+        player.connection.sendPacket(new SPacketPlayerAbilities(player.capabilities));
 
         for (final PotionEffect potioneffect : player.getActivePotionEffects()) {
             player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), potioneffect));

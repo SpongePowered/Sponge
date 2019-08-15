@@ -1303,18 +1303,16 @@ public final class WorldManager {
     }
 
     public static int getClientDimensionId(final EntityPlayerMP player, final World world) {
-        if (!((EntityPlayerMPBridge) player).bridge$usesCustomClient()) {
-            final DimensionType type = world.provider.getDimensionType();
-            if (type == DimensionType.OVERWORLD) {
-                return 0;
-            } else if (type == DimensionType.NETHER) {
-                return -1;
-            }
-
+        final DimensionType type = world.provider.getDimensionType();
+        if (type == DimensionType.OVERWORLD) {
+            return 0;
+        } else if (type == DimensionType.NETHER) {
+            return -1;
+        } else if (type == DimensionType.THE_END) {
             return 1;
+        } else {
+            return ((WorldServerBridge) world).bridge$getDimensionId();
         }
-
-        return ((WorldServerBridge) world).bridge$getDimensionId();
     }
 
     public static boolean isKnownWorld(final WorldServer world) {

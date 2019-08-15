@@ -266,7 +266,6 @@ public final class NetworkUtil {
         // Support vanilla clients logging into custom dimensions
         final int dimensionId = WorldManager.getClientDimensionId(playerIn, worldServer);
 
-        // Send dimension registration
         WorldManager.sendDimensionRegistration(playerIn, worldServer.provider);
 
         handler.sendPacket(new SPacketJoinGame(playerIn.getEntityId(), playerIn.interactionManager.getGameType(), worldinfo
