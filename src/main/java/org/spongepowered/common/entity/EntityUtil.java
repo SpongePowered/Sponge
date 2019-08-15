@@ -41,7 +41,12 @@ import net.minecraft.entity.item.EntityMinecartTNT;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.server.*;
+import net.minecraft.network.play.server.SPacketEntityEffect;
+import net.minecraft.network.play.server.SPacketEntityProperties;
+import net.minecraft.network.play.server.SPacketEntityStatus;
+import net.minecraft.network.play.server.SPacketPlayerAbilities;
+import net.minecraft.network.play.server.SPacketRespawn;
+import net.minecraft.network.play.server.SPacketServerDifficulty;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
@@ -80,6 +85,8 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
+import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
@@ -409,33 +416,44 @@ public final class EntityUtil {
             toWorld = (WorldServer) toTransform.getExtent();
         }
 
-        WorldManager.sendDimensionRegistration(player, toWorld.provider);
+        final int dimensionId;
 
-        final int fromClientDimId = WorldManager.getClientDimensionId(player, fromWorld);
-        final int toClientDimId = WorldManager.getClientDimensionId(player, toWorld);
+        if (!((EntityPlayerMPBridge) player).bridge$usesCustomClient()) {
 
-        if (fromClientDimId == toClientDimId) {
-            final int fakeDimId;
-            switch (fromClientDimId) {
-                case 1:
-                    fakeDimId = -1;
-                    break;
-                case 0:
-                    fakeDimId = 1;
-                    break;
-                default:
-                    fakeDimId = 0;
-                    break;
+            // Check if the world we're going to matches our provider type. if so, we need to send a fake respawn packet to clear chunks
+            final int fromClientDimId = WorldManager.getClientDimensionId(player, fromWorld);
+            final int toClientDimId = WorldManager.getClientDimensionId(player, toWorld);
+
+            if (fromClientDimId == toClientDimId) {
+                final int fakeDimId;
+                switch (fromClientDimId) {
+                    case 1:
+                        fakeDimId = -1;
+                        break;
+                    case 0:
+                        fakeDimId = 1;
+                        break;
+                    default:
+                        fakeDimId = 0;
+                        break;
+                }
+
+                player.connection.sendPacket(new SPacketRespawn(fakeDimId, toWorld.getDifficulty(), toWorld.getWorldType(),
+                        player.interactionManager.getGameType()));
             }
 
-            player.connection.sendPacket(new SPacketRespawn(fakeDimId, toWorld.getDifficulty(), toWorld.getWorldType(),
-                player.interactionManager.getGameType()));
+            dimensionId = toClientDimId;
+        } else {
+            // We're a custom client, their problem to handle the client provider
+            WorldManager.sendDimensionRegistration(player, toWorld.provider);
+
+            dimensionId = ((WorldServerBridge) toWorld).bridge$getDimensionId();
         }
 
-        player.connection.sendPacket(new SPacketRespawn(toClientDimId, toWorld.getDifficulty(), toWorld.getWorldType(),
+        player.connection.sendPacket(new SPacketRespawn(dimensionId, toWorld.getDifficulty(), toWorld.getWorldType(),
             player.interactionManager.getGameType()));
 
-        player.dimension = ((WorldServerBridge) toWorld).bridge$getDimensionId();
+        player.dimension = ((WorldServerBridge) toWorld).bridge$getDimensionId(); // If a Vanilla client, dimensionId could be a provider id.
         player.setWorld(toWorld);
 
         playerList.updatePermissionLevel(player);
