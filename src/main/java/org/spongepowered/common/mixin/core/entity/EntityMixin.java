@@ -591,6 +591,9 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Override
     public void bridge$setInvisible(final boolean invisible) {
         this.setInvisible(invisible);
+        if (!invisible && this instanceof DataCompoundHolder && ((DataCompoundHolder) this).data$hasSpongeCompound()) {
+            ((DataCompoundHolder) this).data$getSpongeCompound().removeTag(Constants.Sponge.Entity.IS_INVISIBLE);
+        }
     }
 
     @Override
