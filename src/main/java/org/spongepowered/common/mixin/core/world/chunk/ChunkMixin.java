@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.chunk;
 
+import com.flowpowered.math.GenericMath;
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
@@ -49,11 +51,14 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
+import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.EntityUniverse;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -89,10 +94,13 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -128,7 +136,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     private long impl$scheduledForUnload = -1; // delay chunk unloads
     private boolean impl$persistedChunk = false;
     private boolean impl$isSpawning = false;
-    private net.minecraft.world.chunk.Chunk[] impl$neighbors = new net.minecraft.world.chunk.Chunk[4];
+    private final net.minecraft.world.chunk.Chunk[] impl$neighbors = new net.minecraft.world.chunk.Chunk[4];
     private long impl$cacheKey;
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
@@ -138,7 +146,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Override
     public net.minecraft.world.chunk.Chunk[] bridge$getNeighborArray() {
-        return this.impl$neighbors;
+        return this.impl$neighbors.clone();
     }
 
     @Override
@@ -259,14 +267,14 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
 
-    @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
+    @Inject(method = "getEntitiesWithinAABBForEntity", at = @At("RETURN"))
     private void impl$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
         @SuppressWarnings("Guava") final Predicate<Entity> p_177414_4_, final CallbackInfo ci) {
         if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
             return;
         }
 
-        if (listToFill.size() == 0) {
+        if (listToFill.isEmpty()) {
             return;
         }
 
@@ -284,14 +292,14 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         }
     }
 
-    @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At(value = "RETURN"))
+    @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At("RETURN"))
     private void impl$throwCollsionEvent(final Class<? extends Entity> entityClass, final AxisAlignedBB aabb, final List<Entity> listToFill,
         @SuppressWarnings("Guava") final Predicate<Entity> p_177430_4_, final CallbackInfo ci) {
         if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
             return;
         }
 
-        if (listToFill.size() == 0) {
+        if (listToFill.isEmpty()) {
             return;
         }
 
@@ -386,7 +394,11 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         final TileEntity existing = this.getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
         final PhaseContext<?> peek = isFake ? null : PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState state = isFake ? null : peek.state;
-        final SpongeBlockSnapshot snapshot = (isFake || (!ShouldFire.CHANGE_BLOCK_EVENT || !state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag))) ? null : createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
+        final SpongeBlockSnapshot snapshot = (isFake
+                                              || !ShouldFire.CHANGE_BLOCK_EVENT
+                                              || !state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag))
+                                             ? null
+                                             : createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
         final BlockTransaction.ChangeBlock transaction;
         final WorldServerBridge mixinWorld = isFake ? null : (WorldServerBridge) this.world;
 
@@ -754,6 +766,59 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     @Override
     public void bridge$setScheduledForUnload(final long scheduled) {
         this.impl$scheduledForUnload = scheduled;
+    }
+
+    @Override
+    public void bridge$getIntersectingEntities(final Vector3d start, final Vector3d direction, final double distance,
+        final java.util.function.Predicate<? super EntityUniverse.EntityHit> filter, final double entryY, final double exitY,
+        final Set<? super EntityUniverse.EntityHit> intersections) {
+        // Order the entry and exit y coordinates by magnitude
+        final double yMin = Math.min(entryY, exitY);
+        final double yMax = Math.max(entryY, exitY);
+        // Added offset matches the one in Chunk.getEntitiesWithinAABBForEntity
+        final int lowestSubChunk = GenericMath.clamp(GenericMath.floor((yMin - 2) / 16D), 0, this.entityLists.length - 1);
+        final int highestSubChunk = GenericMath.clamp(GenericMath.floor((yMax + 2) / 16D), 0, this.entityLists.length - 1);
+        // For each sub-chunk, perform intersections in its entity list
+        for (int i = lowestSubChunk; i <= highestSubChunk; i++) {
+            impl$getIntersectingEntities(this.entityLists[i], start, direction, distance, filter, intersections);
+        }
+    }
+
+    private void impl$getIntersectingEntities(final Collection<? extends Entity> entities, final Vector3d start, final Vector3d direction,
+        final double distance, final java.util.function.Predicate<? super EntityUniverse.EntityHit> filter,
+        final Set<? super EntityUniverse.EntityHit> intersections) {
+        // Check each entity in the list
+        for (final net.minecraft.entity.Entity entity : entities) {
+            final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entity;
+            final Optional<AABB> box = spongeEntity.getBoundingBox();
+            // Can't intersect if the entity doesn't have a bounding box
+            if (!box.isPresent()) {
+                continue;
+            }
+            // Ignore entities that didn't intersect
+            final Optional<Tuple<Vector3d, Vector3d>> optionalIntersection = box.get().intersects(start, direction);
+            if (!optionalIntersection.isPresent()) {
+                continue;
+            }
+            // Check that the entity isn't too far away
+            final Tuple<Vector3d, Vector3d> intersection = optionalIntersection.get();
+            final double distanceSquared = intersection.getFirst().sub(start).lengthSquared();
+            if (distanceSquared > distance * distance) {
+                continue;
+            }
+            // Now test the filter on the entity and intersection
+            final EntityUniverse.EntityHit hit = new EntityUniverse.EntityHit(spongeEntity, intersection.getFirst(), intersection.getSecond(), Math.sqrt(distanceSquared));
+            if (!filter.test(hit)) {
+                continue;
+            }
+            // If everything passes we have an intersection!
+            intersections.add(hit);
+            // If the entity has part, recurse on these
+            final net.minecraft.entity.Entity[] parts = entity.getParts();
+            if (parts != null && parts.length > 0) {
+                impl$getIntersectingEntities(Arrays.asList(parts), start, direction, distance, filter, intersections);
+            }
+        }
     }
 
     @Inject(method = "generateSkylightMap", at = @At("HEAD"), cancellable = true)

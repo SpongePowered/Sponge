@@ -83,6 +83,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.LivingEntityBaseBridge;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
@@ -190,6 +191,9 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Override
     public void bridge$setMaxAir(final int air) {
         this.impl$maxAir = air;
+        if (air == Constants.Sponge.Entity.DEFAULT_MAX_AIR && this instanceof DataCompoundHolder && ((DataCompoundHolder) this).data$hasSpongeCompound()) {
+            ((DataCompoundHolder) this).data$getSpongeCompound().removeTag(Constants.Sponge.Entity.MAX_AIR);
+        }
     }
 
     @Override

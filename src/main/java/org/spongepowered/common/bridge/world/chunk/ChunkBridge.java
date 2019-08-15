@@ -29,7 +29,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.IChunkGenerator;
@@ -48,8 +47,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -94,8 +91,8 @@ public interface ChunkBridge {
 
     void bridge$setScheduledForUnload(long scheduled);
 
-    void bridge$getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityUniverse.EntityHit> filter,
-            double entryY, double exitY, Set<EntityUniverse.EntityHit> intersections);
+    void bridge$getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<? super EntityUniverse.EntityHit> filter,
+            double entryY, double exitY, Set<? super EntityUniverse.EntityHit> intersections);
 
     boolean bridge$isPersistedChunk();
 

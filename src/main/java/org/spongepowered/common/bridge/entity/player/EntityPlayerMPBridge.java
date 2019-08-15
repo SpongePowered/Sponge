@@ -107,5 +107,6 @@ public interface EntityPlayerMPBridge {
     @Nullable
     EntityPlayerMP bridge$getDelegate();
 
+    @Nullable
     Vector3d bridge$getVelocityOverride();
 }

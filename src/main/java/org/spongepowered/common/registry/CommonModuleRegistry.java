@@ -429,7 +429,7 @@ public final class CommonModuleRegistry {
                 .registerModule(WorldGeneratorModifier.class, WorldGeneratorModifierRegistryModule.getInstance())
                 .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
                 .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
-                .registerModule(SkinPart.class, new SkinPartRegistryModule())
+                .registerModule(SkinPart.class, SkinPartRegistryModule.getInstance())
                 .registerModule(WorldArchetype.class, WorldArchetypeRegistryModule.getInstance())
                 .registerModule(BossBarColor.class, new BossBarColorRegistryModule())
                 .registerModule(BossBarOverlay.class, new BossBarOverlayRegistryModule())

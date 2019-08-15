@@ -22,25 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
-
-import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.common.data.type.SpongeSkinPart;
-
-import java.util.Set;
-
-public final class SkinUtil {
-
-    private SkinUtil() {
-    }
-
-    public static Set<SkinPart> fromFlags(int flags) {
-        return Sponge.getRegistry().getAllOf(SkinPart.class).stream()
-                .map(part -> (SpongeSkinPart) part)
-                .filter(part -> part.test(flags))
-                .collect(ImmutableSet.toImmutableSet());
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.mixin.api.mcp.world.chunk;

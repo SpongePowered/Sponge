@@ -360,6 +360,11 @@ public final class Constants {
             public static final int DEFAULT_CREATION_RADIUS = 16;
         }
     }
+
+    public static final class GameRule {
+
+        public static final String SHOW_DEATH_MESSAGES = "showDeathMessages";
+    }
     public static final class Chunk {
 
         public static final Direction[] CARDINAL_DIRECTIONS = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
