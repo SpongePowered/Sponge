@@ -534,7 +534,7 @@ public final class DataUtil {
         if (dataList.tagCount() == 0) {
             return DataTransactionResult.successNoData();
         }
-        final DataRegistration<?, ?> registration = SpongeManipulatorRegistry.getInstance().getRegistrationFor((Class<? extends DataManipulator>) containerClass);
+        final DataRegistration<?, ?> registration = SpongeManipulatorRegistry.getInstance().getRegistrationFor((Class) containerClass);
         for (int i = 0; i < dataList.tagCount(); i++) {
             final NBTTagCompound dataCompound = dataList.getCompoundTagAt(i);
             final String dataId = dataCompound.getString(Constants.Sponge.MANIPULATOR_ID);
