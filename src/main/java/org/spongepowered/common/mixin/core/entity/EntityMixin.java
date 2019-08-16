@@ -94,7 +94,7 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.ShouldFire;
@@ -479,7 +479,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      * @param compound The SpongeData compound to read from
      */
     protected void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
-        CustomDataNbtUtil.readCustomData(compound, ((org.spongepowered.api.entity.Entity) this));
+        DataUtil.readCustomData(compound, ((org.spongepowered.api.entity.Entity) this));
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(Constants.Sponge.Entity.CAN_GRIEF)) {
             ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(Constants.Sponge.Entity.CAN_GRIEF));
         }
@@ -503,7 +503,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      * @param compound The SpongeData compound to write to
      */
     protected void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
-        CustomDataNbtUtil.writeCustomData(compound, (org.spongepowered.api.entity.Entity) this);
+        DataUtil.writeCustomData(compound, (org.spongepowered.api.entity.Entity) this);
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && ((GrieferBridge) this).bridge$CanGrief()) {
             compound.setBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
         }

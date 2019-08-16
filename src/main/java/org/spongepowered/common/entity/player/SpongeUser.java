@@ -35,7 +35,6 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataSerializable;
@@ -56,8 +55,8 @@ import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.player.BedLocationsBridge;
-import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.storage.SaveHandlerAccessor;
@@ -68,9 +67,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -348,7 +344,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
 
         final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Forge.FORGE_DATA).getCompoundTag(Constants.Sponge.SPONGE_DATA);
-        CustomDataNbtUtil.readCustomData(spongeCompound, (DataHolder) this);
+        DataUtil.readCustomData(spongeCompound, (DataHolder) this);
         //if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
         //    ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
         //}
@@ -480,7 +476,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 	forgeCompound.setTag(Constants.Sponge.SPONGE_DATA, spongeCompound);
         compound.setTag(Constants.Forge.FORGE_DATA, forgeCompound);
 
-        CustomDataNbtUtil.writeCustomData(spongeCompound, (DataHolder) this);
+        DataUtil.writeCustomData(spongeCompound, (DataHolder) this);
     }
 
     @Override

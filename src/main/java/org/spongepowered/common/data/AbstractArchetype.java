@@ -43,7 +43,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -60,7 +59,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     protected final C type;
     protected NBTTagCompound data;
 
-    protected AbstractArchetype(C type, NBTTagCompound data) {
+    protected AbstractArchetype(final C type, final NBTTagCompound data) {
         this.type = type;
         this.data = data;
     }
@@ -70,12 +69,12 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     protected abstract ValidationType getValidationType();
 
     @Override
-    public boolean validateRawData(DataView container) {
+    public boolean validateRawData(final DataView container) {
         return DataUtil.getValidators(this.getValidationType()).validate(container);
     }
 
     @Override
-    public void setRawData(DataView container) throws InvalidDataException {
+    public void setRawData(final DataView container) throws InvalidDataException {
         checkNotNull(container, "Raw data cannot be null!");
         final NBTTagCompound copy = NbtTranslator.getInstance().translateData(container);
         DataUtil.getValidators(this.getValidationType()).validate(copy);
@@ -83,7 +82,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     }
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
+    public <T extends Property<?, ?>> Optional<T> getProperty(final Class<T> propertyClass) {
         return SpongeImpl.getPropertyRegistry().getStore(propertyClass)
                 .flatMap(store -> store.getFor(this));
     }
@@ -95,20 +94,20 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
+    public <T extends DataManipulator<?, ?>> Optional<T> get(final Class<T> containerClass) {
         return DataUtil.getRawNbtProcessor(this.getDataType(), containerClass)
                 .flatMap(processor -> processor.readFrom(this.data));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
+    public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
         return DataUtil.getRawNbtProcessor(this.getDataType(), containerClass)
                 .flatMap(processor -> processor.readFrom(this.data));
     }
 
     @Override
-    public boolean supports(Class<? extends DataManipulator<?, ?>> holderClass) {
+    public boolean supports(final Class<? extends DataManipulator<?, ?>> holderClass) {
         // By default, if there is a processor, we can check compatibilty with that
         // Otherwise, it's true because of custom data.
         return DataUtil.getRawNbtProcessor(this.getDataType(), holderClass)
@@ -117,7 +116,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     }
 
     @Override
-    public <R> DataTransactionResult offer(Key<? extends BaseValue<R>> key, R value) {
+    public <R> DataTransactionResult offer(final Key<? extends BaseValue<R>> key, final R value) {
         return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .map(processor -> processor.offer(this.data, value))
                 .orElseGet(DataTransactionResult::failNoData);
@@ -125,7 +124,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
+    public DataTransactionResult offer(final DataManipulator<?, ?> valueContainer, final MergeFunction function) {
         return DataUtil.getRawNbtProcessor(this.getDataType(), valueContainer.getClass())
                 .map(processor -> {
                     Optional<DataManipulator<?, ?>> optionalManipulator = processor.readFrom(this.data);
@@ -141,40 +140,40 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
                     return DataTransactionResult.failNoData();
 
                 })
-                .orElseGet(() -> CustomDataNbtUtil.apply(this.data, valueContainer));
+                .orElseGet(() -> DataUtil.apply(this.data, valueContainer));
     }
 
     @Override
-    public DataTransactionResult remove(Class<? extends DataManipulator<?, ?>> containerClass) {
+    public DataTransactionResult remove(final Class<? extends DataManipulator<?, ?>> containerClass) {
         return DataUtil.getRawNbtProcessor(this.getDataType(), containerClass)
                 .map(processor -> processor.remove(this.data))
-                .orElseGet(() -> CustomDataNbtUtil.remove(this.data, containerClass));
+                .orElseGet(() -> DataUtil.remove(this.data, containerClass));
     }
 
     @Override
-    public DataTransactionResult remove(Key<?> key) {
+    public DataTransactionResult remove(final Key<?> key) {
         return DataUtil.getRawNbtProcessor(this.getDataType(), key)
                 .map(processor -> processor.remove(this.data))
                 .orElseGet(DataTransactionResult::failNoData);
     }
 
     @Override
-    public DataTransactionResult undo(DataTransactionResult result) {
+    public DataTransactionResult undo(final DataTransactionResult result) {
         if (result.getReplacedData().isEmpty() && result.getSuccessfulData().isEmpty()) {
             return DataTransactionResult.successNoData();
         }
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        for (ImmutableValue<?> replaced : result.getReplacedData()) {
+        for (final ImmutableValue<?> replaced : result.getReplacedData()) {
             builder.absorbResult(offer(replaced));
         }
-        for (ImmutableValue<?> successful : result.getSuccessfulData()) {
+        for (final ImmutableValue<?> successful : result.getSuccessfulData()) {
             builder.absorbResult(remove(successful));
         }
         return builder.build();
     }
 
     @Override
-    public DataTransactionResult copyFrom(DataHolder that, MergeFunction function) {
+    public DataTransactionResult copyFrom(final DataHolder that, final MergeFunction function) {
         return DataTransactionResult.failNoData();
     }
 
@@ -188,26 +187,25 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     }
 
     @Override
-    public <R> Optional<R> get(Key<? extends BaseValue<R>> key) {
+    public <R> Optional<R> get(final Key<? extends BaseValue<R>> key) {
         return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .flatMap(processor -> processor.readValue(this.data));
     }
 
     @Override
-    public <R, V extends BaseValue<R>> Optional<V> getValue(Key<V> key) {
+    public <R, V extends BaseValue<R>> Optional<V> getValue(final Key<V> key) {
         return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .flatMap(processor -> processor.readFrom(this.data));
     }
 
     @Override
-    public boolean supports(Key<?> key) {
+    public boolean supports(final Key<?> key) {
         return DataUtil.getRawNbtProcessor(this.getDataType(), key)
                 .map(processor -> processor.isCompatible(this.getDataType()))
                 .orElse(true); // we want to say we automatically support custom data
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     public Set<Key<?>> getKeys() {
         return DataUtil.getNbtValueProcessors(this.getDataType()).stream()
                 .map(processor -> processor.readFrom(this.data))
@@ -230,14 +228,14 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (!(o instanceof AbstractArchetype)) {
             return false;
         }
-        AbstractArchetype<?, ?, ?> that = (AbstractArchetype<?, ?, ?>) o;
+        final AbstractArchetype<?, ?, ?> that = (AbstractArchetype<?, ?, ?>) o;
         return this.type.equals(that.type) &&
                this.data.equals(that.data);
     }

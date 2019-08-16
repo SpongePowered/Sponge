@@ -43,8 +43,8 @@ import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
@@ -131,7 +131,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      * @param compound The SpongeData compound to read from
      */
     protected void bridge$readFromSpongeCompound(final NBTTagCompound compound) {
-        CustomDataNbtUtil.readCustomData(compound, (TileEntity) this);
+        DataUtil.readCustomData(compound, (TileEntity) this);
     }
 
     /**
@@ -140,7 +140,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      * @param compound The SpongeData compound to write to
      */
     protected void bridge$writeToSpongeCompound(final NBTTagCompound compound) {
-        CustomDataNbtUtil.writeCustomData(compound, (TileEntity) this);
+        DataUtil.writeCustomData(compound, (TileEntity) this);
     }
 
 
