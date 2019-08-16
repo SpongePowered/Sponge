@@ -27,7 +27,6 @@ package org.spongepowered.common.data.persistence.schematic;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 
 // TODO - Migrate this to DataFixer DSL in 1.14.
@@ -46,7 +45,7 @@ public class SchematicUpdater1_to_2 implements DataContentUpdater {
     @Override
     public DataView update(final DataView content) {
         content.set(Constants.Sponge.Schematic.VERSION, 2);
-        content.set(Constants.Sponge.Schematic.DATA_VERSION, DataUtil.MINECRAFT_DATA_VERSION);
+        content.set(Constants.Sponge.Schematic.DATA_VERSION, Constants.MINECRAFT_DATA_VERSION);
         content.getViewList(Constants.Sponge.Schematic.Versions.V1_TILE_ENTITY_DATA).ifPresent(tiles -> {
             tiles.forEach(tile -> {
                 // Remove unnecessary version information.

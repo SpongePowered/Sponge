@@ -48,7 +48,6 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataTranslator;
@@ -98,13 +97,8 @@ import javax.annotation.Nullable;
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 public final class DataUtil {
 
-    // TODO Bump this when needing to fix sponge added file data
-    public static final int DATA_VERSION = 1;
-    public static final DataFixer spongeDataFixer = new DataFixer(DATA_VERSION);
-    public static final int MINECRAFT_DATA_VERSION = 1343;
+    public static final DataFixer spongeDataFixer = new DataFixer(Constants.Sponge.SPONGE_DATA_VERSION);
     private static final Supplier<InvalidDataException> INVALID_DATA_EXCEPTION_SUPPLIER = InvalidDataException::new;
-    private static Iterable<? extends DataSerializable> manipulators;
-    private static Function<? extends DataSerializable, ? extends DataRegistration<?, ?>> func;
 
     static {
         spongeDataFixer.registerFix(FixTypes.LEVEL, new SpongeLevelFixer());
@@ -170,7 +164,7 @@ public final class DataUtil {
 
     public static <T> T getData(final DataView dataView, final Key<?> key, final Class<T> clazz) throws InvalidDataException {
         checkDataExists(dataView, checkNotNull(key).getQuery());
-        final Object object = dataView.get(key.getQuery()).get();
+        final Object object = dataView.get(key.getQuery()).orElseThrow(dataNotFound());
         if (clazz.isInstance(object)) {
             return (T) object;
         }
@@ -179,7 +173,7 @@ public final class DataUtil {
 
     public static <T> T getData(final DataView dataView, final DataQuery query, final Class<T> data) throws InvalidDataException {
         checkDataExists(dataView, query);
-        final Object object = dataView.get(query).get();
+        final Object object = dataView.get(query).orElseThrow(dataNotFound());
         if (data.isInstance(object)) {
             return (T) object;
         }
@@ -196,8 +190,6 @@ public final class DataUtil {
 
     private static <T extends DataSerializable> List<DataView> getSerializedManipulatorList(final Iterable<? extends T> manipulators,
         final Function<T, ? extends DataRegistration<?, ?>> func) {
-        DataUtil.manipulators = manipulators;
-        DataUtil.func = func;
         checkNotNull(manipulators);
         final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
         for (final T manipulator : manipulators) {
@@ -210,7 +202,7 @@ public final class DataUtil {
         return builder.build();
     }
 
-    public static SerializedDataTransaction deserializeManipulatorList(final List<DataView> containers) {
+    public static SerializedDataTransaction deserializeManipulatorList(final List<? extends DataView> containers) {
         checkNotNull(containers);
         final SerializedDataTransaction.Builder builder = SerializedDataTransaction.builder();
         for (final DataView view : containers) {
@@ -273,7 +265,7 @@ public final class DataUtil {
         return dataView;
     }
 
-    public static ImmutableList<ImmutableDataManipulator<?, ?>> deserializeImmutableManipulatorList(final List<DataView> containers) {
+    public static ImmutableList<ImmutableDataManipulator<?, ?>> deserializeImmutableManipulatorList(final List<? extends DataView> containers) {
         checkNotNull(containers);
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         for (DataView view : containers) {
@@ -290,43 +282,35 @@ public final class DataUtil {
     }
 
     public static Location<World> getLocation(final DataView view, final boolean castToInt) {
-        final UUID worldUuid = UUID.fromString(view.getString(Queries.WORLD_ID).get());
-        final double x = view.getDouble(Queries.POSITION_X).get();
-        final double y = view.getDouble(Queries.POSITION_Y).get();
-        final double z = view.getDouble(Queries.POSITION_Z).get();
+        final UUID worldUuid = UUID.fromString(view.getString(Queries.WORLD_ID).orElseThrow(dataNotFound()));
+        final double x = view.getDouble(Queries.POSITION_X).orElseThrow(dataNotFound());
+        final double y = view.getDouble(Queries.POSITION_Y).orElseThrow(dataNotFound());
+        final double z = view.getDouble(Queries.POSITION_Z).orElseThrow(dataNotFound());
         if (castToInt) {
-            return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
+            return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).orElseThrow(dataNotFound()), (int) x, (int) y, (int) z);
         }
-        return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
+        return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).orElseThrow(dataNotFound()), x, y, z);
     }
 
     public static Vector3i getPosition3i(final DataView view) {
-        return getPosition3i(view, Constants.Sponge.SNAPSHOT_WORLD_POSITION);
-    }
-
-    public static Vector3i getPosition3i(final DataView view, final DataQuery query) {
         checkDataExists(view, Constants.Sponge.SNAPSHOT_WORLD_POSITION);
-        final DataView internal = view.getView(Constants.Sponge.SNAPSHOT_WORLD_POSITION).get();
-        final int x = internal.getInt(Queries.POSITION_X).get();
-        final int y = internal.getInt(Queries.POSITION_Y).get();
-        final int z = internal.getInt(Queries.POSITION_Z).get();
+        final DataView internal = view.getView(Constants.Sponge.SNAPSHOT_WORLD_POSITION).orElseThrow(dataNotFound());
+        final int x = internal.getInt(Queries.POSITION_X).orElseThrow(dataNotFound());
+        final int y = internal.getInt(Queries.POSITION_Y).orElseThrow(dataNotFound());
+        final int z = internal.getInt(Queries.POSITION_Z).orElseThrow(dataNotFound());
         return new Vector3i(x, y, z);
-    }
-
-    public static Vector3d getPosition3d(final DataView view) {
-        return getPosition3d(view, Constants.Sponge.SNAPSHOT_WORLD_POSITION);
     }
 
     public static Vector3d getPosition3d(final DataView view, final DataQuery query) {
         checkDataExists(view, query);
-        final DataView internal = view.getView(query).get();
-        final double x = internal.getDouble(Queries.POSITION_X).get();
-        final double y = internal.getDouble(Queries.POSITION_Y).get();
-        final double z = internal.getDouble(Queries.POSITION_Z).get();
+        final DataView internal = view.getView(query).orElseThrow(dataNotFound());
+        final double x = internal.getDouble(Queries.POSITION_X).orElseThrow(dataNotFound());
+        final double y = internal.getDouble(Queries.POSITION_Y).orElseThrow(dataNotFound());
+        final double z = internal.getDouble(Queries.POSITION_Z).orElseThrow(dataNotFound());
         return new Vector3d(x, y, z);
     }
 
-    public static Supplier<InvalidDataException> dataNotFound() {
+    private static Supplier<InvalidDataException> dataNotFound() {
         return INVALID_DATA_EXCEPTION_SUPPLIER;
     }
 
@@ -397,7 +381,7 @@ public final class DataUtil {
      * @param mutableClass The class of the {@link DataManipulator}
      * @return The raw typed data processor
      */
-    @SuppressWarnings({"rawtypes", "SuspiciousMethodCalls"})
+    @SuppressWarnings("rawtypes")
     public static Optional<DataProcessor> getWildDataProcessor(final Class<? extends DataManipulator> mutableClass) {
         return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getDelegate(mutableClass));
     }
@@ -452,11 +436,6 @@ public final class DataUtil {
     public static RawDataValidator getValidators(final ValidationType validationType) {
 
         return new DelegateDataValidator(ImmutableList.of(), validationType);
-    }
-
-    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<NbtDataProcessor<T, I>> getNbtProcessor(
-        final NbtDataType dataType, final Class<T> clazz) {
-        return Optional.ofNullable((NbtDataProcessor<T, I>) SpongeManipulatorRegistry.getInstance().getNbtDelegate(dataType, clazz));
     }
 
     public static <E, V extends BaseValue<E>> Optional<NbtValueProcessor<E, V>> getNbtProcessor(final NbtDataType dataType, final Key<V> key) {
@@ -652,12 +631,4 @@ public final class DataUtil {
         }
     }
 
-    public static void writeCustomData(final NBTTagCompound compound, final DataManipulator<?, ?> manipulator) {
-        final List<DataView> manipulatorViews = getSerializedManipulatorList(Collections.singleton(manipulator));
-        final NBTTagList manipulatorTagList = new NBTTagList();
-        for (final DataView dataView : manipulatorViews) {
-            manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
-        }
-        compound.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
-    }
 }

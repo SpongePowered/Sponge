@@ -73,9 +73,11 @@ public final class Constants {
     public static final String UUID_MOST = "UUIDMost";
     public static final String UUID_LEAST = "UUIDLeast";
     public static final BlockPos DUMMY_POS = new BlockPos(0, 0, 0);
+    public static final int MINECRAFT_DATA_VERSION = 1343;
 
     @SuppressWarnings("DeprecatedIsStillUsed")
     public static final class Sponge {
+        public static final int SPONGE_DATA_VERSION = 1;
         public static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
 
         public static final GameRules DEFAULT_GAME_RULES = new GameRules();

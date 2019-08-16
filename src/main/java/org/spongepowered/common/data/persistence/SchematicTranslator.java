@@ -53,7 +53,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.schematic.SchematicUpdater1_to_2;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.mixin.core.server.MinecraftServerAccessor;
@@ -139,7 +138,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final int dataVersion = unprocessed.getInt(Constants.Sponge.Schematic.DATA_VERSION).get();
         // DataFixer will be able to upgrade entity and tile entity data if and only if we're running a valid server and
         // the data version is outdated.
-        final boolean needsFixers = dataVersion < DataUtil.MINECRAFT_DATA_VERSION && VANILLA_FIXER != null;
+        final boolean needsFixers = dataVersion < Constants.MINECRAFT_DATA_VERSION && VANILLA_FIXER != null;
         final DataView updatedView = unprocessed;
 
         final DataView metadata = updatedView.getView(Constants.Sponge.Schematic.METADATA).orElse(null);
@@ -382,7 +381,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         data.set(Constants.Sponge.Schematic.LENGTH, length);
 
         data.set(Constants.Sponge.Schematic.VERSION, Constants.Sponge.Schematic.CURRENT_VERSION);
-        data.set(Constants.Sponge.Schematic.DATA_VERSION, DataUtil.MINECRAFT_DATA_VERSION);
+        data.set(Constants.Sponge.Schematic.DATA_VERSION, Constants.MINECRAFT_DATA_VERSION);
         for (final DataQuery metaKey : schematic.getMetadata().getKeys(false)) {
             data.set(Constants.Sponge.Schematic.METADATA.then(metaKey), schematic.getMetadata().get(metaKey).get());
         }

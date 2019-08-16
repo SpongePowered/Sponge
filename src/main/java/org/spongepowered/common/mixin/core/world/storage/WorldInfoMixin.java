@@ -406,7 +406,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     private void writeSpongeNbt() {
         // Never save Sponge data if we have no UUID
         if (this.impl$uuid != null && this.bridge$isValid()) {
-            this.impl$spongeNbt.setInteger(Constants.Sponge.DATA_VERSION, DataUtil.DATA_VERSION);
+            this.impl$spongeNbt.setInteger(Constants.Sponge.DATA_VERSION, Constants.Sponge.SPONGE_DATA_VERSION);
             this.impl$spongeNbt.setUniqueId(Constants.UUID, this.impl$uuid);
             this.impl$spongeNbt.setInteger(Constants.Sponge.World.DIMENSION_ID, this.impl$dimensionId);
             this.impl$spongeNbt.setString(Constants.Sponge.World.DIMENSION_TYPE, this.impl$dimensionType.getId());
