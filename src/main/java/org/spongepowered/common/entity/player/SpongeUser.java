@@ -143,6 +143,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     public void invalidate() {
         this.nbt = null;
+        this.inventory = null;
+        this.enderChest = null;
 
         ((CustomDataHolderBridge) this).bridge$getFailedData().clear();
         for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) this).bridge$getCustomManipulators()) {
@@ -402,6 +404,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     private SpongeUser loadInventory() {
         if (this.inventory == null) {
+            if (!isInitialized()) {
+                initialize();
+            }
             this.inventory = new SpongeUserInventory(this);
             final NBTTagList nbttaglist = this.nbt.getTagList(Constants.Entity.Player.INVENTORY, 10);
             this.inventory.readFromNBT(nbttaglist);
@@ -412,6 +417,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     private SpongeUser loadEnderInventory() {
         if (this.enderChest == null) {
+            if (!isInitialized()) {
+                initialize();
+            }
             this.enderChest = new SpongeUserInventoryEnderchest(this);
             if (this.nbt.hasKey(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9))
             {
