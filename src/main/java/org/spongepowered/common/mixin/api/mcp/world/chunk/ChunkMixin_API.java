@@ -151,15 +151,14 @@ public abstract class ChunkMixin_API implements Chunk {
         return this.loaded;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public boolean loadChunk(final boolean generate) {
         final WorldServer worldserver = (WorldServer) this.world;
-        net.minecraft.world.chunk.Chunk chunk = null;
-        if (worldserver.getChunkProvider().chunkExists(this.x, this.z) || generate) {
-            chunk = worldserver.getChunkProvider().loadChunk(this.x, this.z);
+        if (!generate) {
+            return worldserver.getChunkProvider().loadChunk(this.x, this.z) != null;
         }
-
-        return chunk != null;
+        return worldserver.getChunkProvider().provideChunk(this.x, this.z) != null;
     }
 
     @Override
