@@ -38,6 +38,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -94,6 +95,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -307,10 +309,10 @@ public final class PhaseTracker {
                 if (hasCaptures) {
                     ((IPhaseState) state).unwind(currentContext);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 this.printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, currentContext, e);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             this.printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state,
                 currentContext, e);
         }
@@ -394,7 +396,7 @@ public final class PhaseTracker {
         }
     }
 
-    private void printEmptyStackOnCompletion(PhaseContext<?> context) {
+    private void printEmptyStackOnCompletion(final PhaseContext<?> context) {
         if (this.hasPrintedEmptyOnce) {
             // We want to only mention it once that we are completing an
             // empty state, of course something is bound to break, but
@@ -420,7 +422,7 @@ public final class PhaseTracker {
         }
     }
 
-    private void printRunawayPhase(IPhaseState<?> state, PhaseContext<?> context) {
+    private void printRunawayPhase(final IPhaseState<?> state, final PhaseContext<?> context) {
         if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && !this.hasPrintedAboutRunnawayPhases) {
             // Avoiding spam logs.
             return;
@@ -641,6 +643,65 @@ public final class PhaseTracker {
         }
     }
 
+    public static Block validateBlockForNeighborNotification(final WorldServer worldServer, final BlockPos pos, @Nullable Block blockIn,
+        final BlockPos otherPos, final Chunk chunk) {
+        if (blockIn == null) {
+            // If the block is null, check with the PhaseState to see if it can perform a safe way
+            final PhaseContext<?> currentContext = getInstance().getCurrentContext();
+            final PhaseTrackerCategory trackerConfig = SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker();
+
+            if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
+                // Try to save ourselves
+                final TileEntityType type = currentContext
+                    .getSource(org.spongepowered.api.block.tileentity.TileEntity.class)
+                    .map(org.spongepowered.api.block.tileentity.TileEntity::getType)
+                    .orElse(null);
+                if (type != null) {
+                    final Map<String, Boolean> autoFixedTiles = trackerConfig.getAutoFixedTiles();
+                    final boolean contained = autoFixedTiles.containsKey(type.getId());
+                    // If we didn't map the tile entity yet, we should apply the mapping
+                    // based on whether the source is the same as the TileEntity.
+                    if (!contained) {
+                        if (pos.equals(currentContext.getSource(TileEntity.class).get().getPos())) {
+                            autoFixedTiles.put(type.getId(), true);
+                        } else {
+                            autoFixedTiles.put(type.getId(), false);
+                        }
+                    }
+                    final boolean useTile = contained && autoFixedTiles.get(type.getId());
+                    if (useTile) {
+                        blockIn = ((TileEntity) currentContext.getSource()).getBlockType();
+                    } else {
+                        blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
+                                  ? chunk.getBlockState(pos).getBlock()
+                                  : worldServer.getBlockState(pos).getBlock();
+                    }
+                    if (!contained && trackerConfig.isReportNullSourceBlocks()) {
+                        printNullSourceBlockWithTile(pos, blockIn, otherPos, type, useTile, new NullPointerException("Null Source Block For TileEntity Neighbor Notification"));
+                    }
+                } else {
+                    blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
+                              ? chunk.getBlockState(pos).getBlock()
+                              : worldServer.getBlockState(pos).getBlock();
+                    if (trackerConfig.isReportNullSourceBlocks()) {
+                        printNullSourceBlockNeighborNotificationWithNoTileSource(pos, blockIn, otherPos,
+                            new NullPointerException("Null Source Block For Neighbor Notification"));
+                    }
+                }
+
+            } else {
+                blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
+                          ? chunk.getBlockState(pos).getBlock()
+                          : worldServer.getBlockState(pos).getBlock();
+                if (trackerConfig.isReportNullSourceBlocks()) {
+                    printNullSourceForBlock(worldServer, pos, blockIn, otherPos, new NullPointerException("Null Source Block For Neighbor Notification"));
+                }
+            }
+        }
+        return blockIn;
+    }
+
+
     String dumpStack() {
         if (this.stack.isEmpty()) {
             return "[Empty stack]";
@@ -677,7 +738,8 @@ public final class PhaseTracker {
      * @param sourcePos The source block position
      */
     @SuppressWarnings("rawtypes")
-    public void notifyBlockOfStateChange(final WorldServerBridge mixinWorld, final IBlockState notifyState, final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos) {
+    public void notifyBlockOfStateChange(final WorldServerBridge mixinWorld, final IBlockState notifyState, final BlockPos notifyPos,
+        final Block sourceBlock, final BlockPos sourcePos) {
         if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
@@ -732,14 +794,14 @@ public final class PhaseTracker {
 
                 notifyState.neighborChanged(((WorldServer) mixinWorld), notifyPos, sourceBlock, sourcePos);
             }
-        } catch (Throwable throwable) {
+        } catch (final Throwable throwable) {
             final CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
             final CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
             crashreportcategory.addDetail("Source block type", () -> {
                 try {
                     return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(sourceBlock),
                         sourceBlock.getTranslationKey(), sourceBlock.getClass().getCanonicalName());
-                } catch (Throwable var2) {
+                } catch (final Throwable var2) {
                     return "ID #" + Block.getIdFromBlock(sourceBlock);
                 }
             });
@@ -900,7 +962,7 @@ public final class PhaseTracker {
                     TrackingUtil.performTransactionProcess(transaction, phaseState, context, 0);
                     return true;
                 }
-            } catch (Exception | NoClassDefFoundError e) {
+            } catch (final Exception | NoClassDefFoundError e) {
                 this.printBlockTrackingException(context, phaseState, e);
                 return false;
             }
@@ -1029,7 +1091,7 @@ public final class PhaseTracker {
                     && context.getCaptureBlockPos().getPos().isPresent())) {
                 try {
                     return ((IPhaseState) phaseState).spawnEntityOrCapture(context, (Entity) entity, chunkX, chunkZ);
-                } catch (Exception | NoClassDefFoundError e) {
+                } catch (final Exception | NoClassDefFoundError e) {
                     // Just in case something really happened, we should print a nice exception for people to
                     // paste us
                     this.printExceptionSpawningEntity(context, e);

@@ -88,7 +88,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
-import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.DataFormats;
@@ -155,7 +154,6 @@ import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
 import org.spongepowered.common.bridge.world.gen.PopulatorProviderBridge;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.ShouldFire;
@@ -1506,62 +1504,9 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if (chunk == null) {
             return;
         }
-        //noinspection ConstantConditions
-        if (blockIn == null) {
-            // If the block is null, check with the PhaseState to see if it can perform a safe way
-            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
-            final PhaseTrackerCategory trackerConfig = SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker();
+        final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, pos, blockIn, otherPos, chunk);
 
-            if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
-                // Try to save ourselves
-                final TileEntityType type = currentContext
-                    .getSource(org.spongepowered.api.block.tileentity.TileEntity.class)
-                    .map(org.spongepowered.api.block.tileentity.TileEntity::getType)
-                    .orElse(null);
-                if (type != null) {
-                    final Map<String, Boolean> autoFixedTiles = trackerConfig.getAutoFixedTiles();
-                    final boolean contained = autoFixedTiles.containsKey(type.getId());
-                    // If we didn't map the tile entity yet, we should apply the mapping
-                    // based on whether the source is the same as the TileEntity.
-                    if (!contained) {
-                        if (pos.equals(currentContext.getSource(TileEntity.class).get().getPos())) {
-                            autoFixedTiles.put(type.getId(), true);
-                        } else {
-                            autoFixedTiles.put(type.getId(), false);
-                        }
-                    }
-                    final boolean useTile = contained && autoFixedTiles.get(type.getId());
-                    if (useTile) {
-                        blockIn = ((TileEntity) currentContext.getSource()).getBlockType();
-                    } else {
-                        blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
-                                  ? chunk.getBlockState(pos).getBlock()
-                                  : this.getBlockState(pos).getBlock();
-                    }
-                    if (!contained && trackerConfig.isReportNullSourceBlocks()) {
-                        PhaseTracker.printNullSourceBlockWithTile(pos, blockIn, otherPos, type, useTile, new NullPointerException("Null Source Block For TileEntity Neighbor Notification"));
-                    }
-                } else {
-                    blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
-                              ? chunk.getBlockState(pos).getBlock()
-                              : this.getBlockState(pos).getBlock();
-                    if (trackerConfig.isReportNullSourceBlocks()) {
-                        PhaseTracker.printNullSourceBlockNeighborNotificationWithNoTileSource(pos, blockIn, otherPos,
-                            new NullPointerException("Null Source Block For Neighbor Notification"));
-                    }
-                }
-
-            } else {
-                blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
-                          ? chunk.getBlockState(pos).getBlock()
-                          : this.getBlockState(pos).getBlock();
-                if (trackerConfig.isReportNullSourceBlocks()) {
-                    PhaseTracker.printNullSourceForBlock(((WorldServer) (Object) this), pos, blockIn, otherPos, new NullPointerException("Null Source Block For Neighbor Notification"));
-                }
-            }
-        }
-
-        PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(pos), pos, blockIn, otherPos);
+        PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(pos), pos, used, otherPos);
     }
 
     /**
@@ -1589,7 +1534,9 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                 continue;
             }
             final BlockPos offset = pos.offset(direction);
-            PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(offset), offset, blockType, pos);
+            final Chunk chunk = this.getChunk(pos);
+            final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, pos, blockType, offset, chunk);
+            PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(offset), offset, used, pos);
         }
 
     }
@@ -1611,7 +1558,9 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
             for (final EnumFacing direction : Constants.World.NOTIFY_DIRECTIONS) {
                 final BlockPos notifyPos = sourcePos.offset(direction);
-                PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, sourceBlock, sourcePos);
+                final Chunk chunk = this.getChunk(sourcePos);
+                final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, sourcePos, sourceBlock, notifyPos, chunk);
+                PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, used, sourcePos);
             }
         }
 
@@ -1633,7 +1582,9 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                 }
 
                 final BlockPos notifyPos = sourcePos.offset(facing);
-                PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, sourceBlock, sourcePos);
+                final Chunk chunk = this.getChunk(sourcePos);
+                final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, sourcePos, sourceBlock, notifyPos, chunk);
+                PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, used, sourcePos);
             }
         }
     }

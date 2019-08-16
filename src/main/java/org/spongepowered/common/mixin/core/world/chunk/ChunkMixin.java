@@ -146,7 +146,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Override
     public net.minecraft.world.chunk.Chunk[] bridge$getNeighborArray() {
-        return this.impl$neighbors.clone();
+        return Arrays.copyOf(this.impl$neighbors, this.impl$neighbors.length);
     }
 
     @Override

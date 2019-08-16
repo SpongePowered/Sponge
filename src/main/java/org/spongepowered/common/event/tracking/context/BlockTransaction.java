@@ -30,6 +30,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -43,6 +44,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.mixin.core.world.WorldServerMixin;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -573,7 +575,10 @@ public abstract class BlockTransaction {
             if (blockState == null) {
                 blockState = ((WorldServer) this.worldServer).getBlockState(notifyPos);
             }
-            PhaseTracker.getInstance().notifyBlockOfStateChange(worldServer, blockState, notifyPos, sourceBlock, sourcePos);
+            final Chunk chunk = ((WorldServer) this.worldServer).getChunk(sourcePos);
+            final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, sourcePos, sourceBlock, notifyPos, chunk);
+
+            PhaseTracker.getInstance().notifyBlockOfStateChange(worldServer, blockState, notifyPos, used, sourcePos);
         }
 
         @Override
