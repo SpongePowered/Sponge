@@ -576,7 +576,7 @@ public abstract class BlockTransaction {
                 blockState = ((WorldServer) this.worldServer).getBlockState(notifyPos);
             }
             final Chunk chunk = ((WorldServer) this.worldServer).getChunk(sourcePos);
-            final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, sourcePos, sourceBlock, notifyPos, chunk);
+            final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) this.worldServer, sourcePos, sourceBlock, notifyPos, chunk);
 
             PhaseTracker.getInstance().notifyBlockOfStateChange(worldServer, blockState, notifyPos, used, sourcePos);
         }
