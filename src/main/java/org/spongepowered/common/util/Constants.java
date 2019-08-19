@@ -348,12 +348,6 @@ public final class Constants {
         public static final int MAX_CHUNK_UNLOADS = 100;
         public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
         public static final int CHUNK_UNLOAD_DELAY = 30000;
-        /**
-         * Used by SpongeVanilla to load the Forge dimension data information.
-         * See {@link org.spongepowered.common.util.Constants.Forge#DIMENSION_DATA}
-         * usage in {@link SaveHandlerMixin#bridge$loadDimensionAndOtherData(SaveHandler, WorldInfo, NBTTagCompound)}.
-         */
-        public static final String DIMENSION_DATA = "Data";
 
         public static final class Teleporter {
 
@@ -915,8 +909,6 @@ public final class Constants {
          * with Forge.
          */
         public static final String USED_DIMENSION_IDS = "UsedIDs";
-        public static final String DIMENSION_DATA = "DimensionData";
-        public static final String FORGE_DIMENSION_DATA_TAG = "Forge";
     }
 
     public static final class Bukkit {

@@ -42,12 +42,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.io.File;
@@ -86,63 +84,27 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
         return "Failed to check session lock for world " + this.worldDirectory + ", aborting";
     }
 
-    @Inject(method = "saveWorldInfoWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
-                                                                                    + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER),
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onSaveWorldInfoWithPlayerAfterTagSet(final WorldInfo worldInformation, final NBTTagCompound tagCompound, final CallbackInfo ci,
-      final NBTTagCompound nbttagcompound1, final NBTTagCompound nbttagcompound2) {
-        this.bridge$loadDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbttagcompound2);
-    }
-
     @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
-    private void onSaveWorldInfoWithPlayerEnd(final WorldInfo worldInformation, final NBTTagCompound tagCompound, final CallbackInfo ci) {
-        this.impl$saveSpongeDatData(worldInformation);
-    }
-
-    @Override
-    public void bridge$loadSpongeDatData(final WorldInfo info) {
-        final File spongeFile = new File(this.worldDirectory, Constants.Sponge.World.LEVEL_SPONGE_DAT);
-        final File spongeOldFile = new File(this.worldDirectory, Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
-
-        if (spongeFile.exists() || spongeOldFile.exists()) {
-            final File actualFile = spongeFile.exists() ? spongeFile : spongeOldFile;
-            final NBTTagCompound compound;
-            try (final FileInputStream stream = new FileInputStream(actualFile)) {
-                compound = CompressedStreamTools.readCompressed(stream);
-            } catch (Exception ex) {
-                throw new RuntimeException("Attempt failed when reading Sponge level data for [" + info.getWorldName() + "] from file [" +
-                        actualFile.getName() + "]!", ex);
-            }
-            ((WorldInfoBridge) info).bridge$setSpongeRootLevelNBT(compound);
-            if (compound.hasKey(Constants.Sponge.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Sponge.SPONGE_DATA);
-                DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
-                ((WorldInfoBridge) info).bridge$readSpongeNbt(spongeCompound);
-            }
-        }
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void impl$saveSpongeDatData(final WorldInfo info) {
+    private void impl$saveLevelSpongeDataFile(final WorldInfo worldInformation, final NBTTagCompound tagCompound, final CallbackInfo ci) {
         try {
             // If the returned NBT is empty, then we should warn the user.
-            NBTTagCompound spongeRootLevelNBT = ((WorldInfoBridge) info).bridge$getSpongeRootLevelNbt();
+            NBTTagCompound spongeRootLevelNBT = ((WorldInfoBridge) worldInformation).bridge$getSpongeRootLevelNbt();
             if (spongeRootLevelNBT.isEmpty()) {
-                Integer dimensionId = ((WorldInfoBridge) info).bridge$getDimensionId();
+                Integer dimensionId = ((WorldInfoBridge) worldInformation).bridge$getDimensionId();
                 String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
 
                 // We should warn the user about the NBT being empty, but not saving it.
-                new PrettyPrinter().add("Sponge Root Level NBT for world %s is empty!", info.getWorldName()).centre().hr()
+                new PrettyPrinter().add("Sponge Root Level NBT for world %s is empty!", worldInformation.getWorldName()).centre().hr()
                         .add("When trying to save Sponge data for the world %s, an empty NBT compound was provided. The old Sponge data file was "
                                         + "left intact.",
-                                info.getWorldName())
+                                worldInformation.getWorldName())
                         .add()
                         .add("The following information may be useful in debugging:")
                         .add()
-                        .add("UUID: ", ((WorldInfoBridge) info).bridge$getAssignedId())
+                        .add("UUID: ", ((WorldInfoBridge) worldInformation).bridge$getAssignedId())
                         .add("Dimension ID: ", dimensionIdString)
-                        .add("Is Modded: ", ((WorldInfoBridge) info).bridge$getIsMod())
-                        .add("Valid flag: ", ((WorldInfoBridge) info).bridge$isValid())
+                        .add("Is Modded: ", ((WorldInfoBridge) worldInformation).bridge$getIsMod())
+                        .add("Valid flag: ", ((WorldInfoBridge) worldInformation).bridge$isValid())
                         .add()
                         .add("Stack trace:")
                         .add(new Exception())
@@ -159,19 +121,19 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
 
             // Before we continue, is the file zero length?
             if (newDataFile.length() == 0) {
-                Integer dimensionId = ((WorldInfoBridge) info).bridge$getDimensionId();
+                Integer dimensionId = ((WorldInfoBridge) worldInformation).bridge$getDimensionId();
                 String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
                 // Then we just delete the file and tell the user that we didn't save properly.
-                new PrettyPrinter().add("Zero length level_sponge.dat file was created for %s!", info.getWorldName()).centre().hr()
+                new PrettyPrinter().add("Zero length level_sponge.dat file was created for %s!", worldInformation.getWorldName()).centre().hr()
                         .add("When saving the data file for the world %s, a zero length file was written. Sponge has discarded this file.",
-                                info.getWorldName())
+                                worldInformation.getWorldName())
                         .add()
                         .add("The following information may be useful in debugging:")
                         .add()
-                        .add("UUID: ", ((WorldInfoBridge) info).bridge$getAssignedId())
+                        .add("UUID: ", ((WorldInfoBridge) worldInformation).bridge$getAssignedId())
                         .add("Dimension ID: ", dimensionIdString)
-                        .add("Is Modded: ", ((WorldInfoBridge) info).bridge$getIsMod())
-                        .add("Valid flag: ", ((WorldInfoBridge) info).bridge$isValid())
+                        .add("Is Modded: ", ((WorldInfoBridge) worldInformation).bridge$getIsMod())
+                        .add("Valid flag: ", ((WorldInfoBridge) worldInformation).bridge$isValid())
                         .add()
                         .add("Stack trace:")
                         .add(new Exception())
@@ -198,31 +160,28 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
         }
     }
 
-    /**
-     * This bridge method is used in both common and vanilla to store
-     * the world dimension mappings that Forge would otherwise perform.
-     * Because Forge makes changes to the SaveHandler, SpongeVanilla has
-     * to be able to add the same hooks but still call this central method
-     * to store the dimension data.
-     *
-     * @param handler The save handler instance
-     * @param info The world info
-     * @param compound The compound
-     */
     @Override
-    public void bridge$loadDimensionAndOtherData(final SaveHandler handler, final WorldInfo info, final NBTTagCompound compound) {
-        // Only save dimension data to root world
-        if (this.worldDirectory.getParentFile() == null
-                || (SpongeImpl.getGame().getPlatform().getType().isClient()
-                    && this.worldDirectory.getParentFile().toPath().equals(SpongeImpl.getGame().getSavesDirectory()))) {
-            final NBTTagCompound customWorldDataCompound = new NBTTagCompound();
-            final NBTTagCompound customDimensionDataCompound = WorldManager.saveDimensionDataMap();
-            customWorldDataCompound.setTag(Constants.Forge.DIMENSION_DATA, customDimensionDataCompound);
-            // Share data back to Sponge
-            compound.setTag(Constants.Forge.FORGE_DIMENSION_DATA_TAG, customWorldDataCompound);
+    public void bridge$loadSpongeDatData(final WorldInfo info) {
+        final File spongeFile = new File(this.worldDirectory, Constants.Sponge.World.LEVEL_SPONGE_DAT);
+        final File spongeOldFile = new File(this.worldDirectory, Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
+
+        if (spongeFile.exists() || spongeOldFile.exists()) {
+            final File actualFile = spongeFile.exists() ? spongeFile : spongeOldFile;
+            final NBTTagCompound compound;
+            try (final FileInputStream stream = new FileInputStream(actualFile)) {
+                compound = CompressedStreamTools.readCompressed(stream);
+            } catch (Exception ex) {
+                throw new RuntimeException("Attempt failed when reading Sponge level data for [" + info.getWorldName() + "] from file [" +
+                        actualFile.getName() + "]!", ex);
+            }
+            ((WorldInfoBridge) info).bridge$setSpongeRootLevelNBT(compound);
+            if (compound.hasKey(Constants.Sponge.SPONGE_DATA)) {
+                final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Sponge.SPONGE_DATA);
+                DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
+                ((WorldInfoBridge) info).bridge$readSpongeNbt(spongeCompound);
+            }
         }
     }
-
 
     /**
      * Redirects the {@link File#exists()} checking that if the file exists, grab
