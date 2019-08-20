@@ -30,7 +30,7 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandDat
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBrewingStandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
-import org.spongepowered.common.data.util.ComparatorUtil;
+import org.spongepowered.common.util.Constants;
 
 public class SpongeBrewingStandData extends AbstractBoundedComparableData<Integer, BrewingStandData, ImmutableBrewingStandData> implements BrewingStandData {
 
@@ -44,7 +44,7 @@ public class SpongeBrewingStandData extends AbstractBoundedComparableData<Intege
 
     // For reflection
     public SpongeBrewingStandData(int value, int minimum, int maximum, int defaultValue) {
-        super(BrewingStandData.class, value, Keys.REMAINING_BREW_TIME, ComparatorUtil.intComparator(), ImmutableSpongeBrewingStandData.class,
+        super(BrewingStandData.class, value, Keys.REMAINING_BREW_TIME, Constants.Functional.intComparator(), ImmutableSpongeBrewingStandData.class,
             minimum, maximum, defaultValue);
     }
 

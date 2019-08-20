@@ -41,7 +41,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePistonData;
-import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -69,7 +69,7 @@ public abstract class BlockPistonExtensionMixin extends BlockMixin {
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockDirectional.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(BlockDirectional.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -82,7 +82,7 @@ public abstract class BlockPistonExtensionMixin extends BlockMixin {
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockDirectional.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(BlockDirectional.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -95,6 +95,6 @@ public abstract class BlockPistonExtensionMixin extends BlockMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockDirectional.FACING)));
+                Constants.DirectionFunctions.getFor(blockState.getValue(BlockDirectional.FACING)));
     }
 }

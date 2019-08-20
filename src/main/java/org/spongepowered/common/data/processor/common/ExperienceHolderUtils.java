@@ -40,8 +40,8 @@ public class ExperienceHolderUtils {
      * @param level The player's level
      * @return The amount of XP between the specified level and the next level
      */
-    public static int getExpBetweenLevels(int level) {
-        return level >= 30 ? 112 + (level - 30) * 9 : (level >= 15 ? 37 + (level - 15) * 5 : 7 + level * 2);
+    public static int getExpBetweenLevels(final int level) {
+        return level >= 30 ? 112 + (level - 30) * 9 : level >= 15 ? 37 + (level - 15) * 5 : 7 + level * 2;
     }
 
     /**
@@ -53,13 +53,13 @@ public class ExperienceHolderUtils {
      * @return The total amount of XP a player would have if they are exactly
      * at the start of the specified level
      */
-    public static int xpAtLevel(int level) {
+    public static int xpAtLevel(final int level) {
         if (level > 30) {
             return (int) (4.5 * level * level - 162.5 * level + 2220);
         } else if (level > 15) {
             return (int) (2.5 * level * level - 40.5 * level + 360);
         } else {
-            return (level * level + 6 * level);
+            return level * level + 6 * level;
         }
     }
 
@@ -72,7 +72,7 @@ public class ExperienceHolderUtils {
      * @param experience The player's experience
      * @return The level the player would be at
      */
-    public static int getLevelForExp(int experience) {
+    public static int getLevelForExp(final int experience) {
         if (experience >= XP_AT_LEVEL_30) {
             return (int) ((162.5 + Math.sqrt(-13553.75 + 18 * experience)) / 9);
         } else if (experience >= XP_AT_LEVEL_15) {

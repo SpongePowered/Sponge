@@ -24,86 +24,43 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import static org.spongepowered.common.item.inventory.util.ItemStackUtil.getTagCompound;
-
-import com.google.common.collect.ImmutableList;
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataTransactionResult;
+import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
-import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextParseException;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
-import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.Constants;
 
-import java.util.List;
-import java.util.Optional;
-
-public class ItemPagedDataProcessor extends AbstractItemSingleDataProcessor<List<Text>, ListValue<Text>, PagedData, ImmutablePagedData> {
+public class ItemPagedDataProcessor extends AbstractItemBookPagesProcessor<Text, PagedData, ImmutablePagedData> {
 
     public ItemPagedDataProcessor() {
         super(input -> input.getItem() == Items.WRITABLE_BOOK || input.getItem() == Items.WRITTEN_BOOK, Keys.BOOK_PAGES);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Optional<PagedData> fill(DataContainer container, PagedData pagedData) {
-        final List<String> json = DataUtil.getData(container, Keys.BOOK_PAGES, List.class);
-        return Optional.of(pagedData.set(Keys.BOOK_PAGES, SpongeTexts.fromJson(json)));
+    NBTTagString translateTo(final Text type) {
+        return new NBTTagString(TextSerializers.JSON.serialize(type));
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (supports(container)) {
-            ItemStack stack = (ItemStack) container;
-            Optional<List<Text>> old = getVal(stack);
-            if (!old.isPresent()) {
-                return DataTransactionResult.successNoData();
-            }
-            NbtDataUtil.removePagesFromNBT(stack);
-            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+    Text translateFrom(final String page) {
+        try {
+            // Book text should be in JSON, but there is a chance it might be in
+            // Legacy format.
+            return TextSerializers.JSON.deserialize(page);
+        } catch (final TextParseException ignored) {
+            return SpongeTexts.fromLegacy(page);
         }
-        return DataTransactionResult.failNoData();
     }
+
 
     @Override
     protected PagedData createManipulator() {
         return new SpongePagedData();
-    }
-
-    @Override
-    protected boolean set(ItemStack itemStack, List<Text> value) {
-        NbtDataUtil.setPagesToNBT(itemStack, value);
-        return true;
-    }
-
-    @Override
-    protected Optional<List<Text>> getVal(ItemStack itemStack) {
-        if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(Constants.Item.Book.ITEM_BOOK_PAGES)) {
-            return Optional.empty();
-        }
-        return Optional.of(NbtDataUtil.getPagesFromNBT(getTagCompound(itemStack)));
-    }
-
-    @Override
-    protected ListValue<Text> constructValue(List<Text> actualValue) {
-        return new SpongeListValue<>(Keys.BOOK_PAGES, actualValue);
-    }
-
-    @Override
-    protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
-        return new ImmutableSpongeListValue<>(Keys.BOOK_PAGES, ImmutableList.copyOf(value));
     }
 
 }

@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 
@@ -41,12 +40,12 @@ public class PotionEffectContentUpdater implements DataContentUpdater {
 
     @Override
     public int getInputVersion() {
-        return DataVersions.Potion.BROKEN_POTION_ID;
+        return Constants.Sponge.Potion.BROKEN_POTION_ID;
     }
 
     @Override
     public int getOutputVersion() {
-        return DataVersions.Potion.POTION_V2;
+        return Constants.Sponge.Potion.POTION_V2;
     }
 
     @Override

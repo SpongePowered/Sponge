@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeLogAxisData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.util.TreeTypeResolver;
+import org.spongepowered.common.registry.type.block.TreeTypeRegistryModule;
 
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +62,7 @@ public abstract class BlockLogMixin extends BlockMixin {
             type = BlockPlanks.EnumType.OAK;
         }
 
-        final TreeType treeType = TreeTypeResolver.getFor(type);
+        final TreeType treeType = TreeTypeRegistryModule.getFor(type);
 
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType);
     }
@@ -84,7 +84,7 @@ public abstract class BlockLogMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableTreeData) {
             final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
-            final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
+            final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
             return impl$processLogType(blockState, type, treeType);
         }
         if (manipulator instanceof ImmutableLogAxisData) {
@@ -98,7 +98,7 @@ public abstract class BlockLogMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.TREE_TYPE)) {
             final TreeType treeType = (TreeType) value;
-            final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
+            final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
             return impl$processLogType(blockState, type, treeType);
         } else if (key.equals(Keys.LOG_AXIS)) {
             return Optional.of((BlockState) blockState.withProperty(BlockLog.LOG_AXIS, (BlockLog.EnumAxis) value));

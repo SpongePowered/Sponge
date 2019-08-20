@@ -44,7 +44,6 @@ import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
@@ -112,7 +111,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
 
     @Override
     public int getContentVersion() {
-        return DataVersions.TileEntitArchetype.BASE_VERSION;
+        return Constants.Sponge.TileEntityArchetype.BASE_VERSION;
     }
 
     @Override

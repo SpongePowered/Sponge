@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
+import static org.spongepowered.common.util.Constants.Functional.doubleComparator;
 
 import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionResult;

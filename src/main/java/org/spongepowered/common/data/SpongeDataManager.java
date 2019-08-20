@@ -55,9 +55,9 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataManipulatorBuilder;
-import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -135,7 +135,7 @@ public final class SpongeDataManager implements DataManager {
         }
         final List<DataContentUpdater> updaters = this.updatersMap.get(clazz);
         updaters.add(updater);
-        Collections.sort(updaters, ComparatorUtil.DATA_CONTENT_UPDATER_COMPARATOR);
+        Collections.sort(updaters, Constants.Functional.DATA_CONTENT_UPDATER_COMPARATOR);
     }
 
     @Override

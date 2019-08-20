@@ -27,7 +27,6 @@ package org.spongepowered.common.data.fixer.entity;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.datafix.IFixableData;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.Constants;
 
 import java.util.UUID;
@@ -36,7 +35,7 @@ public class EntityTrackedUser implements IFixableData {
 
     @Override
     public int getFixVersion() {
-        return DataVersions.Entity.TRACKER_ID_VERSION;
+        return Constants.Legacy.Entity.TRACKER_ID_VERSION;
     }
 
     @Override

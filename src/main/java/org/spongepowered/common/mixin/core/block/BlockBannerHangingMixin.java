@@ -39,7 +39,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
-import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -48,7 +48,7 @@ public abstract class BlockBannerHangingMixin extends BlockBannerMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         final EnumFacing facing = blockState.getValue(BlockBanner.FACING);
-        final Direction direction = DirectionResolver.getFor(facing);
+        final Direction direction = Constants.DirectionFunctions.getFor(facing);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, direction);
     }
 
@@ -61,7 +61,7 @@ public abstract class BlockBannerHangingMixin extends BlockBannerMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
-            final EnumFacing facing = DirectionResolver.getFor(direction);
+            final EnumFacing facing = Constants.DirectionFunctions.getFor(direction);
             return Optional.of((BlockState) blockState.withProperty(BlockBanner.FACING, facing));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
@@ -71,7 +71,7 @@ public abstract class BlockBannerHangingMixin extends BlockBannerMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
-            final EnumFacing facing = DirectionResolver.getFor(direction);
+            final EnumFacing facing = Constants.DirectionFunctions.getFor(direction);
             return Optional.of((BlockState) blockState.withProperty(BlockBanner.FACING, facing));
         }
         return super.bridge$getStateWithValue(blockState, key, value);

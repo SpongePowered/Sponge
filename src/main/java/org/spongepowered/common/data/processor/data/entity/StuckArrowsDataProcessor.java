@@ -36,9 +36,9 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeStuckArrowsData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -73,7 +73,7 @@ public class StuckArrowsDataProcessor extends
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeBoundedValue<>(this.key, 0, value, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE);
+        return new ImmutableSpongeBoundedValue<>(this.key, 0, value, Constants.Functional.intComparator(), 0, Integer.MAX_VALUE);
     }
 
     @Override

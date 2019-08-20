@@ -419,7 +419,7 @@ public final class CommonModuleRegistry {
                 .registerModule(TextStyle.Base.class, new TextStyleRegistryModule())
                 .registerModule(TileEntityType.class, TileEntityTypeRegistryModule.getInstance())
                 .registerModule(ToolType.class, new ToolTypeRegistryModule())
-                .registerModule(TreeType.class, new TreeTypeRegistryModule())
+                .registerModule(TreeType.class, TreeTypeRegistryModule.getInstance())
                 .registerModule(Visibility.class, new VisibilityRegistryModule())
                 .registerModule(Statistic.class, StatisticRegistryModule.getInstance())
                 .registerModule(StatisticType.class, new StatisticTypeRegistryModule())

@@ -51,8 +51,6 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.DataVersions;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
@@ -121,7 +119,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
                     spongeCompound.removeTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
-            NbtDataUtil.filterSpongeCustomData(compound);
+            Constants.NBT.filterSpongeCustomData(compound);
             if (!compound.isEmpty()) {
                 this.compound = compound;
             } else {
@@ -197,7 +195,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public int getContentVersion() {
-        return DataVersions.ItemStackSnapshot.CURRENT_VERSION;
+        return Constants.Sponge.ItemStackSnapshot.CURRENT_VERSION;
     }
 
     @Override

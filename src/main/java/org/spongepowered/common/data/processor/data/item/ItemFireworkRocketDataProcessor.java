@@ -38,9 +38,9 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkRocketData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -91,12 +91,12 @@ public class ItemFireworkRocketDataProcessor
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer value) {
-        return new SpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE, value);
+        return new SpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, Constants.Functional.intComparator(), 0, Integer.MAX_VALUE, value);
     }
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, value, 0, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE);
+        return new ImmutableSpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, value, 0, Constants.Functional.intComparator(), 0, Integer.MAX_VALUE);
     }
 
 }

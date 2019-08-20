@@ -27,6 +27,7 @@ package org.spongepowered.common.data.processor.data.item;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -39,7 +40,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
@@ -69,7 +69,9 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            NbtDataUtil.removeLoreFromNBT(stack);
+            if(stack.getSubCompound(Constants.Item.ITEM_DISPLAY) != null) {
+                stack.getSubCompound(Constants.Item.ITEM_DISPLAY).removeTag(Constants.Item.ITEM_LORE);
+            }
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();
@@ -82,7 +84,8 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
 
     @Override
     protected boolean set(ItemStack itemStack, List<Text> value) {
-        NbtDataUtil.setLoreToNBT(itemStack, value);
+        final NBTTagList list =  SpongeTexts.asLegacy(value);
+        itemStack.getOrCreateSubCompound(Constants.Item.ITEM_DISPLAY).setTag(Constants.Item.ITEM_LORE, list); // setSubCompound
         return true;
     }
 
@@ -95,7 +98,8 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
         if (!subCompound.hasKey(Constants.Item.ITEM_LORE, Constants.NBT.TAG_LIST)) {
             return Optional.empty();
         }
-        return Optional.of(NbtDataUtil.getLoreFromNBT(subCompound));
+        final NBTTagList list = subCompound.getTagList(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
+        return Optional.of(SpongeTexts.fromNbtLegacy(list));
     }
 
     @Override

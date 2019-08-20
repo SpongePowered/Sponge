@@ -32,7 +32,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.play.server.SPacketServerDifficulty;
 import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
@@ -42,7 +41,6 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.PortalAgentTypes;
-import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -62,13 +60,11 @@ import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.FunctionalUtil;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
@@ -372,7 +368,8 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         final String dimensionTypeId = nbt.getString(Constants.Sponge.World.DIMENSION_TYPE);
         final DimensionType dimensionType = (org.spongepowered.api.world.DimensionType)(Object) WorldManager.getDimensionType(this.impl$dimensionId).orElse(null);
         this.bridge$setDimensionType(dimensionType != null ? dimensionType : DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)
-                .orElseThrow(FunctionalUtil.invalidArgument("Could not find a DimensionType registered for world '" + this.getWorldName() + "' with dim id: " + this.impl$dimensionId)));
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Could not find a DimensionType registered for world '" + this.getWorldName() + "' with dim id: " + this.impl$dimensionId)));
         this.impl$generateBonusChest = nbt.getBoolean(Constants.World.GENERATE_BONUS_CHEST);
         this.impl$portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(nbt.getString(Constants.Sponge.World.PORTAL_AGENT_TYPE), this.levelName);
         this.impl$hasCustomDifficulty = nbt.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);

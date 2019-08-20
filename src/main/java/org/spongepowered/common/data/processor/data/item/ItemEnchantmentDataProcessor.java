@@ -27,7 +27,10 @@ package org.spongepowered.common.data.processor.data.item;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -37,14 +40,15 @@ import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class ItemEnchantmentDataProcessor
@@ -60,31 +64,56 @@ public class ItemEnchantmentDataProcessor
     }
 
     @Override
-    protected boolean set(ItemStack itemStack, List<Enchantment> value) {
-        NbtDataUtil.setItemEnchantments(itemStack, value);
+    protected boolean set(final ItemStack itemStack, final List<Enchantment> value) {
+        final NBTTagCompound compound;
+        if (itemStack.getTagCompound() == null) {
+            compound = new NBTTagCompound();
+            itemStack.setTagCompound(compound);
+        } else {
+            compound = itemStack.getTagCompound();
+        }
+
+        if (value.isEmpty()) { // if there's no enchantments, remove the tag that says there's enchantments
+            compound.removeTag(Constants.Item.ITEM_ENCHANTMENT_LIST);
+        } else {
+            final Map<EnchantmentType, Integer> valueMap = Maps.newLinkedHashMap();
+            for (final Enchantment enchantment : value) { // convert ItemEnchantment to map
+                valueMap.put(enchantment.getType(), enchantment.getLevel());
+            }
+            final NBTTagList newList = new NBTTagList(); // construct the enchantment list
+            for (final Map.Entry<EnchantmentType, Integer> entry : valueMap.entrySet()) {
+                final NBTTagCompound enchantmentCompound = new NBTTagCompound();
+                enchantmentCompound.setShort(Constants.Item.ITEM_ENCHANTMENT_ID,
+                    (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
+                enchantmentCompound.setShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
+                newList.appendTag(enchantmentCompound);
+            }
+            compound.setTag(Constants.Item.ITEM_ENCHANTMENT_LIST, newList);
+        }
+
         return true;
     }
 
     @Override
-    protected Optional<List<Enchantment>> getVal(ItemStack itemStack) {
+    protected Optional<List<Enchantment>> getVal(final ItemStack itemStack) {
         if (itemStack.isItemEnchanted()) {
-            return Optional.of(NbtDataUtil.getItemEnchantments(itemStack));
+            return Optional.of(Constants.NBT.getItemEnchantments(itemStack));
         }
         return Optional.empty();
     }
 
     @Override
-    protected ListValue<Enchantment> constructValue(List<Enchantment> actualValue) {
+    protected ListValue<Enchantment> constructValue(final List<Enchantment> actualValue) {
         return new SpongeListValue<>(Keys.ITEM_ENCHANTMENTS, actualValue);
     }
 
     @Override
-    protected ImmutableValue<List<Enchantment>> constructImmutableValue(List<Enchantment> value) {
+    protected ImmutableValue<List<Enchantment>> constructImmutableValue(final List<Enchantment> value) {
         return new ImmutableSpongeListValue<>(Keys.ITEM_ENCHANTMENTS, ImmutableList.copyOf(value));
     }
 
     @Override
-    public Optional<EnchantmentData> fill(DataContainer container, EnchantmentData enchantmentData) {
+    public Optional<EnchantmentData> fill(final DataContainer container, final EnchantmentData enchantmentData) {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
         final List<Enchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(), Enchantment.class).get();
         final ListValue<Enchantment> existing = enchantmentData.enchantments();
@@ -94,10 +123,10 @@ public class ItemEnchantmentDataProcessor
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (container instanceof ItemStack) {
-            ItemStack stack = (ItemStack) container;
-            Optional<List<Enchantment>> old = getVal(stack);
+            final ItemStack stack = (ItemStack) container;
+            final Optional<List<Enchantment>> old = getVal(stack);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }

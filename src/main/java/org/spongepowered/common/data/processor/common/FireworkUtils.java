@@ -38,7 +38,6 @@ import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeFireworkShape;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
@@ -46,6 +45,8 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class FireworkUtils {
 
@@ -57,7 +58,7 @@ public class FireworkUtils {
             .put((byte) 4, new SpongeFireworkShape("minecraft:burst", "Burst"))
             .build();
 
-    public static ItemStack getItem(EntityFireworkRocket firework) {
+    public static ItemStack getItem(final EntityFireworkRocket firework) {
         ItemStack item = firework.getDataManager().get(EntityFireworkRocket.FIREWORK_ITEM);
         if (item.isEmpty()) {
             item = (ItemStack) new SpongeItemStackBuilder().itemType(ItemTypes.FIREWORKS).build();
@@ -66,10 +67,17 @@ public class FireworkUtils {
         return item;
     }
 
-    public static FireworkEffect getChargeEffect(ItemStack item) {
+    @Nullable
+    public static FireworkEffect getChargeEffect(final ItemStack item) {
         Preconditions.checkArgument(item.getItem() == Items.FIREWORK_CHARGE, "Item is not a firework!"); // FIREWORK_CHARGE
-        NBTTagCompound firework = NbtDataUtil.getOrCreateCompound(item).getCompoundTag("Explosion");
-        if(firework == null) return null;
+        final NBTTagCompound tag = item.getTagCompound();
+        if (tag == null) {
+            return null;
+        }
+        final NBTTagCompound firework = tag.getCompoundTag(Constants.Entity.Firework.EXPLOSION);
+        if(firework.isEmpty()) {
+            return null;
+        }
 
         return fromNbt(firework);
     }
@@ -79,34 +87,34 @@ public class FireworkUtils {
         return shapeMapping.get(id);
     }
 
-    public static byte getShapeId(FireworkShape shape) {
+    public static byte getShapeId(final FireworkShape shape) {
         return shapeMapping.inverse().get(shape);
     }
 
-    public static FireworkEffect fromNbt(NBTTagCompound effectNbt) {
-        FireworkEffect.Builder builder = new SpongeFireworkEffectBuilder();
-        if(effectNbt.hasKey("Flicker")) {
-            builder.flicker(effectNbt.getBoolean("Flicker"));
+    public static FireworkEffect fromNbt(final NBTTagCompound effectNbt) {
+        final FireworkEffect.Builder builder = new SpongeFireworkEffectBuilder();
+        if (effectNbt.hasKey(Constants.Item.Fireworks.FLICKER)) {
+            builder.flicker(effectNbt.getBoolean(Constants.Item.Fireworks.FLICKER));
         }
-        if(effectNbt.hasKey("Trail")) {
-            builder.trail(effectNbt.getBoolean("Trail"));
+        if (effectNbt.hasKey(Constants.Item.Fireworks.TRAIL)) {
+            builder.trail(effectNbt.getBoolean(Constants.Item.Fireworks.TRAIL));
         }
-        if(effectNbt.hasKey("Type")) {
-            byte type = effectNbt.getByte("Type");
+        if (effectNbt.hasKey(Constants.Item.Fireworks.SHAPE_TYPE)) {
+            final byte type = effectNbt.getByte(Constants.Item.Fireworks.SHAPE_TYPE);
             builder.shape(getShape(type));
         }
-        if(effectNbt.hasKey("Colors")) {
-            List<Color> colors = Lists.newArrayList();
-            int[] colorsRaw = effectNbt.getIntArray("Colors");
-            for(int color : colorsRaw) {
+        if (effectNbt.hasKey(Constants.Item.Fireworks.COLORS)) {
+            final List<Color> colors = Lists.newArrayList();
+            final int[] colorsRaw = effectNbt.getIntArray(Constants.Item.Fireworks.COLORS);
+            for(final int color : colorsRaw) {
                 colors.add(Color.ofRgb(color));
             }
             builder.colors(colors);
         }
-        if(effectNbt.hasKey("FadeColors")) {
-            List<Color> fades = Lists.newArrayList();
-            int[] fadesRaw = effectNbt.getIntArray("FadeColors");
-            for(int fade : fadesRaw) {
+        if (effectNbt.hasKey(Constants.Item.Fireworks.FADE_COLORS)) {
+            final List<Color> fades = Lists.newArrayList();
+            final int[] fadesRaw = effectNbt.getIntArray(Constants.Item.Fireworks.FADE_COLORS);
+            for(final int fade : fadesRaw) {
                 fades.add(Color.ofRgb(fade));
             }
             builder.fades(fades);
@@ -115,28 +123,28 @@ public class FireworkUtils {
         return builder.build();
     }
 
-    public static NBTTagCompound toNbt(FireworkEffect effect) {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setBoolean("Flicker", effect.flickers());
-        tag.setBoolean("Trail", effect.hasTrail());
-        tag.setByte("Type", getShapeId(effect.getShape()));
-        int[] colorsArray = new int[effect.getColors().size()];
-        List<Color> colors = effect.getColors();
+    public static NBTTagCompound toNbt(final FireworkEffect effect) {
+        final NBTTagCompound tag = new NBTTagCompound();
+        tag.setBoolean(Constants.Item.Fireworks.FLICKER, effect.flickers());
+        tag.setBoolean(Constants.Item.Fireworks.TRAIL, effect.hasTrail());
+        tag.setByte(Constants.Item.Fireworks.SHAPE_TYPE, getShapeId(effect.getShape()));
+        final int[] colorsArray = new int[effect.getColors().size()];
+        final List<Color> colors = effect.getColors();
         for (int i = 0; i < colors.size(); i++) {
             colorsArray[i] = colors.get(i).getRgb();
         }
-        tag.setIntArray("Colors", colorsArray);
-        int[] fadeArray = new int[effect.getFadeColors().size()];
-        List<Color> fades = effect.getFadeColors();
+        tag.setIntArray(Constants.Item.Fireworks.COLORS, colorsArray);
+        final int[] fadeArray = new int[effect.getFadeColors().size()];
+        final List<Color> fades = effect.getFadeColors();
         for (int i = 0; i < fades.size(); i++) {
             fadeArray[i] = fades.get(i).getRgb();
         }
-        tag.setIntArray("FadeColors", fadeArray);
+        tag.setIntArray(Constants.Item.Fireworks.FADE_COLORS, fadeArray);
 
         return tag;
     }
 
-    public static boolean setFireworkEffects(Object object, List<FireworkEffect> effects) {
+    public static boolean setFireworkEffects(final Object object, final List<? extends FireworkEffect> effects) {
         ItemStack item = ItemStack.EMPTY;
         if(object instanceof ItemStack) {
             item = (ItemStack) object;
@@ -147,24 +155,28 @@ public class FireworkUtils {
         if(item.isEmpty()) return false;
 
         if(item.getItem() == Items.FIREWORK_CHARGE) {
-            if(effects.size() != 0) {
-                NbtDataUtil.getOrCreateCompound(item).setTag("Explosion", toNbt(effects.get(0)));
+            final NBTTagCompound tag = item.getTagCompound();
+            if (tag == null) {
+                return true;
+            }
+            if(!effects.isEmpty()) {
+                tag.setTag(Constants.Entity.Firework.EXPLOSION, toNbt(effects.get(0)));
             } else {
-                NbtDataUtil.getOrCreateCompound(item).removeTag("Explosion");
+                tag.removeTag(Constants.Entity.Firework.EXPLOSION);
             }
             return true;
         } else if(item.getItem() == Items.FIREWORKS) {
-            NBTTagList nbtEffects = new NBTTagList();
+            final NBTTagList nbtEffects = new NBTTagList();
             effects.stream().map(FireworkUtils::toNbt).forEach(nbtEffects::appendTag);
 
-            NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
-            fireworks.setTag("Explosions", nbtEffects);
+            final NBTTagCompound fireworks = item.getOrCreateSubCompound(Constants.Item.Fireworks.FIREWORKS);
+            fireworks.setTag(Constants.Item.Fireworks.EXPLOSIONS, nbtEffects);
             return true;
         }
         return false;
     }
 
-    public static Optional<List<FireworkEffect>> getFireworkEffects(Object object) {
+    public static Optional<List<FireworkEffect>> getFireworkEffects(final Object object) {
         ItemStack item = ItemStack.EMPTY;
         if(object instanceof ItemStack) {
             item = (ItemStack) object;
@@ -174,19 +186,19 @@ public class FireworkUtils {
         }
         if(item.isEmpty()) return Optional.empty();
 
-        List<FireworkEffect> effects;
+        final List<FireworkEffect> effects;
         if(item.getItem() == Items.FIREWORKS) {
-            NBTTagCompound fireworks = item.getSubCompound("Fireworks");
-            if(fireworks == null || !fireworks.hasKey("Explosions")) return Optional.empty();
+            final NBTTagCompound fireworks = item.getSubCompound(Constants.Item.Fireworks.FIREWORKS);
+            if(fireworks == null || !fireworks.hasKey(Constants.Item.Fireworks.EXPLOSIONS)) return Optional.empty();
 
-            NBTTagList effectsNbt = fireworks.getTagList("Explosions", Constants.NBT.TAG_COMPOUND);
+            final NBTTagList effectsNbt = fireworks.getTagList(Constants.Item.Fireworks.EXPLOSIONS, Constants.NBT.TAG_COMPOUND);
             effects = Lists.newArrayList();
             for(int i = 0; i < effectsNbt.tagCount(); i++) {
-                NBTTagCompound effectNbt = effectsNbt.getCompoundTagAt(i);
+                final NBTTagCompound effectNbt = effectsNbt.getCompoundTagAt(i);
                 effects.add(fromNbt(effectNbt));
             }
         } else {
-            FireworkEffect effect = FireworkUtils.getChargeEffect(item);
+            final FireworkEffect effect = FireworkUtils.getChargeEffect(item);
             if(effect == null) return Optional.empty();
             effects = ImmutableList.of(effect);
         }
@@ -194,7 +206,7 @@ public class FireworkUtils {
         return Optional.of(effects);
     }
 
-    public static boolean removeFireworkEffects(Object object) {
+    public static boolean removeFireworkEffects(final Object object) {
         ItemStack item = ItemStack.EMPTY;
         if(object instanceof ItemStack) {
             item = (ItemStack) object;
@@ -205,11 +217,15 @@ public class FireworkUtils {
         if(item.isEmpty()) return false;
 
         if(item.getItem() == Items.FIREWORK_CHARGE) {
-            NbtDataUtil.getOrCreateCompound(item).removeTag("Explosion");
+            final NBTTagCompound tag = item.getTagCompound();
+            if (tag == null) {
+                return true;
+            }
+            tag.removeTag(Constants.Entity.Firework.EXPLOSION);
             return true;
         } else if(item.getItem() == Items.FIREWORKS) {
-            NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
-            fireworks.removeTag("Explosions");
+            final NBTTagCompound fireworks = item.getOrCreateSubCompound(Constants.Item.Fireworks.FIREWORKS);
+            fireworks.removeTag(Constants.Item.Fireworks.EXPLOSIONS);
             return true;
         }
 

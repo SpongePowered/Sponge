@@ -35,10 +35,10 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
-import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.entity.projectile.ShulkerBulletEntityAccessor;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -54,7 +54,7 @@ public class ShulkerBulletDirectionalDataProcessor extends AbstractSingleDataSin
         if (value == Direction.NONE) {
             dataHolder.accessor$setDirection(null);
         } else {
-            dataHolder.accessor$setDirection(DirectionResolver.getFor(value));
+            dataHolder.accessor$setDirection(Constants.DirectionFunctions.getFor(value));
         }
         return true;
     }
@@ -62,7 +62,7 @@ public class ShulkerBulletDirectionalDataProcessor extends AbstractSingleDataSin
     @Override
     protected Optional<Direction> getVal(ShulkerBulletEntityAccessor dataHolder) {
         final EnumFacing direction = dataHolder.accessor$getDirection();
-        return Optional.of(direction != null ? DirectionResolver.getFor(direction) : Direction.NONE);
+        return Optional.of(direction != null ? Constants.DirectionFunctions.getFor(direction) : Direction.NONE);
     }
 
     @Override

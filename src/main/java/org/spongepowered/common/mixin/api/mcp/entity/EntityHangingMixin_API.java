@@ -35,8 +35,8 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 
@@ -49,12 +49,12 @@ public abstract class EntityHangingMixin_API extends EntityMixin_API implements 
 
     @Override
     public DirectionalData getDirectionalData() {
-        return new SpongeDirectionalData(this.facingDirection == null ? Direction.NONE : DirectionResolver.getFor(this.facingDirection));
+        return new SpongeDirectionalData(this.facingDirection == null ? Direction.NONE : Constants.DirectionFunctions.getFor(this.facingDirection));
     }
 
     @Override
     public Value<Direction> direction() {
-        return new SpongeValue<>(Keys.DIRECTION, this.facingDirection == null ? Direction.NONE : DirectionResolver.getFor(this.facingDirection));
+        return new SpongeValue<>(Keys.DIRECTION, this.facingDirection == null ? Direction.NONE : Constants.DirectionFunctions.getFor(this.facingDirection));
     }
 
     @Override

@@ -30,12 +30,12 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCooldownData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
-import org.spongepowered.common.data.util.ComparatorUtil;
+import org.spongepowered.common.util.Constants;
 
 public class SpongeCooldownData extends AbstractBoundedComparableData<Integer, CooldownData, ImmutableCooldownData> implements CooldownData {
 
     public SpongeCooldownData(int value) {
-        super(CooldownData.class, value, Keys.COOLDOWN, ComparatorUtil.intComparator(), ImmutableSpongeCooldownData.class, 0, Integer.MAX_VALUE, 0);
+        super(CooldownData.class, value, Keys.COOLDOWN, Constants.Functional.intComparator(), ImmutableSpongeCooldownData.class, 0, Integer.MAX_VALUE, 0);
     }
 
     public SpongeCooldownData() {

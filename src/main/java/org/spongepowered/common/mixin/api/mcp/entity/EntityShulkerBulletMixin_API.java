@@ -37,8 +37,8 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 
@@ -55,12 +55,12 @@ public abstract class EntityShulkerBulletMixin_API extends EntityMixin_API imple
 
     @Override
     public DirectionalData getDirectionalData() {
-        return new SpongeDirectionalData( this.direction != null ? DirectionResolver.getFor(this.direction) : Direction.NONE);
+        return new SpongeDirectionalData( this.direction != null ? Constants.DirectionFunctions.getFor(this.direction) : Direction.NONE);
     }
 
     @Override
     public Value<Direction> direction() {
-        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, this.direction != null ? DirectionResolver.getFor(this.direction) : Direction.NONE);
+        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, this.direction != null ? Constants.DirectionFunctions.getFor(this.direction) : Direction.NONE);
     }
 
     @Override

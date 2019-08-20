@@ -39,7 +39,7 @@ import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
-import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,7 +59,7 @@ public class ImmutableItemEnchantmentDataBuilder extends AbstractDataBuilder<Imm
     public Optional<ImmutableEnchantmentData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
             if (((ItemStack) dataHolder).isItemEnchanted()) {
-                final List<Enchantment> enchantments = NbtDataUtil.getItemEnchantments((ItemStack) dataHolder);
+                final List<Enchantment> enchantments = Constants.NBT.getItemEnchantments((ItemStack) dataHolder);
                 return Optional.of(new ImmutableSpongeEnchantmentData(enchantments));
             }
         }

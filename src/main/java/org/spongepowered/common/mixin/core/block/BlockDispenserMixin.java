@@ -60,11 +60,11 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
-import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +94,8 @@ public abstract class BlockDispenserMixin extends BlockMixin {
     @Override
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirectionalData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDispenser.FACING, DirectionResolver.getFor(((ImmutableDirectionalData) manipulator).direction().get())));
+            return Optional.of((BlockState) blockState.withProperty(BlockDispenser.FACING, Constants.DirectionFunctions
+                .getFor(((ImmutableDirectionalData) manipulator).direction().get())));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -102,14 +103,14 @@ public abstract class BlockDispenserMixin extends BlockMixin {
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DIRECTION)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDispenser.FACING, DirectionResolver.getFor((Direction) value)));
+            return Optional.of((BlockState) blockState.withProperty(BlockDispenser.FACING, Constants.DirectionFunctions.getFor((Direction) value)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockDispenser.FACING)));
+                Constants.DirectionFunctions.getFor(blockState.getValue(BlockDispenser.FACING)));
     }
 
     @Inject(method = "dispense", at = @At(value = "HEAD"))

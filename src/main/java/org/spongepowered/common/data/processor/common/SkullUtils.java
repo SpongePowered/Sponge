@@ -62,13 +62,6 @@ public class SkullUtils {
         return container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.SKULL);
     }
 
-    public static void setSkullType(final TileEntitySkull tileEntitySkull, final int skullType) {
-        tileEntitySkull.setType(skullType);
-        tileEntitySkull.markDirty();
-        tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
-                .getBlockState(tileEntitySkull.getPos()), 3);
-    }
-
     public static boolean setProfile(final TileEntitySkull tileEntitySkull, @Nullable final GameProfile profile) {
         if (SkullUtils.getSkullType(tileEntitySkull.getSkullType()).equals(SkullTypes.PLAYER)) {
             final GameProfile newProfile = SpongeRepresentedPlayerData.NULL_PROFILE.equals(profile) ? null : resolveProfileIfNecessary(profile);

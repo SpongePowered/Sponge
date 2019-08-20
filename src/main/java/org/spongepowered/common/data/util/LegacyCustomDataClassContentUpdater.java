@@ -36,12 +36,12 @@ public class LegacyCustomDataClassContentUpdater implements DataContentUpdater {
 
     @Override
     public int getInputVersion() {
-        return DataVersions.Data.CLASS_BASED_CUSTOM_DATA;
+        return Constants.Sponge.CLASS_BASED_CUSTOM_DATA;
     }
 
     @Override
     public int getOutputVersion() {
-        return DataVersions.Data.CUSTOM_DATA_WITH_DATA_IDS;
+        return Constants.Sponge.CUSTOM_DATA_WITH_DATA_IDS;
     }
 
     @SuppressWarnings("deprecation")

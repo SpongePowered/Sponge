@@ -100,6 +100,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
@@ -333,18 +334,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         }
         final net.minecraft.tileentity.TileEntity tile = chunk.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
         if (tile != null) {
-            for (final DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).bridge$getCustomManipulators()) {
-                builder.add(manipulator);
-            }
-            final NBTTagCompound nbt = new NBTTagCompound();
-            // Some mods like OpenComputers assert if attempting to save robot while moving
-            try {
-                tile.writeToNBT(nbt);
-                builder.unsafeNbt(nbt);
-            }
-            catch(Throwable t) {
-                // ignore
-            }
+            TrackingUtil.addTileEntityToBuilder(tile, builder);
         }
         ((ChunkBridge) chunk).bridge$getBlockOwnerUUID(pos).ifPresent(builder::creator);
         ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos).ifPresent(builder::notifier);

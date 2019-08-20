@@ -49,8 +49,7 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeOpenData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
-import org.spongepowered.common.data.util.DirectionChecker;
-import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -84,8 +83,8 @@ public abstract class BlockDoorMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(BlockDoor.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
-            final Direction dir = DirectionChecker.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.FACING, DirectionResolver.getFor(dir)));
+            final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
+            return Optional.of((BlockState) blockState.withProperty(BlockDoor.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         if (manipulator instanceof ImmutablePortionData) {
             return Optional.of((BlockState) blockState.withProperty(BlockDoor.HALF,
@@ -108,8 +107,8 @@ public abstract class BlockDoorMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(BlockDoor.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.DIRECTION)) {
-            final Direction dir = DirectionChecker.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.FACING, DirectionResolver.getFor(dir)));
+            final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
+            return Optional.of((BlockState) blockState.withProperty(BlockDoor.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
             return Optional.of((BlockState) blockState.withProperty(BlockDoor.HALF, impl$convertPortionType((PortionType) value)));
@@ -135,7 +134,7 @@ public abstract class BlockDoorMixin extends BlockMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockDoor.FACING)));
+                Constants.DirectionFunctions.getFor(blockState.getValue(BlockDoor.FACING)));
     }
 
     private ImmutablePortionData impl$getPortionData(final IBlockState blockState) {

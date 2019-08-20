@@ -42,7 +42,7 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
-import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -69,12 +69,12 @@ public abstract class BlockLeverMixin extends BlockMixin {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
             final Axis axis = this.impl$getAxisFromOrientation(blockState.getValue(BlockLever.FACING));
-            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
+            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         if (manipulator instanceof ImmutableAxisData) {
             final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
-            final Direction dir = DirectionResolver.getFor(blockState.getValue(BlockLever.FACING));
-            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
+            final Direction dir = Constants.DirectionFunctions.getFor(blockState.getValue(BlockLever.FACING));
+            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -87,12 +87,12 @@ public abstract class BlockLeverMixin extends BlockMixin {
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
             final Axis axis = this.impl$getAxisFromOrientation(blockState.getValue(BlockLever.FACING));
-            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
+            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         if (key.equals(Keys.AXIS)) {
             final Axis axis = (Axis) value;
-            final Direction dir = DirectionResolver.getFor(blockState.getValue(BlockLever.FACING));
-            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
+            final Direction dir = Constants.DirectionFunctions.getFor(blockState.getValue(BlockLever.FACING));
+            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -103,7 +103,7 @@ public abstract class BlockLeverMixin extends BlockMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         final BlockLever.EnumOrientation intDir = blockState.getValue(BlockLever.FACING);
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, DirectionResolver.getFor(intDir));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, Constants.DirectionFunctions.getFor(intDir));
     }
 
     private ImmutableAxisData impl$getAxisData(final IBlockState blockState) {

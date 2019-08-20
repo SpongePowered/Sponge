@@ -38,7 +38,7 @@ import org.spongepowered.api.util.Axis;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
-import org.spongepowered.common.data.util.DirectionChecker;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -60,7 +60,7 @@ public abstract class BlockHayMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableAxisData) {
             final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockRotatedPillar.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.withProperty(BlockRotatedPillar.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -69,13 +69,13 @@ public abstract class BlockHayMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.AXIS)) {
             final Axis axis = (Axis) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockRotatedPillar.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.withProperty(BlockRotatedPillar.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableAxisData impl$getAxisData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
-                DirectionChecker.convertAxisToSponge(blockState.getValue(BlockRotatedPillar.AXIS)));
+                Constants.DirectionFunctions.convertAxisToSponge(blockState.getValue(BlockRotatedPillar.AXIS)));
     }
 }

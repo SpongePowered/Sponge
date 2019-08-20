@@ -38,7 +38,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.util.EntityDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -65,7 +64,15 @@ public class RepresentedItemDataProcessor extends
 
     @Override
     protected Optional<ItemStackSnapshot> getVal(Entity container) {
-        return EntityDataUtil.getRepresentedItemFrom(container);
+        if (container instanceof EntityItemFrame) {
+            final ItemStack itemStack = ((EntityItemFrame) container).getDisplayedItem();
+            if (!itemStack.isEmpty()) {
+                return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot());
+            }
+        } else if (container instanceof EntityItem) {
+            return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) ((EntityItem) container).getItem()).createSnapshot());
+        }
+        return Optional.empty();
     }
 
     @Override

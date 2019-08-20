@@ -32,8 +32,8 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeInvisibilityData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 public class SpongeInvisibilityData extends AbstractData<InvisibilityData, ImmutableInvisibilityData> implements InvisibilityData {
 
@@ -96,7 +96,7 @@ public class SpongeInvisibilityData extends AbstractData<InvisibilityData, Immut
 
     @Override
     public int getContentVersion() {
-        return DataVersions.Data.INVISIBILITY_DATA_WITH_VANISH;
+        return Constants.Sponge.InvisibilityData.INVISIBILITY_DATA_WITH_VANISH;
     }
 
     @Override

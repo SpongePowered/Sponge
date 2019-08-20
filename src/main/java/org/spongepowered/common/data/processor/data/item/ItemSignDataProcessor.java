@@ -44,7 +44,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
@@ -60,11 +59,11 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
     }
 
     @Override
-    protected Optional<List<Text>> getVal(ItemStack itemStack) {
-        if (!itemStack.hasTagCompound()) {
+    protected Optional<List<Text>> getVal(final ItemStack itemStack) {
+        final NBTTagCompound mainCompound = itemStack.getTagCompound();
+        if (mainCompound == null) {
             return Optional.empty();
         }
-        final NBTTagCompound mainCompound = itemStack.getTagCompound();
         if (!mainCompound.hasKey(Constants.Item.BLOCK_ENTITY_TAG, Constants.NBT.TAG_COMPOUND)
                 || !mainCompound.getCompoundTag(Constants.Item.BLOCK_ENTITY_TAG).hasKey(Constants.Item.BLOCK_ENTITY_ID)) {
             return Optional.empty();
@@ -82,7 +81,7 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
     }
 
     @Override
-    public Optional<SignData> fill(DataContainer container, SignData signData) {
+    public Optional<SignData> fill(final DataContainer container, final SignData signData) {
         if (!container.contains(Keys.SIGN_LINES.getQuery())) {
             return Optional.empty();
         }
@@ -97,7 +96,7 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
 
             } else {
                 int lineNum = 0;
-                for (String line : lines) {
+                for (final String line : lines) {
                     if (lineNum >= 4) {
                         break;
                     }
@@ -105,52 +104,53 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
                     textLines.add(TextSerializers.JSON.deserialize(line));
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new InvalidDataException("Could not translate text json lines", e);
         }
         return Optional.of(signData.set(Keys.SIGN_LINES, textLines));
     }
 
     @Override
-    protected boolean set(ItemStack itemStack, List<Text> lines) {
-        final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(itemStack);
-        final NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, Constants.Item.BLOCK_ENTITY_TAG);
-        tileCompound.setString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
+    protected boolean set(final ItemStack itemStack, final List<Text> lines) {
+        final NBTTagCompound signCompound = itemStack.getOrCreateSubCompound(Constants.Item.BLOCK_ENTITY_TAG);
+        signCompound.setString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
         for (int i = 0; i < 4; i++) {
-            Text line = lines.size() > i ? lines.get(i) : Text.EMPTY;
+            final Text line = lines.size() > i ? lines.get(i) : Text.EMPTY;
             if (line == null) {
                 throw new IllegalArgumentException("A null line was given at index " + i);
             }
-            tileCompound.setString("Text" + (i + 1), TextSerializers.JSON.serialize(line));
+            signCompound.setString("Text" + (i + 1), TextSerializers.JSON.serialize(line));
         }
         return true;
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (!supports(container)) {
             return DataTransactionResult.failNoData();
         }
-        ItemStack itemStack = (ItemStack) container;
-        Optional<List<Text>> old = getVal(itemStack);
+        final ItemStack itemStack = (ItemStack) container;
+        final Optional<List<Text>> old = getVal(itemStack);
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
         try {
-            NbtDataUtil.getItemCompound(itemStack).get().removeTag(Constants.Item.BLOCK_ENTITY_TAG);
+            if (itemStack.hasTagCompound()) {
+                itemStack.getTagCompound().removeTag(Constants.Item.BLOCK_ENTITY_TAG);
+            }
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
         }
     }
 
     @Override
-    protected ListValue<Text> constructValue(List<Text> defaultValue) {
+    protected ListValue<Text> constructValue(final List<Text> defaultValue) {
         return new SpongeListValue<>(Keys.SIGN_LINES, defaultValue);
     }
 
     @Override
-    protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
+    protected ImmutableValue<List<Text>> constructImmutableValue(final List<Text> value) {
         return new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(value));
     }
 

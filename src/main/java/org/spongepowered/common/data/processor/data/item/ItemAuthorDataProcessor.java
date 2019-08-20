@@ -26,6 +26,7 @@ package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
@@ -37,7 +38,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.text.SpongeTexts;
@@ -52,7 +52,7 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
@@ -62,13 +62,13 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
     }
 
     @Override
-    protected boolean set(ItemStack itemStack, Text value) {
-        NbtDataUtil.getOrCreateCompound(itemStack).setString(Constants.Item.Book.ITEM_BOOK_AUTHOR, SpongeTexts.toLegacy(value));
+    protected boolean set(final ItemStack itemStack, final Text value) {
+        itemStack.setTagInfo(Constants.Item.Book.ITEM_BOOK_AUTHOR, new NBTTagString(SpongeTexts.toLegacy(value)));
         return true;
     }
 
     @Override
-    protected Optional<Text> getVal(ItemStack itemStack) {
+    protected Optional<Text> getVal(final ItemStack itemStack) {
         if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(Constants.Item.Book.ITEM_BOOK_AUTHOR)) {
             return Optional.empty();
         }
@@ -78,12 +78,12 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
     }
 
     @Override
-    protected Value<Text> constructValue(Text actualValue) {
+    protected Value<Text> constructValue(final Text actualValue) {
         return new SpongeValue<>(Keys.BOOK_AUTHOR, Text.of(), actualValue);
     }
 
     @Override
-    protected ImmutableValue<Text> constructImmutableValue(Text value) {
+    protected ImmutableValue<Text> constructImmutableValue(final Text value) {
         return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Text.of(), value);
     }
 

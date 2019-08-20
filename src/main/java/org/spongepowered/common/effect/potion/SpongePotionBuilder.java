@@ -35,7 +35,6 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -49,7 +48,7 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
     private boolean showParticles;
 
     public SpongePotionBuilder() {
-        super(PotionEffect.class, DataVersions.Potion.CURRENT_VERSION);
+        super(PotionEffect.class, Constants.Sponge.Potion.CURRENT_VERSION);
     }
 
     @Override

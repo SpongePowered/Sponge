@@ -36,7 +36,6 @@ import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionEffectData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
-import org.spongepowered.common.data.util.PotionUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.mixin.core.entity.projectile.EntityTippedArrowAccessor;
@@ -57,7 +56,10 @@ public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTarg
     protected boolean set(final EntityTippedArrow dataHolder, final List<PotionEffect> value) {
         ((EntityTippedArrowAccessor) dataHolder).accessor$getCustomPotionEffects().clear();
         for (final PotionEffect effect : value) {
-            final net.minecraft.potion.PotionEffect mcEffect = PotionUtil.copyToNative(effect);
+            final net.minecraft.potion.PotionEffect mcEffect =
+                new net.minecraft.potion.PotionEffect(((net.minecraft.potion.PotionEffect) effect).getPotion(), effect.getDuration(),
+                    effect.getAmplifier(), effect.isAmbient(),
+                    effect.getShowParticles());
             dataHolder.addEffect(mcEffect);
         }
         return false;
@@ -71,7 +73,9 @@ public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTarg
         }
         final List<PotionEffect> apiEffects = new ArrayList<>();
         for (final net.minecraft.potion.PotionEffect potionEffect : effects) {
-            apiEffects.add(PotionUtil.copyToApi(potionEffect));
+            apiEffects.add((PotionEffect) new net.minecraft.potion.PotionEffect(potionEffect.getPotion(), potionEffect.getDuration(),
+                potionEffect.getAmplifier(),
+                potionEffect.getIsAmbient(), potionEffect.doesShowParticles()));
         }
         return Optional.of(apiEffects);
     }

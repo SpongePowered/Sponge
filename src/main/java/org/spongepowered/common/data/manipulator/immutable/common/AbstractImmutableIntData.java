@@ -29,7 +29,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.common.data.util.ComparatorUtil;
+import org.spongepowered.common.util.Constants;
 
 public abstract class AbstractImmutableIntData<I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
     extends AbstractImmutableBoundedComparableData<Integer, I, M> {
@@ -37,7 +37,7 @@ public abstract class AbstractImmutableIntData<I extends ImmutableDataManipulato
     public AbstractImmutableIntData(Class<I> immutableClass, int value,
         Key<? extends BaseValue<Integer>> usedKey,
         Class<? extends M> mutableClass, int lowerBound, int upperBound, int defaultValue) {
-        super(immutableClass, value, usedKey, ComparatorUtil.intComparator(), mutableClass, lowerBound, upperBound, defaultValue);
+        super(immutableClass, value, usedKey, Constants.Functional.intComparator(), mutableClass, lowerBound, upperBound, defaultValue);
     }
 
     @Override

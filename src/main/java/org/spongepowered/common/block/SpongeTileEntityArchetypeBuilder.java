@@ -48,7 +48,6 @@ import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -63,7 +62,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     DataContainer  tileData;      // This can be empty, but cannot be null.
 
     public SpongeTileEntityArchetypeBuilder() {
-        super(TileEntityArchetype.class, DataVersions.TileEntitArchetype.BASE_VERSION);
+        super(TileEntityArchetype.class, Constants.Sponge.TileEntityArchetype.BASE_VERSION);
     }
 
     @Override

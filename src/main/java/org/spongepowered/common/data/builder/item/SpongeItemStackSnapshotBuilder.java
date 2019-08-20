@@ -39,7 +39,6 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
@@ -52,7 +51,7 @@ import javax.annotation.Nullable;
 public class SpongeItemStackSnapshotBuilder extends AbstractDataBuilder<ItemStackSnapshot> implements DataBuilder<ItemStackSnapshot> {
 
     public SpongeItemStackSnapshotBuilder() {
-        super(ItemStackSnapshot.class, DataVersions.ItemStackSnapshot.CURRENT_VERSION);
+        super(ItemStackSnapshot.class, Constants.Sponge.ItemStackSnapshot.CURRENT_VERSION);
     }
 
     @Override

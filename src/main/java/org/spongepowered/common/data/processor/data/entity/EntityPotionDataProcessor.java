@@ -36,7 +36,6 @@ import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionEffectData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
-import org.spongepowered.common.data.util.PotionUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
@@ -56,7 +55,10 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
     protected boolean set(EntityLivingBase dataHolder, List<PotionEffect> value) {
         dataHolder.clearActivePotions();
         for (PotionEffect effect : value) {
-            net.minecraft.potion.PotionEffect mcEffect = PotionUtil.copyToNative(effect);
+            net.minecraft.potion.PotionEffect mcEffect =
+                new net.minecraft.potion.PotionEffect(((net.minecraft.potion.PotionEffect) effect).getPotion(), effect.getDuration(),
+                    effect.getAmplifier(), effect.isAmbient(),
+                    effect.getShowParticles());
             dataHolder.addPotionEffect(mcEffect);
         }
         return true;
@@ -70,7 +72,9 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
         }
         List<PotionEffect> apiEffects = new ArrayList<>();
         for (net.minecraft.potion.PotionEffect potionEffect : effects) {
-            apiEffects.add(PotionUtil.copyToApi(potionEffect));
+            apiEffects.add((PotionEffect) new net.minecraft.potion.PotionEffect(potionEffect.getPotion(), potionEffect.getDuration(),
+                potionEffect.getAmplifier(),
+                potionEffect.getIsAmbient(), potionEffect.doesShowParticles()));
         }
         return Optional.of(apiEffects);
     }

@@ -26,7 +26,7 @@ package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.data.processor.common.NoteUtils;
+import org.spongepowered.common.registry.type.NotePitchRegistryModule;
 
 public class SpongeNotePitch extends SpongeCatalogType implements NotePitch {
 
@@ -43,7 +43,8 @@ public class SpongeNotePitch extends SpongeCatalogType implements NotePitch {
 
     @Override
     public NotePitch cycleNext() {
-        return NoteUtils.getNext(this);
+        byte value = (byte) (((SpongeNotePitch) this).getByteId() + 1);
+        return NotePitchRegistryModule.getPitch(value); // Ensure wrapping at edge
     }
 
 }

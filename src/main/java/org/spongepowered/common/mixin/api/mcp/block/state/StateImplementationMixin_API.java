@@ -58,7 +58,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
@@ -346,7 +345,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @Override
     public int getContentVersion() {
-        return DataVersions.BlockState.STATE_AS_CATALOG_ID;
+        return Constants.Sponge.BlockState.STATE_AS_CATALOG_ID;
     }
 
     @Override

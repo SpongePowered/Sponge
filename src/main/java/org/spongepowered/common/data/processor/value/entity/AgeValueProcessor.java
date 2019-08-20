@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
+import static org.spongepowered.common.util.Constants.Functional.intComparator;
 
 import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.DataTransactionResult;

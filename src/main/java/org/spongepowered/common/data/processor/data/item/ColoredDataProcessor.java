@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
@@ -35,10 +36,10 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.ColorUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -49,24 +50,27 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (supports(container)) {
-            ItemStack stack = (ItemStack) container;
-            Optional<Color> old = getVal(stack);
+            final ItemStack stack = (ItemStack) container;
+            final Optional<Color> old = getVal(stack);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
             if (!ColorUtil.hasColorInNbt(stack)) {
                 return DataTransactionResult.failNoData();
             }
-            NbtDataUtil.removeColorFromNBT(stack);
+            final NBTTagCompound display = stack.getSubCompound(Constants.Item.ITEM_DISPLAY);
+            if(display != null) {
+                display.removeTag(Constants.Item.ITEM_COLOR);
+            }
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected boolean set(ItemStack container, Color value) {
+    protected boolean set(final ItemStack container, final Color value) {
         if (!supports(container)) {
             return false;
         }
@@ -75,17 +79,17 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
     }
 
     @Override
-    protected Optional<Color> getVal(ItemStack container) {
+    protected Optional<Color> getVal(final ItemStack container) {
         return ColorUtil.getItemStackColor(container);
     }
 
     @Override
-    protected Value<Color> constructValue(Color actualValue) {
+    protected Value<Color> constructValue(final Color actualValue) {
         return new SpongeValue<>(Keys.COLOR, Color.BLACK, actualValue);
     }
 
     @Override
-    protected ImmutableValue<Color> constructImmutableValue(Color value) {
+    protected ImmutableValue<Color> constructImmutableValue(final Color value) {
         return ImmutableSpongeValue.cachedOf(Keys.COLOR, Color.BLACK, value);
     }
 

@@ -55,12 +55,12 @@ import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.SpongeNbtProcessorDelegate;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
-import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
+import org.spongepowered.common.util.Constants;
 
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -360,7 +360,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         // ValueProcessors
         this.tempRegistry.valueProcessorMap.forEach((key, value) -> {
             ImmutableList.Builder<ValueProcessor<?, ?>> valueListBuilder = ImmutableList.builder();
-            value.sort(ComparatorUtil.VALUE_PROCESSOR_COMPARATOR);
+            value.sort(Constants.Functional.VALUE_PROCESSOR_COMPARATOR);
             valueListBuilder.addAll(value);
             final ValueProcessorDelegate<?, ?> delegate = new ValueProcessorDelegate(key, valueListBuilder.build());
             this.valueDelegates.put(key, delegate);
@@ -368,7 +368,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         // DataProcessors
         this.tempRegistry.processorMap.forEach((key, value) -> {
             ImmutableList.Builder<DataProcessor<?, ?>> dataListBuilder = ImmutableList.builder();
-            value.sort(ComparatorUtil.DATA_PROCESSOR_COMPARATOR);
+            value.sort(Constants.Functional.DATA_PROCESSOR_COMPARATOR);
             dataListBuilder.addAll(value);
             final DataProcessorDelegate<?, ?> delegate = new DataProcessorDelegate(dataListBuilder.build());
             this.dataProcessorDelegates.put(key, delegate);
@@ -396,7 +396,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         // Immutable DataProcessors
         this.tempRegistry.immutableProcessorMap.forEach((key, value) -> {
             ImmutableList.Builder<DataProcessor<?, ?>> dataListBuilder = ImmutableList.builder();
-            value.sort(ComparatorUtil.DATA_PROCESSOR_COMPARATOR);
+            value.sort(Constants.Functional.DATA_PROCESSOR_COMPARATOR);
             dataListBuilder.addAll(value);
             final DataProcessorDelegate<?, ?> delegate = new DataProcessorDelegate(dataListBuilder.build());
             this.immutableDataProcessorDelegates.put(key, delegate);

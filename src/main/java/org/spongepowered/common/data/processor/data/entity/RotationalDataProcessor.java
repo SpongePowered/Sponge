@@ -34,9 +34,9 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.util.rotation.Rotations;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRotationalData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.processor.common.RotationalUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -51,13 +51,13 @@ public class RotationalDataProcessor
 
     @Override
     protected boolean set(EntityItemFrame entity, Rotation value) {
-        entity.setItemRotation(RotationalUtils.getItemRotation(value));
+        entity.setItemRotation(value.getAngle() / 45);
         return true;
     }
 
     @Override
     protected Optional<Rotation> getVal(EntityItemFrame entity) {
-        return Optional.of(RotationalUtils.getRotation(entity.getRotation()));
+        return Optional.of(SpongeImpl.getGame().getRegistry().getRotationFromDegree(entity.getRotation() * 45).get());
     }
 
     @Override

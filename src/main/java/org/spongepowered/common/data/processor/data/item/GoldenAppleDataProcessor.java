@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
+import com.google.common.collect.Iterables;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -35,11 +36,12 @@ import org.spongepowered.api.data.type.GoldenApples;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.processor.common.GoldenAppleUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.item.SpongeGoldenApple;
 
 import java.util.Optional;
 
@@ -57,13 +59,13 @@ public class GoldenAppleDataProcessor
 
     @Override
     protected boolean set(ItemStack itemStack, GoldenApple value) {
-        GoldenAppleUtils.setType(itemStack, value);
+        itemStack.setItemDamage(((SpongeGoldenApple) value).type);
         return true;
     }
 
     @Override
     protected Optional<GoldenApple> getVal(ItemStack itemStack) {
-        return Optional.of(GoldenAppleUtils.getType(itemStack));
+        return Optional.of(Iterables.get(SpongeImpl.getRegistry().getAllOf(GoldenApple.class), itemStack.getMetadata()));
     }
 
     @Override

@@ -43,8 +43,7 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeOpenData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
-import org.spongepowered.common.data.util.DirectionChecker;
-import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -78,8 +77,8 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.OPEN, isOpen));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
-            final Direction dir = DirectionChecker.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.FACING, DirectionResolver.getFor(dir)));
+            final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
+            return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -94,8 +93,8 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.OPEN, isOpen));
         }
         if (key.equals(Keys.DIRECTION)) {
-            final Direction dir = DirectionChecker.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.FACING, DirectionResolver.getFor(dir)));
+            final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
+            return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -111,7 +110,7 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockTrapDoor.FACING)));
+                Constants.DirectionFunctions.getFor(blockState.getValue(BlockTrapDoor.FACING)));
     }
 
     @SuppressWarnings("ConstantConditions")

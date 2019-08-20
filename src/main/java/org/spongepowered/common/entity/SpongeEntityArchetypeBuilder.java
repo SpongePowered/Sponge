@@ -43,7 +43,6 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -55,7 +54,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     NBTTagCompound compound;
 
     public SpongeEntityArchetypeBuilder() {
-        super(EntityArchetype.class, DataVersions.EntityArchetype.BASE_VERSION);
+        super(EntityArchetype.class, Constants.Sponge.EntityArchetype.BASE_VERSION);
     }
 
     @Override

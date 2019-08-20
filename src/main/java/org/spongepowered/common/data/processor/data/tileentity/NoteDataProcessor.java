@@ -38,9 +38,10 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeNoteData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
-import org.spongepowered.common.data.processor.common.NoteUtils;
+import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.registry.type.NotePitchRegistryModule;
 
 import java.util.Optional;
 
@@ -53,14 +54,14 @@ public class NoteDataProcessor
 
     @Override
     protected boolean set(TileEntityNote entity, NotePitch value) {
-        entity.note = NoteUtils.getPitch(checkNotNull(value));
+        entity.note = ((SpongeNotePitch) checkNotNull(value)).getByteId();
         entity.markDirty();
         return true;
     }
 
     @Override
     protected Optional<NotePitch> getVal(TileEntityNote entity) {
-        return Optional.of(NoteUtils.getPitch(entity.note));
+        return Optional.of(NotePitchRegistryModule.getPitch(entity.note));
     }
 
     @Override

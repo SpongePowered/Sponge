@@ -80,7 +80,6 @@ import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
@@ -550,7 +549,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         final Transform<World> transform = getTransform();
         final NBTTagCompound compound = new NBTTagCompound();
         writeToNBT(compound);
-        NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
+        Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())

@@ -44,8 +44,7 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeStairShapeData;
-import org.spongepowered.common.data.util.DirectionChecker;
-import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -77,8 +76,8 @@ public abstract class BlockStairsMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(BlockStairs.HALF, impl$convertType((BlockSlab.EnumBlockHalf) (Object) portionType)));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
-            final Direction dir = DirectionChecker.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.withProperty(BlockStairs.FACING, DirectionResolver.getFor(dir)));
+            final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
+            return Optional.of((BlockState) blockState.withProperty(BlockStairs.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -93,8 +92,8 @@ public abstract class BlockStairsMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(BlockStairs.HALF, impl$convertType((BlockSlab.EnumBlockHalf) value)));
         }
         if (key.equals(Keys.DIRECTION)) {
-            final Direction dir = DirectionChecker.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.withProperty(BlockStairs.FACING, DirectionResolver.getFor(dir)));
+            final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
+            return Optional.of((BlockState) blockState.withProperty(BlockStairs.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -112,7 +111,7 @@ public abstract class BlockStairsMixin extends BlockMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockStairs.FACING)));
+                Constants.DirectionFunctions.getFor(blockState.getValue(BlockStairs.FACING)));
     }
 
     @SuppressWarnings("ConstantConditions")

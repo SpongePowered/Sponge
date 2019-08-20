@@ -37,7 +37,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
-import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +54,7 @@ public abstract class BlockHorizontalMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
-            final EnumFacing facing = DirectionResolver.getFor(direction);
+            final EnumFacing facing = Constants.DirectionFunctions.getFor(direction);
             return Optional.of((BlockState) blockState.withProperty(BlockHorizontal.FACING, facing));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
@@ -64,7 +64,7 @@ public abstract class BlockHorizontalMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
-            final EnumFacing facing = DirectionResolver.getFor(direction);
+            final EnumFacing facing = Constants.DirectionFunctions.getFor(direction);
             return Optional.of((BlockState) blockState.withProperty(BlockHorizontal.FACING, facing));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
@@ -74,7 +74,7 @@ public abstract class BlockHorizontalMixin extends BlockMixin {
     public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
-                .add(new ImmutableSpongeDirectionalData(DirectionResolver.getFor(blockState.getValue(BlockHorizontal.FACING))))
+                .add(new ImmutableSpongeDirectionalData(Constants.DirectionFunctions.getFor(blockState.getValue(BlockHorizontal.FACING))))
                 .build();
     }
 }

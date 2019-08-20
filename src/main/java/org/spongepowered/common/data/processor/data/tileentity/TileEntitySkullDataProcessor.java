@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -54,39 +55,42 @@ public class TileEntitySkullDataProcessor
     }
 
     @Override
-    protected boolean supports(TileEntitySkull skull) {
+    protected boolean supports(final TileEntitySkull skull) {
         return SkullUtils.supportsObject(skull);
     }
 
     @Override
-    protected Optional<SkullType> getVal(TileEntitySkull skull) {
+    protected Optional<SkullType> getVal(final TileEntitySkull skull) {
         return Optional.of(SkullUtils.getSkullType(skull.getSkullType()));
     }
 
     @Override
-    public Optional<SkullData> fill(DataContainer container, SkullData skullData) {
+    public Optional<SkullData> fill(final DataContainer container, final SkullData skullData) {
         return Optional.of(skullData.set(Keys.SKULL_TYPE, SpongeImpl.getGame().getRegistry()
                 .getType(SkullType.class, DataUtil.getData(container, Keys.SKULL_TYPE, String.class)).get()));
     }
 
     @Override
-    protected boolean set(TileEntitySkull skull, SkullType type) {
-        SkullUtils.setSkullType(skull, ((SpongeSkullType) type).getByteId());
+    protected boolean set(final TileEntitySkull skull, final SkullType type) {
+        skull.setType(((SpongeSkullType) type).getByteId());
+        skull.markDirty();
+        final IBlockState blockState = skull.getWorld().getBlockState(skull.getPos());
+        skull.getWorld().notifyBlockUpdate(skull.getPos(), blockState, blockState, 3);
         return true;
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected Value<SkullType> constructValue(SkullType value) {
+    protected Value<SkullType> constructValue(final SkullType value) {
         return new SpongeValue<>(Keys.SKULL_TYPE, SkullTypes.SKELETON, value);
     }
 
     @Override
-    protected ImmutableValue<SkullType> constructImmutableValue(SkullType value) {
+    protected ImmutableValue<SkullType> constructImmutableValue(final SkullType value) {
         return ImmutableSpongeValue.cachedOf(Keys.SKULL_TYPE, SkullTypes.SKELETON, value);
     }
 

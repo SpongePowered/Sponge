@@ -30,18 +30,17 @@ import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
-import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.data.util.NbtDataUtil;
 
+import java.util.Locale;
 import java.util.Optional;
 
 public final class ColorUtil {
 
-    public static Optional<Color> getItemStackColor(ItemStack stack) {
+    public static Optional<Color> getItemStackColor(final ItemStack stack) {
         // Special case for armor: it has a special method
         final Item item = stack.getItem();
         if (item instanceof ItemArmor) {
@@ -52,17 +51,24 @@ public final class ColorUtil {
             final int color = ((ItemArmor) item).getColor(stack);
             return color == -1 ? Optional.empty() : Optional.of(Color.ofRgb(color));
         }
-        return NbtDataUtil.getItemCompound(stack).flatMap(NbtDataUtil::getColorFromNBT);
+        final NBTTagCompound compound = stack.getTagCompound();
+        if (compound == null) {
+            return Optional.empty();
+        }
+        if (!compound.hasKey(Constants.Item.ITEM_COLOR)) {
+            return Optional.empty();
+        }
+        return Optional.of(Color.ofRgb(compound.getInteger(Constants.Item.ITEM_COLOR)));
     }
 
-    public static int javaColorToMojangColor(Color color) {
+    public static int javaColorToMojangColor(final Color color) {
         checkNotNull(color);
         return (((color.getRed() << 8) + color.getGreen()) << 8) + color.getBlue();
     }
 
-    public static int dyeColorToMojangColor(DyeColor dyeColor) {
+    public static int dyeColorToMojangColor(final DyeColor dyeColor) {
         // For the dye
-        final float[] dyeRgbArray = EntitySheep.createSheepColor(EnumDyeColor.valueOf(dyeColor.getName().toUpperCase()));
+        final float[] dyeRgbArray = EntitySheep.createSheepColor(EnumDyeColor.valueOf(dyeColor.getName().toUpperCase(Locale.ENGLISH)));
 
         // Convert!
         final int trueRed = (int) (dyeRgbArray[0] * 255.0F);
@@ -73,17 +79,17 @@ public final class ColorUtil {
         return actualColor;
     }
 
-    public static Color fromDyeColor(DyeColor dyeColor) {
-        final float[] dyeRgbArray = EntitySheep.createSheepColor(EnumDyeColor.valueOf(dyeColor.getName().toUpperCase()));
+    public static Color fromDyeColor(final DyeColor dyeColor) {
+        final float[] dyeRgbArray = EntitySheep.createSheepColor(EnumDyeColor.valueOf(dyeColor.getName().toUpperCase(Locale.ENGLISH)));
         final int trueRed = (int) (dyeRgbArray[0] * 255.0F);
         final int trueGreen = (int) (dyeRgbArray[1] * 255.0F);
         final int trueBlue = (int) (dyeRgbArray[2] * 255.0F);
         return Color.ofRgb(trueRed, trueGreen, trueBlue);
     }
 
-    public static EnumDyeColor fromColor(Color color) {
-        for (EnumDyeColor enumDyeColor : EnumDyeColor.values()) {
-            Color color1 = fromDyeColor((DyeColor) (Object) enumDyeColor);
+    public static EnumDyeColor fromColor(final Color color) {
+        for (final EnumDyeColor enumDyeColor : EnumDyeColor.values()) {
+            final Color color1 = fromDyeColor((DyeColor) (Object) enumDyeColor);
             if (color.equals(color1)) {
                 return enumDyeColor;
             }
@@ -91,8 +97,9 @@ public final class ColorUtil {
         return EnumDyeColor.WHITE;
     }
 
-    public static void setItemStackColor(ItemStack stack, Color value) {
-        NbtDataUtil.setColorToNbt(stack, value);
+    public static void setItemStackColor(final ItemStack stack, final Color value) {
+        final int mojangColor = javaColorToMojangColor(value);
+        stack.getOrCreateSubCompound(Constants.Item.ITEM_DISPLAY).setInteger(Constants.Item.ITEM_COLOR, mojangColor);
     }
 
     /**
@@ -100,14 +107,16 @@ public final class ColorUtil {
      * has a color even without a set color. This returns {@code true} only if
      * there is a color set on the display tag.
      */
-    public static boolean hasColorInNbt(ItemStack stack) {
-        return NbtDataUtil.hasColorFromNBT(stack);
+    public static boolean hasColorInNbt(final ItemStack stack) {
+        return stack.hasTagCompound() &&
+               stack.getTagCompound().hasKey(Constants.Item.ITEM_DISPLAY) &&
+               stack.getTagCompound().getCompoundTag(Constants.Item.ITEM_DISPLAY).hasKey(Constants.Item.ITEM_COLOR);
     }
 
-    public static boolean hasColor(ItemStack stack) {
+    public static boolean hasColor(final ItemStack stack) {
         final Item item = stack.getItem();
         return item instanceof ItemArmor &&
-                ((ItemArmor) item).getArmorMaterial() == ArmorMaterial.LEATHER;
+                ((ItemArmor) item).getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER;
     }
 
     private ColorUtil() {

@@ -24,14 +24,42 @@
  */
 package org.spongepowered.common.registry.type.block;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import net.minecraft.block.BlockPlanks;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
+import java.util.Map;
+
 @RegisterCatalog(TreeTypes.class)
 public final class TreeTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockPlanks.EnumType, TreeType> {
+
+    private static final class Holder {
+        private static final TreeTypeRegistryModule INSTANCE = new TreeTypeRegistryModule();
+    }
+
+    public static TreeTypeRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public static BlockPlanks.EnumType getFor(final TreeType treeType) {
+        return (BlockPlanks.EnumType) (Object) treeType;
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public static TreeType getFor(final BlockPlanks.EnumType planks) {
+        return (TreeType) (Object) planks;
+    }
+
+    TreeTypeRegistryModule() {
+        super();
+    }
 
     @Override
     protected BlockPlanks.EnumType[] getValues() {

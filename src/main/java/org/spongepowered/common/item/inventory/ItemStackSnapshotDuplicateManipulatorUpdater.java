@@ -29,20 +29,18 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataVersions;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.util.Constants;
 
 public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataContentUpdater {
 
     @Override
     public int getInputVersion() {
-        return DataVersions.ItemStackSnapshot.DUPLICATE_MANIPULATOR_DATA_VERSION;
+        return Constants.Sponge.ItemStackSnapshot.DUPLICATE_MANIPULATOR_DATA_VERSION;
     }
 
     @Override
     public int getOutputVersion() {
-        return DataVersions.ItemStackSnapshot.REMOVED_DUPLICATE_DATA;
+        return Constants.Sponge.ItemStackSnapshot.REMOVED_DUPLICATE_DATA;
     }
 
     @Override
@@ -55,7 +53,7 @@ public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataC
                     spongeCompound.removeTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
-            NbtDataUtil.filterSpongeCustomData(compound);
+            Constants.NBT.filterSpongeCustomData(compound);
             content.remove(Constants.Sponge.UNSAFE_NBT);
             if (!compound.isEmpty()) {
                 content.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translate(compound));

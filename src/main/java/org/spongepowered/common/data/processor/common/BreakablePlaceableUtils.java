@@ -31,6 +31,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -38,7 +39,7 @@ import java.util.Set;
 
 public final class BreakablePlaceableUtils {
 
-    public static boolean set(ItemStack stack, String nbtKey, Set<BlockType> value) {
+    public static boolean set(final ItemStack stack, final String nbtKey, final Set<? extends BlockType> value) {
         NBTTagCompound stackTag = stack.getTagCompound();
 
         if (value.isEmpty()) {
@@ -49,8 +50,8 @@ public final class BreakablePlaceableUtils {
                 }
             }
         } else {
-            NBTTagList breakableIds = new NBTTagList();
-            for (BlockType breakable : value) {
+            final NBTTagList breakableIds = new NBTTagList();
+            for (final BlockType breakable : value) {
                 String id = breakable.getId();
                 if (id.startsWith("minecraft:")) {
                     id = id.substring("minecraft:".length());
@@ -67,22 +68,18 @@ public final class BreakablePlaceableUtils {
         return true;
     }
 
-    public static Optional<Set<BlockType>> get(ItemStack stack, String nbtKey) {
-        NBTTagCompound tag = stack.getTagCompound();
+    public static Optional<Set<BlockType>> get(final ItemStack stack, final String nbtKey) {
+        final NBTTagCompound tag = stack.getTagCompound();
         if (tag == null) {
             return Optional.empty();
         }
-        NBTTagList blockIds = tag.getTagList(nbtKey, Constants.NBT.TAG_STRING);
+        final NBTTagList blockIds = tag.getTagList(nbtKey, Constants.NBT.TAG_STRING);
         if (blockIds.isEmpty()) {
             return Optional.empty();
         }
-        Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.tagCount());
+        final Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.tagCount());
         for (int i = 0; i < blockIds.tagCount(); i++) {
-            Optional<BlockType> blockType = SpongeImpl.getGame().getRegistry()
-                    .getType(BlockType.class, blockIds.getStringTagAt(i));
-            if (blockType.isPresent()) {
-                blockTypes.add(blockType.get());
-            }
+            BlockTypeRegistryModule.getInstance().getById(blockIds.getStringTagAt(i)).ifPresent(blockTypes::add);
         }
         return Optional.of(blockTypes);
     }

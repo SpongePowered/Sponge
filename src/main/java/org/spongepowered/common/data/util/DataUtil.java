@@ -194,7 +194,7 @@ public final class DataUtil {
         final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
         for (final T manipulator : manipulators) {
             final DataContainer container = DataContainer.createNew();
-            container.set(Queries.CONTENT_VERSION, DataVersions.Data.CURRENT_CUSTOM_DATA);
+            container.set(Queries.CONTENT_VERSION, Constants.Sponge.CURRENT_CUSTOM_DATA);
             container.set(Constants.Sponge.DATA_ID, func.apply(manipulator).getId())
                      .set(Constants.Sponge.INTERNAL_DATA, manipulator.toContainer());
             builder.add(container);
@@ -256,9 +256,9 @@ public final class DataUtil {
 
     private static DataView updateDataViewForDataManipulator(final DataView dataView) {
         final int version = dataView.getInt(Queries.CONTENT_VERSION).orElse(1);
-        if (version != DataVersions.Data.CURRENT_CUSTOM_DATA) {
+        if (version != Constants.Sponge.CURRENT_CUSTOM_DATA) {
             final DataContentUpdater contentUpdater = SpongeDataManager.getInstance()
-                .getWrappedContentUpdater(DataManipulator.class, version, DataVersions.Data.CURRENT_CUSTOM_DATA)
+                .getWrappedContentUpdater(DataManipulator.class, version, Constants.Sponge.CURRENT_CUSTOM_DATA)
                 .orElseThrow(() -> new IllegalArgumentException("Could not find a content updater for DataManipulator information with version: " + version));
             return contentUpdater.update(dataView);
         }

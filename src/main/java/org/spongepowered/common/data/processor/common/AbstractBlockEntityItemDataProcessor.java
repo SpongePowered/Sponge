@@ -22,14 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.data.processor.common;
 
-import java.util.function.Supplier;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 
-public class FunctionalUtil {
+import java.util.function.Predicate;
 
-    public static Supplier<IllegalArgumentException> invalidArgument(String string) {
-        return () -> new IllegalArgumentException(string);
+public abstract class AbstractBlockEntityItemDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractItemDataProcessor<M, I> {
+
+    private final Item validItem;
+    private final TileEntityType validTileId;
+
+    protected AbstractBlockEntityItemDataProcessor(final Item item, final TileEntityType validTileId) {
+        super(incoming -> item.equals(incoming.getItem()));
+        this.validItem = item;
+        this.validTileId = validTileId;
     }
+
 
 }

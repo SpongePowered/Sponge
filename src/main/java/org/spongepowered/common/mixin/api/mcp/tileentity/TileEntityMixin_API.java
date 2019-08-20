@@ -48,7 +48,6 @@ import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
@@ -95,7 +94,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
             .set(Constants.TileEntity.TILE_TYPE, this.api$TileEntityType.getId());
         final NBTTagCompound compound = new NBTTagCompound();
         this.writeToNBT(compound);
-        NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
+        Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
         final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
         if (!manipulators.isEmpty()) {

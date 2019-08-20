@@ -34,8 +34,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.monster.EntityShulkerBridge;
-import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.mixin.core.entity.EntityLivingMixin;
+import org.spongepowered.common.util.Constants;
 
 @Mixin(EntityShulker.class)
 public abstract class EntityShulkerMixin extends EntityLivingMixin implements EntityShulkerBridge {
@@ -58,12 +58,12 @@ public abstract class EntityShulkerMixin extends EntityLivingMixin implements En
 
     @Override
     public Direction bridge$getDirection() {
-        return DirectionResolver.getFor(this.dataManager.get(ATTACHED_FACE));
+        return Constants.DirectionFunctions.getFor(this.dataManager.get(ATTACHED_FACE));
     }
 
     @Override
     public void bridge$setDirection(final Direction direction) {
-        this.dataManager.set(ATTACHED_FACE, DirectionResolver.getFor(direction));
+        this.dataManager.set(ATTACHED_FACE, Constants.DirectionFunctions.getFor(direction));
     }
 
 }

@@ -37,7 +37,7 @@ import org.spongepowered.api.util.Axis;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
-import org.spongepowered.common.data.util.DirectionChecker;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -62,7 +62,7 @@ public abstract class BlockPortalMixin extends BlockMixin {
             if (axis == Axis.Y) {
                 return Optional.of((BlockState) blockState);
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockPortal.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.withProperty(BlockPortal.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -74,13 +74,13 @@ public abstract class BlockPortalMixin extends BlockMixin {
             if (axis == Axis.Y) {
                 return Optional.of((BlockState) blockState);
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockPortal.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.withProperty(BlockPortal.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableAxisData impl$getAxisData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
-                DirectionChecker.convertAxisToSponge(blockState.getValue(BlockPortal.AXIS)));
+                Constants.DirectionFunctions.convertAxisToSponge(blockState.getValue(BlockPortal.AXIS)));
     }
 }

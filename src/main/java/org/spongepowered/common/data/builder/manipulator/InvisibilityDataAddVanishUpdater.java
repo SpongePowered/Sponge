@@ -27,7 +27,7 @@ package org.spongepowered.common.data.builder.manipulator;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.common.data.util.DataVersions;
+import org.spongepowered.common.util.Constants;
 
 public class InvisibilityDataAddVanishUpdater implements DataContentUpdater {
 
@@ -43,12 +43,12 @@ public class InvisibilityDataAddVanishUpdater implements DataContentUpdater {
 
     @Override
     public int getInputVersion() {
-        return DataVersions.Data.INVISIBILITY_DATA_PRE_1_9;
+        return Constants.Sponge.InvisibilityData.INVISIBILITY_DATA_PRE_1_9;
     }
 
     @Override
     public int getOutputVersion() {
-        return DataVersions.Data.INVISIBILITY_DATA_WITH_VANISH;
+        return Constants.Sponge.InvisibilityData.INVISIBILITY_DATA_WITH_VANISH;
     }
 
     @Override

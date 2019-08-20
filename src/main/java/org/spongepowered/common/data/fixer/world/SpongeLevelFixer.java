@@ -27,7 +27,6 @@ package org.spongepowered.common.data.fixer.world;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.datafix.IFixableData;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.Constants;
 
 import java.util.UUID;
@@ -36,7 +35,7 @@ public class SpongeLevelFixer implements IFixableData {
 
     @Override
     public int getFixVersion() {
-        return DataVersions.World.WORLD_UUID_1_9_VERSION;
+        return Constants.Legacy.World.WORLD_UUID_1_9_VERSION;
     }
 
     @Override

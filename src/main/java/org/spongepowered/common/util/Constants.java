@@ -24,13 +24,20 @@
  */
 package org.spongepowered.common.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Lists;
+import net.minecraft.block.BlockLever;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagDouble;
+import net.minecraft.nbt.NBTTagFloat;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
@@ -39,20 +46,32 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.property.PropertyStore;
 import org.spongepowered.api.data.type.*;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
+import org.spongepowered.api.item.enchantment.Enchantment;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
+import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
+import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
+import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.mixin.core.world.storage.SaveHandlerMixin;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -79,7 +98,6 @@ public final class Constants {
     public static final class Sponge {
         public static final int SPONGE_DATA_VERSION = 1;
         public static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
-
         public static final GameRules DEFAULT_GAME_RULES = new GameRules();
         public static final String DATA_VERSION = "DataVersion";
         public static final String CUSTOM_DATA_CLASS = "DataClass";
@@ -105,6 +123,9 @@ public final class Constants {
         // Snapshots
         public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
         public static final DataQuery SNAPSHOT_TILE_DATA = of("TileEntityData");
+        public static final int CLASS_BASED_CUSTOM_DATA = 1;
+        public static final int CUSTOM_DATA_WITH_DATA_IDS = 2;
+        public static final int CURRENT_CUSTOM_DATA = CUSTOM_DATA_WITH_DATA_IDS;
 
         /**
          * Modifies bits in an integer.
@@ -140,50 +161,41 @@ public final class Constants {
         }
 
         public static final class PlayerData {
-
-            // SpongePlayerData
-
             public static final DataQuery PLAYER_DATA_JOIN = of("FirstJoin");
             public static final DataQuery PLAYER_DATA_LAST = of("LastPlayed");
+            public static final int RESPAWN_DATA_1_9_VERSION = 0;
+        }
+        public static final class InvisibilityData {
+            public static final int INVISIBILITY_DATA_PRE_1_9 = 1;
+            public static final int INVISIBILITY_DATA_WITH_VANISH = 2;
         }
         public static final class VelocityData {
-
-            // Velocity
-
             public static final DataQuery VELOCITY_X = of("X");
             public static final DataQuery VELOCITY_Y = of("Y");
             public static final DataQuery VELOCITY_Z = of("Z");
         }
-
         public static final class AccelerationData {
-
             public static final DataQuery ACCELERATION_X = of("X");
             public static final DataQuery ACCELERATION_Y = of("Y");
             public static final DataQuery ACCELERATION_Z = of("Z");
         }
-
         public static final class EntityArchetype {
-
+            public static final int BASE_VERSION = 1;
             public static final String REQUIRES_EXTRA_INITIAL_SPAWN = "RequireInitialSpawn";
             public static final String ENTITY_ID = "Id";
             public static final DataQuery ENTITY_TYPE = of("EntityType");
             public static final DataQuery ENTITY_DATA = of("EntityData");
         }
         public static final class Entity {
-
             public static final String IS_VANISHED = "IsVanished";
-
             public static final String IS_INVISIBLE = "IsInvisible";
             public static final String VANISH_UNCOLLIDEABLE = "VanishUnCollideable";
             public static final String VANISH_UNTARGETABLE = "VanishUnTargetable";
             public static final String MAX_AIR = "maxAir";
             public static final int DEFAULT_MAX_AIR = 300;
             public static final String CAN_GRIEF = "CanGrief";
-
             public static final class Item {
-
                 // These are used by pickup/despawn delay for ItemEntity
-
                 public static final String INFINITE_PICKUP_DELAY = "InfinitePickupDelay";
                 public static final String INFINITE_DESPAWN_DELAY = "InfiniteDespawnDelay";
                 public static final String PREVIOUS_PICKUP_DELAY = "PreviousPickupDelay";
@@ -191,27 +203,20 @@ public final class Constants {
             }
             public static final class Projectile {
                 public static final String PROJECTILE_DAMAGE_AMOUNT = "damageAmount";
-
             }
             public static final class Player {
-
                 public static final String HEALTH_SCALE = "HealthScale";
-
             }
         }
         public static final class User {
-
             public static final String USER_SPAWN_X = "SpawnX";
-
             public static final String USER_SPAWN_Y = "SpawnY";
             public static final String USER_SPAWN_Z = "SpawnZ";
             public static final String USER_SPAWN_FORCED = "SpawnForced";
             public static final String USER_SPAWN_LIST = "Spawns";
         }
         public static final class World {
-
             public static final String DIMENSION_TYPE = "dimensionType";
-
             public static final String DIMENSION_ID = "dimensionId";
             public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
             public static final String PORTAL_AGENT_TYPE = "portalAgentType";
@@ -222,13 +227,10 @@ public final class Constants {
             public static final String LEVEL_SPONGE_DAT_NEW = "level_sponge.dat_new";
         }
         public static final class Schematic {
-
             public static final DataQuery NAME = of("Name");
             public static final int CURRENT_VERSION = 2;
             public static final int MAX_SIZE = 65535;
-
             public static final class Versions {
-
                 public static final DataQuery V1_TILE_ENTITY_DATA = of("TileEntities");
                 public static final DataQuery V1_TILE_ENTITY_ID = of("id");
             }
@@ -238,9 +240,7 @@ public final class Constants {
              * It's no longer updated due to the
              */
             public static final class Legacy {
-
                 public static final DataQuery X_POS = of("x");
-
                 public static final DataQuery Y_POS = of("y");
                 public static final DataQuery Z_POS = of("z");
                 public static final DataQuery MATERIALS = of("Materials");
@@ -255,61 +255,62 @@ public final class Constants {
                 public static final DataQuery ENTITY_ID = of("id");
             }
             public static final DataQuery VERSION = of("Version");
-
             public static final DataQuery DATA_VERSION = of("DataVersion");
             public static final DataQuery METADATA = of("Metadata");
             public static final DataQuery REQUIRED_MODS = of(org.spongepowered.api.world.schematic.Schematic.METADATA_REQUIRED_MODS);
             public static final DataQuery WIDTH = of("Width");
-
             public static final DataQuery HEIGHT = of("Height");
             public static final DataQuery LENGTH = of("Length");
             public static final DataQuery OFFSET = of("Offset");
-
             public static final DataQuery PALETTE = of("Palette");
             public static final DataQuery PALETTE_MAX = of("PaletteMax");
             public static final DataQuery BLOCK_DATA = of("BlockData");
             public static final DataQuery BIOME_DATA = of("BiomeData");
             public static final DataQuery BLOCKENTITY_DATA = of("BlockEntities");
-
             public static final DataQuery BLOCKENTITY_ID = of("Id");
             public static final DataQuery BLOCKENTITY_POS = of("Pos");
             public static final DataQuery ENTITIES = of("Entities");
-
             public static final DataQuery ENTITIES_ID = of("Id");
             public static final DataQuery ENTITIES_POS = of("Pos");
             public static final DataQuery BIOME_PALETTE = of("BiomePalette");
-
             public static final DataQuery BIOME_PALETTE_MAX = of("BiomePaletteMax");
 
         }
         public static final class TileEntityArchetype {
-
+            public static final int BASE_VERSION = 1;
             public static final String TILE_ENTITY_ID = "Id";
-
             public static final String TILE_ENTITY_POS = "Pos";
             public static final DataQuery TILE_TYPE = of("TileEntityType");
-
             public static final DataQuery BLOCK_STATE = of("BlockState");
             public static final DataQuery TILE_DATA = of("TileEntityData");
-
         }
         public static final class BlockSnapshot {
-
             public static final String TILE_ENTITY_POSITION_X = "x";
-
             public static final String TILE_ENTITY_POSITION_Y = "y";
             public static final String TILE_ENTITY_POSITION_Z = "z";
         }
-        public static final class EntitySnapshot {
 
 
+        public static final class Potion {
+            public static final int BROKEN_POTION_ID = 1;
+            public static final int POTION_V2 = 2;
+            public static final int CURRENT_VERSION = POTION_V2;
+        }
+
+        public static final class ItemStackSnapshot {
+            public static final int DUPLICATE_MANIPULATOR_DATA_VERSION = 1;
+            public static final int REMOVED_DUPLICATE_DATA = 2;
+            public static final int CURRENT_VERSION = REMOVED_DUPLICATE_DATA;
+        }
+
+        public static final class BlockState {
+            public static final int BLOCK_TYPE_WITH_DAMAGE_VALUE = 1;
+            public static final int STATE_AS_CATALOG_ID = 2;
         }
 
     }
     public static final class Permissions {
-
         public static final String FORCE_GAMEMODE_OVERRIDE = "minecraft.force-gamemode.override";
-
         public static final String SELECTOR_PERMISSION = "minecraft.selector";
     }
 
@@ -317,7 +318,6 @@ public final class Constants {
      * https://wiki.vg/Protocol#Effect
      */
     public static final class WorldEvents {
-
         public static final int PLAY_RECORD_EVENT = 1010;
         public static final int PLAY_WITHER_SPAWN_EVENT = 1023;
         public static final int PLAY_ENDERDRAGON_DEATH_EVENT = 1028;
@@ -460,6 +460,7 @@ public final class Constants {
         public static final String ITEM_HIDE_FLAGS = "HideFlags";
         public static final String ITEM_UNBREAKABLE = "Unbreakable";
         public static final String CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
+        public static final String LOCK = "Lock";
 
         public static final class Armor {
 
@@ -514,6 +515,13 @@ public final class Constants {
             public static final DataQuery FIREWORK_FADE_COLORS = of("Fades");
             public static final DataQuery FIREWORK_TRAILS = of("Trails");
             public static final DataQuery FIREWORK_FLICKERS = of("Flickers");
+            public static final String FIREWORKS = "Fireworks";
+            public static final String EXPLOSIONS = "Explosions";
+            public static final String FADE_COLORS = "FadeColors";
+            public static final String COLORS = "Colors";
+            public static final String FLICKER = "Flicker";
+            public static final String TRAIL = "Trail";
+            public static final String SHAPE_TYPE = "Type";
         }
     }
 
@@ -734,6 +742,7 @@ public final class Constants {
         public static final class Firework {
 
             public static final int DEFAULT_EXPLOSION_RADIUS = 0;
+            public static final String EXPLOSION = "Explosion";
         }
 
         public static final class Horse {
@@ -857,18 +866,31 @@ public final class Constants {
         // The flags that are naturally inverted are already inverted here by being masked in
         // with the opposite OR.
         // Example: If we DO want physics, we don't include the physics flag, if we DON'T want physics, we | it in.
-        public static final int ALL                         = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.NEIGHBOR_MASK;
-        public static final int NONE                        =
-            Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.PHYSICS_MASK | Constants.BlockChangeFlags.OBSERVER_MASK | Constants.BlockChangeFlags.FORCE_RE_RENDER;
-        public static final int NEIGHBOR                    =
-            Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.NEIGHBOR_MASK | Constants.BlockChangeFlags.PHYSICS_MASK | Constants.BlockChangeFlags.OBSERVER_MASK;
-        public static final int PHYSICS                     = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.OBSERVER_MASK;
-        public static final int OBSERVER                    = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.PHYSICS_MASK;
-        public static final int NEIGHBOR_PHYSICS            = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.NEIGHBOR_MASK
+        public static final int ALL                         = Constants.BlockChangeFlags.NOTIFY_CLIENTS
+                                                              | Constants.BlockChangeFlags.NEIGHBOR_MASK;
+        public static final int NONE                        = Constants.BlockChangeFlags.NOTIFY_CLIENTS
+                                                              | Constants.BlockChangeFlags.PHYSICS_MASK
+                                                              | Constants.BlockChangeFlags.OBSERVER_MASK
+                                                              | Constants.BlockChangeFlags.FORCE_RE_RENDER;
+        public static final int NEIGHBOR                    = Constants.BlockChangeFlags.NOTIFY_CLIENTS
+                                                              | Constants.BlockChangeFlags.NEIGHBOR_MASK
+                                                              | Constants.BlockChangeFlags.PHYSICS_MASK
                                                               | Constants.BlockChangeFlags.OBSERVER_MASK;
-        public static final int NEIGHBOR_OBSERVER           = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.NEIGHBOR_MASK
+        public static final int PHYSICS                     = Constants.BlockChangeFlags.NOTIFY_CLIENTS
+                                                              | Constants.BlockChangeFlags.OBSERVER_MASK;
+
+        public static final int OBSERVER                    = Constants.BlockChangeFlags.NOTIFY_CLIENTS
                                                               | Constants.BlockChangeFlags.PHYSICS_MASK;
-        public static final int NEIGHBOR_PHYSICS_OBSERVER   = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.NEIGHBOR_MASK;
+
+        public static final int NEIGHBOR_PHYSICS            = Constants.BlockChangeFlags.NOTIFY_CLIENTS
+                                                              | Constants.BlockChangeFlags.NEIGHBOR_MASK
+                                                              | Constants.BlockChangeFlags.OBSERVER_MASK;
+        public static final int NEIGHBOR_OBSERVER           = Constants.BlockChangeFlags.NOTIFY_CLIENTS
+                                                              | Constants.BlockChangeFlags.NEIGHBOR_MASK
+                                                              | Constants.BlockChangeFlags.PHYSICS_MASK;
+
+        public static final int NEIGHBOR_PHYSICS_OBSERVER   = Constants.BlockChangeFlags.NOTIFY_CLIENTS
+                                                              | Constants.BlockChangeFlags.NEIGHBOR_MASK;
         public static final int PHYSICS_OBSERVER            = Constants.BlockChangeFlags.NOTIFY_CLIENTS;
 
     }
@@ -889,6 +911,68 @@ public final class Constants {
         public static final byte TAG_INT_ARRAY = 11;
         public static final byte TAG_LONG_ARRAY  = 12;
         public static final byte TAG_ANY_NUMERIC = 99;
+
+        public static NBTTagCompound filterSpongeCustomData(final NBTTagCompound rootCompound) {
+            if (rootCompound.hasKey(Forge.FORGE_DATA, TAG_COMPOUND)) {
+                final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(Forge.FORGE_DATA);
+                if (forgeCompound.hasKey(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
+                    cleanseInnerCompound(forgeCompound);
+                }
+                if (forgeCompound.isEmpty()) {
+                    rootCompound.removeTag(Forge.FORGE_DATA);
+                }
+            } else if (rootCompound.hasKey(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
+                cleanseInnerCompound(rootCompound);
+            }
+            return rootCompound;
+        }
+
+        private static void cleanseInnerCompound(final NBTTagCompound compound) {
+            final NBTTagCompound inner = compound.getCompoundTag(Sponge.SPONGE_DATA);
+            if (inner.isEmpty()) {
+                compound.removeTag(Sponge.SPONGE_DATA);
+            }
+        }
+
+        public static List<Enchantment> getItemEnchantments(final net.minecraft.item.ItemStack itemStack) {
+            if (!itemStack.isItemEnchanted()) {
+                return Collections.emptyList();
+            }
+            final List<Enchantment> enchantments = Lists.newArrayList();
+            final NBTTagList list = itemStack.getEnchantmentTagList();
+            for (int i = 0; i < list.tagCount(); i++) {
+                final NBTTagCompound compound = list.getCompoundTagAt(i);
+                final short enchantmentId = compound.getShort(Item.ITEM_ENCHANTMENT_ID);
+                final short level = compound.getShort(Item.ITEM_ENCHANTMENT_LEVEL);
+
+                final EnchantmentType enchantmentType = (EnchantmentType) net.minecraft.enchantment.Enchantment.getEnchantmentByID(enchantmentId);
+                if (enchantmentType == null) {
+                    continue;
+                }
+                enchantments.add(new SpongeEnchantment(enchantmentType, level));
+            }
+            return enchantments;
+        }
+
+        public static NBTTagList newDoubleNBTList(final double... numbers) {
+            final NBTTagList nbttaglist = new NBTTagList();
+
+            for (final double d1 : numbers) {
+                nbttaglist.appendTag(new NBTTagDouble(d1));
+            }
+
+            return nbttaglist;
+        }
+
+        public static NBTTagList newFloatNBTList(final float... numbers) {
+            final NBTTagList nbttaglist = new NBTTagList();
+
+            for (final float f : numbers) {
+                nbttaglist.appendTag(new NBTTagFloat(f));
+            }
+
+            return nbttaglist;
+        }
     }
 
     private Constants() {}
@@ -934,6 +1018,7 @@ public final class Constants {
         public static final class Entity {
             public static final String UUID_LEAST_1_8 = "uuid_least";
             public static final String UUID_MOST_1_8 = "uuid_most";
+            public static final int TRACKER_ID_VERSION = 0;
 
             private Entity() {
             }
@@ -943,6 +1028,7 @@ public final class Constants {
 
             public static final String WORLD_UUID_LEAST_1_8 = "uuid_least";
             public static final String WORLD_UUID_MOST_1_8 = "uuid_most";
+            public static final int WORLD_UUID_1_9_VERSION = 0;
 
             private World() {
             }
@@ -1016,5 +1102,213 @@ public final class Constants {
         public static final int OBJECTIVE_PACKET_ADD = 0;
         public static final int OBJECTIVE_PACKET_REMOVE = 1;
         public static final int SCORE_NAME_LENGTH = 40;
+    }
+
+    public static final class Functional {
+
+        /**
+         * This will compare two {@link ValueProcessor}s where the higher priority
+         * will compare opposite to the lower priority.
+         */
+        public static final Comparator<ValueProcessor<?, ?>> VALUE_PROCESSOR_COMPARATOR =
+            (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
+        public static final Comparator<DataProcessor<?, ?>> DATA_PROCESSOR_COMPARATOR =
+            (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
+        public static final Comparator<PropertyStore<?>> PROPERTY_STORE_COMPARATOR =
+            (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
+        public static final Comparator<DataContentUpdater> DATA_CONTENT_UPDATER_COMPARATOR =
+            (o1, o2) -> ComparisonChain.start()
+                .compare(o2.getInputVersion(), o1.getInputVersion())
+                .compare(o2.getOutputVersion(), o1.getOutputVersion())
+                .result();
+        public static final Comparator<? super NbtDataProcessor<?, ?>>
+                NBT_PROCESSOR_COMPARATOR =
+                (o1, o2) -> ComparisonChain.start().compare(o2.getPriority(), o1.getPriority()).result();
+
+        public static Comparator<Integer> intComparator() {
+            return Integer::compareTo;
+        }
+
+        public static Comparator<Long> longComparator() {
+            return Long::compareTo;
+        }
+
+        public static Comparator<Short> shortComparator() {
+            return Short::compareTo;
+        }
+
+        public static Comparator<Byte> byteComparator() {
+            return Byte::compareTo;
+        }
+
+        public static Comparator<Double> doubleComparator() {
+            return Double::compareTo;
+        }
+
+        public static Comparator<Float> floatComparator() {
+            return Float::compareTo;
+        }
+    }
+
+    public static final class DirectionFunctions {
+
+        public static EnumFacing getFor(final Direction direction) {
+            switch (checkNotNull(direction)) {
+                case UP:
+                    return EnumFacing.UP;
+                case DOWN:
+                    return EnumFacing.DOWN;
+                case WEST:
+                    return EnumFacing.WEST;
+                case SOUTH:
+                    return EnumFacing.SOUTH;
+                case EAST:
+                    return EnumFacing.EAST;
+                case NORTH:
+                    return EnumFacing.NORTH;
+                default:
+                    throw new IllegalArgumentException("No matching direction found for direction: " + direction);
+            }
+        }
+
+        public static Direction getFor(final EnumFacing facing) {
+            switch (checkNotNull(facing)) {
+                case UP:
+                    return Direction.UP;
+                case DOWN:
+                    return Direction.DOWN;
+                case WEST:
+                    return Direction.WEST;
+                case SOUTH:
+                    return Direction.SOUTH;
+                case EAST:
+                    return Direction.EAST;
+                case NORTH:
+                    return Direction.NORTH;
+                default:
+                    throw new IllegalArgumentException("No matching enum facing direction found for direction: " + facing);
+            }
+        }
+
+        public static Direction getFor(final BlockLever.EnumOrientation orientation) {
+            switch (orientation) {
+                case DOWN_X:
+                    return Direction.DOWN;
+                case EAST:
+                    return Direction.EAST;
+                case WEST:
+                    return Direction.WEST;
+                case SOUTH:
+                    return Direction.SOUTH;
+                case NORTH:
+                    return Direction.NORTH;
+                case UP_Z:
+                    return Direction.UP;
+                case UP_X:
+                    return Direction.UP;
+                case DOWN_Z:
+                    return Direction.DOWN;
+                default:
+                    return Direction.NORTH;
+            }
+        }
+
+        public static BlockLever.EnumOrientation getAsOrientation(final Direction direction, final Axis axis) {
+            switch (direction) {
+                case DOWN:
+                    return axis == Axis.Z ? BlockLever.EnumOrientation.DOWN_Z : BlockLever.EnumOrientation.DOWN_X;
+                case EAST:
+                    return BlockLever.EnumOrientation.EAST;
+                case WEST:
+                    return BlockLever.EnumOrientation.WEST;
+                case SOUTH:
+                    return BlockLever.EnumOrientation.SOUTH;
+                case NORTH:
+                    return BlockLever.EnumOrientation.NORTH;
+                case UP:
+                    return axis == Axis.Z ? BlockLever.EnumOrientation.UP_Z : BlockLever.EnumOrientation.UP_X;
+                default:
+                    return BlockLever.EnumOrientation.NORTH;
+            }
+        }
+
+        public static Direction checkDirectionToHorizontal(final Direction dir) {
+            switch (dir) {
+                case EAST:
+                    break;
+                case NORTH:
+                    break;
+                case SOUTH:
+                    break;
+                case WEST:
+                    break;
+                default:
+                    return Direction.NORTH;
+            }
+            return dir;
+        }
+
+        public static Direction checkDirectionNotUp(final Direction dir) {
+            switch (dir) {
+                case EAST:
+                    break;
+                case NORTH:
+                    break;
+                case SOUTH:
+                    break;
+                case WEST:
+                    break;
+                case DOWN:
+                    break;
+                default:
+                    return Direction.NORTH;
+            }
+            return dir;
+        }
+
+        public static Direction checkDirectionNotDown(final Direction dir) {
+            switch (dir) {
+                case EAST:
+                    break;
+                case NORTH:
+                    break;
+                case SOUTH:
+                    break;
+                case WEST:
+                    break;
+                case UP:
+                    break;
+                default:
+                    return Direction.NORTH;
+            }
+            return dir;
+        }
+
+        public static EnumFacing.Axis convertAxisToMinecraft(final Axis axis) {
+            switch (axis) {
+                case X:
+                    return EnumFacing.Axis.X;
+                case Y:
+                    return EnumFacing.Axis.Y;
+                case Z:
+                    return EnumFacing.Axis.Z;
+                default:
+                    return EnumFacing.Axis.X;
+
+            }
+        }
+
+        public static Axis convertAxisToSponge(final EnumFacing.Axis axis) {
+            switch (axis) {
+                case X:
+                    return Axis.X;
+                case Y:
+                    return Axis.Y;
+                case Z:
+                    return Axis.Z;
+                default:
+                    return Axis.X;
+            }
+        }
     }
 }

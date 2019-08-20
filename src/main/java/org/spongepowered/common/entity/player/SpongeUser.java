@@ -57,7 +57,6 @@ import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.player.BedLocationsBridge;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.util.Constants;
@@ -434,9 +433,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         compound.setTag(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.saveInventoryToNBT());
         compound.setInteger(Constants.Entity.Player.SELECTED_ITEM_SLOT, this.inventory.currentItem);
 
-        compound.setTag(Constants.Entity.ENTITY_POSITION, NbtDataUtil.newDoubleNBTList(this.posX, this.posY, this.posZ));
+        compound.setTag(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(this.posX, this.posY, this.posZ));
         compound.setInteger(Constants.Entity.ENTITY_DIMENSION, this.dimension);
-        compound.setTag(Constants.Entity.ENTITY_ROTATION, NbtDataUtil.newFloatNBTList(this.rotationYaw, this.rotationPitch));
+        compound.setTag(Constants.Entity.ENTITY_ROTATION, Constants.NBT.newFloatNBTList(this.rotationYaw, this.rotationPitch));
 
         compound.setBoolean(Constants.Entity.Player.INVULNERABLE, this.invulnerable);
 

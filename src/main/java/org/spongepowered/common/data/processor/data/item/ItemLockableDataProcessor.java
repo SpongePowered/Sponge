@@ -42,7 +42,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeLockableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
@@ -53,21 +52,21 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
 
     public ItemLockableDataProcessor() {
         super(stack -> {
-            Item item = stack.getItem();
+            final Item item = stack.getItem();
             if (!(item instanceof ItemBlock)) {
                 return false;
             }
-            Block block = ((ItemBlock) item).getBlock();
+            final Block block = ((ItemBlock) item).getBlock();
             if (!(block instanceof ITileEntityProvider)) {
                 return false;
             }
-            TileEntity tile = ((ITileEntityProvider) block).createNewTileEntity(null, item.getMetadata(stack.getItemDamage()));
+            final TileEntity tile = ((ITileEntityProvider) block).createNewTileEntity(null, item.getMetadata(stack.getItemDamage()));
             return tile instanceof TileEntityLockable;
         } , Keys.LOCK_TOKEN);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (supports(container)) {
             set((ItemStack) container, "");
             return DataTransactionResult.successNoData();
@@ -76,25 +75,25 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
     }
 
     @Override
-    protected boolean set(ItemStack stack, String value) {
-        NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(stack);
-        NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, Constants.Item.BLOCK_ENTITY_TAG);
-        LockCode code = new LockCode(value);
-        if (code.isEmpty()) {
-            tileCompound.removeTag("Lock");
-        } else {
-            code.toNBT(tileCompound);
+    protected boolean set(final ItemStack stack, final String value) {
+        if (value.isEmpty()) {
+            if (stack.hasTagCompound() && stack.getTagCompound().hasKey(Constants.Item.BLOCK_ENTITY_TAG, Constants.NBT.TAG_COMPOUND)) {
+                stack.getTagCompound().getCompoundTag(Constants.Item.BLOCK_ENTITY_TAG).removeTag(Constants.Item.LOCK);
+            }
+            return true;
         }
+        final LockCode code = new LockCode(value);
+        code.toNBT(stack.getOrCreateSubCompound(Constants.Item.BLOCK_ENTITY_TAG));
         return true;
     }
 
     @Override
-    protected Optional<String> getVal(ItemStack container) {
+    protected Optional<String> getVal(final ItemStack container) {
         if (container.getTagCompound() == null) {
             return Optional.of("");
         }
-        NBTTagCompound tileCompound = container.getTagCompound().getCompoundTag(Constants.Item.BLOCK_ENTITY_TAG);
-        LockCode code = LockCode.fromNBT(tileCompound);
+        final NBTTagCompound tileCompound = container.getTagCompound().getCompoundTag(Constants.Item.BLOCK_ENTITY_TAG);
+        final LockCode code = LockCode.fromNBT(tileCompound);
         if (code.isEmpty()) {
             return Optional.empty();
         }
@@ -102,12 +101,12 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
     }
 
     @Override
-    protected Value<String> constructValue(String actualValue) {
+    protected Value<String> constructValue(final String actualValue) {
         return new SpongeValue<String>(Keys.LOCK_TOKEN, "", actualValue);
     }
 
     @Override
-    protected ImmutableValue<String> constructImmutableValue(String value) {
+    protected ImmutableValue<String> constructImmutableValue(final String value) {
         return new ImmutableSpongeValue<String>(Keys.LOCK_TOKEN, "", value);
     }
 

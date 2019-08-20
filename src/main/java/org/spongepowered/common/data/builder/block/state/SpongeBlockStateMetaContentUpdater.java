@@ -33,7 +33,6 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -42,12 +41,12 @@ public class SpongeBlockStateMetaContentUpdater implements DataContentUpdater {
 
     @Override
     public int getInputVersion() {
-        return DataVersions.BlockState.BLOCK_TYPE_WITH_DAMAGE_VALUE;
+        return Constants.Sponge.BlockState.BLOCK_TYPE_WITH_DAMAGE_VALUE;
     }
 
     @Override
     public int getOutputVersion() {
-        return DataVersions.BlockState.STATE_AS_CATALOG_ID;
+        return Constants.Sponge.BlockState.STATE_AS_CATALOG_ID;
     }
 
     @SuppressWarnings("deprecation")

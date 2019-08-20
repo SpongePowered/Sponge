@@ -43,7 +43,6 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeSpawnableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -59,19 +58,18 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean set(ItemStack itemStack, EntityType value) {
+    public boolean set(final ItemStack itemStack, final EntityType value) {
         final ResourceLocation name = EntityList.getKey((Class<? extends Entity>) value.getEntityClass());
         if (EntityList.ENTITY_EGGS.containsKey(name)) {
-            final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(itemStack);
-            final NBTTagCompound subCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG);
-            subCompound.setString(Constants.Entity.ENTITY_TYPE_ID, name.toString());
+            itemStack.getOrCreateSubCompound(Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG)
+                .setString(Constants.Entity.ENTITY_TYPE_ID, name.toString());
             return true;
         }
         return false;
     }
 
     @Override
-    public Optional<EntityType> getVal(ItemStack itemStack) {
+    public Optional<EntityType> getVal(final ItemStack itemStack) {
         final ResourceLocation name = ItemMonsterPlacer.getNamedIdFrom(itemStack);
         if (name != null) {
             final Class<? extends Entity> entity = SpongeImplHooks.getEntityClass(name);
@@ -81,12 +79,12 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
     }
 
     @Override
-    protected Value<EntityType> constructValue(EntityType actualValue) {
+    protected Value<EntityType> constructValue(final EntityType actualValue) {
         return new SpongeValue<>(Keys.SPAWNABLE_ENTITY_TYPE, EntityTypes.CREEPER, actualValue);
     }
 
     @Override
-    public ImmutableValue<EntityType> constructImmutableValue(EntityType value) {
+    public ImmutableValue<EntityType> constructImmutableValue(final EntityType value) {
         return ImmutableSpongeValue.cachedOf(Keys.SPAWNABLE_ENTITY_TYPE, EntityTypes.CREEPER, value);
     }
 
@@ -96,19 +94,22 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (!supports(container)) {
             return DataTransactionResult.failNoData();
         }
-        ItemStack itemStack = (ItemStack) container;
-        Optional<EntityType> old = getVal(itemStack);
+        final ItemStack itemStack = (ItemStack) container;
+        final Optional<EntityType> old = getVal(itemStack);
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
         try {
-            NbtDataUtil.getItemCompound(itemStack).get().removeTag(Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG);
+            final NBTTagCompound tag = itemStack.getTagCompound();
+            if (tag != null) {
+                tag.removeTag(Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG);
+            }
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
         }
     }

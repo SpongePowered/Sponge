@@ -58,7 +58,6 @@ import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.lang.ref.WeakReference;
@@ -119,7 +118,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         this.scale = builder.scale;
         this.entityReference = builder.entityReference;
         if (this.compound != null) {
-            this.compound.setTag("Pos", NbtDataUtil.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
+            this.compound.setTag("Pos", Constants.NBT.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
             // TODO should ensure other elements are within the compound as well
         }
     }

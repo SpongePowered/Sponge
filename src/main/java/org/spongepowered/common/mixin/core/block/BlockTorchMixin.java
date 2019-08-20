@@ -40,8 +40,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAttachedData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
-import org.spongepowered.common.data.util.DirectionChecker;
-import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -65,8 +64,8 @@ public abstract class BlockTorchMixin extends BlockMixin {
             return Optional.of((BlockState) blockState);
         }
         if (manipulator instanceof ImmutableDirectionalData) {
-            final Direction dir = DirectionChecker.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.withProperty(BlockTorch.FACING, DirectionResolver.getFor(dir)));
+            final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
+            return Optional.of((BlockState) blockState.withProperty(BlockTorch.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -77,8 +76,8 @@ public abstract class BlockTorchMixin extends BlockMixin {
             return Optional.of((BlockState) blockState);
         }
         if (key.equals(Keys.DIRECTION)) {
-            final Direction dir = DirectionChecker.checkDirectionNotDown((Direction) value);
-            return Optional.of((BlockState) blockState.withProperty(BlockTorch.FACING, DirectionResolver.getFor(dir)));
+            final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown((Direction) value);
+            return Optional.of((BlockState) blockState.withProperty(BlockTorch.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -90,6 +89,6 @@ public abstract class BlockTorchMixin extends BlockMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockTorch.FACING)));
+                Constants.DirectionFunctions.getFor(blockState.getValue(BlockTorch.FACING)));
     }
 }

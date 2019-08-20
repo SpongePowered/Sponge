@@ -53,11 +53,11 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.data.util.TreeTypeResolver;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.registry.type.block.TreeTypeRegistryModule;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.util.List;
@@ -138,7 +138,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
             type = BlockPlanks.EnumType.OAK;
         }
 
-        final TreeType treeType = TreeTypeResolver.getFor(type);
+        final TreeType treeType = TreeTypeRegistryModule.getFor(type);
 
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType);
     }
@@ -156,7 +156,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableTreeData) {
             final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
-            final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
+            final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
             if (blockState.getBlock() instanceof BlockOldLeaf) {
                 if (treeType.equals(TreeTypes.OAK) ||
                         treeType.equals(TreeTypes.BIRCH) ||
@@ -182,7 +182,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.TREE_TYPE)) {
             final TreeType treeType = (TreeType) value;
-            final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
+            final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
             if (blockState.getBlock() instanceof BlockOldLeaf) {
                 if (treeType.equals(TreeTypes.OAK) ||
                         treeType.equals(TreeTypes.BIRCH) ||

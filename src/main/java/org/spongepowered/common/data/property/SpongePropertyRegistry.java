@@ -36,7 +36,7 @@ import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.data.property.PropertyStore;
-import org.spongepowered.common.data.util.ComparatorUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -68,7 +68,7 @@ public class SpongePropertyRegistry implements PropertyRegistry {
         if (temp != null) {
             for (final Map.Entry<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> entry : temp.propertyStoreMap.entrySet()) {
                 final ImmutableList.Builder<PropertyStore<?>> propertyStoreBuilder = ImmutableList.builder();
-                entry.getValue().sort(ComparatorUtil.PROPERTY_STORE_COMPARATOR);
+                entry.getValue().sort(Constants.Functional.PROPERTY_STORE_COMPARATOR);
                 propertyStoreBuilder.addAll(entry.getValue());
                 final PropertyStoreDelegate<?> delegate = new PropertyStoreDelegate(propertyStoreBuilder.build());
                 this.delegateMap.put(entry.getKey(), delegate);
@@ -113,7 +113,7 @@ public class SpongePropertyRegistry implements PropertyRegistry {
                 if (!used.contains(entry.getKey())) {
                     used.add(entry.getKey());
                     final ImmutableList.Builder<PropertyStore<?>> propertyStoreBuilder = ImmutableList.builder();
-                    entry.getValue().sort(ComparatorUtil.PROPERTY_STORE_COMPARATOR);
+                    entry.getValue().sort(Constants.Functional.PROPERTY_STORE_COMPARATOR);
                     propertyStoreBuilder.addAll(entry.getValue());
                     final PropertyStoreDelegate<?> delegate = new PropertyStoreDelegate(propertyStoreBuilder.build());
                     this.tempRegistry.delegateMap.put(entry.getKey(), delegate);

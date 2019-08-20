@@ -50,7 +50,6 @@ import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.item.ItemBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.Constants;
@@ -145,7 +144,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
                     spongeCompound.removeTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
-            NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
+            Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
             if (!compound.isEmpty()) {
                 final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
                 container.set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);

@@ -26,6 +26,7 @@ package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagInt;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGenerationData;
@@ -36,7 +37,6 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGenerationData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
@@ -50,12 +50,12 @@ public final class GenerationDataProcessor
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected MutableBoundedValue<Integer> constructValue(final Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.GENERATION)
                 .actualValue(actualValue)
                 .defaultValue(0)
@@ -65,18 +65,21 @@ public final class GenerationDataProcessor
     }
 
     @Override
-    protected boolean set(ItemStack stack, Integer value) {
-        NbtDataUtil.getOrCreateCompound(stack).setInteger(Constants.Item.Book.ITEM_BOOK_GENERATION, value);
+    protected boolean set(final ItemStack stack, final Integer value) {
+        stack.setTagInfo(Constants.Item.Book.ITEM_BOOK_GENERATION, new NBTTagInt(value));
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(ItemStack stack) {
-        return Optional.of(NbtDataUtil.getItemCompound(stack).map(tag -> tag.getInteger(Constants.Item.Book.ITEM_BOOK_GENERATION)).orElse(0));
+    protected Optional<Integer> getVal(final ItemStack stack) {
+        if (!stack.hasTagCompound()) {
+            return Optional.empty();
+        }
+        return Optional.of(stack.getTagCompound().getInteger(Constants.Item.Book.ITEM_BOOK_GENERATION));
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return ImmutableSpongeValue.cachedOf(Keys.GENERATION, 0, value);
     }
 

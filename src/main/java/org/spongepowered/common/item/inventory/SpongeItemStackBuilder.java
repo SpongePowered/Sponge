@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.data.util.DataUtil.getData;
-import static org.spongepowered.common.data.util.ItemsHelper.validateData;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -123,11 +122,6 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     public ItemStack.Builder itemData(final DataManipulator<?, ?> itemData) throws IllegalArgumentException {
         checkNotNull(itemData, "Must have a non-null item data!");
         checkNotNull(this.type, "Cannot set item data without having set a type first!");
-        // Validation is required, we can't let devs set block data on a non-block item!
-        DataTransactionResult result = validateData(this.type, itemData);
-        if (result.getType() != DataTransactionResult.Type.SUCCESS) {
-            throw new IllegalArgumentException("The item data is not compatible with the current item type!");
-        }
         if (this.itemDataSet == null) {
             this.itemDataSet = new HashSet<>();
         }

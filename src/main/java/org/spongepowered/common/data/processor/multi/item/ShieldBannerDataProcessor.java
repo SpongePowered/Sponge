@@ -56,24 +56,24 @@ public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerD
     }
 
     @Override
-    public boolean doesDataExist(ItemStack itemStack) {
+    public boolean doesDataExist(final ItemStack itemStack) {
         return true;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public boolean set(ItemStack itemStack, Map<Key<?>, Object> keyValues) {
+    public boolean set(final ItemStack itemStack, final Map<Key<?>, Object> keyValues) {
         if (itemStack.getTagCompound() == null) {
             itemStack.setTagCompound(new NBTTagCompound());
         }
-        final NBTTagCompound tagCompound = ItemStackUtil.getTagCompound(itemStack);
-        final NBTTagCompound blockEntity = new NBTTagCompound();
+        final NBTTagCompound blockEntity = itemStack.getOrCreateSubCompound(Constants.Item.BLOCK_ENTITY_TAG);
         final DyeColor baseColor = (DyeColor) keyValues.get(Keys.BANNER_BASE_COLOR);
         final PatternListValue patternLayers = (PatternListValue) keyValues.get(Keys.BANNER_PATTERNS);
         if (!patternLayers.isEmpty()) {
             final NBTTagList patterns = new NBTTagList();
 
-            for (PatternLayer layer : patternLayers) {
-                NBTTagCompound compound = new NBTTagCompound();
+            for (final PatternLayer layer : patternLayers) {
+                final NBTTagCompound compound = new NBTTagCompound();
                 compound.setString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).getHashname());
                 compound.setInteger(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
                 patterns.appendTag(compound);
@@ -81,12 +81,11 @@ public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerD
             blockEntity.setTag(Constants.TileEntity.Banner.BANNER_PATTERNS, patterns);
         }
         blockEntity.setInteger(Constants.TileEntity.Banner.BANNER_BASE, ((EnumDyeColor) (Object) baseColor).getDyeDamage());
-        tagCompound.setTag(Constants.Item.BLOCK_ENTITY_TAG, blockEntity);
         return true;
     }
 
     @Override
-    public Map<Key<?>, ?> getValues(ItemStack itemStack) {
+    public Map<Key<?>, ?> getValues(final ItemStack itemStack) {
         if (itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey(Constants.Item.ITEM_UNBREAKABLE)) {
             return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getItemDamage(),
                     Keys.UNBREAKABLE, itemStack.getTagCompound().getBoolean(Constants.Item.ITEM_UNBREAKABLE));
@@ -100,7 +99,7 @@ public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerD
     }
 
     @Override
-    public Optional<BannerData> fill(DataContainer container, BannerData durabilityData) {
+    public Optional<BannerData> fill(final DataContainer container, final BannerData durabilityData) {
         final Optional<Integer> durability = container.getInt(Keys.ITEM_DURABILITY.getQuery());
         final Optional<Boolean> unbreakable = container.getBoolean(Keys.UNBREAKABLE.getQuery());
         if (durability.isPresent() && unbreakable.isPresent()) {
@@ -112,7 +111,7 @@ public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerD
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult remove(final DataHolder dataHolder) {
         return DataTransactionResult.failNoData();
     }
 }

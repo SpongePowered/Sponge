@@ -44,7 +44,6 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
@@ -174,7 +173,7 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
 
     @Override
     default int getContentVersion() {
-        return DataVersions.BlockState.STATE_AS_CATALOG_ID;
+        return Constants.Sponge.BlockState.STATE_AS_CATALOG_ID;
     }
 
     @Override

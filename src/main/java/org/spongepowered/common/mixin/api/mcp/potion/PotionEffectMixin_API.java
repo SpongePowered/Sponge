@@ -35,7 +35,6 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.Constants;
 
 @Mixin(net.minecraft.potion.PotionEffect.class)
@@ -75,7 +74,7 @@ public abstract class PotionEffectMixin_API implements PotionEffect {
 
     @Override
     public int getContentVersion() {
-        return DataVersions.Potion.CURRENT_VERSION;
+        return Constants.Sponge.Potion.CURRENT_VERSION;
     }
 
     @Override

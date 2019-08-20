@@ -30,7 +30,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.datafix.IFixableData;
 import org.spongepowered.api.util.RespawnLocation;
-import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
@@ -40,7 +39,7 @@ public class PlayerRespawnData implements IFixableData {
 
     @Override
     public int getFixVersion() {
-        return DataVersions.PlayerData.RESPAWN_DATA_1_9_VERSION;
+        return Constants.Sponge.PlayerData.RESPAWN_DATA_1_9_VERSION;
     }
 
     @Override
