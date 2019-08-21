@@ -39,6 +39,18 @@ public interface ExplosionBridge {
 
     void bridge$setShouldDamageEntities(boolean shouldDamageEntities);
 
+    void bridge$setBoundingBoxSize(int boundingBoxSize);
+
+    int bridge$getBoundingBoxSize();
+
+    void bridge$setReducedRandomness(boolean reducedRandomness);
+
+    boolean bridge$getReducedRandomness();
+
+    void bridge$setEntityKnockbackMultiplier(double entityKnockbackMultiplier);
+
+    double bridge$getEntityKnockbackMultiplier();
+
     @Nullable
     Entity bridge$getExploder();
 

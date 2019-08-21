@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
@@ -83,6 +82,9 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     private boolean impl$shouldBreakBlocks;
     private boolean impl$shouldDamageEntities;
 //    private Cause createdCause;
+    private int impl$boundingBoxSize;
+    private boolean impl$reducedRandomness;
+    private double impl$entityKnockbackMultiplier;
 
     @Shadow @Final private List<BlockPos> affectedBlockPositions;
     @Shadow @Final private Map<EntityPlayer, Vec3d> playerKnockbackMap;
@@ -116,22 +118,24 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     public void doExplosionA() {
         // Sponge Start - If the explosion should not break blocks, don't bother calculating it
         if (this.impl$shouldBreakBlocks) {
-            // Sponge End
             final Set<BlockPos> set = Sets.<BlockPos>newHashSet();
-            final int i = 16;
+            final float impl$random = this.world.rand.nextFloat();
 
-            for (int j = 0; j < 16; ++j) {
-                for (int k = 0; k < 16; ++k) {
-                    for (int l = 0; l < 16; ++l) {
-                        if (j == 0 || j == 15 || k == 0 || k == 15 || l == 0 || l == 15) {
-                            double d0 = (double) ((float) j / 15.0F * 2.0F - 1.0F);
-                            double d1 = (double) ((float) k / 15.0F * 2.0F - 1.0F);
-                            double d2 = (double) ((float) l / 15.0F * 2.0F - 1.0F);
+            for (int j = 0; j < impl$boundingBoxSize; ++j) {
+                for (int k = 0; k < impl$boundingBoxSize; ++k) {
+                    for (int l = 0; l < impl$boundingBoxSize; ++l) {
+                        if (j == 0 || j == impl$boundingBoxSize - 1 || k == 0 || k == impl$boundingBoxSize - 1 || l == 0 || l == impl$boundingBoxSize - 1) {
+                            double d0 = (double) ((float) j / (float)(impl$boundingBoxSize - 1) * 2.0F - 1.0F);
+                            double d1 = (double) ((float) k / (float)(impl$boundingBoxSize - 1) * 2.0F - 1.0F);
+                            double d2 = (double) ((float) l / (float)(impl$boundingBoxSize - 1) * 2.0F - 1.0F);
                             final double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                             d0 = d0 / d3;
                             d1 = d1 / d3;
                             d2 = d2 / d3;
-                            float f = this.size * (0.7F + this.world.rand.nextFloat() * 0.6F);
+                            float f = this.size * (0.7F + impl$random * 0.6F);
+                            if (!impl$reducedRandomness)
+                                f = this.size * (0.7F + this.world.rand.nextFloat() * 0.6F);
+                            //Sponge End
                             double d4 = this.x;
                             double d6 = this.y;
                             double d8 = this.z;
@@ -245,15 +249,17 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             d11 = EnchantmentProtection.getBlastDamageReduction((EntityLivingBase) entity, d10);
                         }
 
-                        entity.motionX += d5 * d11;
-                        entity.motionY += d7 * d11;
-                        entity.motionZ += d9 * d11;
+                        //Sponge Start
+                        entity.motionX += d5 * d11 * impl$entityKnockbackMultiplier;
+                        entity.motionY += d7 * d11 * impl$entityKnockbackMultiplier;
+                        entity.motionZ += d9 * d11 * impl$entityKnockbackMultiplier;
 
                         if (entity instanceof EntityPlayer) {
                             final EntityPlayer entityplayer = (EntityPlayer) entity;
 
                             if (!entityplayer.isSpectator() && (!entityplayer.isCreative() || !entityplayer.capabilities.isFlying)) {
-                                this.playerKnockbackMap.put(entityplayer, new Vec3d(d5 * d10, d7 * d10, d9 * d10));
+                                this.playerKnockbackMap.put(entityplayer, new Vec3d(d5 * d10 * impl$entityKnockbackMultiplier, d7 * d10 * impl$entityKnockbackMultiplier, d9 * d10 * impl$entityKnockbackMultiplier));
+                                //Sponge End
                             }
                         }
                     }
@@ -389,6 +395,36 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     @Override
     public void bridge$setShouldDamageEntities(final boolean shouldDamageEntities) {
         this.impl$shouldDamageEntities = shouldDamageEntities;
+    }
+
+    @Override
+    public void bridge$setBoundingBoxSize(int boundingBoxSize) {
+        this.impl$boundingBoxSize = boundingBoxSize;
+    }
+
+    @Override
+    public int bridge$getBoundingBoxSize() {
+        return this.impl$boundingBoxSize;
+    }
+
+    @Override
+    public void bridge$setReducedRandomness(boolean reducedRandomness) {
+        this.impl$reducedRandomness = reducedRandomness;
+    }
+
+    @Override
+    public boolean bridge$getReducedRandomness() {
+        return this.impl$reducedRandomness;
+    }
+
+    @Override
+    public void bridge$setEntityKnockbackMultiplier(double entityKnockbackMultiplier) {
+        this.impl$entityKnockbackMultiplier = entityKnockbackMultiplier;
+    }
+
+    @Override
+    public double bridge$getEntityKnockbackMultiplier() {
+        return this.impl$entityKnockbackMultiplier;
     }
 
     @Nullable

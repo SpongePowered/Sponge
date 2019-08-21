@@ -101,4 +101,19 @@ public abstract class ExplosionMixin_API implements Explosion {
         return ((ExplosionBridge) this).bridge$getShouldDamageEntities();
     }
 
+    @Override
+    public int getBoundingBoxSize() {
+        return  ((ExplosionBridge) this).bridge$getBoundingBoxSize();
+    }
+
+    @Override
+    public boolean isRandomnessReduced() {
+        return  ((ExplosionBridge) this).bridge$getReducedRandomness();
+    }
+
+    @Override
+    public double getEntityKnockbackMultiplier() {
+        return  ((ExplosionBridge) this).bridge$getEntityKnockbackMultiplier();
+    }
+
 }
