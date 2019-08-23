@@ -28,7 +28,6 @@ import com.google.common.base.MoreObjects;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.block.state.pattern.BlockPattern;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -45,23 +44,18 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.entity.InvokingTeleporterContext;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
-import java.util.Random;
 
 @Mixin(Teleporter.class)
-public class TeleporterMixin implements TeleporterBridge {
+public abstract class TeleporterMixin implements TeleporterBridge {
 
-    private boolean impl$isVanilla = this.getClass().getName().startsWith("net.minecraft.");
     private boolean impl$createNetherPortal = true;
     private PortalAgentType impl$portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(this);
 
     @Shadow @Final private WorldServer world;
-    @Shadow @Final private Random random;
     @Shadow @Final private Long2ObjectMap<Teleporter.PortalPosition> destinationCoordinateCache;
 
     /**
@@ -192,7 +186,6 @@ public class TeleporterMixin implements TeleporterBridge {
     @Overwrite
     public boolean makePortal(Entity entityIn) {
         return ((PortalAgent) this).createPortal(((org.spongepowered.api.entity.Entity) entityIn).getLocation()).isPresent();
-
     }
 
     @Override
@@ -211,35 +204,8 @@ public class TeleporterMixin implements TeleporterBridge {
     }
 
     @Override
-    public void bridge$placeEntity(net.minecraft.world.World world, Entity entity, float yaw) {
-        boolean didPort;
-
-        if (entity instanceof EntityPlayerMP) {
-            this.placeInPortal(entity, yaw);
-            didPort = true;
-        } else {
-            if (((WorldServerBridge) this.world).bridge$getDimensionId() == 1) {
-                didPort = true;
-            } else {
-                didPort = this.placeInExistingPortal(entity, yaw);
-            }
-        }
-
-        if (PhaseTracker.getInstance().getCurrentContext() instanceof InvokingTeleporterContext) {
-            if (!((InvokingTeleporterContext) PhaseTracker.getInstance().getCurrentContext()).getDidPort()) {
-                ((InvokingTeleporterContext) PhaseTracker.getInstance().getCurrentContext()).setDidPort(didPort);
-            }
-        }
-    }
-
-    @Override
     public PortalAgentType bridge$getPortalAgentType() {
         return this.impl$portalAgentType;
-    }
-
-    @Override
-    public boolean bridge$isVanilla() {
-        return this.impl$isVanilla;
     }
 
     @Override
