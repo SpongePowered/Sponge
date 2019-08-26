@@ -133,8 +133,9 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             d1 = d1 / d3;
                             d2 = d2 / d3;
                             float f = this.size * (0.7F + impl$random * 0.6F);
-                            if (!impl$reducedRandomness)
+                            if (!impl$reducedRandomness) {
                                 f = this.size * (0.7F + this.world.rand.nextFloat() * 0.6F);
+                            }
                             //Sponge End
                             double d4 = this.x;
                             double d6 = this.y;
