@@ -159,7 +159,7 @@ public final class DataRegistrar {
         dataManager.registerBuilder(LocatableBlock.class, new SpongeLocatableBlockBuilder());
 
         // Block stuff
-        dataManager.registerBuilder(BlockSnapshot.class, new SpongeBlockSnapshotBuilder());
+        dataManager.registerBuilder(BlockSnapshot.class, SpongeBlockSnapshotBuilder.pooled());
         dataManager.registerBuilder(BlockState.class, new SpongeBlockStateBuilder());
         dataManager.registerBuilderAndImpl(ImmutableTreeData.class, ImmutableSpongeTreeData.class, new ImmutableSpongeTreeDataBuilder());
 

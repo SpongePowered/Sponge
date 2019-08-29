@@ -42,7 +42,7 @@ public final class ChunkRegeneratePhaseState extends GeneralGenerationPhaseState
     }
 
     @Override
-    public ChunkRegenerateContext createPhaseContext() {
+    public ChunkRegenerateContext createNewContext() {
         return new ChunkRegenerateContext(this);
     }
 

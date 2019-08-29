@@ -31,7 +31,7 @@ public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericG
     }
 
     @Override
-    public GenericGenerationContext createPhaseContext() {
+    public GenericGenerationContext createNewContext() {
         return new GenericGenerationContext(this)
                 .addCaptures();
     }

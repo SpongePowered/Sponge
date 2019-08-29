@@ -72,7 +72,6 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase.Listener;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -238,10 +237,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param chunkZ The chunk z position
      * @return True if the entity was successfully captured
      */
-    default boolean spawnEntityOrCapture(C context, org.spongepowered.api.entity.Entity entity, int chunkX, int chunkZ) {
+    default boolean spawnEntityOrCapture(final C context, final org.spongepowered.api.entity.Entity entity, final int chunkX, final int chunkZ) {
         final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
@@ -266,7 +265,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param entityitem The item to be dropped
      * @return True if we are capturing, false if we are to let the item spawn
      */
-    default boolean spawnItemOrCapture(C phaseContext, Entity entity, EntityItem entityitem) {
+    default boolean spawnItemOrCapture(final C phaseContext, final Entity entity, final EntityItem entityitem) {
         if (this.doesCaptureEntityDrops(phaseContext)) {
             if (this.tracksEntitySpecificDrops()) {
                 // We are capturing per entity drop
@@ -297,7 +296,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param context The context to re-check for captures
      * @param depth THe current processing depth
      */
-    default void performOnBlockAddedSpawns(C context, int depth) {
+    default void performOnBlockAddedSpawns(final C context, final int depth) {
 
     }
     /**
@@ -322,9 +321,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param changeFlag
      * @param currentDepth The current processing depth, to prevenet stack overflows
      */
-    default void performPostBlockNotificationsAndNeighborUpdates(C context,
-        IBlockState newState, SpongeBlockChangeFlag changeFlag,
-        int currentDepth) {
+    default void performPostBlockNotificationsAndNeighborUpdates(final C context,
+        final IBlockState newState, final SpongeBlockChangeFlag changeFlag,
+        final int currentDepth) {
 
     }
 
@@ -338,16 +337,16 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param cause
      * @return
      */
-    default ChangeBlockEvent.Post createChangeBlockPostEvent(C context, ImmutableList<Transaction<BlockSnapshot>> transactions,
-        Cause cause) {
+    default ChangeBlockEvent.Post createChangeBlockPostEvent(final C context, final ImmutableList<Transaction<BlockSnapshot>> transactions,
+        final Cause cause) {
         return SpongeEventFactory.createChangeBlockEventPost(cause, transactions);
     }
 
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place. The provided {@link BlockChange} is usually
-     * provided from either {@link #performTransactionProcess(Transaction}
-     * or {@link UnwindingState#postBlockTransactionApplication(BlockChange, Transaction, UnwindingPhaseContext)} due to
+     * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, PhaseContext, int)}
+     * or {@link IPhaseState#postBlockTransactionApplication(BlockChange, Transaction, PhaseContext)} due to
      * delegation to the underlying context during post processing of reactionary
      * side effects (like water spread from a bucket).
      *
@@ -355,7 +354,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param snapshotTransaction The transaction of the old and new snapshots
      * @param context The context for information
      */
-    default void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction, C context) { }
+    default void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> snapshotTransaction,
+        final C context) { }
 
     /**
      * During {@link UnwindingState#unwind(UnwindingPhaseContext)}, this delegates to the "unwinding" state to perform
@@ -364,8 +364,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param unwindingContext
      * @param entities
      */
-    default void postProcessSpawns(C unwindingContext, ArrayList<org.spongepowered.api.entity.Entity> entities) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    default void postProcessSpawns(final C unwindingContext, final ArrayList<org.spongepowered.api.entity.Entity> entities) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             SpongeCommonEventFactory.callSpawnEntity(entities, unwindingContext);
         }
@@ -398,7 +398,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return Whether per-block drops are being captured
      * @param context
      */
-    default boolean tracksBlockSpecificDrops(C context) {
+    default boolean tracksBlockSpecificDrops(final C context) {
         return false;
     }
     /**
@@ -439,7 +439,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param context The context, usually to provide the boolean value depending on the source of the phase
      * @return True if entity drops are captured
      */
-    default boolean doesCaptureEntityDrops(C context) {
+    default boolean doesCaptureEntityDrops(final C context) {
         return false;
     }
 
@@ -465,7 +465,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param context The context to provide extra information whether captures can take place
      * @return True or false
      */
-    default boolean doesBulkBlockCapture(C context) {
+    default boolean doesBulkBlockCapture(final C context) {
         return true;
     }
 
@@ -502,7 +502,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return True by default, false for things like world gen
      * @param context
      */
-    default boolean doesBlockEventTracking(C context) {
+    default boolean doesBlockEventTracking(final C context) {
         return true;
     }
 
@@ -515,7 +515,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return
      */
     // TODO -implement this into the config, and wherever else
-    default boolean doesDropEventTracking(C context) {
+    default boolean doesDropEventTracking(final C context) {
         return true;
     }
 
@@ -549,7 +549,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param context The phase data currently present
      * @return True if it's going to be ignored
      */
-    default boolean ignoresBlockUpdateTick(C context) {
+    default boolean ignoresBlockUpdateTick(final C context) {
         return false;
     }
 
@@ -592,8 +592,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param flags
      * @return
      */
-    default boolean shouldCaptureBlockChangeOrSkip(C phaseContext, BlockPos pos, IBlockState currentState,
-        IBlockState newState, BlockChangeFlag flags) {
+    default boolean shouldCaptureBlockChangeOrSkip(final C phaseContext, final BlockPos pos, final IBlockState currentState,
+        final IBlockState newState, final BlockChangeFlag flags) {
         return true;
     }
 
@@ -607,7 +607,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param context
      * @return
      */
-    default boolean alreadyCapturingBlockTicks(C context) {
+    default boolean alreadyCapturingBlockTicks(final C context) {
         return false;
     }
 
@@ -695,8 +695,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param minecraftWorld The world
      * @param notifier The tracker type (owner or notifier)
      */
-    default void associateNeighborStateNotifier(C unwindingContext, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-        WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    default void associateNeighborStateNotifier(final C unwindingContext, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
+        final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
 
     }
 
@@ -708,7 +708,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param explosionContext The explosion context to populate
      * @param currentPhaseData The current context to provide information
      */
-    default void appendContextPreExplosion(ExplosionContext explosionContext, C currentPhaseData) {
+    default void appendContextPreExplosion(final ExplosionContext explosionContext, final C currentPhaseData) {
 
     }
 
@@ -722,7 +722,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param context The context
      * @param phaseContext the block tick context being entered
      */
-    default void appendNotifierPreBlockTick(WorldServerBridge mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
+    default void appendNotifierPreBlockTick(final WorldServerBridge mixinWorld, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
         final Chunk chunk = ((WorldServer) mixinWorld).getChunk(pos);
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
@@ -739,8 +739,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param pos
      * @param blockEvent
      */
-    default void appendNotifierToBlockEvent(C context, PhaseContext<?> currentContext,
-                                            WorldServerBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
+    default void appendNotifierToBlockEvent(final C context, final PhaseContext<?> currentContext,
+                                            final WorldServerBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
 
     }
 
@@ -752,12 +752,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param playerIn
      * @param context
      */
-    default void capturePlayerUsingStackToBreakBlock(ItemStack itemStack, EntityPlayerMP playerIn, C context) {
+    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final EntityPlayerMP playerIn, final C context) {
 
     }
 
 
-    default void provideNotifierForNeighbors(C context, NeighborNotificationContext notification) {
+    default void provideNotifierForNeighbors(final C context, final NeighborNotificationContext notification) {
         if (context.neighborNotificationSource != null) {
             notification.setSourceNotification(context.neighborNotificationSource);
         }
@@ -783,7 +783,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * for more information and context of why this is needed.
      * </p>
      *
-     * @return True if an {@link Listener#GENERAL_LISTENER} is to be entered during this state
+     * @return True if an {@link org.spongepowered.common.event.tracking.phase.plugin.PluginPhase.Listener#GENERAL_LISTENER}
+     *     is to be entered during this state
      */
     default boolean allowsEventListener() {
         return true;
@@ -799,7 +800,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param chunkZ the z position
      * @return The chunk populator offset
      */
-    default Vector3i getChunkPopulatorOffset(org.spongepowered.api.world.Chunk chunk, int chunkX, int chunkZ) {
+    default Vector3i getChunkPopulatorOffset(final org.spongepowered.api.world.Chunk chunk, final int chunkX, final int chunkZ) {
         return  new Vector3i(chunkX * 16 + 8, 0, chunkZ * 16 + 8);
     }
 
@@ -807,30 +808,20 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default boolean getShouldCancelAllTransactions(C context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent, ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+    default boolean getShouldCancelAllTransactions(final C context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
+        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
         return false;
     }
 
-    default void capturesNeighborNotifications(C context, WorldServerBridge mixinWorld, BlockPos notifyPos, Block sourceBlock,
-                                               IBlockState iblockstate, BlockPos sourcePos) {
-    }
     /**
      * Specifically captures a block change by {@link ChunkMixin#bridge$setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)}
      * such that the change of a {@link IBlockState} will be appropriately logged, along with any changes of tile entities being removed
      * or added, likewise, this will avoid duplicating transactions later after the fact, in the event that multiple changes are taking
      * place, including but not withstanding, tile entity replacements after the fact.
-     *
-     * @param phaseContext
-     * @param pos
-     * @param originalBlockSnapshot
-     * @param newState
-     * @param flags
-     * @param tileEntity
-     * @return
      */
     @Nullable
-    default BlockTransaction.ChangeBlock captureBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
-        BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
+    default BlockTransaction.ChangeBlock captureBlockChange(final C phaseContext, final BlockPos pos, final SpongeBlockSnapshot originalBlockSnapshot,
+        final IBlockState newState, final BlockChangeFlag flags, @Nullable final TileEntity tileEntity) {
         if (!this.doesBulkBlockCapture(phaseContext)) {
             phaseContext.setSingleSnapshot(originalBlockSnapshot);
             return null;
@@ -842,16 +833,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return null;
 
     }
-    default void captureTileEntityReplacement(C currentContext, WorldServerBridge mixinWorldServer, BlockPos pos, @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
-        // Default, do nothing.
 
-    }
-
-    default boolean tracksTileEntityChanges(C currentContext) {
+    default boolean tracksTileEntityChanges(final C currentContext) {
         return false;
     }
 
-    default void processCancelledTransaction(C context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
+    default void processCancelledTransaction(final C context, final Transaction<BlockSnapshot> transaction, final BlockSnapshot original) {
         if (this.hasSpecificBlockProcess(context)) {
             context.getCapturedBlockSupplier().cancelTransaction(original);
             ((SpongeBlockSnapshot) original).getWorldServer().ifPresent(worldServer -> {
@@ -872,20 +859,20 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         }
     }
 
-    default boolean hasSpecificBlockProcess(C context) {
+    default boolean hasSpecificBlockProcess(final C context) {
         return false;
     }
-    default boolean doesCaptureNeighborNotifications(C context) {
+    default boolean doesCaptureNeighborNotifications(final C context) {
         return false;
     }
 
-    default void postProcessSpecificBlockChange(C currentContext, BlockTransaction.ChangeBlock changeBlock, int i) {
+    default void postProcessSpecificBlockChange(final C currentContext, final BlockTransaction.ChangeBlock changeBlock, final int i) {
 
     }
 
-    default BlockChange associateBlockChangeWithSnapshot(C phaseContext, IBlockState newState, Block newBlock,
-        IBlockState currentState, SpongeBlockSnapshot snapshot,
-        Block originalBlock) {
+    default BlockChange associateBlockChangeWithSnapshot(final C phaseContext, final IBlockState newState, final Block newBlock,
+        final IBlockState currentState, final SpongeBlockSnapshot snapshot,
+        final Block originalBlock) {
         if (newBlock == Blocks.AIR) {
             return BlockChange.BREAK;
         } else if (newBlock != originalBlock && !TrackingUtil.forceModify(originalBlock, newBlock)) {
@@ -906,7 +893,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param phaseContext The appropriate phase context
      * @return True if the modifiers should be pushed to the manager
      */
-    default boolean shouldProvideModifiers(C phaseContext) {
+    default boolean shouldProvideModifiers(final C phaseContext) {
         return true;
     }
     default boolean isRestoring() {

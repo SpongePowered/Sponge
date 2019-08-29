@@ -35,8 +35,14 @@ public class EntityContext<E extends EntityContext<E>> extends PhaseContext<E> {
 
     @Nullable protected DamageSource damageSource;
 
-    public EntityContext(IPhaseState<? extends E> state) {
+    public EntityContext(final IPhaseState<? extends E> state) {
         super(state);
+    }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.damageSource = null;
     }
 
     @Nullable
@@ -45,14 +51,14 @@ public class EntityContext<E extends EntityContext<E>> extends PhaseContext<E> {
     }
 
     @SuppressWarnings("unchecked")
-    public E setDamageSource(DamageSource damageSource) {
+    public E setDamageSource(final DamageSource damageSource) {
         this.damageSource = damageSource;
         return (E) this;
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "DamageSource", this.damageSource);
     }

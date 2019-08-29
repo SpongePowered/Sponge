@@ -37,7 +37,7 @@ public class GeneralDragonPhaseState implements IPhaseState<GeneralizedContext> 
 
     @Override
     public void unwind(GeneralizedContext phaseContext) {
-        TrackingUtil.processBlockCaptures(this, phaseContext);
+        TrackingUtil.processBlockCaptures(phaseContext);
     }
 
     private final String desc = TrackingUtil.phaseStateToString("Dragon", this);

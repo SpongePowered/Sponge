@@ -69,6 +69,7 @@ import java.util.stream.Collectors;
 
 class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
+
     private final BiConsumer<CauseStackManager.StackFrame, EntityTickContext> ENTITY_TICK_MODIFIER =
         super.getFrameModifier().andThen((frame, context) -> {
             final Entity tickingEntity = context.getSource(Entity.class)
@@ -102,7 +103,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         phaseContext.addNotifierAndOwnerToCauseStack(frame);
         // If we're doing bulk captures for blocks, go ahead and do them. otherwise continue with entity checks
         if (phaseContext.allowsBulkBlockCaptures()) {
-            if (!TrackingUtil.processBlockCaptures(this, phaseContext)) {
+            if (!TrackingUtil.processBlockCaptures(phaseContext)) {
                 ((EntityBridge) tickingEntity).bridge$onCancelledBlockChange(phaseContext);
             }
         }
@@ -237,12 +238,12 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public EntityTickContext createPhaseContext() {
+    protected EntityTickContext createNewContext() {
         return new EntityTickContext(this).addCaptures();
     }
 
     @Override
-    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<BlockSnapshot> transaction,
+    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction,
         final EntityTickContext context) {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();

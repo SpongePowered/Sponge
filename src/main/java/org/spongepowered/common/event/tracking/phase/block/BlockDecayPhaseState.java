@@ -31,7 +31,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
@@ -52,36 +52,33 @@ import java.util.stream.Collectors;
 
 final class BlockDecayPhaseState extends BlockPhaseState {
 
-    public final BiConsumer<StackFrame, GeneralizedContext> BLOCK_DECAY_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
+    private final BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> BLOCK_DECAY_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
         final LocatableBlock locatable = context.getSource(LocatableBlock.class)
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
         frame.pushCause(locatable);
     });
 
-    BlockDecayPhaseState() {
-    }
-
     @Override
-    public GeneralizedContext createPhaseContext() {
-        return super.createPhaseContext()
+    public GeneralizedContext createNewContext() {
+        return super.createNewContext()
             .addCaptures();
     }
 
     @Override
-    public BiConsumer<StackFrame, GeneralizedContext> getFrameModifier() {
+    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
         return this.BLOCK_DECAY_MODIFIER;
     }
 
     @SuppressWarnings({"unchecked", "RedundantCast"})
     @Override
-    public void unwind(GeneralizedContext context) {
+    public void unwind(final GeneralizedContext context) {
         final LocatableBlock locatable = context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
         final Location<World> worldLocation = locatable.getLocation();
-        final WorldServerBridge mixinWorld = ((WorldServerBridge) worldLocation.getExtent());
+        final WorldServerBridge mixinWorld = (WorldServerBridge) worldLocation.getExtent();
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, context);
+        TrackingUtil.processBlockCaptures(context);
 
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
@@ -120,9 +117,8 @@ final class BlockDecayPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public BlockChange associateBlockChangeWithSnapshot(GeneralizedContext phaseContext, IBlockState newState,
-        Block newBlock,
-        IBlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
+    public BlockChange associateBlockChangeWithSnapshot(final GeneralizedContext phaseContext, final IBlockState newState,
+        final Block newBlock, final IBlockState currentState, final SpongeBlockSnapshot snapshot, final Block originalBlock) {
         if (newBlock == Blocks.AIR) {
             return BlockChange.DECAY;
         } else {

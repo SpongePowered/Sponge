@@ -27,7 +27,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -40,7 +40,7 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     }
 
     @Override
-    public DimensionContext createPhaseContext() {
+    public DimensionContext createNewContext() {
         return new DimensionContext()
                 .addBlockCaptures()
                 .addEntityCaptures()
@@ -48,13 +48,13 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     }
 
     @Override
-    public void unwind(DimensionContext phaseContext) {
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    public void unwind(final DimensionContext phaseContext) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
-            TrackingUtil.processBlockCaptures(this, phaseContext);
-    
+            TrackingUtil.processBlockCaptures(phaseContext);
+
             phaseContext.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities ->
                         SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext)
@@ -62,7 +62,7 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
             phaseContext.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (EntityItem entity : entities) {
+                        for (final EntityItem entity : entities) {
                             capturedEntities.add((Entity) entity);
                         }
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, phaseContext);
@@ -81,10 +81,10 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
 
      */
     @Override
-    public boolean spawnEntityOrCapture(DimensionContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final DimensionContext context, final Entity entity, final int chunkX, final int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }

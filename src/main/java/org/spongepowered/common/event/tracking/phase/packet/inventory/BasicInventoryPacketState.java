@@ -137,7 +137,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Override
-    public InventoryPacketContext createPhaseContext() {
+    public InventoryPacketContext createNewContext() {
         return new InventoryPacketContext(this).addCaptures(); // if for whatever reason there's a capture.. i don't know...
     }
 

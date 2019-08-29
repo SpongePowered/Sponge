@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
@@ -33,28 +35,25 @@ import java.util.function.BiConsumer;
 
 public class BlockEventQueuePhaseState extends BlockPhaseState {
 
-    public final BiConsumer<StackFrame, GeneralizedContext> FRAME_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
+    public final BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> FRAME_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
         final BlockEventDataBridge blockEventData = context.getSource(BlockEventDataBridge.class).orElse(null);
         if (blockEventData != null) {
-            if (blockEventData.bridge$getTileEntity() != null) {
-                frame.pushCause(blockEventData.bridge$getTileEntity());
+            final TileEntity tile = blockEventData.bridge$getTileEntity();
+            if (tile != null) {
+                frame.pushCause(tile);
             }
-            if (blockEventData.bridge$getTickingLocatable() != null) {
-                if (blockEventData.bridge$getTileEntity() == null) {
-                    frame.pushCause(blockEventData.bridge$getTickingLocatable());
+            final LocatableBlock locatable = blockEventData.bridge$getTickingLocatable();
+            if (locatable != null) {
+                if (tile == null) {
+                    frame.pushCause(locatable);
                 }
-                frame.addContext(EventContextKeys.BLOCK_EVENT_QUEUE, blockEventData.bridge$getTickingLocatable());
+                frame.addContext(EventContextKeys.BLOCK_EVENT_QUEUE, locatable);
             }
         }
     });
 
     @Override
-    public GeneralizedContext createPhaseContext() {
-        return super.createPhaseContext();
-    }
-
-    @Override
-    public BiConsumer<StackFrame, GeneralizedContext> getFrameModifier() {
+    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
         return this.FRAME_MODIFIER;
     }
 

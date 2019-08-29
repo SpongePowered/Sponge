@@ -43,6 +43,11 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
         return super.hasCaptures() || (this.usesMulti && this.blockSuppliers != null && !this.blockSuppliers.isEmpty());
     }
 
+    @Override
+    protected void reset() {
+        super.reset();
+    }
+
     @Nullable
     static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context, boolean hasCaptures) {
         if (!state.requiresPost() || !hasCaptures) {

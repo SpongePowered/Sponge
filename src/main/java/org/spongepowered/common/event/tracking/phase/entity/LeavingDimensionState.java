@@ -26,11 +26,8 @@ package org.spongepowered.common.event.tracking.phase.entity;
 
 final class LeavingDimensionState extends EntityPhaseState<BasicEntityContext> {
 
-    LeavingDimensionState() {
-    }
-
     @Override
-    public BasicEntityContext createPhaseContext() {
+    public BasicEntityContext createNewContext() {
         return new BasicEntityContext(this);
     }
 

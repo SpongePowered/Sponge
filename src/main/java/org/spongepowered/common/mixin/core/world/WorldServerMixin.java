@@ -1801,7 +1801,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if (!this.isBlockLoaded(pos)) {
             return (SpongeBlockSnapshot) BlockSnapshot.NONE;
         }
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         final int chunkX = pos.getX() >> 4;
         final int chunkZ = pos.getZ() >> 4;
         final Chunk chunk = ((ChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
@@ -1834,23 +1834,28 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
     @Override
     public SpongeBlockSnapshot bridge$createSnapshot(final IBlockState state, final IBlockState extended, final BlockPos pos, final BlockChangeFlag updateFlag) {
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.reset();
         builder.blockState(state)
                 .extendedState(extended)
                 .worldId(((org.spongepowered.api.world.World) this).getUniqueId())
                 .position(VecHelper.toVector3i(pos));
-        final Optional<UUID> creator = ((org.spongepowered.api.world.World) this).getCreator(pos.getX(), pos.getY(), pos.getZ());
-        final Optional<UUID> notifier = ((org.spongepowered.api.world.World) this).getNotifier(pos.getX(), pos.getY(), pos.getZ());
+        final Chunk chunk = this.getChunk(pos);
+        if (chunk == null) {
+            final SpongeBlockSnapshot build = builder.flag(updateFlag).build();
+            builder.reset();
+            return build;
+        }
+        final Optional<UUID> creator = ((ChunkBridge) chunk).bridge$getBlockOwnerUUID(pos);
+        final Optional<UUID> notifier = ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos);
         creator.ifPresent(builder::creator);
         notifier.ifPresent(builder::notifier);
         final boolean hasTileEntity = SpongeImplHooks.hasBlockTileEntity(state.getBlock(), state);
-        final TileEntity tileEntity = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
+        final TileEntity tileEntity = chunk.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
         if (hasTileEntity || tileEntity != null) {
             // We MUST only check to see if a TE exists to avoid creating a new one.
             if (tileEntity != null) {
-                final TileEntity tile = (TileEntity) tileEntity;
-                for (final DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).bridge$getCustomManipulators()) {
+                for (final DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators()) {
                     builder.add(manipulator);
                 }
                 final NBTTagCompound nbt = new NBTTagCompound();
@@ -1871,7 +1876,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @Override
     public SpongeBlockSnapshot bridge$createSnapshotWithEntity(final IBlockState state, final BlockPos pos, final BlockChangeFlag updateFlag,
         @Nullable final TileEntity tileEntity) {
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.reset();
         builder.blockState(state)
             .extendedState(state)

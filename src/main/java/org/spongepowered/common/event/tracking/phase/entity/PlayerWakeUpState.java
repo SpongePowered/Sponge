@@ -28,18 +28,16 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 
 final class PlayerWakeUpState extends EntityPhaseState<BasicEntityContext> {
 
-    PlayerWakeUpState() {
+    @Override
+    public BasicEntityContext createNewContext() {
+        return new BasicEntityContext(this)
+            .addCaptures();
     }
 
     @Override
-    public BasicEntityContext createPhaseContext() {
-        return new BasicEntityContext(this);
-    }
-
-    @Override
-    public void unwind(BasicEntityContext context) {
+    public void unwind(final BasicEntityContext context) {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, context);
+        TrackingUtil.processBlockCaptures(context);
     }
 }

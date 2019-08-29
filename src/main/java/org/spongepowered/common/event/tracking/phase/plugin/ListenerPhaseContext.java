@@ -43,17 +43,18 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
     Object object;
     private CapturePlayer capturePlayer;
 
-    ListenerPhaseContext(IPhaseState<L> state) {
+    ListenerPhaseContext(final IPhaseState<L> state) {
         super(state);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    protected boolean isRunaway(PhaseContext<?> phaseContext) {
+    protected boolean isRunaway(final PhaseContext<?> phaseContext) {
         return phaseContext instanceof ListenerPhaseContext && ((ListenerPhaseContext) phaseContext).object == this.object;
     }
 
     @SuppressWarnings("unchecked")
-    public L event(Object obj) {
+    public L event(final Object obj) {
         this.object = obj;
         return (L) this;
     }
@@ -83,14 +84,23 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$" + indent + "s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent)
             .add(s + "- %s: %s", "Listener", this.object);
         if (this.capturePlayer != null && this.capturePlayer.player != null) {
             printer.add(s + "- %s: %s", "CapturedPlayer", this.capturePlayer.player);
         }
         return printer;
+    }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.object = null;
+        if (this.capturePlayer != null) {
+            this.capturePlayer.player = null;
+        }
     }
 
     public static final class CapturePlayer {
@@ -106,14 +116,14 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) {
                 return true;
             }
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            CapturePlayer that = (CapturePlayer) o;
+            final CapturePlayer that = (CapturePlayer) o;
             return com.google.common.base.Objects.equal(this.player, that.player);
         }
 
@@ -129,7 +139,7 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
                 .toString();
         }
 
-        public void addPlayer(EntityPlayerMP playerMP) {
+        public void addPlayer(final EntityPlayerMP playerMP) {
             this.player = ((Player) playerMP);
         }
     }

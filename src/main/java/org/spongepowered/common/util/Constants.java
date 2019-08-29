@@ -93,6 +93,10 @@ public final class Constants {
     public static final String UUID_LEAST = "UUIDLeast";
     public static final BlockPos DUMMY_POS = new BlockPos(0, 0, 0);
     public static final int MINECRAFT_DATA_VERSION = 1343;
+    public static final String MINECRAFT_CLIENT = "net.minecraft.client.Minecraft";
+    public static final String DEDICATED_SERVER = "net.minecraft.server.dedicated.DedicatedServer";
+    public static final String MINECRAFT_SERVER = "net.minecraft.server.MinecraftServer";
+    public static final String INTEGRATED_SERVER = "net.minecraft.server.integrated.IntegratedServer";
 
     @SuppressWarnings("DeprecatedIsStillUsed")
     public static final class Sponge {

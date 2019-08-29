@@ -28,7 +28,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -42,7 +42,7 @@ import java.util.function.BiConsumer;
 
 final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
 
-    final BiConsumer<StackFrame, EntityDeathContext> DEATH_STATE_MODIFIER = super.getFrameModifier()
+    private final BiConsumer<CauseStackManager.StackFrame, EntityDeathContext> DEATH_STATE_MODIFIER = super.getFrameModifier()
         .andThen((frame, ctx) -> {
             final Entity dyingEntity =
                 ctx.getSource(Entity.class)
@@ -53,7 +53,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         });
 
     @Override
-    public boolean tracksBlockSpecificDrops(EntityDeathContext context) {
+    public boolean tracksBlockSpecificDrops(final EntityDeathContext context) {
         return true;
     }
 
@@ -63,19 +63,19 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
     }
 
     @Override
-    public BiConsumer<StackFrame, EntityDeathContext> getFrameModifier() {
+    public BiConsumer<CauseStackManager.StackFrame, EntityDeathContext> getFrameModifier() {
         return this.DEATH_STATE_MODIFIER;
     }
 
     @Override
-    public EntityDeathContext createPhaseContext() {
+    public EntityDeathContext createNewContext() {
         return new EntityDeathContext(this)
             .addCaptures()
             .addEntityDropCaptures();
     }
 
     @Override
-    public void unwind(EntityDeathContext context) {
+    public void unwind(final EntityDeathContext context) {
         final Entity dyingEntity =
             context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
@@ -84,10 +84,10 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         // WE have to handle per-item entity drops and entity item drops before we handle other entity spawns
         // the reason we have to do it this way is because forge allows for item drops to potentially spawn
         // other entities at the same time.
-        boolean hasCaptures = !context.getPerEntityItemEntityDropSupplier().isEmpty();
+        final boolean hasCaptures = !context.getPerEntityItemEntityDropSupplier().isEmpty();
         context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
             final ArrayList<Entity> entities = new ArrayList<>();
-            for (EntityItem item : items) {
+            for (final EntityItem item : items) {
                 entities.add((Entity) item);
             }
 
@@ -97,7 +97,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                 entityPlayer.inventory.clear();
             }
 
-            try (StackFrame internal = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame internal = Sponge.getCauseStackManager().pushCauseFrame()) {
                 internal.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                 SpongeCommonEventFactory.callDropItemDestruct(entities, context);
             }
@@ -137,7 +137,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, context);
+        TrackingUtil.processBlockCaptures(context);
 
     }
 

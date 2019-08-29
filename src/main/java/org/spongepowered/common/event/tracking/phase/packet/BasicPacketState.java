@@ -27,7 +27,7 @@ package org.spongepowered.common.event.tracking.phase.packet;
 public class BasicPacketState extends PacketState<BasicPacketContext> {
 
     @Override
-    public BasicPacketContext createPhaseContext() {
+    public BasicPacketContext createNewContext() {
         return new BasicPacketContext(this)
             .addCaptures()
             .addEntityDropCaptures();

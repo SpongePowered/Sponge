@@ -625,8 +625,8 @@ public class SpongeCommonEventFactory {
             final WorldProperties world = ((World) worldIn).getProperties();
             final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
-            final SpongeBlockSnapshot from = new SpongeBlockSnapshotBuilder().blockState(fromState).world(world).position(position).build();
-            final SpongeBlockSnapshot to = new SpongeBlockSnapshotBuilder().blockState(toState).world(world).position(position).build();
+            final SpongeBlockSnapshot from = SpongeBlockSnapshotBuilder.pooled().blockState(fromState).world(world).position(position).build();
+            final SpongeBlockSnapshot to = SpongeBlockSnapshotBuilder.pooled().blockState(toState).world(world).position(position).build();
             final Transaction<BlockSnapshot> transaction = new Transaction<>(from, to);
             final ChangeBlockEvent.Break event = SpongeEventFactory.createChangeBlockEventBreak(frame.getCurrentCause(),
                 Collections.singletonList(transaction));

@@ -31,6 +31,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
@@ -132,18 +133,18 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     @Nullable private Object source;
 
-    public P source(Object owner) {
+    public P source(final Object owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.source = owner;
         return (P) this;
     }
 
-    public P owner(Supplier<Optional<User>> supplier) {
+    public P owner(final Supplier<Optional<User>> supplier) {
         supplier.get().ifPresent(this::owner);
         return (P) this;
     }
 
-    public P owner(User owner) {
+    public P owner(final User owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         if (this.owner != null) {
             throw new IllegalStateException("Owner for this phase context is already set!");
@@ -152,12 +153,12 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return (P) this;
     }
 
-    public P notifier(Supplier<Optional<User>> supplier) {
+    public P notifier(final Supplier<Optional<User>> supplier) {
         supplier.get().ifPresent(this::notifier);
         return (P) this;
     }
 
-    public P notifier(User notifier) {
+    public P notifier(final User notifier) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         if (this.notifier != null) {
             throw new IllegalStateException("Notifier for this phase context is already set!");
@@ -215,7 +216,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return (P) this;
     }
 
-    public P setBulkBlockCaptures(boolean captures) {
+    public P setBulkBlockCaptures(final boolean captures) {
         this.allowsBulkBlockCaptures = captures;
         return (P) this;
     }
@@ -224,7 +225,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.allowsBulkBlockCaptures;
     }
 
-    public P setBlockEvents(boolean events) {
+    public P setBlockEvents(final boolean events) {
         this.allowsBlockEvents = events;
         return (P) this;
     }
@@ -233,7 +234,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.allowsBlockEvents;
     }
 
-    protected P setEntitySpawnEvents(boolean b) {
+    protected P setEntitySpawnEvents(final boolean b) {
         this.allowsEntityEvents = b;
         return (P) this;
     }
@@ -242,7 +243,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.allowsEntityEvents;
     }
 
-    protected P setBulkEntityCaptures(boolean b) {
+    protected P setBulkEntityCaptures(final boolean b) {
         this.allowsBulkEntityCaptures = b;
         return (P) this;
     }
@@ -264,8 +265,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.isCompleted;
     }
 
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         if (this.stackTrace != null) {
             printer.add(s + "StackTrace On Entry")
                 .add(this.stackTrace);
@@ -325,12 +326,12 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
                 || isNonEmpty(this.blockEntitySpawnSupplier);
     }
 
-    private boolean isNonEmpty(@Nullable ICaptureSupplier supplier) {
+    private boolean isNonEmpty(@Nullable final ICaptureSupplier supplier) {
         return supplier != null && !supplier.isEmpty();
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> getSource(Class<T> sourceClass) {
+    public <T> Optional<T> getSource(final Class<T> sourceClass) {
         if (this.source == null) {
             return Optional.empty();
         }
@@ -345,7 +346,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.source;
     }
 
-    public <T> T requireSource(Class<T> targetClass) {
+    public <T> T requireSource(final Class<T> targetClass) {
         return getSource(targetClass)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", this));
     }
@@ -360,7 +361,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      * @param consumer The consumer consuming the owner that isn't null
      * @return True if the consumer was called
      */
-    public boolean applyOwnerIfAvailable(Consumer<User> consumer) {
+    public boolean applyOwnerIfAvailable(final Consumer<? super User> consumer) {
         if (this.owner != null) {
             consumer.accept(this.owner);
             return true;
@@ -378,7 +379,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      * @param consumer The consumer consuming the notifier that isn't null
      * @return True if the consumer was called
      */
-    public boolean applyNotifierIfAvailable(Consumer<User> consumer) {
+    public boolean applyNotifierIfAvailable(final Consumer<? super User> consumer) {
         if (this.notifier != null) {
             consumer.accept(this.notifier);
             return true;
@@ -541,7 +542,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             return true;
         }
         if (this.source != null && this.source instanceof EntityPlayer) {
-            if (((TrackedInventoryBridge) ((EntityPlayer) this.source).inventory).bridge$getCapturedSlotTransactions().size() > 0) {
+            if (!((TrackedInventoryBridge) ((EntityPlayer) this.source).inventory).bridge$getCapturedSlotTransactions().isEmpty()) {
                 return true;
             }
         }
@@ -554,7 +555,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
                 .getPos();
     }
 
-    public void addNotifierAndOwnerToCauseStack(CauseStackManager.StackFrame frame) {
+    public void addNotifierAndOwnerToCauseStack(final CauseStackManager.StackFrame frame) {
         if (this.owner != null) {
             frame.addContext(EventContextKeys.OWNER, this.owner);
         }
@@ -563,7 +564,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         }
     }
 
-    protected PhaseContext(IPhaseState<? extends P> state) {
+    protected PhaseContext(final IPhaseState<? extends P> state) {
         this.state = state;
     }
 
@@ -573,7 +574,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -603,6 +604,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return false;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void close() { // Should never throw an exception
         if (this.isEmpty()) {
@@ -631,6 +633,25 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             this.usedFrame.clear();
             this.usedFrame = null;
         }
+        this.reset();
+        this.isCompleted = false;
+        if (this.state instanceof PooledPhaseState) {
+            ((PooledPhaseState) this.state).releaseContextFromPool(this);
+        }
+    }
+
+    protected void reset() {
+        this.source = null;
+        this.neighborNotificationSource = null;
+        this.singleSnapshot = null;
+        this.stackTrace = null;
+        this.owner = null;
+        this.notifier = null;
+
+        if (this.captureBlockPos != null) {
+            this.captureBlockPos.setPos(null);
+            this.captureBlockPos.setWorld((WorldServer) null);
+        }
     }
 
 
@@ -646,7 +667,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.blockItemDropsSupplier != null || this.blockEntitySpawnSupplier != null;
     }
 
-    public void printTrace(PrettyPrinter printer) {
+    public void printTrace(final PrettyPrinter printer) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
             printer.add("Entrypoint:")
                 .add(this.stackTrace);
@@ -657,7 +678,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.captureBlockPos != null;
     }
 
-    public boolean captureEntity(Entity entity) {
+    public boolean captureEntity(final Entity entity) {
         // So, first we want to check if we're capturing per block position
         if (this.captureBlockPos != null && this.captureBlockPos.getPos().isPresent() && this.blockEntitySpawnSupplier != null) {
             // If we are, then go ahead and check if we can put it into the desired lists
@@ -689,7 +710,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             return this.owner;
         }
         if (this.source != null && this.source instanceof User) {
-            return ((User) this.source);
+            return (User) this.source;
         }
         return null;
     }
@@ -711,11 +732,11 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return checkNotNull(this.singleSnapshot, "Single Snapshot is null!");
     }
 
-    public void setSingleSnapshot(@Nullable SpongeBlockSnapshot singleSnapshot) {
+    public void setSingleSnapshot(@Nullable final SpongeBlockSnapshot singleSnapshot) {
         this.singleSnapshot = singleSnapshot;
     }
 
-    protected boolean isRunaway(PhaseContext<?> phaseContext) {
+    protected boolean isRunaway(final PhaseContext<?> phaseContext) {
         return phaseContext.getClass() == this.getClass();
     }
 }

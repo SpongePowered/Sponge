@@ -31,22 +31,19 @@ final class EventListenerPhaseState extends ListenerPhaseState<EventListenerPhas
 
     private boolean hasPrintedEntities = false;
 
-    EventListenerPhaseState() {
-    }
-
 
     @Override
-    public EventListenerPhaseContext createPhaseContext() {
+    public EventListenerPhaseContext createNewContext() {
         return new EventListenerPhaseContext(this)
             .addCaptures()
             .player();
     }
 
     @Override
-    public void unwind(EventListenerPhaseContext phaseContext) {
+    public void unwind(final EventListenerPhaseContext phaseContext) {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, phaseContext);
+        TrackingUtil.processBlockCaptures(phaseContext);
 
         // TODO - determine if entities are needed to be captured.
         phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {

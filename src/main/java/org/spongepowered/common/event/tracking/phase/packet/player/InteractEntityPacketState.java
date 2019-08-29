@@ -106,7 +106,7 @@ public final class InteractEntityPacketState extends BasicPacketState {
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, phaseContext);
+        TrackingUtil.processBlockCaptures(phaseContext);
         phaseContext.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
@@ -142,7 +142,7 @@ public final class InteractEntityPacketState extends BasicPacketState {
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, phaseContext);
+        TrackingUtil.processBlockCaptures(phaseContext);
     }
 
     @Override

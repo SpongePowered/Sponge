@@ -37,7 +37,7 @@ final class CompletePhase extends GeneralState<GeneralizedContext> {
         };
 
     @Override
-    public GeneralizedContext createPhaseContext() {
+    public GeneralizedContext createNewContext() {
         return new GeneralizedContext(this);
     }
 

@@ -34,6 +34,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
 
@@ -41,7 +42,7 @@ import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
 @SuppressWarnings({"unchecked", "rawTypes"})
-public class GrowablePhaseState implements IPhaseState<GrowablePhaseContext> {
+public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> implements IPhaseState<GrowablePhaseContext> {
 
     private final BiConsumer<CauseStackManager.StackFrame, GrowablePhaseContext> FRAME_MODIFIER = IPhaseState.super.getFrameModifier()
         .andThen((stackFrame, growablePhaseContext) -> {
@@ -53,13 +54,14 @@ public class GrowablePhaseState implements IPhaseState<GrowablePhaseContext> {
         });
 
     @Override
-    public GrowablePhaseContext createPhaseContext() {
-        return new GrowablePhaseContext(this).addBlockCaptures();
+    public GrowablePhaseContext createNewContext() {
+        final GrowablePhaseContext context = new GrowablePhaseContext(this);
+        return context.addBlockCaptures();
     }
 
     @Override
     public void unwind(GrowablePhaseContext phaseContext) {
-        TrackingUtil.processBlockCaptures(this, phaseContext);
+        TrackingUtil.processBlockCaptures(phaseContext);
     }
 
     @Override

@@ -36,25 +36,25 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C> {
-
-    TickPhaseState() {
-    }
+abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState<C> implements IPhaseState<C> {
 
     @Override
-    public boolean doesCaptureEntityDrops(C context) {
+    public boolean doesCaptureEntityDrops(final C context) {
         return true;
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(C context) {
+    public boolean tracksBlockSpecificDrops(final C context) {
         return true;
     }
 
@@ -64,24 +64,24 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
     }
 
     @Override
-    public void unwind(C phaseContext) { }
+    public void unwind(final C phaseContext) { }
 
     @Override
-    public void associateNeighborStateNotifier(C context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(final C context, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
+                                               final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
 
     }
 
     @Override
-    public void appendNotifierPreBlockTick(WorldServerBridge mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
+    public void appendNotifierPreBlockTick(final WorldServerBridge mixinWorld, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
         if (this == TickPhase.Tick.BLOCK || this == TickPhase.Tick.RANDOM_BLOCK) {
 
         }
     }
 
     @Override
-    public void postProcessSpawns(C phaseContext, ArrayList<Entity> entities) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    public void postProcessSpawns(final C phaseContext, final ArrayList<Entity> entities) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (!frame.getCurrentContext().get(EventContextKeys.SPAWN_TYPE).isPresent()) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             }
@@ -90,7 +90,7 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
     }
 
     @Override
-    public void appendContextPreExplosion(ExplosionContext explosionContext, C context) {
+    public void appendContextPreExplosion(final ExplosionContext explosionContext, final C context) {
 
     }
 

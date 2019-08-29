@@ -85,6 +85,17 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
         return printer;
     }
 
+    @Override
+    protected void reset() {
+        super.reset();
+        this.sourceNotification = null;
+        this.sourceNotifier = null;
+        this.notifiedBlockPos = null;
+        this.notifiedBlockState = null;
+        this.notificationSnapshot = null;
+        this.depth = -1;
+    }
+
     public NeighborNotificationContext allowsCaptures(IPhaseState<?> state) {
         if (state.isWorldGeneration()) {
             this.setBlockEvents(false);

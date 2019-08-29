@@ -73,7 +73,7 @@ public final class UnknownPacketState extends BasicPacketState {
             frame1.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
-            TrackingUtil.processBlockCaptures(this, context);
+            TrackingUtil.processBlockCaptures(context);
             context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                 SpongeCommonEventFactory.callSpawnEntity(entities, context);
             });

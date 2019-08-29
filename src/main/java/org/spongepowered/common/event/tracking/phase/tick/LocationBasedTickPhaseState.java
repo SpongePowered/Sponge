@@ -49,9 +49,6 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
                 .ifPresent(frame::pushCause)
         );
 
-    LocationBasedTickPhaseState() {
-    }
-
     abstract LocatableBlock getLocatableBlockSourceFromContext(PhaseContext<?> context);
 
     @Override
@@ -60,8 +57,8 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     }
 
     @Override
-    public void associateNeighborStateNotifier(T context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(final T context, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
+                                               final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
             final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.getChunk(notifyPos);
@@ -70,8 +67,8 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     }
 
     @Override
-    public void postBlockTransactionApplication(BlockChange blockChange,
-        Transaction<BlockSnapshot> snapshotTransaction, T context) {
+    public void postBlockTransactionApplication(final BlockChange blockChange,
+        final Transaction<? extends BlockSnapshot> snapshotTransaction, final T context) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
             final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();

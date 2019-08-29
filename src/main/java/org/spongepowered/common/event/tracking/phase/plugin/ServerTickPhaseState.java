@@ -44,7 +44,7 @@ final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
     }
 
     @Override
-    public ServerTickContext createPhaseContext() {
+    public ServerTickContext createNewContext() {
         return new ServerTickContext(this).addCaptures().player();
     }
 
@@ -56,7 +56,7 @@ final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, phaseContext);
+        TrackingUtil.processBlockCaptures(phaseContext);
         // This could be happening regardless whether block bulk captures are done or not.
         // Would depend on whether entity captures are done.
         phaseContext.getBlockItemDropSupplier()

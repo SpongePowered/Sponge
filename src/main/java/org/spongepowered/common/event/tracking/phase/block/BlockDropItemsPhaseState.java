@@ -66,8 +66,8 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public GeneralizedContext createPhaseContext() {
-        return super.createPhaseContext()
+    public GeneralizedContext createNewContext() {
+        return super.createNewContext()
                 .addBlockCaptures()
                 .addEntityCaptures();
     }
@@ -99,7 +99,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, context);
+        TrackingUtil.processBlockCaptures(context);
         context.getCapturedItemStackSupplier()
             .acceptAndClearIfNotEmpty(drops -> maybeWorld.ifPresent(mixinWorld -> {
                 final List<EntityItem> items = drops.stream()

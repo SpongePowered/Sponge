@@ -42,9 +42,11 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
 
-    final BiConsumer<CauseStackManager.StackFrame, BasicEntityContext> DEATH_STATE_MODIFIER = super.getFrameModifier()
+    private final BiConsumer<CauseStackManager.StackFrame, BasicEntityContext> DEATH_STATE_MODIFIER = super.getFrameModifier()
         .andThen((frame, ctx) -> {
             final Entity dyingEntity =
                 ctx.getSource(Entity.class)
@@ -62,7 +64,7 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
     }
 
     @Override
-    public BasicEntityContext createPhaseContext() {
+    public BasicEntityContext createNewContext() {
         return new BasicEntityContext(this).addCaptures()
             .addEntityDropCaptures();
     }
@@ -73,7 +75,7 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
     }
 
     @Override
-    public void unwind(BasicEntityContext context) {
+    public void unwind(final BasicEntityContext context) {
         final Entity dyingEntity =
             context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
@@ -93,7 +95,7 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
         }
         context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
             final ArrayList<Entity> entities = new ArrayList<>();
-            for (EntityItem item : items) {
+            for (final EntityItem item : items) {
                 entities.add((Entity) item);
             }
 
@@ -113,10 +115,10 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
         processPerItemDrop(context, dyingEntity, isPlayer, entityPlayer);
     }
 
-    static void processPerItemDrop(EntityContext<?> context, Entity dyingEntity, boolean isPlayer, EntityPlayer entityPlayer) {
+    static void processPerItemDrop(final EntityContext<?> context, final Entity dyingEntity, final boolean isPlayer,
+        @Nullable final EntityPlayer entityPlayer) {
         context.getPerEntityItemDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), itemStacks -> {
-            final List<ItemDropData> items = new ArrayList<>();
-            items.addAll(itemStacks);
+            final List<ItemDropData> items = new ArrayList<>(itemStacks);
 
             if (!items.isEmpty()) {
                 final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) dyingEntity;
@@ -125,7 +127,7 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
                     .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
 
-                if (isPlayer) {
+                if (isPlayer && entityPlayer != null) {
                     // Forge and Vanilla always clear items on player death BEFORE drops occur
                     // This will also provide the highest compatibility with mods such as Tinkers Construct
                     entityPlayer.inventory.clear();

@@ -320,8 +320,6 @@ public class SpongeCommandManager implements CommandManager {
             try (// Since we know we are in the main thread, this is safe to do without a thread check
                  CommandPhaseContext context = GeneralPhase.State.COMMAND.createPhaseContext()
                          .source(source)
-                         .addCaptures()
-                         .addEntityDropCaptures()
                          .command(commandLine)) {
                 if (source instanceof User) {
                     context.owner((User) source);

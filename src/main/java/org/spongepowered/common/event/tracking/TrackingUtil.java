@@ -325,15 +325,13 @@ public final class TrackingUtil {
     public static boolean fireMinecraftBlockEvent(final WorldServer worldIn, final BlockEventData event) {
         final IBlockState currentState = worldIn.getBlockState(event.getPosition());
         final BlockEventDataBridge blockEvent = (BlockEventDataBridge) event;
-        final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext();
-
         final Object source = blockEvent.bridge$getTileEntity() != null ? blockEvent.bridge$getTileEntity() : blockEvent.bridge$getTickingLocatable();
-        if (source != null) {
-            phaseContext.source(source);
-        } else {
+        if (source == null) {
             // No source present which means we are ignoring the phase state
             return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         }
+        final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext();
+        phaseContext.source(source);
 
         final User user = ((BlockEventDataBridge) event).bridge$getSourceUser();
         if (user != null) {
@@ -387,8 +385,8 @@ public final class TrackingUtil {
         };
     }
 
-    public static boolean processBlockCaptures(final IPhaseState<?> state, final PhaseContext<?> context) {
-        return processBlockCaptures(state, context, 0, context.getCapturedBlockSupplier());
+    public static boolean processBlockCaptures(final PhaseContext<?> context) {
+        return processBlockCaptures(context, 0, context.getCapturedBlockSupplier());
     }
 
     /**
@@ -398,18 +396,15 @@ public final class TrackingUtil {
      * returns {@code false} to signify a transaction was cancelled. This return value
      * is used for portal creation.
      *
-     * @param state The phase state that is being processed, used to handle marking notifiers
-     *  and block owners
      * @param context The phase context, only used by the phase for handling processes.
      * @param supplier
      * @return True if no events or transactions were cancelled
      */
     @SuppressWarnings({"unchecked"})
-    static boolean processBlockCaptures(
-        final IPhaseState<?> state, final PhaseContext<?> context, final int currentDepth, final MultiBlockCaptureSupplier supplier) {
+    static boolean processBlockCaptures(final PhaseContext<?> context, final int currentDepth, final MultiBlockCaptureSupplier supplier) {
         // Fail fast and check if it's empty.
         if (!supplier.hasBlocksCaptured()) {
-            if (((IPhaseState) state).hasSpecificBlockProcess(context) && supplier.hasTransactions()) {
+            if (((IPhaseState) context.state).hasSpecificBlockProcess(context) && supplier.hasTransactions()) {
                 // Then we just need to process the transactions, there may be things that are not
                 // specifically block captured
                 final ListMultimap<BlockPos, BlockEventData> scheduledEvents = supplier.getScheduledEvents();
@@ -428,7 +423,7 @@ public final class TrackingUtil {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
 
-        createTransactionLists(state, context, supplier, transactionArrays, transactionBuilders);
+        createTransactionLists(context, supplier, transactionArrays, transactionBuilders);
         final ListMultimap<BlockPos, BlockEventData> scheduledEvents = supplier.getScheduledEvents();
 
         // Clear captured snapshots after processing them
@@ -439,7 +434,7 @@ public final class TrackingUtil {
         // Creates the block events accordingly to the transaction arrays
         iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents); // Needs to throw events
         // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
-        final ChangeBlockEvent.Post postEvent = throwMultiEventsAndCreatePost(state, context, transactionArrays, blockEvents, mainEvents);
+        final ChangeBlockEvent.Post postEvent = throwMultiEventsAndCreatePost(context, transactionArrays, blockEvents, mainEvents);
 
         if (postEvent == null) { // Means that we have had no actual block changes apparently?
             return false;
@@ -449,7 +444,7 @@ public final class TrackingUtil {
 
         // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
         // transactions of the preceding block events)
-        boolean noCancelledTransactions = checkCancelledEvents(blockEvents, postEvent, scheduledEvents, state, context, invalid);
+        boolean noCancelledTransactions = checkCancelledEvents(blockEvents, postEvent, scheduledEvents, context, invalid);
 
         // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
         // Because after, we will restore all the invalid transactions in reverse order.
@@ -458,15 +453,15 @@ public final class TrackingUtil {
         if (!invalid.isEmpty()) {
             // We need to set this value and return it to signify that some transactions were cancelled
             noCancelledTransactions = false;
-            rollBackTransactions(state, context, invalid);
+            rollBackTransactions(context, invalid);
             invalid.clear(); // Clear because we might re-enter for some reasons yet to be determined.
 
         }
-        return performBlockAdditions(postEvent.getTransactions(), state, context, noCancelledTransactions, scheduledEvents, currentDepth);
+        return performBlockAdditions(postEvent.getTransactions(), context, noCancelledTransactions, scheduledEvents, currentDepth);
 
     }
 
-    private static void createTransactionLists(final IPhaseState state, final PhaseContext<?> context, final MultiBlockCaptureSupplier supplier,
+    private static void createTransactionLists(final PhaseContext<?> context, final MultiBlockCaptureSupplier supplier,
         final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
         final List<SpongeBlockSnapshot> snapshots = supplier.get();
         for (final SpongeBlockSnapshot snapshot : snapshots) {
@@ -482,7 +477,7 @@ public final class TrackingUtil {
     }
 
     private static boolean checkCancelledEvents(final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
-        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final IPhaseState<?> state, final PhaseContext<?> context, final List<Transaction<BlockSnapshot>> invalid) {
+        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final PhaseContext<?> context, final List<Transaction<BlockSnapshot>> invalid) {
         boolean noCancelledTransactions = true;
         for (final ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
             if (blockEvent.isCancelled()) {
@@ -516,7 +511,7 @@ public final class TrackingUtil {
             // This is available to verify only when necessary that a state
             // absolutely needs to cancel the entire transaction chain, this is mostly for more fasts
             // since we don't want to iterate over the transaction list multiple times.
-            final boolean cancelAll = ((IPhaseState) state).getShouldCancelAllTransactions(context, blockEvents, postEvent, scheduledEvents, false);
+            final boolean cancelAll = ((IPhaseState) context.state).getShouldCancelAllTransactions(context, blockEvents, postEvent, scheduledEvents, false);
 
             for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
                 if (cancelAll) {
@@ -548,12 +543,12 @@ public final class TrackingUtil {
         }
     }
 
-    private static void rollBackTransactions(final IPhaseState<?> state, final PhaseContext<?> context, final List<Transaction<BlockSnapshot>> invalid) {
+    private static void rollBackTransactions(final PhaseContext<?> context, final List<Transaction<BlockSnapshot>> invalid) {
         // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
         // or the events were cancelled), again in reverse order of which they were received.
         for (final Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
             transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
-            ((IPhaseState) state).processCancelledTransaction(context, transaction, transaction.getOriginal());
+            ((IPhaseState) context.state).processCancelledTransaction(context, transaction, transaction.getOriginal());
         }
     }
 
@@ -578,7 +573,7 @@ public final class TrackingUtil {
         }
     }
 
-    private static boolean performBlockAdditions(final List<Transaction<BlockSnapshot>> transactions, final IPhaseState<?> phaseState,
+    private static boolean performBlockAdditions(final List<Transaction<BlockSnapshot>> transactions,
         final PhaseContext<?> phaseContext, final boolean noCancelledTransactions,
         final ListMultimap<BlockPos, BlockEventData> scheduledEvents,
         final int currentDepth) {
@@ -588,7 +583,7 @@ public final class TrackingUtil {
         if (!scheduledEvents.isEmpty()) {
             hasEvents = true;
         }
-        if (((IPhaseState) phaseState).hasSpecificBlockProcess(phaseContext)) {
+        if (((IPhaseState) phaseContext.state).hasSpecificBlockProcess(phaseContext)) {
             // In some states, we need to be taking advantage of processing the transactions in the order in which they
             // were processed. This means recycling some usage of how transactions are processed, but at the same time
             // processing the ORDER of them differently (since some notifications or block events can be thrown around
@@ -599,7 +594,7 @@ public final class TrackingUtil {
             if (!transaction.isValid()) {
                 continue;
             }
-            performTransactionProcess(transaction, phaseState, phaseContext, currentDepth);
+            performTransactionProcess(transaction, phaseContext, currentDepth);
         }
         phaseContext.getCapturedBlockSupplier().clearProxies();
         return noCancelledTransactions;
@@ -616,11 +611,10 @@ public final class TrackingUtil {
      * an event is required to be thrown. The deterministic requirement to know whether a bulk capture
      * is being performed or not is with the provided {@link IPhaseState} itself.
      * @param transaction The transaction to perform
-     * @param phaseState The currently working phase state
      * @param phaseContext The currently working phase context
      * @param currentDepth The current processing depth, to avoid stack overflows
      */
-    public static void performTransactionProcess(final Transaction<BlockSnapshot> transaction, final IPhaseState<?> phaseState, final PhaseContext<?> phaseContext, final int currentDepth) {
+    public static void performTransactionProcess(final Transaction<BlockSnapshot> transaction, final PhaseContext<?> phaseContext, final int currentDepth) {
         // Handle custom replacements - these need to get actually set onto the chunk, but ignored as far as tracking
         // goes.
         if (transaction.getCustom().isPresent()) {
@@ -648,7 +642,7 @@ public final class TrackingUtil {
         final WorldServerBridge mixinWorld = (WorldServerBridge) worldServer.get();
         // Reset any previously set transactions
         final BlockPos pos = oldBlockSnapshot.getBlockPos();
-        performBlockEntitySpawns(phaseState, phaseContext, oldBlockSnapshot, pos);
+        performBlockEntitySpawns( phaseContext.state, phaseContext, oldBlockSnapshot, pos);
 
         final WorldServer world = (WorldServer) mixinWorld;
         SpongeHooks.logBlockAction(world, oldBlockSnapshot.blockChange, transaction);
@@ -662,9 +656,9 @@ public final class TrackingUtil {
             // We call onBlockAdded here for blocks without a TileEntity.
             // ChunkMixin#bridge$setBlockState will call onBlockAdded for blocks
             // with a TileEntity or when capturing is not being done.
-            performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, originalChangeFlag, originalState, newState);
+            performOnBlockAdded(phaseContext, currentDepth, pos, world, originalChangeFlag, originalState, newState);
 
-            ((IPhaseState) phaseState).postBlockTransactionApplication(oldBlockSnapshot.blockChange, transaction, phaseContext);
+            ((IPhaseState)  phaseContext.state).postBlockTransactionApplication(oldBlockSnapshot.blockChange, transaction, phaseContext);
 
             if (originalChangeFlag.isNotifyClients()) { // Always try to notify clients of the change.
                 world.notifyBlockUpdate(pos, originalState, newState, originalChangeFlag.getRawFlag());
@@ -681,7 +675,7 @@ public final class TrackingUtil {
             // We have to process the original block change (since it's not part of the intermediary changes)
             // as a original -> intermediary
             if (!processedOriginal) {
-                performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, originalChangeFlag, originalState, intermediaryState);
+                performOnBlockAdded(phaseContext, currentDepth, pos, world, originalChangeFlag, originalState, intermediaryState);
                 if (originalChangeFlag.isNotifyClients()) {
                     world.notifyBlockUpdate(pos, originalState, intermediaryState, originalChangeFlag.getRawFlag());
                 }
@@ -692,7 +686,7 @@ public final class TrackingUtil {
             // whereas if there's more than one intermediary, the intermediary will refer to the previous intermediary
             // block state for appropriate physics.
             final boolean isFinal = !iterator.hasNext();
-            performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, intermediaryChangeFlag, isFinal ? intermediaryState : previousIntermediary, isFinal ? newState : intermediaryState);
+            performOnBlockAdded(phaseContext, currentDepth, pos, world, intermediaryChangeFlag, isFinal ? intermediaryState : previousIntermediary, isFinal ? newState : intermediaryState);
             if (intermediaryChangeFlag.isNotifyClients()) {
                 world.notifyBlockUpdate(pos, isFinal ? intermediaryState :  previousIntermediary, isFinal ? newState : intermediaryState, intermediaryChangeFlag.getRawFlag());
             }
@@ -704,13 +698,13 @@ public final class TrackingUtil {
         }
     }
 
-    private static void performOnBlockAdded(final IPhaseState phaseState, final PhaseContext<?> phaseContext, final int currentDepth, final BlockPos pos, final WorldServer world,
+    private static void performOnBlockAdded(final PhaseContext<?> phaseContext, final int currentDepth, final BlockPos pos, final WorldServer world,
         final SpongeBlockChangeFlag changeFlag, final IBlockState originalState, final IBlockState newState) {
         final Block newBlock = newState.getBlock();
         if (originalState.getBlock() != newBlock && changeFlag.performBlockPhysics()
             && (!SpongeImplHooks.hasBlockTileEntity(newBlock, newState))) {
             newBlock.onBlockAdded(world, pos, newState);
-            phaseState.performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
+            ((IPhaseState) phaseContext.state).performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
         }
     }
 
@@ -828,8 +822,8 @@ public final class TrackingUtil {
 
     @SuppressWarnings("rawtypes")
     @Nullable
-    private static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(final IPhaseState<?> state,
-        final PhaseContext<?> context, final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
+    private static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(final PhaseContext<?> context,
+        final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
         final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent[] mainEvents) {
         if (!blockEvents.isEmpty()) {
             final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[MULTI_CHANGE_INDEX];
@@ -837,7 +831,7 @@ public final class TrackingUtil {
             // contexts or resetting the caches, this allows us to avoid adding extra frames when unnecessary.
             final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
             final Cause causeToUse;
-            if (((IPhaseState) state).shouldProvideModifiers(context)) {
+            if (((IPhaseState) context.state).shouldProvideModifiers(context)) {
                 final Cause.Builder builder = Cause.builder().from(currentCause);
                 final EventContext.Builder modified = EventContext.builder();
                 modified.from(currentCause.getContext());
@@ -852,14 +846,14 @@ public final class TrackingUtil {
             } else {
                 causeToUse = currentCause;
             }
-            final ChangeBlockEvent.Post post = ((IPhaseState) state).createChangeBlockPostEvent(context, transactions, causeToUse);
+            final ChangeBlockEvent.Post post = ((IPhaseState) context.state).createChangeBlockPostEvent(context, transactions, causeToUse);
             SpongeImpl.postEvent(post);
             return post;
         }
         return null;
     }
 
-    public static void associateTrackerToTarget(final BlockChange blockChange, final Transaction<BlockSnapshot> transaction, final User user) {
+    public static void associateTrackerToTarget(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction, final User user) {
         final BlockSnapshot finalSnapshot = transaction.getFinal();
         final SpongeBlockSnapshot spongeSnapshot = (SpongeBlockSnapshot) finalSnapshot;
         final BlockPos pos = spongeSnapshot.getBlockPos();

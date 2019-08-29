@@ -626,7 +626,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     private SpongeBlockSnapshot createSpongeBlockSnapshot(
         final IBlockState state, final IBlockState extended, final BlockPos pos, final BlockChangeFlag updateFlag, @Nullable final TileEntity existing) {
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.reset();
         builder.blockState(state)
             .extendedState(extended)

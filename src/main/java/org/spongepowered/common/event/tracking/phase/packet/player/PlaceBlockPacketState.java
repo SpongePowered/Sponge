@@ -87,7 +87,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final BasicPacketContext context) {
         final CPacketPlayerTryUseItemOnBlock placeBlock = (CPacketPlayerTryUseItemOnBlock) packet;
         final net.minecraft.item.ItemStack itemUsed = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
@@ -97,14 +97,14 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     }
 
     @Override
-    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> transaction,
-        BasicPacketContext context) {
+    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction,
+        final BasicPacketContext context) {
         TrackingUtil.associateTrackerToTarget(blockChange, transaction, (Player) context.getPacketPlayer());
     }
 
     @Override
-    public void appendNotifierToBlockEvent(BasicPacketContext context, PhaseContext<?> currentContext,
-                                           WorldServerBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
+    public void appendNotifierToBlockEvent(final BasicPacketContext context, final PhaseContext<?> currentContext,
+                                           final WorldServerBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
         final Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
         final BlockState state = ((World) mixinWorldServer).getBlock(pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((World) mixinWorldServer).position(pos.getX(), pos.getY(), pos.getZ()).state(state).build();
@@ -115,20 +115,20 @@ public final class PlaceBlockPacketState extends BasicPacketState {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void unwind(BasicPacketContext context) {
+    public void unwind(final BasicPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
         final ItemStack itemStack = context.getItemUsed();
         final SpongeItemStackSnapshot snapshot = context.getItemUsedSnapshot();
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);
                 }
             });
         // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
-        if (!TrackingUtil.processBlockCaptures(this, context) && !snapshot.isNone()) {
-            EnumHand hand = (EnumHand) (Object) context.getHandUsed();
+        if (!TrackingUtil.processBlockCaptures(context) && !snapshot.isNone()) {
+            final EnumHand hand = (EnumHand) (Object) context.getHandUsed();
             PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), hand);
         }
         context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
@@ -136,7 +136,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
                 drops.stream().map(drop -> drop.create(player.getServerWorld())).map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
             if (!entities.isEmpty()) {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
                     SpongeCommonEventFactory.callDropItemCustom(entities, context, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
                 }
@@ -150,7 +150,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     }
 
     @Override
-    public SpawnType getEntitySpawnType(BasicPacketContext context) {
+    public SpawnType getEntitySpawnType(final BasicPacketContext context) {
         if (context.getItemUsed().getType().equals(ItemTypes.SPAWN_EGG)) {
             return SpawnTypes.SPAWN_EGG;
         }

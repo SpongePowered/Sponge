@@ -31,7 +31,7 @@ public class BasicGenerationState extends GeneralGenerationPhaseState<GenericGen
     }
 
     @Override
-    public GenericGenerationContext createPhaseContext() {
+    public GenericGenerationContext createNewContext() {
         return new GenericGenerationContext(this)
                 .addCaptures();
     }

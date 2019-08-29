@@ -37,11 +37,20 @@ public final class InvokingTeleporterContext extends EntityContext<InvokingTelep
     private Transform<World> transform;
     private boolean didPort = false;
 
-    InvokingTeleporterContext(IPhaseState<? extends InvokingTeleporterContext> state) {
+    InvokingTeleporterContext(final IPhaseState<? extends InvokingTeleporterContext> state) {
         super(state);
     }
 
-    public InvokingTeleporterContext setTargetWorld(WorldServer world) {
+    @Override
+    protected void reset() {
+        super.reset();
+        this.world = null;
+        this.agent = null;
+        this.transform = null;
+        this.didPort = false;
+    }
+
+    public InvokingTeleporterContext setTargetWorld(final WorldServer world) {
         this.world = world;
         return this;
     }
@@ -50,7 +59,7 @@ public final class InvokingTeleporterContext extends EntityContext<InvokingTelep
         return this.world;
     }
 
-    public InvokingTeleporterContext setTeleporter(PortalAgent agent) {
+    public InvokingTeleporterContext setTeleporter(final PortalAgent agent) {
         this.agent = agent;
         return this;
     }
@@ -59,7 +68,7 @@ public final class InvokingTeleporterContext extends EntityContext<InvokingTelep
         return this.agent;
     }
 
-    public InvokingTeleporterContext setExitTransform(Transform<World> transform) {
+    public InvokingTeleporterContext setExitTransform(final Transform<World> transform) {
         this.transform = transform;
         return this;
     }
@@ -68,7 +77,7 @@ public final class InvokingTeleporterContext extends EntityContext<InvokingTelep
         return this.transform;
     }
 
-    public InvokingTeleporterContext setDidPort(boolean didPort) {
+    public InvokingTeleporterContext setDidPort(final boolean didPort) {
         this.didPort = didPort;
         return this;
     }

@@ -40,7 +40,7 @@ public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<Chunk
     }
 
     @Override
-    public ChunkLoadContext createPhaseContext() {
+    public ChunkLoadContext createNewContext() {
         return new ChunkLoadContext(this);
     }
 

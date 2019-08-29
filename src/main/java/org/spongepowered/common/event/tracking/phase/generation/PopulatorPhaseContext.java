@@ -28,16 +28,23 @@ import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
+import javax.annotation.Nullable;
+
 public class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseContext> {
 
-    private PopulatorType type;
+    @Nullable private PopulatorType type;
 
-    PopulatorPhaseContext(
-        IPhaseState<? extends PopulatorPhaseContext> state) {
+    PopulatorPhaseContext(final IPhaseState<? extends PopulatorPhaseContext> state) {
         super(state);
     }
 
-    public PopulatorPhaseContext populator(PopulatorType type) {
+    @Override
+    protected void reset() {
+        super.reset();
+        this.type = null;
+    }
+
+    public PopulatorPhaseContext populator(final PopulatorType type) {
         this.type = type;
         return this;
     }
@@ -47,8 +54,8 @@ public class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseConte
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "PopulatorType", this.type);
     }

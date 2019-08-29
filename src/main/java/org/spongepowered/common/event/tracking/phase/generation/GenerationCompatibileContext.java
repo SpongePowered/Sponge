@@ -45,6 +45,15 @@ public class GenerationCompatibileContext extends GenerationContext<GenerationCo
         super(state);
     }
 
+    @Override
+    protected void reset() {
+        super.reset();
+        this.type = null;
+        this.spongeGen = null;
+        this.provider = null;
+        this.modGen = null;
+    }
+
     public GenerationCompatibileContext populator(final PopulatorType type) {
         this.type = type;
         return this;

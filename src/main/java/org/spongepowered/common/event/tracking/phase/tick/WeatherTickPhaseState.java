@@ -36,17 +36,15 @@ import java.util.ArrayList;
 
 class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
 
-    WeatherTickPhaseState() {
-    }
 
     @Override
-    public TickContext.General createPhaseContext() {
+    public TickContext.General createNewContext() {
         return new TickContext.General(this).addCaptures();
     }
 
     @Override
-    public void unwind(TickContext.General phaseContext) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    public void unwind(final TickContext.General phaseContext) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
             phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                 SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
@@ -54,13 +52,13 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
             });
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
-            TrackingUtil.processBlockCaptures(this, phaseContext);
+            TrackingUtil.processBlockCaptures(phaseContext);
         }
     }
 
     @Override
-    public boolean spawnEntityOrCapture(TickContext.General context, Entity entity, int chunkX, int chunkZ) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    public boolean spawnEntityOrCapture(final TickContext.General context, final Entity entity, final int chunkX, final int chunkZ) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
             final ArrayList<Entity> entities = new ArrayList<>();
             entities.add(entity);
@@ -68,8 +66,4 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
         }
     }
 
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
-    }
 }

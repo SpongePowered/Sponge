@@ -35,6 +35,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 
@@ -49,19 +50,19 @@ import java.util.Set;
  * Generally does not capture or throw events unless necessary.
  */
 @SuppressWarnings("rawtypes")
-abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> implements IPhaseState<G> {
+abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> extends PooledPhaseState<G> implements IPhaseState<G> {
 
     private Set<IPhaseState<?>> compatibleStates = new HashSet<>();
     private boolean isBaked = false;
     private final String id;
     private final String desc;
 
-    GeneralGenerationPhaseState(String id) {
+    GeneralGenerationPhaseState(final String id) {
         this.id = id;
         this.desc = TrackingUtil.phaseStateToString("Generation", id, this);
     }
 
-    final GeneralGenerationPhaseState addCompatibleState(IPhaseState<?> state) {
+    final GeneralGenerationPhaseState addCompatibleState(final IPhaseState<?> state) {
         if (this.isBaked) {
             throw new IllegalStateException("This state is already baked! " + this.id);
         }
@@ -95,7 +96,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean ignoresBlockUpdateTick(G context) {
+    public boolean ignoresBlockUpdateTick(final G context) {
         return true;
     }
 
@@ -105,7 +106,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean doesBulkBlockCapture(G context) {
+    public boolean doesBulkBlockCapture(final G context) {
         return false;
     }
 
@@ -130,23 +131,24 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(G phaseContext, BlockPos pos, IBlockState currentState, IBlockState newState,
-        BlockChangeFlag flags) {
+    public boolean shouldCaptureBlockChangeOrSkip(final G phaseContext, final BlockPos pos, final IBlockState currentState,
+        final IBlockState newState, final BlockChangeFlag flags) {
         return false;
     }
 
     @Override
-    public void appendNotifierPreBlockTick(WorldServerBridge mixinWorld, BlockPos pos, G context, BlockTickContext phaseContext) {
+    public void appendNotifierPreBlockTick(final WorldServerBridge mixinWorld, final BlockPos pos, final G context,
+        final BlockTickContext phaseContext) {
 
     }
 
     @Override
-    public boolean doesBlockEventTracking(G context) {
+    public boolean doesBlockEventTracking(final G context) {
         return false;
     }
 
     @Override
-    public void unwind(G context) {
+    public void unwind(final G context) {
         final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
         if (spawnedEntities.isEmpty()) {
             return;
@@ -155,10 +157,10 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean spawnEntityOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final G context, final Entity entity, final int chunkX, final int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entity.getLocation().getExtent());
             return SpongeCommonEventFactory.callSpawnEntitySpawner(entities, context);
         }
@@ -175,19 +177,19 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean shouldProvideModifiers(G phaseContext) {
+    public boolean shouldProvideModifiers(final G phaseContext) {
         return false;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        GeneralGenerationPhaseState that = (GeneralGenerationPhaseState) o;
+        final GeneralGenerationPhaseState that = (GeneralGenerationPhaseState) o;
         return Objects.equal(this.id, that.id);
     }
 

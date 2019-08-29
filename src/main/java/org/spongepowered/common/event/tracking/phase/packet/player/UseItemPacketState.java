@@ -92,7 +92,7 @@ public final class UseItemPacketState extends BasicPacketState {
     }
 
     @Override
-    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> transaction,
+    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<? extends BlockSnapshot> transaction,
         BasicPacketContext context) {
         Player player = context.getSpongePlayer();
         BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getLocation().get());
@@ -121,7 +121,7 @@ public final class UseItemPacketState extends BasicPacketState {
             if (!context.getCapturedBlockSupplier().isEmpty()) {
                 // TODO - Determine if we need to pass the supplier or perform some parameterized
                 //  process if not empty method on the capture object.
-                boolean success = TrackingUtil.processBlockCaptures(this, context);
+                boolean success = TrackingUtil.processBlockCaptures(context);
                 if (!success && snapshot.isNone()) {
                     Sponge.getCauseStackManager().pushCause(player);
                     PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, (EnumHand) (Object) hand);

@@ -37,12 +37,9 @@ import java.util.Collection;
 
 final class DispensePhaseState extends BlockPhaseState {
 
-    DispensePhaseState() {
-    }
-
     @Override
-    public GeneralizedContext createPhaseContext() {
-        return super.createPhaseContext()
+    public GeneralizedContext createNewContext() {
+        return super.createNewContext()
             .addBlockCaptures()
             .addEntityCaptures()
             .addEntityDropCaptures();
@@ -50,10 +47,10 @@ final class DispensePhaseState extends BlockPhaseState {
 
     @SuppressWarnings({"unchecked", "Duplicates", "RedundantCast"})
     @Override
-    public void unwind(GeneralizedContext phaseContext) {
+    public void unwind(final GeneralizedContext phaseContext) {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, phaseContext);
+        TrackingUtil.processBlockCaptures(phaseContext);
         phaseContext.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);

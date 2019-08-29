@@ -98,7 +98,7 @@ public abstract class EntityFallingBlockMixin extends EntityMixin {
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         // By this point, we should have some sort of captured block
         if (((IPhaseState) currentContext.state).doesBulkBlockCapture(currentContext)) {
-            if (!TrackingUtil.processBlockCaptures(currentContext.state, currentContext)) {
+            if (!TrackingUtil.processBlockCaptures(currentContext)) {
                 // So, it's been cancelled, we want to absolutely remove this entity.
                 // And we want to stop the entity update at this point.
                 this.setDead();

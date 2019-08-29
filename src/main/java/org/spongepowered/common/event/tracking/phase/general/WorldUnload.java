@@ -33,18 +33,18 @@ public class WorldUnload extends GeneralState<GeneralizedContext> {
 
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext, BlockPos pos, IBlockState currentState,
-        IBlockState newState, BlockChangeFlag flags) {
+    public boolean shouldCaptureBlockChangeOrSkip(final GeneralizedContext phaseContext, final BlockPos pos, final IBlockState currentState,
+        final IBlockState newState, final BlockChangeFlag flags) {
         return false;
     }
 
     @Override
-    public GeneralizedContext createPhaseContext() {
+    public GeneralizedContext createNewContext() {
         return new GeneralizedContext(this);
     }
 
     @Override
-    public void unwind(GeneralizedContext context) {
+    public void unwind(final GeneralizedContext context) {
 
     }
 }

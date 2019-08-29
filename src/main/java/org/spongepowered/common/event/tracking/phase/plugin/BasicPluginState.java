@@ -39,8 +39,9 @@ public class BasicPluginState extends PluginPhaseState<BasicPluginContext> {
         });
 
     @Override
-    public BasicPluginContext createPhaseContext() {
-        return new BasicPluginContext(this);
+    public BasicPluginContext createNewContext() {
+        return new BasicPluginContext(this)
+            .addCaptures();
     }
 
     @Override

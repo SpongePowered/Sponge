@@ -41,11 +41,6 @@ import java.util.function.BiConsumer;
 
 public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
 
-    @Override
-    public void unwind(GeneralizedContext context) {
-
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
@@ -53,17 +48,17 @@ public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext,
-        BlockPos pos, IBlockState currentState, IBlockState newState,
-        BlockChangeFlag flags) {
+    public boolean shouldCaptureBlockChangeOrSkip(final GeneralizedContext phaseContext,
+        final BlockPos pos, final IBlockState currentState, final IBlockState newState,
+        final BlockChangeFlag flags) {
         return false;
     }
 
     @Override
-    public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final GeneralizedContext context, final Entity entity, final int chunkX, final int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
@@ -75,17 +70,8 @@ public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(GeneralizedContext context) {
+    public boolean doesBulkBlockCapture(final GeneralizedContext context) {
         return false;
     }
 
-    @Override
-    public boolean doesBulkBlockCapture(GeneralizedContext context) {
-        return false;
-    }
-
-    @Override
-    public boolean doesBlockEventTracking(GeneralizedContext context) {
-        return true; // We still want to do block events.
-    }
 }

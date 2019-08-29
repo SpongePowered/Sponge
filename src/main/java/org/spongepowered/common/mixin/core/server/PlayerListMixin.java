@@ -443,7 +443,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;removeEntity(Lnet/minecraft/entity/Entity;)V"))
     private void onPlayerRemoveFromWorldFromDisconnect(final WorldServer world, final Entity player, final EntityPlayerMP playerMP) {
-        try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT.createPhaseContext().source(playerMP).addCaptures()) {
+        try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT.createPhaseContext().source(playerMP)) {
             context.buildAndSwitch();
             world.removeEntity(player);
         }

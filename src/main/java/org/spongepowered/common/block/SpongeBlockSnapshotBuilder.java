@@ -32,6 +32,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -56,6 +57,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
+import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -65,6 +67,16 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapshot> implements BlockSnapshot.Builder {
+
+    private static final ArrayDeque<SpongeBlockSnapshotBuilder> pool = new ArrayDeque<>();
+
+    public static SpongeBlockSnapshotBuilder pooled() {
+        final SpongeBlockSnapshotBuilder builder = pool.pollFirst();
+        if (builder != null) {
+            return builder.reset();
+        }
+        return new SpongeBlockSnapshotBuilder();
+    }
 
     BlockState blockState;
     @Nullable BlockState extendedState;
@@ -77,7 +89,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     SpongeBlockChangeFlag flag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
 
 
-    public SpongeBlockSnapshotBuilder() {
+    SpongeBlockSnapshotBuilder() {
         super(BlockSnapshot.class, 1);
     }
 
@@ -220,13 +232,15 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     public SpongeBlockSnapshotBuilder reset() {
-        this.blockState = BlockTypes.AIR.getDefaultState();
+        this.blockState = (BlockState) Blocks.AIR.getDefaultState();
+        this.extendedState = null;
         this.worldUuid = null;
         this.creatorUuid = null;
         this.notifierUuid = null;
         this.coords = null;
         this.manipulators = null;
         this.compound = null;
+        this.flag = null;
         return this;
     }
 
@@ -236,7 +250,10 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         if (this.extendedState == null) {
             this.extendedState = this.blockState;
         }
-        return new SpongeBlockSnapshot(this);
+        final SpongeBlockSnapshot spongeBlockSnapshot = new SpongeBlockSnapshot(this);
+        this.reset();
+        pool.push(this);
+        return spongeBlockSnapshot;
     }
 
     @Override
@@ -246,7 +263,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         }
         checkDataExists(container, Constants.Block.BLOCK_STATE);
         checkDataExists(container, Queries.WORLD_ID);
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         final Optional<String> creatorUuid = container.getString(Queries.CREATOR_ID);

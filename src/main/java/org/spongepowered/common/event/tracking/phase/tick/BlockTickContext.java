@@ -62,4 +62,12 @@ public class BlockTickContext extends LocationBasedTickContext<BlockTickContext>
         }
         return this;
     }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.tickingBlock = null;
+        this.providesModifier = true;
+        this.world = null;
+    }
 }

@@ -72,7 +72,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
 
     @Override
-    public InteractionPacketContext createPhaseContext() {
+    public InteractionPacketContext createNewContext() {
         return new InteractionPacketContext(this);
     }
 
@@ -157,7 +157,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             final List<SpongeBlockSnapshot> capturedBlcoks = phaseContext.getCapturedOriginalBlocksChanged();
             final @Nullable BlockSnapshot firstBlockChange = hasBlocks ? capturedBlcoks.isEmpty()? null : capturedBlcoks.get(0) : null;
             if (hasBlocks) {
-                if (!TrackingUtil.processBlockCaptures(this, phaseContext)) {
+                if (!TrackingUtil.processBlockCaptures(phaseContext)) {
                     // Stop entities like XP from being spawned
                     phaseContext.getBlockItemDropSupplier().get().clear();
                     phaseContext.getCapturedItems().clear();

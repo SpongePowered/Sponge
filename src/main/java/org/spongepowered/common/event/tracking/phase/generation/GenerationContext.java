@@ -24,32 +24,42 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
+import javax.annotation.Nullable;
+
 public class GenerationContext<G extends GenerationContext<G>> extends PhaseContext<G> {
 
-    private World world;
+    @Nullable private World world;
 
-    GenerationContext(IPhaseState<? extends G> state) {
+    GenerationContext(final IPhaseState<? extends G> state) {
         super(state);
     }
 
+    @Override
+    protected void reset() {
+        super.reset();
+        this.world = null;
+    }
+
     @SuppressWarnings("unchecked")
-    public G world(net.minecraft.world.World world) {
+    public G world(final net.minecraft.world.World world) {
         this.world = (World) world;
         return (G) this;
     }
 
     public final World getWorld() {
-        return this.world;
+        return checkNotNull(this.world);
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "World", this.world);
     }

@@ -30,7 +30,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 public class PluginPhaseContext<P extends PluginPhaseContext<P>> extends PhaseContext<P> {
 
 
-    protected PluginPhaseContext(IPhaseState<P> phaseState) {
+    protected PluginPhaseContext(final IPhaseState<? extends P> phaseState) {
         super(phaseState);
     }
 }

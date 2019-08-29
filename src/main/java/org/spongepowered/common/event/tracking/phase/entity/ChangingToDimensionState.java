@@ -30,40 +30,23 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 
 final class ChangingToDimensionState extends EntityPhaseState<DimensionChangeContext> {
 
-    ChangingToDimensionState() {
-    }
-
     @Override
-    public DimensionChangeContext createPhaseContext() {
+    public DimensionChangeContext createNewContext() {
         return new DimensionChangeContext(this)
             .addBlockCaptures()
             .addEntityCaptures();
     }
 
     @Override
-    public void unwind(DimensionChangeContext context) {
-    }
-
-    @Override
-    public boolean tracksBlockSpecificDrops(DimensionChangeContext context) {
+    public boolean tracksBlockSpecificDrops(final DimensionChangeContext context) {
         return true;
     }
 
     @Override
-    public boolean spawnEntityOrCapture(DimensionChangeContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final DimensionChangeContext context, final Entity entity, final int chunkX, final int chunkZ) {
         final WorldServer worldServer = context.getTargetWorld();
         // Allowed to use the force spawn because it's the same "entity"
         ((WorldServerBridge) worldServer).bridge$forceSpawnEntity((net.minecraft.entity.Entity) entity);
-        return true;
-    }
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
         return true;
     }
 

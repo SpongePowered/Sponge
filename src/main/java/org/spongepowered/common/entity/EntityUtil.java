@@ -85,7 +85,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
@@ -228,7 +227,7 @@ public final class EntityUtil {
 
                         // Unwind PhaseTracker captured blocks here, the actual position placement of the entity is common code below
                         if (teleporter instanceof TeleporterBridge && !context.getCapturedBlockSupplier().isEmpty() && !TrackingUtil
-                            .processBlockCaptures(EntityPhase.State.INVOKING_TELEPORTER, context)) {
+                            .processBlockCaptures(context)) {
                             // Transactions were rolled back, the portal wasn't made. We need to bomb the dimension change and clear portal cache
                             final Vector3i chunkPosition = context.getExitTransform().getLocation().getChunkPosition();
                             ((TeleporterBridge) teleporter)
@@ -397,7 +396,7 @@ public final class EntityUtil {
 
                         // Unwind PhaseTracker captured blocks here, the actual position placement of the entity is common code below
                         if (teleporter instanceof TeleporterBridge && !context.getCapturedBlockSupplier().isEmpty() && !TrackingUtil
-                            .processBlockCaptures(EntityPhase.State.INVOKING_TELEPORTER, context)) {
+                            .processBlockCaptures(context)) {
                             // Transactions were rolled back, the portal wasn't made. We need to bomb the dimension change and clear portal cache
                             final Vector3i chunkPosition = context.getExitTransform().getLocation().getChunkPosition();
                             ((TeleporterBridge) teleporter)

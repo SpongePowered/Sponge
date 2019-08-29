@@ -599,7 +599,7 @@ public abstract class WorldMixin_API implements World {
         World world = this;
         BlockState state = world.getBlock(x, y, z);
         Optional<TileEntity> te = world.getTileEntity(x, y, z);
-        SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
+        SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
                 .blockState(state)
                 .worldId(world.getUniqueId())
                 .position(new Vector3i(x, y, z));

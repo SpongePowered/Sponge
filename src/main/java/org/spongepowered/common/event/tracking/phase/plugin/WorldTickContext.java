@@ -31,16 +31,17 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
+import javax.annotation.Nullable;
+
 public class WorldTickContext extends ListenerPhaseContext<WorldTickContext> {
 
-    private World tickingWorld;
+    @Nullable private World tickingWorld;
 
-    WorldTickContext(
-        IPhaseState<WorldTickContext> state) {
+    WorldTickContext(final IPhaseState<WorldTickContext> state) {
         super(state);
     }
 
-    public WorldTickContext world(World world) {
+    public WorldTickContext world(final World world) {
         this.tickingWorld = world;
         return this;
     }
@@ -50,14 +51,20 @@ public class WorldTickContext extends ListenerPhaseContext<WorldTickContext> {
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$" + indent + "s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent);
-        if (!((WorldBridge) this.tickingWorld).bridge$isFake()) {
-            printer.add(s + "- %s: %s", "TickingWorld", ((org.spongepowered.api.world.World) this.tickingWorld).getName());
+        if (!((WorldBridge) getWorld()).bridge$isFake()) {
+            printer.add(s + "- %s: %s", "TickingWorld", ((org.spongepowered.api.world.World) getWorld()).getName());
         } else {
             printer.add(s + "- %s: %s", "Ticking World", "Pseudo Fake World?" + this.tickingWorld);
         }
         return printer;
+    }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.tickingWorld = null;
     }
 }

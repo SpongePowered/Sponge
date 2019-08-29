@@ -101,7 +101,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
 
     @Override
     public BlockSnapshot toSnapshot(Location<World> location) {
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.blockState = this.blockState;
         builder.compound = this.data.copy();
         builder.worldUuid = location.getExtent().getUniqueId();

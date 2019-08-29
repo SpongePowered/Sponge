@@ -68,4 +68,10 @@ public class BasicPacketContext extends PacketContext<BasicPacketContext> {
             .add(s + "- %s: %s", "OpenContainer", this.container)
             ;
     }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.container = null;
+    }
 }

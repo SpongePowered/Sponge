@@ -248,7 +248,7 @@ public final class CommonModuleRegistry {
                 .registerBuilderSupplier(WorldArchetype.Builder.class, SpongeWorldArchetypeBuilder::new)
                 .registerBuilderSupplier(Explosion.Builder.class, SpongeExplosionBuilder::new)
                 .registerBuilderSupplier(BlockState.Builder.class, SpongeBlockStateBuilder::new)
-                .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::new)
+                .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::pooled)
                 .registerBuilderSupplier(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
                 .registerBuilderSupplier(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
                 .registerBuilderSupplier(WanderAITask.Builder.class, SpongeWanderAIBuilder::new)

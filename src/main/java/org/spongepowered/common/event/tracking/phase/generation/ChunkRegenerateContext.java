@@ -28,16 +28,24 @@ import org.spongepowered.api.world.Chunk;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
+import javax.annotation.Nullable;
+
 public class ChunkRegenerateContext extends GenerationContext<ChunkRegenerateContext> {
 
-    private Chunk chunk;
+    @Nullable private Chunk chunk;
 
-    public ChunkRegenerateContext(IPhaseState<? extends ChunkRegenerateContext> state) {
+    public ChunkRegenerateContext(final IPhaseState<? extends ChunkRegenerateContext> state) {
         super(state);
     }
 
+    @Override
+    protected void reset() {
+        super.reset();
+        this.chunk = null;
+    }
+
     @SuppressWarnings("unchecked")
-    public ChunkRegenerateContext chunk(net.minecraft.world.chunk.Chunk chunk) {
+    public ChunkRegenerateContext chunk(final net.minecraft.world.chunk.Chunk chunk) {
         this.chunk = (Chunk) chunk;
         return this;
     }
@@ -47,8 +55,8 @@ public class ChunkRegenerateContext extends GenerationContext<ChunkRegenerateCon
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "Chunk", this.chunk);
     }

@@ -47,7 +47,7 @@ final class WorldTickPhaseState extends ListenerPhaseState<WorldTickContext> {
     }
 
     @Override
-    public WorldTickContext createPhaseContext() {
+    public WorldTickContext createNewContext() {
         return new WorldTickContext(this).addCaptures().player();
     }
 
@@ -56,7 +56,7 @@ final class WorldTickPhaseState extends ListenerPhaseState<WorldTickContext> {
         final Object container = phaseContext.getSource(Object.class)
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
 
-        TrackingUtil.processBlockCaptures(this, phaseContext);
+        TrackingUtil.processBlockCaptures(phaseContext);
         phaseContext.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(map -> map.asMap().forEach((key, value) -> {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

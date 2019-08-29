@@ -73,11 +73,8 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
                 }
             });
 
-    BlockEventTickPhaseState() {
-    }
-
     @Override
-    public BlockEventTickContext createPhaseContext() {
+    public BlockEventTickContext createNewContext() {
         return new BlockEventTickContext()
                 .addBlockCaptures()
                 .addEntityCaptures();
@@ -112,18 +109,8 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public boolean doesBulkBlockCapture(final BlockEventTickContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
-    }
-
-    @Override
     public void postBlockTransactionApplication(final BlockChange blockChange,
-        final Transaction<BlockSnapshot> snapshotTransaction, final BlockEventTickContext context) {
+        final Transaction<? extends BlockSnapshot> snapshotTransaction, final BlockEventTickContext context) {
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
         final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();
         final BlockPos changedBlockPos = original.getBlockPos();
@@ -140,7 +127,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     public void unwind(final BlockEventTickContext context) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-            TrackingUtil.processBlockCaptures(this, context);
+            TrackingUtil.processBlockCaptures(context);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();

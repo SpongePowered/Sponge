@@ -341,8 +341,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     public void wakeUpPlayer(final boolean immediately, final boolean updateWorldFlag, final boolean setSpawn) {
         // Sponge start - enter phase
         try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext()
-                .source(this)
-                .addCaptures()) {
+                .source(this)) {
             basicEntityContext.buildAndSwitch();
             // Sponge end
 

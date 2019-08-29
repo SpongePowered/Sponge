@@ -27,7 +27,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
@@ -46,41 +46,33 @@ import java.util.function.BiConsumer;
 @SuppressWarnings("unchecked")
 class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNotificationContext> {
 
-    private final BiConsumer<StackFrame, NeighborNotificationContext> FRAME_MODIFIER =
-        ((BiConsumer<StackFrame, NeighborNotificationContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER)
+    private final BiConsumer<CauseStackManager.StackFrame, NeighborNotificationContext> FRAME_MODIFIER =
+        ((BiConsumer<CauseStackManager.StackFrame, NeighborNotificationContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER)
             .andThen((frame, context) -> {
                 if (context.notificationSnapshot != null) {
                     frame.addContext(EventContextKeys.NEIGHBOR_NOTIFY_SOURCE, context.notificationSnapshot);
                 }
             });
 
-    NeighborNotificationState() {
-    }
-
     @Override
-    public NeighborNotificationContext createPhaseContext() {
+    public NeighborNotificationContext createNewContext() {
         return new NeighborNotificationContext(this)
                 .addCaptures();
     }
 
     @Override
-    public BiConsumer<StackFrame, NeighborNotificationContext> getFrameModifier() {
+    public BiConsumer<CauseStackManager.StackFrame, NeighborNotificationContext> getFrameModifier() {
         return this.FRAME_MODIFIER;
     }
 
     @Override
-    LocatableBlock getLocatableBlockSourceFromContext(PhaseContext<?> context) {
+    LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
         return context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
     }
 
     @Override
-    public void unwind(NeighborNotificationContext context) {
-        // we shouldn't have anything to unwind. Neighbor notifications are performing instant block events.
-    }
-
-    @Override
-    public void appendContextPreExplosion(ExplosionContext explosionContext, NeighborNotificationContext context) {
+    public void appendContextPreExplosion(final ExplosionContext explosionContext, final NeighborNotificationContext context) {
         context.applyNotifierIfAvailable(explosionContext::notifier);
         context.applyOwnerIfAvailable(explosionContext::owner);
         final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
@@ -88,12 +80,12 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
     }
 
     @Override
-    public boolean spawnEntityOrCapture(NeighborNotificationContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final NeighborNotificationContext context, final Entity entity, final int chunkX, final int chunkZ) {
         final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
         if (!context.allowsEntityEvents() || !ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
             return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
         }
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatableBlock);
             if (entity instanceof EntityXPOrb) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
@@ -109,15 +101,11 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
     }
 
     @Override
-    public void provideNotifierForNeighbors(NeighborNotificationContext context, NeighborNotificationContext notification) {
+    public void provideNotifierForNeighbors(final NeighborNotificationContext context, final NeighborNotificationContext notification) {
         super.provideNotifierForNeighbors(context, notification);
         notification.setDepth(context.getDepth() + 1);
     }
 
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
-    }
 
     @Override
     public boolean isNotReEntrant() {
@@ -130,7 +118,7 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
      * @return True if bulk block captures are usable for this entity type (default true)
      */
     @Override
-    public boolean doesBulkBlockCapture(NeighborNotificationContext context) {
+    public boolean doesBulkBlockCapture(final NeighborNotificationContext context) {
         return false;
     }
 
@@ -140,13 +128,13 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
      * @return True if block events are to be tracked by the specific type of entity (default is true)
      */
     @Override
-    public boolean doesBlockEventTracking(NeighborNotificationContext context) {
+    public boolean doesBlockEventTracking(final NeighborNotificationContext context) {
         return context.allowsBlockEvents();
     }
 
 
     @Override
-    public boolean doesCaptureEntityDrops(NeighborNotificationContext context) {
+    public boolean doesCaptureEntityDrops(final NeighborNotificationContext context) {
         return false; // Maybe make this configurable as well.
     }
 }

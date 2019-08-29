@@ -38,6 +38,12 @@ public class InteractionPacketContext extends PacketContext<InteractionPacketCon
         this.addEntityDropCaptures();
     }
 
+    @Override
+    protected void reset() {
+        super.reset();
+        this.targetBlock = BlockSnapshot.NONE;
+    }
+
     InteractionPacketContext targetBlock(BlockSnapshot snapshot) {
         this.targetBlock = snapshot;
         return this;

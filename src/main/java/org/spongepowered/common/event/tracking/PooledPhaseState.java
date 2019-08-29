@@ -22,42 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.generation;
+package org.spongepowered.common.event.tracking;
 
-import org.spongepowered.api.world.Chunk;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.event.tracking.IPhaseState;
+import java.util.ArrayDeque;
 
 import javax.annotation.Nullable;
 
-public class ChunkLoadContext extends GenerationContext<ChunkLoadContext> {
+public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPhaseState<C> {
 
-    @Nullable private Chunk chunk;
+    private final ArrayDeque<C> contextPool = PhaseTracker.SERVER.createContextPool(this);
+    @Nullable private C cached;
 
-    public ChunkLoadContext(final IPhaseState<? extends ChunkLoadContext> state) {
-        super(state);
+    protected PooledPhaseState() {
     }
 
     @Override
-    protected void reset() {
-        super.reset();
-        this.chunk = null;
+    public final C createPhaseContext() {
+        if (this.cached != null && !this.cached.isCompleted) {
+            final C cached = this.cached;
+            this.cached = null;
+            return cached;
+        }
+        final C peek = this.contextPool.pollFirst();
+        if (peek != null) {
+            this.cached = peek;
+            return peek;
+        }
+        return createNewContext();
     }
 
-    @SuppressWarnings("unchecked")
-    public ChunkLoadContext chunk(final net.minecraft.world.chunk.Chunk chunk) {
-        this.chunk = (Chunk) chunk;
-        return this;
+    final void releaseContextFromPool(final C context) {
+        if (this.cached == context) {
+            return;
+        }
+        this.contextPool.push(context);
     }
 
-    public final Chunk getChunk() {
-        return this.chunk;
-    }
+    protected abstract C createNewContext();
 
-    @Override
-    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
-        final String s = String.format("%1$" + indent + "s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "Chunk", this.chunk);
-    }
 }

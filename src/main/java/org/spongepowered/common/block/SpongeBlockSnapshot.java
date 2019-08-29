@@ -154,7 +154,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public BlockSnapshot withContainer(final DataContainer container) {
-        return new SpongeBlockSnapshotBuilder().build(container).get();
+        return SpongeBlockSnapshotBuilder.pooled().build(container).get();
     }
 
     @Override
@@ -513,7 +513,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     public SpongeBlockSnapshotBuilder createBuilder() {
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.blockState(this.blockState)
             .extendedState(this.extendedState)
             .position(this.pos)

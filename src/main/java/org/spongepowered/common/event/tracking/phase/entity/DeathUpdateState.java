@@ -50,7 +50,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
     }
 
     @Override
-    public BasicEntityContext createPhaseContext() {
+    public BasicEntityContext createNewContext() {
         return new BasicEntityContext(this)
             .addCaptures()
             .addEntityDropCaptures();
@@ -130,7 +130,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
         });
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, context);
+        TrackingUtil.processBlockCaptures(context);
 
     }
 }

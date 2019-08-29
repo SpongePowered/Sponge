@@ -25,9 +25,10 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
-public abstract class PluginPhaseState<P extends PluginPhaseContext<P>> implements IPhaseState<P> {
+public abstract class PluginPhaseState<P extends PluginPhaseContext<P>> extends PooledPhaseState<P> implements IPhaseState<P> {
 
     private final String desc = TrackingUtil.phaseStateToString("Plugin", this);
 

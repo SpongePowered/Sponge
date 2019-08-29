@@ -34,22 +34,28 @@ public class BasicPluginContext extends PluginPhaseContext<BasicPluginContext> {
 
     @Nullable PluginContainer container;
 
-    public BasicPluginContext(IPhaseState<BasicPluginContext> phaseState) {
+    public BasicPluginContext(final IPhaseState<? extends BasicPluginContext> phaseState) {
         super(phaseState);
     }
 
-    public BasicPluginContext container(PluginContainer container) {
+    public BasicPluginContext container(final PluginContainer container) {
         this.container = container;
         return this;
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
         super.printCustom(printer, indent);
-        String s = String.format("%1$" + indent + "s", "");
+        final String s = String.format("%1$" + indent + "s", "");
         if (this.container != null) {
             printer.add(s + "- %s: %s", "PluginContainer", this.container);
         }
         return printer;
+    }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.container = null;
     }
 }

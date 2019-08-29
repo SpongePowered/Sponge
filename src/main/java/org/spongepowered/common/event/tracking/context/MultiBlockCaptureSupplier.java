@@ -302,7 +302,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     private SpongeBlockSnapshot getBackingSnapshot(final BlockSnapshot snapshot) {
         final SpongeBlockSnapshot backingSnapshot;
         if (!(snapshot instanceof SpongeBlockSnapshot)) {
-            backingSnapshot = new SpongeBlockSnapshotBuilder().from(snapshot).build();
+            backingSnapshot = SpongeBlockSnapshotBuilder.pooled().from(snapshot).build();
         } else {
             backingSnapshot = (SpongeBlockSnapshot) snapshot;
         }
@@ -644,7 +644,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 if (!transaction.isValid()) {
                     continue;
                 }
-                TrackingUtil.performTransactionProcess(transaction, phaseState, phaseContext, currentDepth);
+                TrackingUtil.performTransactionProcess(transaction, phaseContext, currentDepth);
                 if (hasEvents) {
                     final SpongeBlockSnapshot original = (SpongeBlockSnapshot) transaction.getOriginal();
                     original.getWorldServer().ifPresent(worldServer -> {
@@ -760,6 +760,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     PhaseTracker.getInstance().printMessageWithCaughtException("Forcibly Closing Proxy", "Proxy Access could not be popped", e);
                 }
             }
+            this.processingWorlds.clear();
             for (BlockTransaction transaction = this.head; transaction != null; ) {
                 final BlockTransaction next = transaction.next;
                 transaction.previous = null;

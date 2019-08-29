@@ -32,23 +32,24 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class EntityPhaseState<E extends EntityContext<E>> implements IPhaseState<E> {
+public abstract class EntityPhaseState<E extends EntityContext<E>> extends PooledPhaseState<E> implements IPhaseState<E> {
 
     private final String desc = TrackingUtil.phaseStateToString("Block", this);
 
     @Override
-    public boolean doesCaptureEntityDrops(E context) {
+    public boolean doesCaptureEntityDrops(final E context) {
         return true;
     }
 
     @Override
-    public void unwind(E context) {
+    public void unwind(final E context) {
 
     }
 
@@ -57,7 +58,7 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> implements IP
         return this.desc;
     }
 
-    void standardSpawnCapturedEntities(PhaseContext<?> context, List<Entity> entities) {
+    void standardSpawnCapturedEntities(final PhaseContext<?> context, final List<? extends Entity> entities) {
         // Separate experience orbs from other entity drops
         final List<Entity> experience = entities.stream()
             .filter(entity -> entity instanceof ExperienceOrb)

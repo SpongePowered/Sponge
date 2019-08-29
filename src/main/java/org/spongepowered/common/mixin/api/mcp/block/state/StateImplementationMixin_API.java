@@ -113,7 +113,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @Override
     public BlockSnapshot snapshotFor(final Location<World> location) {
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
             .blockState((IBlockState) (Object) this)
             .position(location.getBlockPosition())
             .worldId(location.getExtent().getUniqueId());

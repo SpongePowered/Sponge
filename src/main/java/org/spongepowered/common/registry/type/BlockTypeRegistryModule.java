@@ -143,7 +143,7 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
 
     @Override
     public void registerDefaults() {
-        BlockSnapshot NONE_SNAPSHOT = new SpongeBlockSnapshotBuilder()
+        BlockSnapshot NONE_SNAPSHOT = SpongeBlockSnapshotBuilder.pooled()
             .worldId(Constants.World.INVALID_WORLD_UUID)
             .position(new Vector3i(0, 0, 0))
             .blockState(Blocks.AIR.getDefaultState())

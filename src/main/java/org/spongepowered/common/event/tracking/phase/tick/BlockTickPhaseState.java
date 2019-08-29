@@ -78,7 +78,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public BlockTickContext createPhaseContext() {
+    public BlockTickContext createNewContext() {
         return new BlockTickContext(this)
                 .addCaptures();
     }
@@ -138,7 +138,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
 
     @Override
     public void unwind(BlockTickContext context) {
-        TrackingUtil.processBlockCaptures(this, context);
+        TrackingUtil.processBlockCaptures(context);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
                         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);

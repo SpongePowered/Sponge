@@ -27,12 +27,13 @@ package org.spongepowered.common.event.tracking.phase.block;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.function.BiConsumer;
 
-public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
+public class BlockPhaseState extends PooledPhaseState<GeneralizedContext> implements IPhaseState<GeneralizedContext> {
 
     private final BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> BLOCK_MODIFIER =
         IPhaseState.super.getFrameModifier().andThen((frame, ctx) -> {
@@ -44,7 +45,7 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
     }
 
     @Override
-    public GeneralizedContext createPhaseContext() {
+    public GeneralizedContext createNewContext() {
         return new GeneralizedContext(this);
     }
 
@@ -54,22 +55,17 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
     }
 
     @Override
-    public void unwind(GeneralizedContext context) {
+    public void unwind(final GeneralizedContext context) {
 
     }
 
     @Override
-    public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final GeneralizedContext context, final Entity entity, final int chunkX, final int chunkZ) {
         return context.captureEntity(entity);
     }
 
     @Override
     public boolean doesCaptureEntitySpawns() {
-        return true;
-    }
-
-    @Override
-    public boolean doesAllowEntitySpawns() {
         return true;
     }
 

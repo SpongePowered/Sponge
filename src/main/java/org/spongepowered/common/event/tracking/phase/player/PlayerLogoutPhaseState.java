@@ -31,27 +31,28 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class PlayerLogoutPhaseState implements IPhaseState<GeneralizedContext> {
+final class PlayerLogoutPhaseState extends PooledPhaseState<GeneralizedContext> implements IPhaseState<GeneralizedContext> {
 
     PlayerLogoutPhaseState() {
     }
 
     @Override
-    public GeneralizedContext createPhaseContext() {
-        return new GeneralizedContext(this);
+    public GeneralizedContext createNewContext() {
+        return new GeneralizedContext(this).addCaptures();
     }
 
     @Override
-    public void unwind(GeneralizedContext phaseContext) {
+    public void unwind(final GeneralizedContext phaseContext) {
         final Player player = phaseContext.getSource(Player.class)
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing a player leaving, but we're not!", phaseContext));
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
                 SpongeCommonEventFactory.callDropItemDispense(items, phaseContext);
@@ -68,7 +69,7 @@ final class PlayerLogoutPhaseState implements IPhaseState<GeneralizedContext> {
             });
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
-            TrackingUtil.processBlockCaptures(this, phaseContext);
+            TrackingUtil.processBlockCaptures(phaseContext);
         }
     }
 

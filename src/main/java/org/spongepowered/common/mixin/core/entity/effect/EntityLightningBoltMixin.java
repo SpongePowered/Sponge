@@ -74,12 +74,12 @@ public abstract class EntityLightningBoltMixin extends EntityMixin {
         if (!this.effect && ((World) world).containsBlock(pos.getX(), pos.getY(), pos.getZ())) {
             final Vector3i pos3i = VecHelper.toVector3i(pos);
             final Transaction<BlockSnapshot> transaction = new Transaction<>(
-                new SpongeBlockSnapshotBuilder()
+                SpongeBlockSnapshotBuilder.pooled()
                     .blockState(world.getBlockState(pos))
                     .world(((World) world).getProperties())
                     .position(pos3i)
                     .build(),
-                new SpongeBlockSnapshotBuilder()
+                SpongeBlockSnapshotBuilder.pooled()
                     .blockState(blockState)
                     .world(((World) world).getProperties())
                     .position(pos3i)

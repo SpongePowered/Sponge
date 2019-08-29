@@ -103,7 +103,7 @@ public final class CloseWindowState extends BasicPacketState {
         }
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, context);
+        TrackingUtil.processBlockCaptures(context);
 
     }
 

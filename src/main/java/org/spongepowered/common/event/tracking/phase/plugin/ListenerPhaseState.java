@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends PluginPhaseState<L> {
 
     @Override
-    public void unwind(L phaseContext) {
+    public void unwind(final L phaseContext) {
 
     }
 
@@ -59,20 +59,20 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(L context) {
+    public boolean tracksBlockSpecificDrops(final L context) {
         return true;
     }
 
 
     @Override
-    public void appendNotifierToBlockEvent(L context, PhaseContext<?> currentContext,
-                                           WorldServerBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
+    public void appendNotifierToBlockEvent(final L context, final PhaseContext<?> currentContext,
+                                           final WorldServerBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
 
     }
 
     @Override
-    public void associateNeighborStateNotifier(L unwindingContext, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-        WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(final L unwindingContext, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
+        final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
         unwindingContext.getCapturedPlayer().ifPresent(player ->
             ((ChunkBridge) minecraftWorld.getChunk(notifyPos))
                 .bridge$addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
@@ -80,7 +80,7 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack stack, EntityPlayerMP playerMP, L context) {
+    public void capturePlayerUsingStackToBreakBlock(@Nullable final ItemStack stack, final EntityPlayerMP playerMP, final L context) {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 

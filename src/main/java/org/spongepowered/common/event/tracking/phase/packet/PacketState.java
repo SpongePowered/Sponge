@@ -46,6 +46,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
@@ -54,10 +55,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-public abstract class PacketState<P extends PacketContext<P>> implements IPhaseState<P> {
+public abstract class PacketState<P extends PacketContext<P>> extends PooledPhaseState<P> implements IPhaseState<P> {
 
-
-    private BiConsumer<CauseStackManager.StackFrame, P> BASIC_PACKET_MODIFIER = IPhaseState.super.getFrameModifier().andThen((frame, ctx) -> {
+    private final BiConsumer<CauseStackManager.StackFrame, P> BASIC_PACKET_MODIFIER = IPhaseState.super.getFrameModifier().andThen((frame, ctx) -> {
         if (ctx.packetPlayer != null) {
             frame.pushCause(ctx.packetPlayer);
         }
@@ -68,13 +68,13 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
 
-    protected static void processSpawnedEntities(EntityPlayerMP player, SpawnEntityEvent event) {
-        List<Entity> entities = event.getEntities();
+    protected static void processSpawnedEntities(final EntityPlayerMP player, final SpawnEntityEvent event) {
+        final List<Entity> entities = event.getEntities();
         processEntities(player, entities);
     }
 
-    protected static void processEntities(EntityPlayerMP player, Collection<Entity> entities) {
-        for (Entity entity : entities) {
+    protected static void processEntities(final EntityPlayerMP player, final Collection<Entity> entities) {
+        for (final Entity entity : entities) {
             EntityUtil.processEntitySpawn(entity, () -> Optional.of((Player) player));
         }
     }
@@ -85,35 +85,36 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
-    public void unwind(P phaseContext) {
+    public void unwind(final P phaseContext) {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, phaseContext);
+        TrackingUtil.processBlockCaptures(phaseContext);
     }
 
-    public boolean matches(int packetState) {
+    public boolean matches(final int packetState) {
         return false;
     }
 
     @Override
-    public void appendNotifierToBlockEvent(P context, PhaseContext<?> currentContext,
-                                           WorldServerBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
+    public void appendNotifierToBlockEvent(final P context, final PhaseContext<?> currentContext,
+                                           final WorldServerBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
 
     }
 
     @Override
-    public void associateNeighborStateNotifier(P unwindingContext, BlockPos sourcePos, Block block, BlockPos notifyPos, WorldServer minecraftWorld,
-        PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(
+        final P unwindingContext, final BlockPos sourcePos, final Block block, final BlockPos notifyPos, final WorldServer minecraftWorld,
+        final PlayerTracker.Type notifier) {
         final Player player = unwindingContext.getSpongePlayer();
-        Chunk chunk = minecraftWorld.getChunk(notifyPos);
+        final Chunk chunk = minecraftWorld.getChunk(notifyPos);
         ((ChunkBridge) chunk).bridge$setBlockNotifier(notifyPos, player.getUniqueId());
     }
 
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, P context) {
+    public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final P context) {
 
     }
 
-    public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
+    public boolean isPacketIgnored(final Packet<?> packetIn, final EntityPlayerMP packetPlayer) {
         return false;
     }
 
@@ -123,12 +124,12 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(P context) {
+    public boolean doesCaptureEntityDrops(final P context) {
         return false;
     }
 
     @Override
-    public boolean doesBulkBlockCapture(P context) {
+    public boolean doesBulkBlockCapture(final P context) {
         return true;
     }
 
@@ -139,9 +140,9 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
      * @param entities The list of entities to spawn
      */
     @Override
-    public void postProcessSpawns(P context, ArrayList<Entity> entities) {
+    public void postProcessSpawns(final P context, final ArrayList<Entity> entities) {
         final Player player = context.getSpongePlayer();
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             frame.pushCause(player);
             SpongeCommonEventFactory.callSpawnEntity(entities, context);
@@ -149,7 +150,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
-    public boolean spawnEntityOrCapture(P context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final P context, final Entity entity, final int chunkX, final int chunkZ) {
         return this.shouldCaptureEntity()
         ? context.getCapturedEntities().add(entity)
         : this.spawnEntity(context, entity, chunkX, chunkZ);
@@ -178,12 +179,12 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
      * @param chunkZ
      * @return True if the entity was spawned
      */
-    public boolean spawnEntity(P context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntity(final P context, final Entity entity, final int chunkX, final int chunkZ) {
         final Player player = context.getSource(Player.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player", context));
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SPAWN_TYPE, this.getEntitySpawnType(context));
             frame.addContext(EventContextKeys.NOTIFIER, player);
@@ -192,7 +193,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         }
     }
 
-    public SpawnType getEntitySpawnType(P context) {
+    public SpawnType getEntitySpawnType(final P context) {
         return SpawnTypes.PLACEMENT;
     }
 

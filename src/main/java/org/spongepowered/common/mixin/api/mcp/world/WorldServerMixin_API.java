@@ -321,7 +321,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             return BlockSnapshot.NONE;
         }
         final BlockPos pos = new BlockPos(x, y, z);
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.worldId(this.getUniqueId())
             .position(new Vector3i(x, y, z));
         final Chunk chunk = this.getChunk(pos);
@@ -423,8 +423,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (!state.alreadyCapturingEntitySpawns()) {
-            try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext()
-                .addCaptures()) {
+            try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext()) {
                 context.buildAndSwitch();
                 phaseTracker.spawnEntityWithCause(this, entity);
                 return true;

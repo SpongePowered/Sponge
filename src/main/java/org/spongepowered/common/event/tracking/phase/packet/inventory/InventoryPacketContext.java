@@ -97,4 +97,10 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "HighlightedSlotId", this.highlightedSlotId);
     }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.highlightedSlotId = 0;
+    }
 }

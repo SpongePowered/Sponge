@@ -86,18 +86,21 @@ import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationCo
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.core.world.WorldServerAccessor;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 
@@ -145,10 +148,6 @@ public final class PhaseTracker {
             .submit(SpongeImpl.getPlugin());
     }
 
-    public static final String MINECRAFT_CLIENT = "net.minecraft.client.Minecraft";
-    public static final String DEDICATED_SERVER = "net.minecraft.server.dedicated.DedicatedServer";
-    public static final String MINECRAFT_SERVER = "net.minecraft.server.MinecraftServer";
-    public static final String INTEGRATED_SERVER = "net.minecraft.server.integrated.IntegratedServer";
     @Nullable private Thread sidedThread;
     private boolean hasRun = false;
 
@@ -164,10 +163,10 @@ public final class PhaseTracker {
         final String callingParent = stackTrace[2].getClassName();
         if (
             !(
-                (MINECRAFT_CLIENT.equals(callingClass) && MINECRAFT_CLIENT.equals(callingParent))
-                || (MINECRAFT_SERVER.equals(callingClass) && MINECRAFT_SERVER.equals(callingParent))
-                || (DEDICATED_SERVER.equals(callingClass) && MINECRAFT_CLIENT.equals(callingParent))
-                || (INTEGRATED_SERVER.equals(callingClass) && MINECRAFT_CLIENT.equals(callingParent))
+                (Constants.MINECRAFT_CLIENT.equals(callingClass) && Constants.MINECRAFT_CLIENT.equals(callingParent))
+                || (Constants.MINECRAFT_SERVER.equals(callingClass) && Constants.MINECRAFT_SERVER.equals(callingParent))
+                || (Constants.DEDICATED_SERVER.equals(callingClass) && Constants.MINECRAFT_CLIENT.equals(callingParent))
+                || (Constants.INTEGRATED_SERVER.equals(callingClass) && Constants.MINECRAFT_CLIENT.equals(callingParent))
             )
         ) {
             throw new IllegalAccessException("Illegal Attempts to re-assign PhaseTracker threads on Sponge");
@@ -225,8 +224,15 @@ public final class PhaseTracker {
     private final List<IPhaseState<?>> printedExceptionsForState = new ArrayList<>();
     private final Set<IPhaseState<?>> printedExceptionsForUnprocessedState = new HashSet<>();
     private final Set<IPhaseState<?>> printedExceptionForMaximumProcessDepth = new HashSet<>();
+    private final ConcurrentHashMap<IPhaseState<?>, ArrayDeque<? extends PhaseContext<?>>> stateContextPool = new ConcurrentHashMap<>();
 
     // ----------------- STATE ACCESS ----------------------------------
+
+    public <C extends PhaseContext<C>> ArrayDeque<C> createContextPool(final IPhaseState<C> state) {
+        final ArrayDeque<C> pool = new ArrayDeque<>();
+        this.stateContextPool.put(state, pool);
+        return pool;
+    }
 
     @SuppressWarnings("rawtypes")
     void switchToPhase(final IPhaseState<?> state, final PhaseContext<?> phaseContext) {
@@ -959,7 +965,7 @@ public final class PhaseTracker {
                     }
                     // And now, proceed as normal.
                     // If we've gotten this far, the transaction wasn't cancelled, so pass 'noCancelledTransactions' as 'true'
-                    TrackingUtil.performTransactionProcess(transaction, phaseState, context, 0);
+                    TrackingUtil.performTransactionProcess(transaction, context, 0);
                     return true;
                 }
             } catch (final Exception | NoClassDefFoundError e) {

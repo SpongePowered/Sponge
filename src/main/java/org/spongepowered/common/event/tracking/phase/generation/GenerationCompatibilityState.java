@@ -31,7 +31,7 @@ final class GenerationCompatibilityState extends GeneralGenerationPhaseState<Gen
     }
 
     @Override
-    public GenerationCompatibileContext createPhaseContext() {
+    public GenerationCompatibileContext createNewContext() {
         return new GenerationCompatibileContext(this)
             .addBlockCaptures()
             .addEntityCaptures();

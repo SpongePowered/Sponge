@@ -45,6 +45,13 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
         return (this.inventory != null && !this.inventory.bridge$getCapturedSlotTransactions().isEmpty()) || super.hasCaptures();
     }
 
+    @Override
+    protected void reset() {
+        super.reset();
+        this.command = null;
+        this.inventory = null;
+    }
+
     public CommandPhaseContext command(final String command) {
         this.command = command;
         return this;

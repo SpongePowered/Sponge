@@ -34,23 +34,23 @@ public final class InvokingTeleporterState extends EntityPhaseState<InvokingTele
     }
 
     @Override
-    public InvokingTeleporterContext createPhaseContext() {
+    public InvokingTeleporterContext createNewContext() {
         return new InvokingTeleporterContext(this)
             .addBlockCaptures()
             .addEntityCaptures();
     }
 
     @Override
-    public void unwind(InvokingTeleporterContext context) {
+    public void unwind(final InvokingTeleporterContext context) {
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(InvokingTeleporterContext context) {
+    public boolean tracksBlockSpecificDrops(final InvokingTeleporterContext context) {
         return true;
     }
 
     @Override
-    public boolean spawnEntityOrCapture(InvokingTeleporterContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final InvokingTeleporterContext context, final Entity entity, final int chunkX, final int chunkZ) {
         final WorldServer worldServer = context.getTargetWorld();
         // Allowed to use the force spawn because it's the same "entity"
         ((WorldServerBridge) worldServer).bridge$forceSpawnEntity((net.minecraft.entity.Entity) entity);

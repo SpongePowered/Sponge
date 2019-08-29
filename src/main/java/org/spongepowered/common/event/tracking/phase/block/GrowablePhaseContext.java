@@ -42,34 +42,33 @@ import org.spongepowered.common.util.VecHelper;
 
 public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
 
-    protected final PhaseContext<?> priorContext;
+    protected PhaseContext<?> priorContext;
     ItemStackSnapshot usedItem;
     World world;
     IBlockState blockState;
     BlockPos pos;
     SpongeBlockSnapshot snapshot;
 
-    protected GrowablePhaseContext(IPhaseState<GrowablePhaseContext> state) {
+    protected GrowablePhaseContext(final IPhaseState<? extends GrowablePhaseContext> state) {
         super(state);
-        this.priorContext = PhaseTracker.getInstance().getCurrentContext();
     }
 
-    public GrowablePhaseContext provideItem(ItemStack stack) {
+    public GrowablePhaseContext provideItem(final ItemStack stack) {
         this.usedItem = ItemStackUtil.snapshotOf(stack);
         return this;
     }
 
-    public GrowablePhaseContext world(World worldIn) {
+    public GrowablePhaseContext world(final World worldIn) {
         this.world = worldIn;
         return this;
     }
 
-    public GrowablePhaseContext block(IBlockState blockState) {
+    public GrowablePhaseContext block(final IBlockState blockState) {
         this.blockState = blockState;
         return this;
     }
 
-    public GrowablePhaseContext pos(BlockPos pos) {
+    public GrowablePhaseContext pos(final BlockPos pos) {
         this.pos = pos;
         return this;
     }
@@ -81,7 +80,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         checkState(this.usedItem != null, "ItemUsed is null");
         checkState(this.priorContext != null, "Prior context is null");
         checkState(this.world != null, "World is null");
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
             .worldId(((org.spongepowered.api.world.World) this.world).getUniqueId())
             .position(VecHelper.toVector3i(this.pos))
             .blockState(this.blockState)
@@ -90,5 +89,16 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         this.priorContext.applyNotifierIfAvailable((notifier) -> builder.notifier(notifier.getUniqueId()));
         this.snapshot = builder.build();
         return super.buildAndSwitch();
+    }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.priorContext = null;
+        this.usedItem = null;
+        this.world = null;
+        this.blockState = null;
+        this.pos = null;
+        this.snapshot = null;
     }
 }

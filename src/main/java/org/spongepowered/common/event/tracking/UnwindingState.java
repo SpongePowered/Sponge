@@ -178,7 +178,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
             final List<Entity> contextItems = (List<Entity>) (List<?>) context.getCapturedItemsOrEmptyList();
             final MultiBlockCaptureSupplier originalSupplier = context.getCapturedBlockSupplier();
             if (context.usesMulti) {
-                TrackingUtil.processBlockCaptures(this, context, 0, originalSupplier);
+                TrackingUtil.processBlockCaptures(context, 0, originalSupplier);
                 do {
                     // The auto closeable is set up to only pop the pushed supplier after the fact.
                     // The pushed supplier is only provided in the case where a new set of block
@@ -188,14 +188,14 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
                         if (!recursiveSupplier.isEmpty()) {
                             // So, first we mark ourselves with a new capture supplier
                             context.pushNewCaptureSupplier();
-                            TrackingUtil.processBlockCaptures(this, context, 0, recursiveSupplier);
+                            TrackingUtil.processBlockCaptures(context, 0, recursiveSupplier);
                         }
                     }
                 }
                 while (context.blockSuppliers != null && !context.blockSuppliers.isEmpty());
 
             } else {
-                TrackingUtil.processBlockCaptures(this, context);
+                TrackingUtil.processBlockCaptures(context);
             }
             if (contextEntities.isEmpty() && contextItems.isEmpty()) {
                 return;
@@ -232,7 +232,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
             try {
 
                 if (currentContext.usesMulti) {
-                    TrackingUtil.processBlockCaptures(this, currentContext, depth + 1, original);
+                    TrackingUtil.processBlockCaptures(currentContext, depth + 1, original);
                     do {
                         // The auto closeable is set up to only pop the pushed supplier after the fact.
                         // The pushed supplier is only provided in the case where a new set of block
@@ -242,14 +242,14 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
                             if (!recursiveSupplier.isEmpty()) {
                                 // So, first we mark ourselves with a new capture supplier
                                 currentContext.pushNewCaptureSupplier();
-                                TrackingUtil.processBlockCaptures(this, currentContext, depth + 1, recursiveSupplier);
+                                TrackingUtil.processBlockCaptures(currentContext, depth + 1, recursiveSupplier);
                             }
                         }
                     }
                     while (currentContext.blockSuppliers != null && !currentContext.blockSuppliers.isEmpty());
 
                 } else {
-                    TrackingUtil.processBlockCaptures(this, currentContext, depth + 1, original);
+                    TrackingUtil.processBlockCaptures(currentContext, depth + 1, original);
                 }
             } catch (Exception e) {
                 PhaseTracker.getInstance().printExceptionFromPhase(e, currentContext);
@@ -277,7 +277,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
             final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
             context.getUnwindingState().postProcessSpawns(context.getUnwindingContext(), capturedEntities);
         });
-        TrackingUtil.processBlockCaptures(this, context, depth, context.getCapturedBlockSupplier());
+        TrackingUtil.processBlockCaptures(context, depth, context.getCapturedBlockSupplier());
     }
 
     @Override
@@ -290,7 +290,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
             return;
         }
         context.setBulkBlockCaptures(false);
-        TrackingUtil.processBlockCaptures(this, context, depth, context.getCapturedBlockSupplier());
+        TrackingUtil.processBlockCaptures(context, depth, context.getCapturedBlockSupplier());
 
     }
 
@@ -312,15 +312,14 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
     /**
      * Specifically overridden to delegate to the unwinding state. Since the block physics processing is all handled in
-     * {@link TrackingUtil#performBlockAdditions(List, IPhaseState, PhaseContext, boolean, ListMultimap, int)}.
-     *
-     * @param blockChange change
+     * {@link TrackingUtil#performBlockAdditions(List, PhaseContext, boolean, ListMultimap, int)}.
+     *  @param blockChange change
      * @param snapshotTransaction the transaction
      * @param context the context
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction,
+    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<? extends BlockSnapshot> snapshotTransaction,
         UnwindingPhaseContext context) {
         final IPhaseState<?> unwindingState = context.getUnwindingState();
         final PhaseContext unwindingContext = context.getUnwindingContext();

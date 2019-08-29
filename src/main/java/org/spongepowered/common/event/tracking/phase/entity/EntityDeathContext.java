@@ -24,17 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class EntityDeathContext extends EntityContext<EntityDeathContext> {
-    private DamageSource damageSource;
 
     EntityDeathContext(
-        IPhaseState<? extends EntityDeathContext> state) {
+        final IPhaseState<? extends EntityDeathContext> state) {
         super(state);
     }
 
@@ -45,7 +43,7 @@ public class EntityDeathContext extends EntityContext<EntityDeathContext> {
      */
     @Override
     public void close() {
-        PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         // The current phase data may not be this phase data, which would ultimately
         // lead to having to close off another on top of this one.
         if (!context.equals(this)) {
@@ -63,8 +61,8 @@ public class EntityDeathContext extends EntityContext<EntityDeathContext> {
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "DamageSource", this.damageSource);
     }

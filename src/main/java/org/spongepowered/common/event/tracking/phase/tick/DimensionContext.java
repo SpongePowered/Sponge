@@ -63,4 +63,10 @@ public final class DimensionContext extends TickContext<DimensionContext> {
             .add(s + "- %s: %s", "World", this.world)
             ;
     }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.world = null;
+    }
 }

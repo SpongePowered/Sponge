@@ -52,11 +52,11 @@ import java.util.stream.Collectors;
 
 final class ExplosionState extends GeneralState<ExplosionContext> {
 
-    public final BiConsumer<CauseStackManager.StackFrame, ExplosionContext> EXPLOSION_MODIFIER =
+    private final BiConsumer<CauseStackManager.StackFrame, ExplosionContext> EXPLOSION_MODIFIER =
         super.getFrameModifier().andThen((frame, context) -> frame.pushCause(context.getExplosion()));
 
     @Override
-    public ExplosionContext createPhaseContext() {
+    public ExplosionContext createNewContext() {
         return new ExplosionContext()
             .addEntityCaptures()
             .addEntityDropCaptures()
@@ -70,7 +70,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(ExplosionContext context) {
+    public boolean tracksBlockSpecificDrops(final ExplosionContext context) {
         return true;
     }
 
@@ -95,13 +95,13 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public void unwind(ExplosionContext context) {
+    public void unwind(final ExplosionContext context) {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, context);
+        TrackingUtil.processBlockCaptures(context);
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
-                try (CauseStackManager.StackFrame smaller = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame smaller = Sponge.getCauseStackManager().pushCauseFrame()) {
                     smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);
                 }
@@ -126,13 +126,13 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public ChangeBlockEvent.Post createChangeBlockPostEvent(ExplosionContext context, ImmutableList<Transaction<BlockSnapshot>> transactions,
-        Cause cause) {
+    public ChangeBlockEvent.Post createChangeBlockPostEvent(final ExplosionContext context, final ImmutableList<Transaction<BlockSnapshot>> transactions,
+        final Cause cause) {
         return SpongeEventFactory.createExplosionEventPost(cause, context.getSpongeExplosion(), transactions);
     }
 
     @Override
-    public boolean spawnEntityOrCapture(ExplosionContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final ExplosionContext context, final Entity entity, final int chunkX, final int chunkZ) {
         return context.getBlockPosition().map(blockPos -> {
             // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't
             final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getPerBlockEntitySpawnSuppplier().get();
@@ -146,7 +146,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         }).orElseGet(() -> {
             final ArrayList<Entity> entities = new ArrayList<>(1);
             entities.add(entity);
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()){
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()){
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                 return SpongeCommonEventFactory.callSpawnEntity(entities, context);
             }

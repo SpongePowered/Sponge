@@ -31,21 +31,26 @@ public final class MapConversionContext extends GeneralPhaseContext<MapConversio
 
     private String worldFolder;
 
-    public MapConversionContext(
-        IPhaseState<MapConversionContext> state) {
+    MapConversionContext(final IPhaseState<MapConversionContext> state) {
         super(state);
     }
 
-    public MapConversionContext world(String overworldFolder) {
+    public MapConversionContext world(final String overworldFolder) {
         this.worldFolder = overworldFolder;
         return this;
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent);
 
         return printer.add(s + "- %s: %s", "WorldFolder", this.worldFolder);
+    }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.worldFolder = null;
     }
 }

@@ -32,11 +32,12 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
 
-abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G> {
+abstract class GeneralState<G extends PhaseContext<G>> extends PooledPhaseState<G> implements IPhaseState<G> {
 
     @Override
     public abstract void unwind(G context);
@@ -58,18 +59,13 @@ abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G>
      * @return
      */
     @Override
-    public boolean spawnEntityOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final G context, final Entity entity, final int chunkX, final int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
-    }
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
     }
 
     private final String desc = TrackingUtil.phaseStateToString("General", this);

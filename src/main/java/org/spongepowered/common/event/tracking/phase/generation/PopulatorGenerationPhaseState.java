@@ -31,7 +31,7 @@ final class PopulatorGenerationPhaseState extends GeneralGenerationPhaseState<Po
     }
 
     @Override
-    public PopulatorPhaseContext createPhaseContext() {
+    public PopulatorPhaseContext createNewContext() {
         return new PopulatorPhaseContext(this)
             .addEntityCaptures();
     }

@@ -135,4 +135,17 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
             .add(s + "- %s: %s", "ItemStackUsed", this.itemUsed);
 
     }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.packetPlayer = null;
+        this.packet = null;
+        this.cursor = ItemStackSnapshot.NONE;
+        this.itemUsed = ItemStack.empty();
+        this.itemUsedSnapshot = (SpongeItemStackSnapshot) ItemStackSnapshot.NONE;
+        this.handUsed = null;
+        this.ignoreCreative = false;
+        this.interactItemChanged = false;
+    }
 }

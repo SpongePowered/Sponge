@@ -144,9 +144,11 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
                     }
                     if (inventoryEvent instanceof SpawnEntityEvent) {
                         processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
-                    } else if (!context.getCapturedEntitySupplier().isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                        SpongeCommonEventFactory.callSpawnEntity(context.getCapturedEntities(), context);
+                    } else {
+                        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                            SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                        });
                     }
                 }
             }

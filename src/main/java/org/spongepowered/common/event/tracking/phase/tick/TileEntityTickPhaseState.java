@@ -37,7 +37,6 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -59,17 +58,15 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
-    private final BiConsumer<StackFrame, TileEntityTickContext> TILE_ENTITY_MODIFIER =
+    private final BiConsumer<CauseStackManager.StackFrame, TileEntityTickContext> TILE_ENTITY_MODIFIER =
         super.getFrameModifier().andThen((frame, context) ->
             context.getSource(TileEntity.class)
                 .ifPresent(frame::pushCause)
         );
 
-    TileEntityTickPhaseState() {
-    }
 
     @Override
-    public TileEntityTickContext createPhaseContext() {
+    public TileEntityTickContext createNewContext() {
         return new TileEntityTickContext(this)
                 .addEntityCaptures()
                 .addEntityDropCaptures()
@@ -77,7 +74,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public BiConsumer<StackFrame, TileEntityTickContext> getFrameModifier() {
+    public BiConsumer<CauseStackManager.StackFrame, TileEntityTickContext> getFrameModifier() {
         return this.TILE_ENTITY_MODIFIER;
     }
 
@@ -87,12 +84,12 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(TileEntityTickContext context) {
+    public boolean doesCaptureEntityDrops(final TileEntityTickContext context) {
         return true;
     }
 
     @Override
-    LocatableBlock getLocatableBlockSourceFromContext(PhaseContext<?> context) {
+    LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
         return context.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over a TileEntity!", context))
                 .getLocatableBlock();
@@ -100,20 +97,17 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
 
     @SuppressWarnings("unchecked")
     @Override
-    public void unwind(TileEntityTickContext context) {
+    public void unwind(final TileEntityTickContext context) {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
-            TrackingUtil.processBlockCaptures(this, context);
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            TrackingUtil.processBlockCaptures(context);
             frame.pushCause(tickingTile.getLocatableBlock());
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (EntityItem entity : entities) {
+                        for (final EntityItem entity : entities) {
                             capturedEntities.add((Entity) entity);
                         }
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
@@ -153,12 +147,12 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean tracksTileEntityChanges(TileEntityTickContext currentContext) {
+    public boolean tracksTileEntityChanges(final TileEntityTickContext currentContext) {
         return this.doesBulkBlockCapture(currentContext);
     }
 
     @Override
-    public void appendContextPreExplosion(ExplosionContext explosionContext, TileEntityTickContext context) {
+    public void appendContextPreExplosion(final ExplosionContext explosionContext, final TileEntityTickContext context) {
         context.applyNotifierIfAvailable(explosionContext::notifier);
         context.applyOwnerIfAvailable(explosionContext::owner);
         final TileEntity tickingTile = context.getSource(TileEntity.class)
@@ -167,7 +161,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean spawnEntityOrCapture(TileEntityTickContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final TileEntityTickContext context, final Entity entity, final int chunkX, final int chunkZ) {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
             .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
         final TileEntityBridge mixinTileEntity = (TileEntityBridge) tickingTile;
@@ -179,7 +173,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         }
         // Separate experience from other entities
         if (entity instanceof EntityXPOrb) {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(tickingTile.getLocatableBlock());
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                 context.addNotifierAndOwnerToCauseStack(frame);
@@ -190,7 +184,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         }
         final List<Entity> nonExpEntities = new ArrayList<>(1);
         nonExpEntities.add(entity);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(tickingTile.getLocatableBlock());
             frame.addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.bridge$getTickedSpawnType());
             context.addNotifierAndOwnerToCauseStack(frame);
@@ -200,13 +194,9 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
-    }
-
-    @Override
-    public boolean getShouldCancelAllTransactions(TileEntityTickContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
-        ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+    public boolean getShouldCancelAllTransactions(
+        final TileEntityTickContext context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
+        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
         if (!postEvent.getTransactions().isEmpty()) {
             return postEvent.getTransactions().stream().anyMatch(transaction -> {
                 final BlockState state = transaction.getOriginal().getState();
@@ -231,22 +221,22 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean doesCaptureNeighborNotifications(TileEntityTickContext context) {
+    public boolean doesCaptureNeighborNotifications(final TileEntityTickContext context) {
         return context.allowsBulkBlockCaptures();
     }
 
     @Override
-    public boolean doesBulkBlockCapture(TileEntityTickContext context) {
+    public boolean doesBulkBlockCapture(final TileEntityTickContext context) {
         return context.allowsBulkBlockCaptures();
     }
 
     @Override
-    public boolean doesBlockEventTracking(TileEntityTickContext context) {
+    public boolean doesBlockEventTracking(final TileEntityTickContext context) {
         return context.allowsBlockEvents();
     }
 
     @Override
-    public boolean hasSpecificBlockProcess(TileEntityTickContext context) {
+    public boolean hasSpecificBlockProcess(final TileEntityTickContext context) {
         return true;
     }
 }

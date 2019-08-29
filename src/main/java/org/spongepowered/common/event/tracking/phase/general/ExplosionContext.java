@@ -80,6 +80,12 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
     }
 
     @Override
+    protected void reset() {
+        super.reset();
+        this.explosion = null;
+    }
+
+    @Override
     protected boolean isRunaway(final PhaseContext<?> phaseContext) {
         if (phaseContext.getClass() != ExplosionContext.class) {
             return false;

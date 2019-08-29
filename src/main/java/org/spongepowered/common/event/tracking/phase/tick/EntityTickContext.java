@@ -56,6 +56,17 @@ public class EntityTickContext extends TickContext<EntityTickContext> {
         return super.source(owner);
     }
 
+    @Override
+    protected void reset() {
+        super.reset();
+        this.posX = 0;
+        this.posY = 0;
+        this.posZ = 0;
+        this.prevX = 0;
+        this.prevY = 0;
+        this.prevZ = 0;
+    }
+
     public void populateEntityPosition(Entity entity) {
         this.posX = entity.posX;
         this.posY = entity.posY;

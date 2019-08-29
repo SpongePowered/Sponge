@@ -34,11 +34,13 @@ public class BlockEventTickContext extends LocationBasedTickContext<BlockEventTi
     }
 
     @Override
-    public BlockEventTickContext source(Object owner) {
-        return super.source(owner);
+    protected void reset() {
+        super.reset();
+        this.wasNotCancelled = true;
+        this.eventSucceeded = false;
     }
 
-    public void setWasNotCancelled(boolean wasNotCancelled) {
+    public void setWasNotCancelled(final boolean wasNotCancelled) {
         this.wasNotCancelled = wasNotCancelled;
     }
 
@@ -46,7 +48,7 @@ public class BlockEventTickContext extends LocationBasedTickContext<BlockEventTi
         return this.eventSucceeded && this.wasNotCancelled;
     }
 
-    public void setEventSucceeded(boolean eventSucceeded) {
+    public void setEventSucceeded(final boolean eventSucceeded) {
         this.eventSucceeded = eventSucceeded;
     }
 

@@ -36,7 +36,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -69,18 +68,20 @@ import javax.annotation.Nullable;
 
 final class CommandState extends GeneralState<CommandPhaseContext> {
 
-    private final BiConsumer<StackFrame, CommandPhaseContext> COMMAND_MODIFIER = super.getFrameModifier()
+    private final BiConsumer<CauseStackManager.StackFrame, CommandPhaseContext> COMMAND_MODIFIER = super.getFrameModifier()
         .andThen((frame, ctx) -> {
             ctx.getSource(Object.class).ifPresent(frame::pushCause);
         });
 
     @Override
-    public CommandPhaseContext createPhaseContext() {
-        return new CommandPhaseContext(this);
+    public CommandPhaseContext createNewContext() {
+        return new CommandPhaseContext(this)
+            .addCaptures()
+            .addEntityDropCaptures();
     }
 
     @Override
-    public BiConsumer<StackFrame, CommandPhaseContext> getFrameModifier() {
+    public BiConsumer<CauseStackManager.StackFrame, CommandPhaseContext> getFrameModifier() {
         return this.COMMAND_MODIFIER;
     }
 
@@ -90,7 +91,8 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     }
 
     @Override
-    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<BlockSnapshot> transaction, final CommandPhaseContext context) {
+    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction,
+        final CommandPhaseContext context) {
         // We want to investigate if there is a user on the cause stack
         // and if possible, associate the notiifer/owner based on the change flag
         // We have to check if there is a player, because command blocks can be triggered
@@ -102,8 +104,8 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
    }
 
     @Override
-    public void associateNeighborStateNotifier(final CommandPhaseContext context, final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-        final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(final CommandPhaseContext context, @Nullable final BlockPos sourcePos, final Block block,
+        final BlockPos notifyPos, final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
         context.getSource(Player.class)
             .ifPresent(player -> ((ChunkBridge) minecraftWorld.getChunk(notifyPos))
                 .bridge$addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER));
@@ -129,7 +131,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, phaseContext);
+        TrackingUtil.processBlockCaptures(phaseContext);
         phaseContext.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities ->
             {
