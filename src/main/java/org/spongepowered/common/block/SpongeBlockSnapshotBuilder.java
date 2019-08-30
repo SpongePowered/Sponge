@@ -37,7 +37,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
@@ -57,25 +56,30 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapshot> implements BlockSnapshot.Builder {
 
-    private static final ArrayDeque<SpongeBlockSnapshotBuilder> pool = new ArrayDeque<>();
+    private static final Deque<SpongeBlockSnapshotBuilder> pool = new ConcurrentLinkedDeque<>();
+
+    public static SpongeBlockSnapshotBuilder unpooled() {
+        return new SpongeBlockSnapshotBuilder(false);
+    }
 
     public static SpongeBlockSnapshotBuilder pooled() {
         final SpongeBlockSnapshotBuilder builder = pool.pollFirst();
         if (builder != null) {
             return builder.reset();
         }
-        return new SpongeBlockSnapshotBuilder();
+        return new SpongeBlockSnapshotBuilder(true);
     }
 
     BlockState blockState;
@@ -87,10 +91,12 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
     SpongeBlockChangeFlag flag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
+    private final boolean pooled;
 
 
-    SpongeBlockSnapshotBuilder() {
+    private SpongeBlockSnapshotBuilder(boolean pooled) {
         super(BlockSnapshot.class, 1);
+        this.pooled = pooled;
     }
 
     @Override
@@ -252,7 +258,9 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         }
         final SpongeBlockSnapshot spongeBlockSnapshot = new SpongeBlockSnapshot(this);
         this.reset();
-        pool.push(this);
+        if (this.pooled) {
+            pool.push(this);
+        }
         return spongeBlockSnapshot;
     }
 
