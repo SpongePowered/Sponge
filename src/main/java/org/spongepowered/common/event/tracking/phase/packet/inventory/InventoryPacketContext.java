@@ -33,18 +33,18 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 
 public class InventoryPacketContext extends PacketContext<InventoryPacketContext> {
 
-    private int highlightedSlotId;
+    private int oldHighlightedSlotId;
 
-    public InventoryPacketContext(PacketState<? extends InventoryPacketContext> state) {
+    public InventoryPacketContext(final PacketState<? extends InventoryPacketContext> state) {
         super(state);
     }
 
-    public int getHighlightedSlotId() {
-        return this.highlightedSlotId;
+    public int getOldHighlightedSlotId() {
+        return this.oldHighlightedSlotId;
     }
 
-    public InventoryPacketContext setHighlightedSlotId(int highlightedSlotId) {
-        this.highlightedSlotId = highlightedSlotId;
+    public InventoryPacketContext setOldHighlightedSlot(final int highlightedSlotId) {
+        this.oldHighlightedSlotId = highlightedSlotId;
         return this;
     }
 
@@ -92,15 +92,15 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "HighlightedSlotId", this.highlightedSlotId);
+            .add(s + "- %s: %s", "HighlightedSlotId", this.oldHighlightedSlotId);
     }
 
     @Override
     protected void reset() {
         super.reset();
-        this.highlightedSlotId = 0;
+        this.oldHighlightedSlotId = 0;
     }
 }

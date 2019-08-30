@@ -85,7 +85,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
      *
      * @param stateId state
      */
-    public BasicInventoryPacketState(int stateId) {
+    public BasicInventoryPacketState(final int stateId) {
         this(stateId, Constants.Networking.MASK_ALL);
     }
 
@@ -95,19 +95,19 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
      * @param stateId flags we care about
      * @param stateMask caring mask
      */
-    public BasicInventoryPacketState(int stateId, int stateMask) {
+    public BasicInventoryPacketState(final int stateId, final int stateMask) {
         this.stateId = stateId & stateMask;
         this.stateMask = stateMask;
     }
 
     @Override
-    public boolean doesBulkBlockCapture(InventoryPacketContext context) {
+    public boolean doesBulkBlockCapture(final InventoryPacketContext context) {
         return false;
     }
 
     @Nullable
-    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
+    public ClickInventoryEvent createInventoryEvent(final EntityPlayerMP playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
+            final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable final Slot slot) {
         return null;
     }
 
@@ -120,14 +120,13 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Override
-    public boolean matches(int packetState) {
+    public boolean matches(final int packetState) {
         return this.stateMask != Constants.Networking.MASK_NONE && ((packetState & this.stateMask & this.stateId) == (packetState & this.stateMask));
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
+    public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final InventoryPacketContext context) {
         ((TrackedInventoryBridge) playerMP.openContainer).bridge$setCaptureInventory(true);
-        context.addEntityDropCaptures();
     }
 
     @Override
@@ -138,14 +137,14 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     @Override
     public InventoryPacketContext createNewContext() {
-        return new InventoryPacketContext(this).addCaptures(); // if for whatever reason there's a capture.. i don't know...
+        return new InventoryPacketContext(this).addCaptures().addEntityDropCaptures(); // if for whatever reason there's a capture.. i don't know...
     }
 
 
     private static Set<Class<?>> containersFailedCapture = new HashSet<>();
 
     @Override
-    public void unwind(InventoryPacketContext context) {
+    public void unwind(final InventoryPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
 
         // The server will disable the player's crafting after receiving a client packet
@@ -183,14 +182,14 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         // firing an event, checking for cancelled transaction, etc.)
         if (!this.shouldFire()) {
             if (ShouldFire.SPAWN_ENTITY_EVENT && !capturedItems.isEmpty()) {
-                for (Entity entiy: capturedItems) {
+                for (final Entity entiy: capturedItems) {
                     if (entiy instanceof OwnershipTrackedBridge) {
                         ((OwnershipTrackedBridge) entiy).tracked$setOwnerReference((Player) player);
                     } else {
                         entiy.setCreator(player.getUniqueID());
                     }
                 }
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     Sponge.getCauseStackManager().pushCause(openContainer);
                     Sponge.getCauseStackManager().pushCause(player);
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
@@ -207,7 +206,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             slot = ((ContainerBridge) trackedInventory).bridge$getContainerSlot(packetIn.getSlotId());
         }
         // else TODO slot for ClickInventoryEvent.Drag
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(openContainer);
             Sponge.getCauseStackManager().pushCause(player);
             final ClickInventoryEvent inventoryEvent;
@@ -230,7 +229,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 }
                 // No SlotTransaction was captured. So we add the clicked slot as a transaction
                 if (slot != null) {
-                    ItemStackSnapshot item = slot.peek().map(ItemStack::createSnapshot).orElse(ItemStackSnapshot.NONE);
+                    final ItemStackSnapshot item = slot.peek().map(ItemStack::createSnapshot).orElse(ItemStackSnapshot.NONE);
                     slotTransactions.add(new SlotTransaction(slot, item, item));
                 }
             }
@@ -278,7 +277,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         }
     }
 
-    public Transaction<ItemStackSnapshot> getCursorTransaction(InventoryPacketContext context, EntityPlayerMP player) {
+    public Transaction<ItemStackSnapshot> getCursorTransaction(final InventoryPacketContext context, final EntityPlayerMP player) {
         final ItemStackSnapshot lastCursor = context.getCursor();
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         return new Transaction<>(lastCursor, newCursor);
