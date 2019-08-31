@@ -761,10 +761,13 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         this.impl$healthScale = scale;
         this.impl$cachedModifiedHealth = -1;
         this.lastHealth = -1.0F;
-        if (scale == Constants.Entity.Player.DEFAULT_HEALTH_SCALE
-            && this instanceof DataCompoundHolder
-            && ((DataCompoundHolder) this).data$hasSpongeCompound()) {
-            ((DataCompoundHolder) this).data$getSpongeCompound().removeTag(Constants.Sponge.Entity.Player.HEALTH_SCALE);
+        if (scale != Constants.Entity.Player.DEFAULT_HEALTH_SCALE) {
+            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            spongeData.setDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE, scale);
+        } else {
+            if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
+                ((DataCompoundHolder) this).data$getSpongeCompound().removeTag(Constants.Sponge.Entity.Player.HEALTH_SCALE);
+            }
         }
         bridge$refreshScaledHealth();
     }

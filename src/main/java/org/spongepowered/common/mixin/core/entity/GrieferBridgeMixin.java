@@ -28,6 +28,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityLargeFireball;
 import net.minecraft.entity.projectile.EntitySmallFireball;
 import net.minecraft.entity.projectile.EntityWitherSkull;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
@@ -46,8 +47,13 @@ public abstract class GrieferBridgeMixin implements GrieferBridge {
     @Override
     public void bridge$SetCanGrief(final boolean grief) {
         this.griefer$canGrief = grief;
-        if (!grief && this instanceof DataCompoundHolder && ((DataCompoundHolder) this).data$hasSpongeCompound()) {
-            ((DataCompoundHolder) this).data$getSpongeCompound().removeTag(Constants.Sponge.Entity.CAN_GRIEF);
+        if (grief) {
+            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            spongeData.setBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
+        } else {
+            if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
+                ((DataCompoundHolder) this).data$getSpongeCompound().removeTag(Constants.Sponge.Entity.CAN_GRIEF);
+            }
         }
     }
 
