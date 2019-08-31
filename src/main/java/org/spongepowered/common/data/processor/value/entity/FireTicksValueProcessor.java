@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -43,9 +44,9 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (container instanceof Entity) {
-            if (((Entity) container).fire >= Constants.Entity.MINIMUM_FIRE_TICKS) {
+            if (((EntityAccessor) container).accessor$getFire() >= Constants.Entity.MINIMUM_FIRE_TICKS) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 builder.replace(getApiValueFromContainer(container).get().asImmutable());
                 builder.replace(container.getValue(Keys.FIRE_DAMAGE_DELAY).get().asImmutable());
@@ -57,7 +58,7 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    protected MutableBoundedValue<Integer> constructValue(final Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.FIRE_TICKS)
             .defaultValue(Constants.Entity.DEFAULT_FIRE_TICKS)
             .minimum(Constants.Entity.MINIMUM_FIRE_TICKS)
@@ -67,21 +68,21 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
     }
 
     @Override
-    protected boolean set(Entity container, Integer value) {
-        container.fire = value;
+    protected boolean set(final Entity container, final Integer value) {
+        ((EntityAccessor) container).accessor$setFire( value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(Entity container) {
-        if (container.fire > 0) {
-            return Optional.of(container.fire);
+    protected Optional<Integer> getVal(final Entity container) {
+        if (((EntityAccessor) container).accessor$getFire() > 0) {
+            return Optional.of(((EntityAccessor) container).accessor$getFire());
         }
         return Optional.empty();
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 

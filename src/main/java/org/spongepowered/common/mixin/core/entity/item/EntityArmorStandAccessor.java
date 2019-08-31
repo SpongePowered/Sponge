@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.math.Rotations;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -33,6 +34,72 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(EntityArmorStand.class)
 public interface EntityArmorStandAccessor {
 
+    @Accessor("DEFAULT_HEAD_ROTATION")
+    static Rotations accessor$getDefaultHeadRotation() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("DEFAULT_BODY_ROTATION")
+    static Rotations accessor$getDefaultBodyRotation() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("DEFAULT_LEFTARM_ROTATION")
+    static Rotations accessor$getDefaultLeftarmRotation() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("DEFAULT_RIGHTARM_ROTATION")
+    static Rotations accessor$getDefaultRightarmRotation() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("DEFAULT_LEFTLEG_ROTATION")
+    static Rotations accessor$getDefaultLeftlegRotation() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("DEFAULT_RIGHTLEG_ROTATION")
+    static Rotations accessor$getDefaultRightlegRotation() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("STATUS")
+    static DataParameter<Byte> accessor$getStatusParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("HEAD_ROTATION")
+    static DataParameter<Rotations> accessor$getHeadRotationParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("BODY_ROTATION")
+    static DataParameter<Rotations> accessor$getBodyRotationParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("LEFT_ARM_ROTATION")
+    static DataParameter<Rotations> accessor$getLeftArmRotationParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("RIGHT_ARM_ROTATION")
+    static DataParameter<Rotations> accessor$getRightArmRotationParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("LEFT_LEG_ROTATION")
+    static DataParameter<Rotations> accessor$getLeftLegRotationParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("RIGHT_LEG_ROTATION")
+    static DataParameter<Rotations> accessor$getRightLegRotationParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    
     @Accessor("headRotation") Rotations accessor$getheadRotation();
     @Accessor("bodyRotation") Rotations accessor$getbodyRotation();
     @Accessor("leftArmRotation") Rotations accessor$getleftArmRotation();

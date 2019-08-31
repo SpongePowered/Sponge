@@ -41,6 +41,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -56,6 +57,7 @@ import org.spongepowered.common.data.datasync.entity.EntityLivingBaseArrowCountC
 import org.spongepowered.common.data.datasync.entity.EntityLivingBaseHealthConverter;
 import org.spongepowered.common.data.datasync.entity.EntityNoGravityConverter;
 import org.spongepowered.common.data.datasync.entity.EntitySilentConverter;
+import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,6 +70,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
+@RegistrationDependency(EntityTypeRegistryModule.class)
 public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>> {
 
     public static KeyRegistryModule getInstance() {

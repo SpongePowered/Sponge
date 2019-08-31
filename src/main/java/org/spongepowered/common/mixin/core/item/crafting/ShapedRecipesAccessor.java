@@ -24,13 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.item.crafting;
 
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraft.util.NonNullList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+
+import java.util.Map;
 
 @Mixin(ShapedRecipes.class)
 public interface ShapedRecipesAccessor {
 
     @Accessor("group") String accessor$getGroup();
+
+    @Invoker("deserializeIngredients")
+    static NonNullList<Ingredient> accessor$deserializeIngredients(String[] pattern, Map<String, Ingredient> keys, int patternWidth, int patternHeight) {
+        throw new IllegalStateException("Untransformed Accessor");
+    }
 
 }

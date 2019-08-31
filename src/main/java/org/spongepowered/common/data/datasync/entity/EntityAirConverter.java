@@ -30,6 +30,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -38,7 +39,7 @@ import java.util.Optional;
 public class EntityAirConverter extends DataParameterConverter<Integer> {
 
     public EntityAirConverter() {
-        super(Entity.AIR);
+        super(EntityAccessor.accessor$getAirParameter());
     }
 
     @Override

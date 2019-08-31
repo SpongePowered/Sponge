@@ -60,7 +60,7 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
     @SuppressWarnings("ConstantConditions")
     @Override
     public void registerDefaults() {
-        for (final WorldType worldType : WorldType.WORLD_TYPES) {
+        for (final WorldType worldType : WorldTypeAccessor.accessor$getWorldTypes()) {
             this.registerAdditionalCatalog((GeneratorType) worldType);
         }
         {
@@ -91,7 +91,7 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
 
     @AdditionalRegistration(RegistrationPhase.PRE_REGISTRY)
     public void registerAdditional() {
-        for (final WorldType worldType : WorldType.WORLD_TYPES) {
+        for (final WorldType worldType : WorldTypeAccessor.accessor$getWorldTypes()) {
             if (worldType != null && !this.catalogTypeMap.values().contains(worldType)) {
                 this.catalogTypeMap.put(worldType.getName().toLowerCase(Locale.ENGLISH), (GeneratorType) worldType);
             }
@@ -132,17 +132,24 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
 
     private static final class Holder {
         static final GeneratorTypeRegistryModule INSTANCE = new GeneratorTypeRegistryModule();
+        static {
+            try {
+                Class.forName("net.minecraft.world.WorldType");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static int getNextID() {
-        for (int x = 0; x < WorldType.WORLD_TYPES.length; x++) {
-            if (WorldType.WORLD_TYPES[x] == null) {
+        for (int x = 0; x < WorldTypeAccessor.accessor$getWorldTypes().length; x++) {
+            if (WorldTypeAccessor.accessor$getWorldTypes()[x] == null) {
                 return x;
             }
         }
 
-        final int oldLen = WorldType.WORLD_TYPES.length;
-        WorldType.WORLD_TYPES = Arrays.copyOf(WorldType.WORLD_TYPES, oldLen + 16);
+        final int oldLen = WorldTypeAccessor.accessor$getWorldTypes().length;
+        WorldTypeAccessor.accessor$setWorldTypes(Arrays.copyOf(WorldTypeAccessor.accessor$getWorldTypes(), oldLen + 16));
         return oldLen;
     }
 }

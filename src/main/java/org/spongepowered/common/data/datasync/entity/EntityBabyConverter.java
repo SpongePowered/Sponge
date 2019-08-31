@@ -25,12 +25,12 @@
 package org.spongepowered.common.data.datasync.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.mixin.core.entity.EntityAgeableAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,11 +38,11 @@ import java.util.Optional;
 public final class EntityBabyConverter extends DataParameterConverter<Boolean> {
 
     public EntityBabyConverter() {
-        super(EntityAgeable.BABY);
+        super(EntityAgeableAccessor.accessor$getBabyParameter());
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(Entity entity, Boolean currentValue, Boolean value) {
+    public Optional<DataTransactionResult> createTransaction(final Entity entity, final Boolean currentValue, final Boolean value) {
         return Optional.of(DataTransactionResult.builder()
             .replace(ImmutableSpongeValue.cachedOf(Keys.IS_ADULT, false, !currentValue))
             .success(ImmutableSpongeValue.cachedOf(Keys.IS_ADULT, false, !value))
@@ -51,8 +51,8 @@ public final class EntityBabyConverter extends DataParameterConverter<Boolean> {
     }
 
     @Override
-    public Boolean getValueFromEvent(Boolean originalValue, List<ImmutableValue<?>> immutableValues) {
-        for (ImmutableValue<?> value : immutableValues) {
+    public Boolean getValueFromEvent(final Boolean originalValue, final List<ImmutableValue<?>> immutableValues) {
+        for (final ImmutableValue<?> value : immutableValues) {
             if (value.getKey() == Keys.IS_ADULT) {
                 return !(Boolean) value.get();
             }

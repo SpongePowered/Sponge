@@ -22,59 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity;
+package org.spongepowered.common.mixin.core.entity.player;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.ItemStack;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.NonNullList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-import javax.annotation.Nullable;
+@Mixin(EntityPlayer.class)
+public interface EntityPlayerAccessor {
 
-@Mixin(EntityLivingBase.class)
-public interface EntityLivingBaseAccessor {
-
-    @Accessor("HAND_STATES")
-    static DataParameter<Byte> accessor$getHandStatesParameter() {
+    @Accessor("ABSORPTION")
+    static DataParameter<Float> accessor$getAbsorptionParameter() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("HEALTH")
-    static DataParameter<Float> accessor$getHealthParameter() {
+    @Accessor("PLAYER_SCORE")
+    static DataParameter<Integer> accessor$getPlayerScoreParameter() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("POTION_EFFECTS")
-    static DataParameter<Integer> accessor$getPotionEffectsParameter() {
+    @Accessor("PLAYER_MODEL_FLAG")
+    static DataParameter<Byte> accessor$getPlayerModelFlagParameter() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("HIDE_PARTICLES")
-    static DataParameter<Boolean> accessor$getHideParticlesParameter() {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
-
-    @Accessor("ARROW_COUNT_IN_ENTITY")
-    static DataParameter<Integer> accessor$getArrowCountInEntityParameter() {
+    @Accessor("MAIN_HAND")
+    static DataParameter<Byte> accessor$getMainHandParameter() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
 
-    @Accessor("lastDamage") float accessor$getLastDamage();
-
-    @Accessor("lastDamage") void accessor$setLastDamage(float lastDamage);
-
-    @Accessor("recentlyHit") int accessor$getRecentlyHitValue();
-
-    @Accessor("dead") boolean accessor$isLivingDead();
-
-    @Accessor("revengeTarget") @Nullable EntityLivingBase accessor$getRevengeTarget();
-
-    @Invoker("canBlockDamageSource")  boolean accessor$canBlockDamageSource(DamageSource damageSourceIn);
-
-    @Accessor("armorArray") NonNullList<ItemStack> accessor$getArmorArray();
 }

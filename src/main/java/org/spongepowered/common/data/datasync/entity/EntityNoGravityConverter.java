@@ -30,6 +30,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,11 +38,11 @@ import java.util.Optional;
 public class EntityNoGravityConverter extends DataParameterConverter<Boolean> {
 
     public EntityNoGravityConverter() {
-        super(Entity.NO_GRAVITY);
+        super(EntityAccessor.accessor$getNoGravityParameter());
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(Entity entity, Boolean currentValue, Boolean value) {
+    public Optional<DataTransactionResult> createTransaction(final Entity entity, final Boolean currentValue, final Boolean value) {
         return Optional.of(DataTransactionResult.builder()
             .replace(ImmutableSpongeValue.cachedOf(Keys.HAS_GRAVITY, true, !currentValue))
             .success(ImmutableSpongeValue.cachedOf(Keys.HAS_GRAVITY, true, !value))
@@ -50,8 +51,8 @@ public class EntityNoGravityConverter extends DataParameterConverter<Boolean> {
     }
 
     @Override
-    public Boolean getValueFromEvent(Boolean originalValue, List<ImmutableValue<?>> immutableValues) {
-        for (ImmutableValue<?> immutableValue : immutableValues) {
+    public Boolean getValueFromEvent(final Boolean originalValue, final List<ImmutableValue<?>> immutableValues) {
+        for (final ImmutableValue<?> immutableValue : immutableValues) {
             if (immutableValue.getKey() == Keys.HAS_GRAVITY) {
                 return !(Boolean) immutableValue.get();
             }

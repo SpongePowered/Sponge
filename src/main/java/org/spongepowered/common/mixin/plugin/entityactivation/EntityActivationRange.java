@@ -73,6 +73,7 @@ import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
 import org.spongepowered.common.mixin.entityactivation.util.math.AxisAlignedBBAccessor_EntityActivation;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
@@ -343,7 +344,7 @@ public class EntityActivationRange {
      */
     public static boolean checkEntityImmunities(final Entity entity) {
         // quick checks.
-        if (entity.fire > 0) {
+        if (((EntityAccessor) entity).accessor$getFire() > 0) {
             return true;
         }
         if (!(entity instanceof Projectile)) {

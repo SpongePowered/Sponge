@@ -24,15 +24,26 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.passive.AbstractChestHorse;
+import net.minecraft.entity.passive.EntityPig;
+import net.minecraft.entity.passive.EntitySheep;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketPlayer;
@@ -51,6 +62,11 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.entity.EntityAccessor;
+import org.spongepowered.common.mixin.core.entity.passive.AbstractChestHorseAccessor;
+import org.spongepowered.common.mixin.core.entity.passive.EntityPigAccessor;
+import org.spongepowered.common.mixin.core.entity.passive.EntitySheepAccessor;
+import org.spongepowered.common.mixin.core.entity.passive.EntityWolfAccessor;
 
 import java.util.List;
 
@@ -202,5 +218,49 @@ public final class PacketPhaseUtil {
         } else { // client
             packetIn.processPacket(netHandler);
         }
+    }
+
+    /**
+     * Attempts to find the {@link DataParameter} that was potentially modified
+     * when a player interacts with an entity.
+     *
+     * @param stack The item the player is holding
+     * @param entity The entity
+     * @return A possible data parameter or null if unknown
+     */
+    @Nullable
+    public static DataParameter<?> findModifiedEntityInteractDataParameter(final ItemStack stack, final Entity entity) {
+        final Item item = stack.getItem();
+
+        if (item == Items.DYE) {
+            // ItemDye.itemInteractionForEntity
+            if (entity instanceof EntitySheep) {
+                return EntitySheepAccessor.accessor$getDyeColorParameter();
+            }
+
+            // EntityWolf.processInteract
+            if (entity instanceof EntityWolf) {
+                return EntityWolfAccessor.accessor$getCollarColorParameter();
+            }
+
+            return null;
+        }
+
+        if (item == Items.NAME_TAG) {
+            // ItemNameTag.itemInteractionForEntity
+            return entity instanceof EntityLivingBase && !(entity instanceof EntityPlayer) && stack.hasDisplayName() ? EntityAccessor.accessor$getCustomNameParameter() : null;
+        }
+
+        if (item == Items.SADDLE) {
+            // ItemSaddle.itemInteractionForEntity
+            return entity instanceof EntityPig ? EntityPigAccessor.accessor$getSaddledParameter() : null;
+        }
+
+        if (item instanceof ItemBlock && ((ItemBlock) item).getBlock() == Blocks.CHEST) {
+            // AbstractChestHorse.processInteract
+            return entity instanceof AbstractChestHorse ? AbstractChestHorseAccessor.accessor$getDataIdChestParameter() : null;
+        }
+
+        return null;
     }
 }

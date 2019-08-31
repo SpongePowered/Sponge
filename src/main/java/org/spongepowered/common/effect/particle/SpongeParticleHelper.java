@@ -28,8 +28,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3f;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.network.Packet;
@@ -58,6 +56,8 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.mixin.core.entity.EntityAccessor;
+import org.spongepowered.common.mixin.core.entity.item.EntityFireworkRocketAccessor;
 import org.spongepowered.common.mixin.core.network.play.server.SPacketEntityMetadataAccessor;
 import org.spongepowered.common.mixin.core.network.play.server.SPacketEntityStatusAccessor;
 import org.spongepowered.common.mixin.core.network.play.server.SPacketSpawnObjectAccessor;
@@ -155,7 +155,8 @@ public final class SpongeParticleHelper {
                 final SPacketEntityMetadata packetEntityMetadata = new SPacketEntityMetadata();
                 ((SPacketEntityMetadataAccessor) packetEntityMetadata).accessor$setEntityId(CachedFireworkPacket.FIREWORK_ROCKET_ID);
                 ((SPacketEntityMetadataAccessor) packetEntityMetadata).accessor$setManagerEntires(new ArrayList<>());
-                ((SPacketEntityMetadataAccessor) packetEntityMetadata).accessor$getManagerEntires().add(new EntityDataManager.DataEntry<>(EntityFireworkRocket.FIREWORK_ITEM, itemStack));
+                ((SPacketEntityMetadataAccessor) packetEntityMetadata).accessor$getManagerEntires().add(new EntityDataManager.DataEntry<>(
+                    EntityFireworkRocketAccessor.accessor$getFireworkItemParameter(), itemStack));
                 return new CachedFireworkPacket(packetEntityMetadata);
             }
             if (type == ParticleTypes.FERTILIZER) {
@@ -348,7 +349,8 @@ public final class SpongeParticleHelper {
         private static final SPacketEntityStatus FIREWORK_ROCKET_DUMMY_EFFECT;
 
         static {
-            FIREWORK_ROCKET_ID = Entity.nextEntityID++;
+            FIREWORK_ROCKET_ID = EntityAccessor.accessor$getNextEntityId();
+            EntityAccessor.accessor$setNextEntityId(FIREWORK_ROCKET_ID + 1);
             FIREWORK_ROCKET_UNIQUE_ID = MathHelper.getRandomUUID(new Random());
 
             DESTROY_FIREWORK_ROCKET_DUMMY = new SPacketDestroyEntities(FIREWORK_ROCKET_ID);

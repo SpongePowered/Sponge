@@ -35,6 +35,16 @@ public interface WorldTypeAccessor {
 
     @Accessor("hasInfoNotice") void accessor$setHasInfoNotice(boolean hasInfoNotice);
 
+    @Accessor("WORLD_TYPES")
+    static WorldType[] accessor$getWorldTypes() {
+        throw new IllegalStateException("Untransformed Accessor");
+    }
+
+    @Accessor("WORLD_TYPES")
+    static void accessor$setWorldTypes(WorldType[] types) {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
 
 
 

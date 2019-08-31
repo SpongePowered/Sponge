@@ -25,12 +25,12 @@
 package org.spongepowered.common.data.datasync.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +38,7 @@ import java.util.Optional;
 public class EntityLivingBaseArrowCountConverter extends DataParameterConverter<Integer> {
 
     public EntityLivingBaseArrowCountConverter() {
-        super(EntityLivingBase.ARROW_COUNT_IN_ENTITY);
+        super(EntityLivingBaseAccessor.accessor$getArrowCountInEntityParameter());
     }
 
     @Override

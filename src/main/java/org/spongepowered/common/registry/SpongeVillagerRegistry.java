@@ -37,6 +37,7 @@ import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeProfession;
+import org.spongepowered.common.mixin.core.entity.passive.EntityVillagerAccessor;
 import org.spongepowered.common.registry.type.entity.CareerRegistryModule;
 
 import java.util.ArrayList;
@@ -141,7 +142,7 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
         for (Career career: CareerRegistryModule.getInstance().getAll()) {
             SpongeCareer spongeCareer = (SpongeCareer) career;
 
-            EntityVillager.ITradeList[][] careerLevels = EntityVillager.DEFAULT_TRADE_LIST_MAP[((SpongeProfession) spongeCareer.getProfession()).type][spongeCareer.type];
+            EntityVillager.ITradeList[][] careerLevels = EntityVillagerAccessor.accessor$getDefaultTradeListMapping()[((SpongeProfession) spongeCareer.getProfession()).type][spongeCareer.type];
             for (int level = 0; level < careerLevels.length; level++) {
                 EntityVillager.ITradeList[] offers = careerLevels[level];
                 ImmutableList.Builder<TradeOfferListMutator> builder = ImmutableList.builder();

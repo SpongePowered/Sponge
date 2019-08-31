@@ -22,31 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.core.util;
 
-import org.spongepowered.api.data.type.InstrumentType;
-import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.mixin.core.block.BlockNoteAccessor;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.SoundEvent;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-public class SpongeInstrumentType extends SpongeCatalogType implements InstrumentType {
+@Mixin(SoundEvents.class)
+public interface SoundEventsAccessor {
 
-    private final SoundType soundType;
-    private final String name;
-
-    public SpongeInstrumentType(final String id, final String name, final int internalId) {
-        super(id);
-        this.name = name;
-        this.soundType = (SoundType) BlockNoteAccessor.accessor$getInstruments().get(internalId);
+    @Invoker("getRegisteredSoundEvent")
+    static SoundEvent accessor$getRegisteredSoundEvent(String id) {
+        throw new IllegalStateException("Untransformed Accessor");
     }
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public SoundType getSound() {
-        return this.soundType;
-    }
 }

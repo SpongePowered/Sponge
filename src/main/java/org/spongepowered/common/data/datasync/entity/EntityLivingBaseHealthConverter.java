@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +40,7 @@ import java.util.Optional;
 public class EntityLivingBaseHealthConverter extends DataParameterConverter<Float> {
 
     public EntityLivingBaseHealthConverter() {
-        super(EntityLivingBase.HEALTH);
+        super(EntityLivingBaseAccessor.accessor$getHealthParameter());
     }
 
     @Override

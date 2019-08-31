@@ -22,31 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.core.entity.passive;
 
-import org.spongepowered.api.data.type.InstrumentType;
-import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.mixin.core.block.BlockNoteAccessor;
+import net.minecraft.entity.passive.EntitySheep;
+import net.minecraft.item.EnumDyeColor;
+import net.minecraft.network.datasync.DataParameter;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-public class SpongeInstrumentType extends SpongeCatalogType implements InstrumentType {
+@Mixin(EntitySheep.class)
+public interface EntitySheepAccessor {
 
-    private final SoundType soundType;
-    private final String name;
-
-    public SpongeInstrumentType(final String id, final String name, final int internalId) {
-        super(id);
-        this.name = name;
-        this.soundType = (SoundType) BlockNoteAccessor.accessor$getInstruments().get(internalId);
+    @Accessor("DYE_COLOR")
+    static DataParameter<Byte> accessor$getDyeColorParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Override
-    public String getName() {
-        return this.name;
+    @Invoker("createSheepColor")
+    static float[] accessor$createSheepColor(EnumDyeColor p_192020_0_) {
+        throw new IllegalStateException("UntransformedAccessor!");
     }
 
-    @Override
-    public SoundType getSound() {
-        return this.soundType;
-    }
+
 }

@@ -52,6 +52,7 @@ public class SpongeWhitelistService implements WhitelistService {
         return profiles;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean isWhitelisted(final GameProfile profile) {
         final UserListAccessor<com.mojang.authlib.GameProfile, UserListWhitelistEntry> whitelist = (UserListAccessor<com.mojang.authlib.GameProfile, UserListWhitelistEntry>) getWhitelist();

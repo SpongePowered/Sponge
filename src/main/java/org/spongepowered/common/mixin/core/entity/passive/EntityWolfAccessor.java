@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.EntityWolf;
+import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -46,5 +47,12 @@ public interface EntityWolfAccessor {
     @Accessor("prevTimeWolfIsShaking") float accessor$getPreviousTimeShaking();
 
     @Accessor("prevTimeWolfIsShaking") void accessor$setPreviousTimeShaking(float isWet);
+
+    @Accessor("COLLAR_COLOR")
+    static DataParameter<Integer> accessor$getCollarColorParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+
 
 }

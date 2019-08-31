@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.entity.living.human;
 
-import static net.minecraft.entity.player.EntityPlayer.ABSORPTION;
-import static net.minecraft.entity.player.EntityPlayer.MAIN_HAND;
-import static net.minecraft.entity.player.EntityPlayer.PLAYER_MODEL_FLAG;
-import static net.minecraft.entity.player.EntityPlayer.PLAYER_SCORE;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -67,6 +62,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
+import org.spongepowered.common.mixin.core.entity.player.EntityPlayerAccessor;
 import org.spongepowered.common.mixin.core.network.play.server.SPacketPlayerListItemAccessor;
 import org.spongepowered.common.mixin.core.network.play.server.SPacketSpawnPlayerAccessor;
 
@@ -123,16 +120,16 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Override
     protected void entityInit() {
         // EntityLivingBase
-        this.dataManager.register(HAND_STATES, Byte.valueOf((byte)0));
-        this.dataManager.register(POTION_EFFECTS, Integer.valueOf(0));
-        this.dataManager.register(HIDE_PARTICLES, Boolean.valueOf(false));
-        this.dataManager.register(ARROW_COUNT_IN_ENTITY, Integer.valueOf(0));
-        this.dataManager.register(HEALTH, Float.valueOf(1.0F));
+        this.dataManager.register(EntityLivingBaseAccessor.accessor$getHandStatesParameter(), Byte.valueOf((byte)0));
+        this.dataManager.register(EntityLivingBaseAccessor.accessor$getPotionEffectsParameter(), Integer.valueOf(0));
+        this.dataManager.register(EntityLivingBaseAccessor.accessor$getHideParticlesParameter(), Boolean.valueOf(false));
+        this.dataManager.register(EntityLivingBaseAccessor.accessor$getArrowCountInEntityParameter(), Integer.valueOf(0));
+        this.dataManager.register(EntityLivingBaseAccessor.accessor$getHealthParameter(), Float.valueOf(1.0F));
         // EntityPlayer
-        this.dataManager.register(ABSORPTION, Float.valueOf(0.0F));
-        this.dataManager.register(PLAYER_SCORE, Integer.valueOf(0));
-        this.dataManager.register(PLAYER_MODEL_FLAG, Byte.valueOf((byte)0));
-        this.dataManager.register(MAIN_HAND, Byte.valueOf((byte)1));
+        this.dataManager.register(EntityPlayerAccessor.accessor$getAbsorptionParameter(), Float.valueOf(0.0F));
+        this.dataManager.register(EntityPlayerAccessor.accessor$getPlayerScoreParameter(), Integer.valueOf(0));
+        this.dataManager.register(EntityPlayerAccessor.accessor$getPlayerModelFlagParameter(), Byte.valueOf((byte)0));
+        this.dataManager.register(EntityPlayerAccessor.accessor$getMainHandParameter(), Byte.valueOf((byte)1));
     }
 
     @Override
@@ -272,7 +269,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     @Override
     public float getAbsorptionAmount() {
-        return this.getDataManager().get(ABSORPTION);
+        return this.getDataManager().get(EntityPlayerAccessor.accessor$getAbsorptionParameter());
     }
 
     @Override
@@ -280,7 +277,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         if (amount < 0.0F) {
             amount = 0.0F;
         }
-        this.getDataManager().set(ABSORPTION, amount);
+        this.getDataManager().set(EntityPlayerAccessor.accessor$getAbsorptionParameter(), amount);
     }
 
     @Override

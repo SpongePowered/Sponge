@@ -49,16 +49,16 @@ public class IgniteableDataProcessor extends AbstractEntityDataProcessor<Entity,
     }
 
     @Override
-    public Optional<IgniteableData> fill(DataContainer container, IgniteableData igniteableData) {
+    public Optional<IgniteableData> fill(final DataContainer container, final IgniteableData igniteableData) {
         igniteableData.set(Keys.FIRE_TICKS, getData(container, Keys.FIRE_TICKS));
         igniteableData.set(Keys.FIRE_DAMAGE_DELAY, getData(container, Keys.FIRE_DAMAGE_DELAY));
         return Optional.of(igniteableData);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult remove(final DataHolder dataHolder) {
         if (dataHolder instanceof Entity) {
-            if (((Entity) dataHolder).fire > 0) {
+            if (((EntityAccessor) dataHolder).accessor$getFire() > 0) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 builder.replace(from(dataHolder).get().getValues());
                 ((Entity) dataHolder).extinguish();
@@ -74,21 +74,21 @@ public class IgniteableDataProcessor extends AbstractEntityDataProcessor<Entity,
     }
 
     @Override
-    protected boolean doesDataExist(Entity entity) {
-        return entity.fire > 0;
+    protected boolean doesDataExist(final Entity entity) {
+        return ((EntityAccessor) entity).accessor$getFire() > 0;
     }
 
     @Override
-    protected boolean set(Entity entity, Map<Key<?>, Object> keyValues) {
-        entity.fire = (Integer) keyValues.get(Keys.FIRE_TICKS);
+    protected boolean set(final Entity entity, final Map<Key<?>, Object> keyValues) {
+        ((EntityAccessor) entity).accessor$setFire((Integer) keyValues.get(Keys.FIRE_TICKS));
         // TODO - this needs to be a property
         //entity.fireResistance = (Integer) keyValues.get(Keys.FIRE_DAMAGE_DELAY);
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(Entity entity) {
-        final int fireTicks = entity.fire;
+    protected Map<Key<?>, ?> getValues(final Entity entity) {
+        final int fireTicks = ((EntityAccessor) entity).accessor$getFire();
         final int fireDamageDelay = ((EntityAccessor) entity).accessor$getFireImmuneTicks();
         return ImmutableMap.<Key<?>, Object>of(Keys.FIRE_TICKS, fireTicks,
                                                Keys.FIRE_DAMAGE_DELAY, fireDamageDelay);

@@ -31,7 +31,6 @@ import com.google.common.reflect.TypeToken;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
@@ -55,9 +54,9 @@ import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
-import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.mixin.core.server.MinecraftServerAccessor;
+import org.spongepowered.common.mixin.core.tileentity.TileEntityAccessor;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
@@ -164,7 +163,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 final String tileType = tile.getString(TILE_ID).get();
                 final ResourceLocation name = new ResourceLocation(tileType);
                 TileEntityType type = TileEntityTypeRegistryModule.getInstance()
-                        .getForClass(TileEntity.REGISTRY.getObject(name));
+                        .getForClass(TileEntityAccessor.accessor$getRegistry().getObject(name));
                 final BlockState state = buffer.getBlock(x - offsetX, y - offsetY, z - offsetZ);
                 // Somehow we need to get some DataFixers in here, because some data may be legacy from older versions before data
                 // fixers.

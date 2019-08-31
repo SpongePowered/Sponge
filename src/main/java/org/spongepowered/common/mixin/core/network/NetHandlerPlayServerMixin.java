@@ -28,21 +28,13 @@ import com.flowpowered.math.vector.Vector3d;
 import io.netty.util.collection.LongObjectHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.passive.AbstractChestHorse;
-import net.minecraft.entity.passive.EntityPig;
-import net.minecraft.entity.passive.EntitySheep;
-import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -121,10 +113,12 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.ContainerPlayerBridge;
+import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.bridge.packet.SPacketResourcePackSendBridge;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -136,8 +130,6 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.bridge.inventory.ContainerPlayerBridge;
-import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
@@ -683,50 +675,6 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         return item;
     }
 
-    /**
-     * Attempts to find the {@link DataParameter} that was potentially modified
-     * when a player interacts with an entity.
-     *
-     * @param stack The item the player is holding
-     * @param entity The entity
-     * @return A possible data parameter or null if unknown
-     */
-    @Nullable
-    private static DataParameter<?> findModifiedEntityInteractDataParameter(final ItemStack stack, final Entity entity) {
-        final Item item = stack.getItem();
-
-        if (item == Items.DYE) {
-            // ItemDye.itemInteractionForEntity
-            if (entity instanceof EntitySheep) {
-                return EntitySheep.DYE_COLOR;
-            }
-
-            // EntityWolf.processInteract
-            if (entity instanceof EntityWolf) {
-                return EntityWolf.COLLAR_COLOR;
-            }
-
-            return null;
-        }
-
-        if (item == Items.NAME_TAG) {
-            // ItemNameTag.itemInteractionForEntity
-            return entity instanceof EntityLivingBase && !(entity instanceof EntityPlayer) && stack.hasDisplayName() ? Entity.CUSTOM_NAME : null;
-        }
-
-        if (item == Items.SADDLE) {
-            // ItemSaddle.itemInteractionForEntity
-            return entity instanceof EntityPig ? EntityPig.SADDLED : null;
-        }
-
-        if (item instanceof ItemBlock && ((ItemBlock) item).getBlock() == Blocks.CHEST) {
-            // AbstractChestHorse.processInteract
-            return entity instanceof AbstractChestHorse ? AbstractChestHorse.DATA_ID_CHEST : null;
-        }
-
-        return null;
-    }
-
     @Inject(method = "handleAnimation",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;markPlayerActive()V"), cancellable = true)
     private void impl$throwAnimationEvent(final CPacketAnimation packetIn, final CallbackInfo ci) {
@@ -868,7 +816,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                             } else {
                                 // Other cases may involve a specific DataParameter of the entity
                                 // We fix the client state by marking it as dirty so it will be updated on the client the next tick
-                                final DataParameter<?> parameter = findModifiedEntityInteractDataParameter(itemstack, entity);
+                                final DataParameter<?> parameter = PacketPhaseUtil.findModifiedEntityInteractDataParameter(itemstack, entity);
                                 if (parameter != null) {
                                     entity.getDataManager().setDirty(parameter);
                                 }

@@ -31,7 +31,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.minecraft.command.EntitySelector;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.text.selector.Argument;
@@ -44,6 +43,7 @@ import org.spongepowered.api.text.selector.SelectorFactory;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.mixin.core.command.EntitySelectorAccessor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -146,9 +146,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
             if (argListIndex == selector.length()) {
                 rawMap = ImmutableMap.of();
             } else {
-                rawMap =
-                        EntitySelector.getArgumentMap(selector.substring(
-                                argListIndex + 1, selector.length() - 1));
+                rawMap = EntitySelectorAccessor.accessor$getArgumentMap(selector.substring(argListIndex + 1, selector.length() - 1));
             }
             Map<ArgumentType<?>, Argument<?>> arguments =
                     parseArguments(rawMap);

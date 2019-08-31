@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -34,6 +35,16 @@ import java.util.Random;
 @Mixin(Entity.class)
 public interface EntityAccessor {
 
+    @Accessor("nextEntityID")
+    static int accessor$getNextEntityId() {
+        throw new IllegalStateException("Untransformed EntityAccessor!");
+    }
+
+    @Accessor("nextEntityID")
+    static void accessor$setNextEntityId(int id) {
+        throw new IllegalStateException("Untransformed EntityAccessor!");
+    }
+
     @Accessor("rand") Random accessor$getRandom();
 
     @Invoker("copyDataFromOld") void accessor$CopyDataFromOldEntity(Entity entity);
@@ -41,5 +52,35 @@ public interface EntityAccessor {
     @Invoker("setFlag") void accessor$setEntityFlag(int flag, boolean set);
 
     @Invoker("getFireImmuneTicks") int accessor$getFireImmuneTicks();
+
+    @Accessor("fire") int accessor$getFire();
+
+    @Accessor("fire") void accessor$setFire(int fire);
+
+    @Accessor("FLAGS")
+    static DataParameter<Byte> accessor$getFlagsParameter() {
+        throw new IllegalStateException("Untransformed EntityAccessor!");
+    }
+    @Accessor("AIR")
+    static DataParameter<Integer> accessor$getAirParameter() {
+        throw new IllegalStateException("Untransformed EntityAccessor!");
+    }
+    @Accessor("CUSTOM_NAME")
+    static DataParameter<String> accessor$getCustomNameParameter() {
+        throw new IllegalStateException("Untransformed EntityAccessor!");
+    }
+
+    @Accessor("CUSTOM_NAME_VISIBLE")
+    static DataParameter<Boolean> accessor$getCustomNameVisibleParameter() {
+        throw new IllegalStateException("Untransformed EntityAccessor!");
+    }
+    @Accessor("SILENT")
+    static DataParameter<Boolean> accessor$getSilentParameter() {
+        throw new IllegalStateException("Untransformed EntityAccessor!");
+    }
+    @Accessor("NO_GRAVITY")
+    static DataParameter<Boolean> accessor$getNoGravityParameter() {
+        throw new IllegalStateException("Untransformed EntityAccessor!");
+    }
 
 }

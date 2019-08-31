@@ -39,6 +39,7 @@ import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
+import org.spongepowered.common.mixin.core.tileentity.TileEntityAccessor;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
@@ -121,7 +122,7 @@ public final class TileEntityTypeRegistryModule
             return getById(name);
         }
         final ResourceLocation location = new ResourceLocation(id);
-        final Class<? extends TileEntity> object = TileEntity.REGISTRY.getObject(location);
+        final Class<? extends TileEntity> object = TileEntityAccessor.accessor$getRegistry().getObject(location);
         if (object != null) {
             final TileEntityType forClass = getForClass(object);
             if (forClass != null) {

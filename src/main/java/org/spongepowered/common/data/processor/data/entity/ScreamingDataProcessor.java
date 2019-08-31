@@ -36,6 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingD
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.monster.EntityEndermanAccessor;
 
 import java.util.Optional;
 
@@ -52,28 +53,28 @@ public class ScreamingDataProcessor
     }
 
     @Override
-    protected boolean set(EntityEnderman entity, Boolean value) {
-        entity.getDataManager().set(EntityEnderman.SCREAMING, value);
+    protected boolean set(final EntityEnderman entity, final Boolean value) {
+        entity.getDataManager().set(EntityEndermanAccessor.accessor$getScreamingParameter(), value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityEnderman entity) {
+    protected Optional<Boolean> getVal(final EntityEnderman entity) {
         return Optional.of(entity.isScreaming());
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Value<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<>(Keys.IS_SCREAMING, false, actualValue);
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.IS_SCREAMING, false, value);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

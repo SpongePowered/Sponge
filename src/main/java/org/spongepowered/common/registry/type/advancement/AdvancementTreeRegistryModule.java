@@ -28,12 +28,12 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementList;
-import net.minecraft.advancements.AdvancementManager;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.AdvancementListBridge;
+import org.spongepowered.common.mixin.core.advancements.AdvancementManagerAccessor;
 import org.spongepowered.common.registry.CustomRegistrationPhase;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
@@ -53,10 +53,10 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
 
     @SuppressWarnings("unchecked")
     @Override
-    public void registerAdditionalCatalog(AdvancementTree advancementTree) {
+    public void registerAdditionalCatalog(final AdvancementTree advancementTree) {
         checkState(SpongeImplHooks.isMainThread());
         final Advancement advancement = (Advancement) advancementTree.getRootAdvancement();
-        final AdvancementListBridge advancementList = (AdvancementListBridge) AdvancementManager.ADVANCEMENT_LIST;
+        final AdvancementListBridge advancementList = (AdvancementListBridge) AdvancementManagerAccessor.accessor$getAdvancementList();
         advancementList.bridge$getRootsSet().add(advancement);
         final AdvancementList.Listener listener = advancementList.bridge$getListener();
         if (listener != null) {
@@ -68,7 +68,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
         this.catalogTypeMap.clear();
     }
 
-    void registerSilently(Advancement rootAdvancement) {
+    void registerSilently(final Advancement rootAdvancement) {
         final Optional<AdvancementTree> optTree = ((org.spongepowered.api.advancement.Advancement) rootAdvancement).getTree();
         if (optTree.isPresent()) {
             super.register(optTree.get());
@@ -77,7 +77,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
         }
     }
 
-    void remove(Advancement rootAdvancement) {
+    void remove(final Advancement rootAdvancement) {
         final Optional<AdvancementTree> optTree = ((org.spongepowered.api.advancement.Advancement) rootAdvancement).getTree();
         optTree.ifPresent(advancementTree -> this.catalogTypeMap.remove(advancementTree.getId()));
     }

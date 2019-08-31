@@ -37,6 +37,7 @@ import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.chunk.storage.AnvilChunkLoaderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.mixin.core.world.chunk.storage.RegionFileCacheAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.io.DataInputStream;
@@ -115,15 +116,15 @@ public class WorldStorageUtil {
     // file name instead of x,z
     public static RegionFile getRegionFile(Path regionFilePath) {
         File file = regionFilePath.toFile();
-        RegionFile regionFile = RegionFileCache.REGIONS_BY_FILE.get(file);
+        RegionFile regionFile = RegionFileCacheAccessor.accessor$getRegionsByFileMap().get(file);
         if (regionFile != null) {
             return regionFile;
         }
-        if (RegionFileCache.REGIONS_BY_FILE.size() >= 256) {
+        if (RegionFileCacheAccessor.accessor$getRegionsByFileMap().size() >= 256) {
             RegionFileCache.clearRegionFileReferences();
         }
         regionFile = new RegionFile(file);
-        RegionFileCache.REGIONS_BY_FILE.put(file, regionFile);
+        RegionFileCacheAccessor.accessor$getRegionsByFileMap().put(file, regionFile);
         return regionFile;
     }
 

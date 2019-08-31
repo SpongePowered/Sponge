@@ -25,12 +25,18 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(EntityLiving.class)
 public interface EntityLivingAccessor {
+
+    @Accessor("AI_FLAGS")
+    static DataParameter<Byte> accessor$getAiFlagsParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
 
     @Accessor("persistenceRequired") void accessor$setPersisting(boolean persisting);
 

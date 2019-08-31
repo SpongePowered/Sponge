@@ -39,4 +39,9 @@ public interface EntityVillagerAccessor {
 
     @Invoker("populateBuyingList") void accessor$PopulateBuyingList();
 
+    @Accessor("DEFAULT_TRADE_LIST_MAP")
+    static EntityVillager.ITradeList[][][][] accessor$getDefaultTradeListMapping() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
 }

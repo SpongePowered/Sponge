@@ -29,6 +29,7 @@ import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhase
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.mixin.core.entity.boss.PhaseListAccessor;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -42,7 +43,7 @@ public class EnderDragonPhaseTypeRegistryModule implements CatalogRegistryModule
     private final Map<String, EnderDragonPhaseType> phaseTypeMap = new HashMap<>();
 
     @Override
-    public Optional<EnderDragonPhaseType> getById(String id) {
+    public Optional<EnderDragonPhaseType> getById(final String id) {
         return Optional.ofNullable(this.phaseTypeMap.get(id));
     }
 
@@ -53,7 +54,7 @@ public class EnderDragonPhaseTypeRegistryModule implements CatalogRegistryModule
 
     @Override
     public void registerDefaults() {
-        for (PhaseList<?> phaseType : PhaseList.phases) {
+        for (final PhaseList<?> phaseType : PhaseListAccessor.accessor$getPhaseList()) {
             this.phaseTypeMap.put(((EnderDragonPhaseType) phaseType).getId(), (EnderDragonPhaseType) phaseType);
         }
     }
@@ -64,5 +65,12 @@ public class EnderDragonPhaseTypeRegistryModule implements CatalogRegistryModule
 
     static final class Holder {
         static final EnderDragonPhaseTypeRegistryModule INSTANCE = new EnderDragonPhaseTypeRegistryModule();
+        static {
+            try {
+                Class.forName("net.minecraft.entity.boss.dragon.phase.PhaseList");
+            } catch (final ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

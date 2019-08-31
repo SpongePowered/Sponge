@@ -57,6 +57,11 @@ public class InstrumentTypeRegistryModule extends AbstractPrefixCheckCatalogRegi
 
     @Override
     public void registerDefaults() {
+        try {
+            Class.forName("net.minecraft.block.BlockNote"); // Initialize the class so Instruments is loaded
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         register(new SpongeInstrumentType("minecraft:harp", "Harp", 0));
         register(new SpongeInstrumentType("minecraft:bass_drum", "Bass Drum", 1));
         register(new SpongeInstrumentType("minecraft:snare", "Snare", 2));

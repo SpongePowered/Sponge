@@ -30,6 +30,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,11 +38,11 @@ import java.util.Optional;
 public class EntityFlagsConverter extends DataParameterConverter<Byte> {
 
     public EntityFlagsConverter() {
-        super(Entity.FLAGS);
+        super(EntityAccessor.accessor$getFlagsParameter());
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(Entity entity, Byte currentValue, Byte value) {
+    public Optional<DataTransactionResult> createTransaction(final Entity entity, final Byte currentValue, final Byte value) {
         // TODO - on fire and elytra are not represented in the API, maybe we should?
         final boolean onFire = getFlag(currentValue, ON_FIRE_MASK);
         final boolean isSneaking = getFlag(currentValue, CROUCHED_MASK);
@@ -89,18 +90,18 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
     }
 
     @Override
-    public Byte getValueFromEvent(Byte originalValue, List<ImmutableValue<?>> immutableValues) {
+    public Byte getValueFromEvent(final Byte originalValue, final List<ImmutableValue<?>> immutableValues) {
         if (immutableValues.isEmpty()) {
             // Short circuit when there are no changes.
             return originalValue;
         }
-        boolean onFire = getFlag(originalValue, ON_FIRE_MASK);
+        final boolean onFire = getFlag(originalValue, ON_FIRE_MASK);
         boolean newIsSneaking = getFlag(originalValue, CROUCHED_MASK);
         boolean newSprinting = getFlag(originalValue, SPRINTING_MASK);
         boolean newInvisible = getFlag(originalValue, INVISIBLE_MASK);
         boolean newGlowing = getFlag(originalValue, GLOWING_MASK);
         boolean newElytra = getFlag(originalValue, FLYING_ELYTRA_MASK);
-        for (ImmutableValue<?> immutableValue : immutableValues) {
+        for (final ImmutableValue<?> immutableValue : immutableValues) {
             if (immutableValue.getKey() == Keys.IS_SNEAKING) {
                 newIsSneaking = ((Boolean) immutableValue.get());
             }
@@ -126,7 +127,7 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
         return newValue;
     }
 
-    private boolean getFlag(byte value, int mask) {
+    private boolean getFlag(final byte value, final int mask) {
         return (value & mask) != 0;
     }
 

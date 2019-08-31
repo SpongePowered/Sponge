@@ -41,14 +41,49 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.storage.SaveHandler;
-import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.property.PropertyStore;
-import org.spongepowered.api.data.type.*;
+import org.spongepowered.api.data.type.Art;
+import org.spongepowered.api.data.type.Arts;
+import org.spongepowered.api.data.type.BigMushroomType;
+import org.spongepowered.api.data.type.BigMushroomTypes;
+import org.spongepowered.api.data.type.BrickType;
+import org.spongepowered.api.data.type.BrickTypes;
+import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.type.Careers;
+import org.spongepowered.api.data.type.ComparatorType;
+import org.spongepowered.api.data.type.ComparatorTypes;
+import org.spongepowered.api.data.type.DirtType;
+import org.spongepowered.api.data.type.DirtTypes;
+import org.spongepowered.api.data.type.DisguisedBlockType;
+import org.spongepowered.api.data.type.DisguisedBlockTypes;
+import org.spongepowered.api.data.type.DoublePlantType;
+import org.spongepowered.api.data.type.DoublePlantTypes;
+import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.type.DyeColors;
+import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.api.data.type.HandPreferences;
+import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.api.data.type.HorseColors;
+import org.spongepowered.api.data.type.HorseStyle;
+import org.spongepowered.api.data.type.HorseStyles;
+import org.spongepowered.api.data.type.LlamaVariant;
+import org.spongepowered.api.data.type.LlamaVariants;
+import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.type.OcelotTypes;
+import org.spongepowered.api.data.type.ParrotVariant;
+import org.spongepowered.api.data.type.ParrotVariants;
+import org.spongepowered.api.data.type.PickupRule;
+import org.spongepowered.api.data.type.PickupRules;
+import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.data.type.RabbitTypes;
+import org.spongepowered.api.data.type.SkullType;
+import org.spongepowered.api.data.type.SkullTypes;
+import org.spongepowered.api.data.type.StructureMode;
+import org.spongepowered.api.data.type.StructureModes;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -64,7 +99,7 @@ import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
-import org.spongepowered.common.mixin.core.world.storage.SaveHandlerMixin;
+import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.net.InetSocketAddress;
@@ -699,13 +734,20 @@ public final class Constants {
         }
 
         public static final class ArmorStand {
+            static {
+                try {
+                    Class.forName(String.valueOf(EntityArmorStand.class));
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
 
-            public static final Vector3d DEFAULT_HEAD_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_HEAD_ROTATION);
-            public static final Vector3d DEFAULT_CHEST_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_BODY_ROTATION);
-            public static final Vector3d DEFAULT_LEFT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTARM_ROTATION);
-            public static final Vector3d DEFAULT_RIGHT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTARM_ROTATION);
-            public static final Vector3d DEFAULT_LEFT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTLEG_ROTATION);
-            public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
+            public static final Vector3d DEFAULT_HEAD_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultHeadRotation());
+            public static final Vector3d DEFAULT_CHEST_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultBodyRotation());
+            public static final Vector3d DEFAULT_LEFT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultLeftarmRotation());
+            public static final Vector3d DEFAULT_RIGHT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultRightarmRotation());
+            public static final Vector3d DEFAULT_LEFT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultLeftlegRotation());
+            public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultRightlegRotation());
         }
 
         public static final class Boat {

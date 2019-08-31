@@ -22,31 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.core.entity.passive;
 
-import org.spongepowered.api.data.type.InstrumentType;
-import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.mixin.core.block.BlockNoteAccessor;
+import net.minecraft.entity.passive.EntityPig;
+import net.minecraft.network.datasync.DataParameter;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public class SpongeInstrumentType extends SpongeCatalogType implements InstrumentType {
+@Mixin(EntityPig.class)
+public interface EntityPigAccessor {
 
-    private final SoundType soundType;
-    private final String name;
-
-    public SpongeInstrumentType(final String id, final String name, final int internalId) {
-        super(id);
-        this.name = name;
-        this.soundType = (SoundType) BlockNoteAccessor.accessor$getInstruments().get(internalId);
+    @Accessor("SADDLED")
+    static DataParameter<Boolean> accessor$getSaddledParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
 
-    @Override
-    public SoundType getSound() {
-        return this.soundType;
-    }
+
 }

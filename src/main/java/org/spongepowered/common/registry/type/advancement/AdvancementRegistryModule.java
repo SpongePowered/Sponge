@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.advancements.AdvancementList;
-import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
@@ -39,6 +38,7 @@ import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.AdvancementListBridge;
+import org.spongepowered.common.mixin.core.advancements.AdvancementManagerAccessor;
 import org.spongepowered.common.registry.CustomRegistrationPhase;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
@@ -67,7 +67,7 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
     }
 
     private static AdvancementListBridge getAdvancementList() {
-        return (AdvancementListBridge) AdvancementManager.ADVANCEMENT_LIST;
+        return (AdvancementListBridge) AdvancementManagerAccessor.accessor$getAdvancementList();
     }
 
     @Override
@@ -114,5 +114,12 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
 
     private static final class Holder {
         static final AdvancementRegistryModule INSTANCE = new AdvancementRegistryModule();
+        static {
+            try {
+                Class.forName("net.minecraft.advancements.AdvancementManager");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

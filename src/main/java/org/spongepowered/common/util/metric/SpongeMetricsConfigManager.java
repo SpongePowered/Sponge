@@ -32,6 +32,7 @@ import org.spongepowered.common.config.category.MetricsCategory;
 
 import javax.inject.Singleton;
 
+@SuppressWarnings("deprecation")
 @Singleton
 public class SpongeMetricsConfigManager implements MetricsConfigManager {
 

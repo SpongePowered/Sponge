@@ -36,6 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeChargedDat
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.core.entity.monster.EntityCreeperAccessor;
 
 import java.util.Optional;
 
@@ -48,7 +49,7 @@ public class ChargedDataProcessor
 
     @Override
     protected boolean set(EntityCreeper entity, Boolean value) {
-        entity.getDataManager().set(EntityCreeper.POWERED, value);
+        entity.getDataManager().set(EntityCreeperAccessor.accessor$getPoweredParameter(), value);
         return true;
     }
 

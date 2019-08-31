@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.server.management;
 
 import net.minecraft.server.management.UserList;
 import net.minecraft.server.management.UserListEntry;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -40,5 +41,9 @@ public interface UserListAccessor<K, V extends UserListEntry<K>> {
     @Invoker("getObjectKey") String accessor$getObjectKey(K obj);
 
     @Invoker("removeExpired") void accessor$removeExpired();
+
+    @Accessor("LOGGER") static Logger accessor$getLogger() {
+        throw new IllegalStateException("Untransformed Accessor");
+    }
 
 }

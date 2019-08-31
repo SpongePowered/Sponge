@@ -38,6 +38,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.item.crafting.ShapelessRecipesAccessor;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import javax.annotation.Nullable;
@@ -51,29 +52,29 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
     private String groupName = "";
 
     @Override
-    public EndStep group(@Nullable String name) {
+    public EndStep group(@Nullable final String name) {
         this.groupName = name == null ? "" : name;
         return this;
     }
 
     @Override
-    public EndStep name(Translation name) {
+    public EndStep name(final Translation name) {
         return (EndStep) super.name(name);
     }
 
     @Override
-    public EndStep name(String name) {
+    public EndStep name(final String name) {
         return (EndStep) super.name(name);
     }
 
     @Override
-    public EndStep id(String id) {
+    public EndStep id(final String id) {
         return (EndStep) super.id(id);
     }
 
     @Deprecated
     @Override
-    public ShapelessCraftingRecipe.Builder from(ShapelessCraftingRecipe value) {
+    public ShapelessCraftingRecipe.Builder from(final ShapelessCraftingRecipe value) {
         this.exemplaryResult = value.getExemplaryResult();
 
         if (this.exemplaryResult == null) {
@@ -85,7 +86,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
 
         this.groupName = "";
         if (value instanceof ShapelessRecipes) {
-            this.groupName = ((ShapelessRecipes) value).group;
+            this.groupName = ((ShapelessRecipesAccessor) value).accessor$getGroup();
         }
 
         super.reset();
@@ -93,7 +94,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
     }
 
     @Override
-    protected ShapelessCraftingRecipe build(PluginContainer plugin, String id, Translation name) {
+    protected ShapelessCraftingRecipe build(final PluginContainer plugin, final String id, final Translation name) {
         checkState(this.exemplaryResult != null && this.exemplaryResult != ItemStackSnapshot.NONE, "The result is not set.");
         checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
         // Copy the ingredient list
@@ -113,7 +114,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
     }
 
     @Override
-    public ResultStep addIngredient(org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
+    public ResultStep addIngredient(final org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
         checkNotNull(ingredient, "ingredient");
         this.ingredients.add(IngredientUtil.toNative(ingredient));
         return this;
@@ -121,7 +122,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public EndStep result(ItemStackSnapshot result) {
+    public EndStep result(final ItemStackSnapshot result) {
         checkNotNull(result, "result");
         checkArgument(result != ItemStackSnapshot.NONE, "The result must not be `ItemStackSnapshot.NONE`.");
         this.exemplaryResult = result;
@@ -130,14 +131,14 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
 
     @SuppressWarnings("deprecation")
     @Override
-    public ShapelessCraftingRecipe build(String id, Object plugin) {
+    public ShapelessCraftingRecipe build(String id, final Object plugin) {
         checkState(this.exemplaryResult != null && this.exemplaryResult != ItemStackSnapshot.NONE,
                 "The result is not set.");
         checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
         checkNotNull(id, "id");
         checkNotNull(id, "plugin");
 
-        PluginContainer container = SpongeImpl.getPluginContainer(plugin);
+        final PluginContainer container = SpongeImpl.getPluginContainer(plugin);
 
         if (!id.startsWith(container.getId() + ":")) {
             id = container.getId() + ":" + id;

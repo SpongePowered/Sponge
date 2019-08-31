@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.EntityAreaEffectCloud;
+import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.potion.PotionEffect;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -36,6 +37,39 @@ import java.util.List;
  */
 @Mixin(EntityAreaEffectCloud.class)
 public interface EntityAreaEffectCloudAccessor {
+
+
+    @Accessor("RADIUS")
+    static DataParameter<Float> accessor$getRadiusParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("COLOR")
+    static DataParameter<Integer> accessor$getColorParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("IGNORE_RADIUS")
+    static DataParameter<Boolean> accessor$getIgnoreRadiusParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("PARTICLE")
+    static DataParameter<Integer> accessor$getParticleParameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("PARTICLE_PARAM_1")
+    static DataParameter<Integer> accessor$getParticleParam1Parameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("PARTICLE_PARAM_2")
+    static DataParameter<Integer> accessor$getParticleParam2Parameter() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+
 
     @Accessor
     void setDurationOnUse(int radiusOnUse);

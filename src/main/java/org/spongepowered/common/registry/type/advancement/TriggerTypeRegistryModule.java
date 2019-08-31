@@ -30,6 +30,7 @@ import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.advancement.criteria.trigger.Triggers;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.mixin.core.advancements.CriteriaTriggersAccessor;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 @SuppressWarnings("rawtypes")
@@ -54,7 +55,7 @@ public class TriggerTypeRegistryModule extends AbstractPrefixAlternateCatalogTyp
     public void registerAdditionalCatalog(final Trigger triggerType) {
         // Register on CriterionTriggers, that register method will
         // delegate to the register method within this module
-        CriteriaTriggers.register((ICriterionTrigger) triggerType);
+        CriteriaTriggersAccessor.accessor$register((ICriterionTrigger) triggerType);
     }
 
     @Override
@@ -65,5 +66,9 @@ public class TriggerTypeRegistryModule extends AbstractPrefixAlternateCatalogTyp
 
     private static final class Holder {
         static final TriggerTypeRegistryModule INSTANCE = new TriggerTypeRegistryModule();
+        static {
+            // Just need to class initialize
+            CriteriaTriggers.getAll();
+        }
     }
 }

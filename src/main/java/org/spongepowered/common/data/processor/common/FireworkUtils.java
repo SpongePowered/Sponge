@@ -41,6 +41,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeFireworkShape;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
+import org.spongepowered.common.mixin.core.entity.item.EntityFireworkRocketAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -59,10 +60,10 @@ public class FireworkUtils {
             .build();
 
     public static ItemStack getItem(final EntityFireworkRocket firework) {
-        ItemStack item = firework.getDataManager().get(EntityFireworkRocket.FIREWORK_ITEM);
+        ItemStack item = firework.getDataManager().get(EntityFireworkRocketAccessor.accessor$getFireworkItemParameter());
         if (item.isEmpty()) {
             item = (ItemStack) new SpongeItemStackBuilder().itemType(ItemTypes.FIREWORKS).build();
-            firework.getDataManager().set(EntityFireworkRocket.FIREWORK_ITEM, item);
+            firework.getDataManager().set(EntityFireworkRocketAccessor.accessor$getFireworkItemParameter(), item);
         }
         return item;
     }
