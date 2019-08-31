@@ -1,8 +1,11 @@
+plugins {
+    id("org.spongepowered.gradle.sponge.dev")
+}
+
 ext.api = parent.project('SpongeAPI')
-apply from: api.file('gradle/sponge.gradle')
 
 dependencies {
-    compile api
+    implementation api
 }
 
 license {
