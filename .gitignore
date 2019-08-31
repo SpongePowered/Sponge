@@ -76,3 +76,5 @@ nb-configuration.xml
 /.apt_generated/
 *.launch
 /.nb-gradle/
+# We need to exclude the copied files.
+buildSrc/src/api
