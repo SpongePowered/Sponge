@@ -204,7 +204,8 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
                 builder.color(SpongeTextColor.of(style.bridge$getColor()));
             }
 
-            builder.style(new TextStyle(style.bridge$getObfuscated(), style.bridge$getItalic(), style.bridge$getUnderlined(), style.bridge$getStrikethrough(), style.bridge$getObfuscated()));
+            builder.style(new TextStyle(style.bridge$getBold(), style.bridge$getItalic(), style.bridge$getUnderlined(), style.bridge$getStrikethrough(),
+                    style.bridge$getObfuscated()));
 
             if (style.bridge$getClickEvent() != null) {
                 builder.onClick(((ClickEventBridge) style.bridge$getClickEvent()).bridge$getHandle());
