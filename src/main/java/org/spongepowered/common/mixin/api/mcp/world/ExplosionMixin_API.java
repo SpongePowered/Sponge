@@ -26,9 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -38,10 +35,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.ExplosionBridge;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 import javax.annotation.Nullable;
 
@@ -102,18 +96,18 @@ public abstract class ExplosionMixin_API implements Explosion {
     }
 
     @Override
-    public int getBoundingBoxSize() {
-        return  ((ExplosionBridge) this).bridge$getBoundingBoxSize();
+    public int getResolution() {
+        return  ((ExplosionBridge) this).bridge$getResolution();
     }
 
     @Override
-    public boolean isRandomnessReduced() {
-        return  ((ExplosionBridge) this).bridge$getReducedRandomness();
+    public float getRandomness() {
+        return  ((ExplosionBridge) this).bridge$getRandomness();
     }
 
     @Override
-    public double getEntityKnockbackMultiplier() {
-        return  ((ExplosionBridge) this).bridge$getEntityKnockbackMultiplier();
+    public double getKnockback() {
+        return  ((ExplosionBridge) this).bridge$getKnockback();
     }
 
 }

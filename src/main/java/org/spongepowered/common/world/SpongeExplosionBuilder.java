@@ -44,9 +44,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     private boolean shouldBreakBlocks = true;
     private boolean shouldSmoke;
     private boolean shouldDamageEntities = true;
-    private int boundingBoxSize = 16;
-    private boolean reducedRandomness = false;
-    private double entityKnockbackMultiplier = 1;
+    private int resolution = 16;
+    private float randomness = 1.0F;
+    private double knockback = 1;
 
     public SpongeExplosionBuilder() {
         reset();
@@ -95,20 +95,20 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     }
 
     @Override
-    public Explosion.Builder boundingBoxSize(int boundingBoxSize) {
-        this.boundingBoxSize = boundingBoxSize;
+    public Explosion.Builder resolution(int resolution) {
+        this.resolution = resolution;
         return this;
     }
 
     @Override
-    public Explosion.Builder reducedRandomness(boolean reducedRandomness) {
-        this.reducedRandomness = reducedRandomness;
+    public Explosion.Builder randomness(float randomness) {
+        this.randomness = randomness;
         return this;
     }
 
     @Override
-    public Explosion.Builder entityKnockbackMultiplier(double entityKnockbackMultiplier) {
-        this.entityKnockbackMultiplier = entityKnockbackMultiplier;
+    public Explosion.Builder knockback(double knockback) {
+        this.knockback = knockback;
         return this;
     }
 
@@ -121,9 +121,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.shouldBreakBlocks = value.shouldBreakBlocks();
         this.shouldSmoke = value.shouldPlaySmoke();
         this.shouldDamageEntities = value.shouldDamageEntities();
-        this.boundingBoxSize = value.getBoundingBoxSize();
-        this.reducedRandomness = value.isRandomnessReduced();
-        this.entityKnockbackMultiplier = value.getEntityKnockbackMultiplier();
+        this.resolution = value.getResolution();
+        this.randomness = value.getRandomness();
+        this.knockback = value.getKnockback();
         return this;
     }
 
@@ -136,9 +136,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.shouldBreakBlocks = true;
         this.shouldSmoke = false;
         this.shouldDamageEntities = true;
-        this.boundingBoxSize = 16;
-        this.reducedRandomness = false;
-        this.entityKnockbackMultiplier = 1;
+        this.resolution = 16;
+        this.randomness = 1.0F;
+        this.knockback = 1;
         return this;
     }
 
@@ -154,9 +154,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
                 this.canCauseFire, this.shouldSmoke);
         ((ExplosionBridge) explosion).bridge$setShouldBreakBlocks(this.shouldBreakBlocks);
         ((ExplosionBridge) explosion).bridge$setShouldDamageEntities(this.shouldDamageEntities);
-        ((ExplosionBridge) explosion).bridge$setBoundingBoxSize(this.boundingBoxSize);
-        ((ExplosionBridge) explosion).bridge$setReducedRandomness(this.reducedRandomness);
-        ((ExplosionBridge) explosion).bridge$setEntityKnockbackMultiplier(this.entityKnockbackMultiplier);
+        ((ExplosionBridge) explosion).bridge$setResolution(this.resolution);
+        ((ExplosionBridge) explosion).bridge$setRandomness(this.randomness);
+        ((ExplosionBridge) explosion).bridge$setKnockback(this.knockback);
         return (Explosion) explosion;
     }
 }
