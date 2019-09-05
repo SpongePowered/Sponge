@@ -165,7 +165,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     @Nullable private ResourcePack impl$lastReceivedPack, lastAcceptedPack;
     private final AtomicInteger impl$numResourcePacksInTransit = new AtomicInteger();
     private final LongObjectHashMap<Runnable> impl$customKeepAliveCallbacks = new LongObjectHashMap<>();
-    private Transform<World> impl$spectatingTeleportLocation;
+    @Nullable private Transform<World> impl$spectatingTeleportLocation;
 
     @Override
     public void bridge$captureCurrentPlayerPosition() {
@@ -515,8 +515,10 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
     @Inject(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getServerWorld()Lnet/minecraft/world/WorldServer;", ordinal = 1), cancellable = true)
     private void impl$cancelIfSameWorld(CallbackInfo ci) {
+        //noinspection ConstantConditions
         if (this.player.getServerWorld() == (WorldServer) this.impl$spectatingTeleportLocation.getExtent()) {
             final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
+            this.impl$spectatingTeleportLocation = null;
             player.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
             ci.cancel();
         }
@@ -524,6 +526,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
     @Redirect(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setLocationAndAngles(DDDFF)V"))
     private void impl$onSpectateLocationAndAnglesUpdate(EntityPlayerMP player, double x, double y, double z, float yaw, float pitch) {
+        //noinspection ConstantConditions
         player.dimension = ((WorldServer) this.impl$spectatingTeleportLocation.getExtent()).provider.getDimensionType().getId();
         final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
         player.setLocationAndAngles(
@@ -535,8 +538,10 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
     @Redirect(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setPositionAndUpdate(DDD)V"))
     private void impl$onSpectatePositionUpdate(EntityPlayerMP player, double x, double y, double z) {
+        //noinspection ConstantConditions
         final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
         player.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
+        this.impl$spectatingTeleportLocation = null;
     }
 
     /**
