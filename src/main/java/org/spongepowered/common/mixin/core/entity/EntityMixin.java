@@ -83,6 +83,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
@@ -446,7 +447,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      */
     @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
     private void onSpongeWriteToNBT(final NBTTagCompound compound, final CallbackInfoReturnable<NBTTagCompound> ci) {
-        if (((DataCompoundHolder) this).data$hasRootCompound()) {
+        if (((CustomDataHolderBridge) this).bridge$hasManipulators()) {
             this.spongeImpl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeCompound());
         }
     }
@@ -591,8 +592,13 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Override
     public void bridge$setInvisible(final boolean invisible) {
         this.setInvisible(invisible);
-        if (!invisible && this instanceof DataCompoundHolder && ((DataCompoundHolder) this).data$hasSpongeCompound()) {
-            ((DataCompoundHolder) this).data$getSpongeCompound().removeTag(Constants.Sponge.Entity.IS_INVISIBLE);
+        if (invisible) {
+            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            spongeData.setBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
+        } else {
+            if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
+                ((DataCompoundHolder) this).data$getSpongeCompound().removeTag(Constants.Sponge.Entity.IS_INVISIBLE);
+            }
         }
     }
 
@@ -606,11 +612,12 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         this.vanish$isVanished = vanished;
         this.vanish$pendingVisibilityUpdate = true;
         this.vanish$visibilityTicks = 20;
-        if (this instanceof DataCompoundHolder && ((DataCompoundHolder) this).data$hasSpongeCompound()) {
+        if (vanished) {
             final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
-            if (vanished) {
-                spongeData.setBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
-            } else {
+            spongeData.setBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
+        } else {
+            if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
+                final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
                 spongeData.removeTag(Constants.Sponge.Entity.IS_VANISHED);
                 spongeData.removeTag(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
                 spongeData.removeTag(Constants.Sponge.Entity.VANISH_UNTARGETABLE);

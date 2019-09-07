@@ -191,8 +191,13 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Override
     public void bridge$setMaxAir(final int air) {
         this.impl$maxAir = air;
-        if (air == Constants.Sponge.Entity.DEFAULT_MAX_AIR && this instanceof DataCompoundHolder && ((DataCompoundHolder) this).data$hasSpongeCompound()) {
-            ((DataCompoundHolder) this).data$getSpongeCompound().removeTag(Constants.Sponge.Entity.MAX_AIR);
+        if (air != Constants.Sponge.Entity.DEFAULT_MAX_AIR) {
+            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            spongeData.setInteger(Constants.Sponge.Entity.MAX_AIR, air);
+        } else {
+            if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
+                ((DataCompoundHolder) this).data$getSpongeCompound().removeTag(Constants.Sponge.Entity.MAX_AIR);
+            }
         }
     }
 
