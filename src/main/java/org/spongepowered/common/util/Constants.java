@@ -498,6 +498,7 @@ public final class Constants {
         public static final String ITEM_PLACEABLE_BLOCKS = "CanPlaceOn";
         public static final String ITEM_HIDE_FLAGS = "HideFlags";
         public static final String ITEM_UNBREAKABLE = "Unbreakable";
+        public static final String CUSTOM_POTION_COLOR = "CustomPotionColor";
         public static final String CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
         public static final String LOCK = "Lock";
 

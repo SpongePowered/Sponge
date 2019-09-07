@@ -571,6 +571,9 @@ public final class DataRegistrar {
         DataUtil.registerDualProcessor(FluidItemData.class, SpongeFluidItemData.class, ImmutableFluidItemData.class,
                 ImmutableSpongeFluidItemData.class, new FluidItemDataProcessor());
 
+        DataUtil.registerDualProcessor(PotionColorData.class, SpongePotionColorData.class, ImmutablePotionColorData.class,
+                ImmutableSpongePotionColorData.class, new ItemPotionColorDataProcessor());
+
         DataUtil.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
                 ImmutableSpongePotionEffectData.class, new ItemPotionEffectDataProcessor());
 
