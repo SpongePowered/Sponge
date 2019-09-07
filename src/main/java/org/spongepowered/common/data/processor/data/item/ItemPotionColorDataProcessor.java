@@ -27,6 +27,7 @@ package org.spongepowered.common.data.processor.data.item;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.potion.PotionUtils;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionColorData;
@@ -55,6 +56,7 @@ public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcesso
         if (!dataHolder.hasTagCompound()) {
             dataHolder.setTagCompound(new NBTTagCompound());
         }
+
         final NBTTagCompound mainCompound = dataHolder.getTagCompound();
         mainCompound.setInteger(Constants.Item.CUSTOM_POTION_COLOR, value.getRgb());
         return true;
@@ -62,12 +64,7 @@ public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcesso
 
     @Override
     protected Optional<Color> getVal(ItemStack dataHolder) {
-        if (!dataHolder.hasTagCompound()) {
-            return Optional.empty();
-        }
-
-        final NBTTagCompound mainCompound = dataHolder.getTagCompound();
-        return Optional.of(Color.ofRgb(mainCompound.getInteger(Constants.Item.CUSTOM_POTION_COLOR)));
+        return Optional.of(Color.ofRgb(PotionUtils.getColor(dataHolder)));
     }
 
     @Override
@@ -87,6 +84,22 @@ public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcesso
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionResult.failNoData();
+        if (!supports(container)) {
+            return DataTransactionResult.failNoData();
+        }
+
+        ItemStack itemStack = (ItemStack) container;
+        if (!itemStack.hasTagCompound()) {
+            return DataTransactionResult.successNoData();
+        }
+
+        NBTTagCompound mainCompound = itemStack.getTagCompound();
+        if (!mainCompound.hasKey(Constants.Item.CUSTOM_POTION_COLOR, Constants.NBT.TAG_INT)) {
+            return DataTransactionResult.successNoData();
+        }
+
+        Color removedColor = Color.ofRgb(mainCompound.getInteger(Constants.Item.CUSTOM_POTION_COLOR));
+        mainCompound.removeTag(Constants.Item.CUSTOM_POTION_COLOR);
+        return DataTransactionResult.successRemove(constructImmutableValue(removedColor));
     }
 }
