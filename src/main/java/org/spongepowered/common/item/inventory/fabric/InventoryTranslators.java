@@ -22,13 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.item.inventory.fabric;
 
 import net.minecraft.inventory.IInventory;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
-import org.spongepowered.common.item.inventory.fabric.UniversalFabric;
 
-@Mixin(IInventory.class)
-public interface IInventoryFabricMixin extends UniversalFabric, InventoryBridge {
+import java.util.HashMap;
+import java.util.Map;
+
+public class InventoryTranslators {
+    private static final Map<Class, InventoryTranslator> fabricTranslators = new HashMap<>();
+
+    static {
+        register(IInventory.class, new IInventoryTranslator());
+    }
+
+    public static void register(Class inventoryInterface, InventoryTranslator translator) {
+        fabricTranslators.put(inventoryInterface, translator);
+    }
+
+    public static InventoryTranslator getTranslator(Class clazz) {
+        for (Class registered : fabricTranslators.keySet()) {
+            if (registered.isAssignableFrom(clazz)) {
+                return fabricTranslators.get(registered);
+            }
+        }
+        throw new IllegalArgumentException("No Fabric Translator found for " + clazz);
+    }
+
 }

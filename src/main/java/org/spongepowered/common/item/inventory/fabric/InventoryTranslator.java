@@ -22,13 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.item.inventory.fabric;
 
-import net.minecraft.inventory.IInventory;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
-import org.spongepowered.common.item.inventory.fabric.UniversalFabric;
+import org.spongepowered.common.item.inventory.lens.Fabric;
 
-@Mixin(IInventory.class)
-public interface IInventoryFabricMixin extends UniversalFabric, InventoryBridge {
+import java.util.Collection;
+
+/**
+ * Provides {@link Fabric} to an inventory.
+ *
+ * @param <T> The inventory type
+ */
+public interface InventoryTranslator<T> {
+    Collection<InventoryBridge> allInventories(T inventory);
+    InventoryBridge get(T inventory, int index);
+    ItemStack getStack(T inventory, int index);
+    void setStack(T inventory, int index, ItemStack stack);
+    int getMaxStackSize(T inventory);
+    Translation getDisplayName(T inventory);
+    int getSize(T inventory);
+    void clear(T inventory);
+    void markDirty(T inventory);
 }
