@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.network;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import io.netty.util.collection.LongObjectHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -399,13 +400,13 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             final Vector3d fromRotation = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
-            Location<World> fromLocation = player.getLocation();
+            Vector3d fromPosition = player.getPosition();
             if (this.impl$lastMoveLocation != null) {
-                fromLocation = this.impl$lastMoveLocation;
+                fromPosition = this.impl$lastMoveLocation.getPosition();
             }
 
-            Location<World> toLocation = new Location<>(player.getWorld(), packetIn.x, packetIn.y, packetIn.z);
-            Vector3d toRotation = new Vector3d(packetIn.pitch, packetIn.yaw, 0);
+            Vector3d toPosition = Vector3d.from(packetIn.x, packetIn.y, packetIn.z);
+            Vector3d toRotation = Vector3d.from(packetIn.pitch, packetIn.yaw, 0);
 
             // Minecraft does the same with rotation when it's only a positional update
             boolean positionOnly = packetIn.moving && !packetIn.rotating;
@@ -413,7 +414,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                 // Correct the new rotation to match the old rotation
                 toRotation = fromRotation;
 
-                positionOnly = !toLocation.getPosition().equals(fromLocation.getPosition()) && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
+                positionOnly = !toPosition.equals(fromPosition) && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
             }
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
@@ -422,27 +423,29 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             if (rotationOnly) {
                 // Correct the to location so it's not misrepresented to plugins, only when player rotates without moving
                 // In this case it's only a rotation update, which isn't related to the to location
-                fromLocation = player.getLocation();
-                toLocation = fromLocation;
+                fromPosition = player.getLocation().getPosition();
+                toPosition = fromPosition;
 
                 rotationOnly = ShouldFire.ROTATE_ENTITY_EVENT;
             }
 
             if (packetIn.moving && packetIn.rotating) {
-                positionOnly = !toLocation.getPosition().equals(fromLocation.getPosition()) && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
+                positionOnly = !toPosition.equals(fromPosition) && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
                 rotationOnly = ShouldFire.ROTATE_ENTITY_EVENT;
             }
 
-            mixinPlayer.bridge$setVelocityOverride(toLocation.getPosition().sub(fromLocation.getPosition()));
+            mixinPlayer.bridge$setVelocityOverride(toPosition.sub(fromPosition));
 
-            final double deltaSquared = toLocation.getPosition().distanceSquared(fromLocation.getPosition());
+            final double deltaSquared = toPosition.distanceSquared(fromPosition);
             final double deltaAngleSquared = fromRotation.distanceSquared(toRotation);
+            final boolean blockChanged = !Vector3i.from((int) fromPosition.getZ(), (int) fromPosition.getY(), (int) fromPosition.getZ())
+                    .equals(Vector3i.from((int) packetIn.x, (int) packetIn.y, (int) packetIn.z));
 
             // These magic numbers are sad but help prevent excessive lag from this event.
             // eventually it would be nice to not have them
-            if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
-                final Transform<World> fromTransform = player.getTransform().setLocation(fromLocation).setRotation(fromRotation);
-                Transform<World> toTransform = player.getTransform().setLocation(toLocation).setRotation(toRotation);
+            if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f) || blockChanged) {
+                final Transform<World> fromTransform = player.getTransform().setPosition(fromPosition).setRotation(fromRotation);
+                Transform<World> toTransform = player.getTransform().setPosition(toPosition).setRotation(toRotation);
                 final Transform<World> originalToTransform = toTransform;
                 if (rotationOnly || positionOnly) {
                     final Event event;
@@ -453,7 +456,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                     }
                     if (SpongeImpl.postEvent(event)) {
                         ((EntityBridge) mixinPlayer).bridge$setLocationAndAngles(fromTransform);
-                        this.impl$lastMoveLocation = fromLocation;
+                        this.impl$lastMoveLocation = fromTransform.getLocation();
                         mixinPlayer.bridge$setVelocityOverride(null);
                         return true;
                     }
