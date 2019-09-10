@@ -185,8 +185,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
 
     @Override
     public boolean testPermission(CommandSource source) {
-        ICommandSender sender = WrapperICommandSender.of(source);
-        return this.command.checkPermission(sender.getServer(), sender);
+        return source.hasPermission(getCommandPermission());
     }
 
     @Override
