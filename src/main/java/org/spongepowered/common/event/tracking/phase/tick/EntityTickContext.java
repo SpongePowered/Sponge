@@ -38,12 +38,12 @@ public class EntityTickContext extends TickContext<EntityTickContext> {
     public double prevZ;
 
 
-    EntityTickContext(IPhaseState<EntityTickContext> phaseState) {
+    EntityTickContext(final IPhaseState<? extends EntityTickContext> phaseState) {
         super(phaseState);
     }
 
     @Override
-    public EntityTickContext source(Object owner) {
+    public EntityTickContext source(final Object owner) {
         super.source(owner);
         if (owner instanceof TrackableBridge) {
             final TrackableBridge mixinEntity = (TrackableBridge) owner;
@@ -67,7 +67,7 @@ public class EntityTickContext extends TickContext<EntityTickContext> {
         this.prevZ = 0;
     }
 
-    public void populateEntityPosition(Entity entity) {
+    public void populateEntityPosition(final Entity entity) {
         this.posX = entity.posX;
         this.posY = entity.posY;
         this.posZ = entity.posZ;

@@ -830,4 +830,37 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     public boolean hasBlocksCaptured() {
         return !(this.snapshots == null || this.snapshots.isEmpty());
     }
+
+    public void reset() {
+        if (this.multimap != null) {
+            // shouldn't but whatever, it's the end of a phase.
+            this.multimap.clear();
+            this.multimap = null;
+        }
+        if (this.scheduledEvents != null) {
+            this.scheduledEvents.clear();
+        }
+        if (this.snapshots != null) {
+            this.snapshots.clear();
+            this.snapshots = null;
+        }
+        if (this.usedBlocks != null) {
+            this.usedBlocks.clear();
+        }
+        this.clearProxies();
+        this.transactionIndex = -1;
+        this.snapshotIndex = -1;
+        if (this.head != null) {
+            this.head = null;
+            this.tail = null;
+            for (BlockTransaction transaction = this.head; transaction != null; ) {
+                final BlockTransaction next = transaction.next;
+                transaction.previous = null;
+                transaction.next = null;
+                transaction = next;
+            }
+
+        }
+
+    }
 }

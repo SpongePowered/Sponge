@@ -44,7 +44,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
 
     @Nullable private ArrayListMultimap<K, V> captured;
 
-    protected CapturedMultiMapSupplier() {
+    CapturedMultiMapSupplier() {
     }
 
     @Override
@@ -70,7 +70,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
      *
      * @param consumer The consumer to activate
      */
-    public final void acceptAndClearIfNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
+    public final void acceptAndClearIfNotEmpty(final Consumer<? super ListMultimap<K, V>> consumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
             final ListMultimap<K, V> consumed = ArrayListMultimap.create(this.captured);
             this.captured.clear();
@@ -78,7 +78,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
         }
     }
 
-    public final void acceptAndClearIfNotEmpty(BiConsumer<K, V> consumer) {
+    public final void acceptAndClearIfNotEmpty(final BiConsumer<? super K, ? super V> consumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
             final ListMultimap<K, V> consumed = ArrayListMultimap.create(this.captured);
             this.captured.clear();
@@ -91,11 +91,11 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
      *
      * @param biConsumer The consumer to activate
      */
-    public final void acceptIfNotEmpty(BiConsumer<K, List<V>> biConsumer) {
+    public final void acceptIfNotEmpty(final BiConsumer<K, ? super List<V>> biConsumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
             final ListMultimap<K, V> consumed = ArrayListMultimap.create(this.captured);
             this.captured.clear();
-            for (Map.Entry<K, Collection<V>> entry : consumed.asMap().entrySet()) {
+            for (final Map.Entry<K, Collection<V>> entry : consumed.asMap().entrySet()) {
                 if (!entry.getValue().isEmpty()) {
                     biConsumer.accept(entry.getKey(), (List<V>) entry.getValue());
                 }
@@ -109,7 +109,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
      *
      * @param consumer The consumer to activate
      */
-    public final void acceptIfNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
+    public final void acceptIfNotEmpty(final Consumer<? super ListMultimap<K, V>> consumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
             consumer.accept(this.captured);
         }
@@ -122,7 +122,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
      * @param key The key to process and remove
      * @param consumer The consumer to activate
      */
-    public final void acceptAndRemoveIfPresent(K key, Consumer<List<V>> consumer) {
+    public final void acceptAndRemoveIfPresent(final K key, final Consumer<? super List<V>> consumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
             final List<V> values = this.captured.removeAll(key);
             if (!values.isEmpty()) {
@@ -132,7 +132,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
     }
 
 
-    public final void acceptAndRemoveOrNewList(K key, Consumer<List<V>> consumer) {
+    public final void acceptAndRemoveOrNewList(final K key, final Consumer<? super List<V>> consumer) {
         if (this.isEmpty()) {
             consumer.accept(new ArrayList<>());
             return;
@@ -153,7 +153,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
      *
      * @param key The key to remove
      */
-    public final void removeAllIfNotEmpty(K key) {
+    public final void removeAllIfNotEmpty(final K key) {
         if (this.isEmpty()) {
             return;
         }
@@ -168,7 +168,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
      * @param list The fallback list
      * @return If not empty, the captured list otherwise the fallback list
      */
-    public final ListMultimap<K, V> orElse(ListMultimap<K, V> list) {
+    public final ListMultimap<K, V> orElse(final ListMultimap<K, V> list) {
         return this.captured == null ? list : this.captured.isEmpty() ? list : this.captured;
     }
 
@@ -178,7 +178,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
      * @param key The key
      * @return A sequential stream of values
      */
-    public final Stream<V> stream(K key) {
+    public final Stream<V> stream(final K key) {
         // authors note: Multimap#get(K) returns an empty collection if there is no mapping.
         return this.captured == null ? Stream.empty() : this.captured.get(key).stream();
     }
@@ -191,7 +191,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
      * @return The function result or null if no key was found
      */
     @Nullable
-    public final <U> U mapIfPresent(K key, Function<List<V>, ? extends U> function) {
+    public final <U> U mapIfPresent(final K key, final Function<? super List<V>, ? extends U> function) {
         if (this.isEmpty()) {
             return null;
         }
@@ -210,7 +210,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -228,4 +228,9 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
                 .toString();
     }
 
+    public final void reset() {
+        if (this.captured != null) {
+            this.captured.clear();
+        }
+    }
 }

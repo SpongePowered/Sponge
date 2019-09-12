@@ -40,19 +40,16 @@ public final class CaptureBlockPos implements AutoCloseable {
     @Nullable private BlockPos pos;
     @Nullable private WeakReference<WorldServerBridge> mixinWorldReference;
 
-    public CaptureBlockPos() {
-    }
-
     public Optional<BlockPos> getPos() {
         return Optional.ofNullable(this.pos);
     }
 
-    public CaptureBlockPos setPos(@Nullable BlockPos pos) {
+    public CaptureBlockPos setPos(@Nullable final BlockPos pos) {
         this.pos = pos;
         return this;
     }
 
-    public void setWorld(@Nullable WorldServerBridge world) {
+    public void setWorld(@Nullable final WorldServerBridge world) {
         if (world == null) {
             this.mixinWorldReference = null;
         } else {
@@ -60,7 +57,7 @@ public final class CaptureBlockPos implements AutoCloseable {
         }
     }
 
-    public void setWorld(@Nullable WorldServer world) {
+    public void setWorld(@Nullable final WorldServer world) {
         if (world == null) {
             this.mixinWorldReference = null;
         } else {
@@ -73,14 +70,14 @@ public final class CaptureBlockPos implements AutoCloseable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        CaptureBlockPos that = (CaptureBlockPos) o;
+        final CaptureBlockPos that = (CaptureBlockPos) o;
         return com.google.common.base.Objects.equal(this.pos, that.pos);
     }
 

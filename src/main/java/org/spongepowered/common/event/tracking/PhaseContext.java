@@ -647,11 +647,39 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         this.stackTrace = null;
         this.owner = null;
         this.notifier = null;
+        if (this.blocksSupplier != null) {
+            this.blocksSupplier.reset();
+        }
+        if (this.capturedItemsSupplier != null) {
+            this.capturedItemsSupplier.reset();
+        }
+        if (this.capturedEntitiesSupplier != null) {
+            this.capturedEntitiesSupplier.reset();
+        }
+        if (this.capturedItemStackSupplier != null) {
+            this.capturedItemStackSupplier.reset();
+        }
+        if (this.blockEntitySpawnSupplier != null) {
+            this.blockEntitySpawnSupplier.reset();
+        }
+        if (this.blockItemDropsSupplier != null) {
+            this.blockItemDropsSupplier.reset();
+        }
+        if (this.blockItemEntityDropsSupplier != null) {
+            this.blockItemEntityDropsSupplier.reset();
+        }
 
         if (this.captureBlockPos != null) {
             this.captureBlockPos.setPos(null);
             this.captureBlockPos.setWorld((WorldServer) null);
         }
+        if (this.entityItemDropsSupplier != null) {
+            this.entityItemDropsSupplier.reset();
+        }
+        if (this.entityItemEntityDropsSupplier  != null) {
+            this.entityItemEntityDropsSupplier.reset();
+        }
+
     }
 
 
