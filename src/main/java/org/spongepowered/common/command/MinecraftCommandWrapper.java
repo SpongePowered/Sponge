@@ -185,8 +185,13 @@ public class MinecraftCommandWrapper implements CommandCallable {
 
     @Override
     public boolean testPermission(CommandSource source) {
-        ICommandSender sender = WrapperICommandSender.of(source);
-        return this.command.checkPermission(sender.getServer(), sender);
+        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getCommands().isEnforcePermissionChecksOnNonSpongeCommands()
+            || source.hasPermission(getCommandPermission())) {
+            ICommandSender sender = WrapperICommandSender.of(source);
+            return this.command.checkPermission(sender.getServer(), sender);
+        }
+
+        return false;
     }
 
     @Override
