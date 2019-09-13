@@ -403,12 +403,16 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             if (this.impl$lastMoveLocation != null) {
                 fromPosition = this.impl$lastMoveLocation.getPosition();
             }
+
+            // if it's not a "moving packet", use the fromPosition so that the delta is 0
             final Vector3d toPosition = packetIn.moving ? Vector3d.from(packetIn.x, packetIn.y, packetIn.z) : fromPosition;
 
             final double deltaSquared = toPosition.distanceSquared(fromPosition);
 
 
             final Vector3d fromRotation = player.getRotation();
+
+            // if it's not a "rotation packet", use the fromRotation so that the delta is 0
             final Vector3d toRotation = packetIn.rotating ? Vector3d.from(packetIn.pitch, packetIn.yaw, 0) : fromRotation;
 
             final double deltaAngleSquared = fromRotation.distanceSquared(toRotation);
@@ -423,6 +427,8 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                 final Transform<World> fromTransform = player.getTransform().setPosition(fromPosition).setRotation(fromRotation);
                 Transform<World> toTransform = player.getTransform().setPosition(toPosition).setRotation(toRotation);
                 final Transform<World> originalToTransform = toTransform;
+
+                // RotateEntityEvent is fired when a player performs a rotation without moving their position.
                 if (rotating && ShouldFire.ROTATE_ENTITY_EVENT && !moving) {
                     final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
                     if (SpongeImpl.postEvent(event)) {
@@ -431,6 +437,8 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                         toTransform = event.getToTransform();
                     }
                 }
+
+                // MoveEntityEvent.Position needs to be fired even if you move while rotating
                 if (moving && ShouldFire.MOVE_ENTITY_EVENT_POSITION) {
                     final MoveEntityEvent.Position event = SpongeEventFactory.createMoveEntityEventPosition(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
                     if (SpongeImpl.postEvent(event)) {
