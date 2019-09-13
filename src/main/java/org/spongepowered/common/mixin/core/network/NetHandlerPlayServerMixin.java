@@ -423,7 +423,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                 final Transform<World> fromTransform = player.getTransform().setPosition(fromPosition).setRotation(fromRotation);
                 Transform<World> toTransform = player.getTransform().setPosition(toPosition).setRotation(toRotation);
                 final Transform<World> originalToTransform = toTransform;
-                if (rotating && ShouldFire.ROTATE_ENTITY_EVENT && !packetIn.moving) {
+                if (rotating && ShouldFire.ROTATE_ENTITY_EVENT && !moving) {
                     final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
                     if (SpongeImpl.postEvent(event)) {
                         toTransform.setRotation(fromTransform.getRotation());
