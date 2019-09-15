@@ -44,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.advancement.SpongeFilteredTrigger;
 import org.spongepowered.common.advancement.SpongeTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
@@ -67,6 +68,10 @@ public class ICriterionTrigger$ListenerMixin implements ICriterionTrigger$Listen
         final CriterionBridge mixinCriterion = (CriterionBridge) advancementCriterion;
         if (mixinCriterion.bridge$getScoreCriterion() != null) {
             advancementCriterion = mixinCriterion.bridge$getScoreCriterion();
+        }
+        if (!SpongeImplHooks.isMainThread()) {
+            // Some mods do advancement granting on async threads, and we can't allow for the spam to be thrown.
+            return;
         }
         // Sponge filters are always handled in the trigger method
         if (!(this.criterionInstance instanceof SpongeFilteredTrigger)) {
