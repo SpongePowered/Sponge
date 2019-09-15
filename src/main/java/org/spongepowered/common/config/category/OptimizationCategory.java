@@ -111,6 +111,14 @@ public class OptimizationCategory extends ConfigCategory {
                                                                    + "chunks are loaded.")
     private boolean useActiveChunkForCollisions = false;
 
+    @Setting(value = "disable-failing-deserialization-log-spam", comment = "Occasionally, some built in advancements, \n" +
+            "recipes, etc. can fail to deserialize properly\n" +
+            "which ends up potentially spamming the server log\n" +
+            "and the original provider of the failing content\n" +
+            "is not able to fix. This provides an option to\n" +
+            "suppress the exceptions printing out in the log.")
+    private boolean disableFailingAdvancementDeserialization = true;
+
     public OptimizationCategory() {
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
@@ -188,6 +196,11 @@ public class OptimizationCategory extends ConfigCategory {
     }
 
     public boolean isUseActiveChunkForCollisions() {
-        return useActiveChunkForCollisions;
+        return this.useActiveChunkForCollisions;
     }
+
+    public boolean disableFailingAdvancementDeserialization() {
+        return this.disableFailingAdvancementDeserialization;
+    }
+
 }

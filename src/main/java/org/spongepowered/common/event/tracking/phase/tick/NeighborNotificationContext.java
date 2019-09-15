@@ -44,12 +44,12 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
     @Nullable BlockSnapshot notificationSnapshot;
     private int depth;
 
-    NeighborNotificationContext(IPhaseState<NeighborNotificationContext> phaseState) {
+    NeighborNotificationContext(final IPhaseState<NeighborNotificationContext> phaseState) {
         super(phaseState);
     }
 
     @Override
-    public NeighborNotificationContext source(Object owner) {
+    public NeighborNotificationContext source(final Object owner) {
         super.source(owner);
         if (owner instanceof LocatableBlock) {
 
@@ -67,9 +67,9 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
         super.printCustom(printer, indent);
-        String s = String.format("%1$"+indent+"s", "");
+        final String s = String.format("%1$"+indent+"s", "");
         if (this.sourceNotifier != null) {
             printer.add(s + "- %s: %s", "SourceBlock", this.sourceNotifier);
         }
@@ -96,7 +96,7 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
         this.depth = -1;
     }
 
-    public NeighborNotificationContext allowsCaptures(IPhaseState<?> state) {
+    public NeighborNotificationContext allowsCaptures(final IPhaseState<?> state) {
         if (state.isWorldGeneration()) {
             this.setBlockEvents(false);
             this.setBulkBlockCaptures(false);
@@ -106,27 +106,27 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
         return this;
     }
 
-    public NeighborNotificationContext sourceBlock(Block sourceBlock) {
+    public NeighborNotificationContext sourceBlock(final Block sourceBlock) {
         this.sourceNotifier = sourceBlock;
         return this;
     }
 
-    public NeighborNotificationContext setSourceNotification(@Nullable BlockPos sourceNotification) {
+    public NeighborNotificationContext setSourceNotification(@Nullable final BlockPos sourceNotification) {
         this.sourceNotification = sourceNotification;
         return this;
     }
 
-    public NeighborNotificationContext setNotifiedBlockPos(@Nullable BlockPos notifiedBlockPos) {
+    public NeighborNotificationContext setNotifiedBlockPos(@Nullable final BlockPos notifiedBlockPos) {
         this.notifiedBlockPos = notifiedBlockPos;
         return this;
     }
 
-    public NeighborNotificationContext setNotifiedBlockState(@Nullable IBlockState notifiedBlockState) {
+    public NeighborNotificationContext setNotifiedBlockState(@Nullable final IBlockState notifiedBlockState) {
         this.notifiedBlockState = notifiedBlockState;
         return this;
     }
 
-    public NeighborNotificationContext setSourceNotification(@Nullable BlockSnapshot neighborNotificationSource) {
+    public NeighborNotificationContext setSourceNotification(@Nullable final BlockSnapshot neighborNotificationSource) {
         this.notificationSnapshot = neighborNotificationSource;
         return this;
     }
@@ -135,7 +135,7 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
         return this.depth;
     }
 
-    public void setDepth(int depth) {
+    public void setDepth(final int depth) {
         this.depth = depth;
     }
 }
