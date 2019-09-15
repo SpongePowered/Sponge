@@ -33,6 +33,7 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -74,7 +75,7 @@ import java.util.Set;
 public interface DefaultedExtent extends Extent {
 
     @Override
-    default MutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
+    default MutableBiomeVolume getBiomeView(final Vector3i newMin, final Vector3i newMax) {
         if (!containsBiome(newMin.getX(), newMin.getY(), newMin.getZ())) {
             throw new PositionOutOfBoundsException(newMin, getBiomeMin(), getBiomeMax());
         }
@@ -85,7 +86,7 @@ public interface DefaultedExtent extends Extent {
     }
 
     @Override
-    default MutableBiomeVolume getBiomeView(DiscreteTransform3 transform) {
+    default MutableBiomeVolume getBiomeView(final DiscreteTransform3 transform) {
         return new MutableBiomeViewTransform(this, transform);
     }
 
@@ -95,7 +96,7 @@ public interface DefaultedExtent extends Extent {
     }
 
     @Override
-    default MutableBiomeVolume getBiomeCopy(StorageType type) {
+    default MutableBiomeVolume getBiomeCopy(final StorageType type) {
         switch (type) {
             case STANDARD:
                 return new ByteArrayMutableBiomeBuffer(GlobalPalette.getBiomePalette(), ExtentBufferUtil.copyToArray((BiomeVolume) this, getBiomeMin(), getBiomeMax(), getBiomeSize()),
@@ -113,7 +114,7 @@ public interface DefaultedExtent extends Extent {
     }
 
     @Override
-    default MutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
+    default MutableBlockVolume getBlockView(final Vector3i newMin, final Vector3i newMax) {
         if (!containsBlock(newMin.getX(), newMin.getY(), newMin.getZ())) {
             throw new PositionOutOfBoundsException(newMin, getBlockMin(), getBlockMax());
         }
@@ -124,7 +125,7 @@ public interface DefaultedExtent extends Extent {
     }
 
     @Override
-    default MutableBlockVolume getBlockView(DiscreteTransform3 transform) {
+    default MutableBlockVolume getBlockView(final DiscreteTransform3 transform) {
         return new MutableBlockViewTransform(this, transform);
     }
 
@@ -134,7 +135,7 @@ public interface DefaultedExtent extends Extent {
     }
 
     @Override
-    default MutableBlockVolume getBlockCopy(StorageType type) {
+    default MutableBlockVolume getBlockCopy(final StorageType type) {
         switch (type) {
             case STANDARD:
                 // TODO: Optimize and use a local palette
@@ -148,7 +149,7 @@ public interface DefaultedExtent extends Extent {
 
     @Override
     default ImmutableBlockVolume getImmutableBlockCopy() {
-        char[] data = ExtentBufferUtil.copyToArray((BlockVolume) this, getBlockMin(), getBlockMax(), getBlockSize());
+        final char[] data = ExtentBufferUtil.copyToArray((BlockVolume) this, getBlockMin(), getBlockMax(), getBlockSize());
         return ArrayImmutableBlockBuffer.newWithoutArrayClone(GlobalPalette.getBlockPalette(), getBlockMin(), getBlockSize(), data);
     }
 
@@ -163,21 +164,21 @@ public interface DefaultedExtent extends Extent {
     }
 
     @Override
-    default ArchetypeVolume createArchetypeVolume(Vector3i min, Vector3i max, Vector3i origin) {
-        Vector3i tmin = min.min(max);
-        Vector3i tmax = max.max(min);
+    default ArchetypeVolume createArchetypeVolume(Vector3i min, Vector3i max, final Vector3i origin) {
+        final Vector3i tmin = min.min(max);
+        final Vector3i tmax = max.max(min);
         min = tmin;
         max = tmax;
-        Extent volume = getExtentView(min, max);
-        int ox = origin.getX();
-        int oy = origin.getY();
-        int oz = origin.getZ();
+        final Extent volume = getExtentView(min, max);
+        final int ox = origin.getX();
+        final int oy = origin.getY();
+        final int oz = origin.getZ();
         final MutableBlockVolume backing = new ArrayMutableBlockBuffer(min.sub(origin), max.sub(min).add(1, 1, 1));
-        Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
+        final Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
         volume.getBlockWorker().iterate((extent, x, y, z) -> {
-            BlockState state = extent.getBlock(x, y, z);
+            final BlockState state = extent.getBlock(x, y, z);
             backing.setBlock(x - ox, y - oy, z - oz, state);
-            Optional<TileEntity> tile = extent.getTileEntity(x, y, z);
+            final Optional<TileEntity> tile = extent.getTileEntity(x, y, z);
             if (tile.isPresent()) {
                 final TileEntityArchetype archetype = tile.get().createArchetype();
                 if (archetype instanceof SpongeTileEntityArchetype) {
@@ -192,15 +193,15 @@ public interface DefaultedExtent extends Extent {
             // We can't get entities within a 1x1x1 block area because of AABB...
             return new SpongeArchetypeVolume(backing, tiles, Collections.emptyList());
         }
-        Set<Entity> intersectingEntities = volume.getIntersectingEntities(new AABB(min, max));
+        final Set<Entity> intersectingEntities = volume.getIntersectingEntities(new AABB(min, max), entity -> !(entity instanceof Player));
         if (intersectingEntities.isEmpty()) {
             return new SpongeArchetypeVolume(backing, tiles, Collections.emptyList());
         }
-        ArrayList<EntityArchetype> entities = new ArrayList<>();
-        for (Entity hit : intersectingEntities) {
-            net.minecraft.entity.Entity nms = (net.minecraft.entity.Entity) hit;
-            SpongeEntityArchetype archetype = (SpongeEntityArchetype) hit.createArchetype();
-            NBTTagList tagList = archetype.getData().getTagList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+        final ArrayList<EntityArchetype> entities = new ArrayList<>();
+        for (final Entity hit : intersectingEntities) {
+            final net.minecraft.entity.Entity nms = (net.minecraft.entity.Entity) hit;
+            final SpongeEntityArchetype archetype = (SpongeEntityArchetype) hit.createArchetype();
+            final NBTTagList tagList = archetype.getData().getTagList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
             if (tagList.isEmpty()) {
                 tagList.appendTag(new NBTTagDouble(nms.posX - ox));
                 tagList.appendTag(new NBTTagDouble(nms.posY - oy));
