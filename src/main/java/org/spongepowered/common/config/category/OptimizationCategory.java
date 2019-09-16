@@ -111,6 +111,11 @@ public class OptimizationCategory extends ConfigCategory {
                                                                    + "chunks are loaded.")
     private boolean useActiveChunkForCollisions = false;
 
+    @Setting(value = "disable-failing-advancement-warnings", comment = "Some mods and vanilla can cause the log to be flooded with advancement errors during world load\n"
+                                                                       + "this will hide the output from these errors.")
+    private boolean disableFailingAdvancementDeserialization = false;
+
+
     public OptimizationCategory() {
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
@@ -189,5 +194,9 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean isUseActiveChunkForCollisions() {
         return useActiveChunkForCollisions;
+    }
+
+    public boolean disableFailingAdvancementDeserialization() {
+        return this.disableFailingAdvancementDeserialization;
     }
 }
