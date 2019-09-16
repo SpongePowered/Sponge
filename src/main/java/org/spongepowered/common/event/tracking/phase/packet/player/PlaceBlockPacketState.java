@@ -127,9 +127,14 @@ public final class PlaceBlockPacketState extends BasicPacketState {
                 }
             });
         // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
+        // Swap the items used, the item used is what we want to "restore" it to the player
+        final EnumHand hand = (EnumHand) (Object) context.getHandUsed();
+        final net.minecraft.item.ItemStack replaced = player.getHeldItem(hand);
+        player.setHeldItem(hand, ItemStackUtil.toNative(itemStack.copy()));
         if (!TrackingUtil.processBlockCaptures(context) && !snapshot.isNone()) {
-            final EnumHand hand = (EnumHand) (Object) context.getHandUsed();
             PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), hand);
+        } else {
+            player.setHeldItem(hand, replaced);
         }
         context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
             final List<Entity> entities =
