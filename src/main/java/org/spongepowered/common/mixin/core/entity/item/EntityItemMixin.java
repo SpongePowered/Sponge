@@ -192,6 +192,22 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
             ci.cancel();
         }
     }
+    
+    @Inject(
+        method = "onUpdate", 
+        at = @At (
+            value = "INVOKE", 
+            ordinal = 1, 
+            target = "Lnet/minecraft/entity/item/EntityItem;setDead()V")
+    )
+    private void fireExpireEntityEventTargetItem (final CallbackInfo ci) {
+
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this);
+            ExpireEntityEvent.TargetItem event = SpongeEventFactory.createExpireEntityEventTargetItem(Sponge.getCauseStackManager().getCurrentCause(), (Item) this);
+            SpongeImpl.postEvent(event);
+        }
+    }
 
     @Redirect(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addItemStackToInventory(Lnet/minecraft/item/ItemStack;)Z"))
     private boolean spongeImpl$throwPikcupEventForAddItem(final InventoryPlayer inventory, final ItemStack itemStack, final EntityPlayer player) {
