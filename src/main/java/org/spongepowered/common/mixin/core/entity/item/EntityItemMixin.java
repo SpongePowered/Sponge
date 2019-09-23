@@ -200,8 +200,7 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
             ordinal = 1, 
             target = "Lnet/minecraft/entity/item/EntityItem;setDead()V")
     )
-    private void fireExpireEntityEventTargetItem (final CallbackInfo ci) {
-
+    private void spongeImpl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             ExpireEntityEvent.TargetItem event = SpongeEventFactory.createExpireEntityEventTargetItem(Sponge.getCauseStackManager().getCurrentCause(), (Item) this);
