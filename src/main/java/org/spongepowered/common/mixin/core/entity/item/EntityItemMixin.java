@@ -29,14 +29,16 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.ExpireEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.EntityItemBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -200,7 +202,7 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
             ordinal = 1, 
             target = "Lnet/minecraft/entity/item/EntityItem;setDead()V")
     )
-    private void spongeImpl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
+    private void impl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             ExpireEntityEvent.TargetItem event = SpongeEventFactory.createExpireEntityEventTargetItem(Sponge.getCauseStackManager().getCurrentCause(), (Item) this);
