@@ -35,7 +35,6 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
-import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;
@@ -48,7 +47,7 @@ public class SpongeCommandDisambiguator implements Disambiguator {
     private final Game game;
 
     /**
-     * Disambiguator that takes preferences from the global configuration, falling back to {@link SimpleDispatcher#FIRST_DISAMBIGUATOR}.
+     * Disambiguator that takes preferences from the global configuration, falling back to {@link SpongeCommandDispatcher#FIRST_DISAMBIGUATOR}.
      *
      * @param game The game instance to be used
      */
@@ -84,6 +83,6 @@ public class SpongeCommandDisambiguator implements Disambiguator {
                 }
             }
         }
-        return SimpleDispatcher.FIRST_DISAMBIGUATOR.disambiguate(source, aliasUsed, availableOptions);
+        return SpongeCommandDispatcher.FIRST_DISAMBIGUATOR.disambiguate(source, aliasUsed, availableOptions);
     }
 }

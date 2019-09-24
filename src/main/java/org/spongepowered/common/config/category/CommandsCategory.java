@@ -52,6 +52,11 @@ public class CommandsCategory extends ConfigCategory {
                                                     + "changes on the all worlds.")
     private Map<String, Boolean> multiWorldCommandPatches = new HashMap<>();
 
+    @Setting(value = "command-hiding",
+            comment = "Defines how Sponge should act when a user tries to access a command they do not have\n"
+                    + "permission for")
+    private CommandsHiddenCategory commandHiding = new CommandsHiddenCategory();
+
     public boolean isEnforcePermissionChecksOnNonSpongeCommands() {
         return this.enforcePermissionChecksOnNonSpongeCommands;
     }
@@ -62,6 +67,10 @@ public class CommandsCategory extends ConfigCategory {
 
     public Map<String, Boolean> getMultiWorldCommandPatches() {
         return this.multiWorldCommandPatches;
+    }
+
+    public CommandsHiddenCategory getCommandHiding() {
+        return this.commandHiding;
     }
 
 }

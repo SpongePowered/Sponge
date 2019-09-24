@@ -58,7 +58,6 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
@@ -77,6 +76,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -92,7 +92,7 @@ public class SpongeCommandManager implements CommandManager {
 
     private static final Pattern SPACE_PATTERN = Pattern.compile(" ", Pattern.LITERAL);
     private final Logger logger;
-    private final SimpleDispatcher dispatcher;
+    private final SpongeCommandDispatcher dispatcher;
     private final Multimap<PluginContainer, CommandMapping> owners = HashMultimap.create();
     private final Map<CommandMapping, PluginContainer> reverseOwners = new ConcurrentHashMap<>();
     private final Object lock = new Object();
@@ -104,7 +104,7 @@ public class SpongeCommandManager implements CommandManager {
      */
     @Inject
     public SpongeCommandManager(Logger logger) {
-        this(logger, SimpleDispatcher.FIRST_DISAMBIGUATOR);
+        this(logger, SpongeCommandDispatcher.FIRST_DISAMBIGUATOR);
     }
 
     /**
@@ -115,7 +115,7 @@ public class SpongeCommandManager implements CommandManager {
      */
     public SpongeCommandManager(Logger logger, Disambiguator disambiguator) {
         this.logger = logger;
-        this.dispatcher = new SimpleDispatcher(disambiguator);
+        this.dispatcher = new SpongeCommandDispatcher(disambiguator);
     }
 
     @Override
@@ -272,6 +272,10 @@ public class SpongeCommandManager implements CommandManager {
     @Override
     public Optional<? extends CommandMapping> get(String alias, @Nullable CommandSource source) {
         return this.dispatcher.get(alias, source);
+    }
+
+    Optional<? extends CommandMapping> get(String alias, @Nullable CommandSource source, BiPredicate<CommandSource, CommandMapping> filter) {
+        return this.dispatcher.get(alias, source, filter);
     }
 
     @Override

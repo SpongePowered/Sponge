@@ -44,6 +44,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfigSaveManager;
 import org.spongepowered.common.config.type.CustomDataConfig;
@@ -96,6 +97,7 @@ public final class SpongeImpl {
     @Inject @Nullable private static SpongeDataManager dataManager;
     @Inject @Nullable private static SpongePropertyRegistry propertyRegistry;
     @Inject @Nullable private static SpongeScheduler scheduler;
+    @Inject @Nullable private static SpongeCommandManager commandManager;
     @Inject @Nullable private static SpongeCauseStackManager causeStackManager;
 
     private static final List<PluginContainer> internalPlugins = new ArrayList<>();
@@ -154,6 +156,10 @@ public final class SpongeImpl {
 
     public static SpongeScheduler getScheduler() {
         return check(scheduler);
+    }
+
+    public static SpongeCommandManager getCommandManager() {
+        return check(commandManager);
     }
 
     public static SpongeCauseStackManager getCauseStackManager() {

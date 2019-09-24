@@ -59,7 +59,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -169,13 +168,13 @@ public class SpongeCommandFactory {
     private static final Text COMMAND_KEY = Text.of("command");
     private static final Text PLUGIN_KEY = Text.of("plugin");
     private static final Text COLLECTION_STATE_KEY = Text.of("enabled");
-    private static final CommandElement COMMAND_ARGUMENT = new CommandElement(COMMAND_KEY) {
+    private static final CommandElement HELP_COMMAND_ARGUMENT = new CommandElement(COMMAND_KEY) {
 
         @Nullable
         @Override
         protected Object parseValue(final CommandSource source, final CommandArgs args) throws ArgumentParseException {
             final String input = args.next();
-            final Optional<? extends CommandMapping> cmd = SpongeImpl.getGame().getCommandManager().get(input, source);
+            final Optional<? extends CommandMapping> cmd = SpongeImpl.getCommandManager().get(input, source, SpongeCommandDispatcher.ON_DISCOVERY);
 
             if (!cmd.isPresent()) {
                 throw args.createError(SpongeApiTranslationHelper.t("No such command: ", input));
@@ -806,9 +805,10 @@ public class SpongeCommandFactory {
             .description(Text.of("List plugins that own a specific command"))
             .arguments(choices(Text.of("command"), () -> Sponge.getCommandManager().getAll().keySet(), Function.identity()))
             .executor((src, args) -> {
-                CommandManager mgr = Sponge.getCommandManager();
+                SpongeCommandManager mgr = SpongeImpl.getCommandManager();
                 String commandName = args.<String>getOne("command").get();
-                CommandMapping primary = mgr.get(commandName, src)
+
+                CommandMapping primary = mgr.get(commandName, src, SpongeCommandDispatcher.ON_DISCOVERY)
                     .orElseThrow(() -> new CommandException(Text.of("Invalid command ", commandName)));
                 Collection<? extends CommandMapping> all = mgr.getAll(commandName);
                 src.sendMessage(Text.of(title("Primary: "),  "Aliases ", hl(primary.getAllAliases().toString()), " owned by ",
@@ -893,7 +893,7 @@ public class SpongeCommandFactory {
                 optional(
                     firstParsing(
                         GenericArguments.integer(PAGE_KEY),
-                        COMMAND_ARGUMENT,
+                            HELP_COMMAND_ARGUMENT,
                         string(NOT_FOUND)
                     )
                 )
@@ -1066,7 +1066,12 @@ public class SpongeCommandFactory {
      */
     private static TreeSet<CommandMapping> commands(final CommandSource src) {
         final TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
-        commands.addAll(Sponge.getCommandManager().getAll().values().stream().filter(input -> input.getCallable().testPermission(src)).collect(Collectors.toList()));
+        commands.addAll(SpongeImpl.getCommandManager()
+                .getAll()
+                .values()
+                .stream()
+                .filter(input -> SpongeCommandDispatcher.ON_DISCOVERY.test(src, input))
+                .collect(Collectors.toList()));
         return commands;
     }
 
