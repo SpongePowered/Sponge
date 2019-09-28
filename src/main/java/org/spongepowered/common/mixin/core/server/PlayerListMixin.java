@@ -222,7 +222,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 worldServer = worldServer.getMinecraftServer().getWorld(toDimensionId);
             }
 
-            Vector3d targetSpawnVec = VecHelper.toVector3d(worldServer.getSpawnPoint());
+            Vector3d targetSpawnVec = VecHelper.toVector3d(SpongeImplHooks.getRandomizedSpawnPoint(worldServer));
             final BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, toDimensionId);
             if (bedPos != null) { // Player has a bed
                 final boolean forceBedSpawn = SpongeImplHooks.isSpawnForced(playerIn, toDimensionId);
