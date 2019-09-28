@@ -30,6 +30,7 @@ import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -41,6 +42,7 @@ import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @NonnullByDefault
 @Mixin(value = Container.class, priority = 998)
@@ -78,5 +80,18 @@ public abstract class ContainerMixin_API implements org.spongepowered.api.item.i
             }
         }
         return false;
+    }
+
+    @Override
+    public Set<Player> getViewers() {
+        return this.listeners.stream()
+                .filter(l -> l instanceof Player)
+                .map(Player.class::cast)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean hasViewers() {
+        return !this.listeners.isEmpty();
     }
 }
