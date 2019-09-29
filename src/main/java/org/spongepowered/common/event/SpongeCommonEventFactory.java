@@ -36,7 +36,6 @@ import net.minecraft.block.state.BlockPistonStructureHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
@@ -908,9 +907,8 @@ public class SpongeCommonEventFactory {
     @Nullable
     public static Event callMoveEntityEvent(final net.minecraft.entity.Entity entity,
         final EntityTickContext context) {
-        // Ignore movement event if entity is dead, a projectile, or item.
-        // Note: Projectiles are handled with CollideBlockEvent.Impact
-        if (entity.isDead || entity instanceof IProjectile || entity instanceof EntityItem) {
+        // Ignore movement event if entity is dead.
+        if (entity.isDead) {
             return null;
         }
 
