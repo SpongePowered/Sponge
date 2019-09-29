@@ -28,6 +28,7 @@ import com.google.common.base.MoreObjects;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.block.state.pattern.BlockPattern;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -44,7 +45,10 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
@@ -79,6 +83,25 @@ public abstract class TeleporterMixin implements TeleporterBridge {
             this.createEndPortal(targetLocation); // Sponge - move end portal create logic to its own method
             entityIn.setLocationAndAngles(targetLocation.getX(), targetLocation.getY() - 1, targetLocation.getZ(), entityIn.rotationYaw, 0.0F);
             entityIn.motionX = entityIn.motionY = entityIn.motionZ = 0.0D;
+        }
+    }
+
+    @Override
+    public void bridge$placeEntity(net.minecraft.world.World world, Entity entity, float yaw) {
+        boolean didPort;
+        if (entity instanceof EntityPlayerMP) {
+            this.placeInPortal(entity, yaw);
+            didPort = true;
+        } else {
+            if (((WorldServerBridge) this.world).bridge$getDimensionId() == Constants.World.END_DIMENSION_ID) {
+                didPort = true;
+            } else {
+                didPort = this.placeInExistingPortal(entity, yaw);
+            }
+        }
+        
+        if (didPort) {
+            ((IPhaseState) PhaseTracker.getInstance().getCurrentState()).markTeleported(PhaseTracker.getInstance().getCurrentContext());
         }
     }
 
