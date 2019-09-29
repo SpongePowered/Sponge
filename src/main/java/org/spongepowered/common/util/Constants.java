@@ -387,6 +387,7 @@ public final class Constants {
         public static final int MAX_CHUNK_UNLOADS = 100;
         public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
         public static final int CHUNK_UNLOAD_DELAY = 30000;
+        public static final int END_DIMENSION_ID = 1;
 
         public static final class Teleporter {
 

@@ -72,4 +72,8 @@ public final class InvokingTeleporterState extends EntityPhaseState<InvokingTele
         return false;
     }
 
+    @Override
+    public void markTeleported(InvokingTeleporterContext phaseContext) {
+        phaseContext.setDidPort(true);
+    }
 }
