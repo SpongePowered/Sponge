@@ -96,7 +96,8 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
 
     @Override
     public Explosion.Builder resolution(int resolution) {
-        this.resolution = resolution;
+        //A value of 1 would cause a DivideByZeroException
+        this.resolution = Math.max(resolution, 2);
         return this;
     }
 
