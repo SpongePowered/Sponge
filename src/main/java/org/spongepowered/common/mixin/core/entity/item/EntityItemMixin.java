@@ -210,10 +210,12 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
         )
     )
     private void impl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(this);
-            ExpireEntityEvent.TargetItem event = SpongeEventFactory.createExpireEntityEventTargetItem(Sponge.getCauseStackManager().getCurrentCause(), (Item) this);
-            SpongeImpl.postEvent(event);
+        if (SpongeImplHooks.isMainThread()) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(this);
+                ExpireEntityEvent.TargetItem event = SpongeEventFactory.createExpireEntityEventTargetItem(Sponge.getCauseStackManager().getCurrentCause(), (Item) this);
+                SpongeImpl.postEvent(event);
+            }
         }
     }
 
