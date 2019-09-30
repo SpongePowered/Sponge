@@ -197,10 +197,17 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
     
     @Inject(
         method = "onUpdate", 
-        at = @At (
+        slice = @Slice(
+                from = @At(
+                        value = "FIELD",
+                        target = "Lnet/minecraft/world/World;isRemote:Z",
+                        ordinal = 3
+                        )),
+        at = @At(
             value = "INVOKE", 
-            ordinal = 1, 
-            target = "Lnet/minecraft/entity/item/EntityItem;setDead()V")
+            target = "Lnet/minecraft/entity/item/EntityItem;setDead()V",
+            ordinal = 1
+        )
     )
     private void impl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
