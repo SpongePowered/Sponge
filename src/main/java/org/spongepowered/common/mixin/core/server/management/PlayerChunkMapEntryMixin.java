@@ -58,10 +58,11 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     private boolean impl$updateBiomes;
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
-    private void impl$UpdateBimoes(final CallbackInfo ci) {
+    private void impl$updateBiomes(final CallbackInfo ci) {
         final Chunk chunk = this.playerChunkMap.getWorldServer().getChunk(this.pos.x, this.pos.z);
         if (this.impl$updateBiomes) {
-            this.sendPacket(new SPacketChunkData(chunk, Constants.Networking.Packets.CHANGED_SECTION_FILTER_ALL));
+            this.sendPacket(new SPacketChunkData(chunk, 65534));
+            this.sendPacket(new SPacketChunkData(chunk, 1));
             this.changes = 0;
             this.changedSectionFilter = 0;
             this.impl$updateBiomes = false;
