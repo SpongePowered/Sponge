@@ -206,8 +206,7 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
                         )),
         at = @At(
             value = "INVOKE", 
-            target = "Lnet/minecraft/entity/item/EntityItem;setDead()V",
-            ordinal = 1
+            target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"
         )
     )
     private void impl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
