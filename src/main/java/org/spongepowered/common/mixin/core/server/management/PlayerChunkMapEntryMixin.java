@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
-import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 
@@ -58,10 +57,11 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     private boolean impl$updateBiomes;
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
-    private void impl$UpdateBimoes(final CallbackInfo ci) {
-        final Chunk chunk = this.playerChunkMap.getWorldServer().getChunk(this.pos.x, this.pos.z);
+    private void impl$updateBiomes(final CallbackInfo ci) {
         if (this.impl$updateBiomes) {
-            this.sendPacket(new SPacketChunkData(chunk, Constants.Networking.Packets.CHANGED_SECTION_FILTER_ALL));
+            final Chunk chunk = this.playerChunkMap.getWorldServer().getChunk(this.pos.x, this.pos.z);
+            this.sendPacket(new SPacketChunkData(chunk, 65534));
+            this.sendPacket(new SPacketChunkData(chunk, 1));
             this.changes = 0;
             this.changedSectionFilter = 0;
             this.impl$updateBiomes = false;
