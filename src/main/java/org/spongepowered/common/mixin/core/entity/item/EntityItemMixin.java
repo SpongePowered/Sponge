@@ -202,7 +202,12 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
     }
     
     @Inject(
-        method = "onUpdate", 
+        method = "onUpdate",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"),
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;handleWaterMovement()Z"),
+            to = @At("TAIL")
+        )
         slice = @Slice(
                 from = @At(
                         value = "FIELD",
