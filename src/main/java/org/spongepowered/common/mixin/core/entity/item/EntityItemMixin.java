@@ -221,6 +221,15 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
                 ExpireEntityEvent.TargetItem event = SpongeEventFactory.createExpireEntityEventTargetItem(Sponge.getCauseStackManager().getCurrentCause(), (Item) this);
                 SpongeImpl.postEvent(event);
             }
+        if (!SpongeImplHooks.isMainThread() || this.getItem().isEmpty()) {
+            // In the rare case the first if block is actually at the end of the method instruction list, we don't want to 
+            // erroneously be calling this twice.
+            return;
+        }
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this);
+            final ExpireEntityEvent.TargetItem event = SpongeEventFactory.createExpireEntityEventTargetItem(frame.getCurrentCause(), (Item) this);
+            SpongeImpl.postEvent(event);
         }
     }
 
