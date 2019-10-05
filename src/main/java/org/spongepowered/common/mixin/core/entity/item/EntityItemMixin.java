@@ -29,14 +29,22 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.ExpireEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.EntityItemBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -190,6 +198,27 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
     private void spongeImpl$ThrowPickupEvent(final EntityPlayer entityIn, final CallbackInfo ci) {
         if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay)) {
             ci.cancel();
+        }
+    }
+    
+    @Inject(
+        method = "onUpdate",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"),
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;handleWaterMovement()Z"),
+            to = @At("TAIL")
+        )
+    )
+    private void impl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
+        if (!SpongeImplHooks.isMainThread() || this.getItem().isEmpty()) {
+            // In the rare case the first if block is actually at the end of the method instruction list, we don't want to 
+            // erroneously be calling this twice.
+            return;
+        }
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this);
+            final ExpireEntityEvent.TargetItem event = SpongeEventFactory.createExpireEntityEventTargetItem(frame.getCurrentCause(), (Item) this);
+            SpongeImpl.postEvent(event);
         }
     }
 
