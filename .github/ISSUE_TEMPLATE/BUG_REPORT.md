@@ -10,19 +10,20 @@ labels: 'status: needs triage , type: bug'
 - SpongeVanilla version: 
 - Plugins/Mods:
 
-<!-- For the description, assume we have no idea how mods work, be as detailed 
-        as possible and include a step by step reproduction. -->
+<!-- Assume we have no idea how mods work, be as detailed as possible 
+        and include a step by step reproduction. -->
 **Issue Description**
 
 
 
-<!-- Any relevant log files and snippets should be uploaded to gist.github.com!
-        Don't use hastebin/pastebin or other similar sites. -->
+<!-- Any relevant log files and snippets should be uploaded to gist.github.com! -->
 **Log**
 
 
 
 <!-- Additional information -->
+<!-- Don't use hastebin/pastebin or other similar sites, as they have a history of quickly 
+        deleting files before we can look at them. -->
 <!-- If you are a developer, please attach a short and self contained code snippet (http://sscce.org) to 
         replicate your issue.  -->        
 <!-- You can get a list of your mods and plugins by running "/sponge plugins" and/or "/sponge mods" -->
