@@ -102,6 +102,7 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
@@ -907,18 +908,23 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             if (entity instanceof EntityPlayerMP) {
                 final SlotLens slotLens;
                 final InventoryPlayerBridge inventory = (InventoryPlayerBridge) ((EntityPlayerMP) entity).inventory;
-                final PlayerInventoryLens inventoryLens = (PlayerInventoryLens) ((InventoryAdapter) inventory).bridge$getRootLens();
-                switch (entityEquipmentSlot) {
-                    case OFFHAND:
-                        slotLens = inventoryLens.getOffhandLens();
-                        break;
-                    case MAINHAND:
-                        final HotbarLens hotbarLens = inventoryLens.getMainLens().getHotbar();
-                        slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(((InventoryAdapter) inventory).bridge$getFabric()));
-                        break;
-                    default:
-                        slotLens = inventoryLens.getEquipmentLens().getSlot(entityEquipmentSlot.getIndex());
+                final Lens inventoryLens = ((InventoryAdapter) inventory).bridge$getRootLens();
+                if (inventoryLens instanceof PlayerInventoryLens) {
+                    switch (entityEquipmentSlot) {
+                        case OFFHAND:
+                            slotLens = ((PlayerInventoryLens) inventoryLens).getOffhandLens();
+                            break;
+                        case MAINHAND:
+                            final HotbarLens hotbarLens = ((PlayerInventoryLens) inventoryLens).getMainLens().getHotbar();
+                            slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(((InventoryAdapter) inventory).bridge$getFabric()));
+                            break;
+                        default:
+                            slotLens = ((PlayerInventoryLens) inventoryLens).getEquipmentLens().getSlot(entityEquipmentSlot.getIndex());
+                    }
+                } else {
+                    slotLens = inventoryLens.getSlotLens(entityEquipmentSlot.getIndex());
                 }
+
                 slotAdapter = slotLens.getAdapter(((InventoryAdapter) inventory).bridge$getFabric(), (Inventory) inventory);
             } else {
                 if (this.slotLens.isEmpty()) {
