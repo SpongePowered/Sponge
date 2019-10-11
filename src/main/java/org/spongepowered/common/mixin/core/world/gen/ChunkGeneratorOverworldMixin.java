@@ -61,6 +61,7 @@ import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
 import org.spongepowered.common.bridge.world.gen.PopulatorProviderBridge;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
+import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.AnimalPopulator;
 import org.spongepowered.common.world.gen.populators.FilteredPopulator;
@@ -215,6 +216,7 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
      *   This fixes the FuturePack mod as it extends the ChunkProviderOverworld generator.
      * @author gabizou - September 18th, 2018 - Updated modification to redirect for vanilla
      *   generators would re-apply the same modified math for the x and z values.
+     * @author JBYoshi - 
      *
      * Redirects this method call to just simply return the current biomes, as
      * necessitated by @Deamon's changes. This avoids an overwrite entirely.
@@ -230,7 +232,8 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
     private Biome[] onSetBlocksGetBiomesIgnore(
         final BiomeProvider provider, final Biome[] biomes, final int x, final int z, final int width, final int height) {
         if (this.impl$isVanilla) {
-            if (biomes == null) {
+            // SpongeChunkGenerator will directly call the bridge method if it's being used.
+            if (biomes == null || !(this.world.getChunkProvider() instanceof SpongeChunkGenerator)) {
                 // construct the biomes array according to the method above, allows api biome pops to be used
                 return bridge$getBiomesForGeneration((x + 2) / 4, (z + 2) / 4); // Undo the math modification
             }
