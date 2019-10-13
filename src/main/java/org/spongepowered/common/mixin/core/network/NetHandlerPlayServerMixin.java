@@ -407,46 +407,66 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             Location<World> toLocation = new Location<>(player.getWorld(), packetIn.x, packetIn.y, packetIn.z);
             Vector3d toRotation = new Vector3d(packetIn.pitch, packetIn.yaw, 0);
 
+            // If we have zero movement, we have rotation only, we might as well note that now.
+            final boolean zeroMovement = !packetIn.moving || toLocation.getPosition().equals(fromLocation.getPosition());
+
             // Minecraft does the same with rotation when it's only a positional update
-            boolean positionOnly = packetIn.moving && !packetIn.rotating;
-            if (positionOnly) {
+            // Branch executed for CPacketPlayer.Position
+            boolean firePositionEvent = packetIn.moving && !packetIn.rotating;
+            if (firePositionEvent) {
                 // Correct the new rotation to match the old rotation
                 toRotation = fromRotation;
 
-                positionOnly = !toLocation.getPosition().equals(fromLocation.getPosition()) && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
+                firePositionEvent = !zeroMovement && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
             }
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
-            boolean rotationOnly = !packetIn.moving && packetIn.rotating;
+            // Branch executed for CPacketPlayer.Rotation
+            boolean fireRotationEvent = !packetIn.moving && packetIn.rotating;
 
-            if (rotationOnly) {
+            if (fireRotationEvent) {
                 // Correct the to location so it's not misrepresented to plugins, only when player rotates without moving
                 // In this case it's only a rotation update, which isn't related to the to location
                 fromLocation = player.getLocation();
                 toLocation = fromLocation;
 
-                rotationOnly = ShouldFire.ROTATE_ENTITY_EVENT;
+                fireRotationEvent = ShouldFire.ROTATE_ENTITY_EVENT;
             }
 
+            // Branch executed for CPacketPlayer.PositionRotation
             if (packetIn.moving && packetIn.rotating) {
-                positionOnly = !toLocation.getPosition().equals(fromLocation.getPosition()) && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
-                rotationOnly = ShouldFire.ROTATE_ENTITY_EVENT;
+                firePositionEvent = !zeroMovement && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
+                fireRotationEvent = ShouldFire.ROTATE_ENTITY_EVENT;
             }
 
             mixinPlayer.bridge$setVelocityOverride(toLocation.getPosition().sub(fromLocation.getPosition()));
 
-            final double deltaSquared = toLocation.getPosition().distanceSquared(fromLocation.getPosition());
-            final double deltaAngleSquared = fromRotation.distanceSquared(toRotation);
-
             // These magic numbers are sad but help prevent excessive lag from this event.
             // eventually it would be nice to not have them
-            if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
+            final boolean significantMovement =
+                    !zeroMovement && toLocation.getPosition().distanceSquared(fromLocation.getPosition())  > ((1f / 16) * (1f / 16));
+            final boolean significantRotation = fromRotation.distanceSquared(toRotation) > (.15f * .15f);
+
+            if (significantMovement || significantRotation) {
                 final Transform<World> fromTransform = player.getTransform().setLocation(fromLocation).setRotation(fromRotation);
                 Transform<World> toTransform = player.getTransform().setLocation(toLocation).setRotation(toRotation);
                 final Transform<World> originalToTransform = toTransform;
-                if (rotationOnly || positionOnly) {
+
+                // We should only have fireRotationEvent set to true only if there is no movement and so we are not
+                // firing the MoveEntityEvent.Position event anyway. Otherwise, there would be a bug (pointed out in
+                // https://github.com/SpongePowered/SpongeCommon/pull/2373#issuecomment-541351230) where the rotate event will be
+                // fired if ShouldFire.MOVE_ENTITY_EVENT_POSITION is false and the event would normally be the MoveEntityEvent.Position,
+                // rather than a RotateEntityEvent.
+                //
+                // Note that, as the code is written above, if there is a significant rotation but NOT a significant movement (but still
+                // non-zero), then a MoveEntityEvent.Position will be fired, not a rotation event, as some movement is still involved.
+                //
+                // See the API javadocs for RotateEntityEvent for this restriction.
+                fireRotationEvent = fireRotationEvent && zeroMovement;
+
+                if (fireRotationEvent || firePositionEvent) {
                     final Event event;
-                    if (rotationOnly) {
+                    if (fireRotationEvent) {
                         event = SpongeEventFactory.createRotateEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
                     } else {
                         event = SpongeEventFactory.createMoveEntityEventPosition(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
@@ -457,7 +477,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                         mixinPlayer.bridge$setVelocityOverride(null);
                         return true;
                     }
-                    if (rotationOnly) {
+                    if (fireRotationEvent) {
                         toTransform = ((RotateEntityEvent) event).getToTransform();
                     } else {
                         toTransform = ((MoveEntityEvent) event).getToTransform();
