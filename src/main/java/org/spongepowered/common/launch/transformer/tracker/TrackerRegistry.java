@@ -25,14 +25,14 @@
 package org.spongepowered.common.launch.transformer.tracker;
 
 import static java.util.Objects.requireNonNull;
-import static org.spongepowered.asm.lib.Opcodes.ASM5;
+import static org.objectweb.asm.Opcodes.ASM5;
 
 import net.minecraft.launchwrapper.Launch;
-import org.spongepowered.asm.lib.AnnotationVisitor;
-import org.spongepowered.asm.lib.ClassReader;
-import org.spongepowered.asm.lib.ClassVisitor;
-import org.spongepowered.asm.lib.MethodVisitor;
-import org.spongepowered.asm.lib.Type;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;

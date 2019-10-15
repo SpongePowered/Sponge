@@ -24,26 +24,26 @@
  */
 package org.spongepowered.common.launch.transformer.tracker;
 
-import static org.spongepowered.asm.lib.Opcodes.ACC_PRIVATE;
-import static org.spongepowered.asm.lib.Opcodes.ACC_STATIC;
-import static org.spongepowered.asm.lib.Opcodes.ALOAD;
-import static org.spongepowered.asm.lib.Opcodes.ASM5;
-import static org.spongepowered.asm.lib.Opcodes.CHECKCAST;
-import static org.spongepowered.asm.lib.Opcodes.F_SAME;
-import static org.spongepowered.asm.lib.Opcodes.IFEQ;
-import static org.spongepowered.asm.lib.Opcodes.ILOAD;
-import static org.spongepowered.asm.lib.Opcodes.INSTANCEOF;
-import static org.spongepowered.asm.lib.Opcodes.INVOKEINTERFACE;
-import static org.spongepowered.asm.lib.Opcodes.INVOKESTATIC;
-import static org.spongepowered.asm.lib.Opcodes.INVOKEVIRTUAL;
-import static org.spongepowered.asm.lib.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ASM5;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.F_SAME;
+import static org.objectweb.asm.Opcodes.IFEQ;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.INSTANCEOF;
+import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.IRETURN;
 
 import net.minecraft.launchwrapper.IClassTransformer;
-import org.spongepowered.asm.lib.ClassReader;
-import org.spongepowered.asm.lib.ClassVisitor;
-import org.spongepowered.asm.lib.ClassWriter;
-import org.spongepowered.asm.lib.Label;
-import org.spongepowered.asm.lib.MethodVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
 
 import java.util.HashMap;
 import java.util.Map;

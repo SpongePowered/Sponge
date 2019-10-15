@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.launch.transformer.tracker;
 
-import org.spongepowered.asm.lib.Type;
+import org.objectweb.asm.Type;
 
 import java.util.HashMap;
 import java.util.Map;
