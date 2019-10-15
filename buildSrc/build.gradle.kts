@@ -19,10 +19,11 @@ repositories {
     gradlePluginPortal()
     jcenter()
     maven(url = "https://files.minecraftforge.net/maven")
+    maven("https://repo.spongepowered.org/maven")
 }
 
 dependencies {
     implementation("net.minecrell.licenser:net.minecrell.licenser.gradle.plugin:0.4.1")
     implementation("net.minecraftforge.gradle:ForgeGradle:3.+")
-    implementation(group = "org.spongepowered", name = "SpongeGradle", version = "0.11.0-SNAPSHOT")
+    implementation(group = "org.spongepowered", name = "spongegradle", version = "0.11.0-SNAPSHOT")
 }
