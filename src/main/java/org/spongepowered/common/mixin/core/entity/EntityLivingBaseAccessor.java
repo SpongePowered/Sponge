@@ -77,4 +77,6 @@ public interface EntityLivingBaseAccessor {
     @Invoker("canBlockDamageSource")  boolean accessor$canBlockDamageSource(DamageSource damageSourceIn);
 
     @Accessor("armorArray") NonNullList<ItemStack> accessor$getArmorArray();
+    
+    @Accessor("activeItemStack") void accessor$setActiveItemStack(ItemStack stack);
 }

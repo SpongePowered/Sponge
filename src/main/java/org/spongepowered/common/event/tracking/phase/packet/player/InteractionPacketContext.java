@@ -25,12 +25,14 @@
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 
 public class InteractionPacketContext extends PacketContext<InteractionPacketContext> {
 
     private BlockSnapshot targetBlock = BlockSnapshot.NONE;
+    private ItemStack activeItem = ItemStack.empty();
 
     InteractionPacketContext(PacketState<? extends InteractionPacketContext> state) {
         super(state);
@@ -51,5 +53,14 @@ public class InteractionPacketContext extends PacketContext<InteractionPacketCon
 
     BlockSnapshot getTargetBlock() {
         return this.targetBlock;
+    }
+    
+    InteractionPacketContext activeItem(ItemStack item) {
+        this.activeItem = item;
+        return this;
+    }
+    
+    ItemStack getActiveItem() {
+        return this.activeItem;
     }
 }
