@@ -65,6 +65,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.HealEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -75,6 +76,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -112,6 +114,7 @@ import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
@@ -1169,5 +1172,16 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     }
 
     // End implementation of UseItemStackEvent
+    
+    @ModifyVariable(method = "heal", index = 1, at = @At("HEAD"))
+    private float sponge$fireHealEntityEvent(float original) {
+        HealEntityEvent event = SpongeEventFactory.createHealEntityEvent(SpongeImpl.getCauseStackManager().getCurrentCause(),
+                Collections.emptyList(), (org.spongepowered.api.entity.Entity) this, original);
+        if (SpongeImpl.postEvent(event)) {
+            return 0;
+        } else {
+            return (float) event.getFinalHealAmount();
+        }
+    }
 
 }
