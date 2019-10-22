@@ -310,7 +310,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     }
 
     @Inject(method = "readEntityFromNBT", at = @At("RETURN"))
-    private void onReadEntityFromNBT(final NBTTagCompound compound, final CallbackInfo ci) {
+    private void impl$fixEntityProperties(final NBTTagCompound compound, final CallbackInfo ci) {
         // Fix the mistakes of /xp commands past.
         bridge$recalculateTotalExperience();
 
