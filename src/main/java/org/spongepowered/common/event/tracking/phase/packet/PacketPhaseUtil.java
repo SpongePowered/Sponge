@@ -46,6 +46,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.client.CPacketClientStatus;
+import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.EnumHand;
@@ -165,8 +166,16 @@ public final class PacketPhaseUtil {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(final Packet packetIn, final INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
+            EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
+            // Only process the CustomPayload & Respawn packets from players if they are dead.
+            if (!packetPlayer.isEntityAlive()
+                    && (!(packetIn instanceof CPacketCustomPayload)
+                    && (!(packetIn instanceof CPacketClientStatus)
+                    || ((CPacketClientStatus) packetIn).getStatus() != CPacketClientStatus.State.PERFORM_RESPAWN))) {
+                return;
+            }
+
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
                 frame.pushCause(packetPlayer);
                 if (SpongeImplHooks.creativeExploitCheck(packetIn, packetPlayer)) {
                     return;
