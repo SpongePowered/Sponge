@@ -166,16 +166,10 @@ public final class PacketPhaseUtil {
     public static void onProcessPacket(final Packet packetIn, final INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
+            // Don't process packets from a player when they are dead.
             if (!packetPlayer.isEntityAlive()) {
-                // Don't process packets from a player when they are dead.
-                if (!(packetIn instanceof CPacketClientStatus)) {
-                    return;
-                }
-
-                CPacketClientStatus clientStatusPacket = (CPacketClientStatus) packetIn;
-
                 // Allow the player to respawn.
-                if (clientStatusPacket.getStatus() != CPacketClientStatus.State.PERFORM_RESPAWN) {
+                if (!(packetIn instanceof CPacketClientStatus) || ((CPacketClientStatus) packetIn).getStatus() != CPacketClientStatus.State.PERFORM_RESPAWN) {
                     return;
                 }
             }
