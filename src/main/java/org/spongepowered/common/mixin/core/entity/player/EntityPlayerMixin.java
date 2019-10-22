@@ -310,9 +310,14 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     }
 
     @Inject(method = "readEntityFromNBT", at = @At("RETURN"))
-    private void recalculateXpOnLoad(final NBTTagCompound compound, final CallbackInfo ci) {
+    private void onReadEntityFromNBT(final NBTTagCompound compound, final CallbackInfo ci) {
         // Fix the mistakes of /xp commands past.
         bridge$recalculateTotalExperience();
+
+        // Fix isDead not getting set back to true when a player that hasn't respawned after dying reconnects.
+        if (getHealth() <= 0.0F) {
+            this.isDead = true;
+        }
     }
 
     /**
