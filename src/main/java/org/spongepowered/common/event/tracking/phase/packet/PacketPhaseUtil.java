@@ -166,7 +166,7 @@ public final class PacketPhaseUtil {
     public static void onProcessPacket(final Packet packetIn, final INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
-            if (packetPlayer.isDead) {
+            if (!packetPlayer.isEntityAlive()) {
                 // Don't process packets from a player when they are dead.
                 if (!(packetIn instanceof CPacketClientStatus)) {
                     return;
