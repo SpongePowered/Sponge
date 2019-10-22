@@ -165,8 +165,22 @@ public final class PacketPhaseUtil {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(final Packet packetIn, final INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
+            EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
+            if (packetPlayer.isDead) {
+                // Don't process packets from a player when they are dead.
+                if (!(packetIn instanceof CPacketClientStatus)) {
+                    return;
+                }
+
+                CPacketClientStatus clientStatusPacket = (CPacketClientStatus) packetIn;
+
+                // Allow the player to respawn.
+                if (clientStatusPacket.getStatus() != CPacketClientStatus.State.PERFORM_RESPAWN) {
+                    return;
+                }
+            }
+
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
                 frame.pushCause(packetPlayer);
                 if (SpongeImplHooks.creativeExploitCheck(packetIn, packetPlayer)) {
                     return;
