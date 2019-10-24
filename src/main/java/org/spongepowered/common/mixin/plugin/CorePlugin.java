@@ -91,7 +91,7 @@ public class CorePlugin implements IMixinConfigPlugin {
 
 
     private static final Map<String, Consumer<ClassNode>> INCOMPATIBILITY_DETECTION_ERRORS = ImmutableMap.<String, Consumer<ClassNode>>builder()
-        .put("org.spongepowered.common.mixin.core.util.math.BlockPos$MutableBlockPosMixin_Optional", targetClass -> {
+        .put("org.spongepowered.common.mixin.core.util.math.BlockPos_MutableBlockPosMixin_Optional", targetClass -> {
             final ArrayList<String> foundFields = new ArrayList<>();
 
             for (final FieldNode field : targetClass.fields) {

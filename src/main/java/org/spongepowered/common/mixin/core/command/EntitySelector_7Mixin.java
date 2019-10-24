@@ -22,26 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/**
- * The various mixins in this package for command sources mirror the SpongeAPI command source interfaces.
- *
- * <dl>
- * <dt>{@link org.spongepowered.api.command.CommandSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.api.command.CommandSourceMixin_API}
- * <dt>{@link org.spongepowered.api.command.source.CommandBlockSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.command.BlockBasedCommandSourceMixin}
- * <dt>{@link org.spongepowered.api.command.source.RconSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.network.rcon.RConConsoleSourceMixin}
- * <dt>{@link org.spongepowered.api.command.source.SignSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.command.TileEntitySign_1Mixin}
- * <dt>{@link org.spongepowered.api.command.source.ProxySource} via /execute
- * and /function
- * <dd>{@link org.spongepowered.common.mixin.core.command.CommandSenderWrapperMixin}
- * </dl>
- *
- * In addition, {@link org.spongepowered.common.mixin.core.command.TileEntityCommandBlock_1Mixin} and
- * {@link org.spongepowered.common.mixin.core.command.EntityMinecartCommandBlock$1} are for inner classes that are separate from the mixin that
- * actually implements their command source interfaces.
- */
-@org.spongepowered.api.util.annotation.NonnullByDefault
 package org.spongepowered.common.mixin.core.command;
+
+import net.minecraft.entity.Entity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.entity.living.human.EntityHuman;
+
+@Mixin(targets = "net.minecraft.command.EntitySelector$7")
+public class EntitySelector_7Mixin {
+
+    @Redirect(method = "apply(Lnet/minecraft/entity/Entity;)Z",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/entity/Entity;getCachedUniqueIdString()Ljava/lang/String;"))
+    private String impl$getEntityIdString(final Entity entity) {
+        if (entity instanceof EntityHuman) {
+            return entity.getCustomNameTag();
+        }
+        return entity.getCachedUniqueIdString();
+    }
+
+}

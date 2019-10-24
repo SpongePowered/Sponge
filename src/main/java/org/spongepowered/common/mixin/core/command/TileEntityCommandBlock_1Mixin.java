@@ -22,26 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/**
- * The various mixins in this package for command sources mirror the SpongeAPI command source interfaces.
- *
- * <dl>
- * <dt>{@link org.spongepowered.api.command.CommandSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.api.command.CommandSourceMixin_API}
- * <dt>{@link org.spongepowered.api.command.source.CommandBlockSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.command.BlockBasedCommandSourceMixin}
- * <dt>{@link org.spongepowered.api.command.source.RconSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.network.rcon.RConConsoleSourceMixin}
- * <dt>{@link org.spongepowered.api.command.source.SignSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.command.TileEntitySign_1Mixin}
- * <dt>{@link org.spongepowered.api.command.source.ProxySource} via /execute
- * and /function
- * <dd>{@link org.spongepowered.common.mixin.core.command.CommandSenderWrapperMixin}
- * </dl>
- *
- * In addition, {@link org.spongepowered.common.mixin.core.command.TileEntityCommandBlock_1Mixin} and
- * {@link org.spongepowered.common.mixin.core.command.EntityMinecartCommandBlock$1} are for inner classes that are separate from the mixin that
- * actually implements their command source interfaces.
- */
-@org.spongepowered.api.util.annotation.NonnullByDefault
 package org.spongepowered.common.mixin.core.command;
+
+import net.minecraft.tileentity.TileEntityCommandBlock;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.command.CommandSenderBridge;
+
+@Mixin(targets = "net/minecraft/tileentity/TileEntityCommandBlock$1")
+public abstract class TileEntityCommandBlock_1Mixin implements CommandSenderBridge {
+
+    @Shadow(aliases = {"field_145767_a", "this$0"}) @Final private TileEntityCommandBlock field_145767_a;
+
+    @Override
+    public CommandSource bridge$asCommandSource() {
+        return (CommandSource) this.field_145767_a;
+    }
+}

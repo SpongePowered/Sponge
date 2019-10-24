@@ -22,26 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/**
- * The various mixins in this package for command sources mirror the SpongeAPI command source interfaces.
- *
- * <dl>
- * <dt>{@link org.spongepowered.api.command.CommandSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.api.command.CommandSourceMixin_API}
- * <dt>{@link org.spongepowered.api.command.source.CommandBlockSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.command.BlockBasedCommandSourceMixin}
- * <dt>{@link org.spongepowered.api.command.source.RconSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.network.rcon.RConConsoleSourceMixin}
- * <dt>{@link org.spongepowered.api.command.source.SignSource}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.command.TileEntitySign_1Mixin}
- * <dt>{@link org.spongepowered.api.command.source.ProxySource} via /execute
- * and /function
- * <dd>{@link org.spongepowered.common.mixin.core.command.CommandSenderWrapperMixin}
- * </dl>
- *
- * In addition, {@link org.spongepowered.common.mixin.core.command.TileEntityCommandBlock_1Mixin} and
- * {@link org.spongepowered.common.mixin.core.command.EntityMinecartCommandBlock$1} are for inner classes that are separate from the mixin that
- * actually implements their command source interfaces.
- */
-@org.spongepowered.api.util.annotation.NonnullByDefault
 package org.spongepowered.common.mixin.core.command;
+
+import net.minecraft.command.ICommandSender;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.command.CommandSenderBridge;
+
+@NonnullByDefault
+@Mixin(targets = "net.minecraft.entity.item.EntityMinecartCommandBlock$1")
+public abstract class EntityMinecartCommandBlock_1Mixin implements CommandSenderBridge, ICommandSender {
+
+    @Override
+    public CommandSource bridge$asCommandSource() {
+        return (CommandSource) getCommandSenderEntity();
+    }
+}

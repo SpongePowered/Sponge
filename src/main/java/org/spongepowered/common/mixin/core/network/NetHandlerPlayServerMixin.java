@@ -902,7 +902,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     @Inject(method = "handleResourcePackStatus(Lnet/minecraft/network/play/client/CPacketResourcePackStatus;)V", at = @At("HEAD"))
     private void onProcessResourcePackStatus(final CPacketResourcePackStatus packet, final CallbackInfo ci) {
         // Propagate the packet to the main thread so the cause tracker picks
-        // it up. See PacketThreadUtil$1Mixin.
+        // it up. See PacketThreadUtil_1Mixin.
         PacketThreadUtil.checkThreadAndEnqueue(packet, (INetHandlerPlayServer) this, this.player.getServerWorld());
     }
 

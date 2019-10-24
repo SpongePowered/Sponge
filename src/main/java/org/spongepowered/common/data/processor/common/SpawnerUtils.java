@@ -45,7 +45,7 @@ import org.spongepowered.common.bridge.tileentity.MobSpawnerBaseLogicBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
-import org.spongepowered.common.mixin.core.util.WeightedRandom$ItemAccessor;
+import org.spongepowered.common.mixin.core.util.WeightedRandom_ItemAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.IdentityHashMap;
@@ -59,7 +59,7 @@ public class SpawnerUtils {
     }
 
     public static WeightedSerializableObject<EntityArchetype> getNextEntity(final MobSpawnerBaseLogicAccessor logic) {
-        final int weight = ((WeightedRandom$ItemAccessor) logic.accessor$getSpawnData()).accessor$getItemWeight();
+        final int weight = ((WeightedRandom_ItemAccessor) logic.accessor$getSpawnData()).accessor$getItemWeight();
 
         final EntityType type = EntityUtil.fromNameToType(logic.accessor$getSpawnData().getNbt().getString("id")).orElse(EntityTypes.PIG);
 
@@ -97,7 +97,7 @@ public class SpawnerUtils {
                     .entityData(NbtTranslator.getInstance().translateFrom(nbt))
                     .build();
 
-            possibleEntities.add(new WeightedSerializableObject<>(archetype, ((WeightedRandom$ItemAccessor) weightedEntity).accessor$getItemWeight()));
+            possibleEntities.add(new WeightedSerializableObject<>(archetype, ((WeightedRandom_ItemAccessor) weightedEntity).accessor$getItemWeight()));
         }
 
         return possibleEntities;
