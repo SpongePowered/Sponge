@@ -94,7 +94,6 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         final Entity tickingEntity = phaseContext.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(tickingEntity);
             this.processCaptures(tickingEntity, phaseContext, frame);
         }
     }
