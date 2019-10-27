@@ -74,10 +74,10 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         super.getFrameModifier().andThen((frame, context) -> {
             final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
-            frame.pushCause(tickingEntity);
             if (tickingEntity instanceof EntityFallingBlock) {
                 context.getOwner().ifPresent(frame::pushCause);
             }
+            frame.pushCause(tickingEntity);
         });
 
     EntityTickPhaseState() {
