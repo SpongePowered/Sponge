@@ -264,6 +264,7 @@
         "entity.projectile.EntityArrowMixin",
         "entity.projectile.EntityEggMixin",
         "entity.projectile.EntityFireballMixin",
+        "entity.projectile.EntityFireballAccessor",
         "entity.projectile.EntityFishHookMixin",
         "entity.projectile.EntityLargeFireballMixin",
         "entity.projectile.EntityShulkerBulletMixin",
