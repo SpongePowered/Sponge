@@ -817,8 +817,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                         SpongeCommonEventFactory.lastSecondaryPacketTick = this.server.getTickCounter();
 
                         // Is interaction allowed with item in hand
-                        if (SpongeCommonEventFactory.callInteractItemEventSecondary(frame, this.player, itemstack, hand, VecHelper.toVector3d(packetIn
-                            .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, itemstack,
+                        if (SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, itemstack,
                             entity, hand, VecHelper.toVector3d(entity.getPositionVector().add(packetIn.getHitVec()))).isCancelled()) {
 
                             // Restore held item in hand
