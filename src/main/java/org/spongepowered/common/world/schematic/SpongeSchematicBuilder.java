@@ -285,7 +285,10 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
         if (this.biomeVolume == null) {
             if (this.volume == null) {
                 if (this.view != null) {
-                    final MutableBiomeVolume biomes = new ByteArrayMutableBiomeBuffer(this.biomePalette, min, size);
+                    // We have to set the size to 1 for the y limit due to the
+                    // format having that restriction (up until 1.15's supposed
+                    // changes.
+                    final MutableBiomeVolume biomes = new ByteArrayMutableBiomeBuffer(this.biomePalette, min, new Vector3i(size.getX(), 1, size.getZ()));
                     this.view.getBiomeWorker().iterate((v, x, y, z) -> biomes.setBiome(x, y, z, v.getBiome(x, y, z)));
                     this.biomeVolume = biomes;
                 }
