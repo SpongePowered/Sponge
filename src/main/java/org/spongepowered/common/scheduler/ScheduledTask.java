@@ -70,6 +70,10 @@ public class ScheduledTask implements Task {
          */
         RUNNING(true),
         /**
+         * Is being executed.
+         */
+        EXECUTING(true),
+        /**
          * Task cancelled, scheduled to be removed from the task map.
          */
         CANCELED(false);

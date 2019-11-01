@@ -148,6 +148,11 @@ abstract class SchedulerBase {
             this.removeTask(task);
             return;
         }
+        // If the task is already being processed, we wait for the previous
+        // occurrence to terminate.
+        if (task.getState() == ScheduledTask.ScheduledTaskState.EXECUTING) {
+            return;
+        }
         long threshold = Long.MAX_VALUE;
         // Figure out if we start a delayed Task after threshold ticks or, start
         // it after the interval (period) of the repeating task parameter.
@@ -167,6 +172,7 @@ abstract class SchedulerBase {
             task.setState(ScheduledTask.ScheduledTaskState.SWITCHING);
             task.setTimestamp(this.getTimestamp(task));
             startTask(task);
+            task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
             // If task is one time shot, remove it from the map.
             if (task.period == 0L) {
                 this.removeTask(task);
@@ -181,7 +187,7 @@ abstract class SchedulerBase {
      */
     protected void startTask(final ScheduledTask task) {
         this.executeTaskRunnable(task, () -> {
-            task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
+            task.setState(ScheduledTask.ScheduledTaskState.EXECUTING);
             try (final PhaseContext<?> context = createContext(task, task.getOwner());
                  final Timing timings = task.getTimingsHandler()) {
                 timings.startTimingIfSync();
