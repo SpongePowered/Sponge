@@ -63,7 +63,7 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     @Nullable private String api$id;
 
     @Override
-    public String getId() {
+    public final String getId() {
         if (this.api$id == null || this.api$id.isEmpty()) {
             final ResourceLocation id = REGISTRY.getNameForObject((Enchantment) (Object) this);
             if (id != null) {

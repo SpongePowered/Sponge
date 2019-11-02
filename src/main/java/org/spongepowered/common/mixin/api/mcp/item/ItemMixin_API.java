@@ -54,7 +54,7 @@ public abstract class ItemMixin_API implements ItemType {
     @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
 
     @Override
-    public String getId() {
+    public final String getId() {
         final ResourceLocation resourceLocation = SpongeImplHooks.getItemResourceLocation((Item) (Object) this);
         checkState(resourceLocation != null, "Attempted to access the id before the Item is registered.");
         return resourceLocation.toString();

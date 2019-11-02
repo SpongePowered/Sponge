@@ -66,7 +66,7 @@ public abstract class BiomeMixin_API implements BiomeType {
     }
 
     @Override
-    public String getId() {
+    public final String getId() {
         return ((BiomeBridge) this).bridge$getId();
     }
 
