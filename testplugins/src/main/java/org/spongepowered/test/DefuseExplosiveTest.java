@@ -31,10 +31,14 @@ import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 @Plugin(id = "defuseexplosivetest", name = "Defuse Explosive Test", description = "Defuse Explosive", version = "0.0.0")
 public class DefuseExplosiveTest implements LoadableModule {
@@ -49,14 +53,20 @@ public class DefuseExplosiveTest implements LoadableModule {
 
     public static class Listeners {
         @Listener
-        public void onDispense(InteractEntityEvent.Secondary.MainHand event) {
+        public void onInteractExplosive(InteractEntityEvent.Secondary.MainHand event, @Root Player player) {
             final Entity entity = event.getTargetEntity();
 
             if (!(entity instanceof FusedExplosive)) {
                 return;
             }
 
+            if (!((FusedExplosive) entity).isPrimed()) {
+                player.sendMessage(Text.of(TextColors.RED, "fused explosive not primed"));
+                return;
+            }
+
             ((FusedExplosive) entity).defuse();
+            player.sendMessage(Text.of(TextColors.DARK_GREEN, entity.getType().getName(), " defused"));
         }
     }
 }
