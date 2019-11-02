@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.item.EntityTNTPrimedBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -54,7 +55,6 @@ public abstract class EntityTNTPrimedMixin_API extends EntityMixin_API implement
     @Shadow @Nullable private EntityLivingBase tntPlacedBy;
     @Shadow private void explode() { }
 
-    private int fuseDuration = 80;
     @Override
     public Optional<Living> getDetonator() {
         return Optional.ofNullable((Living) this.tntPlacedBy);
@@ -65,6 +65,7 @@ public abstract class EntityTNTPrimedMixin_API extends EntityMixin_API implement
     @Override
     public void defuse() {
         checkState(isPrimed(), "not primed");
+        checkState(!((EntityTNTPrimedBridge) this).bridge$isExploding(), "tnt about to explode");
         if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
             setDead();
             // Place a TNT block at the Entity's position
@@ -78,13 +79,13 @@ public abstract class EntityTNTPrimedMixin_API extends EntityMixin_API implement
     @Override
     public void prime() {
         checkState(!isPrimed(), "already primed");
-        checkState(this.isDead, "tnt about to be primed");
+        checkState(!((EntityTNTPrimedBridge) this).bridge$isExploding(), "tnt about to explode");
         getWorld().spawnEntity(this);
     }
 
     @Override
     public boolean isPrimed() {
-        return this.fuse > 0 && this.fuse < this.fuseDuration && !this.isDead || ((EntityTNTPrimedBridge) this).bridge$isExploding();
+        return this.fuse > 0 && this.fuse < Constants.Entity.PrimedTNT.DEFAULT_FUSE_DURATION && !this.isDead;
     }
 
     @Override
