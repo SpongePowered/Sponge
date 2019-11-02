@@ -32,39 +32,39 @@ import org.spongepowered.api.data.manipulator.mutable.entity.DespawnDelayData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeDespawnDelayData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayData, ImmutableDespawnDelayData> implements DespawnDelayData {
+public final class SpongeDespawnDelayData extends AbstractData<DespawnDelayData, ImmutableDespawnDelayData> implements DespawnDelayData {
+
+    private int value;
 
     public SpongeDespawnDelayData() {
         this(Constants.Entity.Item.DEFAULT_DESPAWN_DELAY);
     }
 
     public SpongeDespawnDelayData(int value) {
-        super(DespawnDelayData.class, value, Keys.DESPAWN_DELAY);
+        super(DespawnDelayData.class);
+        this.value = value;
+        registerGettersAndSetters();
     }
 
     public SpongeDespawnDelayData(int value, int minimum, int maximum, int defaultValue) {
         this(value);
     }
 
-
     @Override
-    public MutableBoundedValue<Integer> delay() {
-        return SpongeValueFactory.boundedBuilder(Keys.DESPAWN_DELAY) // this.usedKey does not work here
-                .actualValue(this.getValue())
-                .minimum(Constants.Entity.Item.MIN_DESPAWN_DELAY)
-                .maximum(Constants.Entity.Item.MAX_DESPAWN_DELAY)
-                .defaultValue(Constants.Entity.Item.DEFAULT_DESPAWN_DELAY)
-                .build();
-    }
+    protected void registerGettersAndSetters() {
+        registerFieldGetter(Keys.INFINITE_DESPAWN_DELAY, this::isInfinite);
+        registerFieldSetter(Keys.INFINITE_DESPAWN_DELAY, (value) -> this.value = value ? Constants.Entity.Item.MAGIC_NO_DESPAWN : this.value);
+        registerKeyValue(Keys.INFINITE_DESPAWN_DELAY, this::infinite);
 
-    @Override
-    public boolean supports(Key<?> key) {
-        return super.supports(key) || key == Keys.INFINITE_DESPAWN_DELAY;
+        registerFieldGetter(Keys.DESPAWN_DELAY, this::getDelay);
+        registerFieldSetter(Keys.DESPAWN_DELAY, (value) -> this.value = value);
+        registerKeyValue(Keys.DESPAWN_DELAY, this::delay);
     }
 
     @Override
@@ -73,22 +73,37 @@ public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayDa
     }
 
     private boolean isInfinite() {
-        return this.getValue() == Constants.Entity.Item.MAGIC_NO_DESPAWN;
+        return this.value == Constants.Entity.Item.MAGIC_NO_DESPAWN;
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return this.delay();
+    public MutableBoundedValue<Integer> delay() {
+        return SpongeValueFactory.boundedBuilder(Keys.DESPAWN_DELAY) // this.usedKey does not work here
+                .actualValue(this.value)
+                .minimum(Constants.Entity.Item.MIN_DESPAWN_DELAY)
+                .maximum(Constants.Entity.Item.MAX_DESPAWN_DELAY)
+                .defaultValue(Constants.Entity.Item.DEFAULT_DESPAWN_DELAY)
+                .build();
+    }
+
+    private int getDelay() {
+        return this.value;
+    }
+
+    @Override
+    public DespawnDelayData copy() {
+        return new SpongeDespawnDelayData(this.value);
     }
 
     @Override
     public ImmutableDespawnDelayData asImmutable() {
-        return new ImmutableSpongeDespawnDelayData(this.getValue());
+        return new ImmutableSpongeDespawnDelayData(this.value);
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.INFINITE_DESPAWN_DELAY, isInfinite());
+                .set(Keys.DESPAWN_DELAY, this.value)
+                .set(Keys.INFINITE_DESPAWN_DELAY, isInfinite());
     }
 }

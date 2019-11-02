@@ -24,35 +24,71 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePickupDelayData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PickupDelayData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePickupDelayData;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.util.Constants;
 
-public final class ImmutableSpongePickupDelayData extends AbstractImmutableIntData<ImmutablePickupDelayData, PickupDelayData>
+public final class ImmutableSpongePickupDelayData extends AbstractImmutableData<ImmutablePickupDelayData, PickupDelayData>
         implements ImmutablePickupDelayData {
 
-    private final ImmutableValue<Boolean> infinite;
+    private final int value;
 
     public ImmutableSpongePickupDelayData(int value) {
-        super(ImmutablePickupDelayData.class, value, Keys.PICKUP_DELAY, SpongePickupDelayData.class, Constants.Entity.Item.MIN_PICKUP_DELAY,
-                Constants.Entity.Item.MAX_PICKUP_DELAY, Constants.Entity.Item.DEFAULT_PICKUP_DELAY);
-        this.infinite = ImmutableSpongeValue.cachedOf(Keys.INFINITE_PICKUP_DELAY, false, this.getValue() == Constants.Entity.Item.MAGIC_NO_PICKUP);
+        super(ImmutablePickupDelayData.class);
+        this.value = value;
+        registerGetters();
+    }
+
+    @Override
+    protected void registerGetters() {
+        registerFieldGetter(Keys.INFINITE_PICKUP_DELAY, this::isInifinitePickup);
+        registerKeyValue(Keys.INFINITE_PICKUP_DELAY, this::infinite);
+
+        registerFieldGetter(Keys.PICKUP_DELAY, this::getDelay);
+        registerKeyValue(Keys.PICKUP_DELAY, this::delay);
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+                .set(Keys.PICKUP_DELAY, this.value)
+                .set(Keys.INFINITE_PICKUP_DELAY, this.isInifinitePickup());
     }
 
     @Override
     public ImmutableBoundedValue<Integer> delay() {
-        return this.getValueGetter();
+        return SpongeValueFactory.boundedBuilder(Keys.PICKUP_DELAY) // this.usedKey does not work here
+                .actualValue(this.value)
+                .minimum(Constants.Entity.Item.MIN_PICKUP_DELAY)
+                .maximum(Constants.Entity.Item.MAX_PICKUP_DELAY)
+                .defaultValue(Constants.Entity.Item.DEFAULT_PICKUP_DELAY)
+                .build()
+                .asImmutable();
+    }
+
+    private int getDelay() {
+        return this.value;
     }
 
     @Override
     public ImmutableValue<Boolean> infinite() {
-        return this.infinite;
+        return new ImmutableSpongeValue<>(Keys.INFINITE_PICKUP_DELAY, false, isInifinitePickup());
     }
 
+    private boolean isInifinitePickup() {
+        return this.value == Constants.Entity.Item.MAGIC_NO_PICKUP;
+    }
+
+    @Override
+    public PickupDelayData asMutable() {
+        return new SpongePickupDelayData(this.value);
+    }
 }
