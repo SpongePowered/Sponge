@@ -66,6 +66,11 @@ public abstract class EntityTNTPrimedMixin extends EntityMixin implements Entity
     }
 
     @Override
+    public boolean bridge$isExploding() {
+        return this.isDead && this.fuse <= 0;
+    }
+
+    @Override
     public Optional<Integer> bridge$getExplosionRadius() {
         return Optional.of(this.bridge$explosionRadius);
     }
