@@ -46,7 +46,6 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
-import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.command.SendCommandEvent;
@@ -321,6 +320,7 @@ public class SpongeCommandManager implements CommandManager {
         }
 
         try {
+            final TrackedInventoryBridge inventory = source instanceof EntityPlayer ? ((TrackedInventoryBridge) ((EntityPlayer) source).inventory) : null;
             try (// Since we know we are in the main thread, this is safe to do without a thread check
                  CommandPhaseContext context = GeneralPhase.State.COMMAND.createPhaseContext()
                          .source(source)
@@ -329,19 +329,13 @@ public class SpongeCommandManager implements CommandManager {
                     context.owner((User) source);
                     context.notifier((User) source);
                 }
-                final TrackedInventoryBridge
-                    inventory = source instanceof EntityPlayer ? ((TrackedInventoryBridge) ((EntityPlayer) source).inventory) : null;
                 if (inventory != null) {
                     // Enable player inventory capture
                     context.inventory(inventory);
                     inventory.bridge$setCaptureInventory(true);
                 }
                 context.buildAndSwitch();
-                final CommandResult result = this.dispatcher.process(source, commandLine);
-                if (inventory != null) {
-                    inventory.bridge$setCaptureInventory(false);
-                }
-                return result;
+                return this.dispatcher.process(source, commandLine);
             } catch (InvocationCommandException ex) {
                 if (ex.getCause() != null) {
                     throw ex.getCause();
@@ -369,6 +363,10 @@ public class SpongeCommandManager implements CommandManager {
 
                         source.sendMessage(error(t("Usage: /%s %s", argSplit[0], usage)));
                     }
+                }
+            } finally {
+                if (inventory != null) {
+                    inventory.bridge$setCaptureInventory(false);
                 }
             }
         } catch (Throwable thr) {
