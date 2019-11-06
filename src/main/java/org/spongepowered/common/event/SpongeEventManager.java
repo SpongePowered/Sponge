@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
-import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
@@ -54,14 +52,14 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.inventory.custom.CustomInventory;
-import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.item.inventory.custom.CustomInventoryListener;
+import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.util.TypeTokenHelper;
 
 import java.lang.reflect.Field;
@@ -370,12 +368,7 @@ public class SpongeEventManager implements EventManager {
     @Override
     public void unregisterListeners(final Object listener) {
         checkNotNull(listener, "listener");
-
-        if (listener instanceof CustomInventory) {
-            unregister(handler -> handler.getHandle() instanceof CustomInventoryListener && listener.equals(((CustomInventoryListener) handler.getHandle()).getInventory()));
-        } else {
-            unregister(handler -> listener.equals(handler.getHandle()));
-        }
+        unregister(handler -> listener.equals(handler.getHandle()));
     }
 
     @Override
