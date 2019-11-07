@@ -172,7 +172,6 @@ abstract class SchedulerBase {
             task.setState(ScheduledTask.ScheduledTaskState.SWITCHING);
             task.setTimestamp(this.getTimestamp(task));
             startTask(task);
-            task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
             // If task is one time shot, remove it from the map.
             if (task.period == 0L) {
                 this.removeTask(task);
@@ -200,6 +199,9 @@ abstract class SchedulerBase {
                     SpongeImpl.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
                         task.getOwner(), t);
                 }
+            } finally {
+                task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
+                onTaskCompletion(task);
             }
         });
     }
@@ -221,5 +223,13 @@ abstract class SchedulerBase {
      * @param runnable The runnable to run
      */
     protected abstract void executeTaskRunnable(ScheduledTask task, Runnable runnable);
+
+    /**
+     * Run when a task has completed and is switching into
+     * the {@link ScheduledTask.ScheduledTaskState#RUNNING} state
+     */
+    protected void onTaskCompletion(ScheduledTask task) {
+        // no-op for sync methods.
+    }
 
 }

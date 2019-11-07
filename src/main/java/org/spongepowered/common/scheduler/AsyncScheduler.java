@@ -75,6 +75,10 @@ public class AsyncScheduler extends SchedulerBase {
             long now = System.nanoTime();
             for (Task tmpTask : tasks) {
                 ScheduledTask task = (ScheduledTask) tmpTask;
+                if (task.getState() == ScheduledTask.ScheduledTaskState.EXECUTING) {
+                    // bail out for this task. We'll signal when we complete the task.
+                    continue;
+                }
                 // Recalibrate the wait delay for processing tasks before new
                 // tasks cause the scheduler to process pending tasks.
                 if (task.offset == 0 && task.period == 0) {
@@ -141,6 +145,15 @@ public class AsyncScheduler extends SchedulerBase {
             this.condition.signalAll();
         } finally {
             this.lock.unlock();
+        }
+    }
+
+    @Override
+    protected void onTaskCompletion(ScheduledTask task) {
+        // This will likely be run from an executor thread rather than
+        // the thread that owns the task, hence no lock.
+        if (task.getState() == ScheduledTask.ScheduledTaskState.RUNNING) {
+            this.condition.signalAll();
         }
     }
 

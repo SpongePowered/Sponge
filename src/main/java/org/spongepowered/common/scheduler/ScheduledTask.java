@@ -62,7 +62,7 @@ public class ScheduledTask implements Task {
          */
         WAITING(false),
         /**
-         * In the process of switching to the running state.
+         * In the process of switching to the execution state.
          */
         SWITCHING(true),
         /**
@@ -133,7 +133,7 @@ public class ScheduledTask implements Task {
     @Override
     public boolean cancel() {
         boolean success = false;
-        if (this.getState() != ScheduledTask.ScheduledTaskState.RUNNING) {
+        if (getState() != ScheduledTask.ScheduledTaskState.RUNNING && getState() != ScheduledTaskState.EXECUTING) {
             success = true;
         }
         this.setState(ScheduledTask.ScheduledTaskState.CANCELED);
