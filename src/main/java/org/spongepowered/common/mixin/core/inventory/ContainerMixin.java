@@ -49,7 +49,6 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -513,17 +512,6 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
                 result = ItemStack.EMPTY; // Return empty to stop shift-crafting
             }
         }
-
-        final Inventory craftInv = ((Inventory) thisContainer).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
-        if (craftInv instanceof CraftingInventory) {
-            List<SlotTransaction> previewTransactions = ((ContainerBridge) thisContainer).bridge$getPreviewTransactions();
-            if (previewTransactions.isEmpty()) {
-                final CraftingOutput outSlot = ((CraftingInventory) craftInv).getResult();
-                final SlotTransaction st = new SlotTransaction(outSlot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(outSlot.peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
-                previewTransactions.add(st);
-            }
-        }
-
         this.impl$shiftCraft = false;
 
         return result;
