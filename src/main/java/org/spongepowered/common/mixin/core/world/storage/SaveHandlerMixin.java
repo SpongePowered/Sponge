@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
 import org.spongepowered.common.data.util.DataUtil;
@@ -57,6 +58,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -141,6 +143,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
                 newDataFile.delete();
                 return;
             }
+
             if (dataFile.exists()) {
                 if (oldDataFile.exists()) {
                     oldDataFile.delete();
@@ -165,21 +168,32 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
         final File spongeFile = new File(this.worldDirectory, Constants.Sponge.World.LEVEL_SPONGE_DAT);
         final File spongeOldFile = new File(this.worldDirectory, Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
 
-        if (spongeFile.exists() || spongeOldFile.exists()) {
-            final File actualFile = spongeFile.exists() ? spongeFile : spongeOldFile;
-            final NBTTagCompound compound;
-            try (final FileInputStream stream = new FileInputStream(actualFile)) {
-                compound = CompressedStreamTools.readCompressed(stream);
-            } catch (Exception ex) {
-                throw new RuntimeException("Attempt failed when reading Sponge level data for [" + info.getWorldName() + "] from file [" +
-                        actualFile.getName() + "]!", ex);
+        boolean exceptionRaised = false;
+        if (spongeFile.exists()) {
+            if (impl$loadSpongeDatFile(info, spongeFile, true)) {
+                return;
             }
-            ((WorldInfoBridge) info).bridge$setSpongeRootLevelNBT(compound);
-            if (compound.hasKey(Constants.Sponge.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Sponge.SPONGE_DATA);
-                DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
-                ((WorldInfoBridge) info).bridge$readSpongeNbt(spongeCompound);
+
+            exceptionRaised = true;
+        }
+
+        if (spongeOldFile.exists()) {
+            if (impl$loadSpongeDatFile(info, spongeOldFile, false)) {
+                if (exceptionRaised) {
+                    // Tell the user we successfully loaded a backup
+                    SpongeImpl.getLogger().warn("Successfully loaded backup data file {} for world {}.", spongeFile.getName(), info.getWorldName());
+
+                    // Delete the "current" file so we don't accidentally make it the backup file.
+                    spongeFile.delete();
+                }
+                return;
             }
+
+            exceptionRaised = true;
+        }
+
+        if (exceptionRaised) {
+            throw new RuntimeException("Unable to load sponge data for world [" + info.getWorldName() + "]");
         }
     }
 
@@ -284,4 +298,46 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
     public File bridge$getSpongeWorldDirectory() {
         return this.worldDirectory;
     }
+
+    private boolean impl$loadSpongeDatFile(final WorldInfo info, final File file, boolean isCurrent) {
+        final NBTTagCompound compound;
+        try (final FileInputStream stream = new FileInputStream(file)) {
+            compound = CompressedStreamTools.readCompressed(stream);
+        } catch (Exception ex) {
+            PrettyPrinter errorPrinter = new PrettyPrinter()
+                    .add("Unable to load level data from world [%s] for file [%s]!", info.getWorldName(), file.getName())
+                    .centre()
+                    .hr();
+            // We can't read it - but let's copy the file so we can ask for it to inspect what it looks like later.
+            Path corrupted = file.toPath().getParent().resolve(file.getName() + ".corrupted-" +
+                    DateTimeFormatter.ISO_INSTANT.format(Instant.now()).replaceAll(":", "") + ".dat");
+            try {
+                Files.copy(file.toPath(), corrupted);
+                errorPrinter.add("We have backed up the corrupted file to %s. Please keep hold of this, it may be useful to Sponge developers.",
+                        corrupted.getFileName());
+            } catch (IOException e) {
+                errorPrinter.add("We were unable to copy the corrupted file.");
+            }
+
+            if (isCurrent) {
+                errorPrinter.add("We will try to load the backup file (if it exists)");
+            }
+
+            errorPrinter
+                    .hr()
+                    .add("Exception:")
+                    .add(ex)
+                    .print(System.err);
+            return false;
+        }
+        ((WorldInfoBridge) info).bridge$setSpongeRootLevelNBT(compound);
+        if (compound.hasKey(Constants.Sponge.SPONGE_DATA)) {
+            final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Sponge.SPONGE_DATA);
+            DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
+            ((WorldInfoBridge) info).bridge$readSpongeNbt(spongeCompound);
+        }
+
+        return true;
+    }
+
 }
