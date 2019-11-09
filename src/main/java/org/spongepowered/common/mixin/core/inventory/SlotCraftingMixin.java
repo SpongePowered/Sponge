@@ -179,9 +179,13 @@ public abstract class SlotCraftingMixin extends Slot {
             return; // CraftMatrix is empty and/or no transaction present. Do not fire Preview.
         }
 
-        final SlotTransaction last = previewTransactions.isEmpty()
-                ? new SlotTransaction(craftingInventory.getResult(), ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(this.getStack()))
-                : previewTransactions.get(0);
+        final SlotTransaction last;
+        if (previewTransactions.isEmpty()) {
+            last = new SlotTransaction(craftingInventory.getResult(), ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(this.getStack()));
+            previewTransactions.add(last);
+        } else {
+            last = previewTransactions.get(0);
+        }
 
         final CraftingRecipe newRecipe = (CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world);
 
