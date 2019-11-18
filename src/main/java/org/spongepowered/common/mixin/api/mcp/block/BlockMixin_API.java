@@ -67,7 +67,7 @@ public abstract class BlockMixin_API implements BlockType {
     @Shadow public abstract BlockStateContainer getBlockState();
 
     @Override
-    public String getId() {
+    public final String getId() {
         return this.getNameFromRegistry();
     }
 

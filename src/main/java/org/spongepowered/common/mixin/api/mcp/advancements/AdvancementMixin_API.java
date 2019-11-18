@@ -98,7 +98,7 @@ public class AdvancementMixin_API implements org.spongepowered.api.advancement.A
     }
 
     @Override
-    public String getId() {
+    public final String getId() {
         checkState(SpongeImplHooks.isMainThread());
         return ((AdvancementBridge) this).bridge$getId();
     }
