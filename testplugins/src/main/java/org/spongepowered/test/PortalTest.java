@@ -24,78 +24,47 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.type.DyeColors;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.world.ConstructPortalEvent;
-import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.Color;
-import org.spongepowered.api.world.explosion.Explosion;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+@Plugin(id = "portaltest", name = "Portal Test", description = "A plugin to test portal events", version = "0.0.0")
+public class PortalTest implements LoadableModule {
 
-@Plugin(id = "portaltest")
-public class PortalTest {
+    @Inject
+    private PluginContainer container;
+    private final PortalListener listener = new PortalListener();
 
-    private static final Random RANDOM = new Random();
-    /**
-     * There is no significance in this UUID. I just created it so I didn't
-     * have to go through the effort of setting up custom data.
-     */
-    private static final UUID CREATOR_UUID = UUID.fromString("7fac20d9-cbd4-48c7-88dc-61a33e22cd74");
-
-    @Listener
-    public void onCreatePortal(ConstructPortalEvent e) {
-        if (RANDOM.nextInt(5) == 0) {
-            e.setCancelled(true);
-            e.getPortalLocation().getExtent().triggerExplosion(Explosion.builder()
-                    .location(e.getPortalLocation())
-                    .radius(10)
-                    .build());
-            e.getCause().last(MessageReceiver.class).ifPresent(x -> x.sendMessage(Text.of(TextColors.RED, "The portal destabilized! Try again.")));
-            return;
-        }
-        List<Color> dyeColors = new ArrayList<>();
-        for (DyeColor x : Sponge.getRegistry().getAllOf(DyeColor.class)) {
-            if (!DyeColors.RED.equals(x)) {
-                Color color = x.getColor();
-                if (Math.abs(color.getRed() - color.getGreen()) >= 30 || Math.abs(color.getGreen() - color.getBlue()) >= 30
-                        || Math.abs(color.getRed() - color.getBlue()) >= 30) {
-                    dyeColors.add(color);
-                }
-            }
-        }
-        Color randomColor = dyeColors.get(RANDOM.nextInt(dyeColors.size()));
-        Firework firework = (Firework) e.getPortalLocation().createEntity(EntityTypes.FIREWORK);
-        firework.offer(Keys.FIREWORK_EFFECTS, Collections.singletonList(FireworkEffect.builder().color(randomColor).build()));
-        e.getPortalLocation().getExtent().spawnEntity(firework);
-        firework.setCreator(CREATOR_UUID);
-        firework.detonate();
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, listener);
     }
 
-    /**
-     * Because fireworks only explode after a tick, they might move - or,
-     * worse, travel through the portal that was just created. This prevents
-     * any movement of those fireworks.
-     */
-    @Listener
-    public void preventMove(MoveEntityEvent.Teleport.Portal event, @Getter("getTargetEntity") Firework firework) {
-        if (firework.getCreator().map(CREATOR_UUID::equals).orElse(false)) {
-            event.setCancelled(true);
+    @Override
+    public void disable(CommandSource src) {
+        Sponge.getEventManager().unregisterListeners(listener);
+    }
+
+    public static class PortalListener {
+
+        @Listener
+        public void onCreatePortal(ConstructPortalEvent e) {
+            e.setCancelled(true);
+            e.getCause().last(MessageReceiver.class).ifPresent(x -> x.sendMessage(Text.of("Portal event received and cancelled")));
+
+            // Mark the position
+            Entity slime = e.getPortalLocation().createEntity(EntityTypes.SLIME);
+            slime.offer(Keys.SLIME_SIZE, 5);
+            e.getPortalLocation().spawnEntity(slime);
         }
     }
 }

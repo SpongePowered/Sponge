@@ -185,10 +185,8 @@ public final class EntityUtil {
                             .getCurrentCause(), context.getExitTransform().getLocation());
                     SpongeImpl.postEvent(constructPortalEvent);
                     if (constructPortalEvent.isCancelled()) {
-                        for (BlockSnapshot original : Lists.reverse(context.getCapturedBlockChanges())) {
-                            original.restore(true, BlockChangeFlags.NONE);
-                        }
-                        context.getCapturedBlockChanges().clear();
+                        context.getCapturedBlockSupplier().restoreOriginals();
+                        ((EntityBridge) sEntity).bridge$setLocationAndAngles(fromTransform);
                         return null;
                     }
                 }
@@ -368,10 +366,8 @@ public final class EntityUtil {
                             .getCurrentCause(), context.getExitTransform().getLocation());
                     SpongeImpl.postEvent(constructPortalEvent);
                     if (constructPortalEvent.isCancelled()) {
-                        for (BlockSnapshot original : Lists.reverse(context.getCapturedBlockChanges())) {
-                            original.restore(true, BlockChangeFlags.NONE);
-                        }
-                        context.getCapturedBlockChanges().clear();
+                        context.getCapturedBlockSupplier().restoreOriginals();
+                        ((EntityBridge) player).bridge$setLocationAndAngles(fromTransform);
                         return null;
                     }
                 }
