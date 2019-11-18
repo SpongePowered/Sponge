@@ -906,4 +906,13 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean allowsGettingQueuedRemovedTiles() {
         return false;
     }
+
+    /**
+     * Allows phases to be notified when an entity successfully teleports
+     * between dimensions.
+     * 
+     * @param phaseContext The appropriate phase context
+     */
+    default void markTeleported(final C phaseContext) {
+    }
 }
