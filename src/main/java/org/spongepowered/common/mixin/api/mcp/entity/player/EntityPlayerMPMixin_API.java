@@ -118,7 +118,6 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.effect.sound.SoundEffectHelper;
-import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -377,7 +376,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     @Override
     public void kick(final Text message) {
         final ITextComponent component = SpongeTexts.toComponent(message);
-        PlayerKickHelper.kickPlayer((EntityPlayerMP) (Object) this, component);
+        this.connection.disconnect(component);
     }
 
     @Override
