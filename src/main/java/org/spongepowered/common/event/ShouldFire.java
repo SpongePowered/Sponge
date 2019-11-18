@@ -68,6 +68,8 @@ public class ShouldFire {
     public static boolean CLICK_INVENTORY_EVENT = false;
     public static boolean CLICK_INVENTORY_EVENT_DOUBLE = false;
 
+    public static boolean DESTRUCT_ENTITY_EVENT = false;
+
     public static boolean DROP_ITEM_EVENT = false;
     public static boolean DROP_ITEM_EVENT_DESTRUCT = false;
     public static boolean DROP_ITEM_EVENT_DISPENSE = false;

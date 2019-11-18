@@ -32,6 +32,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
@@ -63,8 +64,11 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -108,6 +112,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -127,6 +132,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     private boolean vanish$isVanished = false;
     private boolean vanish$pendingVisibilityUpdate = false;
     private int vanish$visibilityTicks = 0;
+    @Nullable private DestructEntityEvent impl$destructEvent;
 
     @Shadow @Nullable private Entity ridingEntity;
     @Shadow @Final private List<Entity> riddenByEntities;
@@ -234,6 +240,14 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Override
     public void bridge$setWorldTracked(final boolean tracked) {
         this.trackedInWorld = tracked;
+        // Since this is called during removeEntity from world, we can
+        // post the removal event here, basically.
+        if (!tracked) {
+            if (this.impl$destructEvent != null) {
+                SpongeImpl.postEvent(this.impl$destructEvent);
+            }
+            this.impl$destructEvent = null;
+        }
     }
 
     @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;ridingEntity:Lnet/minecraft/entity/Entity;", ordinal = 0),
@@ -832,6 +846,24 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             return entity.attackEntityFrom(DamageSource.LIGHTNING_BOLT, damage);
         } finally {
             ((DamageSourceBridge) source).bridge$setLightningSource();
+        }
+    }
+
+    @Inject(method = "setDead", at = @At(value = "RETURN"))
+    private void impl$createDestructionEventOnDeath(final CallbackInfo ci) {
+        if (ShouldFire.DESTRUCT_ENTITY_EVENT
+            && !((WorldBridge) this.world).bridge$isFake()
+            && !((Entity) (Object) this instanceof EntityLiving)) {
+            final MessageChannel originalChannel = MessageChannel.TO_NONE;
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+
+                final DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(
+                    frame.getCurrentCause(), originalChannel, Optional.of(originalChannel),
+                    new MessageEvent.MessageFormatter(), (org.spongepowered.api.entity.Entity) this, true
+                );
+
+                this.impl$destructEvent = event;
+            }
         }
     }
 
