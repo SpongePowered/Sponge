@@ -181,8 +181,8 @@ public final class EntityUtil {
                 frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
 
                 if (!context.getCapturedBlockChanges().isEmpty()) {
-                    ConstructPortalEvent constructPortalEvent = SpongeEventFactory.createConstructPortalEvent(Sponge.getCauseStackManager()
-                            .getCurrentCause(), context.getExitTransform().getLocation());
+                    ConstructPortalEvent constructPortalEvent = SpongeEventFactory.createConstructPortalEvent(frame.getCurrentCause(),
+                            context.getExitTransform().getLocation());
                     SpongeImpl.postEvent(constructPortalEvent);
                     if (constructPortalEvent.isCancelled()) {
                         context.getCapturedBlockSupplier().restoreOriginals();
@@ -362,8 +362,8 @@ public final class EntityUtil {
                 frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
 
                 if (!context.getCapturedBlockChanges().isEmpty()) {
-                    ConstructPortalEvent constructPortalEvent = SpongeEventFactory.createConstructPortalEvent(Sponge.getCauseStackManager()
-                            .getCurrentCause(), context.getExitTransform().getLocation());
+                    ConstructPortalEvent constructPortalEvent = SpongeEventFactory.createConstructPortalEvent(frame.getCurrentCause(),
+                            context.getExitTransform().getLocation());
                     SpongeImpl.postEvent(constructPortalEvent);
                     if (constructPortalEvent.isCancelled()) {
                         context.getCapturedBlockSupplier().restoreOriginals();
