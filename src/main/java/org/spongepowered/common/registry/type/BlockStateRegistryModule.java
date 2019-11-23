@@ -70,6 +70,10 @@ public final class BlockStateRegistryModule implements CatalogRegistryModule<Blo
             final String[] propertyValuePairs = properties.split(",");
             List<Tuple<BlockTrait<?>, ? extends Comparable<?>>> foundPairs = new ArrayList<>(propertyValuePairs.length);
             for (String propertyValuePair : propertyValuePairs) {
+                if (!propertyValuePair.contains("=")) {
+                    continue;
+                }
+
                 final String name = propertyValuePair.split("=")[0];
                 final String value = propertyValuePair.split("=")[1];
                 type.getTrait(name).ifPresent(trait -> {
