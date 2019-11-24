@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingInventoryAdapter;
@@ -37,16 +38,10 @@ public class CraftingInventoryLens extends DefaultIndexedLens {
     private final int outputSlotIndex;
 
     private final CraftingOutputSlotLens outputSlot;
-
     private final CraftingGridInventoryLens craftingGrid;
 
-
     public CraftingInventoryLens(int outputSlotIndex, int gridBase, int width, int height, SlotLensProvider slots) {
-        this(outputSlotIndex, gridBase, width, height, CraftingInventoryAdapter.class, slots);
-    }
-
-    public CraftingInventoryLens(int outputSlotIndex, int gridBase, int width, int height, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
-        super(gridBase, width * height + 1, adapterType);
+        super(gridBase, width * height + 1, slots);
         this.outputSlotIndex = outputSlotIndex;
         this.outputSlot = (CraftingOutputSlotLens)slots.getSlotLens(this.outputSlotIndex);
         this.craftingGrid = new CraftingGridInventoryLens(this.base, width, height, slots);

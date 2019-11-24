@@ -35,9 +35,10 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.bridge.inventory.LensProviderBridge;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
-import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 @Mixin(value = {Inventory.class, CraftResultInventory.class})
@@ -48,7 +49,7 @@ public abstract class InventoryBasicMixin implements IInventory, LensProviderBri
         if (this.getSizeInventory() == 0) {
             return new DefaultEmptyLens(adapter);
         }
-        return new DefaultIndexedLens(0, this.getSizeInventory(), 1, adapter.bridge$getSlotProvider());
+        return new DefaultIndexedLens(0, this.getSizeInventory(), adapter.bridge$getSlotProvider());
     }
 
     @Override

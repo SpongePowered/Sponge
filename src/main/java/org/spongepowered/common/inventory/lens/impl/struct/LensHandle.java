@@ -110,7 +110,7 @@ public final class LensHandle {
 
     @SuppressWarnings("unchecked")
     public void setProperty(PropertyEntry tuple) {
-        setProperty((Property) tuple.getProperty(), tuple.getValue());
+        this.setProperty((Property) tuple.getProperty(), tuple.getValue());
     }
 
     public <V> void setProperty(Property<V> property, V value) {
@@ -118,12 +118,6 @@ public final class LensHandle {
             this.properties = new HashMap<>();
         }
         this.properties.put(property, value);
-    }
-
-    public void removeProperty(Property<?> property) {
-        if (this.properties != null) {
-            this.properties.remove(property);
-        }
     }
 
     @Override

@@ -25,14 +25,10 @@
 package org.spongepowered.common.inventory.adapter.impl;
 
 import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.inventory.fabric.Fabric;
 
 public class VanillaContainerAdapter extends BasicInventoryAdapter {
 
-    /**
-     * Used to calculate {@link #getPlugin()}.
-     */
     private final Container rootContainer;
 
     public VanillaContainerAdapter(Fabric fabric, net.minecraft.inventory.container.Container container) {
@@ -40,15 +36,4 @@ public class VanillaContainerAdapter extends BasicInventoryAdapter {
         this.rootContainer = (Container) container;
     }
 
-    @Override
-    public PluginContainer getPlugin() {
-        PluginContainer plugin = super.getPlugin();
-        if (plugin != null) {
-            return plugin;
-        }
-        if (this.rootContainer == null) {
-            return null;
-        }
-        return this.rootContainer.getPlugin();
-    }
 }

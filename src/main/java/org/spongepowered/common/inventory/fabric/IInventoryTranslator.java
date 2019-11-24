@@ -27,9 +27,8 @@ package org.spongepowered.common.inventory.fabric;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.text.translation.FixedTranslation;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
+
 import java.util.Collection;
 
 /**
@@ -60,11 +59,6 @@ class IInventoryTranslator implements InventoryTranslator<IInventory> {
     @Override
     public int getMaxStackSize(IInventory inventory) {
         return inventory.getInventoryStackLimit();
-    }
-
-    @Override
-    public Translation getDisplayName(IInventory inventory) {
-        return new FixedTranslation(inventory.getDisplayName().getUnformattedText());
     }
 
     @Override

@@ -24,6 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.entity;
 
+import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.entity.monster.AbstractSkeletonEntity;
+import net.minecraft.entity.monster.GiantEntity;
+import net.minecraft.entity.monster.ZombieEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -36,12 +42,6 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.monster.AbstractSkeletonEntity;
-import net.minecraft.entity.monster.GiantEntity;
-import net.minecraft.entity.monster.ZombieEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
 
 // All living implementors of ArmorEquipable
 @Mixin({ArmorStandEntity.class, GiantEntity.class, ServerPlayerEntity.class, AbstractSkeletonEntity.class, ZombieEntity.class, EntityHuman.class})

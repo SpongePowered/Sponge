@@ -24,9 +24,16 @@
  */
 package org.spongepowered.common.bridge.inventory;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 
+/**
+ * This interface provides the {@link InventoryAdapter} needed to implement {@link Inventory} using {@link DefaultImplementedAdapterInventory}
+ *
+ * The {@link InventoryAdapter} may be mixed into the inventory itself or provided by a wrapper. See {@link InventoryUtil#findAdapter}
+ */
 public interface InventoryBridge {
     default InventoryAdapter bridge$getAdapter() {
         return InventoryUtil.findAdapter(this);

@@ -36,7 +36,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.tileentity.SmeltEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
@@ -83,11 +82,12 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
 
     private SlotLensProvider impl$generateSlotProvider() {
         return new SlotLensCollection.Builder().add(InputSlotAdapter.class, InputSlotLens::new)
-                .add(FuelSlotAdapter.class, (i) -> new FuelSlotLens(i, (s) -> FurnaceTileEntity.isItemFuel((ItemStack) s) || isBucket(
-                        (ItemStack) s), t -> {
-                    final ItemStack nmsStack = (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1);
-                    return FurnaceTileEntity.isItemFuel(nmsStack) || isBucket(nmsStack);
-                }))
+                .add(FuelSlotAdapter.class,
+                        (i) -> new FuelSlotLens(i, (s) -> FurnaceTileEntity.isItemFuel(ItemStackUtil.toNative(s)) || isBucket(ItemStackUtil.toNative(s)),
+                        t -> {
+                            final ItemStack nmsStack = ItemStackUtil.toNative(org.spongepowered.api.item.inventory.ItemStack.of(t, 1));
+                            return FurnaceTileEntity.isItemFuel(nmsStack) || isBucket(nmsStack);
+                        }))
                 // TODO represent the filtering in the API somehow
                 .add(OutputSlotAdapter.class, (i) -> new OutputSlotLens(i, (s) -> true, (t) -> true))
                 .build();

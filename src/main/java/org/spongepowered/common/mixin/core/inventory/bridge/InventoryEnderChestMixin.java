@@ -36,6 +36,6 @@ public abstract class InventoryEnderChestMixin extends InventoryBasicMixin {
 
     @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return new GridInventoryLens(0, 9, 3, 9, adapter.bridge$getSlotProvider());
+        return new GridInventoryLens(0, 9, 3, adapter.bridge$getSlotProvider());
     }
 }

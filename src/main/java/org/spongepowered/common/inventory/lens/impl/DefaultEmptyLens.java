@@ -39,8 +39,6 @@ import java.util.Map;
 
 public class DefaultEmptyLens implements Lens {
 
-    private static final IntSet EMPTY_SLOT_SET = IntSets.EMPTY_SET;
-
     protected final InventoryAdapter adapter;
 
     public DefaultEmptyLens(final InventoryAdapter adapter) {
@@ -56,11 +54,6 @@ public class DefaultEmptyLens implements Lens {
     @Override
     public InventoryAdapter getAdapter(final Fabric fabric, final Inventory parent) {
         return this.adapter;
-    }
-
-    @Override
-    public Translation getName(final Fabric fabric) {
-        return fabric.fabric$getDisplayName();
     }
 
     @Override
@@ -117,6 +110,7 @@ public class DefaultEmptyLens implements Lens {
         return true;
     }
 
+    
     @Override
     public Lens getParent() {
         return null;
@@ -124,7 +118,7 @@ public class DefaultEmptyLens implements Lens {
 
     @Override
     public List<Lens> children() {
-        return Collections.emptyList()
+        return Collections.emptyList();
     }
 
     @Override

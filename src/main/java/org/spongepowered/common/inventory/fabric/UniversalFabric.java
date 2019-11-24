@@ -25,10 +25,13 @@
 package org.spongepowered.common.inventory.fabric;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
+
 import java.util.Collection;
 
+/**
+ * A {@link Fabric} implementation that uses registered {@link InventoryTranslator}s
+ */
 @SuppressWarnings("unchecked")
 public interface UniversalFabric extends Fabric, InventoryBridge {
 
@@ -54,10 +57,6 @@ public interface UniversalFabric extends Fabric, InventoryBridge {
 
     @Override default int fabric$getMaxStackSize() {
         return InventoryTranslators.getTranslator(this.getClass()).getMaxStackSize(this);
-    }
-
-    @Override default Translation fabric$getDisplayName() {
-        return InventoryTranslators.getTranslator(this.getClass()).getDisplayName(this);
     }
 
     @Override default int fabric$getSize() {

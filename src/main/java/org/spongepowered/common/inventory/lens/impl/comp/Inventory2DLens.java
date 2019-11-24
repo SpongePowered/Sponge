@@ -93,9 +93,4 @@ public class Inventory2DLens extends SlotBasedLens {
         return new Inventory2DAdapter(fabric, this, parent);
     }
 
-    @Override
-    public int getStide() {
-        return this.stride;
-    }
-
 }

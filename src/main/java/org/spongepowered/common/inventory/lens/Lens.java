@@ -26,7 +26,6 @@ package org.spongepowered.common.inventory.lens;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
@@ -67,11 +66,6 @@ public interface Lens extends LensCollection {
      * @return adapter for this lens
      */
     InventoryAdapter getAdapter(Fabric fabric, Inventory parent);
-    
-    /**
-     * Returns the display name of this lens 
-     */
-    Translation getName(Fabric fabric);
     
     /**
      * Get the number of slots referenced by this lens

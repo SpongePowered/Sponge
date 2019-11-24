@@ -27,36 +27,41 @@ package org.spongepowered.common.inventory.adapter.impl;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
+import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
-import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
-import org.spongepowered.common.inventory.EmptyInventoryImpl;
-import org.spongepowered.common.inventory.InventoryIterator;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
+import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.inventory.lens.impl.fabric.CompoundFabric;
 import org.spongepowered.common.inventory.query.Query;
 import org.spongepowered.common.inventory.query.type.LensQuery;
 import org.spongepowered.common.inventory.query.type.SlotLensQuery;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Implements almost all of {@link Inventory} assuming that this is a {@link InventoryBridge} providing the {@link InventoryAdapter}.
  */
-public interface DefaultImplementedAdapterInventory extends Inventory {
+public interface DefaultImplementedAdapterInventory extends InventoryPropertyHolder {
+
+    // Helpers
+    default Lens impl$getLens()
+    {
+        return ((InventoryBridge) this).bridge$getAdapter().bridge$getRootLens();
+    }
+
+    default Fabric impl$getFabric()
+    {
+        return ((InventoryBridge) this).bridge$getAdapter().bridge$getFabric();
+    }
 
     /**
      * Only use on Inventories that are Fabrics themselves
@@ -70,20 +75,6 @@ public interface DefaultImplementedAdapterInventory extends Inventory {
     }
 
     @Override
-    default PluginContainer getPlugin() {
-        return ((InventoryAdapterBridge) this).bridge$getPlugin();
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    default Translation getName() {
-        if (((InventoryBridge) this).bridge$getAdapter().bridge$getRootLens() == null) {
-            return ((InventoryBridge) this).bridge$getAdapter().bridge$getFabric().fabric$getDisplayName();
-        }
-        return ((InventoryBridge) this).bridge$getAdapter().bridge$getRootLens().getName(((InventoryBridge) this).bridge$getAdapter().bridge$getFabric());
-    }
-
-    @Override
     default Inventory root() {
         return this.parent() == this ? this : this.parent().root();
     }
@@ -94,58 +85,52 @@ public interface DefaultImplementedAdapterInventory extends Inventory {
     }
 
     @Override
-    default Optional<ItemStack> poll() {
-        return AdapterLogic.pollSequential(((InventoryBridge) this).bridge$getAdapter());
+    default InventoryTransactionResult.Poll poll() {
+        return AdapterLogic.pollSequential(this.impl$getFabric(), this.impl$getLens(), null);
     }
 
     @Override
-    default Optional<ItemStack> poll(int limit) {
-        return AdapterLogic.pollSequential(((InventoryBridge) this).bridge$getAdapter(), limit);
+    default InventoryTransactionResult.Poll poll(int limit) {
+        return AdapterLogic.pollSequential(this.impl$getFabric(), this.impl$getLens(), limit);
     }
 
     @Override
-    default Optional<ItemStack> peek() {
-        return AdapterLogic.peekSequential(((InventoryBridge) this).bridge$getAdapter());
+    default ItemStack peek() {
+        return AdapterLogic.peekSequential(this.impl$getFabric(), this.impl$getLens()).orElse(ItemStack.empty());
     }
 
     @Override
-    default Optional<ItemStack> peek(int limit) {
-        return AdapterLogic.peekSequential(((InventoryBridge) this).bridge$getAdapter(), limit);
-    }
-
-    @Override
-    default InventoryTransactionResult offer(ItemStack stack) {
-        return AdapterLogic.appendSequential(((InventoryBridge) this).bridge$getAdapter(), stack);
+    default InventoryTransactionResult offer(ItemStack... stacks) {
+        InventoryTransactionResult result = InventoryTransactionResult.successNoTransactions();
+        for (ItemStack stack : stacks) {
+            result = result.and(AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens(), stack));
+        }
+        return result;
     }
 
     @Override
     default boolean canFit(ItemStack stack) {
-        return AdapterLogic.canFit(((InventoryBridge) this).bridge$getAdapter(), stack);
+        return AdapterLogic.canFit(this.impl$getFabric(), this.impl$getLens(), stack);
     }
 
     @Override
-    default InventoryTransactionResult set(ItemStack stack) {
-        return AdapterLogic.insertSequential(((InventoryBridge) this).bridge$getAdapter(), stack);
+    default int freeCapacity() {
+        return AdapterLogic.countFreeCapacity(this.impl$getFabric(), this.impl$getLens());
     }
 
     @Override
-    default int size() {
-        return AdapterLogic.countStacks(((InventoryBridge) this).bridge$getAdapter());
-    }
-
-    @Override
-    default int totalItems() {
-        return AdapterLogic.countItems(((InventoryBridge) this).bridge$getAdapter());
+    default int totalQuantity() {
+        return AdapterLogic.countQuantity(this.impl$getFabric(), this.impl$getLens());
     }
 
     @Override
     default int capacity() {
-        return AdapterLogic.getCapacity(((InventoryBridge) this).bridge$getAdapter());
+        return AdapterLogic.getCapacity(this.impl$getFabric(), this.impl$getLens());
     }
 
     @Override
     default boolean hasChildren() {
-        return ((InventoryBridge) this).bridge$getAdapter().bridge$getRootLens().getChildren().size() != 0;
+        return this.impl$getLens().getChildren().size() != 0;
     }
 
     @Override
@@ -163,85 +148,34 @@ public interface DefaultImplementedAdapterInventory extends Inventory {
         return AdapterLogic.contains(((InventoryBridge) this).bridge$getAdapter(), type);
     }
 
+    default List<Inventory> children() {
+        return this.impl$generateChildren();
+    }
+
+    default List<Inventory> impl$generateChildren() {
+        return this.impl$getLens().getSpanningChildren().stream()
+                .map(l -> l.getAdapter(this.impl$getFabric(), this))
+                .map(Inventory.class::cast)
+                .collect(Collectors.toList());
+    }
     @Override
-    default int getMaxStackSize() {
-        return ((InventoryBridge) this).bridge$getAdapter().bridge$getRootLens().getMaxStackSize(((InventoryBridge) this).bridge$getAdapter().bridge$getFabric());
+    default Inventory query(QueryOperation<?>... queries) {
+        return Query.compile(((InventoryBridge) this).bridge$getAdapter(), queries).execute();
+    }
+
+    @Override
+    default Inventory query(org.spongepowered.api.item.inventory.query.Query query) {
+        // TODO
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Inventory child, Class<T> property) {
-        return (Collection<T>) AdapterLogic.getProperties(((InventoryBridge) this).bridge$getAdapter(), child, property);
-    }
-
-    @Override
-    default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Class<T> property) {
-        if (this.parent() == this) {
-            return AdapterLogic.getRootProperties(((InventoryBridge) this).bridge$getAdapter(), property);
-        }
-        return this.parent().getProperties(this, property);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property, Object key) {
-        for (final InventoryProperty<?, ?> prop : AdapterLogic.getProperties(((InventoryBridge) this).bridge$getAdapter(), child, property)) {
-            if (key.equals(prop.getKey())) {
-                return Optional.of((T)prop);
-            }
+    default <T extends Inventory> Optional<T> query(Class<T> inventoryType) {
+        Inventory result = this.query(QueryOperationTypes.INVENTORY_TYPE.of(inventoryType));
+        if (inventoryType.isAssignableFrom(result.getClass())) {
+            return Optional.of((T) result);
         }
         return Optional.empty();
-    }
-
-    @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property, Object key) {
-        if (this.parent() == this) {
-            return AdapterLogic.getRootProperty(((InventoryBridge) this).bridge$getAdapter(), property, key);
-        }
-        return this.parent().getProperty(this, property, key);
-    }
-
-    @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Inventory child, Class<T> property) {
-        final Object key = AbstractInventoryProperty.getDefaultKey(property);
-        return this.getProperty(child, property, key);
-    }
-
-    @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Class<T> property) {
-        final Object key = AbstractInventoryProperty.getDefaultKey(property);
-        return this.getProperty(property, key);
-    }
-
-    @Override
-    default Iterator<Inventory> iterator() {
-        return new InventoryIterator(((InventoryBridge) this).bridge$getAdapter().bridge$getRootLens(), ((InventoryBridge) this).bridge$getAdapter().bridge$getFabric(), this);
-    }
-
-    @Override
-    @Deprecated
-    default void setMaxStackSize(int size) {
-        throw new UnsupportedOperationException("This inventory does not support stack limit adjustment");
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    @Deprecated
-    default <T extends Inventory> T first() {
-        return (T) this.iterator().next();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    @Deprecated
-    default <T extends Inventory> T next() {
-        return (T) new EmptyInventoryImpl(this);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    default <T extends Inventory> T query(org.spongepowered.api.item.inventory.query.Query<?>... queries) {
-        return (T) Query.compile(((InventoryBridge) this).bridge$getAdapter(), queries).execute();
     }
 
     @Override
@@ -251,17 +185,18 @@ public interface DefaultImplementedAdapterInventory extends Inventory {
 
     @Override
     default Inventory union(Inventory inventory) {
-        final CompoundLens.Builder lensBuilder = CompoundLens.builder().add(((InventoryBridge) this).bridge$getAdapter().bridge$getRootLens());
-        final CompoundFabric fabric = new CompoundFabric(((InventoryBridge) this).bridge$getAdapter().bridge$getFabric(), ((InventoryAdapter) inventory).bridge$getFabric());
+        final CompoundLens.Builder lensBuilder = CompoundLens.builder().add(impl$getLens());
+        final CompoundFabric fabric = new CompoundFabric(impl$getFabric(), ((InventoryAdapter) inventory).bridge$getFabric());
         final CompoundSlotProvider provider = new CompoundSlotProvider().add(((InventoryBridge) this).bridge$getAdapter());
-        for (final Object inv : inventory) {
+        for (final Inventory inv : inventory.children()) {
             lensBuilder.add(((InventoryAdapter) inv).bridge$getRootLens());
             provider.add((InventoryAdapter) inv);
         }
         final CompoundLens lens = lensBuilder.build(provider);
         final InventoryAdapter compoundAdapter = lens.getAdapter(fabric, this);
 
-        return Query.compile(compoundAdapter, new SlotLensQuery(ImmutableSet.of((Inventory) compoundAdapter))).execute();
+        return (Inventory) lens.getAdapter(fabric, this);
+        //return Query.compile(compoundAdapter, new SlotLensQuery(ImmutableSet.of((Inventory) compoundAdapter))).execute();
     }
 
     @Override
@@ -271,16 +206,55 @@ public interface DefaultImplementedAdapterInventory extends Inventory {
     }
 
     @Override
-    default InventoryArchetype getArchetype() {
-        return InventoryArchetypes.UNKNOWN;
+    default boolean containsChild(Inventory child) {
+        // TODO implement me;
+        return false;
+    }
+
+    @Override
+    default Optional<Slot> getSlot(int index) {
+        return ((InventoryBridge) this).bridge$getAdapter().bridge$getSlot(index);
+    }
+
+    @Override
+    default InventoryTransactionResult.Poll pollFrom(int index) {
+        return AdapterLogic.pollSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(index), null);
+    }
+
+    @Override
+    default InventoryTransactionResult.Poll pollFrom(int index, int limit) {
+        return AdapterLogic.pollSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(index), limit);
+    }
+
+    @Override
+    default Optional<ItemStack> peekAt(int index) {
+        return AdapterLogic.peekSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(index));
+    }
+
+    @Override
+    default InventoryTransactionResult set(int index, ItemStack stack) {
+        return AdapterLogic.insertSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(index), stack);
+    }
+
+    @Override
+    default InventoryTransactionResult offer(int index, ItemStack stack) {
+        return AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(index), stack);
+    }
+
+    @Override
+    default Optional<ViewableInventory> asViewable() {
+        if (this instanceof ViewableInventory) {
+            return Optional.of(((ViewableInventory) this));
+        }
+        // TODO Mod-Support
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     default List<Slot> slots() {
         // TODO caching and not an iterator
-        SlotCollection iterator = SlotCollection.of(this, ((InventoryBridge) this).bridge$getAdapter());
-        return iterator;
+        return SlotCollection.of(this, ((InventoryBridge) this).bridge$getAdapter()).slots();
     }
 
 }

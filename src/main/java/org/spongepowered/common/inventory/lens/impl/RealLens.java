@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.inventory.lens.impl;
 
+import net.minecraft.inventory.container.Container;
+import net.minecraft.tileentity.LockableTileEntity;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 
 /**
- * Lenses for real Inventories like {@link TileEntityLockable} and {@link Container}.
+ * Lenses for real Inventories like {@link LockableTileEntity} and {@link Container}.
  *
  * <p>When possible this lens will return the real {@link InventoryAdapter} as opposed to some kind of Wrapper Adapter</p>
  */

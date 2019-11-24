@@ -25,20 +25,21 @@
 package org.spongepowered.common.inventory.adapter.impl.slots;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.util.ItemStackUtil;import java.util.List;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import net.minecraft.inventory.container.Container;
+import org.spongepowered.common.item.util.ItemStackUtil;
+
+import java.util.List;
 
 /**
  * Base SlotAdapter implementation for {@link net.minecraft.item.ItemStack} based Inventories.
@@ -46,90 +47,77 @@ import net.minecraft.inventory.container.Container;
 @SuppressWarnings("rawtypes")
 public class SlotAdapter extends BasicInventoryAdapter implements Slot {
 
+    private final int ordinal;
+    private final ImmutableList<Slot> slots;
     private final SlotLens slot;
 
-    private final int ordinal;
-
-    private SlotAdapter nextSlot;
-    private final ImmutableList<Inventory> slots;
-
-    // Internal use for events, will be removed soon!
-    public int slotNumber = -1;
-
-    public SlotAdapter(final Fabric fabric, final SlotLens lens, final Inventory parent) {
+    public SlotAdapter(Fabric fabric, SlotLens lens, Inventory parent) {
         super(fabric, lens, parent);
         this.slot = lens;
         this.ordinal = lens.getOrdinal(fabric);
         this.slots = ImmutableList.of(this);
-        this.slotNumber = this.ordinal; // TODO this is used in events
     }
 
     public int getOrdinal() {
         return this.ordinal;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public int getStackSize() {
-        return this.slot.getStack(this.bridge$getFabric()).getCount();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> Iterable<T> slots() {
-        return (Iterable<T>) this.slots;
-    }
-
-    @SuppressWarnings({"unchecked", "deprecation"})
-    @Override
-    public <T extends Inventory> T first() {
-        return (T) this;
+    public List<Slot> slots() {
+        return this.slots;
     }
 
     @Override
-    public Optional<ItemStack> poll() {
+    public InventoryTransactionResult.Poll poll() {
         final net.minecraft.item.ItemStack stack = this.bridge$getFabric().fabric$getStack(this.ordinal);
         if (stack.isEmpty()) {
-            return Optional.<ItemStack>empty();
+            return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS).poll(ItemStackSnapshot.empty()).build();
         }
+
         this.bridge$getFabric().fabric$setStack(this.ordinal, net.minecraft.item.ItemStack.EMPTY);
-        return Optional.<ItemStack>of(ItemStackUtil.fromNative(stack));
+        return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS)
+                .transaction(new SlotTransaction(this, ItemStackUtil.snapshotOf(stack), ItemStackSnapshot.empty()))
+                .poll(ItemStackUtil.snapshotOf(stack)).build();
     }
 
+
     @Override
-    public Optional<ItemStack> peek() {
+    public ItemStack peek() {
         final net.minecraft.item.ItemStack stack = this.slot.getStack(this.bridge$getFabric());
-        if (stack.isEmpty()) {
-            return Optional.empty();
-        }
-        return ItemStackUtil.cloneDefensiveOptional(stack);
+        return ItemStackUtil.cloneDefensive(stack);
     }
 
     @Override
-    public InventoryTransactionResult offer(final ItemStack stack) {
+    public InventoryTransactionResult offer(final ItemStack... stacks) {
+
         final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
-        final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+        for (ItemStack stack : stacks) {
+            final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        final int maxStackSize = this.slot.getMaxStackSize(this.bridge$getFabric());
-        int remaining = stack.getQuantity();
+            final int maxStackSize = this.slot.getMaxStackSize(this.bridge$getFabric());
+            int remaining = stack.getQuantity();
 
-        final net.minecraft.item.ItemStack old = this.slot.getStack(this.bridge$getFabric());
-        int push = Math.min(remaining, maxStackSize);
-        if (old.isEmpty() && this.slot.setStack(this.bridge$getFabric(), ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
-            remaining -= push;
-        } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
-            this.bridge$getFabric().fabric$markDirty();
-            push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
-            old.setCount(old.getCount() + push);
-            remaining -= push;
-        }
-        // TODO transaction failure
+            final net.minecraft.item.ItemStack old = this.slot.getStack(this.bridge$getFabric());
+            ItemStackSnapshot oldStack = ItemStackUtil.snapshotOf(old);
+            ItemStackSnapshot newStack = oldStack;
+            int push = Math.min(remaining, maxStackSize);
+            if (old.isEmpty() && this.slot.setStack(this.bridge$getFabric(), ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
+                remaining -= push;
+                newStack = ItemStackUtil.snapshotOf(stack);
+            } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
+                this.bridge$getFabric().fabric$markDirty();
+                push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
+                old.setCount(old.getCount() + push);
+                remaining -= push;
+                newStack = ItemStackUtil.snapshotOf(old);
+            }
 
-        if (remaining == stack.getQuantity()) {
-            // No items were consumed
-            result.reject(ItemStackUtil.cloneDefensive(nativeStack));
-        } else {
-            stack.setQuantity(remaining);
+            result.transaction(new SlotTransaction(this, oldStack, newStack));
+            if (remaining == stack.getQuantity()) {
+                // No items were consumed
+                result.reject(ItemStackUtil.cloneDefensive(nativeStack));
+                result.type(InventoryTransactionResult.Type.FAILURE);
+            }
         }
 
         return result.build();
@@ -140,11 +128,12 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
         if (stack.isEmpty()) {
             return true;
         }
+        int maxStackSize = this.bridge$getFabric().fabric$getMaxStackSize();
         final net.minecraft.item.ItemStack old = this.slot.getStack(this.bridge$getFabric());
         if (old.isEmpty()) {
-            return this.getMaxStackSize() >= stack.getQuantity();
+            return maxStackSize >= stack.getQuantity();
         }
-        return ItemStackUtil.compareIgnoreQuantity(old, stack) && this.getMaxStackSize() - old.getCount() >= stack.getQuantity();
+        return ItemStackUtil.compareIgnoreQuantity(old, stack) && maxStackSize - old.getCount() >= stack.getQuantity();
     }
 
     @Override
@@ -153,14 +142,17 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
         final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
         final net.minecraft.item.ItemStack old = this.slot.getStack(this.bridge$getFabric());
-        if (stack.getType() == ItemTypes.NONE) {
+        ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
+        if (stack.isEmpty()) {
             clear(); // NONE item will clear the slot
-            return result.replace(ItemStackUtil.fromNative(old)).build();
+            SlotTransaction trans = new SlotTransaction(this, oldSnap, ItemStackSnapshot.empty());
+            return result.transaction(trans).build();
         }
         int remaining = stack.getQuantity();
         final int push = Math.min(remaining, this.slot.getMaxStackSize(this.bridge$getFabric()));
-        if (this.slot.setStack(this.bridge$getFabric(), ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
-            result.replace(ItemStackUtil.fromNative(old));
+        net.minecraft.item.ItemStack newStack = ItemStackUtil.cloneDefensiveNative(nativeStack, push);
+        if (this.slot.setStack(this.bridge$getFabric(), newStack)) {
+            result.transaction(new SlotTransaction(this, oldSnap, ItemStackUtil.snapshotOf(newStack)));
             remaining -= push;
         }
 
@@ -177,12 +169,12 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
     }
 
     @Override
-    public int size() {
+    public int freeCapacity() {
         return !this.slot.getStack(this.bridge$getFabric()).isEmpty()? 1 : 0;
     }
 
     @Override
-    public int totalItems() {
+    public int totalQuantity() {
         return this.slot.getStack(this.bridge$getFabric()).getCount();
     }
 
@@ -216,41 +208,14 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
     }
 
     @Override
-    public Slot transform(final Slot.Type type) {
-        switch (type) {
-            case INVENTORY:
-                if (this.bridge$getFabric() instanceof net.minecraft.inventory.container.Slot) {
-                    return (Slot) this.bridge$getFabric();
-                }
-                if (this.bridge$getFabric() instanceof Container) {
-                    return (Slot) ((Container) this.bridge$getFabric()).getSlot(this.slotNumber);
-                }
-                return this;
-            default:
-                return this;
+    public Slot viewedSlot() {
+        Fabric fabric = this.bridge$getFabric();
+        if (fabric instanceof net.minecraft.inventory.container.Slot) {
+            return (Slot) fabric;
         }
-    }
-
-    @Override
-    public Slot transform() {
-        return this.transform(Slot.Type.INVENTORY);
-    }
-
-    @Override
-    public Iterator<Inventory> iterator() {
-        return new Iterator<Inventory>() {
-            private boolean iterated = false;
-            @Override
-            public boolean hasNext() {
-                return !this.iterated;
-            }
-
-            @Override
-            public Inventory next() {
-                if (this.iterated) throw new NoSuchElementException("Iterator is consumed");
-                this.iterated = true;
-                return SlotAdapter.this;
-            }
-        };
+        if (fabric instanceof Container) {
+            return (Slot)((Container) fabric).getSlot(this.ordinal);
+        }
+        return this;
     }
 }

@@ -46,28 +46,28 @@ public class SlotLensCollection implements SlotLensProvider {
         private List<Tuple<Class<? extends SlotAdapter>, SlotLensProvider>> slotTypes = new ArrayList<>();
         private final SlotLensProvider defaultProvider = (i) -> new BasicSlotLens(i, this.slotTypes.get(i).getFirst());
 
-        public org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection.Builder add() {
+        public SlotLensCollection.Builder add() {
             return this.add(SlotAdapter.class);
         }
 
-        public org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection.Builder add(Class<? extends SlotAdapter> type) {
+        public SlotLensCollection.Builder add(Class<? extends SlotAdapter> type) {
             return this.add(type, this.defaultProvider);
         }
 
-        public org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection.Builder add(Class<? extends SlotAdapter> type, SlotLensProvider provider) {
+        public SlotLensCollection.Builder add(Class<? extends SlotAdapter> type, SlotLensProvider provider) {
             this.slotTypes.add(Tuple.of(checkNotNull(type), provider));
             return this;
         }
 
-        public org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection.Builder add(int count) {
+        public SlotLensCollection.Builder add(int count) {
             return this.add(count, SlotAdapter.class, this.defaultProvider);
         }
 
-        public org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection.Builder add(int count, Class<? extends SlotAdapter> type) {
+        public SlotLensCollection.Builder add(int count, Class<? extends SlotAdapter> type) {
             return this.add(count, type, this.defaultProvider);
         }
 
-        public org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection.Builder add(int count, Class<? extends SlotAdapter> type, SlotLensProvider provider) {
+        public SlotLensCollection.Builder add(int count, Class<? extends SlotAdapter> type, SlotLensProvider provider) {
             checkNotNull(type);
             for (int i = 0; i < count; i++) {
                 this.add(type, provider);

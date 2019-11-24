@@ -24,44 +24,31 @@
  */
 package org.spongepowered.common.mixin.core.common.inventory.custom;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.CustomInventory;
-import org.spongepowered.common.inventory.custom.CustomLens;
+import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.slots.SlotLensProvider;
-
-import java.util.Map;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 @Mixin(CustomInventory.class)
-public abstract class CustomInventoryMixin implements InventoryAdapter, InventoryAdapterBridge {
+public abstract class CustomInventoryMixin implements InventoryAdapter {
 
-    @Shadow(remap = false) protected InventoryArchetype archetype;
-    @Shadow(remap = false) private net.minecraft.inventory.Inventory inv;
-    @Shadow(remap = false) private Map<String, InventoryProperty<?, ?>> properties;
-
-    @Shadow public abstract int getSizeInventory();
+    @Shadow(remap = false) private SlotLensProvider slots;
+    @Shadow(remap = false) private Lens lens;
+    @Shadow @Final private PluginContainer plugin;
 
     @Override
-    public SlotLensProvider bridge$generateSlotProvider() {
-        return new SlotLensCollection.Builder().add(this.inv.getSizeInventory()).build();
+    public Lens bridge$getRootLens() {
+        return this.lens;
     }
 
-    @SuppressWarnings("Unchecked")
     @Override
-    public Lens bridge$generateLens(SlotLensProvider slots) {
-        return new CustomLens(this.getSizeInventory(), (Class<? extends Inventory>) this.getClass(), slots, this.archetype, this.properties);
+    public Fabric bridge$getFabric() {
+        return (Fabric) this;
     }
 
 }

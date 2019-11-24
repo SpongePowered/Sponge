@@ -49,21 +49,12 @@ import java.util.Map;
  */
 public class BasicSlotLens extends AbstractLens implements SlotLens {
 
-    public static final Translation SLOT_NAME = new SpongeTranslation("slot.name");
-
-    protected int maxStackSize = -1;
-
     public BasicSlotLens(int index) {
         this(index, SlotAdapter.class);
     }
 
     public BasicSlotLens(int index, Class<? extends Inventory> adapterType) {
         super(index, 1, adapterType);
-    }
-
-    @Override
-    public Translation getName(Fabric fabric) {
-        return BasicSlotLens.SLOT_NAME;
     }
 
     @Override

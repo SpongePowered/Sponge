@@ -24,32 +24,29 @@
  */
 package org.spongepowered.common.inventory.adapter.impl.comp;
 
-import org.spongepowered.api.item.inventory.ArmorEquipable;
-import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
+import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.ArmorInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 
 import java.util.Optional;
 
-public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implements EquipmentInventory {
+public class EquipmentInventoryAdapter extends BasicInventoryAdapter implements EquipmentInventory {
 
-    private final ArmorEquipable carrier;
-    private final EquipmentInventoryLens lens;
+    private final Equipable carrier;
 
-    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric fabric, EquipmentInventoryLens root, Inventory parent) {
+    public EquipmentInventoryAdapter(Equipable carrier, Fabric fabric, EquipmentInventoryLens root, Inventory parent) {
         super(fabric, root, parent);
         this.carrier = carrier;
-        this.lens = root;
     }
 
     public EquipmentInventoryAdapter(Equipable carrier, Fabric fabric, ArmorInventoryLens root, Inventory parent) {
@@ -58,7 +55,7 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
     }
 
     @Override
-    public Optional<ArmorEquipable> getCarrier() {
+    public Optional<Equipable> getCarrier() {
         return Optional.ofNullable(this.carrier);
     }
 
@@ -82,11 +79,6 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
     }
 
     @Override
-    public InventoryTransactionResult set(EquipmentSlotType equipmentType, ItemStack stack) {
-        return this.query(QueryTypes.INVENTORY_PROPERTY.of(equipmentType)).set(stack);
-    }
-
-    @Override
     public InventoryTransactionResult set(EquipmentType equipmentType, ItemStack stack) {
         Inventory query = this.queryForType(equipmentType);
         if (query.capacity() == 0) {
@@ -99,13 +91,12 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
     public Optional<Slot> getSlot(EquipmentType equipmentType) {
         Inventory slot = this.queryForType(equipmentType);
         if (slot instanceof Slot) {
-            return Optional.of(((Slot) slot));
+            return Optional.of((Slot) slot);
         }
         return Optional.empty();
     }
 
-    @Override
-    public Optional<Slot> getSlot(EquipmentType equipmentType) {
-        return this.getSlot(new EquipmentSlotType(equipmentType));
+    private Inventory queryForType(EquipmentType equipmentType) {
+        return this.query(PropertyMatcher.of(InventoryProperties.EQUIPMENT_TYPE, equipmentType));
     }
 }

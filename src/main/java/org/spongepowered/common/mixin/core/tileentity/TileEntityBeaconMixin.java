@@ -37,13 +37,14 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.InputSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.ReusableLens;
+import org.spongepowered.common.inventory.lens.impl.collections.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.InputSlotLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLensImpl;
 import org.spongepowered.common.inventory.lens.slots.InputSlotLens;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
 
@@ -55,6 +56,7 @@ public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin impl
     @Shadow private String customName;
     @Shadow public abstract boolean isItemValidForSlot(int index, ItemStack stack);
 
+
     @SuppressWarnings({"rawtypes"})
     @Override
     public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
@@ -63,8 +65,9 @@ public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin impl
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private SlotLensProvider impl$generateBeaconSlotProvider() {
-        final org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens lens = new org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens(0, ((Class) BeaconTileEntity.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
-                itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)));
+        final InputSlotLens lens = new InputSlotLens(0, ((Class) BeaconTileEntity.class),
+                itemStack -> this.isItemValidForSlot(0, ItemStackUtil.toNative (itemStack)),
+                itemType -> this.isItemValidForSlot(0, ItemStackUtil.toNative(org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
         return new SlotLensCollection.Builder()
                 .add(InputSlotAdapter.class, i -> lens)
                 .build();
@@ -72,7 +75,7 @@ public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin impl
 
     @SuppressWarnings({"rawtypes"})
     private InputSlotLens impl$generateBeaconRootLens(final SlotLensProvider slots) {
-        return ((InputSlotLens) slots.getSlot(0));
+        return ((InputSlotLens) slots.getSlotLens(0));
     }
 
     /**

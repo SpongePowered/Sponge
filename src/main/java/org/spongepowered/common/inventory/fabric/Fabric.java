@@ -54,8 +54,6 @@ public interface Fabric {
 
     int fabric$getMaxStackSize();
 
-    Translation fabric$getDisplayName();
-
     int fabric$getSize();
 
     void fabric$clear();

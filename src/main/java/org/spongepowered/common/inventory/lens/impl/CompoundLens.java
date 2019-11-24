@@ -54,7 +54,7 @@ public class CompoundLens extends SlotBasedLens {
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            if (!this.children.children().contains(slots.getSlotLens(slot))) {
+            if (!this.children.contains(slots.getSlotLens(slot))) {
                 this.addSpanningChild(slots.getSlotLens(slot), PropertyEntry.slotIndex(ord));
             }
         }

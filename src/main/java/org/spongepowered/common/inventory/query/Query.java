@@ -29,9 +29,9 @@ import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.lens.MutableLensSet;
 import org.spongepowered.common.inventory.lens.impl.collections.MutableLensSetImpl;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.query.result.MinecraftResultAdapterProvider;
 import org.spongepowered.common.inventory.query.result.QueryResult;
 
