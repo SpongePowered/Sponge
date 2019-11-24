@@ -24,28 +24,33 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperties;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
-import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.query.SpongeDepthQuery;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.QueryType;
+import org.spongepowered.common.inventory.EmptyInventoryImpl;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.query.SpongeQuery;
 
-import java.util.Optional;
+public class EmptyQuery extends SpongeQuery implements QueryType.NoParam {
 
-public final class InventoryTranslationQuery extends SpongeDepthQuery {
+    private CatalogKey key = CatalogKey.sponge("empty");
 
-    private final Translation translation;
+    @Override
+    public CatalogKey getKey() {
+        return this.key;
+    }
 
-    public InventoryTranslationQuery(Translation translation) {
-        this.translation = translation;
+    public EmptyQuery() {
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Inventory inventory) {
-        Optional<Text> title = InventoryPropertyProvider.getRootProperty(inventory, InventoryProperties.TITLE);
-        return false; // TODO translation or title?
+    public Inventory execute(Inventory inventory, InventoryAdapter adapter) {
+        return new EmptyInventoryImpl(inventory);
     }
 
+    @Override
+    public Query toQuery() {
+        return this;
+    }
 }

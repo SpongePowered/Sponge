@@ -24,31 +24,32 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.inventory.query.SpongeQuery;
+import org.spongepowered.common.inventory.query.SpongeDepthQuery;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-public abstract class ItemStackQuery<T> extends SpongeQuery<T> {
+public abstract class ItemStackQuery<T> extends SpongeDepthQuery {
 
     private final T arg;
 
-    protected ItemStackQuery(QueryOperationType<T> type, T arg) {
-        super(type);
+    protected ItemStackQuery(T arg) {
         this.arg = arg;
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric fabric) {
+    public boolean matches(Lens lens, Lens parent, Inventory inventory) {
         if (lens instanceof SlotLens) {
-            @SuppressWarnings("unchecked")
+            Fabric fabric = ((InventoryBridge) inventory).bridge$getAdapter().bridge$getFabric();
             ItemStack stack = ItemStackUtil.fromNative(((SlotLens) lens).getStack(fabric));
-            if (this.matches(stack, this.arg)) {
-                return true;
+            if (stack == null) {
+                return false;
             }
+            return this.matches(stack, this.arg);
         }
         return false;
     }

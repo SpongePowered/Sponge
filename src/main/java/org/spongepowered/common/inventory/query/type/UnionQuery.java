@@ -25,27 +25,33 @@
 package org.spongepowered.common.inventory.query.type;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperties;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
-import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.query.SpongeDepthQuery;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
+import org.spongepowered.common.inventory.lens.impl.CompoundLens;
+import org.spongepowered.common.inventory.lens.impl.fabric.CompoundFabric;
+import org.spongepowered.common.inventory.query.SpongeQuery;
 
-import java.util.Optional;
+public final class UnionQuery extends SpongeQuery {
 
-public final class InventoryTranslationQuery extends SpongeDepthQuery {
+    private final Inventory other;
 
-    private final Translation translation;
-
-    public InventoryTranslationQuery(Translation translation) {
-        this.translation = translation;
+    public UnionQuery(Inventory inventory) {
+        this.other = inventory;
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Inventory inventory) {
-        Optional<Text> title = InventoryPropertyProvider.getRootProperty(inventory, InventoryProperties.TITLE);
-        return false; // TODO translation or title?
+    public Inventory execute(Inventory inventory, InventoryAdapter adapter) {
+        final CompoundLens.Builder lensBuilder = CompoundLens.builder().add(adapter.bridge$getRootLens());
+        final CompoundFabric fabric = new CompoundFabric(adapter.bridge$getFabric(), ((InventoryBridge)this.other).bridge$getAdapter().bridge$getFabric());
+        final CompoundSlotProvider provider = new CompoundSlotProvider().add(adapter);
+        for (final Inventory inv : this.other.children()) {
+            lensBuilder.add(((InventoryAdapter) inv).bridge$getRootLens());
+            provider.add((InventoryAdapter) inv);
+        }
+        final CompoundLens lens = lensBuilder.build(provider);
+        return (Inventory) lens.getAdapter(fabric, inventory);
     }
+
 
 }

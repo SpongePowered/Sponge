@@ -22,30 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory.query.type;
+package org.spongepowered.common.inventory.query;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperties;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
-import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.query.SpongeDepthQuery;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Optional;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.QueryType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public final class InventoryTranslationQuery extends SpongeDepthQuery {
+import java.util.function.Function;
 
-    private final Translation translation;
+public final class SpongeOneParamQueryType<T> extends SpongeCatalogType implements QueryType.OneParam<T> {
 
-    public InventoryTranslationQuery(Translation translation) {
-        this.translation = translation;
+    private final Function<T, Query> newInstance;
+
+    public SpongeOneParamQueryType(String id, Function<T, Query> newInstance) {
+        super(CatalogKey.sponge(id), id);
+        this.newInstance = newInstance;
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Inventory inventory) {
-        Optional<Text> title = InventoryPropertyProvider.getRootProperty(inventory, InventoryProperties.TITLE);
-        return false; // TODO translation or title?
+    public Query of(T arg) {
+        checkNotNull(arg);
+        return this.newInstance.apply(arg);
     }
 
 }

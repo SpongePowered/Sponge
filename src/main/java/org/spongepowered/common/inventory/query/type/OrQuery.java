@@ -25,27 +25,44 @@
 package org.spongepowered.common.inventory.query.type;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperties;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
+import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.query.SpongeDepthQuery;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-public final class InventoryTranslationQuery extends SpongeDepthQuery {
+public class OrQuery extends SpongeDepthQuery {
 
-    private final Translation translation;
+    private final List<Query> orQueries;
 
-    public InventoryTranslationQuery(Translation translation) {
-        this.translation = translation;
+    public OrQuery(List<Query> orQueries) {
+        this.orQueries = Collections.unmodifiableList(orQueries);
     }
 
-    @Override
+    public static Query of(Query query, Query[] queries) {
+        List<Query> newQueries = new ArrayList<>();
+        if (query instanceof OrQuery) {
+            newQueries.addAll(((OrQuery) query).orQueries);
+        } else {
+            newQueries.add(query);
+        }
+        newQueries.addAll(Arrays.asList(queries));
+        return new OrQuery(newQueries);
+
+    }
+
     public boolean matches(Lens lens, Lens parent, Inventory inventory) {
-        Optional<Text> title = InventoryPropertyProvider.getRootProperty(inventory, InventoryProperties.TITLE);
-        return false; // TODO translation or title?
+        for (Query orQuery : orQueries) {
+            if (orQuery instanceof SpongeDepthQuery) {
+                if (((SpongeDepthQuery) orQuery).matches(lens, parent, inventory)) {
+                    return true;
+                }
+            }
+            // else ?
+        }
+        return false;
     }
-
 }

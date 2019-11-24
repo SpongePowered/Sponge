@@ -24,32 +24,39 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
-import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
-import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.property.PropertyMatcher;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.query.SpongeQuery;
+import org.spongepowered.common.inventory.query.SpongeDepthQuery;
 
-public final class InventoryPropertyMatcherQuery extends SpongeQuery<InventoryProperty<?, ?>> {
+import java.util.Optional;
 
-    private final InventoryProperty<?, ?> property;
+@SuppressWarnings("unchecked")
+public final class InventoryPropertyMatcherQuery extends SpongeDepthQuery {
 
-    public InventoryPropertyMatcherQuery(InventoryProperty<?, ?> property) {
-        super(QueryTypes.INVENTORY_PROPERTY);
-        this.property = property;
+    private final PropertyMatcher propertyMatcher;
+
+    public InventoryPropertyMatcherQuery(PropertyMatcher propertyMatcher) {
+        this.propertyMatcher = propertyMatcher;
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric fabric) {
+    public boolean matches(Lens lens, Lens parent, Inventory inventory) {
         if (parent == null) {
             return false;
         }
-        for (InventoryProperty<?, ?> lensProperty : parent.getProperties(lens)) {
-            if (this.property.matches(lensProperty)) {
-                return true;
-            }
+
+        Property property = this.propertyMatcher.getProperty();
+        Optional propertyValue = InventoryPropertyProvider.getRootProperty(inventory, property);
+        if (this.propertyMatcher.matches(propertyValue.orElse(null))) {
+            return true;
         }
-        return false;
+
+        // Check for lens properties
+        final Object value = parent.getProperties(lens).get(this.propertyMatcher.getProperty());
+        return this.propertyMatcher.matches(value);
     }
 
 }

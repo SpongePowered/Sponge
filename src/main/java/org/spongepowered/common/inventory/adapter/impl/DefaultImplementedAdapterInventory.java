@@ -29,19 +29,15 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.CompoundLens;
-import org.spongepowered.common.inventory.lens.impl.fabric.CompoundFabric;
-import org.spongepowered.common.inventory.query.Query;
-import org.spongepowered.common.inventory.query.type.LensQuery;
-import org.spongepowered.common.inventory.query.type.SlotLensQuery;
+import org.spongepowered.common.inventory.query.SpongeQueryTypes;
 
 import java.util.List;
 import java.util.Optional;
@@ -158,20 +154,11 @@ public interface DefaultImplementedAdapterInventory extends InventoryPropertyHol
                 .map(Inventory.class::cast)
                 .collect(Collectors.toList());
     }
-    @Override
-    default Inventory query(QueryOperation<?>... queries) {
-        return Query.compile(((InventoryBridge) this).bridge$getAdapter(), queries).execute();
-    }
-
-    @Override
-    default Inventory query(org.spongepowered.api.item.inventory.query.Query query) {
-        // TODO
-    }
 
     @SuppressWarnings("unchecked")
     @Override
     default <T extends Inventory> Optional<T> query(Class<T> inventoryType) {
-        Inventory result = this.query(QueryOperationTypes.INVENTORY_TYPE.of(inventoryType));
+        Inventory result = this.query(QueryTypes.INVENTORY_TYPE.of(inventoryType));
         if (inventoryType.isAssignableFrom(result.getClass())) {
             return Optional.of((T) result);
         }
@@ -180,35 +167,23 @@ public interface DefaultImplementedAdapterInventory extends InventoryPropertyHol
 
     @Override
     default Inventory intersect(Inventory inventory) {
-        return Query.compile(((InventoryBridge) this).bridge$getAdapter(), new SlotLensQuery(ImmutableSet.of(inventory))).execute();
+        return SpongeQueryTypes.SLOT_LENS.of(ImmutableSet.of(inventory)).execute(this);
     }
 
     @Override
     default Inventory union(Inventory inventory) {
-        final CompoundLens.Builder lensBuilder = CompoundLens.builder().add(impl$getLens());
-        final CompoundFabric fabric = new CompoundFabric(impl$getFabric(), ((InventoryAdapter) inventory).bridge$getFabric());
-        final CompoundSlotProvider provider = new CompoundSlotProvider().add(((InventoryBridge) this).bridge$getAdapter());
-        for (final Inventory inv : inventory.children()) {
-            lensBuilder.add(((InventoryAdapter) inv).bridge$getRootLens());
-            provider.add((InventoryAdapter) inv);
-        }
-        final CompoundLens lens = lensBuilder.build(provider);
-        final InventoryAdapter compoundAdapter = lens.getAdapter(fabric, this);
-
-        return (Inventory) lens.getAdapter(fabric, this);
-        //return Query.compile(compoundAdapter, new SlotLensQuery(ImmutableSet.of((Inventory) compoundAdapter))).execute();
+        return this.query(SpongeQueryTypes.UNION.of(inventory));
     }
 
     @Override
     default boolean containsInventory(Inventory inventory) {
-        final Inventory result = Query.compile(((InventoryBridge) this).bridge$getAdapter(), new LensQuery(((InventoryAdapter) inventory).bridge$getRootLens())).execute();
+        Inventory result = SpongeQueryTypes.LENS.of(((InventoryBridge) inventory).bridge$getAdapter().bridge$getRootLens()).execute(this);
         return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).bridge$getRootLens() == ((InventoryAdapter) inventory).bridge$getRootLens();
     }
 
     @Override
     default boolean containsChild(Inventory child) {
-        // TODO implement me;
-        return false;
+        return this.impl$getLens().getSpanningChildren().contains(((InventoryBridge) child).bridge$getAdapter().bridge$getRootLens());
     }
 
     @Override
@@ -248,6 +223,11 @@ public interface DefaultImplementedAdapterInventory extends InventoryPropertyHol
         }
         // TODO Mod-Support
         return Optional.empty();
+    }
+
+    @Override
+    default Inventory query(Query query) {
+        return query.execute(this);
     }
 
     @SuppressWarnings("unchecked")

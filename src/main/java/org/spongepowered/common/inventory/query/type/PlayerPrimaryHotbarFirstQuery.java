@@ -24,28 +24,31 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperties;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
-import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.query.SpongeDepthQuery;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.item.inventory.entity.Hotbar;
+import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.QueryType;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 
-import java.util.Optional;
+import java.util.Arrays;
 
-public final class InventoryTranslationQuery extends SpongeDepthQuery {
+public class PlayerPrimaryHotbarFirstQuery extends AppendQuery implements QueryType.NoParam {
 
-    private final Translation translation;
+    private CatalogKey key = CatalogKey.sponge("player_primary_hotbar_first");
 
-    public InventoryTranslationQuery(Translation translation) {
-        this.translation = translation;
+    public PlayerPrimaryHotbarFirstQuery() {
+        super(Arrays.asList(QueryTypes.INVENTORY_TYPE.of(Hotbar.class),
+                QueryTypes.INVENTORY_TYPE.of(PrimaryPlayerInventory.class)));
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Inventory inventory) {
-        Optional<Text> title = InventoryPropertyProvider.getRootProperty(inventory, InventoryProperties.TITLE);
-        return false; // TODO translation or title?
+    public CatalogKey getKey() {
+        return this.key;
     }
 
+    @Override
+    public Query toQuery() {
+        return this;
+    }
 }

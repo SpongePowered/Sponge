@@ -26,16 +26,17 @@ package org.spongepowered.common.inventory.query;
 
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.query.type.LensQuery;
 import org.spongepowered.common.inventory.query.type.SlotLensQuery;
+import org.spongepowered.common.inventory.query.type.UnionQuery;
 
 public final class SpongeQueryTypes {
 
-    public static final QueryOperationType<Lens> LENS = new SpongeQueryType<>("lens", LensQuery::new);
+    public static final QueryType.OneParam<Lens> LENS = new SpongeOneParamQueryType<>("lens", LensQuery::new);
 
-    public static final QueryOperationType<ImmutableSet<Inventory>> SLOT_LENS = new SpongeQueryType<>("slot_lens",
-            SlotLensQuery::new);
+    public static final QueryType.OneParam<ImmutableSet<Inventory>> SLOT_LENS = new SpongeOneParamQueryType<>("slot_lens", SlotLensQuery::new);
 
+    public static final QueryType.OneParam<Inventory> UNION = new SpongeOneParamQueryType<>("union", UnionQuery::new);
 }

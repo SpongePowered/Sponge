@@ -24,51 +24,48 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
-import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.api.item.inventory.query.QueryType;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
-import org.spongepowered.common.inventory.lens.impl.CompoundLens;
+import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.query.SpongeQuery;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Reverses the slot order of an inventory.
- */
-public class ReverseQuery extends SpongeQuery implements QueryType.NoParam {
+public class AppendQuery extends SpongeQuery {
 
-    private CatalogKey key = CatalogKey.sponge("reverse");
+    private final List<Query> queryList;
 
-    @Override
-    public CatalogKey getKey() {
-        return this.key;
+    public AppendQuery(List<Query> queryList) {
+        this.queryList = Collections.unmodifiableList(queryList);
+    }
+
+    public static Query of(Query query, Query[] queries) {
+        List<Query> newQueries = new ArrayList<>();
+        if (query instanceof AppendQuery) {
+            newQueries.addAll(((AppendQuery) query).queryList);
+        } else {
+            newQueries.add(query);
+        }
+        newQueries.addAll(Arrays.asList(queries));
+        return new AppendQuery(newQueries);
     }
 
     @Override
-    public Inventory execute(Inventory parent, InventoryAdapter inventory) {
+    public Inventory execute(Inventory inventory, InventoryAdapter adapter) {
+        Inventory result = new EmptyInventoryImpl(inventory);
+        if (this.queryList.isEmpty()) {
+            return result;
+        }
 
-        List<Slot> slots = new ArrayList<>(((Inventory) inventory).slots());
-        Collections.reverse(slots);
-
-        CompoundSlotProvider slotProvider = new CompoundSlotProvider();
-        slots.forEach(s -> slotProvider.add((InventoryAdapter) s));
-
-        InventoryAdapter adapter = ((InventoryBridge) inventory).bridge$getAdapter();
-
-        CompoundLens lens = CompoundLens.builder().add(adapter.bridge$getRootLens()).build(slotProvider);
-
-        return (Inventory) lens.getAdapter(adapter.bridge$getFabric(), (Inventory) inventory);
+        List<Inventory> results = this.queryList.stream().map(q -> q.execute(inventory)).collect(Collectors.toList());
+        return new BasicInventoryAdapter(adapter.bridge$getFabric(), results, inventory);
     }
 
-    @Override
-    public Query toQuery() {
-        return this;
-    }
+
 }

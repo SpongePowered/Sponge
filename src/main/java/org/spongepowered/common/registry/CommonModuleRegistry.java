@@ -119,6 +119,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
@@ -216,8 +217,8 @@ import org.spongepowered.common.event.damage.SpongeFallingBlockDamgeSourceBuilde
 import org.spongepowered.common.event.damage.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
+import org.spongepowered.common.inventory.custom.SpongeViewableInventoryBuilder;
 import org.spongepowered.common.inventory.SpongeInventoryBuilder;
-import org.spongepowered.common.inventory.query.SpongeTransformationBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
@@ -324,9 +325,7 @@ import org.spongepowered.common.registry.type.item.FishRegistryModule;
 import org.spongepowered.common.registry.type.item.GoldenAppleRegistryModule;
 import org.spongepowered.common.registry.type.item.ItemStackComparatorRegistryModule;
 import org.spongepowered.common.registry.type.item.PotionTypeRegistryModule;
-import org.spongepowered.common.registry.type.item.QueryOperationRegistryModule;
 import org.spongepowered.common.registry.type.item.ToolTypeRegistryModule;
-import org.spongepowered.common.registry.type.item.TransformationRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.CollisionRuleRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.CriteriaRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
@@ -599,7 +598,7 @@ public final class CommonModuleRegistry {
                 .registerModule(PrismarineType.class, new PrismarineRegistryModule())
                 .registerModule(Profession.class, ProfessionRegistryModule.getInstance())
                 .registerModule(QuartzType.class, new QuartzTypeRegistryModule())
-                .registerModule(QueryOperationType.class, new QueryOperationRegistryModule())
+                .registerModule(QueryType.class, new QueryTypeRegistryModule())
                 .registerModule(RabbitType.class, new RabbitTypeRegistryModule())
                 .registerModule(RailDirection.class, new RailDirectionRegistryModule())
                 .registerModule(Rotation.class, RotationRegistryModule.getInstance())
@@ -645,7 +644,6 @@ public final class CommonModuleRegistry {
                 .registerModule(DismountType.class, new DismountTypeRegistryModule())
                 .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
                 .registerModule(ContainerType.class, ContainerTypeRegistryModule.getInstance())
-                .registerModule(TransformationRegistryModule.getInstance())
                 .registerModule(StructureMode.class, new StructureModeRegistryModule())
                 .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
                 .registerModule(SmeltingRecipe.class, (CatalogRegistryModule<SmeltingRecipe>) FurnaceRecipes.instance())

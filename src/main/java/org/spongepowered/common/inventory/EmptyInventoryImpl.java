@@ -156,7 +156,7 @@ public class EmptyInventoryImpl implements EmptyInventory {
         return null;
     }
 
-    public Inventory query(org.spongepowered.api.item.inventory.query.Query query) {
+    public Inventory query(Query query) {
         return query.execute(this);
     }
 
