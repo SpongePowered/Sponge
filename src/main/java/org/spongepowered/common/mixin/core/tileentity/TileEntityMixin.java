@@ -30,6 +30,7 @@ import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -208,10 +209,14 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public String toString() {
+        final TileEntityType type = ((TileEntity) this).getType();
         return MoreObjects.toStringHelper(this)
-            .add("tileType", ((TileEntity) this).getType().getId())
+                // Double check some mods are registering their tile entities and doing some "interesting"
+                // things with doing a to string on a tile entity not actually functionally valid in the game "yet".
+            .add("tileType", type == null ? this.getClass() : type.getId())
             .add("world", this.world)
             .add("pos", this.pos)
             .add("blockMetadata", this.blockMetadata)
