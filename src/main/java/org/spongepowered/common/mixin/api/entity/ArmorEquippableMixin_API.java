@@ -26,6 +26,12 @@ package org.spongepowered.common.mixin.api.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.entity.monster.AbstractSkeletonEntity;
+import net.minecraft.entity.monster.GiantEntity;
+import net.minecraft.entity.monster.ZombieEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.Hand;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -34,25 +40,17 @@ import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.monster.AbstractSkeletonEntity;
-import net.minecraft.entity.monster.GiantEntity;
-import net.minecraft.entity.monster.ZombieEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.Hand;
 
 // All living implementors of ArmorEquipable
 @Mixin({ArmorStandEntity.class, GiantEntity.class, ServerPlayerEntity.class, AbstractSkeletonEntity.class, ZombieEntity.class, EntityHuman.class})
 public abstract class ArmorEquippableMixin_API extends EntityLivingBaseMixin_API implements ArmorEquipable {
 
     @Override
-    public Optional<ItemStack> getItemInHand(HandType handType) {
+    public ItemStack getItemInHand(HandType handType) {
         checkNotNull(handType, "HandType cannot be null!");
         final net.minecraft.item.ItemStack nmsItem = this.getHeldItem((Hand) (Object) handType);
-        return Optional.of(ItemStackUtil.fromNative(nmsItem));
+        return ItemStackUtil.fromNative(nmsItem);
     }
 
     @Override

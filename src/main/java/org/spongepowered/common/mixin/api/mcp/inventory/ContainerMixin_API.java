@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.inventory;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
@@ -34,15 +34,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.common.inventory.util.ItemStackUtil;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -81,11 +81,24 @@ public abstract class ContainerMixin_API implements org.spongepowered.api.item.i
     }
 
     @Override
-    public Set<Player> getViewers() {
-        return this.listeners.stream()
-                .filter(l -> l instanceof Player)
-                .map(Player.class::cast)
-                .collect(Collectors.toSet());
+    public List<Inventory> getViewed() {
+        List<Inventory> list = new ArrayList<>();
+        for (IInventory inv : ((ContainerBridge) this).bridge$getInventories().keySet()) {
+            Inventory inventory = InventoryUtil.toInventory(inv, null);
+            list.add(inventory);
+        }
+        return list;
+    }
+
+    @Override
+    public boolean setCursor(org.spongepowered.api.item.inventory.ItemStack item) {
+        if (!this.isOpen()) {
+            return false;
+        }
+        ItemStack nativeStack = ItemStackUtil.toNative(item);
+        this.listeners().stream().findFirst()
+                .ifPresent(p -> p.inventory.setItemStack(nativeStack));
+        return true;
     }
 
     @Override

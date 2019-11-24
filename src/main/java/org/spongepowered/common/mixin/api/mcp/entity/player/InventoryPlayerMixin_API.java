@@ -56,8 +56,9 @@ public abstract class InventoryPlayerMixin_API implements PlayerInventory {
     @Shadow public abstract ItemStack getStackInSlot(int index);
 
 
-    @Nullable private PrimaryPlayerInventoryAdapter api$main;
+    @Nullable private PrimaryPlayerInventoryAdapter api$primary;
     @Nullable private EquipmentInventoryAdapter api$equipment;
+    @Nullable private EquipmentInventoryAdapter api$armor;
     @Nullable private SlotAdapter api$offhand;
 
     @SuppressWarnings("ConstantConditions")
@@ -68,13 +69,23 @@ public abstract class InventoryPlayerMixin_API implements PlayerInventory {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public PrimaryPlayerInventory getMain() {
-        if (this.api$main == null && ((InventoryAdapter) this).bridge$getRootLens() instanceof PlayerInventoryLens) {
+    public PrimaryPlayerInventory getPrimary() {
+        if (this.api$primary == null && ((InventoryAdapter) this).bridge$getRootLens() instanceof PlayerInventoryLens) {
             final Lens lens = ((InventoryAdapter) this).bridge$getRootLens();
             final Fabric fabric = ((InventoryAdapter) this).bridge$getFabric();
-            this.api$main = (PrimaryPlayerInventoryAdapter) ((PlayerInventoryLens) lens).getMainLens().getAdapter(fabric, this);
+            this.api$primary = (PrimaryPlayerInventoryAdapter) ((PlayerInventoryLens) lens).getPrimaryInventoryLens().getAdapter(fabric, this);
         }
-        return this.api$main;
+        return this.api$primary;
+    }
+
+    @Override
+    public EquipmentInventory getArmor() {
+        if (this.api$armor == null && ((InventoryAdapter) this).bridge$getRootLens() instanceof PlayerInventoryLens) {
+            final Lens lens = ((InventoryAdapter) this).bridge$getRootLens();
+            final Fabric fabric = ((InventoryAdapter) this).bridge$getFabric();
+            this.api$armor = (EquipmentInventoryAdapter) ((PlayerInventoryLens) lens).getArmorLens().getAdapter(fabric, this);
+        }
+        return this.api$armor;
     }
 
     @Override

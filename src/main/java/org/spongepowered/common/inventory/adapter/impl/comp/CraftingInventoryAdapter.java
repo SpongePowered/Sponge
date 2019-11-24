@@ -28,10 +28,11 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
+import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
 
-public class CraftingInventoryAdapter extends OrderedInventoryAdapter implements CraftingInventory {
+public class CraftingInventoryAdapter extends BasicInventoryAdapter implements CraftingInventory {
 
     protected final CraftingInventoryLens craftingLens;
     

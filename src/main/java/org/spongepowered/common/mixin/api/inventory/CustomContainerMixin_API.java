@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.inventory;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.custom.CustomContainer;
@@ -37,9 +35,4 @@ public abstract class CustomContainerMixin_API extends ContainerMixin_API {
 
     @Shadow(remap = false) public CustomInventory inv;
 
-    @Override
-    public PluginContainer getPlugin() {
-        // Fail fast to the base inventory
-        return ((Inventory) this.inv).getPlugin();
-    }
 }

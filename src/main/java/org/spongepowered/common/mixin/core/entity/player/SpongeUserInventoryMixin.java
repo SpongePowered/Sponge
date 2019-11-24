@@ -65,7 +65,8 @@ public abstract class SpongeUserInventoryMixin implements InventoryAdapter, User
     @Shadow public abstract int getSizeInventory();
 
     @Nullable private User impl$carrier;
-    @Nullable private PrimaryPlayerInventoryAdapter impl$main;
+    @Nullable private PrimaryPlayerInventoryAdapter impl$grid;
+    @Nullable private EquipmentInventoryAdapter impl$armor;
     @Nullable private EquipmentInventoryAdapter impl$equipment;
     @Nullable private SlotAdapter offhand;
 
@@ -96,11 +97,19 @@ public abstract class SpongeUserInventoryMixin implements InventoryAdapter, User
     }
 
     @Override
-    public PrimaryPlayerInventory getMain() {
-        if (this.impl$main == null) {
-            this.impl$main = (PrimaryPlayerInventoryAdapter) ((PlayerInventoryLens) this.bridge$getRootLens()).getMainLens().getAdapter(this.bridge$getFabric(), this);
+    public PrimaryPlayerInventory getPrimary() {
+        if (this.impl$grid == null) {
+            this.impl$grid = (PrimaryPlayerInventoryAdapter) ((PlayerInventoryLens) this.bridge$getRootLens()).getPrimaryInventoryLens().getAdapter(this.bridge$getFabric(), this);
         }
-        return this.impl$main;
+        return this.impl$grid;
+    }
+
+    @Override
+    public EquipmentInventory getArmor() {
+        if (this.impl$equipment == null) {
+            this.impl$equipment = (EquipmentInventoryAdapter) ((PlayerInventoryLens) this.bridge$getRootLens()).getArmorLens().getAdapter(this.bridge$getFabric(), this);
+        }
+        return this.impl$equipment;
     }
 
     @Override

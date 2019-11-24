@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.minecart.ChestMinecartEntity;
-import org.spongepowered.api.entity.vehicle.minecart.ChestMinecart;
+import org.spongepowered.api.entity.vehicle.minecart.carrier.ChestMinecart;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,6 +39,6 @@ public abstract class EntityMinecartChestMixin extends EntityMinecartContainerMi
 
     @Override
     public Lens bridge$generateLens(SlotLensProvider slots) {
-        return new GridInventoryLens(0, 9, 3, 9, this.bridge$getSlotProvider());
+        return new GridInventoryLens(0, 9, 3, this.bridge$getSlotProvider());
     }
 }

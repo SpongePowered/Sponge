@@ -75,7 +75,6 @@ public final class InventoryUtil {
         sb.append("Invalid CraftingGridInventory. Could not find InventoryCrafting.\n")
           .append("Fabric was: ")
           .append(fabric.getClass().getSimpleName()).append(" Name: ")
-          .append(fabric.fabric$getDisplayName() == null ? "unknown" : fabric.fabric$getDisplayName().get())
           .append("Viewed:");
         for (Object iInventory : fabric.fabric$allInventories()) {
             sb.append("\n").append(iInventory.getClass().getName());
@@ -96,9 +95,9 @@ public final class InventoryUtil {
                 DoubleSidedInventory inventory;
 
                 if (enumfacing != Direction.WEST && enumfacing != Direction.NORTH) {
-                    inventory = new DoubleSidedInventory("container.chestDouble", chest, (ChestTileEntity) tileentity1);
+                    inventory = new DoubleSidedInventory( chest, (ChestTileEntity) tileentity1);
                 } else {
-                    inventory = new DoubleSidedInventory("container.chestDouble", (ChestTileEntity) tileentity1, chest);
+                    inventory = new DoubleSidedInventory((ChestTileEntity) tileentity1, chest);
                 }
 
                 return Optional.of((Inventory) inventory);

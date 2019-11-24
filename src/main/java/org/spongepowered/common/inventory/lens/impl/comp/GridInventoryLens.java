@@ -36,8 +36,8 @@ import java.util.List;
 
 public class GridInventoryLens extends Inventory2DLens {
 
-    protected List<LensHandle> rows;
-    protected List<LensHandle> cols;
+    private List<LensHandle> rows = new ArrayList<>();
+    private List<LensHandle> cols = new ArrayList<>();
 
     public GridInventoryLens(int base, int width, int height, SlotLensProvider slots) {
         this(base, width, height, GridInventoryAdapter.class, slots);
@@ -49,14 +49,6 @@ public class GridInventoryLens extends Inventory2DLens {
     }
 
     protected void init(SlotLensProvider slots) {
-    }
-
-    @Override
-    protected void init(SlotLensProvider slots, boolean spanning) {
-        super.init(slots, false);
-        this.rows = new ArrayList<>();
-        this.cols = new ArrayList<>();
-
         for (int y = 0, base = this.base; y < this.height; y++, base += this.stride) {
             InventoryRowLens row = new InventoryRowLens(base, this.width, this.xBase, this.yBase + y, slots);
             this.addRow(row);
@@ -68,12 +60,12 @@ public class GridInventoryLens extends Inventory2DLens {
         }
     }
 
-    protected void addRow(InventoryRowLens row) {
+    private void addRow(InventoryRowLens row) {
         super.addSpanningChild(row);
         this.rows.add(new LensHandle(row));
     }
 
-    protected void addColumn(InventoryColumnLens column) {
+    private void addColumn(InventoryColumnLens column) {
         super.addChild(column);
         this.cols.add(new LensHandle(column));
     }

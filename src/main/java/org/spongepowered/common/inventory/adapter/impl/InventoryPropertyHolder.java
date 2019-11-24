@@ -22,26 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory.adapter;
+package org.spongepowered.common.inventory.adapter.impl;
 
-public class InvalidAdapterException extends RuntimeException {
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
 
-    private static final long serialVersionUID = 1L;
+import java.util.Map;
+import java.util.Optional;
 
-    public InvalidAdapterException() {
-        super();
+public interface InventoryPropertyHolder extends Inventory {
+
+
+    @Override
+    default <V> Optional<V> getProperty(Inventory child, Property<V> property) {
+        return InventoryPropertyProvider.getProperty(this, child, property);
     }
 
-    public InvalidAdapterException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    default <V> Optional<V> getProperty(Property<V> property) {
+        if (parent() == this) {
+            return InventoryPropertyProvider.getRootProperty(this, property);
+        }
+        return parent().getProperty(this, property);
     }
 
-    public InvalidAdapterException(String message) {
-        super(message);
-    }
-
-    public InvalidAdapterException(Throwable cause) {
-        super(cause);
+    @Override
+    default Map<Property<?>, ?> getProperties() {
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
     }
 
 }

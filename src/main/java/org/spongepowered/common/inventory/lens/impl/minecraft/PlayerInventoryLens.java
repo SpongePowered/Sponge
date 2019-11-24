@@ -143,7 +143,7 @@ public class PlayerInventoryLens extends AbstractLens {
         return fabric.fabric$get(this.base).bridge$getAdapter();
     }
 
-    public PrimaryPlayerInventoryLens getMainLens() {
+    public PrimaryPlayerInventoryLens getPrimaryInventoryLens() {
         return this.primary;
     }
 

@@ -24,25 +24,49 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.item.inventory.property.GuiId;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.Container;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.inventory.lens.LensCreator;
+import org.spongepowered.common.registry.type.item.ContainerTypeRegistryModule;
 
-import javax.annotation.Nullable;
+public class SpongeContainerType extends SpongeCatalogType implements ContainerType {
 
-public class SpongeContainerType extends SpongeCatalogType implements GuiId {
+    private ContainerTypeRegistryModule.ContainerProvider containerProvider;
+    private final int size;
+    private final int width;
+    private final int height;
+    private LensCreator lensCreator;
 
-    @Nullable private String internalId;
-
-    public SpongeContainerType(String id) {
-        super(id);
+    public SpongeContainerType(final CatalogKey key, int size, int width, int height, LensCreator lensCreator, ContainerTypeRegistryModule.ContainerProvider containerProvider) {
+        super(key);
+        this.containerProvider = containerProvider;
+        this.lensCreator = lensCreator;
+        this.size = size;
+        this.width = width;
+        this.height = height;
     }
 
-    public SpongeContainerType(String id, String internalId) {
-        this(id);
-        this.internalId = internalId;
+    public LensCreator getLensCreator() {
+        return this.lensCreator;
     }
 
-    public String getInternalId() {
-        return this.internalId == null ? this.getId() : this.internalId;
+    public int getSize() {
+        return size;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public Container provideContainer(int id, IInventory viewed, PlayerEntity viewing) {
+        return this.containerProvider.provide(id, viewed, viewing);
     }
 }

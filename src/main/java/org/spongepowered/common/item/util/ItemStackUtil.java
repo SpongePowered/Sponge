@@ -136,15 +136,15 @@ public abstract class ItemStackUtil {
     }
 
     public static ItemStackSnapshot snapshotOf(net.minecraft.item.ItemStack itemStack) {
-        return itemStack.isEmpty() ? ItemStackSnapshot.NONE : fromNative(itemStack).createSnapshot();
+        return itemStack.isEmpty() ? ItemStackSnapshot.empty() : fromNative(itemStack).createSnapshot();
     }
 
     public static ItemStackSnapshot snapshotOf(@Nullable ItemStack itemStack) {
-        return itemStack == null ? ItemStackSnapshot.NONE : itemStack.isEmpty() ? ItemStackSnapshot.NONE : itemStack.createSnapshot();
+        return itemStack == null ? ItemStackSnapshot.empty() : itemStack.isEmpty() ? ItemStackSnapshot.empty() : itemStack.createSnapshot();
     }
 
     public static net.minecraft.item.ItemStack fromSnapshotToNative(@Nullable ItemStackSnapshot snapshot) {
-        return snapshot == null ? emptyNative() : snapshot == ItemStackSnapshot.NONE ? emptyNative() : toNative(snapshot.createStack());
+        return snapshot == null ? emptyNative() : snapshot == ItemStackSnapshot.empty() ? emptyNative() : toNative(snapshot.createStack());
     }
 
     public static ItemStack fromSnapshot(@Nullable ItemStackSnapshot snapshot) {

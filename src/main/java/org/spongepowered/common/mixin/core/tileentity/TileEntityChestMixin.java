@@ -29,7 +29,6 @@ import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,6 +38,9 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.ReusableLens;
+import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.collections.SlotLensProvider;
+import org.spongepowered.plugin.meta.util.NonnullByDefault;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
@@ -69,7 +71,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
     @SuppressWarnings("unchecked")
     private GridInventoryLens impl$generateRootLens(final SlotLensProvider slots) {
         final int size = this.getSizeInventory();
-        return new org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens(0, 9, size / 9, 9, (Class<? extends Inventory>) this.getClass(), slots);
+        return new GridInventoryLens(0, 9, size / 9, (Class<? extends Inventory>) this.getClass(), slots);
     }
 
     /**

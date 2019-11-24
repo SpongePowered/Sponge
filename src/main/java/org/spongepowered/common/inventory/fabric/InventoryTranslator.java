@@ -40,7 +40,6 @@ public interface InventoryTranslator<T> {
     ItemStack getStack(T inventory, int index);
     void setStack(T inventory, int index, ItemStack stack);
     int getMaxStackSize(T inventory);
-    Translation getDisplayName(T inventory);
     int getSize(T inventory);
     void clear(T inventory);
     void markDirty(T inventory);

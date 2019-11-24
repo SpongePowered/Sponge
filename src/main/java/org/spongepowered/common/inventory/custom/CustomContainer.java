@@ -33,10 +33,10 @@ public class CustomContainer extends Container {
 
     public CustomInventory inv;
 
-    public CustomContainer(final PlayerEntity player, final CustomInventory inventory) {
+    public CustomContainer(int id, final PlayerEntity player, final CustomInventory inventory) {
+        super(null, id); // TODO check if null ContainerType is ok
         this.inv = inventory;
 
-        // TODO what significance has the x/y coord on the Slots?
         for (int slot = 0; slot < inventory.getSizeInventory(); slot++) {
             this.addSlot(new Slot(inventory, slot, 0, 0));
         }

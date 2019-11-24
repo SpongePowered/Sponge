@@ -55,6 +55,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.*;
 import org.spongepowered.api.data.manipulator.mutable.entity.*;
 import org.spongepowered.api.data.manipulator.mutable.item.*;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.*;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.item.enchantment.Enchantment;
@@ -69,6 +70,7 @@ import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFlu
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.item.FireworkEffect;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
@@ -91,6 +93,7 @@ import org.spongepowered.common.data.builder.item.*;
 import org.spongepowered.common.data.builder.manipulator.InvisibilityDataAddVanishUpdater;
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
+import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
 import org.spongepowered.common.effect.potion.PotionEffectContentUpdater;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
@@ -959,6 +962,19 @@ public final class DataRegistrar {
         propertyRegistry.register(EyeLocationProperty.class, new EyeLocationPropertyStore());
         propertyRegistry.register(EyeHeightProperty.class, new EyeHeightPropertyStore());
         propertyRegistry.register(DominantHandProperty.class, new DominantHandPropertyStore());
+
+        // Inventory Properties
+        registerInvProperty(InventoryProperties.EQUIPMENT_TYPE);
+        registerInvProperty(InventoryProperties.SLOT_POSITION);
+        registerInvProperty(InventoryProperties.SLOT_INDEX);
+        registerInvProperty(InventoryProperties.TITLE);
+        registerInvProperty(InventoryProperties.SLOT_SIDE);
+        registerInvProperty(InventoryProperties.UNIQUE_ID);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void registerInvProperty(Property<?> property) {
+        Sponge.getPropertyRegistry().register(property, new InventoryPropertyProvider(property));
     }
 
 }

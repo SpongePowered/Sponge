@@ -46,13 +46,8 @@ public abstract class SlotMixin_API implements org.spongepowered.api.item.invent
     }
 
     @Override
-    public org.spongepowered.api.item.inventory.Slot transform(final Type type) {
+    public org.spongepowered.api.item.inventory.Slot viewedSlot() {
         return this;
-    }
-
-    @Override
-    public org.spongepowered.api.item.inventory.Slot transform() {
-        return this.transform(Type.INVENTORY);
     }
 
 }

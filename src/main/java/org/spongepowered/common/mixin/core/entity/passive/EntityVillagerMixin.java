@@ -89,7 +89,7 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
 
     @Override
     public Lens bridge$generateLens(SlotLensProvider slots) {
-        return new DefaultIndexedLens(0, 8, 1, slots);
+        return new DefaultIndexedLens(0, 8, slots);
     }
 
     @Override

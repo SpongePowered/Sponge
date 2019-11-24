@@ -22,20 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.inventory;
+package org.spongepowered.common.mixin.api.item.inventory;
 
-import net.minecraft.entity.item.EntityMinecartContainer;
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.inventory.InventoryLargeChest;
-import net.minecraft.tileentity.TileEntityLockable;
 import org.spongepowered.api.item.inventory.ContainerType;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.entity.player.SpongeUserInventory;
+import org.spongepowered.common.inventory.custom.CustomInventory;
+import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
 
 @Mixin(ViewableCustomInventory.class)
-public abstract class CustomViewableInventoryMixin_API extends MixinCustomInventory implements ViewableInventory {
+public abstract class CustomViewableInventoryMixin_API extends CustomInventoryMixin_API implements ViewableInventory {
 
     @Shadow(remap = false) private ContainerType type;
 

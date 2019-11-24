@@ -35,10 +35,9 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
-import java.util.Iterator;
 import java.util.List;
 
-public class SlotCollection implements Iterable<Slot> {
+public class SlotCollection {
     
     private Inventory parent;
 
@@ -49,11 +48,11 @@ public class SlotCollection implements Iterable<Slot> {
     public SlotCollection(Inventory parent, Fabric fabric, Lens lens, SlotLensProvider slots) {
         this.parent = parent;
         this.fabric = fabric;
-        this.slots = this.traverseSpanningTree(fabric, lens, slots, ImmutableList.<Slot>builder()).build();
+        this.slots = this.traverseSpanningTree(fabric, lens, ImmutableList.<Slot>builder()).build();
     }
     
     @SuppressWarnings("rawtypes")
-    private Builder<Slot> traverseSpanningTree(Fabric fabric, Lens lens, SlotLensProvider slots, Builder<Slot> list) {
+    private Builder<Slot> traverseSpanningTree(Fabric fabric, Lens lens, Builder<Slot> list) {
         if (lens instanceof SlotLens) {
             list.add(((SlotAdapter) lens.getAdapter(fabric, this.parent)));
             return list;
@@ -62,7 +61,7 @@ public class SlotCollection implements Iterable<Slot> {
             if (child instanceof SlotLens) {
                 list.add((SlotAdapter) child.getAdapter(fabric, this.parent));
             } else if (child.getSpanningChildren().size() > 0) {
-                this.traverseSpanningTree(fabric, child, slots, list);
+                this.traverseSpanningTree(fabric, child, list);
             }
         }
         return list;
@@ -72,9 +71,8 @@ public class SlotCollection implements Iterable<Slot> {
         return this.fabric;
     }
 
-    @Override
-    public Iterator<Slot> iterator() {
-        return this.slots.iterator();
+    public List<Slot> slots() {
+        return this.slots;
     }
 
     public static SlotCollection of(Inventory parent, InventoryAdapter adapter) {

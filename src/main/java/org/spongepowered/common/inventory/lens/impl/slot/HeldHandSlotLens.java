@@ -25,10 +25,11 @@
 package org.spongepowered.common.inventory.lens.impl.slot;
 
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
+
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.text.translation.Translation;
@@ -56,13 +57,13 @@ public class HeldHandSlotLens implements SlotLens {
     }
 
     @Override
-    public net.minecraft.item.ItemStack getStack(Fabric fabric) {
+    public ItemStack getStack(Fabric fabric) {
         PlayerInventory inv = this.getInventoryPlayer(fabric);
         return inv.getCurrentItem();
     }
 
     @Override
-    public boolean setStack(Fabric fabric, net.minecraft.item.ItemStack stack) {
+    public boolean setStack(Fabric fabric, ItemStack stack) {
         PlayerInventory inv = this.getInventoryPlayer(fabric);
         inv.mainInventory.set(inv.currentItem, stack);
         return true;
@@ -90,11 +91,7 @@ public class HeldHandSlotLens implements SlotLens {
     }
 
     @Override
-    public Translation getName(Fabric fabric) {
-        return fabric.fabric$getDisplayName();
-    }
-
-    @Override public int slotCount() {
+    public int slotCount() {
         return 1;
     }
 
@@ -155,7 +152,7 @@ public class HeldHandSlotLens implements SlotLens {
         return (e) -> e == EquipmentTypes.MAIN_HAND;
     }
 
-    public Predicate<ItemStack> getItemStackFilter() {
+    public Predicate<org.spongepowered.api.item.inventory.ItemStack> getItemStackFilter() {
         return (i) -> true;
     }
 

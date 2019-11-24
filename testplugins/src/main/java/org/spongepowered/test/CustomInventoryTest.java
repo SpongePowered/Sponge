@@ -29,9 +29,11 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.entity.living.animal.Llama;
 import org.spongepowered.api.entity.living.animal.Mule;
+import org.spongepowered.api.entity.living.animal.horse.Horse;
 import org.spongepowered.api.entity.living.monster.Slime;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -42,11 +44,8 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.*;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.property.GuiIdProperty;
 import org.spongepowered.api.item.inventory.property.GuiIds;
 import org.spongepowered.api.item.inventory.property.Identifiable;
@@ -55,6 +54,7 @@ import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
@@ -62,6 +62,8 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -104,92 +106,54 @@ public class CustomInventoryTest implements LoadableModule {
             if (!player.get(Keys.IS_SNEAKING).orElse(false)) {
                 return;
             }
-            if (event.getTargetEntity() instanceof Mule) {
-                Inventory.Builder builder;
-                if (((Mule) event.getTargetEntity()).getInventory().capacity() <= 2) {
-                    builder = Inventory.builder().of(InventoryArchetypes.HORSE);
-                } else {
-                    builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
-                }
-                Inventory inventory = builder.property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Mule")))
-                        .withCarrier(((Horse) event.getTargetEntity()))
-                        .build(this);
+            if (event.getEntity() instanceof Horse) {
+
+                World world = event.getEntity().getWorld();
+
+                Entity copyEntity = world.createEntity(event.getEntity().getType(), event.getEntity().getPosition());
+                CarriedInventory<? extends Carrier> inventory = ((Horse) copyEntity).getInventory();
+
+
                 int i = 1;
                 for (Inventory slot : inventory.slots()) {
                     slot.set(ItemStack.of(ItemTypes.APPLE, i++));
                 }
-                Sponge.getCauseStackManager().pushCause(player);
-                player.openInventory(inventory);
-                Sponge.getCauseStackManager().popCause();
-                event.setCancelled(true);
-            } else if (event.getTargetEntity() instanceof Llama) {
-                Inventory.Builder builder;
-                if (((Llama) event.getTargetEntity()).getInventory().capacity() <= 2) {
-                    builder = Inventory.builder().of(InventoryArchetypes.HORSE);
-                } else {
-                    builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
+                Text text = Text.of("Custom Horse");
+                if (event.getEntity() instanceof Mule) {
+                    text = Text.of("Custom Mule");
+                } else if (event.getEntity() instanceof Llama) {
+                    text = Text.of("Custom Llama");
                 }
-                Inventory inventory = builder.property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Llama")))
-                        .withCarrier(((Horse) event.getTargetEntity()))
-                        .build(this);
-                int i = 1;
-                for (Inventory slot : inventory.slots()) {
-                    slot.set(ItemStack.of(ItemTypes.APPLE, i++));
-                }
-                Sponge.getCauseStackManager().pushCause(player);
-                player.openInventory(inventory);
-                Sponge.getCauseStackManager().popCause();
-                event.setCancelled(true);
-            } else if (event.getTargetEntity() instanceof Horse) {
-                Inventory inventory = Inventory.builder().of(InventoryArchetypes.HORSE)
-                        .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Horse")))
-                        .withCarrier(((Horse) event.getTargetEntity()))
-                        .build(this);
-                int i = 1;
-                for (Inventory slot : inventory.slots()) {
-                    slot.set(ItemStack.of(ItemTypes.APPLE, i++));
-                }
-                Sponge.getCauseStackManager().pushCause(player);
-                player.openInventory(inventory);
-                Sponge.getCauseStackManager().popCause();
+
+                player.openInventory(inventory, text);
                 event.setCancelled(true);
             }
+
             if (event.getTargetEntity() instanceof Slime) {
-                Inventory inventory = Inventory.builder().of(InventoryArchetypes.MENU_GRID)
-                        .property(InventoryDimension.of(1, 9))
-                        .property(InventoryTitle.of(Text.of("Slime Content")))
-                        .property(new Identifiable())
-                        .property(new GuiIdProperty(GuiIds.DISPENSER))
-                        .build(this);
+                ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.DISPENSER)
+                        .completeStructure()
+                        .identity(UUID.randomUUID())
+                        .build();
                 ItemStack flard = ItemStack.of(ItemTypes.SLIME, 1);
                 flard.offer(Keys.DISPLAY_NAME, Text.of("Flard?"));
                 for (Inventory slot : inventory.slots()) {
                     slot.set(flard);
                 }
-                Sponge.getCauseStackManager().pushCause(player);
-                player.openInventory(inventory);
-                Sponge.getCauseStackManager().popCause();
+
+                player.openInventory(inventory, Text.of("Slime Content"));
+                event.setCancelled(true);
             }
         }
 
         private void interactOtherBlock(InteractBlockEvent.Primary event, Player player, Location<World> loc) {
             if (loc.getBlockType() == BlockTypes.CRAFTING_TABLE) {
-                Inventory inventory = Inventory.builder().of(InventoryArchetypes.WORKBENCH)
-                        .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Workbench")))
-                        .listener(ClickInventoryEvent.Shift.class, new Consumer<ClickInventoryEvent.Shift>() {
-
-                            @Override
-                            public void accept(ClickInventoryEvent.Shift shift) {
-                                shift.getCause().first(Player.class).get().sendMessage(Text.of(TextColors.GREEN, "Shift click!"));
-                            }
-                        })
-                        .build(this);
+                ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.CRAFTING).completeStructure()
+                        .build();
                 for (Inventory slot : inventory.slots()) {
                     slot.set(ItemStack.of(ItemTypes.IRON_NUGGET, 1));
                 }
-                Sponge.getCauseStackManager().pushCause(player);
-                player.openInventory(inventory);
-                Sponge.getCauseStackManager().popCause();
+
+                player.openInventory(inventory, Text.of("Custom Workbench"));
 
                 event.setCancelled(true);
             }
@@ -199,24 +163,16 @@ public class CustomInventoryTest implements LoadableModule {
             loc.getTileEntity().ifPresent(te -> {
                 if (te instanceof Carrier) {
                     BasicCarrier myCarrier = new BasicCarrier();
-                    Inventory custom = Inventory.builder().from(((Carrier) te).getInventory())
-                            .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom ", ((Carrier) te).getInventory().getName())))
-                            .listener(ClickInventoryEvent.Shift.class, new Consumer<ClickInventoryEvent.Shift>() {
+                    Optional<ViewableInventory> vi = ((Carrier) te).getInventory().asViewable();
+                    if (vi.isPresent()) {
+                        ViewableInventory inventory = ViewableInventory.builder().typeFrom(vi.get()).completeStructure()
+                                .carrier(myCarrier)
+                                .build();
 
-                                @Override
-                                public void accept(ClickInventoryEvent.Shift shift) {
-                                    player.sendMessage(Text.of(TextColors.YELLOW, "Carrier shift click!"));
-                                }
-                            })
-                            .withCarrier(myCarrier)
-                            .build(this);
-                    myCarrier.init(custom);
-                    Sponge.getCauseStackManager().pushCause(player);
-                    player.openInventory(custom);
-                    player.closeInventory();
-                    player.openInventory(custom);
-                    Sponge.getCauseStackManager().popCause();
-                    event.setCancelled(true);
+                        myCarrier.init(inventory);
+                        player.openInventory(inventory, Text.of("Custom ", ((Carrier) te).getInventory().getName()));
+                        event.setCancelled(true);
+                    }
                 }
             });
         }
@@ -250,6 +206,51 @@ public class CustomInventoryTest implements LoadableModule {
         public void init(Inventory inventory) {
             this.inventory = inventory;
         }
+    }
+
+
+
+    // TODO actually make it do smth.
+    static void foobar()
+    {
+        Player player = null;
+        Player player2 = null;
+
+        Inventory inv1 = Inventory.builder().grid(3, 3).completeStructure().build();
+        Inventory inv2 = Inventory.builder().grid(3, 3).completeStructure().build();
+        Inventory inv3 = Inventory.builder().grid(9, 3).completeStructure().build();
+
+        ViewableInventory inv = ViewableInventory.builder()
+                .type(ContainerTypes.CHEST_3X9)
+                .grid(inv1.slots(), new Vector2i(3,3), 0)
+                .grid(inv2.slots(), new Vector2i(3,3), new Vector2i(3, 1))
+                .grid(inv3.slots() /*TODO query for grid*/, new Vector2i(3, 3), new Vector2i(6, 3))
+                .slots(Arrays.asList(inv3.getSlot(SlotIndex.of(0)).get()), 37)
+                .dummySlots(1, 16)
+                .fillDummy()
+                .completeStructure()
+                .identity(UUID.randomUUID())
+                .build();
+
+        ViewableInventory basicChest = ViewableInventory.builder()
+                .type(ContainerTypes.CHEST_3X9)
+                .completeStructure()
+                .build();
+
+        ItemStackSnapshot disabled = ItemStack.of(ItemTypes.LIGHT_GRAY_STAINED_GLASS_PANE, 1).createSnapshot();
+        ItemStackSnapshot emerald = ItemStack.of(ItemTypes.EMERALD, 1).createSnapshot();
+
+
+        EquipmentInventory armor = null;
+        GridInventory mainGrid = null;
+        Slot offhand = null;
+
+        ViewableInventory.builder().type(ContainerTypes.CHEST_3X9)
+                .slots(armor.slots(), 0)
+                .slots(mainGrid.slots(), armor.slots().size())
+                .slots(offhand.slots(), armor.slots().size() + mainGrid.slots().size())
+                .completeStructure();
+
     }
 
 }

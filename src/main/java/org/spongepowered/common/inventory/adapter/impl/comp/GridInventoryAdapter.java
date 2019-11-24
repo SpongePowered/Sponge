@@ -39,17 +39,12 @@ import org.spongepowered.common.inventory.lens.impl.comp.InventoryColumnLens;
 import org.spongepowered.common.inventory.lens.impl.comp.InventoryRowLens;
 import org.spongepowered.math.vector.Vector2i;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class GridInventoryAdapter extends Inventory2DAdapter implements GridInventory {
     
     protected final GridInventoryLens gridLens;
     
-    protected final List<InventoryRow> rows = new ArrayList<InventoryRow>();
-    protected final List<InventoryColumn> columns = new ArrayList<InventoryColumn>();
-
     public GridInventoryAdapter(Fabric fabric, GridInventoryLens root) {
         this(fabric, root, null);
     }
@@ -100,23 +95,18 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
     }
 
     @Override
-    public Optional<ItemStack> poll(int x, int y) {
-        return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(x, y));
+    public InventoryTransactionResult.Poll poll(int x, int y) {
+        return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(x, y), null);
     }
 
     @Override
-    public Optional<ItemStack> poll(int x, int y, int limit) {
+    public InventoryTransactionResult.Poll poll(int x, int y, int limit) {
         return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(x, y), limit);
     }
 
     @Override
     public Optional<ItemStack> peek(int x, int y) {
         return AdapterLogic.peekSequential(this.bridge$getFabric(), this.getSlotLens(x, y));
-    }
-
-    @Override
-    public Optional<ItemStack> peek(int x, int y, int limit) {
-        return AdapterLogic.peekSequential(this.bridge$getFabric(), this.getSlotLens(x, y), limit);
     }
 
     @Override

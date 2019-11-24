@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
-import org.spongepowered.api.item.inventory.ArmorEquipable;
+import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -55,11 +55,11 @@ public class EquipmentInventoryLens extends RealLens {
     @SuppressWarnings("rawtypes")
     @Override
     public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
-        ArmorEquipable carrier = null;
+        Equipable carrier = null;
         if (parent instanceof CarriedInventory) {
             Optional opt = ((CarriedInventory) parent).getCarrier();
-            if (opt.isPresent() && opt.get() instanceof ArmorEquipable) {
-                carrier = ((ArmorEquipable) opt.get());
+            if (opt.isPresent() && opt.get() instanceof Equipable) {
+                carrier = ((Equipable) opt.get());
             }
         }
         return new EquipmentInventoryAdapter(carrier, fabric, this, parent);

@@ -25,13 +25,14 @@
 package org.spongepowered.common.bridge.inventory;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -67,13 +68,19 @@ public interface ContainerBridge {
 
     List<SlotTransaction> bridge$getPreviewTransactions();
 
-    @Nullable Location<World> bridge$getOpenLocation();
+    @Nullable Location bridge$getOpenLocation();
 
-    void bridge$setOpenLocation(@Nullable Location<World> loc);
+    void bridge$setOpenLocation(@Nullable Location loc);
 
     void bridge$setInUse(boolean inUse);
 
     boolean bridge$isInUse();
 
     boolean bridge$capturePossible();
+
+    void bridge$setMenu(SpongeInventoryMenu menu);
+
+    List<ServerPlayerEntity> listeners();
+
+    void setViewed(Object viewed);
 }

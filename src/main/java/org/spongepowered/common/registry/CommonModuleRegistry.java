@@ -119,8 +119,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.api.item.inventory.property.GuiId;
-import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.item.potion.PotionType;
@@ -224,9 +223,6 @@ import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
 import org.spongepowered.common.item.generation.SpongeItemStackGenerator;
-import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
-import org.spongepowered.common.item.inventory.query.SpongeTransformationBuilder;
-import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
 import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
@@ -507,8 +503,8 @@ public final class CommonModuleRegistry {
                 .registerBuilderSupplier(Schematic.Builder.class, SpongeSchematicBuilder::new)
                 .registerBuilderSupplier(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
                 .registerBuilderSupplier(BiomeGenerationSettings.Builder.class, SpongeBiomeGenerationSettingsBuilder::new)
-                .registerBuilderSupplier(InventoryArchetype.Builder.class, SpongeInventoryArchetypeBuilder::new)
                 .registerBuilderSupplier(Inventory.Builder.class, SpongeInventoryBuilder::new)
+                .registerBuilderSupplier(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)
                 .registerBuilderSupplier(InventoryTransformation.Builder.class, SpongeTransformationBuilder::new)
                 .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
                 .registerBuilderSupplier(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
@@ -648,8 +644,7 @@ public final class CommonModuleRegistry {
                 .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
                 .registerModule(DismountType.class, new DismountTypeRegistryModule())
                 .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
-                .registerModule(GuiId.class, ContainerTypeRegistryModule.getInstance())
-                .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
+                .registerModule(ContainerType.class, ContainerTypeRegistryModule.getInstance())
                 .registerModule(TransformationRegistryModule.getInstance())
                 .registerModule(StructureMode.class, new StructureModeRegistryModule())
                 .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())

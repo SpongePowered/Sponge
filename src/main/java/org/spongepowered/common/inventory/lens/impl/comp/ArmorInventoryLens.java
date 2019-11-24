@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
+import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -74,11 +75,11 @@ public class ArmorInventoryLens extends SlotBasedLens {
     @SuppressWarnings("rawtypes")
     @Override
     public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
-        Equipable carrier = null;
+        ArmorEquipable carrier = null;
         if (parent instanceof CarriedInventory) {
             Optional opt = ((CarriedInventory) parent).getCarrier();
-            if (opt.isPresent() && opt.get() instanceof Equipable) {
-                carrier = ((Equipable) opt.get());
+            if (opt.isPresent() && opt.get() instanceof ArmorEquipable) {
+                carrier = ((ArmorEquipable) opt.get());
             }
         }
         // TODO
