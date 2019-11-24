@@ -71,7 +71,7 @@ public final class BlockStateRegistryModule implements CatalogRegistryModule<Blo
             List<Tuple<BlockTrait<?>, ? extends Comparable<?>>> foundPairs = new ArrayList<>(propertyValuePairs.length);
             for (String propertyValuePair : propertyValuePairs) {
                 if (!propertyValuePair.contains("=")) {
-                    continue;
+                    return Optional.empty();
                 }
 
                 final String name = propertyValuePair.split("=")[0];
