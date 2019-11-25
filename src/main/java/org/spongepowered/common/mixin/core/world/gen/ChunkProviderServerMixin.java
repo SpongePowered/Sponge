@@ -199,8 +199,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
         locals = LocalCapture.CAPTURE_FAILHARD
     )
     private void impl$StopGenerationPhaseFromError(final int x, final int z, final CallbackInfoReturnable<Chunk> cir, final Chunk ungenerated,
-        final long chunkIndex, final Throwable error, final CrashReport report, final CrashReportCategory chunkGenerationCategory,
-        @Coerce final Object provider, final int someVar, final int someOther) {
+        final long chunkIndex, final Throwable error, final CrashReport report, final CrashReportCategory chunkGenerationCategory) {
 
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         report.makeCategoryDepth("Current PhaseState", 1)

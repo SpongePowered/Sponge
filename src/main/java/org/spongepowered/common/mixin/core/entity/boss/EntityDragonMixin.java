@@ -31,7 +31,7 @@ import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.entity.boss.dragon.phase.PhaseHover;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.Vec3d;
-import org.spongepowered.asm.lib.Opcodes;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;

@@ -16,7 +16,9 @@ apply plugin: forgeGradlePlugin
 apply plugin: 'org.spongepowered.mixin'
 
 dependencies {
-    testCompile 'org.spongepowered:lwts:1.0.0'
+    testCompile ('org.spongepowered:lwts:1.0.0') {
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+    }
 }
 
 minecraft {

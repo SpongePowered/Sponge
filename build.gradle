@@ -21,7 +21,7 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
         classpath 'gradle.plugin.net.minecrell:licenser:0.3'
         classpath 'gradle.plugin.org.spongepowered:spongegradle:0.8.1'
-        classpath 'org.spongepowered:mixingradle:0.4-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 
@@ -59,8 +59,9 @@ dependencies {
         exclude module: 'spongeapi'
     }
     compile 'org.ow2.asm:asm-debug-all:5.2'
-    compile('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
+    compile('org.spongepowered:mixin:0.8-SNAPSHOT') {
         exclude module: 'launchwrapper'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
     }
 
     // log4j2 slf4j implementation

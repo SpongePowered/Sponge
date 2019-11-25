@@ -36,6 +36,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
@@ -43,7 +44,6 @@ import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -181,17 +181,16 @@ public class ItemEnderEyeMixin extends Item {
      *
      * @param worldIn
      * @param playerIn
-     * @param handIn
+     * @param handIn:
      * @param cir
      * @param playerStack
      * @param targetPos
      * @param enderEye
-     * @param preEventCir
      */
     @Surrogate
     private void implSetShooter(final World worldIn, final EntityPlayer playerIn, final EnumHand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack playerStack,
-        final BlockPos targetPos, final EntityEnderEye enderEye, final CallbackInfoReturnable<ActionResult<ItemStack>> preEventCir) {
+        final BlockPos targetPos, final EntityEnderEye enderEye) {
         if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }

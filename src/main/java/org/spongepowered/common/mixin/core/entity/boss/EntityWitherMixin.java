@@ -27,11 +27,11 @@ package org.spongepowered.common.mixin.core.entity.boss;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.EntityWither;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.living.monster.Wither;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,9 +45,8 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.monster.EntityMobMixin;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(value = EntityWither.class)
 public abstract class EntityWitherMixin extends EntityMobMixin implements FusedExplosiveBridge, ExplosiveBridge {

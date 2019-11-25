@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import static net.minecraft.inventory.SlotFurnaceFuel.isBucket;
-
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.MathHelper;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
 import org.spongepowered.api.data.Transaction;
@@ -38,7 +37,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.SmeltEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -65,6 +63,8 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.OutputSlotLensImp
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.Collections;
+
+import static net.minecraft.inventory.SlotFurnaceFuel.isBucket;
 
 @Mixin(TileEntityFurnace.class)
 public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin implements CustomNameableBridge {
