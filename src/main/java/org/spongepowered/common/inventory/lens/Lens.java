@@ -31,6 +31,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
+
 import java.util.List;
 
 /**
@@ -77,44 +78,44 @@ public interface Lens extends LensCollection {
      * @return
      */
     int slotCount();
-    
+
     /**
      * Used by parent lenses when marshalling their spanning tree, queries
      * whether this lens has access to a slot with the specified absolute index.
-     * 
+     *
      * @param inv Inventory
      * @param index Absolute slot index
      * @return true if this lens has a path to the specified slot index
      */
 //    @Deprecated // TODO deprecate
     boolean hasSlot(int index); //TInventory inv, int index);
-    
+
 //    @Deprecated // TODO deprecate
     IntSet getSlots(); //TInventory inv);
-    
+
     /**
      * Returns the "real" underlying slot index in the target inventory for the
      * specified slot ordinal. This method returns -1 if the ordinal is less
      * than 0 or greater than or equal to the value returned by
      * {@link #slotCount()}.
-     * 
+     *
      * @param inv inventory
-     * @param ordinal 
+     * @param ordinal
      * @return the "real" slot index (ordinal), or -1 for invalid indices
      */
     int getRealIndex(Fabric inv, int ordinal);
-    
+
     /**
      * Gets the itemstack for the specified slot ordinal. Returns null if the
      * slot is empty, or if the specified ordinal is outside the range of this
      * lens.
-     * 
+     *
      * @param inv inventory
      * @param ordinal slot ordinal
      * @return the item stack in the specified slot
      */
     ItemStack getStack(Fabric inv, int ordinal);
-    
+
     /**
      * Get the maximum stack size from the target inventory
      * 
@@ -146,7 +147,7 @@ public interface Lens extends LensCollection {
      * @return
      */
     boolean setStack(Fabric inv, int ordinal, ItemStack stack);
-    
+
     SlotLens getSlotLens(int ordinal);
 
 }

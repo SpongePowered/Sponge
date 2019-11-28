@@ -39,13 +39,14 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
-import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+
 import java.util.Optional;
 
 import javax.annotation.Nullable;

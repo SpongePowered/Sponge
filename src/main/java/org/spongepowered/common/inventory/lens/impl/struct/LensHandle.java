@@ -26,6 +26,7 @@ package org.spongepowered.common.inventory.lens.impl.struct;
 
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.common.inventory.lens.Lens;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,28 +42,28 @@ public final class LensHandle {
      * The lens
      */
     public Lens lens;
-    
+
     /**
      * Ordinal, when required 
      */
     public int ordinal = -1;
-    
+
     /**
      * Properties for the lens when viewed through the parent lens
      */
     private Collection<InventoryProperty<?, ?>> properties;
-    
+
     /**
      * Create an "empty" lens handle
      */
     public LensHandle() {
         this(null);
     }
-    
+
     /**
      * Create a lens handle containing the specified lens, and define the
      * supplied properties
-     * 
+     *
      * @param lens
      * @param properties
      */
@@ -77,7 +78,7 @@ public final class LensHandle {
     /**
      * Create a lens handle containing the specified lens, and define the
      * supplied properties
-     * 
+     *
      * @param lens
      * @param properties
      */
@@ -87,7 +88,7 @@ public final class LensHandle {
             this.properties = new ArrayList<>(properties);
         }
     }
-    
+
     public Collection<InventoryProperty<?, ?>> getProperties() {
         if (this.properties == null) {
             return Collections.emptyList();
@@ -98,7 +99,7 @@ public final class LensHandle {
     public <T, K, V> InventoryProperty<K, V> getProperty(Class<T> property) {
         return this.getProperty(property, null);
     }
-    
+
     @SuppressWarnings("unchecked")
     public <T, K, V> InventoryProperty<K, V> getProperty(Class<T> property, Object key) {
         if (this.properties != null) {
@@ -107,7 +108,7 @@ public final class LensHandle {
                     return (InventoryProperty<K, V>) prop;
                 }
             }
-        }        
+        }
         return null;
     }
 

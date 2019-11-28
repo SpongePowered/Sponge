@@ -33,7 +33,7 @@ import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.inventory.query.type.ReverseQuery;
-import org.spongepowered.common.item.inventory.query.SpongeQueryTransformation;
+import org.spongepowered.common.inventory.query.SpongeQueryTransformation;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.Arrays;

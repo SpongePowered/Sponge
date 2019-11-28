@@ -28,7 +28,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.RepairContainer;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,19 +44,19 @@ import org.spongepowered.common.inventory.adapter.impl.slots.OutputSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.OutputSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.bridge.inventory.LensProviderBridge;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(RepairContainer.class)
-public abstract class ContainerRepairMixin extends ContainerMixin implements LensProviderBridge {
+public abstract class ContainerRepairMixin extends ContainerMixin {
 
     @Shadow private String repairedItemName;
     @Shadow @Final private IInventory outputSlot;

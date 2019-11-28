@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableActiveItemData;
@@ -38,7 +39,6 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.Optional;
-import net.minecraft.entity.LivingEntity;
 
 public class ActiveItemDataProcessor extends AbstractSingleDataSingleTargetProcessor<LivingEntity, ItemStackSnapshot,
         Mutable<ItemStackSnapshot>, ActiveItemData, ImmutableActiveItemData> {

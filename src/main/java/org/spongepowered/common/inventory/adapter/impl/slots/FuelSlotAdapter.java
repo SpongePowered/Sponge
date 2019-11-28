@@ -27,8 +27,7 @@ package org.spongepowered.common.inventory.adapter.impl.slots;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.slot.FuelSlot;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
-
+import org.spongepowered.common.inventory.lens.slots.InputSlotLens;
 
 public class FuelSlotAdapter extends InputSlotAdapter implements FuelSlot {
 

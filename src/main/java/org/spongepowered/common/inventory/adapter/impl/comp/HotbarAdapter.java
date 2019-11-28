@@ -27,7 +27,7 @@ package org.spongepowered.common.inventory.adapter.impl.comp;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
+import org.spongepowered.common.inventory.lens.comp.HotbarLens;
 
 public class HotbarAdapter extends InventoryRowAdapter implements Hotbar {
 

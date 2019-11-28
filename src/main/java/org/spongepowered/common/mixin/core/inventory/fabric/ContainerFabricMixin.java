@@ -25,7 +25,8 @@
 package org.spongepowered.common.mixin.core.inventory.fabric;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
@@ -34,7 +35,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import java.util.Collection;
 import java.util.List;

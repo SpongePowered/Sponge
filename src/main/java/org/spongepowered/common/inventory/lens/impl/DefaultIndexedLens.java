@@ -43,7 +43,7 @@ public class DefaultIndexedLens extends AbstractLens {
             this.addSpanningChild(slots.getSlot(slot), new SlotIndex(slot));
         }
     }
-    
+
     @Override
     public int getRealIndex(Fabric inv, int ordinal) {
         return ordinal >= this.base + this.size ? -1 : Math.max(-1, this.base + ordinal);

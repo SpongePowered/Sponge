@@ -34,7 +34,7 @@ import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 
 import java.util.Optional;
 

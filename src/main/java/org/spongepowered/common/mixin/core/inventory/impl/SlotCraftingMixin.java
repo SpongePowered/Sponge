@@ -31,7 +31,6 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
@@ -53,12 +52,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.bridge.world.WorldBridge;
+
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -179,7 +178,7 @@ public abstract class SlotCraftingMixin extends Slot {
 
         final SlotTransaction last;
         if (previewTransactions.isEmpty()) {
-            last = new SlotTransaction(craftingInventory.getResult(), ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(this.getStack()));
+            last = new SlotTransaction(craftingInventory.getResult(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(this.getStack()));
             previewTransactions.add(last);
         } else {
             last = previewTransactions.get(0);

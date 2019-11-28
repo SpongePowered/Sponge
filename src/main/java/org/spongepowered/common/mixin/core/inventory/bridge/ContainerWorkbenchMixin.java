@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.inventory.bridge;
 
+import net.minecraft.inventory.container.WorkbenchContainer;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.inventory.LensProviderBridge;
@@ -32,15 +33,16 @@ import org.spongepowered.common.inventory.adapter.impl.slots.CraftingOutputAdapt
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLensImpl;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.mixin.core.inventory.impl.ContainerMixin;
+
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.inventory.container.WorkbenchContainer;
 
 @Mixin(WorkbenchContainer.class)
 public abstract class ContainerWorkbenchMixin extends ContainerMixin implements LensProviderBridge {
@@ -48,8 +50,8 @@ public abstract class ContainerWorkbenchMixin extends ContainerMixin implements 
     @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
         final List<Lens> lenses = new ArrayList<>();
-        lenses.add(new CraftingInventoryLens(0, 1, 3, 3, bridge$getSlotProvider()));
-        lenses.add(new PrimaryPlayerInventoryLens(3 * 3 + 1, bridge$getSlotProvider(), true));
+        lenses.add(new CraftingInventoryLens(0, 1, 3, 3, adapter.bridge$getSlotProvider()));
+        lenses.add(new PrimaryPlayerInventoryLens(3 * 3 + 1, adapter.bridge$getSlotProvider(), true));
         return new ContainerLens(adapter.bridge$getFabric().fabric$getSize(), (Class<? extends Inventory>) adapter.getClass(), bridge$getSlotProvider(), lenses);
     }
 

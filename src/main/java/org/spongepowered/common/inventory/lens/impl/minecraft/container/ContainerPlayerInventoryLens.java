@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft.container;
 
+import org.spongepowered.api.inventory.property.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 

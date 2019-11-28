@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
+import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -35,13 +36,12 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
-import org.spongepowered.common.item.inventory.lens.comp.MainPlayerInventoryLens;
+
 import java.util.Optional;
-import net.minecraft.inventory.container.Container;
 
 public class PlayerInventoryLens extends AbstractLens {
 
@@ -49,7 +49,7 @@ public class PlayerInventoryLens extends AbstractLens {
     private static final int OFFHAND = 1;
 
     private PrimaryPlayerInventoryLens main;
-    private org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens equipment;
+    private EquipmentInventoryLens equipment;
     private SlotLens offhand;
     private final boolean isContainer;
 
@@ -139,7 +139,7 @@ public class PlayerInventoryLens extends AbstractLens {
         }
     }
 
-    public MainPlayerInventoryLens getMainLens() {
+    public PrimaryPlayerInventoryLens getMainLens() {
         return this.main;
     }
 

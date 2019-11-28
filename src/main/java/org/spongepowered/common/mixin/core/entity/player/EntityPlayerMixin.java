@@ -117,6 +117,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.EntityLivingBaseMixin;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;

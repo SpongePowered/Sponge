@@ -29,6 +29,7 @@ import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
 import java.util.Collections;
 import java.util.List;
 

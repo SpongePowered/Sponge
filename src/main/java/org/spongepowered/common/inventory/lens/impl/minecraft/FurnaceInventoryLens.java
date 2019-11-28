@@ -30,9 +30,9 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.slot.FuelSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.OutputSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.impl.slots.InputSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slots.OutputSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slots.SlotLensProvider;
 
 public class FurnaceInventoryLens extends RealLens {
 

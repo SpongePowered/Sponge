@@ -31,13 +31,15 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
-import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.EmptyInventoryImpl;
+import org.spongepowered.common.inventory.InventoryIterator;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.inventory.lens.impl.CompoundLens;
@@ -45,9 +47,10 @@ import org.spongepowered.common.inventory.lens.impl.fabric.CompoundFabric;
 import org.spongepowered.common.inventory.query.Query;
 import org.spongepowered.common.inventory.query.type.LensQuery;
 import org.spongepowered.common.inventory.query.type.SlotLensQuery;
-import org.spongepowered.common.item.inventory.InventoryIterator;
+
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -274,9 +277,10 @@ public interface DefaultImplementedAdapterInventory extends Inventory {
 
     @SuppressWarnings("unchecked")
     @Override
-    default <T extends Inventory> Iterable<T> slots() {
-        // TODO caching
-        return (Iterable<T>) SlotCollection.of(this, ((InventoryBridge) this).bridge$getAdapter());
+    default List<Slot> slots() {
+        // TODO caching and not an iterator
+        SlotCollection iterator = SlotCollection.of(this, ((InventoryBridge) this).bridge$getAdapter());
+        return iterator;
     }
 
 }

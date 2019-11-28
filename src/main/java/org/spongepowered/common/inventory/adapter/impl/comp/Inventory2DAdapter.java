@@ -33,8 +33,9 @@ import org.spongepowered.api.item.inventory.type.Inventory2D;
 import org.spongepowered.common.inventory.adapter.impl.AdapterLogic;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.comp.Inventory2DLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.lens.comp.Inventory2DLens;
+
 import java.util.Optional;
 
 public class Inventory2DAdapter extends OrderedInventoryAdapter implements Inventory2D {

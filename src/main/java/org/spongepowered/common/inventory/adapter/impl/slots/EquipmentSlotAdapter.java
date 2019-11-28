@@ -28,7 +28,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.EquipmentSlotLens;
+import org.spongepowered.common.inventory.lens.slots.EquipmentSlotLens;
 
 import java.util.function.Predicate;
 

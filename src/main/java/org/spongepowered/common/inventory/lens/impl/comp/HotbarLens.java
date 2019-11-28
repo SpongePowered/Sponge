@@ -31,7 +31,7 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.HotbarAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
+import org.spongepowered.common.inventory.lens.comp.HotbarLens;
 
 public class HotbarLens extends InventoryRowLens implements HotbarLens {
 

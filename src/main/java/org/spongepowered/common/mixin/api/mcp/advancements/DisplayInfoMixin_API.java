@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
-import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.math.vector.Vector2d;
 

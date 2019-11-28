@@ -28,13 +28,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,8 +42,6 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 public interface ContainerBridge {
-
-    InventoryArchetype bridge$getArchetype();
 
     Optional<Carrier> bridge$getCarrier();
 
