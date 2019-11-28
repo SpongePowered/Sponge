@@ -60,7 +60,7 @@ public abstract class BlockDirtMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirtData) {
             final BlockDirt.DirtType dirtType = (BlockDirt.DirtType) (Object) ((ImmutableDirtData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockDirt.VARIANT, dirtType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDirt.field_176386_a, dirtType));
         }
         if (manipulator instanceof ImmutableSnowedData) {
             return Optional.of((BlockState) blockState);
@@ -72,7 +72,7 @@ public abstract class BlockDirtMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DIRT_TYPE)) {
             final BlockDirt.DirtType dirtType = (BlockDirt.DirtType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockDirt.VARIANT, dirtType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDirt.field_176386_a, dirtType));
         }
         if (key.equals(Keys.SNOWED)) {
             return Optional.of((BlockState) blockState);
@@ -81,10 +81,10 @@ public abstract class BlockDirtMixin extends BlockMixin {
     }
 
     private ImmutableDirtData impl$getDirtTypeFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirtData.class, (DirtType) (Object) blockState.getValue(BlockDirt.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirtData.class, (DirtType) (Object) blockState.func_177229_b(BlockDirt.field_176386_a));
     }
 
     private ImmutableSnowedData impl$getIsSnowedFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.getValue(BlockDirt.SNOWY));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.func_177229_b(BlockDirt.field_176385_b));
     }
 }

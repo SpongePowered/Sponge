@@ -56,7 +56,7 @@ public abstract class NetHandlerLoginServerMixin_Bungee {
             ordinal = 0,
             shift = At.Shift.AFTER))
     private void bungee$initUuid(final CallbackInfo ci) {
-        if (!this.server.isServerInOnlineMode()) {
+        if (!this.server.func_71266_T()) {
             final UUID uuid;
             if (((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$getSpoofedUUID() != null) {
                 uuid = ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$getSpoofedUUID();

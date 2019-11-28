@@ -49,7 +49,7 @@ public abstract class CommandDifficultyMixin_GlobalCommand {
             target = "Lnet/minecraft/server/MinecraftServer;setDifficultyForAllWorlds(Lnet/minecraft/world/EnumDifficulty;)V"))
     private void globalCommand$adjustWorldsThroughManager(final MinecraftServer server, final EnumDifficulty difficulty, final MinecraftServer server2,
         final ICommandSender sender, final String[] args) {
-        for (final WorldServer world : SpongeImpl.getServer().worlds) {
+        for (final WorldServer world : SpongeImpl.getServer().field_71305_c) {
             WorldManager.adjustWorldForDifficulty(world, difficulty, true);
         }
     }

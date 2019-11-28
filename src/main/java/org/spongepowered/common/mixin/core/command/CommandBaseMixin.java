@@ -51,12 +51,12 @@ public abstract class CommandBaseMixin implements ICommandBridge, ICommand {
 
     @Override
     public void bridge$updateNamespacedAlias(final String ownerId) {
-        this.impl$namespacedAlias = ownerId + ":" + getName();
+        this.impl$namespacedAlias = ownerId + ":" + func_71517_b();
     }
 
     @Redirect(method = "checkPermission", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/CommandBase;getName()Ljava/lang/String;"))
     private String onCheckPermissionGetNameCall(final CommandBase thisObject) {
-        return this.impl$namespacedAlias == null ? getName() : this.impl$namespacedAlias;
+        return this.impl$namespacedAlias == null ? func_71517_b() : this.impl$namespacedAlias;
     }
 
 }

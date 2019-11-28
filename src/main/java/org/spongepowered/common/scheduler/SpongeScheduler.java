@@ -192,7 +192,7 @@ public class SpongeScheduler implements Scheduler {
             for (Player player : Sponge.getServer().getOnlinePlayers()) {
                 if (player instanceof EntityPlayer) {
                     // Detect Changes on PlayerInventories marked as dirty.
-                    ((InventoryPlayerBridge) ((EntityPlayer) player).inventory).bridge$cleanupDirty();
+                    ((InventoryPlayerBridge) ((EntityPlayer) player).field_71071_by).bridge$cleanupDirty();
                 }
             }
         }

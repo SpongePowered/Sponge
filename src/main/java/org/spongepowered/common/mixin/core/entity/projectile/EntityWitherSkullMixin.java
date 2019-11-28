@@ -71,8 +71,8 @@ public abstract class EntityWitherSkullMixin extends EntityFireballMixin impleme
     @Override
     public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.hasKey(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.impl$damage = compound.getFloat(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
+        if (compound.func_74764_b(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
+            this.impl$damage = compound.func_74760_g(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
             this.impl$damageSet = true;
         }
     }
@@ -81,9 +81,9 @@ public abstract class EntityWitherSkullMixin extends EntityFireballMixin impleme
     public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         if (this.impl$damageSet) {
-            compound.setFloat(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damage);
+            compound.func_74776_a(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damage);
         } else {
-            compound.removeTag(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
+            compound.func_82580_o(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
         }
     }
 

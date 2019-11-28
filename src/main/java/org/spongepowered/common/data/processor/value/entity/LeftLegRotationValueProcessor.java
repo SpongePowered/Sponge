@@ -57,7 +57,7 @@ public class LeftLegRotationValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected boolean set(final EntityArmorStand container, final Vector3d value) {
-        container.setLeftLegRotation(VecHelper.toRotation(value));
+        container.func_175417_e(VecHelper.toRotation(value));
         return true;
     }
 

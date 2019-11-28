@@ -63,20 +63,20 @@ public final class InteractEntityPacketState extends BasicPacketState {
     public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.world);
+        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.func_149564_a(packetPlayer.field_70170_p);
         return entity == null;
     }
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
-        net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
+        net.minecraft.entity.Entity entity = useEntityPacket.func_149564_a(playerMP.field_70170_p);
         if (entity != null) {
-            final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
+            final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.func_184586_b(useEntityPacket.func_186994_b()));
             if (stack != null) {
                 context.itemUsed(stack);
             }
-            final HandType handType = (HandType) (Object) useEntityPacket.getHand();
+            final HandType handType = (HandType) (Object) useEntityPacket.func_186994_b();
             context.handUsed(handType);
         }
 
@@ -92,16 +92,16 @@ public final class InteractEntityPacketState extends BasicPacketState {
 
         final EntityPlayerMP player = phaseContext.getPacketPlayer();
         final CPacketUseEntity useEntityPacket = phaseContext.getPacket();
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
+        final net.minecraft.entity.Entity entity = useEntityPacket.func_149564_a(player.field_70170_p);
         if (entity == null) {
             // Something happened?
             return;
         }
-        final World spongeWorld = (World) player.world;
+        final World spongeWorld = (World) player.field_70170_p;
         if (entity instanceof OwnershipTrackedBridge) {
             ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) player);
         } else {
-            ((Entity) entity).setNotifier(player.getUniqueID());
+            ((Entity) entity).setNotifier(player.func_110124_au());
         }
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized

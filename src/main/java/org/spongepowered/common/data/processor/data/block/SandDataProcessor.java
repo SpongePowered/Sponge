@@ -39,17 +39,17 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class SandDataProcessor extends AbstractCatalogDataProcessor<SandType, Value<SandType>, SandData, ImmutableSandData> {
 
     public SandDataProcessor() {
-        super(Keys.SAND_TYPE, input -> input.getItem() == ItemTypes.SAND);
+        super(Keys.SAND_TYPE, input -> input.func_77973_b() == ItemTypes.SAND);
     }
 
     @Override
     protected int setToMeta(SandType value) {
-        return ((BlockSand.EnumType) (Object) value).getMetadata();
+        return ((BlockSand.EnumType) (Object) value).func_176688_a();
     }
 
     @Override
     protected SandType getFromMeta(int meta) {
-        return (SandType) (Object) BlockSand.EnumType.byMetadata(meta);
+        return (SandType) (Object) BlockSand.EnumType.func_176686_a(meta);
     }
 
     @Override

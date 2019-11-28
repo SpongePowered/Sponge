@@ -101,7 +101,7 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
     )
     private Entity impl$ThrowEventAndConstruct(
         final NBTTagCompound compound, final World world, final double x, final double y, final double z, final boolean doesNotForceSpawn) {
-        final String entityTypeString = compound.getString(Constants.Entity.ENTITY_TYPE_ID);
+        final String entityTypeString = compound.func_74779_i(Constants.Entity.ENTITY_TYPE_ID);
         final Class<? extends Entity> clazz = SpongeImplHooks.getEntityClass(new ResourceLocation(entityTypeString));
         if (clazz == null) {
             final PrettyPrinter printer = new PrettyPrinter(60).add("Unknown Entity for MobSpawners").centre().hr()
@@ -133,7 +133,7 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
         }
         final Entity entity;
         try {
-            entity = EntityList.createEntityFromNBT(compound, world);
+            entity = EntityList.func_75615_a(compound, world);
         } catch (Exception e) {
             return null;
         }
@@ -142,20 +142,20 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
             return null;
         }
 
-        entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
+        entity.func_70012_b(x, y, z, entity.field_70177_z, entity.field_70125_A);
 
-        if (doesNotForceSpawn && !world.spawnEntity(entity)) {
+        if (doesNotForceSpawn && !world.func_72838_d(entity)) {
             return null;
         }
 
 
-        if (compound.hasKey(Constants.Entity.PASSENGERS, Constants.NBT.TAG_LIST)) {
-            final NBTTagList passengerList = compound.getTagList(Constants.Entity.PASSENGERS, Constants.NBT.TAG_COMPOUND);
+        if (compound.func_150297_b(Constants.Entity.PASSENGERS, Constants.NBT.TAG_LIST)) {
+            final NBTTagList passengerList = compound.func_150295_c(Constants.Entity.PASSENGERS, Constants.NBT.TAG_COMPOUND);
 
-            for (int i = 0; i < passengerList.tagCount(); i++) {
-                final Entity passenger = impl$ThrowEventAndConstruct(passengerList.getCompoundTagAt(i), world, x, y, z, doesNotForceSpawn);
+            for (int i = 0; i < passengerList.func_74745_c(); i++) {
+                final Entity passenger = impl$ThrowEventAndConstruct(passengerList.func_150305_b(i), world, x, y, z, doesNotForceSpawn);
                 if (passenger != null) {
-                    passenger.startRiding(entity, true);
+                    passenger.func_184205_a(entity, true);
                 }
             }
         }

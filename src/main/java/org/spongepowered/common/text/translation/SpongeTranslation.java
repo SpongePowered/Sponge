@@ -49,13 +49,13 @@ public class SpongeTranslation implements Translation {
     @SuppressWarnings("deprecation")
     @Override
     public String get(Locale locale) {
-        return net.minecraft.util.text.translation.I18n.translateToLocal(this.id);
+        return net.minecraft.util.text.translation.I18n.func_74838_a(this.id);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public String get(Locale locale, Object... args) {
-        return net.minecraft.util.text.translation.I18n.translateToLocalFormatted(this.id, args);
+        return net.minecraft.util.text.translation.I18n.func_74837_a(this.id, args);
     }
 
     @Override

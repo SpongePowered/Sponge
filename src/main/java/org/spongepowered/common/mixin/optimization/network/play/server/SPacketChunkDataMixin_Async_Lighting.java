@@ -49,7 +49,7 @@ public abstract class SPacketChunkDataMixin_Async_Lighting implements Packet<INe
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/chunk/Chunk;getBlockStorageArray()[Lnet/minecraft/world/chunk/storage/ExtendedBlockStorage;"))
     private ExtendedBlockStorage[] asyncLightingImpl$onGetBlockStorageArrayForCalculation(final Chunk chunk) {
-        return this.asyncLightingImpl$blockStorageArray = ArrayUtils.clone(chunk.getBlockStorageArray());
+        return this.asyncLightingImpl$blockStorageArray = ArrayUtils.clone(chunk.func_76587_i());
     }
 
     @Redirect(method = "extractChunkData",

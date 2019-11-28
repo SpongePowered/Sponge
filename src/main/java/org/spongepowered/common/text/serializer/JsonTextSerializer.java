@@ -55,7 +55,7 @@ public final class JsonTextSerializer implements TextSerializer {
     @Override
     public Text deserialize(String input) throws TextParseException {
         try {
-            ITextComponent component = ITextComponent.Serializer.jsonToComponent(input);
+            ITextComponent component = ITextComponent.Serializer.func_150699_a(input);
             if (component == null) {
                 return Text.EMPTY;
             }

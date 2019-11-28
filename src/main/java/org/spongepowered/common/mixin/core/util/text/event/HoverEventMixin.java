@@ -68,13 +68,13 @@ public abstract class HoverEventMixin implements HoverEventBridge {
                         break;
                     case SHOW_ENTITY:
                         NBTTagCompound nbt = loadNbt();
-                        String name = nbt.getString("name");
+                        String name = nbt.func_74779_i("name");
                         EntityType type = null;
-                        if (nbt.hasKey("type", Constants.NBT.TAG_STRING)) {
+                        if (nbt.func_150297_b("type", Constants.NBT.TAG_STRING)) {
                             type = SpongeImpl.getGame().getRegistry().getType(EntityType.class, name).orElse(null);
                         }
 
-                        UUID uniqueId = UUID.fromString(nbt.getString("id"));
+                        UUID uniqueId = UUID.fromString(nbt.func_74779_i("id"));
                         bridge$setHandle(TextActions.showEntity(uniqueId, name, type));
                         break;
                     default:
@@ -89,7 +89,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
 
     private NBTTagCompound loadNbt() {
         try {
-            return checkNotNull(JsonToNBT.getTagFromJson(this.value.getUnformattedText()), "NBT");
+            return checkNotNull(JsonToNBT.func_180713_a(this.value.func_150260_c()), "NBT");
         } catch (NBTException e) {
             throw new RuntimeException(e);
         }

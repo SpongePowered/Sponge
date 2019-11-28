@@ -68,7 +68,7 @@ public abstract class BlockFarmlandMixin extends BlockMixin {
             if (moisture > 7) {
                 moisture = 7;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockFarmland.MOISTURE, moisture));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockFarmland.field_176531_a, moisture));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -80,13 +80,13 @@ public abstract class BlockFarmlandMixin extends BlockMixin {
             if (moisture > 7) {
                 moisture = 7;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockFarmland.MOISTURE, moisture));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockFarmland.field_176531_a, moisture));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableMoistureData impl$getMoistureData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeMoistureData.class, blockState.getValue(BlockFarmland.MOISTURE), 0, 7);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeMoistureData.class, blockState.func_177229_b(BlockFarmland.field_176531_a), 0, 7);
     }
 
     @Redirect(method = "onFallenUpon",

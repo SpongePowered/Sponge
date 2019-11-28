@@ -50,13 +50,13 @@ public class IsAdultZombieValueProcessor extends AbstractSpongeValueProcessor<En
 
     @Override
     protected boolean set(EntityZombie container, Boolean adult) {
-        container.setChild(!adult);
+        container.func_82227_f(!adult);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityZombie container) {
-        return OptBool.of((Boolean) !container.isChild());
+        return OptBool.of((Boolean) !container.func_70631_g_());
     }
 
     @Override

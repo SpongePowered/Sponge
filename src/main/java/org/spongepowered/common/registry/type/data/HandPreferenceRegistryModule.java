@@ -33,7 +33,7 @@ import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandPreferences;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-
+import org.spongepowered.common.registry.type.data.HandPreferenceRegistryModule.Holder;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;

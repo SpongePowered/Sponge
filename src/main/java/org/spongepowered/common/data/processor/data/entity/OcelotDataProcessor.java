@@ -59,7 +59,7 @@ public class OcelotDataProcessor extends
     @Override
     protected boolean set(EntityOcelot entity, OcelotType value) {
         if (value instanceof SpongeOcelotType) {
-            entity.setTameSkin(((SpongeOcelotType) value).type);
+            entity.func_70912_b(((SpongeOcelotType) value).type);
             return true;
         }
         return false;
@@ -67,7 +67,7 @@ public class OcelotDataProcessor extends
 
     @Override
     protected Optional<OcelotType> getVal(EntityOcelot entity) {
-        return Optional.ofNullable(OcelotTypeRegistryModule.OCELOT_IDMAP.get(entity.getTameSkin()));
+        return Optional.ofNullable(OcelotTypeRegistryModule.OCELOT_IDMAP.get(entity.func_70913_u()));
     }
 
     @Override

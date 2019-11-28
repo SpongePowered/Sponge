@@ -54,13 +54,13 @@ public class EntityTracksOutputValueProcessor extends AbstractSpongeValueProcess
 
     @Override
     protected boolean set(EntityMinecartCommandBlock container, Boolean value) {
-        container.getCommandBlockLogic().setTrackOutput(value);
+        container.func_145822_e().func_175573_a(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityMinecartCommandBlock container) {
-        return Optional.of(container.getCommandBlockLogic().shouldTrackOutput());
+        return Optional.of(container.func_145822_e().func_175571_m());
     }
 
     @Override

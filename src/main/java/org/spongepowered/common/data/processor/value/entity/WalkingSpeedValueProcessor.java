@@ -57,13 +57,13 @@ public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<Ent
     @Override
     protected boolean set(final EntityPlayer container, final Double value) {
         setWalkSpeed(container, value);
-        container.sendPlayerAbilities();
+        container.func_71016_p();
         return true;
     }
 
     @Override
     protected Optional<Double> getVal(final EntityPlayer container) {
-        return Optional.of(((double) container.capabilities.getWalkSpeed()));
+        return Optional.of(((double) container.field_71075_bZ.func_75094_b()));
     }
 
     @Override
@@ -72,8 +72,8 @@ public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     public static void setWalkSpeed(final EntityPlayer container, final double value) {
-        ((PlayerCapabilitiesAccessor) container.capabilities).accessor$setWalkSpeed((float) value);
-        final IAttributeInstance attribute = container.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
-        attribute.setBaseValue(value);
+        ((PlayerCapabilitiesAccessor) container.field_71075_bZ).accessor$setWalkSpeed((float) value);
+        final IAttributeInstance attribute = container.func_110148_a(SharedMonsterAttributes.field_111263_d);
+        attribute.func_111128_a(value);
     }
 }

@@ -53,7 +53,7 @@ public abstract class EntityMixin_Activation implements ActivationCapability {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void activation$InitActivationRanges(@Nullable final World world, final CallbackInfo ci) {
-        if (world != null && !((WorldBridge) world).bridge$isFake() && ((WorldInfoBridge) world.getWorldInfo()).bridge$isValid()) {
+        if (world != null && !((WorldBridge) world).bridge$isFake() && ((WorldInfoBridge) world.func_72912_H()).bridge$isValid()) {
             EntityActivationRange.initializeEntityActivationState((net.minecraft.entity.Entity) (Object) this);
         }
     }

@@ -167,7 +167,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
                 Collectors.toMap(e -> e.getKey().toString(), e -> IngredientUtil.toNative(e.getValue())));
 
         // Default space to Empty Ingredient
-        ingredientsMap.putIfAbsent(" ", net.minecraft.item.crafting.Ingredient.EMPTY);
+        ingredientsMap.putIfAbsent(" ", net.minecraft.item.crafting.Ingredient.field_193370_a);
 
         // Throws JsonException when pattern is not complete or defines unused Ingredients
         final NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipesAccessor.accessor$deserializeIngredients(keys, ingredientsMap, width, height);

@@ -65,7 +65,7 @@ public abstract class BlockTorchMixin extends BlockMixin {
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.withProperty(BlockTorch.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockTorch.field_176596_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -77,18 +77,18 @@ public abstract class BlockTorchMixin extends BlockMixin {
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown((Direction) value);
-            return Optional.of((BlockState) blockState.withProperty(BlockTorch.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockTorch.field_176596_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableAttachedData impl$getIsAttachedFor(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class,
-                blockState.getValue(BlockTorch.FACING) != EnumFacing.UP);
+                blockState.func_177229_b(BlockTorch.field_176596_a) != EnumFacing.UP);
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.getValue(BlockTorch.FACING)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockTorch.field_176596_a)));
     }
 }

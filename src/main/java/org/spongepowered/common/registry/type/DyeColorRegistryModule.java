@@ -63,7 +63,7 @@ public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeCo
     @Override
     public void registerDefaults() {
         for (EnumDyeColor dyeColor : EnumDyeColor.values()) {
-            this.dyeColorMappings.put(dyeColor.getName().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
+            this.dyeColorMappings.put(dyeColor.func_176610_l().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
         }
     }
 
@@ -71,14 +71,14 @@ public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeCo
     public void registerAdditional() {
         for (EnumDyeColor dyeColor : EnumDyeColor.values()) {
             if (!this.dyeColorMappings.containsValue(dyeColor)) {
-                this.dyeColorMappings.put(dyeColor.getName().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
+                this.dyeColorMappings.put(dyeColor.func_176610_l().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
             }
         }
     }
 
     public static Optional<DyeColor> fromId(int id) {
         for (EnumDyeColor color : EnumDyeColor.values()) {
-            if (color.getDyeDamage() == id) {
+            if (color.func_176767_b() == id) {
                 return Optional.of((DyeColor) (Object) color);
             }
         }

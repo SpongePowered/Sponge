@@ -129,7 +129,7 @@ public abstract class RConThreadClientMixin extends RConThreadBase implements RC
         ///         'closeSocket' is moved out of the loop
         while (true) {
             try {
-                if (!this.running) {
+                if (!this.field_72619_a) {
                     break;
                 }
 
@@ -146,22 +146,22 @@ public abstract class RConThreadClientMixin extends RConThreadBase implements RC
 
                 if (10 <= i) {
                     int j = 0;
-                    final int k = RConUtils.getBytesAsLEInt(this.buffer, 0, i);
+                    final int k = RConUtils.func_72665_b(this.buffer, 0, i);
 
                     if (k != i - 4) {
                         break;
                     }
 
                     j += 4;
-                    final int l = RConUtils.getBytesAsLEInt(this.buffer, j, i);
+                    final int l = RConUtils.func_72665_b(this.buffer, j, i);
                     j += 4;
-                    final int i1 = RConUtils.getRemainingBytesAsLEInt(this.buffer, j);
+                    final int i1 = RConUtils.func_72662_b(this.buffer, j);
                     j += 4;
 
                     switch (i1) {
                         case 2:
                             if (this.loggedIn) {
-                                final String command = RConUtils.getBytesAsString(this.buffer, j, i);
+                                final String command = RConUtils.func_72661_a(this.buffer, j, i);
                                 try {
                                     /// Sponge: START
                                     // Execute the command on the main thread and wait for it
@@ -170,11 +170,11 @@ public abstract class RConThreadClientMixin extends RConThreadBase implements RC
                                         // Only add the RemoteConnection here, the RconSource
                                         // will be added by the command manager
                                         causeStackManager.pushCause(this);
-                                        SpongeImpl.getServer().getCommandManager().executeCommand(this.impl$source, command);
+                                        SpongeImpl.getServer().func_71187_D().func_71556_a(this.impl$source, command);
                                         causeStackManager.popCause();
                                     }).get();
-                                    final String logContents = this.impl$source.getLogContents();
-                                    this.impl$source.resetLog();
+                                    final String logContents = this.impl$source.func_70008_c();
+                                    this.impl$source.func_70007_b();
                                     sendMultipacketResponse(l, logContents);
                                     /// Sponge: END
                                 } catch (Exception exception) {
@@ -185,7 +185,7 @@ public abstract class RConThreadClientMixin extends RConThreadBase implements RC
                             sendLoginFailedResponse();
                             break; // Sponge: 'continue' -> 'break', disconnect when a invalid operation is requested
                         case 3:
-                            final String password = RConUtils.getBytesAsString(this.buffer, j, i);
+                            final String password = RConUtils.func_72661_a(this.buffer, j, i);
                             if (!password.isEmpty() && password.equals(this.rconPassword)) {
                                 /// Sponge: START
                                 final RconConnectionEvent.Login event = SpongeImpl.getScheduler().callSync(() -> {

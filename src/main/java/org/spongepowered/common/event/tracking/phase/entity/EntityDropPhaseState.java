@@ -102,7 +102,7 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
             if (isPlayer) {
                 // Forge and Vanilla always clear items on player death BEFORE drops occur
                 // This will also provide the highest compatibility with mods such as Tinkers Construct
-                entityPlayer.inventory.clear();
+                entityPlayer.field_71071_by.func_174888_l();
             }
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
@@ -123,14 +123,14 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
             if (!items.isEmpty()) {
                 final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) dyingEntity;
                 final List<Entity> itemEntities = items.stream()
-                    .map(data -> data.create((WorldServer) minecraftEntity.world))
+                    .map(data -> data.create((WorldServer) minecraftEntity.field_70170_p))
                     .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
 
                 if (isPlayer && entityPlayer != null) {
                     // Forge and Vanilla always clear items on player death BEFORE drops occur
                     // This will also provide the highest compatibility with mods such as Tinkers Construct
-                    entityPlayer.inventory.clear();
+                    entityPlayer.field_71071_by.func_174888_l();
                 }
 
                 SpongeCommonEventFactory.callDropItemDestruct(itemEntities, context);

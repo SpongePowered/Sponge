@@ -169,8 +169,8 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
 
     // used in all init methods
     private void impl$commonConstructionSetUpSpongeCompounds() {
-        this.impl$spongeNbt.setTag(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, this.impl$playerUniqueIdNbt);
-        this.impl$spongeRootLevelNbt.setTag(Constants.Sponge.SPONGE_DATA, this.impl$spongeNbt);
+        this.impl$spongeNbt.func_74782_a(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, this.impl$playerUniqueIdNbt);
+        this.impl$spongeRootLevelNbt.func_74782_a(Constants.Sponge.SPONGE_DATA, this.impl$spongeNbt);
     }
 
     @Inject(method = "updateTagCompound", at = @At("HEAD"))
@@ -258,11 +258,11 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     public void bridge$updatePlayersForDifficulty() {
         WorldManager.getWorlds()
                 .stream()
-                .filter(world -> world.getWorldInfo() == (WorldInfo) (Object) this)
-                .flatMap(world -> world.playerEntities.stream())
+                .filter(world -> world.func_72912_H() == (WorldInfo) (Object) this)
+                .flatMap(world -> world.field_73010_i.stream())
                 .filter(player -> player instanceof EntityPlayerMP)
                 .map(player -> (EntityPlayerMP) player)
-                .forEach(player -> player.connection.sendPacket(new SPacketServerDifficulty(this.difficulty, ((WorldInfo) (Object) this).isDifficultyLocked
+                .forEach(player -> player.field_71135_a.func_147359_a(new SPacketServerDifficulty(this.difficulty, ((WorldInfo) (Object) this).func_176123_z
                         ())));
     }
 
@@ -352,30 +352,30 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Override
     public void bridge$setSpongeRootLevelNBT(final NBTTagCompound nbt) {
         this.impl$spongeRootLevelNbt = nbt;
-        if (nbt.hasKey(Constants.Sponge.SPONGE_DATA)) {
-            this.impl$spongeNbt = nbt.getCompoundTag(Constants.Sponge.SPONGE_DATA);
+        if (nbt.func_74764_b(Constants.Sponge.SPONGE_DATA)) {
+            this.impl$spongeNbt = nbt.func_74775_l(Constants.Sponge.SPONGE_DATA);
         }
     }
 
     @Override
     public void bridge$readSpongeNbt(final NBTTagCompound nbt) {
-        final UUID nbtUniqueId = nbt.getUniqueId(Constants.UUID);
+        final UUID nbtUniqueId = nbt.func_186857_a(Constants.UUID);
         if (UUID.fromString("00000000-0000-0000-0000-000000000000").equals(nbtUniqueId)) {
             return;
         }
         this.impl$uuid = nbtUniqueId;
-        this.impl$dimensionId = nbt.getInteger(Constants.Sponge.World.DIMENSION_ID);
-        final String dimensionTypeId = nbt.getString(Constants.Sponge.World.DIMENSION_TYPE);
+        this.impl$dimensionId = nbt.func_74762_e(Constants.Sponge.World.DIMENSION_ID);
+        final String dimensionTypeId = nbt.func_74779_i(Constants.Sponge.World.DIMENSION_TYPE);
         final DimensionType dimensionType = (org.spongepowered.api.world.DimensionType)(Object) WorldManager.getDimensionType(this.impl$dimensionId).orElse(null);
         this.bridge$setDimensionType(dimensionType != null ? dimensionType : DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)
                 .orElseThrow(() -> new IllegalArgumentException(
                     "Could not find a DimensionType registered for world '" + this.getWorldName() + "' with dim id: " + this.impl$dimensionId)));
-        this.impl$generateBonusChest = nbt.getBoolean(Constants.World.GENERATE_BONUS_CHEST);
-        this.impl$portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(nbt.getString(Constants.Sponge.World.PORTAL_AGENT_TYPE), this.levelName);
-        this.impl$hasCustomDifficulty = nbt.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);
+        this.impl$generateBonusChest = nbt.func_74767_n(Constants.World.GENERATE_BONUS_CHEST);
+        this.impl$portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(nbt.func_74779_i(Constants.Sponge.World.PORTAL_AGENT_TYPE), this.levelName);
+        this.impl$hasCustomDifficulty = nbt.func_74767_n(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);
         this.impl$trackedUniqueIdCount = 0;
-        if (nbt.hasKey(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR)) {
-            final short saveBehavior = nbt.getShort(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR);
+        if (nbt.func_74764_b(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR)) {
+            final short saveBehavior = nbt.func_74765_d(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR);
             if (saveBehavior == 1) {
                 ((WorldProperties) this).setSerializationBehavior(SerializationBehaviors.AUTOMATIC);
             } else if (saveBehavior == 0) {
@@ -384,16 +384,16 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
                 ((WorldProperties) this).setSerializationBehavior(SerializationBehaviors.NONE);
             }
         }
-        if (nbt.hasKey(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
-            final NBTTagList playerIdList = nbt.getTagList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
-            for (int i = 0; i < playerIdList.tagCount(); i++) {
-                final NBTTagCompound playerId = playerIdList.getCompoundTagAt(i);
-                final UUID playerUuid = playerId.getUniqueId(Constants.UUID);
+        if (nbt.func_150297_b(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
+            final NBTTagList playerIdList = nbt.func_150295_c(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
+            for (int i = 0; i < playerIdList.func_74745_c(); i++) {
+                final NBTTagCompound playerId = playerIdList.func_150305_b(i);
+                final UUID playerUuid = playerId.func_186857_a(Constants.UUID);
                 final Integer playerIndex = this.impl$playerUniqueIdMap.inverse().get(playerUuid);
                 if (playerIndex == null) {
                     this.impl$playerUniqueIdMap.put(this.impl$trackedUniqueIdCount++, playerUuid);
                 } else {
-                    playerIdList.removeTag(i);
+                    playerIdList.func_74744_a(i);
                 }
             }
 
@@ -403,29 +403,29 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     private void writeSpongeNbt() {
         // Never save Sponge data if we have no UUID
         if (this.impl$uuid != null && this.bridge$isValid()) {
-            this.impl$spongeNbt.setInteger(Constants.Sponge.DATA_VERSION, Constants.Sponge.SPONGE_DATA_VERSION);
-            this.impl$spongeNbt.setUniqueId(Constants.UUID, this.impl$uuid);
-            this.impl$spongeNbt.setInteger(Constants.Sponge.World.DIMENSION_ID, this.impl$dimensionId);
-            this.impl$spongeNbt.setString(Constants.Sponge.World.DIMENSION_TYPE, this.impl$dimensionType.getId());
-            this.impl$spongeNbt.setBoolean(Constants.World.GENERATE_BONUS_CHEST, this.impl$generateBonusChest);
+            this.impl$spongeNbt.func_74768_a(Constants.Sponge.DATA_VERSION, Constants.Sponge.SPONGE_DATA_VERSION);
+            this.impl$spongeNbt.func_186854_a(Constants.UUID, this.impl$uuid);
+            this.impl$spongeNbt.func_74768_a(Constants.Sponge.World.DIMENSION_ID, this.impl$dimensionId);
+            this.impl$spongeNbt.func_74778_a(Constants.Sponge.World.DIMENSION_TYPE, this.impl$dimensionType.getId());
+            this.impl$spongeNbt.func_74757_a(Constants.World.GENERATE_BONUS_CHEST, this.impl$generateBonusChest);
             if (this.impl$portalAgentType == null) {
                 this.impl$portalAgentType = PortalAgentTypes.DEFAULT;
             }
-            this.impl$spongeNbt.setString(Constants.Sponge.World.PORTAL_AGENT_TYPE, this.impl$portalAgentType.getPortalAgentClass().getName());
+            this.impl$spongeNbt.func_74778_a(Constants.Sponge.World.PORTAL_AGENT_TYPE, this.impl$portalAgentType.getPortalAgentClass().getName());
             short saveBehavior = 1;
             if (((WorldProperties) this).getSerializationBehavior() == SerializationBehaviors.NONE) {
                 saveBehavior = -1;
             } else if (((WorldProperties) this).getSerializationBehavior() == SerializationBehaviors.MANUAL) {
                 saveBehavior = 0;
             }
-            this.impl$spongeNbt.setShort(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
-            this.impl$spongeNbt.setBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY, this.impl$hasCustomDifficulty);
+            this.impl$spongeNbt.func_74777_a(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
+            this.impl$spongeNbt.func_74757_a(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY, this.impl$hasCustomDifficulty);
             final Iterator<UUID> iterator = this.impl$pendingUniqueIds.iterator();
-            final NBTTagList playerIdList = this.impl$spongeNbt.getTagList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
+            final NBTTagList playerIdList = this.impl$spongeNbt.func_150295_c(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
             while (iterator.hasNext()) {
                 final NBTTagCompound compound = new NBTTagCompound();
-                compound.setUniqueId(Constants.UUID, iterator.next());
-                playerIdList.appendTag(compound);
+                compound.func_186854_a(Constants.UUID, iterator.next());
+                playerIdList.func_74742_a(compound);
                 iterator.remove();
             }
         }

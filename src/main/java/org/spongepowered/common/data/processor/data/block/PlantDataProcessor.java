@@ -43,7 +43,7 @@ import java.util.Optional;
 public class PlantDataProcessor extends AbstractCatalogDataProcessor<PlantType, Value<PlantType>, PlantData, ImmutablePlantData> {
 
     public PlantDataProcessor() {
-        super(Keys.PLANT_TYPE, input -> input.getItem() == ItemTypes.YELLOW_FLOWER || input.getItem() == ItemTypes.RED_FLOWER);
+        super(Keys.PLANT_TYPE, input -> input.func_77973_b() == ItemTypes.YELLOW_FLOWER || input.func_77973_b() == ItemTypes.RED_FLOWER);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class PlantDataProcessor extends AbstractCatalogDataProcessor<PlantType, 
 
     @Override
     protected int setToMeta(PlantType value) {
-        return ((BlockFlower.EnumFlowerType) (Object) value).getMeta();
+        return ((BlockFlower.EnumFlowerType) (Object) value).func_176968_b();
     }
 
     @Override
@@ -68,10 +68,10 @@ public class PlantDataProcessor extends AbstractCatalogDataProcessor<PlantType, 
 
     @Override
     protected Optional<PlantType> getVal(ItemStack itemStack) {
-        if (itemStack.getItem() == ItemTypes.RED_FLOWER) {
-            return Optional.of((PlantType) (Object) BlockFlower.EnumFlowerType.getType(EnumFlowerColor.RED, itemStack.getItemDamage()));
+        if (itemStack.func_77973_b() == ItemTypes.RED_FLOWER) {
+            return Optional.of((PlantType) (Object) BlockFlower.EnumFlowerType.func_176967_a(EnumFlowerColor.RED, itemStack.func_77952_i()));
         }
-        return Optional.of((PlantType) (Object) BlockFlower.EnumFlowerType.getType(EnumFlowerColor.YELLOW, itemStack.getItemDamage()));
+        return Optional.of((PlantType) (Object) BlockFlower.EnumFlowerType.func_176967_a(EnumFlowerColor.YELLOW, itemStack.func_77952_i()));
     }
 
     @Override

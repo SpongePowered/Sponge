@@ -54,14 +54,14 @@ public abstract class BlockLiquidMixin extends BlockMixin {
     )
     private void impl$CheckForLiquidMixing(final World worldIn, final BlockPos pos, final IBlockState state,
         final CallbackInfoReturnable<Boolean> cir, final boolean flag, final Integer integer) {
-        final IBlockState newState = integer == 0 ? Blocks.OBSIDIAN.getDefaultState() : Blocks.COBBLESTONE.getDefaultState();
+        final IBlockState newState = integer == 0 ? Blocks.field_150343_Z.func_176223_P() : Blocks.field_150347_e.func_176223_P();
         final ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, pos, newState, null);
         final Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
         if (event.isCancelled() || !transaction.isValid()) {
             cir.setReturnValue(false);
             return;
         }
-        final boolean success = worldIn.setBlockState(pos, (IBlockState) transaction.getFinal().getState());
+        final boolean success = worldIn.func_175656_a(pos, (IBlockState) transaction.getFinal().getState());
         if (!success) {
             cir.setReturnValue(false);
         }

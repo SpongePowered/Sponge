@@ -34,32 +34,32 @@ import java.util.UUID;
 public class SpongeLevelFixer implements IFixableData {
 
     @Override
-    public int getFixVersion() {
+    public int func_188216_a() {
         return Constants.Legacy.World.WORLD_UUID_1_9_VERSION;
     }
 
     @Override
-    public NBTTagCompound fixTagCompound(NBTTagCompound compound) {
+    public NBTTagCompound func_188217_a(NBTTagCompound compound) {
         { // Fixes the world unique id
-            final long least = compound.getLong(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
-            final long most = compound.getLong(Constants.Legacy.World.WORLD_UUID_MOST_1_8);
+            final long least = compound.func_74763_f(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
+            final long most = compound.func_74763_f(Constants.Legacy.World.WORLD_UUID_MOST_1_8);
             final UUID worldId = new UUID(most, least);
-            compound.removeTag(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
-            compound.removeTag(Constants.Legacy.World.WORLD_UUID_MOST_1_8);
-            compound.setUniqueId(Constants.UUID, worldId);
+            compound.func_82580_o(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
+            compound.func_82580_o(Constants.Legacy.World.WORLD_UUID_MOST_1_8);
+            compound.func_186854_a(Constants.UUID, worldId);
 
         }
         // Fixes the Player Id Table
-        if (compound.hasKey(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
-            final NBTTagList playerIdList = compound.getTagList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
-            for (int i = 0; i < playerIdList.tagCount(); i++) {
-                final NBTTagCompound playerIdCompound = playerIdList.getCompoundTagAt(i);
-                final long least = playerIdCompound.getLong(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
-                final long most = playerIdCompound.getLong(Constants.Legacy.World.WORLD_UUID_MOST_1_8);
-                playerIdCompound.removeTag(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
-                playerIdCompound.removeTag(Constants.Legacy.World.WORLD_UUID_MOST_1_8);
+        if (compound.func_150297_b(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
+            final NBTTagList playerIdList = compound.func_150295_c(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
+            for (int i = 0; i < playerIdList.func_74745_c(); i++) {
+                final NBTTagCompound playerIdCompound = playerIdList.func_150305_b(i);
+                final long least = playerIdCompound.func_74763_f(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
+                final long most = playerIdCompound.func_74763_f(Constants.Legacy.World.WORLD_UUID_MOST_1_8);
+                playerIdCompound.func_82580_o(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
+                playerIdCompound.func_82580_o(Constants.Legacy.World.WORLD_UUID_MOST_1_8);
                 final UUID playerId = new UUID(most, least);
-                playerIdCompound.setUniqueId(Constants.UUID, playerId);
+                playerIdCompound.func_186854_a(Constants.UUID, playerId);
             }
         }
         return compound;

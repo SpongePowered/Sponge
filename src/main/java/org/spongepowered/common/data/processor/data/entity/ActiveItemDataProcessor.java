@@ -51,7 +51,7 @@ public class ActiveItemDataProcessor extends AbstractSingleDataSingleTargetProce
     @Override
     protected boolean set(EntityLivingBase dataHolder, ItemStackSnapshot value) {
         if (value == null || value.isEmpty()) {
-            dataHolder.stopActiveHand();
+            dataHolder.func_184597_cx();
             return true;
         }
         return false;
@@ -59,7 +59,7 @@ public class ActiveItemDataProcessor extends AbstractSingleDataSingleTargetProce
 
     @Override
     protected Optional<ItemStackSnapshot> getVal(EntityLivingBase dataHolder) {
-        return Optional.of(ItemStackUtil.snapshotOf(dataHolder.getActiveItemStack()));
+        return Optional.of(ItemStackUtil.snapshotOf(dataHolder.func_184607_cu()));
     }
 
     @Override

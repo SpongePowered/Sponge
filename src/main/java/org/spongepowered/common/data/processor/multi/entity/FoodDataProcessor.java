@@ -61,17 +61,17 @@ public class FoodDataProcessor extends AbstractEntityDataProcessor<EntityPlayer,
 
     @Override
     protected boolean set(final EntityPlayer entity, final Map<Key<?>, Object> keyValues) {
-        entity.getFoodStats().setFoodLevel((Integer) keyValues.get(Keys.FOOD_LEVEL));
-        ((FoodStatsAccessor) entity.getFoodStats()).accessor$setFoodSaturationLevel(((Double) keyValues.get(Keys.SATURATION)).floatValue());
-        ((FoodStatsAccessor) entity.getFoodStats()).accessor$setFoodExhaustionLevel(((Double) keyValues.get(Keys.EXHAUSTION)).floatValue());
+        entity.func_71024_bL().func_75114_a((Integer) keyValues.get(Keys.FOOD_LEVEL));
+        ((FoodStatsAccessor) entity.func_71024_bL()).accessor$setFoodSaturationLevel(((Double) keyValues.get(Keys.SATURATION)).floatValue());
+        ((FoodStatsAccessor) entity.func_71024_bL()).accessor$setFoodExhaustionLevel(((Double) keyValues.get(Keys.EXHAUSTION)).floatValue());
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(final EntityPlayer entity) {
-        final int food = entity.getFoodStats().getFoodLevel();
-        final double saturation = entity.getFoodStats().getSaturationLevel();
-        final double exhaustion = ((FoodStatsAccessor) entity.getFoodStats()).accessor$getFoodExhaustionLevel();
+        final int food = entity.func_71024_bL().func_75116_a();
+        final double saturation = entity.func_71024_bL().func_75115_e();
+        final double exhaustion = ((FoodStatsAccessor) entity.func_71024_bL()).accessor$getFoodExhaustionLevel();
         return ImmutableMap.<Key<?>, Object>of(Keys.FOOD_LEVEL, food,
                                                Keys.SATURATION, saturation,
                                                Keys.EXHAUSTION, exhaustion);

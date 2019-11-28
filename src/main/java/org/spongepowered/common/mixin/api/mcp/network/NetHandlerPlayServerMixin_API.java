@@ -66,7 +66,7 @@ public abstract class NetHandlerPlayServerMixin_API implements PlayerConnection 
 
     @Override
     public int getLatency() {
-        return this.player.ping;
+        return this.player.field_71138_i;
     }
 
 }

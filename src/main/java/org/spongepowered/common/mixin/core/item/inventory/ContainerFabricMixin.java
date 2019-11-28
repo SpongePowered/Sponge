@@ -59,8 +59,8 @@ public abstract class ContainerFabricMixin implements Fabric, InventoryBridge {
         if (this.all == null) {
             ImmutableSet.Builder<InventoryBridge> builder = ImmutableSet.builder();
             for (Slot slot : inventorySlots) {
-                if (slot.inventory != null) {
-                    builder.add((InventoryBridge) slot.inventory);
+                if (slot.field_75224_c != null) {
+                    builder.add((InventoryBridge) slot.field_75224_c);
                 }
             }
             this.all = builder.build();
@@ -73,17 +73,17 @@ public abstract class ContainerFabricMixin implements Fabric, InventoryBridge {
         if (this.inventorySlots.isEmpty()) {
             return null; // Somehow we got an empty container
         }
-        return (InventoryBridge) this.getSlot(index).inventory;
+        return (InventoryBridge) this.getSlot(index).field_75224_c;
     }
 
     @Override
     public ItemStack fabric$getStack(int index) {
-        return this.getSlot(index).getStack();
+        return this.getSlot(index).func_75211_c();
     }
 
     @Override
     public void fabric$setStack(int index, ItemStack stack) {
-        this.getSlot(index).putStack(stack);
+        this.getSlot(index).func_75215_d(stack);
     }
 
     @Override
@@ -108,7 +108,7 @@ public abstract class ContainerFabricMixin implements Fabric, InventoryBridge {
     @Override
     public void fabric$clear() {
         for (Slot slot : this.inventorySlots) {
-            slot.putStack(ItemStack.EMPTY);
+            slot.func_75215_d(ItemStack.field_190927_a);
         }
     }
 
@@ -125,14 +125,14 @@ public abstract class ContainerFabricMixin implements Fabric, InventoryBridge {
         try
         {
             Slot slot = this.getSlot(0);
-            return slot.inventory != null && slot.inventory.getDisplayName() != null ?
-                    new FixedTranslation(slot.inventory.getDisplayName().getUnformattedText()) :
+            return slot.field_75224_c != null && slot.field_75224_c.func_145748_c_() != null ?
+                    new FixedTranslation(slot.field_75224_c.func_145748_c_().func_150260_c()) :
                     new FixedTranslation("UNKNOWN: " + this.getClass().getName());
         }
         catch (AbstractMethodError e)
         {
             SpongeImpl.getLogger().warn("AbstractMethodError! Could not find displayName for " +
-                    this.getSlot(0).inventory.getClass().getName(), e);
+                    this.getSlot(0).field_75224_c.getClass().getName(), e);
             return new FixedTranslation("UNKNOWN: " + this.getClass().getName());
         }
     }

@@ -38,8 +38,8 @@ import javax.annotation.Nullable;
 
 public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
 
-    public static Builder builder() {
-        return new Builder();
+    public static org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator.Builder builder() {
+        return new org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator.Builder();
     }
 
     final ItemStackGenerator firstItemGenerator;
@@ -49,7 +49,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
     final VariableAmount baseUses;
     final VariableAmount maxUses;
 
-    SpongeTradeOfferGenerator(Builder builder) {
+    SpongeTradeOfferGenerator(org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator.Builder builder) {
         this.firstItemGenerator = builder.firstGenerator;
         this.secondItemGenerator = builder.secondGenerator;
         this.sellingItemGenerator = builder.sellingGenerator;

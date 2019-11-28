@@ -42,23 +42,23 @@ public final class ColorUtil {
 
     public static Optional<Color> getItemStackColor(final ItemStack stack) {
         // Special case for armor: it has a special method
-        final Item item = stack.getItem();
+        final Item item = stack.func_77973_b();
         if (item instanceof ItemArmor) {
-            final NBTTagCompound tagCompound = stack.getTagCompound();
-            if (tagCompound == null || !tagCompound.hasKey(Constants.Item.Armor.ARMOR_COLOR_DISPLAY_TAG)) {
+            final NBTTagCompound tagCompound = stack.func_77978_p();
+            if (tagCompound == null || !tagCompound.func_74764_b(Constants.Item.Armor.ARMOR_COLOR_DISPLAY_TAG)) {
                 return Optional.empty();
             }
-            final int color = ((ItemArmor) item).getColor(stack);
+            final int color = ((ItemArmor) item).func_82814_b(stack);
             return color == -1 ? Optional.empty() : Optional.of(Color.ofRgb(color));
         }
-        final NBTTagCompound compound = stack.getTagCompound();
+        final NBTTagCompound compound = stack.func_77978_p();
         if (compound == null) {
             return Optional.empty();
         }
-        if (!compound.hasKey(Constants.Item.ITEM_COLOR)) {
+        if (!compound.func_74764_b(Constants.Item.ITEM_COLOR)) {
             return Optional.empty();
         }
-        return Optional.of(Color.ofRgb(compound.getInteger(Constants.Item.ITEM_COLOR)));
+        return Optional.of(Color.ofRgb(compound.func_74762_e(Constants.Item.ITEM_COLOR)));
     }
 
     public static int javaColorToMojangColor(final Color color) {
@@ -99,7 +99,7 @@ public final class ColorUtil {
 
     public static void setItemStackColor(final ItemStack stack, final Color value) {
         final int mojangColor = javaColorToMojangColor(value);
-        stack.getOrCreateSubCompound(Constants.Item.ITEM_DISPLAY).setInteger(Constants.Item.ITEM_COLOR, mojangColor);
+        stack.func_190925_c(Constants.Item.ITEM_DISPLAY).func_74768_a(Constants.Item.ITEM_COLOR, mojangColor);
     }
 
     /**
@@ -108,15 +108,15 @@ public final class ColorUtil {
      * there is a color set on the display tag.
      */
     public static boolean hasColorInNbt(final ItemStack stack) {
-        return stack.hasTagCompound() &&
-               stack.getTagCompound().hasKey(Constants.Item.ITEM_DISPLAY) &&
-               stack.getTagCompound().getCompoundTag(Constants.Item.ITEM_DISPLAY).hasKey(Constants.Item.ITEM_COLOR);
+        return stack.func_77942_o() &&
+               stack.func_77978_p().func_74764_b(Constants.Item.ITEM_DISPLAY) &&
+               stack.func_77978_p().func_74775_l(Constants.Item.ITEM_DISPLAY).func_74764_b(Constants.Item.ITEM_COLOR);
     }
 
     public static boolean hasColor(final ItemStack stack) {
-        final Item item = stack.getItem();
+        final Item item = stack.func_77973_b();
         return item instanceof ItemArmor &&
-                ((ItemArmor) item).getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER;
+                ((ItemArmor) item).func_82812_d() == ItemArmor.ArmorMaterial.LEATHER;
     }
 
     private ColorUtil() {

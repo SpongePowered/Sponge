@@ -93,7 +93,7 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setSettings(final net.minecraft.world.World worldIn, final long p_i45636_2_, final boolean p_i45636_4_, final String p_i45636_5_, final CallbackInfo ci) {
         if (this.settings == null) {
-            this.settings = new ChunkGeneratorSettings.Factory().build();
+            this.settings = new ChunkGeneratorSettings.Factory().func_177864_b();
         }
     }
 
@@ -104,65 +104,65 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
 
     @Override
     public void bridge$addPopulators(final WorldGenerator generator) {
-        if (this.settings.useCaves) {
+        if (this.settings.field_177839_r) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.caveGenerator);
         }
 
-        if (this.settings.useRavines) {
+        if (this.settings.field_177850_z) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.ravineGenerator);
         }
 
         // Structures are both generation populators and populators as they are
         // placed in a two phase system
 
-        if (this.settings.useMineShafts && this.mapFeaturesEnabled) {
+        if (this.settings.field_177829_w && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.mineshaftGenerator);
             generator.getPopulators().add((Populator) this.mineshaftGenerator);
         }
 
-        if (this.settings.useVillages && this.mapFeaturesEnabled) {
+        if (this.settings.field_177831_v && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.villageGenerator);
             generator.getPopulators().add((Populator) this.villageGenerator);
         }
 
-        if (this.settings.useStrongholds && this.mapFeaturesEnabled) {
+        if (this.settings.field_177833_u && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.strongholdGenerator);
             generator.getPopulators().add((Populator) this.strongholdGenerator);
         }
 
-        if (this.settings.useTemples && this.mapFeaturesEnabled) {
+        if (this.settings.field_177854_x && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.scatteredFeatureGenerator);
             generator.getPopulators().add((Populator) this.scatteredFeatureGenerator);
         }
 
-        if (this.settings.useMonuments && this.mapFeaturesEnabled) {
+        if (this.settings.field_177852_y && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.oceanMonumentGenerator);
             generator.getPopulators().add((Populator) this.oceanMonumentGenerator);
         }
 
-        if (this.settings.useMansions && this.mapFeaturesEnabled) {
+        if (this.settings.field_191077_z && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.woodlandMansionGenerator);
             generator.getPopulators().add((Populator) this.woodlandMansionGenerator);
         }
 
-        if (this.settings.useWaterLakes) {
+        if (this.settings.field_177781_A) {
             final Lake lake = Lake.builder()
-                    .chance(1d / this.settings.waterLakeChance)
-                    .liquidType((BlockState) Blocks.WATER.getDefaultState())
+                    .chance(1d / this.settings.field_177782_B)
+                    .liquidType((BlockState) Blocks.field_150355_j.func_176223_P())
                     .height(VariableAmount.baseWithRandomAddition(0, 256))
                     .build();
             final FilteredPopulator filtered = new FilteredPopulator(lake, (c) -> {
-                final Biome biomegenbase = this.world.getBiome(VecHelper.toBlockPos(c.getBlockMin()).add(16, 0, 16));
-                return biomegenbase != Biomes.DESERT && biomegenbase != Biomes.DESERT_HILLS;
+                final Biome biomegenbase = this.world.func_180494_b(VecHelper.toBlockPos(c.getBlockMin()).func_177982_a(16, 0, 16));
+                return biomegenbase != Biomes.field_76769_d && biomegenbase != Biomes.field_76786_s;
             });
             filtered.setRequiredFlags(WorldGenConstants.VILLAGE_FLAG);
             generator.getPopulators().add(filtered);
         }
 
-        if (this.settings.useLavaLakes) {
+        if (this.settings.field_177783_C) {
             final Lake lake = Lake.builder()
-                    .chance(1d / this.settings.lavaLakeChance)
-                    .liquidType((BlockState) Blocks.WATER.getDefaultState())
+                    .chance(1d / this.settings.field_177777_D)
+                    .liquidType((BlockState) Blocks.field_150355_j.func_176223_P())
                     .height(VariableAmount.baseWithVariance(0,
                             VariableAmount.baseWithRandomAddition(8, VariableAmount.baseWithOptionalAddition(55, 193, 0.1))))
                     .build();
@@ -171,10 +171,10 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
             generator.getPopulators().add(filtered);
         }
 
-        if (this.settings.useDungeons) {
+        if (this.settings.field_177837_s) {
             final Dungeon dungeon = Dungeon.builder()
                     // this is actually a count, terrible naming
-                    .attempts(this.settings.dungeonChance)
+                    .attempts(this.settings.field_177835_t)
                     .build();
             generator.getPopulators().add(dungeon);
         }
@@ -187,7 +187,7 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
     @Override
     public Biome[] bridge$getBiomesForGeneration(final int x, final int z) {
         if (this.impl$biomegen instanceof BiomeProvider) {
-            return ((BiomeProvider) this.impl$biomegen).getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
+            return ((BiomeProvider) this.impl$biomegen).func_76937_a(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
         }
         // If its not a WorldChunkManager then we have to perform a reverse of
         // the voronoi zoom biome generation layer to get a zoomed out version
@@ -233,14 +233,14 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
         final BiomeProvider provider, final Biome[] biomes, final int x, final int z, final int width, final int height) {
         if (this.impl$isVanilla) {
             // SpongeChunkGenerator will directly call the bridge method if it's being used.
-            if (biomes == null || !(this.world.getChunkProvider() instanceof SpongeChunkGenerator)) {
+            if (biomes == null || !(this.world.func_72863_F() instanceof SpongeChunkGenerator)) {
                 // construct the biomes array according to the method above, allows api biome pops to be used
                 return bridge$getBiomesForGeneration((x + 2) / 4, (z + 2) / 4); // Undo the math modification
             }
             return biomes;
         }
         // Re-use the same values passed in since the biomes parameter
-        return provider.getBiomesForGeneration(biomes, x, z, width, height);
+        return provider.func_76937_a(biomes, x, z, width, height);
     }
 
     /**
@@ -287,7 +287,7 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
             // Only problem with this being set like this is the possibility of setting different biomes
             // than the biomes for the neighboring blocks. Of course, that point is invalidated by the fact that
             // the biome retrieved from the generated biome array is null.
-            biome = array[index] = Biomes.PLAINS; // At the very least, avoid future nullability issues, strange world generation modifications that are occuring if this is reached.
+            biome = array[index] = Biomes.field_76772_c; // At the very least, avoid future nullability issues, strange world generation modifications that are occuring if this is reached.
         }
         return biome;
     }

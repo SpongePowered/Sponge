@@ -39,9 +39,9 @@ public abstract class CommandToggleDownfallMixin_GlobalCommand {
      */
     @Overwrite
     protected void toggleRainfall(final MinecraftServer server) {
-        final boolean raining = !server.worlds[0].getWorldInfo().isRaining();
-        for (final WorldServer world : server.worlds) {
-            world.getWorldInfo().setRaining(raining);
+        final boolean raining = !server.field_71305_c[0].func_72912_H().func_76059_o();
+        for (final WorldServer world : server.field_71305_c) {
+            world.func_72912_H().func_76084_b(raining);
         }
     }
 

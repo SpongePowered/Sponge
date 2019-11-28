@@ -49,13 +49,13 @@ public class AreaEffectCloudColorProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected boolean set(EntityAreaEffectCloud container, Color value) {
-        container.setColor(value.getRgb());
+        container.func_184482_a(value.getRgb());
         return true;
     }
 
     @Override
     protected Optional<Color> getVal(EntityAreaEffectCloud container) {
-        return Optional.of(Color.ofRgb(container.getColor()));
+        return Optional.of(Color.ofRgb(container.func_184492_k()));
     }
 
     @Override

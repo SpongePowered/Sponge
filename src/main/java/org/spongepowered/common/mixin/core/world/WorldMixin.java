@@ -204,7 +204,7 @@ public abstract class WorldMixin implements WorldBridge {
                                                                      + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
     private net.minecraft.world.border.WorldBorder onCreateWorldBorder(final WorldProvider provider) {
         if (this.bridge$isFake()) {
-            return provider.createWorldBorder();
+            return provider.func_177501_r();
         }
         return ((WorldProviderBridge) provider).bridge$createServerWorldBorder();
     }
@@ -214,7 +214,7 @@ public abstract class WorldMixin implements WorldBridge {
         if (this.bridge$isFake() || entity == null) {
             return;
         }
-        if (entity.world != null && !((WorldBridge) entity.world).bridge$isFake() && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
+        if (entity.field_70170_p != null && !((WorldBridge) entity.field_70170_p).bridge$isFake() && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
             cir.setReturnValue(new ArrayList<>());
         }
@@ -248,7 +248,7 @@ public abstract class WorldMixin implements WorldBridge {
     @Nullable
     @Redirect(method = "removeTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getTileEntity(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/tileentity/TileEntity;"))
     protected TileEntity getTileEntityForRemoval(final net.minecraft.world.World world, final BlockPos pos) {
-        return world.getTileEntity(pos); // Overridden in WorldServerMixin
+        return world.func_175625_s(pos); // Overridden in WorldServerMixin
     }
 
     /**
@@ -296,7 +296,7 @@ public abstract class WorldMixin implements WorldBridge {
      */
     @Redirect(method = "setTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;isInvalid()Z"))
     protected boolean onSetTileEntityForCapture(final TileEntity tileEntity, final BlockPos pos, final TileEntity sameEntity) {
-        return tileEntity.isInvalid();
+        return tileEntity.func_145837_r();
     }
 
 
@@ -305,7 +305,7 @@ public abstract class WorldMixin implements WorldBridge {
         if (this.impl$hasChecked) {
             return this.impl$isDefinitelyFake;
         }
-        this.impl$isDefinitelyFake = this.isRemote || this.worldInfo == null || this.worldInfo.getWorldName() == null || !(this instanceof WorldServerBridge);
+        this.impl$isDefinitelyFake = this.isRemote || this.worldInfo == null || this.worldInfo.func_76065_j() == null || !(this instanceof WorldServerBridge);
         this.impl$hasChecked = true;
         return this.impl$isDefinitelyFake;
     }
@@ -319,7 +319,7 @@ public abstract class WorldMixin implements WorldBridge {
     @Redirect(method = "isAnyPlayerWithinRangeAt", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     private boolean onIsAnyPlayerWithinRangePredicate(final com.google.common.base.Predicate<EntityPlayer> predicate, final Object object) {
         final EntityPlayer player = (EntityPlayer) object;
-        return !(player.isDead || !((EntityPlayerBridge) player).bridge$affectsSpawning()) && predicate.apply(player);
+        return !(player.field_70128_L || !((EntityPlayerBridge) player).bridge$affectsSpawning()) && predicate.apply(player);
     }
 
     // For invisibility
@@ -328,7 +328,7 @@ public abstract class WorldMixin implements WorldBridge {
             target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;"))
     private List<net.minecraft.entity.Entity> impl$filterInvisibile(final net.minecraft.world.World world, final net.minecraft.entity.Entity entityIn,
         final AxisAlignedBB axisAlignedBB) {
-        final List<net.minecraft.entity.Entity> entities = world.getEntitiesWithinAABBExcludingEntity(entityIn, axisAlignedBB);
+        final List<net.minecraft.entity.Entity> entities = world.func_72839_b(entityIn, axisAlignedBB);
         entities.removeIf(entity -> ((VanishableBridge) entity).bridge$isVanished() && ((VanishableBridge) entity).bridge$isUncollideable());
         return entities;
     }
@@ -388,10 +388,10 @@ public abstract class WorldMixin implements WorldBridge {
                 final TileEntity tileEntity = this.getTileEntity(pos);
                 if(tileEntity instanceof BlockJukebox.TileEntityJukebox) {
                     final BlockJukebox.TileEntityJukebox jukebox = (BlockJukebox.TileEntityJukebox) tileEntity;
-                    final ItemStack record = jukebox.getRecord();
+                    final ItemStack record = jukebox.func_145856_a();
                     frame.pushCause(jukebox);
                     frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(record));
-                    if(!record.isEmpty()) {
+                    if(!record.func_190926_b()) {
                         final Optional<RecordProperty> recordProperty = ((org.spongepowered.api.item.inventory.ItemStack) record).getProperty(RecordProperty.class);
                         if(!recordProperty.isPresent()) {
                             //Safeguard for https://github.com/SpongePowered/SpongeCommon/issues/2337
@@ -417,22 +417,22 @@ public abstract class WorldMixin implements WorldBridge {
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     protected void onUpdateWeatherEffect(final net.minecraft.entity.Entity entityIn) {
-        entityIn.onUpdate();
+        entityIn.func_70071_h_();
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
     protected void onUpdateTileEntities(final ITickable tile) {
-        tile.update();
+        tile.func_73660_a();
     }
 
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     protected void onCallEntityUpdate(final net.minecraft.entity.Entity entity) {
-        entity.onUpdate();
+        entity.func_70071_h_();
     }
 
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;updateRidden()V"))
     protected void onCallEntityRidingUpdate(final net.minecraft.entity.Entity entity) {
-        entity.updateRidden();
+        entity.func_70098_U();
     }
 
     @Redirect(method = "updateEntityWithOptionalForce",
@@ -446,16 +446,16 @@ public abstract class WorldMixin implements WorldBridge {
         // Sponge start - Remove active chunk and re-assign new Active Chunk
         final Chunk activeChunk = (Chunk) ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();
         if (activeChunk != null) {
-            activeChunk.removeEntityAtIndex(entity, entity.chunkCoordY);
+            activeChunk.func_76608_a(entity, entity.field_70162_ai);
         }
-        final int l = MathHelper.floor(entity.posX / 16.0D);
-        final int j1 = MathHelper.floor(entity.posZ / 16.0D);
+        final int l = MathHelper.func_76128_c(entity.field_70165_t / 16.0D);
+        final int j1 = MathHelper.func_76128_c(entity.field_70161_v / 16.0D);
         final ChunkBridge newChunk = (ChunkBridge) ((ChunkProviderBridge) this.shadow$getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(l, j1);
-        final boolean isPositionDirty = entity.setPositionNonDirty();
+        final boolean isPositionDirty = entity.func_184189_br();
         if (newChunk == null || (!isPositionDirty && newChunk.bridge$isQueuedForUnload() && !newChunk.bridge$isPersistedChunk())) {
-            entity.addedToChunk = false;
+            entity.field_70175_ag = false;
         } else {
-            ((net.minecraft.world.chunk.Chunk) newChunk).addEntity(entity);
+            ((net.minecraft.world.chunk.Chunk) newChunk).func_76612_a(entity);
         }
         // Sponge end
         return false; // Always return false, because we handle re-assigning the chunk owning the entity in the above block
@@ -555,7 +555,7 @@ public abstract class WorldMixin implements WorldBridge {
     protected void impl$getRawLightWithoutMarkingChunkActive(final BlockPos pos, final EnumSkyBlock enumSkyBlock, final CallbackInfoReturnable<Integer> cir) {
         final Chunk chunk;
         chunk = this.getChunk(pos);
-        if (chunk == null || chunk.unloadQueued) {
+        if (chunk == null || chunk.field_189550_d) {
             cir.setReturnValue(0);
         }
     }
@@ -573,10 +573,10 @@ public abstract class WorldMixin implements WorldBridge {
         // if (this.isOutsideBuildHeight(pos)) // Vanilla
         if (((BlockPosBridge) pos).bridge$isInvalidYPosition()) {
             // Sponge end
-            return Blocks.AIR.getDefaultState();
+            return Blocks.field_150350_a.func_176223_P();
         }
         final Chunk chunk = this.getChunk(pos);
-        return chunk.getBlockState(pos);
+        return chunk.func_177435_g(pos);
     }
 
     @Redirect(method = "getTileEntity",
@@ -591,8 +591,8 @@ public abstract class WorldMixin implements WorldBridge {
     private void impl$checkForAsync(final BlockPos pos, final CallbackInfoReturnable<TileEntity> cir) {
         // Sponge - Don't create or obtain pending tileentity async, simply check if TE exists in chunk
         // Mods such as pixelmon call this method async, so this is a temporary workaround until fixed
-        if (!this.bridge$isFake() && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            cir.setReturnValue(this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK));
+        if (!this.bridge$isFake() && !SpongeImpl.getServer().func_152345_ab()) {
+            cir.setReturnValue(this.getChunk(pos).func_177424_a(pos, Chunk.EnumCreateEntityType.CHECK));
             return;
         }
         if (this.isTileMarkedForRemoval(pos) && !this.bridge$isFake()) {
@@ -622,7 +622,7 @@ public abstract class WorldMixin implements WorldBridge {
         target = "Lnet/minecraft/world/chunk/Chunk;getTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/chunk/Chunk$EnumCreateEntityType;)Lnet/minecraft/tileentity/TileEntity;"))
     @Nullable
     TileEntity impl$getTileOrNullIfMarkedForRemoval(final Chunk chunk, final BlockPos pos, final Chunk.EnumCreateEntityType creationMode) {
-        return chunk.getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
+        return chunk.func_177424_a(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
     }
 
     @Nullable
@@ -696,18 +696,18 @@ public abstract class WorldMixin implements WorldBridge {
      */
     @Overwrite
     public int getLightFor(final EnumSkyBlock type, BlockPos pos) {
-        if (pos.getY() < 0) {
-            pos = new BlockPos(pos.getX(), 0, pos.getZ());
+        if (pos.func_177956_o() < 0) {
+            pos = new BlockPos(pos.func_177958_n(), 0, pos.func_177952_p());
         }
 
         // Sponge Start - Replace with inlined method to check
         // if (!this.isValid(pos)) // vanilla
         if (!((BlockPosBridge) pos).bridge$isValidPosition()) {
             // Sponge End
-            return type.defaultLightValue;
+            return type.field_77198_c;
         } else {
             final Chunk chunk = this.getChunk(pos);
-            return chunk.getLightFor(type, pos);
+            return chunk.func_177413_a(type, pos);
         }
     }
 
@@ -727,7 +727,7 @@ public abstract class WorldMixin implements WorldBridge {
             // Sponge End
             if (this.isBlockLoaded(pos)) {
                 final Chunk chunk = this.getChunk(pos);
-                chunk.setLightFor(type, pos, lightValue);
+                chunk.func_177431_a(type, pos, lightValue);
                 this.notifyLightSet(pos);
             }
         }
@@ -756,23 +756,23 @@ public abstract class WorldMixin implements WorldBridge {
     @Overwrite
     public boolean collidesWithAnyBlock(final AxisAlignedBB bbox) {
         final List<AxisAlignedBB> list = Lists.<AxisAlignedBB>newArrayList();
-        final int i = MathHelper.floor(bbox.minX) - 1;
-        final int j = MathHelper.ceil(bbox.maxX) + 1;
-        final int k = MathHelper.floor(bbox.minY) - 1;
-        final int l = MathHelper.ceil(bbox.maxY) + 1;
-        final int i1 = MathHelper.floor(bbox.minZ) - 1;
-        final int j1 = MathHelper.ceil(bbox.maxZ) + 1;
-        final BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
+        final int i = MathHelper.func_76128_c(bbox.field_72340_a) - 1;
+        final int j = MathHelper.func_76143_f(bbox.field_72336_d) + 1;
+        final int k = MathHelper.func_76128_c(bbox.field_72338_b) - 1;
+        final int l = MathHelper.func_76143_f(bbox.field_72337_e) + 1;
+        final int i1 = MathHelper.func_76128_c(bbox.field_72339_c) - 1;
+        final int j1 = MathHelper.func_76143_f(bbox.field_72334_f) + 1;
+        final BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.func_185346_s();
 
         try {
             for (int k1 = i; k1 < j; ++k1) {
                 for (int l1 = i1; l1 < j1; ++l1) {
                     final int i2 = (k1 != i && k1 != j - 1 ? 0 : 1) + (l1 != i1 && l1 != j1 - 1 ? 0 : 1);
 
-                    if (i2 != 2 && this.isBlockLoaded(blockpos$pooledmutableblockpos.setPos(k1, 64, l1))) {
+                    if (i2 != 2 && this.isBlockLoaded(blockpos$pooledmutableblockpos.func_181079_c(k1, 64, l1))) {
                         for (int j2 = k; j2 < l; ++j2) {
                             if (i2 <= 0 || j2 != k && j2 != l - 1) {
-                                blockpos$pooledmutableblockpos.setPos(k1, j2, l1);
+                                blockpos$pooledmutableblockpos.func_181079_c(k1, j2, l1);
 
                                 // Sponge - Replace with inlined method
                                 // if (k1 < -30000000 || k1 >= 30000000 || l1 < -30000000 || l1 >= 30000000) // Vanilla
@@ -782,7 +782,7 @@ public abstract class WorldMixin implements WorldBridge {
                                 }
 
                                 final IBlockState iblockstate = this.getBlockState(blockpos$pooledmutableblockpos);
-                                iblockstate.addCollisionBoxToList((net.minecraft.world.World) (Object) this, blockpos$pooledmutableblockpos, bbox, list, (net.minecraft.entity.Entity) null, false);
+                                iblockstate.func_185908_a((net.minecraft.world.World) (Object) this, blockpos$pooledmutableblockpos, bbox, list, (net.minecraft.entity.Entity) null, false);
 
                                 if (!list.isEmpty()) {
                                     return true;
@@ -795,7 +795,7 @@ public abstract class WorldMixin implements WorldBridge {
 
             return false;
         } finally {
-            blockpos$pooledmutableblockpos.release();
+            blockpos$pooledmutableblockpos.func_185344_t();
         }
     }
 
@@ -859,14 +859,14 @@ public abstract class WorldMixin implements WorldBridge {
         // int k1 = entity1.chunkCoordZ;
 
         // Sponge start - use cached chunk
-        final int l1 = entity.chunkCoordX;
-        final int i2 = entity.chunkCoordZ;
+        final int l1 = entity.field_70176_ah;
+        final int i2 = entity.field_70164_aj;
 
         final Chunk activeChunk = (Chunk) ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();
         if (activeChunk == null) {
-            this.getChunk(l1, i2).removeEntity(entity);
+            this.getChunk(l1, i2).func_76622_b(entity);
         } else {
-            activeChunk.removeEntity(entity);
+            activeChunk.func_76622_b(entity);
         }
         // Sponge end
         //if (entity1.addedToChunk && this.isChunkLoaded(j, k1, true))
@@ -1054,7 +1054,7 @@ public abstract class WorldMixin implements WorldBridge {
         )
     )
     private boolean impl$checkIfTileHasActiveChunk(final TileEntity tileEntity) {
-        return tileEntity.hasWorld() && ((TileEntityBridge) tileEntity).bridge$shouldTick();
+        return tileEntity.func_145830_o() && ((TileEntityBridge) tileEntity).bridge$shouldTick();
 
     }
 
@@ -1102,8 +1102,8 @@ public abstract class WorldMixin implements WorldBridge {
         if (activeChunk != null) {
             //this.getChunk(tileentity.getPos()).removeTileEntity(tileentity.getPos());
             //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desynced
-            if (activeChunk.getTileEntity(tileEntity.getPos(), Chunk.EnumCreateEntityType.CHECK) == tileEntity) {
-                activeChunk.removeTileEntity(tileEntity.getPos());
+            if (activeChunk.func_177424_a(tileEntity.func_174877_v(), Chunk.EnumCreateEntityType.CHECK) == tileEntity) {
+                activeChunk.func_177425_e(tileEntity.func_174877_v());
             }
         }
         // Sponge end

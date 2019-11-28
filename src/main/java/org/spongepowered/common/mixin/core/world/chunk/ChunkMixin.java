@@ -141,7 +141,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
     private void impl$onConstruct(final World worldIn, final int x, final int z, final CallbackInfo ci) {
-        this.impl$cacheKey = ChunkPos.asLong(x, z);
+        this.impl$cacheKey = ChunkPos.func_77272_a(x, z);
     }
 
     @Override
@@ -208,12 +208,12 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     @Redirect(method = "removeTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;invalidate()V"))
     private void impl$resetTileEntityActiveChunk(final TileEntity tileEntityIn) {
         ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(null);
-        tileEntityIn.invalidate();
+        tileEntityIn.func_145843_s();
     }
 
     @Inject(method = "onLoad", at = @At("HEAD"), cancellable = true)
     private void impl$IgnoreOnLoadDuringRegeneration(final CallbackInfo ci) {
-        if (!this.world.isRemote) {
+        if (!this.world.field_72995_K) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 // If we are loading an existing chunk for the sole purpose of
                 // regenerating, we can skip loading TE's and Entities into the world
@@ -226,7 +226,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     private void impl$UpdateNeighborsOnLoad(final CallbackInfo ci) {
         for (final Direction direction : Constants.Chunk.CARDINAL_DIRECTIONS) {
             final Vector3i neighborPosition = ((Chunk) this).getPosition().add(direction.asBlockOffset());
-            final ChunkProviderBridge spongeChunkProvider = (ChunkProviderBridge) this.world.getChunkProvider();
+            final ChunkProviderBridge spongeChunkProvider = (ChunkProviderBridge) this.world.func_72863_F();
             final net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.bridge$getLoadedChunkWithoutMarkingActive
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
@@ -240,7 +240,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         if (ShouldFire.LOAD_CHUNK_EVENT) {
             SpongeImpl.postEvent(SpongeEventFactory.createLoadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
         }
-        if (!this.world.isRemote) {
+        if (!this.world.field_72995_K) {
             SpongeHooks.logChunkLoad(this.world, ((Chunk) this).getPosition());
         }
     }
@@ -249,7 +249,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     private void impl$UpdateNeighborsOnUnload(final CallbackInfo ci) {
         for (final Direction direction : Constants.Chunk.CARDINAL_DIRECTIONS) {
             final Vector3i neighborPosition = ((Chunk) this).getPosition().add(direction.asBlockOffset());
-            final ChunkProviderBridge spongeChunkProvider = (ChunkProviderBridge) this.world.getChunkProvider();
+            final ChunkProviderBridge spongeChunkProvider = (ChunkProviderBridge) this.world.func_72863_F();
             final net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.bridge$getLoadedChunkWithoutMarkingActive
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
@@ -260,7 +260,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             }
         }
 
-        if (!this.world.isRemote) {
+        if (!this.world.field_72995_K) {
             SpongeImpl.postEvent(SpongeEventFactory.createUnloadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
             SpongeHooks.logChunkUnload(this.world, ((Chunk) this).getPosition());
         }
@@ -347,9 +347,9 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     @Override
     @Nullable
     public IBlockState bridge$setBlockState(final BlockPos pos, final IBlockState newState, final IBlockState currentState, final BlockChangeFlag flag) {
-        final int xPos = pos.getX() & 15;
-        final int yPos = pos.getY();
-        final int zPos = pos.getZ() & 15;
+        final int xPos = pos.func_177958_n() & 15;
+        final int yPos = pos.func_177956_o();
+        final int zPos = pos.func_177952_p() & 15;
         final int combinedPos = zPos << 4 | xPos;
 
         if (yPos >= this.precipitationHeightMap[combinedPos] - 1) {
@@ -364,8 +364,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         // if (iblockstate == state) {
         //    return null;
         // } else {
-        final Block newBlock = newState.getBlock();
-        final Block currentBlock = currentState.getBlock();
+        final Block newBlock = newState.func_177230_c();
+        final Block currentBlock = currentState.func_177230_c();
         // Sponge End
 
         ExtendedBlockStorage extendedblockstorage = this.storageArrays[yPos >> 4];
@@ -375,12 +375,12 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         // Sponge - Forge moves this from
         final int newBlockLightOpacity = SpongeImplHooks.getBlockLightOpacity(newState, this.world, pos);
 
-        if (extendedblockstorage == net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE) {
-            if (newBlock == Blocks.AIR) {
+        if (extendedblockstorage == net.minecraft.world.chunk.Chunk.field_186036_a) {
+            if (newBlock == Blocks.field_150350_a) {
                 return null;
             }
 
-            extendedblockstorage = this.storageArrays[yPos >> 4] = new ExtendedBlockStorage(yPos >> 4 << 4, this.world.provider.hasSkyLight());
+            extendedblockstorage = this.storageArrays[yPos >> 4] = new ExtendedBlockStorage(yPos >> 4 << 4, this.world.field_73011_w.func_191066_m());
             requiresNewLightCalculations = yPos >= currentHeight;
             // Sponge Start - properly initialize variable
         } else {
@@ -404,12 +404,12 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
         final int modifiedY = yPos & 15;
 
-        extendedblockstorage.set(xPos, modifiedY, zPos, newState);
+        extendedblockstorage.func_177484_a(xPos, modifiedY, zPos, newState);
 
 
         // if (block1 != block) // Sponge - Forge removes this change.
         // { // Sponge - remove unnecessary braces
-        if (!this.world.isRemote) {
+        if (!this.world.field_72995_K) {
             // Sponge - Redirect phase checks to use bridge$isFake in the event we have mods worlds doing silly things....
             // i.e. fake worlds. Likewise, avoid creating unnecessary snapshots/transactions
             // or triggering unprocessed captures when there are no events being thrown.
@@ -426,7 +426,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                         transaction.queueBreak = true;
                         transaction.enqueueChanges(mixinWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
                     }
-                    currentBlock.breakBlock(this.world, pos, currentState);
+                    currentBlock.func_180663_b(this.world, pos, currentState);
                 }
                 if (existing != null && SpongeImplHooks.shouldRefresh(existing, this.world, pos, currentState, newState)) {
                     // And likewise, we want to queue the tile entity being removed, while
@@ -439,7 +439,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                         transaction.queuedRemoval = existing;
                         transaction.enqueueChanges(mixinWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
                     } else {
-                        this.world.removeTileEntity(pos);
+                        this.world.func_175713_t(pos);
                     }
                 }
 
@@ -447,13 +447,13 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                 transaction = null;
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
                 if (currentBlock != newBlock && (state == null || !state.isRestoring())) { // cache the block break in the event we're capturing tiles
-                    currentBlock.breakBlock(this.world, pos, currentState);
+                    currentBlock.func_180663_b(this.world, pos, currentState);
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
                 // still work by themselves in vanilla. In all intents and purposes, the remove tile entity could
                 // occur before we have a chance to
                 if (existing != null && SpongeImplHooks.shouldRefresh(existing, this.world, pos, currentState, newState)) {
-                    this.world.removeTileEntity(pos);
+                    this.world.func_175713_t(pos);
                 }
             }
             // } else if (currentBlock instanceof ITileEntityProvider) { // Sponge - remove since forge has a special hook we need to add here
@@ -466,14 +466,14 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                 final TileEntity tileEntity = this.getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
                 // Sponge - Add hook for refreshing, because again, forge hooks.
                 if (tileEntity != null && SpongeImplHooks.shouldRefresh(tileEntity, this.world, pos, currentState, newState)) {
-                    this.world.removeTileEntity(pos);
+                    this.world.func_175713_t(pos);
                 }
             }
         }
         // } // Sponge - Remove unnecessary braces
 
-        final IBlockState blockAfterSet = extendedblockstorage.get(xPos, modifiedY, zPos);
-        if (blockAfterSet.getBlock() != newBlock) {
+        final IBlockState blockAfterSet = extendedblockstorage.func_177485_a(xPos, modifiedY, zPos);
+        if (blockAfterSet.func_177230_c() != newBlock) {
             // Sponge Start - prune tracked change
             if (!isFake && snapshot != null) {
                 if (state.doesBulkBlockCapture(peek)) {
@@ -532,7 +532,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                 if (transaction != null) {
                     transaction.queueOnAdd = true;
                 } else if (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
-                    newBlock.onBlockAdded(this.world, pos, newState);
+                    newBlock.func_176213_c(this.world, pos, newState);
                 }
             }
             // Sponge end
@@ -563,8 +563,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                     transaction.queueTileSet = tileentity;
                     if (tileentity != null) {
                         ((TileEntityBridge) tileentity).bridge$setCaptured(true);
-                        tileentity.setWorld(this.world);
-                        tileentity.setPos(pos);// Set the position
+                        tileentity.func_145834_a(this.world);
+                        tileentity.func_174878_a(pos);// Set the position
                     }
                     transaction.enqueueChanges(mixinWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
                 } else {
@@ -574,15 +574,15 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                     // See https://github.com/SpongePowered/SpongeForge/issues/2677 for reference.
                     // Note that vanilla will set the world later, and forge sets the world
                     // after setting the position, but a mod has expectations that defy both of these...
-                    if (tileentity != null && tileentity.getWorld() != this.world) {
-                        tileentity.setWorld(this.world);
+                    if (tileentity != null && tileentity.func_145831_w() != this.world) {
+                        tileentity.func_145834_a(this.world);
                     }
-                    this.world.setTileEntity(pos, tileentity);
+                    this.world.func_175690_a(pos, tileentity);
                 }
             }
 
             if (tileentity != null) {
-                tileentity.updateContainingBlockInfo();
+                tileentity.func_145836_u();
             }
         } else if (transaction != null) {
             // We still want to enqueue any changes to the transaction, including any tiles removed
@@ -596,30 +596,30 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Override
     public void bridge$removeTileEntity(final TileEntity removed) {
-        final TileEntity tileentity = this.tileEntities.remove(removed.getPos());
+        final TileEntity tileentity = this.tileEntities.remove(removed.func_174877_v());
         if (tileentity != removed && tileentity != null) {
             // Because multiple requests to remove a tile entity could cause for checks
             // without actually knowing if the chunk doesn't have the tile entity, this
             // avoids storing nulls.
             // Replace the pre-existing tile entity in case we remove a tile entity
             // we don't want to be removing.
-            this.tileEntities.put(removed.getPos(), tileentity);
+            this.tileEntities.put(removed.func_174877_v(), tileentity);
         }
         ((ActiveChunkReferantBridge) removed).bridge$setActiveChunk(null);
-        removed.invalidate();
+        removed.func_145843_s();
     }
 
     @Override
     public void bridge$setTileEntity(final BlockPos pos, final TileEntity added) {
-        if (added.getWorld() != this.world) {
+        if (added.func_145831_w() != this.world) {
             // Forge adds this because some mods do stupid things....
-            added.setWorld(this.world);
+            added.func_145834_a(this.world);
         }
-        added.setPos(pos);
+        added.func_174878_a(pos);
         if (this.tileEntities.containsKey(pos)) {
-            this.tileEntities.get(pos).invalidate();
+            this.tileEntities.get(pos).func_145843_s();
         }
-        added.validate();
+        added.func_145829_t();
         ((ActiveChunkReferantBridge) added).bridge$setActiveChunk(this);
         this.tileEntities.put(pos, added);
     }
@@ -697,7 +697,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             value = "INVOKE",
             target = "Lnet/minecraft/world/gen/IChunkGenerator;populate(II)V"))
     private void impl$StartTerrainGenerationState(final IChunkGenerator generator, final CallbackInfo callbackInfo) {
-        if (!this.world.isRemote) {
+        if (!this.world.field_72995_K) {
             if (!PhaseTracker.getInstance().getCurrentState().isRegeneration()) {
                 GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
                     .world(this.world)
@@ -712,7 +712,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/IChunkGenerator;populate(II)V"))
     )
     private void impl$CloseTerrainGenerationState(final IChunkGenerator generator, final CallbackInfo info) {
-        if (!this.world.isRemote) {
+        if (!this.world.field_72995_K) {
             if (!PhaseTracker.getInstance().getCurrentState().isRegeneration()) {
                 PhaseTracker.getInstance().getCurrentContext().close();
             }
@@ -814,7 +814,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             // If everything passes we have an intersection!
             intersections.add(hit);
             // If the entity has part, recurse on these
-            final net.minecraft.entity.Entity[] parts = entity.getParts();
+            final net.minecraft.entity.Entity[] parts = entity.func_70021_al();
             if (parts != null && parts.length > 0) {
                 impl$getIntersectingEntities(Arrays.asList(parts), start, direction, distance, filter, intersections);
             }
@@ -830,17 +830,17 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Override
     public void bridge$fill(final ChunkPrimer primer) {
-        final boolean flag = this.world.provider.hasSkyLight();
+        final boolean flag = this.world.field_73011_w.func_191066_m();
         for (int x = 0; x < 16; ++x) {
             for (int z = 0; z < 16; ++z) {
                 for (int y = 0; y < 256; ++y) {
-                    final IBlockState block = primer.getBlockState(x, y, z);
-                    if (block.getMaterial() != Material.AIR) {
+                    final IBlockState block = primer.func_177856_a(x, y, z);
+                    if (block.func_185904_a() != Material.field_151579_a) {
                         final int section = y >> 4;
-                        if (this.storageArrays[section] == net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE) {
+                        if (this.storageArrays[section] == net.minecraft.world.chunk.Chunk.field_186036_a) {
                             this.storageArrays[section] = new ExtendedBlockStorage(section << 4, flag);
                         }
-                        this.storageArrays[section].set(x, y & 15, z, block);
+                        this.storageArrays[section].func_177484_a(x, y & 15, z, block);
                     }
                 }
             }

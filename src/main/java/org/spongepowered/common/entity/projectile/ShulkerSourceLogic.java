@@ -41,10 +41,10 @@ public class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> {
     public <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, Shulker source, Class<P> projectileClass, Object... args) {
         if (projectileClass == ShulkerBullet.class && args.length == 1 && args[0] instanceof Entity) {
             EntityShulker shulker = (EntityShulker) source;
-            EntityShulkerBullet bullet = new EntityShulkerBullet(shulker.world, shulker, (Entity) args[0], shulker.getAttachmentFacing().getAxis());
-            shulker.world.spawnEntity(bullet);
-            shulker.playSound(SoundEvents.ENTITY_SHULKER_SHOOT,
-                    2.0F, (shulker.world.rand.nextFloat() - shulker.world.rand.nextFloat()) * 0.2F + 1.0F);
+            EntityShulkerBullet bullet = new EntityShulkerBullet(shulker.field_70170_p, shulker, (Entity) args[0], shulker.func_184696_cZ().func_176740_k());
+            shulker.field_70170_p.func_72838_d(bullet);
+            shulker.func_184185_a(SoundEvents.field_187789_eW,
+                    2.0F, (shulker.field_70170_p.field_73012_v.nextFloat() - shulker.field_70170_p.field_73012_v.nextFloat()) * 0.2F + 1.0F);
 
             return Optional.of((P) bullet);
         }

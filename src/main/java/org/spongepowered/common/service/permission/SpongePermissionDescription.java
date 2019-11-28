@@ -137,19 +137,19 @@ class SpongePermissionDescription implements PermissionDescription {
         }
 
         @Override
-        public Builder id(String id) {
+        public org.spongepowered.common.service.permission.SpongePermissionDescription.Builder id(String id) {
             this.id = checkNotNull(id, "permissionId");
             return this;
         }
 
         @Override
-        public Builder description(@Nullable Text description) {
+        public org.spongepowered.common.service.permission.SpongePermissionDescription.Builder description(@Nullable Text description) {
             this.description = description;
             return this;
         }
 
         @Override
-        public Builder assign(String role, boolean value) {
+        public org.spongepowered.common.service.permission.SpongePermissionDescription.Builder assign(String role, boolean value) {
             Preconditions.checkNotNull(role, "role");
             this.roleAssignments.put(role, Tristate.fromBoolean(value));
             return this;

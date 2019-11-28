@@ -51,118 +51,118 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public boolean isAtLocation(int x, int z) {
-        return x == this.x && z == this.z;
+    public boolean func_76600_a(int x, int z) {
+        return x == this.field_76635_g && z == this.field_76647_h;
     }
 
     @Override
-    public int getHeightValue(int x, int z) {
+    public int func_76611_b(int x, int z) {
         return 0;
     }
 
     @Override
-    public void generateSkylightMap() {
+    public void func_76603_b() {
     }
 
     @Override
-    public IBlockState getBlockState(BlockPos pos) {
-        return Blocks.AIR.getDefaultState();
+    public IBlockState func_177435_g(BlockPos pos) {
+        return Blocks.field_150350_a.func_176223_P();
     }
 
     @Override
-    public int getBlockLightOpacity(BlockPos pos) {
+    public int func_177437_b(BlockPos pos) {
         return 255;
     }
 
     @Override
-    public int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos) {
-        return p_177413_1_.defaultLightValue;
+    public int func_177413_a(EnumSkyBlock p_177413_1_, BlockPos pos) {
+        return p_177413_1_.field_77198_c;
     }
 
     @Override
-    public void setLightFor(EnumSkyBlock p_177431_1_, BlockPos pos, int value) {
+    public void func_177431_a(EnumSkyBlock p_177431_1_, BlockPos pos, int value) {
     }
 
     @Override
-    public int getLightSubtracted(BlockPos pos, int amount) {
+    public int func_177443_a(BlockPos pos, int amount) {
         return 0;
     }
 
     @Override
-    public void addEntity(Entity entityIn) {
+    public void func_76612_a(Entity entityIn) {
     }
 
     @Override
-    public void removeEntity(Entity entityIn) {
+    public void func_76622_b(Entity entityIn) {
     }
 
     @Override
-    public void removeEntityAtIndex(Entity entityIn, int index) {
+    public void func_76608_a(Entity entityIn, int index) {
     }
 
     @Override
-    public boolean canSeeSky(BlockPos pos) {
+    public boolean func_177444_d(BlockPos pos) {
         return false;
     }
 
     @Override
     @Nullable
-    public TileEntity getTileEntity(BlockPos pos, Chunk.EnumCreateEntityType p_177424_2_) {
+    public TileEntity func_177424_a(BlockPos pos, Chunk.EnumCreateEntityType p_177424_2_) {
         return null;
     }
 
     @Override
-    public void addTileEntity(TileEntity tileEntityIn) {
+    public void func_150813_a(TileEntity tileEntityIn) {
     }
 
     @Override
-    public void addTileEntity(BlockPos pos, TileEntity tileEntityIn) {
+    public void func_177426_a(BlockPos pos, TileEntity tileEntityIn) {
     }
 
     @Override
-    public void removeTileEntity(BlockPos pos) {
+    public void func_177425_e(BlockPos pos) {
     }
 
     @Override
-    public void onLoad() {
+    public void func_76631_c() {
     }
 
     @Override
-    public void onUnload() {
+    public void func_76623_d() {
     }
 
     @Override
-    public void markDirty() {
+    public void func_76630_e() {
     }
 
     @Override
-    public void getEntitiesWithinAABBForEntity(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill,
+    public void func_177414_a(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill,
             Predicate<? super Entity> p_177414_4_) {
     }
 
     @Override
-    public <T extends Entity> void getEntitiesOfTypeWithinAABB(Class<? extends T> entityClass, AxisAlignedBB aabb, List<T> listToFill,
+    public <T extends Entity> void func_177430_a(Class<? extends T> entityClass, AxisAlignedBB aabb, List<T> listToFill,
             Predicate<? super T> p_177430_4_) {
     }
 
     @Override
-    public boolean needsSaving(boolean p_76601_1_) {
+    public boolean func_76601_a(boolean p_76601_1_) {
         return false;
     }
 
     @Override
-    public Random getRandomWithSeed(long seed) {
-        return new Random(this.getWorld().getSeed() + (long) (this.x * this.x * 4987142) + (long) (this.x * 5947611)
-                + (long) (this.z * this.z) * 4392871L + (long) (this.z * 389711) ^ seed);
+    public Random func_76617_a(long seed) {
+        return new Random(this.func_177412_p().func_72905_C() + (long) (this.field_76635_g * this.field_76635_g * 4987142) + (long) (this.field_76635_g * 5947611)
+                + (long) (this.field_76647_h * this.field_76647_h) * 4392871L + (long) (this.field_76647_h * 389711) ^ seed);
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean func_76621_g() {
         return true;
     }
 
     @Override
-    public boolean isEmptyBetween(int startY, int endY) {
+    public boolean func_76606_c(int startY, int endY) {
         return true;
     }
 
@@ -170,8 +170,8 @@ public class SpongeEmptyChunk extends Chunk {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("empty", true)
-                .add("x", this.x)
-                .add("z", this.z)
+                .add("x", this.field_76635_g)
+                .add("z", this.field_76647_h)
                 .toString();
     }
 }

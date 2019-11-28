@@ -63,7 +63,7 @@ public abstract class TileEntityMobSpawnerMixin_API extends TileEntityMixin_API 
             bridge.bridge$setMaxNearbyEntities(Short.MAX_VALUE);
 
             bridge.bridge$setSpawnDelay(0);
-            getSpawnerBaseLogic().updateSpawner();
+            getSpawnerBaseLogic().func_98278_g();
 
             bridge.bridge$setMaxNearbyEntities(oldMaxNearby);
         } else {

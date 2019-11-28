@@ -67,13 +67,13 @@ public class SkullRotationDataProcessor
         if (value.ordinal() > 15) {
             return false;
         }
-        skull.setSkullRotation(value.ordinal());
+        skull.func_145903_a(value.ordinal());
         return true;
     }
 
     @Override
     protected Optional<Direction> getVal(final TileEntitySkull skull) {
-        if (skull.getWorld().getBlockState(skull.getPos()).getValue(BlockSkull.FACING) != EnumFacing.UP) {
+        if (skull.func_145831_w().func_180495_p(skull.func_174877_v()).func_177229_b(BlockSkull.field_176418_a) != EnumFacing.UP) {
             return Optional.empty();
         }
         final int rot = ((TileEntitySkullAccessor) skull).accessor$getSkullRotation() % 16;

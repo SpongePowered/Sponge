@@ -64,13 +64,13 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
     protected boolean set(final EntityPlayerMP player, final Map<Statistic, Long> statMap) {
         checkNotNull(player, "null player");
         checkNotNull(statMap, "null stat map");
-        final StatisticsManagerServer stats = player.getStatFile();
+        final StatisticsManagerServer stats = player.func_147099_x();
         for (final Entry<Statistic, Long> statEntry : statMap.entrySet()) {
             final Long value = statEntry.getValue();
             final StatBase stat = (StatBase) statEntry.getKey();
-            final int currentValue = stats.readStat(stat);
+            final int currentValue = stats.func_77444_a(stat);
             if (value != null) {
-                stats.increaseStat(player, (StatBase) statEntry.getKey(), (int) (value - currentValue));
+                stats.func_150871_b(player, (StatBase) statEntry.getKey(), (int) (value - currentValue));
             }
         }
         return true;
@@ -79,11 +79,11 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
     @Override
     protected Optional<Map<Statistic, Long>> getVal(final EntityPlayerMP player) {
         checkNotNull(player, "null player");
-        final StatisticsManagerServer stats = player.getStatFile();
+        final StatisticsManagerServer stats = player.func_147099_x();
         final Map<StatBase, TupleIntJsonSerializable> data = ((StatisticsManagerBridge) stats).bridge$getStatsData();
         final Map<Statistic, Long> statMap = Maps.newHashMap();
         for (final Entry<StatBase, TupleIntJsonSerializable> statEntry : data.entrySet()) {
-            statMap.put((Statistic) statEntry.getKey(), (long) statEntry.getValue().getIntegerValue());
+            statMap.put((Statistic) statEntry.getKey(), (long) statEntry.getValue().func_151189_a());
         }
         return Optional.of(statMap);
     }

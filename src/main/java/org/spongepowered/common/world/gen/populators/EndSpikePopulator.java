@@ -50,13 +50,13 @@ public class EndSpikePopulator implements Populator {
     public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand) {
         Vector3i min = extent.getBlockMin().sub(8,0,8);
         World worldIn = (World) world;
-        WorldGenSpikes.EndSpike[] aworldgenspikes$endspike = BiomeEndDecorator.getSpikesForWorld(worldIn);
+        WorldGenSpikes.EndSpike[] aworldgenspikes$endspike = BiomeEndDecorator.func_185426_a(worldIn);
         BlockPos pos = VecHelper.toBlockPos(min);
         for (WorldGenSpikes.EndSpike worldgenspikes$endspike : aworldgenspikes$endspike) {
-            if (worldgenspikes$endspike.doesStartInChunk(pos)) {
-                this.spikeGen.setSpike(worldgenspikes$endspike);
-                this.spikeGen.generate(worldIn, rand,
-                        new BlockPos(worldgenspikes$endspike.getCenterX(), 45, worldgenspikes$endspike.getCenterZ()));
+            if (worldgenspikes$endspike.func_186154_a(pos)) {
+                this.spikeGen.func_186143_a(worldgenspikes$endspike);
+                this.spikeGen.func_180709_b(worldIn, rand,
+                        new BlockPos(worldgenspikes$endspike.func_186151_a(), 45, worldgenspikes$endspike.func_186152_b()));
             }
         }
     }

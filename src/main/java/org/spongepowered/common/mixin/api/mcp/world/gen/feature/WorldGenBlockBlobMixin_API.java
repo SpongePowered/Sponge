@@ -72,14 +72,14 @@ public abstract class WorldGenBlockBlobMixin_API extends WorldGenerator implemen
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
-            generate(world, random, world.getHeight(chunkPos.add(x, 0, z)));
+            func_180709_b(world, random, world.func_175645_m(chunkPos.func_177982_a(x, 0, z)));
         }
     }
 
     @Override
     public BlockState getBlock() {
         if (this.api$blockState == null) {
-            this.api$blockState = (BlockState) this.block.getDefaultState();
+            this.api$blockState = (BlockState) this.block.func_176223_P();
         }
         return this.api$blockState;
     }

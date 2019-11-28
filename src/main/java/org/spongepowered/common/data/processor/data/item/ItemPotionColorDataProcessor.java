@@ -47,24 +47,24 @@ import java.util.Optional;
 public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcessor<Color, Value<Color>, PotionColorData, ImmutablePotionColorData> {
 
     public ItemPotionColorDataProcessor() {
-        super(itemStack -> itemStack.getItem() == Items.POTIONITEM || itemStack.getItem() == Items.SPLASH_POTION ||
-                itemStack.getItem() == Items.LINGERING_POTION, Keys.POTION_COLOR);
+        super(itemStack -> itemStack.func_77973_b() == Items.field_151068_bn || itemStack.func_77973_b() == Items.field_185155_bH ||
+                itemStack.func_77973_b() == Items.field_185156_bI, Keys.POTION_COLOR);
     }
 
     @Override
     protected boolean set(ItemStack dataHolder, Color value) {
-        if (!dataHolder.hasTagCompound()) {
-            dataHolder.setTagCompound(new NBTTagCompound());
+        if (!dataHolder.func_77942_o()) {
+            dataHolder.func_77982_d(new NBTTagCompound());
         }
 
-        final NBTTagCompound mainCompound = dataHolder.getTagCompound();
-        mainCompound.setInteger(Constants.Item.CUSTOM_POTION_COLOR, value.getRgb());
+        final NBTTagCompound mainCompound = dataHolder.func_77978_p();
+        mainCompound.func_74768_a(Constants.Item.CUSTOM_POTION_COLOR, value.getRgb());
         return true;
     }
 
     @Override
     protected Optional<Color> getVal(ItemStack dataHolder) {
-        return Optional.of(Color.ofRgb(PotionUtils.getColor(dataHolder)));
+        return Optional.of(Color.ofRgb(PotionUtils.func_190932_c(dataHolder)));
     }
 
     @Override
@@ -89,17 +89,17 @@ public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcesso
         }
 
         ItemStack itemStack = (ItemStack) container;
-        if (!itemStack.hasTagCompound()) {
+        if (!itemStack.func_77942_o()) {
             return DataTransactionResult.successNoData();
         }
 
-        NBTTagCompound mainCompound = itemStack.getTagCompound();
-        if (!mainCompound.hasKey(Constants.Item.CUSTOM_POTION_COLOR, Constants.NBT.TAG_INT)) {
+        NBTTagCompound mainCompound = itemStack.func_77978_p();
+        if (!mainCompound.func_150297_b(Constants.Item.CUSTOM_POTION_COLOR, Constants.NBT.TAG_INT)) {
             return DataTransactionResult.successNoData();
         }
 
-        Color removedColor = Color.ofRgb(mainCompound.getInteger(Constants.Item.CUSTOM_POTION_COLOR));
-        mainCompound.removeTag(Constants.Item.CUSTOM_POTION_COLOR);
+        Color removedColor = Color.ofRgb(mainCompound.func_74762_e(Constants.Item.CUSTOM_POTION_COLOR));
+        mainCompound.func_82580_o(Constants.Item.CUSTOM_POTION_COLOR);
         return DataTransactionResult.successRemove(constructImmutableValue(removedColor));
     }
 }

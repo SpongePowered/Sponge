@@ -52,13 +52,13 @@ public class SilentDataProcessor extends AbstractEntitySingleDataProcessor<Entit
 
     @Override
     protected boolean set(Entity entity, Boolean value) {
-        entity.setSilent(value);
+        entity.func_174810_b(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(Entity entity) {
-        return Optional.of(entity.isSilent());
+        return Optional.of(entity.func_174814_R());
     }
 
     @Override

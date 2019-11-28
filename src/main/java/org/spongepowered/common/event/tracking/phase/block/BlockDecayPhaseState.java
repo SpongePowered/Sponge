@@ -119,7 +119,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
     @Override
     public BlockChange associateBlockChangeWithSnapshot(final GeneralizedContext phaseContext, final IBlockState newState,
         final Block newBlock, final IBlockState currentState, final SpongeBlockSnapshot snapshot, final Block originalBlock) {
-        if (newBlock == Blocks.AIR) {
+        if (newBlock == Blocks.field_150350_a) {
             return BlockChange.DECAY;
         } else {
             return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, snapshot, originalBlock);

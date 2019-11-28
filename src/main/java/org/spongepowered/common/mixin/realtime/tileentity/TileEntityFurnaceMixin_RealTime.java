@@ -64,11 +64,11 @@ public abstract class TileEntityFurnaceMixin_RealTime extends TileEntity {
         )
     )
     private void realTimeImpl$adjustForRealTimeBurnTime(final TileEntityFurnace self, final int modifier) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.field_145850_b).bridge$isFake()) {
             this.furnaceBurnTime = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.getWorld()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) this.func_145831_w()).realTimeBridge$getRealTimeTicks();
         this.furnaceBurnTime = Math.max(0, this.furnaceBurnTime - Math.max(1, ticks - 1));
     }
 
@@ -94,11 +94,11 @@ public abstract class TileEntityFurnaceMixin_RealTime extends TileEntity {
         )
     )
     private void realTimeImpl$adjustForRealTimeCookTime(final TileEntityFurnace self, final int modifier) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.field_145850_b).bridge$isFake()) {
             this.cookTime = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.getWorld()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) this.func_145831_w()).realTimeBridge$getRealTimeTicks();
         this.cookTime = Math.min(this.totalCookTime, this.cookTime + ticks);
     }
 
@@ -121,12 +121,12 @@ public abstract class TileEntityFurnaceMixin_RealTime extends TileEntity {
         )
     )
     private void realTimeImpl$adjustForRealTimeCookTimeCooldown(final TileEntityFurnace self, final int modifier) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.field_145850_b).bridge$isFake()) {
             this.cookTime = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.getWorld()).realTimeBridge$getRealTimeTicks();
-        this.cookTime = MathHelper.clamp(this.cookTime - (2 * ticks), 0, this.totalCookTime);
+        final int ticks = (int) ((RealTimeTrackingBridge) this.func_145831_w()).realTimeBridge$getRealTimeTicks();
+        this.cookTime = MathHelper.func_76125_a(this.cookTime - (2 * ticks), 0, this.totalCookTime);
     }
 
 }

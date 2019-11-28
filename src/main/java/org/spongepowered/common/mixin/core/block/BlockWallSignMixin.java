@@ -46,7 +46,7 @@ import java.util.Optional;
 public abstract class BlockWallSignMixin extends BlockSignMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
-        final EnumFacing facing = blockState.getValue(BlockWallSign.FACING);
+        final EnumFacing facing = blockState.func_177229_b(BlockWallSign.field_176412_a);
         final Direction direction = Constants.DirectionFunctions.getFor(facing);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, direction);
     }
@@ -61,7 +61,7 @@ public abstract class BlockWallSignMixin extends BlockSignMixin {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
             final EnumFacing facing = Constants.DirectionFunctions.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockWallSign.FACING, facing));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockWallSign.field_176412_a, facing));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -71,7 +71,7 @@ public abstract class BlockWallSignMixin extends BlockSignMixin {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
             final EnumFacing facing = Constants.DirectionFunctions.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockWallSign.FACING, facing));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockWallSign.field_176412_a, facing));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

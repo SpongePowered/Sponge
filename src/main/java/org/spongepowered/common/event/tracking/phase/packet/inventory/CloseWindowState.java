@@ -50,7 +50,7 @@ public final class CloseWindowState extends BasicPacketState {
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
-        context.openContainer(playerMP.openContainer);
+        context.openContainer(playerMP.field_71070_bA);
     }
 
     @Override
@@ -58,7 +58,7 @@ public final class CloseWindowState extends BasicPacketState {
         final EntityPlayerMP player = context.getSource(EntityPlayerMP.class).get();
         final Container container = context.getOpenContainer();
         ItemStackSnapshot lastCursor = context.getCursor();
-        ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
+        ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.field_71071_by.func_70445_o());
         if (lastCursor != null) {
             Sponge.getCauseStackManager().pushCause(player);
             InteractInventoryEvent.Close event =
@@ -90,7 +90,7 @@ public final class CloseWindowState extends BasicPacketState {
             // Pre-merged items
             context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(stacks -> {
                 final List<EntityItem> items = stacks.stream()
-                    .map(drop -> drop.create(player.getServerWorld()))
+                    .map(drop -> drop.create(player.func_71121_q()))
                     .collect(Collectors.toList());
                 final List<Entity> entities = items
                     .stream()

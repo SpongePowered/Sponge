@@ -52,9 +52,9 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
         converters.put(GameMode.class.getName(), input -> {
             try {
                 int i = Integer.parseInt(input);
-                return GameType.parseGameTypeWithDefault(i, GameType.NOT_SET);
+                return GameType.func_185329_a(i, GameType.NOT_SET);
             } catch (NumberFormatException e) {
-                return GameType.parseGameTypeWithDefault(input, GameType.NOT_SET);
+                return GameType.func_185328_a(input, GameType.NOT_SET);
             }
         });
     }

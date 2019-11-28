@@ -41,6 +41,6 @@ public class BlastResistancePropertyStore extends AbstractBlockPropertyStore<Bla
 
     @Override
     protected Optional<BlastResistanceProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        return Optional.of(new BlastResistanceProperty(block.getBlock().getExplosionResistance(null)));
+        return Optional.of(new BlastResistanceProperty(block.func_177230_c().func_149638_a(null)));
     }
 }

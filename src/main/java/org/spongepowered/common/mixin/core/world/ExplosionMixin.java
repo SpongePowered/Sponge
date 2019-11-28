@@ -131,25 +131,25 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             d0 = d0 / d3;
                             d1 = d1 / d3;
                             d2 = d2 / d3;
-                            float f = this.size * (0.7F + this.world.rand.nextFloat() * 0.6F);
+                            float f = this.size * (0.7F + this.world.field_73012_v.nextFloat() * 0.6F);
                             double d4 = this.x;
                             double d6 = this.y;
                             double d8 = this.z;
 
                             for (final float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
                                 final BlockPos blockpos = new BlockPos(d4, d6, d8);
-                                final IBlockState iblockstate = this.world.getBlockState(blockpos);
+                                final IBlockState iblockstate = this.world.func_180495_p(blockpos);
 
-                                if (iblockstate.getMaterial() != Material.AIR) {
+                                if (iblockstate.func_185904_a() != Material.field_151579_a) {
                                     final float f2 = this.exploder != null
-                                               ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this
+                                               ? this.exploder.func_180428_a((net.minecraft.world.Explosion) (Object) this
                                             , this.world, blockpos, iblockstate)
-                                               : iblockstate.getBlock().getExplosionResistance((Entity) null);
+                                               : iblockstate.func_177230_c().func_149638_a((Entity) null);
                                     f -= (f2 + 0.3F) * 0.3F;
                                 }
 
                                 if (f > 0.0F && (this.exploder == null || this.exploder
-                                        .canExplosionDestroyBlock((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate, f))) {
+                                        .func_174816_a((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate, f))) {
                                     set.add(blockpos);
                                 }
 
@@ -165,27 +165,27 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             this.affectedBlockPositions.addAll(set);
         } // Sponge - Finish if statement
         final float f3 = this.size * 2.0F;
-        final int k1 = MathHelper.floor(this.x - (double) f3 - 1.0D);
-        final int l1 = MathHelper.floor(this.x + (double) f3 + 1.0D);
-        final int i2 = MathHelper.floor(this.y - (double) f3 - 1.0D);
-        final int i1 = MathHelper.floor(this.y + (double) f3 + 1.0D);
-        final int j2 = MathHelper.floor(this.z - (double) f3 - 1.0D);
-        final int j1 = MathHelper.floor(this.z + (double) f3 + 1.0D);
+        final int k1 = MathHelper.func_76128_c(this.x - (double) f3 - 1.0D);
+        final int l1 = MathHelper.func_76128_c(this.x + (double) f3 + 1.0D);
+        final int i2 = MathHelper.func_76128_c(this.y - (double) f3 - 1.0D);
+        final int i1 = MathHelper.func_76128_c(this.y + (double) f3 + 1.0D);
+        final int j2 = MathHelper.func_76128_c(this.z - (double) f3 - 1.0D);
+        final int j1 = MathHelper.func_76128_c(this.z + (double) f3 + 1.0D);
 
         // Sponge Start - Check if this explosion should damage entities
         final List<Entity> list = this.impl$shouldDamageEntities
-                            ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
+                            ? this.world.func_72839_b(this.exploder, new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
                             : Collections.emptyList();
         // Now we can throw our Detonate Event
         if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
             final List<Location<World>> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
             final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(list.size());
             for (final BlockPos pos : this.affectedBlockPositions) {
-                blockPositions.add(new Location<>((World) this.world, pos.getX(), pos.getY(), pos.getZ()));
+                blockPositions.add(new Location<>((World) this.world, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p()));
             }
             for (final Entity entity : list) {
                 // Make sure to check the entity is immune first.
-                if (!entity.isImmuneToExplosions()) {
+                if (!entity.func_180427_aV()) {
                     entities.add((org.spongepowered.api.entity.Entity) entity);
                 }
             }
@@ -222,37 +222,37 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         for (int k2 = 0; k2 < list.size(); ++k2) {
             final Entity entity = list.get(k2);
 
-            if (!entity.isImmuneToExplosions()) {
-                final double d12 = entity.getDistance(this.x, this.y, this.z) / (double) f3;
+            if (!entity.func_180427_aV()) {
+                final double d12 = entity.func_70011_f(this.x, this.y, this.z) / (double) f3;
 
                 if (d12 <= 1.0D) {
-                    double d5 = entity.posX - this.x;
-                    double d7 = entity.posY + (double) entity.getEyeHeight() - this.y;
-                    double d9 = entity.posZ - this.z;
-                    final double d13 = (double) MathHelper.sqrt(d5 * d5 + d7 * d7 + d9 * d9);
+                    double d5 = entity.field_70165_t - this.x;
+                    double d7 = entity.field_70163_u + (double) entity.func_70047_e() - this.y;
+                    double d9 = entity.field_70161_v - this.z;
+                    final double d13 = (double) MathHelper.func_76133_a(d5 * d5 + d7 * d7 + d9 * d9);
 
                     if (d13 != 0.0D) {
                         d5 = d5 / d13;
                         d7 = d7 / d13;
                         d9 = d9 / d13;
-                        final double d14 = (double) this.world.getBlockDensity(vec3d, entity.getEntityBoundingBox());
+                        final double d14 = (double) this.world.func_72842_a(vec3d, entity.func_174813_aQ());
                         final double d10 = (1.0D - d12) * d14;
-                        entity.attackEntityFrom(
-                                DamageSource.causeExplosionDamage((net.minecraft.world.Explosion) (Object) this), (float) ((int) ((d10 * d10 + d10) / 2.0D * 7.0D * (double) f3 + 1.0D)));
+                        entity.func_70097_a(
+                                DamageSource.func_94539_a((net.minecraft.world.Explosion) (Object) this), (float) ((int) ((d10 * d10 + d10) / 2.0D * 7.0D * (double) f3 + 1.0D)));
                         double d11 = 1.0D;
 
                         if (entity instanceof EntityLivingBase) {
-                            d11 = EnchantmentProtection.getBlastDamageReduction((EntityLivingBase) entity, d10);
+                            d11 = EnchantmentProtection.func_92092_a((EntityLivingBase) entity, d10);
                         }
 
-                        entity.motionX += d5 * d11;
-                        entity.motionY += d7 * d11;
-                        entity.motionZ += d9 * d11;
+                        entity.field_70159_w += d5 * d11;
+                        entity.field_70181_x += d7 * d11;
+                        entity.field_70179_y += d9 * d11;
 
                         if (entity instanceof EntityPlayer) {
                             final EntityPlayer entityplayer = (EntityPlayer) entity;
 
-                            if (!entityplayer.isSpectator() && (!entityplayer.isCreative() || !entityplayer.capabilities.isFlying)) {
+                            if (!entityplayer.func_175149_v() && (!entityplayer.func_184812_l_() || !entityplayer.field_71075_bZ.field_75100_b)) {
                                 this.playerKnockbackMap.put(entityplayer, new Vec3d(d5 * d10, d7 * d10, d9 * d10));
                             }
                         }
@@ -272,27 +272,27 @@ public abstract class ExplosionMixin implements ExplosionBridge {
      */
     @Overwrite
     public void doExplosionB(final boolean spawnParticles) {
-        this.world.playSound((EntityPlayer) null, this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE,
-            SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
+        this.world.func_184148_a((EntityPlayer) null, this.x, this.y, this.z, SoundEvents.field_187539_bB,
+            SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.field_73012_v.nextFloat() - this.world.field_73012_v.nextFloat()) * 0.2F) * 0.7F);
 
         if (this.size >= 2.0F && (this.damagesTerrain || this.impl$shouldBreakBlocks)) {
             // Sponge Start - Use WorldServer methods since we prune the explosion packets
             // to avoid spamming/lagging the client out when some ~idiot~ decides to explode
             // hundreds of explosions at once
             if (this.world instanceof WorldServer) {
-                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
+                ((WorldServer) this.world).func_175739_a(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
             } else {
                 // Sponge End
-                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
+                this.world.func_175688_a(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
             } // Sponge - brackets.
         } else {
             // Sponge Start - Use WorldServer methods since we prune the explosion packets
             // to avoid spamming/lagging the client out when some ~idiot~ decides to explode
             // hundreds of explosions at once
             if (this.world instanceof WorldServer) {
-                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
+                ((WorldServer) this.world).func_175739_a(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
             } else { // Sponge end
-                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
+                this.world.func_175688_a(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
             } // Sponge - brackets.
         }
         // Sponge Start - set up some variables for more fasts
@@ -302,31 +302,31 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
         if (this.impl$shouldBreakBlocks) { // Sponge - use 'impl$shouldBreakBlocks' instead of 'damagesTerrain'
             for (final BlockPos blockpos : this.affectedBlockPositions) {
-                final IBlockState iblockstate = this.world.getBlockState(blockpos);
-                final Block block = iblockstate.getBlock();
+                final IBlockState iblockstate = this.world.func_180495_p(blockpos);
+                final Block block = iblockstate.func_177230_c();
 
                 if (spawnParticles) {
-                    final double d0 = (double) ((float) blockpos.getX() + this.world.rand.nextFloat());
-                    final double d1 = (double) ((float) blockpos.getY() + this.world.rand.nextFloat());
-                    final double d2 = (double) ((float) blockpos.getZ() + this.world.rand.nextFloat());
+                    final double d0 = (double) ((float) blockpos.func_177958_n() + this.world.field_73012_v.nextFloat());
+                    final double d1 = (double) ((float) blockpos.func_177956_o() + this.world.field_73012_v.nextFloat());
+                    final double d2 = (double) ((float) blockpos.func_177952_p() + this.world.field_73012_v.nextFloat());
                     double d3 = d0 - this.x;
                     double d4 = d1 - this.y;
                     double d5 = d2 - this.z;
-                    final double d6 = (double) MathHelper.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
+                    final double d6 = (double) MathHelper.func_76133_a(d3 * d3 + d4 * d4 + d5 * d5);
                     d3 = d3 / d6;
                     d4 = d4 / d6;
                     d5 = d5 / d6;
                     double d7 = 0.5D / (d6 / (double) this.size + 0.1D);
-                    d7 = d7 * (double) (this.world.rand.nextFloat() * this.world.rand.nextFloat() + 0.3F);
+                    d7 = d7 * (double) (this.world.field_73012_v.nextFloat() * this.world.field_73012_v.nextFloat() + 0.3F);
                     d3 = d3 * d7;
                     d4 = d4 * d7;
                     d5 = d5 * d7;
-                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D, (d2 + this.z) / 2.0D, d3, d4, d5, new int[0]);
-                    this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5, new int[0]);
+                    this.world.func_175688_a(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D, (d2 + this.z) / 2.0D, d3, d4, d5, new int[0]);
+                    this.world.func_175688_a(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5, new int[0]);
                 }
 
-                if (iblockstate.getMaterial() != Material.AIR) {
-                    if (block.canDropFromExplosion((net.minecraft.world.Explosion) (Object) this)) {
+                if (iblockstate.func_185904_a() != Material.field_151579_a) {
+                    if (block.func_149659_a((net.minecraft.world.Explosion) (Object) this)) {
                         // Sponge Start - Track the block position being destroyed
                         // We need to capture this block position if necessary
                         try (final CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
@@ -334,7 +334,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                                 pos.setPos(blockpos);
                             }
                             // Sponge End
-                            block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.size, 0);
+                            block.func_180653_a(this.world, blockpos, this.world.func_180495_p(blockpos), 1.0F / this.size, 0);
                         } // Sponge - brackets
                     }
 
@@ -357,14 +357,14 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
         if (this.causesFire) {
             for (final BlockPos blockpos1 : this.affectedBlockPositions) {
-                if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock() && this.random.nextInt(3) == 0) {
+                if (this.world.func_180495_p(blockpos1).func_185904_a() == Material.field_151579_a && this.world.func_180495_p(blockpos1.func_177977_b()).func_185913_b() && this.random.nextInt(3) == 0) {
                     // Sponge Start - Track the block position being destroyed
                     try (final CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
                         if (pos != null) {
                             pos.setPos(blockpos1);
                         }
                         // Sponge End
-                        this.world.setBlockState(blockpos1, Blocks.FIRE.getDefaultState());
+                        this.world.func_175656_a(blockpos1, Blocks.field_150480_ab.func_176223_P());
                     } // Sponge - brackets
                 }
             }
@@ -407,7 +407,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         return MoreObjects.toStringHelper(this)
             .add("causesFire", this.causesFire)
             .add("damagesTerrain", this.damagesTerrain)
-            .add("world", this.world.getWorldInfo() == null ? "null" : this.world.getWorldInfo().getWorldName())
+            .add("world", this.world.func_72912_H() == null ? "null" : this.world.func_72912_H().func_76065_j())
             .add("x", this.x)
             .add("y", this.y)
             .add("z", this.z)

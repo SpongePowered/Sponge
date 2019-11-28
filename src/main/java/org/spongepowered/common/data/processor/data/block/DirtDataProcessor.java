@@ -39,17 +39,17 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class DirtDataProcessor extends AbstractCatalogDataProcessor<DirtType, Value<DirtType>, DirtData, ImmutableDirtData> {
 
     public DirtDataProcessor() {
-        super(Keys.DIRT_TYPE, input -> input.getItem() == ItemTypes.DIRT);
+        super(Keys.DIRT_TYPE, input -> input.func_77973_b() == ItemTypes.DIRT);
     }
 
     @Override
     protected int setToMeta(DirtType value) {
-        return ((BlockDirt.DirtType) (Object) value).getMetadata();
+        return ((BlockDirt.DirtType) (Object) value).func_176925_a();
     }
 
     @Override
     protected DirtType getFromMeta(int meta) {
-        return (DirtType) (Object) BlockDirt.DirtType.byMetadata(meta);
+        return (DirtType) (Object) BlockDirt.DirtType.func_176924_a(meta);
     }
 
     @Override

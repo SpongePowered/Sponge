@@ -55,7 +55,7 @@ public class PickupDelayValueProcessor extends AbstractSpongeValueProcessor<Enti
 
     @Override
     protected boolean set(final EntityItem container, final Integer value) {
-        container.setPickupDelay(value);
+        container.func_174867_a(value);
         return true;
     }
 

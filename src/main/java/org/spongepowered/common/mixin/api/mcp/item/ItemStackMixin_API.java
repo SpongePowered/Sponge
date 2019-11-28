@@ -137,15 +137,15 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
                 .set(Constants.ItemStack.COUNT, this.apiStack$getQuantity())
                 .set(Constants.ItemStack.DAMAGE_VALUE, this.getItemDamage());
         if (hasTagCompound()) { // no tag? no data, simple as that.
-            final NBTTagCompound compound = getTagCompound().copy();
-            if (compound.hasKey(Constants.Sponge.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Sponge.SPONGE_DATA);
-                if (spongeCompound.hasKey(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
-                    spongeCompound.removeTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
+            final NBTTagCompound compound = getTagCompound().func_74737_b();
+            if (compound.func_74764_b(Constants.Sponge.SPONGE_DATA)) {
+                final NBTTagCompound spongeCompound = compound.func_74775_l(Constants.Sponge.SPONGE_DATA);
+                if (spongeCompound.func_74764_b(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
+                    spongeCompound.func_82580_o(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
             Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
-            if (!compound.isEmpty()) {
+            if (!compound.func_82582_d()) {
                 final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
                 container.set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
             }
@@ -164,7 +164,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     }
 
     public Translation apiStack$getTranslation() {
-        return new SpongeTranslation(shadow$getItem().getTranslationKey((net.minecraft.item.ItemStack) (Object) this) + ".name");
+        return new SpongeTranslation(shadow$getItem().func_77667_c((net.minecraft.item.ItemStack) (Object) this) + ".name");
     }
 
     public ItemStackSnapshot apiStack$createSnapshot() {
@@ -172,7 +172,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     }
 
     public boolean apiStack$equalTo(ItemStack that) {
-        return net.minecraft.item.ItemStack.areItemStacksEqual(
+        return net.minecraft.item.ItemStack.func_77989_b(
                 (net.minecraft.item.ItemStack) (Object) this,
                 (net.minecraft.item.ItemStack) that
         );

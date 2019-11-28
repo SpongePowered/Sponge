@@ -75,10 +75,10 @@ public abstract class BlockFenceMixin extends BlockMixin {
 
     private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.getValue(BlockFence.NORTH);
-        final Boolean east = blockState.getValue(BlockFence.EAST);
-        final Boolean west = blockState.getValue(BlockFence.WEST);
-        final Boolean south = blockState.getValue(BlockFence.SOUTH);
+        final Boolean north = blockState.func_177229_b(BlockFence.field_176526_a);
+        final Boolean east = blockState.func_177229_b(BlockFence.field_176525_b);
+        final Boolean west = blockState.func_177229_b(BlockFence.field_176528_N);
+        final Boolean south = blockState.func_177229_b(BlockFence.field_176527_M);
         if (north) {
             directions.add(Direction.NORTH);
         }

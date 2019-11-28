@@ -77,8 +77,8 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
     public static Palette<BlockState> getBlockPalette() {
         if (blockPalette == null) {
             blockPalette = new BlockPaletteWrapper(new GlobalPalette<>(PaletteTypes.GLOBAL_BLOCKS,
-                (type) -> Block.BLOCK_STATE_IDS.get((IBlockState) type),
-                (id) -> (BlockState) Block.BLOCK_STATE_IDS.getByValue(id),
+                (type) -> Block.field_176229_d.func_148747_b((IBlockState) type),
+                (id) -> (BlockState) Block.field_176229_d.func_148745_a(id),
                 BlockState.class), org.spongepowered.api.world.schematic.BlockPaletteTypes.GLOBAL);
         }
         return blockPalette;
@@ -87,8 +87,8 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
     public static GlobalPalette<BiomeType> getBiomePalette() {
         if (biomePalette == null) {
             biomePalette = new GlobalPalette<>(PaletteTypes.GLOBAL_BIOMES,
-                (type) -> Biome.getIdForBiome((Biome) (type instanceof VirtualBiomeType ? ((VirtualBiomeType) type).getPersistedType() : type)),
-                (id) -> (BiomeType) Biome.getBiomeForId(id),
+                (type) -> Biome.func_185362_a((Biome) (type instanceof VirtualBiomeType ? ((VirtualBiomeType) type).getPersistedType() : type)),
+                (id) -> (BiomeType) Biome.func_185357_a(id),
                 BiomeType.class
                 );
 

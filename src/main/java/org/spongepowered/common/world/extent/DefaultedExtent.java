@@ -184,7 +184,7 @@ public interface DefaultedExtent extends Extent {
                 if (archetype instanceof SpongeTileEntityArchetype) {
                     final int[] apos = new int[] {(x - ox) - tmin.getX(), y - tmin.getY(), (z - oz) - tmin.getZ()};
                     final SpongeTileEntityArchetype sponge = (SpongeTileEntityArchetype) archetype;
-                    sponge.getCompound().setIntArray(Constants.Sponge.TileEntityArchetype.TILE_ENTITY_POS, apos);
+                    sponge.getCompound().func_74783_a(Constants.Sponge.TileEntityArchetype.TILE_ENTITY_POS, apos);
                 }
                 tiles.put(new Vector3i(x - ox, y - oy, z - oz), archetype);
             }
@@ -201,15 +201,15 @@ public interface DefaultedExtent extends Extent {
         for (final Entity hit : intersectingEntities) {
             final net.minecraft.entity.Entity nms = (net.minecraft.entity.Entity) hit;
             final SpongeEntityArchetype archetype = (SpongeEntityArchetype) hit.createArchetype();
-            final NBTTagList tagList = archetype.getData().getTagList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
-            if (tagList.isEmpty()) {
-                tagList.appendTag(new NBTTagDouble(nms.posX - ox));
-                tagList.appendTag(new NBTTagDouble(nms.posY - oy));
-                tagList.appendTag(new NBTTagDouble(nms.posZ - oz));
+            final NBTTagList tagList = archetype.getData().func_150295_c(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+            if (tagList.func_82582_d()) {
+                tagList.func_74742_a(new NBTTagDouble(nms.field_70165_t - ox));
+                tagList.func_74742_a(new NBTTagDouble(nms.field_70163_u - oy));
+                tagList.func_74742_a(new NBTTagDouble(nms.field_70161_v - oz));
             } else {
-                tagList.set(0, new NBTTagDouble(nms.posX - ox));
-                tagList.set(1, new NBTTagDouble(nms.posY - oy));
-                tagList.set(2, new NBTTagDouble(nms.posZ - oz));
+                tagList.func_150304_a(0, new NBTTagDouble(nms.field_70165_t - ox));
+                tagList.func_150304_a(1, new NBTTagDouble(nms.field_70163_u - oy));
+                tagList.func_150304_a(2, new NBTTagDouble(nms.field_70161_v - oz));
             }
             entities.add(archetype);
         }

@@ -34,6 +34,6 @@ public abstract class BlockStoneMixin_API extends BlockMixin_API {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() +  "." + BlockStone.EnumType.STONE.getTranslationKey() + ".name");
+        return new SpongeTranslation(getTranslationKey() +  "." + BlockStone.EnumType.STONE.func_176644_c() + ".name");
     }
 }

@@ -49,8 +49,8 @@ public class InvisibilityValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected boolean set(Entity container, Boolean value) {
-        if (!container.world.isRemote) {
-            container.setInvisible(value);
+        if (!container.field_70170_p.field_72995_K) {
+            container.func_82142_c(value);
             return true;
         }
         return false;
@@ -58,7 +58,7 @@ public class InvisibilityValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(container.isInvisible());
+        return Optional.of(container.func_82150_aj());
     }
 
     @Override

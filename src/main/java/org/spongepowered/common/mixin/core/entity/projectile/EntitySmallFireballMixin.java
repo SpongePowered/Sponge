@@ -55,6 +55,6 @@ public abstract class EntitySmallFireballMixin extends EntityFireballMixin {
         )
     )
     private boolean onCanGrief(World world, BlockPos pos) {
-        return ((GrieferBridge) this).bridge$CanGrief() && world.isAirBlock(pos);
+        return ((GrieferBridge) this).bridge$CanGrief() && world.func_175623_d(pos);
     }
 }

@@ -54,7 +54,7 @@ public abstract class BlockTallGrassMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableShrubData) {
             final BlockTallGrass.EnumType grassType = (BlockTallGrass.EnumType) (Object) ((ImmutableShrubData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockTallGrass.TYPE, grassType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockTallGrass.field_176497_a, grassType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -65,7 +65,7 @@ public abstract class BlockTallGrassMixin extends BlockMixin {
         if (key.equals(Keys.SHRUB_TYPE)) {
             final ShrubType shrubType = (ShrubType) value;
             final BlockTallGrass.EnumType grassType = (BlockTallGrass.EnumType) (Object) shrubType;
-            return Optional.of((BlockState) blockState.withProperty(BlockTallGrass.TYPE, grassType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockTallGrass.field_176497_a, grassType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -78,7 +78,7 @@ public abstract class BlockTallGrassMixin extends BlockMixin {
 
 
     private ImmutableShrubData impl$getPlantData(final IBlockState blockState) {
-        final ShrubType shrubType = (ShrubType) (Object) blockState.getValue(BlockTallGrass.TYPE);
+        final ShrubType shrubType = (ShrubType) (Object) blockState.func_177229_b(BlockTallGrass.field_176497_a);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeShrubData.class, shrubType);
     }
 }

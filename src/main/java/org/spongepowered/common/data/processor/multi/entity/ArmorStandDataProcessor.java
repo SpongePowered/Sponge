@@ -67,10 +67,10 @@ public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<EntityA
     @Override
     protected Map<Key<?>, ?> getValues(final EntityArmorStand dataHolder) {
         return ImmutableMap.<Key<?>, Object>builder()
-                .put(Keys.ARMOR_STAND_HAS_ARMS, dataHolder.getShowArms())
-                .put(Keys.ARMOR_STAND_HAS_BASE_PLATE, !dataHolder.hasNoBasePlate())
-                .put(Keys.ARMOR_STAND_MARKER, dataHolder.hasMarker())
-                .put(Keys.ARMOR_STAND_IS_SMALL, dataHolder.isSmall())
+                .put(Keys.ARMOR_STAND_HAS_ARMS, dataHolder.func_175402_q())
+                .put(Keys.ARMOR_STAND_HAS_BASE_PLATE, !dataHolder.func_175414_r())
+                .put(Keys.ARMOR_STAND_MARKER, dataHolder.func_181026_s())
+                .put(Keys.ARMOR_STAND_IS_SMALL, dataHolder.func_175410_n())
                 .build();
     }
 

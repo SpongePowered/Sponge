@@ -103,8 +103,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.inv = new InventoryBasic(title, isCustom, count);
 
         // Updates the Inventory for all viewers on any change
-        this.inv.addInventoryChangeListener(i -> this.viewers.forEach(v -> {
-            v.openContainer.detectAndSendChanges();
+        this.inv.func_110134_a(i -> this.viewers.forEach(v -> {
+            v.field_71070_bA.func_75142_b();
         }));
 
 
@@ -143,7 +143,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public Container createContainer(final InventoryPlayer playerInventory, final EntityPlayer playerIn) {
+    public Container func_174876_a(final InventoryPlayer playerInventory, final EntityPlayer playerIn) {
 
         // To be viewable the Inventory has to implement IInteractionObject and thus provide a Container
         // displayChest falls back to Chest for IInventory instance
@@ -167,7 +167,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public String getGuiID() {
+    public String func_174875_k() {
         final String key = AbstractInventoryProperty.getDefaultKey(GuiIdProperty.class).toString();
         final InventoryProperty<?, ?> property = this.properties.get(key);
         if (property instanceof GuiIdProperty) {
@@ -186,76 +186,76 @@ public class CustomInventory implements IInventory, IInteractionObject {
     // IInventory delegation
 
     @Override
-    public ITextComponent getDisplayName() {
-        return this.inv.getDisplayName();
+    public ITextComponent func_145748_c_() {
+        return this.inv.func_145748_c_();
     }
 
     @Override
-    public String getName() {
-        return this.inv.getName();
+    public String func_70005_c_() {
+        return this.inv.func_70005_c_();
     }
 
     @Override
-    public boolean hasCustomName() {
-        return this.inv.hasCustomName();
+    public boolean func_145818_k_() {
+        return this.inv.func_145818_k_();
     }
 
     @Override
-    public int getSizeInventory() {
-        return this.inv.getSizeInventory();
+    public int func_70302_i_() {
+        return this.inv.func_70302_i_();
     }
 
     @Override
-    public boolean isEmpty() {
-        return this.inv.isEmpty();
+    public boolean func_191420_l() {
+        return this.inv.func_191420_l();
     }
 
     @Override
-    public ItemStack getStackInSlot(final int index) {
-        return this.inv.getStackInSlot(index);
+    public ItemStack func_70301_a(final int index) {
+        return this.inv.func_70301_a(index);
     }
 
     @Override
-    public ItemStack decrStackSize(final int index, final int count) {
-        return this.inv.decrStackSize(index, count);
+    public ItemStack func_70298_a(final int index, final int count) {
+        return this.inv.func_70298_a(index, count);
     }
 
     @Override
-    public ItemStack removeStackFromSlot(final int index) {
-        return this.inv.removeStackFromSlot(index);
+    public ItemStack func_70304_b(final int index) {
+        return this.inv.func_70304_b(index);
     }
 
     @Override
-    public void setInventorySlotContents(final int index, final ItemStack stack) {
-        this.inv.setInventorySlotContents(index, stack);
+    public void func_70299_a(final int index, final ItemStack stack) {
+        this.inv.func_70299_a(index, stack);
     }
 
     @Override
-    public int getInventoryStackLimit() {
-        return this.inv.getInventoryStackLimit();
+    public int func_70297_j_() {
+        return this.inv.func_70297_j_();
     }
 
     @Override
-    public void markDirty() {
-        this.inv.markDirty();
+    public void func_70296_d() {
+        this.inv.func_70296_d();
     }
 
     @Override
-    public boolean isUsableByPlayer(final EntityPlayer player) {
-        return this.inv.isUsableByPlayer(player);
+    public boolean func_70300_a(final EntityPlayer player) {
+        return this.inv.func_70300_a(player);
     }
 
     @Override
-    public void openInventory(final EntityPlayer player) {
+    public void func_174889_b(final EntityPlayer player) {
         this.viewers.add(player);
-        this.inv.openInventory(player);
+        this.inv.func_174889_b(player);
         this.ensureListenersRegistered();
     }
 
     @Override
-    public void closeInventory(final EntityPlayer player) {
+    public void func_174886_c(final EntityPlayer player) {
         this.viewers.remove(player);
-        this.inv.closeInventory(player);
+        this.inv.func_174886_c(player);
         if (this.viewers.isEmpty()) {
             Task.builder().execute(() -> {
                 if (this.viewers.isEmpty()) {
@@ -267,28 +267,28 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public boolean isItemValidForSlot(final int index, final ItemStack stack) {
-        return this.inv.isItemValidForSlot(index, stack);
+    public boolean func_94041_b(final int index, final ItemStack stack) {
+        return this.inv.func_94041_b(index, stack);
     }
 
     @Override
-    public int getField(final int id) {
-        return this.inv.getField(id);
+    public int func_174887_a_(final int id) {
+        return this.inv.func_174887_a_(id);
     }
 
     @Override
-    public void setField(final int id, final int value) {
-        this.inv.setField(id, value);
+    public void func_174885_b(final int id, final int value) {
+        this.inv.func_174885_b(id, value);
     }
 
     @Override
-    public int getFieldCount() {
-        return this.inv.getFieldCount();
+    public int func_174890_g() {
+        return this.inv.func_174890_g();
     }
 
     @Override
-    public void clear() {
-        this.inv.clear();
+    public void func_174888_l() {
+        this.inv.func_174888_l();
     }
 
     public Map<String, InventoryProperty<?, ?>> getProperties() {

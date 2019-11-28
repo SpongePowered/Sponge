@@ -80,7 +80,7 @@ public abstract class EntityItemFrameMixin extends EntityHangingMixin {
         )
     )
     private void postOnSetItemFrame(CallbackInfo ci) {
-        setDisplayedItem(net.minecraft.item.ItemStack.EMPTY);
+        setDisplayedItem(net.minecraft.item.ItemStack.field_190927_a);
     }
 
 }

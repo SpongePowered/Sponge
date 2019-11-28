@@ -60,7 +60,7 @@ public abstract class BlockNetherWartMixin extends BlockMixin {
             if (growth > 3) {
                 growth = 3;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockNetherWart.AGE, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockNetherWart.field_176486_a, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -72,13 +72,13 @@ public abstract class BlockNetherWartMixin extends BlockMixin {
             if (growth > 3) {
                 growth = 3;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockNetherWart.AGE, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockNetherWart.field_176486_a, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData impl$getGrowthData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockNetherWart.AGE), 0, 3);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(BlockNetherWart.field_176486_a), 0, 3);
     }
 
 }

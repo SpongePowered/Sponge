@@ -49,14 +49,14 @@ public class OffsetValueProcessor extends AbstractSpongeValueProcessor<EntityMin
 
     @Override
     protected boolean set(final EntityMinecart container, final Integer value) {
-        if(!container.hasDisplayTile()) return false;
-        container.setDisplayTileOffset(value);
+        if(!container.func_94100_s()) return false;
+        container.func_94086_l(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(final EntityMinecart container) {
-        return Optional.of(container.getDisplayTileOffset());
+        return Optional.of(container.func_94099_q());
     }
 
     @Override

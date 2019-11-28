@@ -71,6 +71,6 @@ public abstract class BlockSignMixin extends BlockMixin {
     }
 
     private ImmutableAttachedData impl$getIsAttachedFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.getBlock() instanceof BlockWallSign);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.func_177230_c() instanceof BlockWallSign);
     }
 }

@@ -98,7 +98,7 @@ public class MushroomBuilder implements Mushroom.Builder {
 
     @Override
     public Mushroom build() throws IllegalStateException {
-        Mushroom populator = (Mushroom) new WorldGenBush(Blocks.BROWN_MUSHROOM);
+        Mushroom populator = (Mushroom) new WorldGenBush(Blocks.field_150338_P);
         populator.getTypes().addAll(this.types);
         populator.setMushroomsPerChunk(this.count);
         populator.setSupplierOverride(this.override);

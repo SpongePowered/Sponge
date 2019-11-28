@@ -37,60 +37,60 @@ public class CustomContainer extends Container {
         this.inv = inventory;
 
         // TODO what significance has the x/y coord on the Slots?
-        for (int slot = 0; slot < inventory.getSizeInventory(); slot++) {
-            this.addSlotToContainer(new Slot(inventory, slot, 0, 0));
+        for (int slot = 0; slot < inventory.func_70302_i_(); slot++) {
+            this.func_75146_a(new Slot(inventory, slot, 0, 0));
         }
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlotToContainer(new Slot(player.inventory, (row + 1) * 9 + col, 0, 0));
+                this.func_75146_a(new Slot(player.field_71071_by, (row + 1) * 9 + col, 0, 0));
             }
         }
         for (int col = 0; col < 9; col++) {
-            this.addSlotToContainer(new Slot(player.inventory, col, 0, 0));
+            this.func_75146_a(new Slot(player.field_71071_by, col, 0, 0));
         }
     }
 
     @Override
-    public boolean canInteractWith(final EntityPlayer playerIn) {
+    public boolean func_75145_c(final EntityPlayer playerIn) {
         return true;
     }
 
     @Override
-    public void onContainerClosed(final EntityPlayer playerIn) {
-        super.onContainerClosed(playerIn);
-        this.inv.closeInventory(playerIn);
+    public void func_75134_a(final EntityPlayer playerIn) {
+        super.func_75134_a(playerIn);
+        this.inv.func_174886_c(playerIn);
     }
 
     @Override
-    public ItemStack transferStackInSlot(final EntityPlayer playerIn, final int index) {
-        ItemStack itemstack = ItemStack.EMPTY;
-        final Slot slot = this.inventorySlots.get(index);
+    public ItemStack func_82846_b(final EntityPlayer playerIn, final int index) {
+        ItemStack itemstack = ItemStack.field_190927_a;
+        final Slot slot = this.field_75151_b.get(index);
 
-        if (slot != null && slot.getHasStack())
+        if (slot != null && slot.func_75216_d())
         {
-            final ItemStack itemstack1 = slot.getStack();
-            itemstack = itemstack1.copy();
+            final ItemStack itemstack1 = slot.func_75211_c();
+            itemstack = itemstack1.func_77946_l();
 
-            if (index < this.inv.getSizeInventory())
+            if (index < this.inv.func_70302_i_())
             {
-                if (!this.mergeItemStack(itemstack1, this.inv.getSizeInventory(), this.inventorySlots.size(), true))
+                if (!this.func_75135_a(itemstack1, this.inv.func_70302_i_(), this.field_75151_b.size(), true))
                 {
-                    return ItemStack.EMPTY;
+                    return ItemStack.field_190927_a;
                 }
             }
-            else if (!this.mergeItemStack(itemstack1, 0, this.inv.getSizeInventory(), false))
+            else if (!this.func_75135_a(itemstack1, 0, this.inv.func_70302_i_(), false))
             {
-                return ItemStack.EMPTY;
+                return ItemStack.field_190927_a;
             }
 
-            if (itemstack1.getCount() == 0)
+            if (itemstack1.func_190916_E() == 0)
             {
-                slot.putStack(ItemStack.EMPTY);
+                slot.func_75215_d(ItemStack.field_190927_a);
             }
             else
             {
-                slot.onSlotChanged();
+                slot.func_75218_e();
             }
         }
 
@@ -98,8 +98,8 @@ public class CustomContainer extends Container {
     }
 
     @Override
-    public void detectAndSendChanges() {
-        super.detectAndSendChanges();
+    public void func_75142_b() {
+        super.func_75142_b();
         // Resend the whole inventory to prevent visual glitches due to client-prediction
         // This would not be needed if the Container enforces the same restrictions on slots as vanilla
 

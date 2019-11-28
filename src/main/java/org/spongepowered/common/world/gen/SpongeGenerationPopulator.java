@@ -94,12 +94,12 @@ public final class SpongeGenerationPopulator implements GenerationPopulator, Tim
 
         WorldGenConstants.disableLighting();
         if (minChunkX == maxChunkX && minChunkZ == maxChunkZ) {
-            this.cachedChunk = this.chunkGenerator.generateChunk(minChunkX, minChunkZ);
+            this.cachedChunk = this.chunkGenerator.func_185932_a(minChunkX, minChunkZ);
             this.placeChunkInBuffer(this.cachedChunk, buffer, minChunkX, minChunkZ);
         } else {
             for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
                 for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
-                    final Chunk generated = this.chunkGenerator.generateChunk(chunkX, chunkZ);
+                    final Chunk generated = this.chunkGenerator.func_185932_a(chunkX, chunkZ);
                     this.placeChunkInBuffer(generated, buffer, chunkX, chunkZ);
                 }
             }
@@ -123,20 +123,20 @@ public final class SpongeGenerationPopulator implements GenerationPopulator, Tim
         final int zInChunkEnd = Math.min(15, maxBound.getZ() - zOffset);
 
         // Copy the right blocks in
-        final ExtendedBlockStorage[] blockStorage = chunk.getBlockStorageArray();
+        final ExtendedBlockStorage[] blockStorage = chunk.func_76587_i();
         for (final ExtendedBlockStorage miniChunk : blockStorage) {
             if (miniChunk == null) {
                 continue;
             }
 
-            final int yOffset = miniChunk.getYLocation();
+            final int yOffset = miniChunk.func_76662_d();
             final int yInChunkStart = Math.max(0, yStart);
             final int yInChunkEnd = Math.min(15, yEnd);
             for (int xInChunk = xInChunkStart; xInChunk <= xInChunkEnd; xInChunk++) {
                 for (int yInChunk = yInChunkStart; yInChunk <= yInChunkEnd; yInChunk++) {
                     for (int zInChunk = zInChunkStart; zInChunk <= zInChunkEnd; zInChunk++) {
                         buffer.setBlock(xOffset + xInChunk, yOffset + yInChunk, zOffset + zInChunk,
-                                (BlockState) miniChunk.get(xInChunk, yInChunk, zInChunk));
+                                (BlockState) miniChunk.func_177485_a(xInChunk, yInChunk, zInChunk));
                     }
                 }
             }

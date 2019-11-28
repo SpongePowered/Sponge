@@ -74,7 +74,7 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     public void associateNeighborStateNotifier(final L unwindingContext, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
         final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
         unwindingContext.getCapturedPlayer().ifPresent(player ->
-            ((ChunkBridge) minecraftWorld.getChunk(notifyPos))
+            ((ChunkBridge) minecraftWorld.func_175726_f(notifyPos))
                 .bridge$addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
         );
     }

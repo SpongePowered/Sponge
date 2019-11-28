@@ -39,6 +39,6 @@ public abstract class CommandExecuteAtMixin {
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getGameRules()Lnet/minecraft/world/GameRules;"))
     private GameRules impl$useWorldGamerules(final WorldServer originalWorld, final MinecraftServer server, final ICommandSender sender,
         final String[] args) {
-        return sender.getEntityWorld().getGameRules();
+        return sender.func_130014_f_().func_82736_K();
     }
 }

@@ -84,7 +84,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     @Override
     public TileEntityArchetype.Builder state(BlockState state) {
         final IBlockState blockState = (IBlockState) state;
-        if (!SpongeImplHooks.hasBlockTileEntity(blockState.getBlock(), blockState)) {
+        if (!SpongeImplHooks.hasBlockTileEntity(blockState.func_177230_c(), blockState)) {
             new IllegalArgumentException("BlockState: "+ state + " does not provide TileEntities!").printStackTrace();
         }
         if (this.blockState != state) {
@@ -112,13 +112,13 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     public TileEntityArchetype.Builder tile(TileEntity tileEntity) {
         checkArgument(tileEntity instanceof net.minecraft.tileentity.TileEntity, "TileEntity is not compatible with this implementation!");
         NBTTagCompound nbttagcompound = new NBTTagCompound();
-        ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(nbttagcompound);
-        nbttagcompound.removeTag("x");
-        nbttagcompound.removeTag("y");
-        nbttagcompound.removeTag("z");
-        String tileId = nbttagcompound.getString("id");
-        nbttagcompound.removeTag("id");
-        nbttagcompound.setString(Constants.Sponge.TileEntityArchetype.TILE_ENTITY_ID, tileId);
+        ((net.minecraft.tileentity.TileEntity) tileEntity).func_189515_b(nbttagcompound);
+        nbttagcompound.func_82580_o("x");
+        nbttagcompound.func_82580_o("y");
+        nbttagcompound.func_82580_o("z");
+        String tileId = nbttagcompound.func_74779_i("id");
+        nbttagcompound.func_82580_o("id");
+        nbttagcompound.func_74778_a(Constants.Sponge.TileEntityArchetype.TILE_ENTITY_ID, tileId);
         this.tileData = NbtTranslator.getInstance().translate(nbttagcompound);
         this.blockState = tileEntity.getBlock();
         this.tileEntityType = tileEntity.getType();

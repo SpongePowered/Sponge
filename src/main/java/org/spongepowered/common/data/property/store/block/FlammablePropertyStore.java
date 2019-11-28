@@ -46,7 +46,7 @@ public class FlammablePropertyStore extends AbstractSpongePropertyStore<Flammabl
     public Optional<FlammableProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final BlockPos pos = VecHelper.toBlockPos(location);
-        final Block block = world.getBlockState(pos).getBlock();
+        final Block block = world.func_180495_p(pos).func_177230_c();
         for (EnumFacing facing : EnumFacing.values()) {
             if (SpongeImplHooks.isBlockFlammable(block, world, pos, facing)) {
                 return Optional.of(TRUE);
@@ -60,7 +60,7 @@ public class FlammablePropertyStore extends AbstractSpongePropertyStore<Flammabl
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final EnumFacing facing = toEnumFacing(direction);
         final BlockPos pos = VecHelper.toBlockPos(location);
-        final boolean flammable = SpongeImplHooks.isBlockFlammable(world.getBlockState(pos).getBlock(), world, pos, facing);
+        final boolean flammable = SpongeImplHooks.isBlockFlammable(world.func_180495_p(pos).func_177230_c(), world, pos, facing);
         return Optional.of(flammable ? TRUE : FALSE);
     }
 

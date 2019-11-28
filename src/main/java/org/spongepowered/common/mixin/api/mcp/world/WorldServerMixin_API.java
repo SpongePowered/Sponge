@@ -144,7 +144,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public Path getDirectory() {
-        final File worldDirectory = this.saveHandler.getWorldDirectory();
+        final File worldDirectory = this.saveHandler.func_75765_b();
         if (worldDirectory == null) {
             new PrettyPrinter(60).add("A Server World has a null save directory!").centre().hr()
                 .add("%s : %s", "World Name", this.getName())
@@ -164,7 +164,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     @Override
     public ScheduledBlockUpdate addScheduledUpdate(final int x, final int y, final int z, final int priority, final int ticks) {
         final BlockPos pos = new BlockPos(x, y, z);
-        this.updateBlockTick(pos, getBlockState(pos).getBlock(), ticks, priority);
+        this.updateBlockTick(pos, getBlockState(pos).func_177230_c(), ticks, priority);
         final ScheduledBlockUpdate sbu = ((WorldServerBridge) this).bridge$getScheduledBlockUpdate();
         ((WorldServerBridge) this).bridge$setScheduledBlockUpdate(null);
         return sbu;
@@ -180,7 +180,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public boolean save() throws IOException {
-        if (!getChunkProvider().canSave()) {
+        if (!getChunkProvider().func_73157_c()) {
             return false;
         }
 
@@ -198,7 +198,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         final BlockPos position = new BlockPos(x, y, z);
         final ImmutableList.Builder<ScheduledBlockUpdate> builder = ImmutableList.builder();
         for (final NextTickListEntry sbu : this.pendingTickListEntriesTreeSet) {
-            if (sbu.position.equals(position)) {
+            if (sbu.field_180282_a.equals(position)) {
                 builder.add((ScheduledBlockUpdate) sbu);
             }
         }
@@ -235,7 +235,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             .chunk(chunk)) {
             context.buildAndSwitch();
             // If we reached this point, an existing chunk was found so we need to regen
-            for (final ClassInheritanceMultiMap<net.minecraft.entity.Entity> multiEntityList : chunk.getEntityLists()) {
+            for (final ClassInheritanceMultiMap<net.minecraft.entity.Entity> multiEntityList : chunk.func_177429_s()) {
                 for (final net.minecraft.entity.Entity entity : multiEntityList) {
                     if (entity instanceof EntityPlayerMP) {
                         playerList.add((EntityPlayerMP) entity);
@@ -247,32 +247,32 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             }
 
             for (final net.minecraft.entity.Entity entity : entityList) {
-                chunk.removeEntity(entity);
+                chunk.func_76622_b(entity);
             }
 
-            final ChunkProviderServer chunkProviderServer = (ChunkProviderServer) chunk.getWorld().getChunkProvider();
+            final ChunkProviderServer chunkProviderServer = (ChunkProviderServer) chunk.func_177412_p().func_72863_F();
             ((ChunkProviderServerBridge) chunkProviderServer).bridge$unloadChunkAndSave(chunk);
             // TODO - Move to accessor with Mixin 0.8
-            final net.minecraft.world.chunk.Chunk newChunk = ((ChunkProviderServerBridge) chunkProviderServer).accessor$getChunkGenerator().generateChunk(cx, cz);
-            final PlayerChunkMapEntry playerChunk = ((WorldServer) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
+            final net.minecraft.world.chunk.Chunk newChunk = ((ChunkProviderServerBridge) chunkProviderServer).accessor$getChunkGenerator().func_185932_a(cx, cz);
+            final PlayerChunkMapEntry playerChunk = ((WorldServer) chunk.func_177412_p()).func_184164_w().func_187301_b(cx, cz);
             if (playerChunk != null) {
                 ((PlayerChunkMapEntryBridge) playerChunk).bridge$setChunk(newChunk);
             }
 
             if (newChunk != null) {
-                final WorldServer world = (WorldServer) newChunk.getWorld();
-                ((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getLoadedChunks().put(ChunkPos.asLong(cx, cz), newChunk);
-                newChunk.onLoad();
-                ((ChunkBridge) newChunk).accessor$populate(((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getChunkGenerator());
+                final WorldServer world = (WorldServer) newChunk.func_177412_p();
+                ((ChunkProviderServerBridge) world.func_72863_F()).accessor$getLoadedChunks().put(ChunkPos.func_77272_a(cx, cz), newChunk);
+                newChunk.func_76631_c();
+                ((ChunkBridge) newChunk).accessor$populate(((ChunkProviderServerBridge) world.func_72863_F()).accessor$getChunkGenerator());
                 for (final net.minecraft.entity.Entity entity: entityList) {
-                    newChunk.addEntity(entity);
+                    newChunk.func_76612_a(entity);
                 }
 
                 if (((ChunkProviderBridge) chunkProviderServer).bridge$getLoadedChunkWithoutMarkingActive(cx, cz) == null) {
                     return Optional.of((org.spongepowered.api.world.Chunk) newChunk);
                 }
 
-                final PlayerChunkMapEntry playerChunkMapEntry = ((WorldServer) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
+                final PlayerChunkMapEntry playerChunkMapEntry = ((WorldServer) newChunk.func_177412_p()).func_184164_w().func_187301_b(cx, cz);
                 if (playerChunkMapEntry != null) {
                     final List<EntityPlayerMP> chunkPlayers = ((PlayerChunkMapEntryBridge) playerChunkMapEntry).accessor$getPlayers();
                     // We deliberately send two packets, to avoid sending a 'fullChunk' packet
@@ -282,8 +282,8 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
                     // for a new chunk)
                     // - Aaron1011
                     for (final EntityPlayerMP playerMP: chunkPlayers) {
-                        playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 65534));
-                        playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 1));
+                        playerMP.field_71135_a.func_147359_a(new SPacketChunkData(newChunk, 65534));
+                        playerMP.field_71135_a.func_147359_a(new SPacketChunkData(newChunk, 1));
                     }
                 }
             }
@@ -325,14 +325,14 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         builder.worldId(this.getUniqueId())
             .position(new Vector3i(x, y, z));
         final Chunk chunk = this.getChunk(pos);
-        final IBlockState state = chunk.getBlockState(x, y, z);
+        final IBlockState state = chunk.func_186032_a(x, y, z);
         builder.blockState(state);
         try {
-            builder.extendedState((BlockState) state.getActualState((WorldServer) (Object) this, pos));
+            builder.extendedState((BlockState) state.func_185899_b((WorldServer) (Object) this, pos));
         } catch (Throwable throwable) {
             // do nothing
         }
-        final net.minecraft.tileentity.TileEntity tile = chunk.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
+        final net.minecraft.tileentity.TileEntity tile = chunk.func_177424_a(pos, Chunk.EnumCreateEntityType.CHECK);
         if (tile != null) {
             TrackingUtil.addTileEntityToBuilder(tile, builder);
         }
@@ -400,11 +400,11 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             final boolean damagesTerrain = explosion.shouldBreakBlocks();
             // Sponge End
 
-            mcExplosion.doExplosionA();
-            mcExplosion.doExplosionB(false);
+            mcExplosion.func_77278_a();
+            mcExplosion.func_77279_a(false);
 
             if (!damagesTerrain) {
-                mcExplosion.clearAffectedBlockPositions();
+                mcExplosion.func_180342_d();
             }
 
             // Sponge Start - end processing
@@ -435,7 +435,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public WorldStorage getWorldStorage() {
-        return (WorldStorage) ((WorldServer) (Object) this).getChunkProvider();
+        return (WorldStorage) ((WorldServer) (Object) this).func_72863_F();
     }
 
     @Override
@@ -459,7 +459,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         final SoundEvent event;
         try {
             // Check if the event is registered (ie has an integer ID)
-            event = SoundEvents.getRegisteredSoundEvent(sound.getId());
+            event = SoundEvents.func_187510_a(sound.getId());
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
             this.eventListeners.stream()
@@ -501,7 +501,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     private void apiImpl$stopSounds(@Nullable final SoundType sound, @Nullable final SoundCategory category) {
-        this.server.getPlayerList().sendPacketToAllPlayersInDimension(
+        this.server.func_184103_al().func_148537_a(
                 SoundEffectHelper.createStopSoundPacket(sound, category), ((WorldServerBridge) this).bridge$getDimensionId());
     }
 
@@ -520,14 +520,14 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         final List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
-            final PlayerList playerList = this.server.getPlayerList();
+            final PlayerList playerList = this.server.func_184103_al();
 
             final double x = position.getX();
             final double y = position.getY();
             final double z = position.getZ();
 
             for (final Packet<?> packet : packets) {
-                playerList.sendToAllNearExcept(null, x, y, z, radius, ((WorldServerBridge) this).bridge$getDimensionId(), packet);
+                playerList.func_148543_a(null, x, y, z, radius, ((WorldServerBridge) this).bridge$getDimensionId(), packet);
             }
         }
     }
@@ -543,16 +543,16 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     private void api$playRecord(final Vector3i position, @Nullable final RecordType recordType) {
-        this.server.getPlayerList().sendPacketToAllPlayersInDimension(
+        this.server.func_184103_al().func_148537_a(
                 SpongeRecordType.createPacket(position, recordType), ((WorldServerBridge) this).bridge$getDimensionId());
     }
 
     @Override
     public Weather getWeather() {
-        if (this.worldInfo.isThundering()) {
+        if (this.worldInfo.func_76061_m()) {
             return Weathers.THUNDER_STORM;
         }
-        if (this.worldInfo.isRaining()) {
+        if (this.worldInfo.func_76059_o()) {
             return Weathers.RAIN;
         }
         return Weathers.CLEAR;
@@ -562,23 +562,23 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     public long getRemainingDuration() {
         final Weather weather = getWeather();
         if (weather.equals(Weathers.CLEAR)) {
-            if (this.worldInfo.getCleanWeatherTime() > 0) {
-                return this.worldInfo.getCleanWeatherTime();
+            if (this.worldInfo.func_176133_A() > 0) {
+                return this.worldInfo.func_176133_A();
             }
-            return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
+            return Math.min(this.worldInfo.func_76071_n(), this.worldInfo.func_76083_p());
         }
         if (weather.equals(Weathers.THUNDER_STORM)) {
-            return this.worldInfo.getThunderTime();
+            return this.worldInfo.func_76071_n();
         }
         if (weather.equals(Weathers.RAIN)) {
-            return this.worldInfo.getRainTime();
+            return this.worldInfo.func_76083_p();
         }
         return 0;
     }
 
     @Override
     public long getRunningDuration() {
-        return this.worldInfo.getWorldTotalTime() - ((WorldServerBridge) this).bridge$getWeatherStartTime();
+        return this.worldInfo.func_82573_f() - ((WorldServerBridge) this).bridge$getWeatherStartTime();
     }
 
     @Override
@@ -590,23 +590,23 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     public void setWeather(final Weather weather, final long duration) {
         ((WorldServerBridge) this).bridge$setPreviousWeather(this.getWeather());
         if (weather.equals(Weathers.CLEAR)) {
-            this.worldInfo.setCleanWeatherTime((int) duration);
-            this.worldInfo.setRainTime(0);
-            this.worldInfo.setThunderTime(0);
-            this.worldInfo.setRaining(false);
-            this.worldInfo.setThundering(false);
+            this.worldInfo.func_176142_i((int) duration);
+            this.worldInfo.func_76080_g(0);
+            this.worldInfo.func_76090_f(0);
+            this.worldInfo.func_76084_b(false);
+            this.worldInfo.func_76069_a(false);
         } else if (weather.equals(Weathers.RAIN)) {
-            this.worldInfo.setCleanWeatherTime(0);
-            this.worldInfo.setRainTime((int) duration);
-            this.worldInfo.setThunderTime((int) duration);
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(false);
+            this.worldInfo.func_176142_i(0);
+            this.worldInfo.func_76080_g((int) duration);
+            this.worldInfo.func_76090_f((int) duration);
+            this.worldInfo.func_76084_b(true);
+            this.worldInfo.func_76069_a(false);
         } else if (weather.equals(Weathers.THUNDER_STORM)) {
-            this.worldInfo.setCleanWeatherTime(0);
-            this.worldInfo.setRainTime((int) duration);
-            this.worldInfo.setThunderTime((int) duration);
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(true);
+            this.worldInfo.func_176142_i(0);
+            this.worldInfo.func_76080_g((int) duration);
+            this.worldInfo.func_76090_f((int) duration);
+            this.worldInfo.func_76084_b(true);
+            this.worldInfo.func_76069_a(true);
         }
     }
 
@@ -620,7 +620,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     @SuppressWarnings("deprecation")
     @Override
     public void setViewDistance(final int viewDistance) {
-        this.playerChunkMap.setPlayerViewRadius(viewDistance);
+        this.playerChunkMap.func_152622_a(viewDistance);
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.getWorldInfo()).bridge$getConfigAdapter();
         // don't use the parameter, use the field that has been clamped
         configAdapter.getConfig().getWorld().setViewDistance(((PlayerChunkMapBridge) this.playerChunkMap).accessor$getViewDistance());
@@ -629,7 +629,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public void resetViewDistance() {
-        this.setViewDistance(this.server.getPlayerList().getViewDistance());
+        this.setViewDistance(this.server.func_184103_al().func_72395_o());
     }
 
 }

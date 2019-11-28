@@ -38,14 +38,14 @@ public class ChunkCacheMixin {
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
     private Chunk onConstruct(World worldIn, int chunkX, int chunkZ) {
-        if (worldIn.isRemote) {
-            return worldIn.getChunk(chunkX, chunkZ);
+        if (worldIn.field_72995_K) {
+            return worldIn.func_72964_e(chunkX, chunkZ);
         }
 
         final net.minecraft.world.chunk.Chunk chunk =
-                ((ChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
+                ((ChunkProviderBridge) worldIn.func_72863_F()).bridge$getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
         ChunkBridge spongeChunk = (ChunkBridge) chunk;
-        if (chunk == null || chunk.unloadQueued || !spongeChunk.bridge$areNeighborsLoaded()) {
+        if (chunk == null || chunk.field_189550_d || !spongeChunk.bridge$areNeighborsLoaded()) {
             return null;
         }
 

@@ -54,7 +54,7 @@ public abstract class PotionTypeMixin_API implements PotionType {
     @Override
     public String getId() {
         if (this.spongeResourceID == null) {
-            this.spongeResourceID = REGISTRY.getNameForObject((net.minecraft.potion.PotionType) (Object) this).toString();
+            this.spongeResourceID = REGISTRY.func_177774_c((net.minecraft.potion.PotionType) (Object) this).toString();
         }
         return this.spongeResourceID;
     }

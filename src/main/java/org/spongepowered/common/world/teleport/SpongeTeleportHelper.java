@@ -64,7 +64,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             filters.add(TeleportHelperFilters.CONFIG);
         }
 
-        final ChunkProviderServerBridge chunkProviderServer = (ChunkProviderServerBridge)((net.minecraft.world.WorldServer) world).getChunkProvider();
+        final ChunkProviderServerBridge chunkProviderServer = (ChunkProviderServerBridge)((net.minecraft.world.WorldServer) world).func_72863_F();
         final boolean previous = chunkProviderServer.bridge$getForceChunkRequests();
         chunkProviderServer.bridge$setForceChunkRequests(true);
 
@@ -84,10 +84,10 @@ public class SpongeTeleportHelper implements TeleportHelper {
     private Stream<Vector3i> getBlockLocations(Location<World> worldLocation, int height, int width) {
         // We don't want to warp outside of the world border, so we want to check that we're within it.
         WorldBorder worldBorder = (WorldBorder) worldLocation.getExtent().getWorldBorder();
-        int worldBorderMinX = GenericMath.floor(worldBorder.minX());
-        int worldBorderMinZ = GenericMath.floor(worldBorder.minZ());
-        int worldBorderMaxX = GenericMath.floor(worldBorder.maxX());
-        int worldBorderMaxZ = GenericMath.floor(worldBorder.maxZ());
+        int worldBorderMinX = GenericMath.floor(worldBorder.func_177726_b());
+        int worldBorderMinZ = GenericMath.floor(worldBorder.func_177736_c());
+        int worldBorderMaxX = GenericMath.floor(worldBorder.func_177728_d());
+        int worldBorderMaxZ = GenericMath.floor(worldBorder.func_177733_e());
 
         // Get the World and get the maximum Y value.
         int worldMaxY = worldLocation.getExtent().getBlockMax().getY();

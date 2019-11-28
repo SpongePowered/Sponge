@@ -52,7 +52,7 @@ public class ItemFireworkEffectDataProcessor
         extends AbstractItemSingleDataProcessor<List<FireworkEffect>, ListValue<FireworkEffect>, FireworkEffectData, ImmutableFireworkEffectData> {
 
     public ItemFireworkEffectDataProcessor() {
-        super(stack -> stack.getItem() == Items.FIREWORK_CHARGE || stack.getItem() == Items.FIREWORKS, Keys.FIREWORK_EFFECTS);
+        super(stack -> stack.func_77973_b() == Items.field_151154_bQ || stack.func_77973_b() == Items.field_151152_bP, Keys.FIREWORK_EFFECTS);
     }
 
     @Override

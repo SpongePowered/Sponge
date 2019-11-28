@@ -58,7 +58,7 @@ public abstract class EntityRabbit_AIRaidFarmMixin extends EntityAIMoveToBlock {
         cancellable = true
     )
     private void onCanGrief(final CallbackInfoReturnable<Boolean> cir) {
-        if (this.runDelay <= 0) {
+        if (this.field_179496_a <= 0) {
             if (!((GrieferBridge) this.rabbit).bridge$CanGrief()) {
                 cir.setReturnValue(false);
             }

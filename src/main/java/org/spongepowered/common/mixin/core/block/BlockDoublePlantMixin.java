@@ -64,9 +64,9 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
         if (manipulator instanceof ImmutableDoublePlantData) {
             final BlockDoublePlant.EnumPlantType doublePlantType =
                     (BlockDoublePlant.EnumPlantType) (Object) ((ImmutableDoublePlantData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockDoublePlant.VARIANT, doublePlantType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoublePlant.field_176493_a, doublePlantType));
         } else if (manipulator instanceof ImmutablePortionData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDoublePlant.HALF,
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoublePlant.field_176492_b,
                     impl$convertPortionType(((ImmutablePortionData) manipulator).type().get())));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
@@ -76,10 +76,10 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DOUBLE_PLANT_TYPE)) {
             final BlockDoublePlant.EnumPlantType doublePlantType = (BlockDoublePlant.EnumPlantType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockDoublePlant.VARIANT, doublePlantType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoublePlant.field_176493_a, doublePlantType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDoublePlant.HALF, impl$convertPortionType((PortionType) value)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoublePlant.field_176492_b, impl$convertPortionType((PortionType) value)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -91,11 +91,11 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableDoublePlantData impl$getDoublePlantTypeFor(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDoublePlantData.class,
-                (DoublePlantType) (Object) blockState.getValue(BlockDoublePlant.VARIANT));
+                (DoublePlantType) (Object) blockState.func_177229_b(BlockDoublePlant.field_176493_a));
     }
 
     private ImmutablePortionData impl$getPortionData(final IBlockState blockState) {
-        final BlockDoublePlant.EnumBlockHalf half = blockState.getValue(BlockDoublePlant.HALF);
+        final BlockDoublePlant.EnumBlockHalf half = blockState.func_177229_b(BlockDoublePlant.field_176492_b);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
                 half == BlockDoublePlant.EnumBlockHalf.LOWER ? PortionTypes.BOTTOM : PortionTypes.TOP);
     }

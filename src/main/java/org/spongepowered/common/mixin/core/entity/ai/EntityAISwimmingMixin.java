@@ -43,8 +43,8 @@ public abstract class EntityAISwimmingMixin {
      */
     @Overwrite
     public void updateTask() {
-        if (this.entity.getRNG().nextFloat() < ((SwimmingAITask) this).getSwimChance()) {
-            this.entity.getJumpHelper().setJumping();
+        if (this.entity.func_70681_au().nextFloat() < ((SwimmingAITask) this).getSwimChance()) {
+            this.entity.func_70683_ar().func_75660_a();
         }
     }
 

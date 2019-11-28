@@ -210,7 +210,7 @@ public final class LegacyTexts {
 
     @SuppressWarnings("ConstantConditions")
     public static TextComponentString parseComponent(final TextComponentString component, final char code) {
-        String text = component.getText();
+        String text = component.func_150265_g();
         int next = text.lastIndexOf(code, text.length() - 2);
 
         List<ITextComponent> parsed = null;
@@ -229,13 +229,13 @@ public final class LegacyTexts {
                         if (current != null) {
                             if (reset) {
                                 parsed.add(current);
-                                current.getStyle().setParentStyle(component.getStyle());
+                                current.func_150256_b().func_150221_a(component.func_150256_b());
                                 reset = false;
                                 current = new TextComponentString("");
                             } else {
                                 final TextComponentString old = current;
                                 current = new TextComponentString("");
-                                current.appendSibling(old);
+                                current.func_150257_a(old);
                             }
                         } else {
                             current = new TextComponentString("");
@@ -246,7 +246,7 @@ public final class LegacyTexts {
                         current = new TextComponentString("");
                     }
 
-                    reset |= applyStyle(current.getStyle(), format);
+                    reset |= applyStyle(current.func_150256_b(), format);
                     pos = next;
                 }
 
@@ -255,34 +255,34 @@ public final class LegacyTexts {
 
             if (current != null) {
                 parsed.add(current);
-                current.getStyle().setParentStyle(component.getStyle());
+                current.func_150256_b().func_150221_a(component.func_150256_b());
             }
 
             Collections.reverse(parsed);
             text = pos > 0 ? text.substring(0, pos) : "";
-            if (component.getSiblings().isEmpty()) {
+            if (component.func_150253_a().isEmpty()) {
                 final TextComponentString newComponent = new TextComponentString(text);
-                newComponent.getSiblings().addAll(parsed);
-                newComponent.setStyle(component.getStyle());
+                newComponent.func_150253_a().addAll(parsed);
+                newComponent.func_150255_a(component.func_150256_b());
                 return newComponent;
             }
-        } else if (component.getSiblings().isEmpty()) {
+        } else if (component.func_150253_a().isEmpty()) {
             return component;
         }
 
         final TextComponentString newComponent = new TextComponentString(text);
         if (parsed != null) {
-            newComponent.getSiblings().addAll(parsed);
+            newComponent.func_150253_a().addAll(parsed);
         }
 
-        newComponent.setStyle(component.getStyle());
-        for (ITextComponent child : component.getSiblings()) {
+        newComponent.func_150255_a(component.func_150256_b());
+        for (ITextComponent child : component.func_150253_a()) {
             if (child instanceof TextComponentString) {
                 child = parseComponent((TextComponentString) child, code);
             } else {
-                child = child.createCopy();
+                child = child.func_150259_f();
             }
-            newComponent.appendSibling(child);
+            newComponent.func_150257_a(child);
         }
 
         return newComponent;

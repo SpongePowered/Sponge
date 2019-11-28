@@ -56,12 +56,12 @@ public abstract class EntityAIBaseMixin_API<O extends Agent> implements AITask<O
 
     @Override
     public boolean canRunConcurrentWith(AITask<O> other) {
-        return (this.mutexBits & ((EntityAIBase) other).getMutexBits()) == 0;
+        return (this.mutexBits & ((EntityAIBase) other).func_75247_h()) == 0;
     }
 
     @Override
     public boolean canBeInterrupted() {
-        return ((EntityAIBase) (Object) this).isInterruptible();
+        return ((EntityAIBase) (Object) this).func_75252_g();
     }
 
 

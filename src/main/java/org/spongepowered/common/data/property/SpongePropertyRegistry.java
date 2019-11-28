@@ -36,6 +36,7 @@ import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.common.data.property.SpongePropertyRegistry.TempRegistry;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;

@@ -73,7 +73,7 @@ public class UserCollection extends SpongeSubjectCollection {
             return false;
         }
         GameProfile profile = uuidToGameProfile(uid);
-        return SpongePermissionService.getOps().getEntry(profile) != null;
+        return SpongePermissionService.getOps().func_152683_b(profile) != null;
     }
 
     private UUID identToUuid(String identifier) {

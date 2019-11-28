@@ -49,7 +49,7 @@ public abstract class ChunkProviderServerMixin_Async_Lighting {
     private boolean asyncLighting$UsePendingLightUpdatesForAsyncChunk(final ChunkBridge chunk) {
         return chunk.bridge$isPersistedChunk()
                || ((ChunkBridge_AsyncLighting) chunk).asyncLightingBridge$getPendingLightUpdates().get() > 0
-               || this.world.getTotalWorldTime() - ((ChunkBridge_AsyncLighting) chunk).asyncLightingBridge$getLightUpdateTime() < 20;
+               || this.world.func_82737_E() - ((ChunkBridge_AsyncLighting) chunk).asyncLightingBridge$getLightUpdateTime() < 20;
 
     }
 }

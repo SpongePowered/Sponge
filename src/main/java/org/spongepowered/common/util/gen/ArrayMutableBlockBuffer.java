@@ -36,6 +36,7 @@ import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteTypes;
+import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.PackedBackingData;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
@@ -310,7 +311,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
             this.bits = bits;
 
             this.maxValue = (1 << bits) - 1;
-            this.longArray = new long[MathHelper.roundUp(size * bits, Long.SIZE) / Long.SIZE];
+            this.longArray = new long[MathHelper.func_154354_b(size * bits, Long.SIZE) / Long.SIZE];
         }
 
         private PackedBackingData(int size, int bits, long[] array) {

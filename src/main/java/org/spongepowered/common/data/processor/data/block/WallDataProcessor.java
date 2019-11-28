@@ -39,17 +39,17 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class WallDataProcessor extends AbstractCatalogDataProcessor<WallType, Value<WallType>, WallData, ImmutableWallData> {
 
     public WallDataProcessor() {
-        super(Keys.WALL_TYPE, input -> input.getItem() == ItemTypes.COBBLESTONE_WALL);
+        super(Keys.WALL_TYPE, input -> input.func_77973_b() == ItemTypes.COBBLESTONE_WALL);
     }
 
     @Override
     protected int setToMeta(WallType value) {
-        return ((BlockWall.EnumType) (Object) value).getMetadata();
+        return ((BlockWall.EnumType) (Object) value).func_176657_a();
     }
 
     @Override
     protected WallType getFromMeta(int meta) {
-        return (WallType) (Object) BlockWall.EnumType.byMetadata(meta);
+        return (WallType) (Object) BlockWall.EnumType.func_176660_a(meta);
     }
 
     @Override

@@ -63,20 +63,20 @@ public class BeaconDataProcessor extends AbstractTileEntityDataProcessor<TileEnt
         ((TileEntityBeaconBridge) dataHolder).bridge$forceSetPrimaryEffect(primary);
         ((TileEntityBeaconBridge) dataHolder).bridge$forceSetSecondaryEffect(secondary);
 
-        dataHolder.markDirty();
+        dataHolder.func_70296_d();
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(TileEntityBeacon dataHolder) {
         ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
-        int primaryID = dataHolder.getField(1);
-        int secondaryID = dataHolder.getField(2);
+        int primaryID = dataHolder.func_174887_a_(1);
+        int secondaryID = dataHolder.func_174887_a_(2);
         if (primaryID > 0) {
-            builder.put(Keys.BEACON_PRIMARY_EFFECT, Optional.ofNullable(Potion.getPotionById(primaryID)));
+            builder.put(Keys.BEACON_PRIMARY_EFFECT, Optional.ofNullable(Potion.func_188412_a(primaryID)));
         }
-        if (secondaryID > 0 && dataHolder.getField(0) == 4) {
-            builder.put(Keys.BEACON_SECONDARY_EFFECT, Optional.ofNullable(Potion.getPotionById(secondaryID)));
+        if (secondaryID > 0 && dataHolder.func_174887_a_(0) == 4) {
+            builder.put(Keys.BEACON_SECONDARY_EFFECT, Optional.ofNullable(Potion.func_188412_a(secondaryID)));
         }
         return builder.build();
     }

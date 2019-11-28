@@ -37,7 +37,7 @@ public abstract class CommandShowSeedMixin_MultiWorldCommand {
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getSeed()J"))
     private long multiWorldCommand$getWorldSeed(final World world, final MinecraftServer server, final ICommandSender sender, final String[] args) {
-        return sender.getEntityWorld().getSeed();
+        return sender.func_130014_f_().func_72905_C();
     }
 
 }

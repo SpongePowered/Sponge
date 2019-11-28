@@ -42,13 +42,13 @@ public class MinecraftBlockDamageSource extends DamageSource {
     }
 
     public void impl$setFireDamage() {
-        this.setFireDamage();
+        this.func_76361_j();
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper("BlockDamageSource")
-            .add("Name", this.damageType)
+            .add("Name", this.field_76373_n)
             .add("BlockSnapshot", this.blockSnapshot)
             .add("Location", this.location)
             .toString();

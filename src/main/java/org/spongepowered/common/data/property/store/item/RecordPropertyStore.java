@@ -38,7 +38,7 @@ public class RecordPropertyStore extends AbstractItemStackPropertyStore<RecordPr
     @Override
     protected Optional<RecordProperty> getFor(ItemStack itemStack) {
         return RecordTypeRegistryModule.getInstance()
-                .getByItem(itemStack.getItem())
+                .getByItem(itemStack.func_77973_b())
                 .map(RecordProperty::new);
     }
 }

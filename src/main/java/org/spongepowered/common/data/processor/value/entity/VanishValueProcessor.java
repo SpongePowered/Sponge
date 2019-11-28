@@ -49,7 +49,7 @@ public class VanishValueProcessor extends AbstractSpongeValueProcessor<Vanishabl
 
     @Override
     protected boolean set(final VanishableBridge container, final Boolean value) {
-        if (container instanceof net.minecraft.entity.Entity && ((net.minecraft.entity.Entity) container).world.isRemote) {
+        if (container instanceof net.minecraft.entity.Entity && ((net.minecraft.entity.Entity) container).field_70170_p.field_72995_K) {
             return false;
         }
         container.bridge$setVanished(value);

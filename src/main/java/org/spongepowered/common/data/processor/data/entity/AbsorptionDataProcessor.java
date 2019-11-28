@@ -56,13 +56,13 @@ public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTarge
     @Override
     protected boolean set(EntityLivingBase living, Double value) {
         checkNotNull(value, "value");
-        living.setAbsorptionAmount(value.floatValue());
+        living.func_110149_m(value.floatValue());
         return true;
     }
 
     @Override
     protected Optional<Double> getVal(EntityLivingBase living) {
-        return Optional.of((double) living.getAbsorptionAmount());
+        return Optional.of((double) living.func_110139_bj());
     }
 
     @Override

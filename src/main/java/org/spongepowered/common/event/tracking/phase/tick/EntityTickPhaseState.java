@@ -137,7 +137,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     if (!breeding.isEmpty()) {
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
                         if (tickingEntity instanceof EntityAnimal) {
-                            final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
+                            final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).func_191993_do();
                             if (playerInLove != null) {
                                 frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
                             }
@@ -225,7 +225,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     private void appendContextOfPossibleEntityDeath(final Entity tickingEntity, final CauseStackManager.StackFrame frame) {
         if (EntityUtil.isEntityDead((net.minecraft.entity.Entity) tickingEntity)) {
             if (tickingEntity instanceof EntityLivingBase) {
-                final CombatEntry entry = ((CombatTrackerAccessor) ((EntityLivingBase) tickingEntity).getCombatTracker()).accessor$getBestCombatEntry();
+                final CombatEntry entry = ((CombatTrackerAccessor) ((EntityLivingBase) tickingEntity).func_110142_aN()).accessor$getBestCombatEntry();
                 if (entry != null) {
                     if (((CombatEntryAccessor) entry).accessor$getDamageSrc() != null) {
                         frame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE,
@@ -248,39 +248,39 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
             final List<EntityHanging> hangingEntities = ((WorldServer) tickingEntity.getWorld())
-                .getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(blockPos, blockPos).grow(1.1D, 1.1D, 1.1D),
+                .func_175647_a(EntityHanging.class, new AxisAlignedBB(blockPos, blockPos).func_72314_b(1.1D, 1.1D, 1.1D),
                     entityIn -> {
                         if (entityIn == null) {
                             return false;
                         }
 
-                        final BlockPos entityPos = entityIn.getPosition();
+                        final BlockPos entityPos = entityIn.func_180425_c();
                         // Hanging Neighbor Entity
-                        if (entityPos.equals(blockPos.add(0, 1, 0))) {
+                        if (entityPos.equals(blockPos.func_177982_a(0, 1, 0))) {
                             return true;
                         }
 
                         // Check around source block
-                        final EnumFacing entityFacing = entityIn.getHorizontalFacing();
+                        final EnumFacing entityFacing = entityIn.func_174811_aO();
 
                         if (entityFacing == EnumFacing.NORTH) {
-                            return entityPos.equals(blockPos.add(Constants.Entity.HANGING_OFFSET_NORTH));
+                            return entityPos.equals(blockPos.func_177971_a(Constants.Entity.HANGING_OFFSET_NORTH));
                         } else if (entityFacing == EnumFacing.SOUTH) {
-                            return entityIn.getPosition().equals(blockPos.add(Constants.Entity.HANGING_OFFSET_SOUTH));
+                            return entityIn.func_180425_c().equals(blockPos.func_177971_a(Constants.Entity.HANGING_OFFSET_SOUTH));
                         } else if (entityFacing == EnumFacing.WEST) {
-                            return entityIn.getPosition().equals(blockPos.add(Constants.Entity.HANGING_OFFSET_WEST));
+                            return entityIn.func_180425_c().equals(blockPos.func_177971_a(Constants.Entity.HANGING_OFFSET_WEST));
                         } else if (entityFacing == EnumFacing.EAST) {
-                            return entityIn.getPosition().equals(blockPos.add(Constants.Entity.HANGING_OFFSET_EAST));
+                            return entityIn.func_180425_c().equals(blockPos.func_177971_a(Constants.Entity.HANGING_OFFSET_EAST));
                         }
                         return false;
                     });
             for (final EntityHanging entityHanging : hangingEntities) {
                 if (entityHanging instanceof EntityItemFrame) {
                     final EntityItemFrame itemFrame = (EntityItemFrame) entityHanging;
-                    if (!itemFrame.isDead) {
-                        itemFrame.dropItemOrSelf((net.minecraft.entity.Entity) tickingEntity, true);
+                    if (!itemFrame.field_70128_L) {
+                        itemFrame.func_146065_b((net.minecraft.entity.Entity) tickingEntity, true);
                     }
-                    itemFrame.setDead();
+                    itemFrame.func_70106_y();
                 }
             }
         }
@@ -330,7 +330,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
                 if (tickingEntity instanceof EntityAnimal) {
-                    final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
+                    final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).func_191993_do();
                     if (playerInLove != null) {
                         frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
                     }

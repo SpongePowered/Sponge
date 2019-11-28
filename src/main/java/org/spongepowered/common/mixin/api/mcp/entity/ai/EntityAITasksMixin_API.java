@@ -79,12 +79,12 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
 
         while (iterator.hasNext()) {
             final EntityAITasks.EntityAITaskEntry entityaitaskentry = iterator.next();
-            final EntityAIBase otherAiBase = entityaitaskentry.action;
+            final EntityAIBase otherAiBase = entityaitaskentry.field_75733_a;
             final AITask<?> otherTask = (AITask<?>) otherAiBase;
 
             if (otherTask.getType().equals(type)) {
                 if (this.executingTaskEntries.contains(entityaitaskentry)) {
-                    otherAiBase.resetTask();
+                    otherAiBase.func_75251_c();
                     this.executingTaskEntries.remove(entityaitaskentry);
                 }
 
@@ -100,7 +100,7 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
         final ImmutableList.Builder<AITask<?>> tasks = ImmutableList.builder();
 
         for (final EntityAITasks.EntityAITaskEntry entry : this.taskEntries) {
-            final AITask<?> task = (AITask<?>) entry.action;
+            final AITask<?> task = (AITask<?>) entry.field_75733_a;
 
             if (task.getType().equals(type)) {
                 tasks.add(task);
@@ -116,7 +116,7 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
         for (final Object o : this.taskEntries) {
             final EntityAITasks.EntityAITaskEntry entry = (EntityAITasks.EntityAITaskEntry) o;
 
-            tasks.add((AITask<?>) entry.action);
+            tasks.add((AITask<?>) entry.field_75733_a);
         }
         return tasks.build();
     }

@@ -51,7 +51,7 @@ public final class SpongeTexts {
         }
         Text source = null;
         Text body = null;
-        for (Object arg : ((TextComponentTranslation) (component)).getFormatArgs()) {
+        for (Object arg : ((TextComponentTranslation) (component)).func_150271_j()) {
             if (source == null) {
                 if (arg instanceof ITextComponent) {
                     source = SpongeTexts.toText((ITextComponent) arg);
@@ -102,15 +102,15 @@ public final class SpongeTexts {
     }
 
     public static ITextComponent fixActionBarFormatting(ITextComponent component) {
-        if (!component.getSiblings().isEmpty()) {
-            List<ITextComponent> children = component.getSiblings();
+        if (!component.func_150253_a().isEmpty()) {
+            List<ITextComponent> children = component.func_150253_a();
             for (int i = 0; i < children.size(); i++) {
                 children.set(i, fixActionBarFormatting(children.get(i)));
             }
         }
 
         TextComponentString result = new TextComponentString(((ITextComponentBridge) component).bridge$getLegacyFormatting());
-        result.appendSibling(component);
+        result.func_150257_a(component);
         return result;
     }
 
@@ -125,7 +125,7 @@ public final class SpongeTexts {
     public static NBTTagList asJsonNBT(List<Text> list) {
         final NBTTagList legacy = new NBTTagList();
         for (Text line : list) {
-            legacy.appendTag(new NBTTagString(TextSerializers.JSON.serialize(line)));
+            legacy.func_74742_a(new NBTTagString(TextSerializers.JSON.serialize(line)));
         }
         return legacy;
     }
@@ -140,16 +140,16 @@ public final class SpongeTexts {
 
     public static List<Text> fromNbtJson(NBTTagList legacy) throws TextParseException {
         List<Text> list = Lists.newArrayList();
-        for (int i = 0; i < legacy.tagCount(); i++) {
-            list.add(TextSerializers.JSON.deserialize(legacy.getStringTagAt(i)));
+        for (int i = 0; i < legacy.func_74745_c(); i++) {
+            list.add(TextSerializers.JSON.deserialize(legacy.func_150307_f(i)));
         }
         return list;
     }
 
     public static List<Text> fromNbtLegacy(NBTTagList legacy) {
         List<Text> list = Lists.newArrayList();
-        for (int i = 0; i < legacy.tagCount(); i++) {
-            list.add(SpongeTexts.fromLegacy(legacy.getStringTagAt(i)));
+        for (int i = 0; i < legacy.func_74745_c(); i++) {
+            list.add(SpongeTexts.fromLegacy(legacy.func_150307_f(i)));
         }
         return list;
     }
@@ -157,7 +157,7 @@ public final class SpongeTexts {
     public static NBTTagList asLegacy(List<Text> list) {
         final NBTTagList legacy = new NBTTagList();
         for (Text line : list) {
-            legacy.appendTag(new NBTTagString(toLegacy(line)));
+            legacy.func_74742_a(new NBTTagString(toLegacy(line)));
         }
         return legacy;
     }

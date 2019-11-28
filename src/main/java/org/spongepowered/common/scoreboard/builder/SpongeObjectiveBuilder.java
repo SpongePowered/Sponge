@@ -107,7 +107,7 @@ public class SpongeObjectiveBuilder implements Objective.Builder {
         if (this.objectiveDisplayMode != null) {
             objective.setDisplayMode(this.objectiveDisplayMode);
         } else if (this.criterion instanceof IScoreCriteria) {
-            objective.setDisplayMode((ObjectiveDisplayMode) (Object) ((IScoreCriteria) this.criterion).getRenderType());
+            objective.setDisplayMode((ObjectiveDisplayMode) (Object) ((IScoreCriteria) this.criterion).func_178790_c());
         }
 
         return objective;

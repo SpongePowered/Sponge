@@ -65,10 +65,10 @@ public abstract class BlockRedstoneComparatorMixin extends BlockMixin {
         if (manipulator instanceof ImmutableComparatorData) {
             final BlockRedstoneComparator.Mode comparatorType =
                     (BlockRedstoneComparator.Mode) (Object) ((ImmutableComparatorData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.MODE, comparatorType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockRedstoneComparator.field_176463_b, comparatorType));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.POWERED, ((ImmutablePoweredData) manipulator).powered()
+            return Optional.of((BlockState) blockState.func_177226_a(BlockRedstoneComparator.field_176464_a, ((ImmutablePoweredData) manipulator).powered()
                     .get()));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
@@ -78,10 +78,10 @@ public abstract class BlockRedstoneComparatorMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.COMPARATOR_TYPE)) {
             final BlockRedstoneComparator.Mode comparatorType = (BlockRedstoneComparator.Mode) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.MODE, comparatorType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockRedstoneComparator.field_176463_b, comparatorType));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockRedstoneComparator.field_176464_a, (Boolean) value));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -89,11 +89,11 @@ public abstract class BlockRedstoneComparatorMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableComparatorData impl$getComparatorTypeFor(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeComparatorData.class,
-                (ComparatorType) (Object) blockState.getValue(BlockRedstoneComparator.MODE));
+                (ComparatorType) (Object) blockState.func_177229_b(BlockRedstoneComparator.field_176463_b));
     }
 
     private ImmutablePoweredData impl$getIsPoweredFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockRedstoneComparator.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(BlockRedstoneComparator.field_176464_a));
     }
 
 }

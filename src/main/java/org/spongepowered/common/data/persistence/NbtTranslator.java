@@ -86,11 +86,11 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             if (value instanceof DataView) {
                 NBTTagCompound inner = new NBTTagCompound();
                 containerToCompound(container.getView(entry.getKey()).get(), inner);
-                compound.setTag(key, inner);
+                compound.func_74782_a(key, inner);
             } else if (value instanceof Boolean) {
-                compound.setTag(key + BOOLEAN_IDENTIFIER, new NBTTagByte(((Boolean) value) ? (byte) 1 : 0));
+                compound.func_74782_a(key + BOOLEAN_IDENTIFIER, new NBTTagByte(((Boolean) value) ? (byte) 1 : 0));
             } else {
-                compound.setTag(key, getBaseFromObject(value));
+                compound.func_74782_a(key, getBaseFromObject(value));
             }
         }
     }
@@ -148,7 +148,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             for (Object object : (List) value) {
                 // Oh hey, we already have a translation already
                 // since DataView only supports some primitive types anyways...
-                list.appendTag(getBaseFromObject(object));
+                list.func_74742_a(getBaseFromObject(object));
             }
             return list;
         } else if (value instanceof Map) {
@@ -156,14 +156,14 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
                 if (entry.getKey() instanceof DataQuery) {
                     if (entry.getValue() instanceof Boolean) {
-                        compound.setBoolean(((DataQuery) entry.getKey()).asString('.') + BOOLEAN_IDENTIFIER, (Boolean) entry.getValue());
+                        compound.func_74757_a(((DataQuery) entry.getKey()).asString('.') + BOOLEAN_IDENTIFIER, (Boolean) entry.getValue());
                     } else {
-                        compound.setTag(((DataQuery) entry.getKey()).asString('.'), getBaseFromObject(entry.getValue()));
+                        compound.func_74782_a(((DataQuery) entry.getKey()).asString('.'), getBaseFromObject(entry.getValue()));
                     }
                 } else if (entry.getKey() instanceof String) {
-                    compound.setTag((String) entry.getKey(), getBaseFromObject(entry.getValue()));
+                    compound.func_74782_a((String) entry.getKey(), getBaseFromObject(entry.getValue()));
                 } else {
-                    compound.setTag(entry.getKey().toString(), getBaseFromObject(entry.getValue()));
+                    compound.func_74782_a(entry.getKey().toString(), getBaseFromObject(entry.getValue()));
                 }
             }
             return compound;
@@ -192,48 +192,48 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         switch (type) {
             case Constants.NBT.TAG_BYTE:
                 if (key.contains(BOOLEAN_IDENTIFIER)) {
-                    view.set(of(key.replace(BOOLEAN_IDENTIFIER, "")), (((NBTTagByte) base).getByte() != 0));
+                    view.set(of(key.replace(BOOLEAN_IDENTIFIER, "")), (((NBTTagByte) base).func_150290_f() != 0));
                 } else {
-                    view.set(of(key), ((NBTTagByte) base).getByte());
+                    view.set(of(key), ((NBTTagByte) base).func_150290_f());
                 }
                 break;
             case Constants.NBT.TAG_SHORT:
-                view.set(of(key), ((NBTTagShort) base).getShort());
+                view.set(of(key), ((NBTTagShort) base).func_150289_e());
                 break;
             case Constants.NBT.TAG_INT:
-                view.set(of(key), ((NBTTagInt) base).getInt());
+                view.set(of(key), ((NBTTagInt) base).func_150287_d());
                 break;
             case Constants.NBT.TAG_LONG:
-                view.set(of(key), ((NBTTagLong) base).getLong());
+                view.set(of(key), ((NBTTagLong) base).func_150291_c());
                 break;
             case Constants.NBT.TAG_FLOAT:
-                view.set(of(key), ((NBTTagFloat) base).getFloat());
+                view.set(of(key), ((NBTTagFloat) base).func_150288_h());
                 break;
             case Constants.NBT.TAG_DOUBLE:
-                view.set(of(key), ((NBTTagDouble) base).getDouble());
+                view.set(of(key), ((NBTTagDouble) base).func_150286_g());
                 break;
             case Constants.NBT.TAG_BYTE_ARRAY:
-                view.set(of(key), ((NBTTagByteArray) base).getByteArray());
+                view.set(of(key), ((NBTTagByteArray) base).func_150292_c());
                 break;
             case Constants.NBT.TAG_STRING:
-                view.set(of(key), ((NBTTagString) base).getString());
+                view.set(of(key), ((NBTTagString) base).func_150285_a_());
                 break;
             case Constants.NBT.TAG_LIST:
                 NBTTagList list = (NBTTagList) base;
-                byte listType = (byte) list.getTagType();
-                int count = list.tagCount();
+                byte listType = (byte) list.func_150303_d();
+                int count = list.func_74745_c();
                 List objectList = Lists.newArrayListWithCapacity(count);
                 for (int i = 0; i < count; i++) {
-                    objectList.add(fromTagBase(list.get(i), listType));
+                    objectList.add(fromTagBase(list.func_179238_g(i), listType));
                 }
                 view.set(of(key), objectList);
                 break;
             case Constants.NBT.TAG_COMPOUND:
                 DataView internalView = view.createView(of(key));
                 NBTTagCompound compound = (NBTTagCompound) base;
-                for (String internalKey : compound.getKeySet()) {
-                    NBTBase internalBase = compound.getTag(internalKey);
-                    byte internalType = internalBase.getId();
+                for (String internalKey : compound.func_150296_c()) {
+                    NBTBase internalBase = compound.func_74781_a(internalKey);
+                    byte internalType = internalBase.func_74732_a();
                     // Basically.... more recursion.
                     // Reasoning: This avoids creating a new DataContainer which would
                     // then be copied in to the owning DataView anyways. We can internally
@@ -242,7 +242,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 }
                 break;
             case Constants.NBT.TAG_INT_ARRAY:
-                view.set(of(key), ((NBTTagIntArray) base).getIntArray());
+                view.set(of(key), ((NBTTagIntArray) base).func_150302_c());
                 break;
             case Constants.NBT.TAG_LONG_ARRAY:
                 view.set(of(key), ((NBTTagLongArrayAccessor) base).accessor$getLongArray());
@@ -256,34 +256,34 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     private static Object fromTagBase(NBTBase base, byte type) {
         switch (type) {
             case Constants.NBT.TAG_BYTE:
-                return ((NBTTagByte) base).getByte();
+                return ((NBTTagByte) base).func_150290_f();
             case Constants.NBT.TAG_SHORT:
-                return (((NBTTagShort) base)).getShort();
+                return (((NBTTagShort) base)).func_150289_e();
             case Constants.NBT.TAG_INT:
-                return ((NBTTagInt) base).getInt();
+                return ((NBTTagInt) base).func_150287_d();
             case Constants.NBT.TAG_LONG:
-                return ((NBTTagLong) base).getLong();
+                return ((NBTTagLong) base).func_150291_c();
             case Constants.NBT.TAG_FLOAT:
-                return ((NBTTagFloat) base).getFloat();
+                return ((NBTTagFloat) base).func_150288_h();
             case Constants.NBT.TAG_DOUBLE:
-                return ((NBTTagDouble) base).getDouble();
+                return ((NBTTagDouble) base).func_150286_g();
             case Constants.NBT.TAG_BYTE_ARRAY:
-                return ((NBTTagByteArray) base).getByteArray();
+                return ((NBTTagByteArray) base).func_150292_c();
             case Constants.NBT.TAG_STRING:
-                return ((NBTTagString) base).getString();
+                return ((NBTTagString) base).func_150285_a_();
             case Constants.NBT.TAG_LIST:
                 NBTTagList list = (NBTTagList) base;
-                byte listType = (byte) list.getTagType();
-                int count = list.tagCount();
+                byte listType = (byte) list.func_150303_d();
+                int count = list.func_74745_c();
                 List objectList = Lists.newArrayListWithCapacity(count);
-                for (int i = 0; i < list.tagCount(); i++) {
-                    objectList.add(fromTagBase(list.get(i), listType));
+                for (int i = 0; i < list.func_74745_c(); i++) {
+                    objectList.add(fromTagBase(list.func_179238_g(i), listType));
                 }
                 return objectList;
             case Constants.NBT.TAG_COMPOUND:
                 return getViewFromCompound((NBTTagCompound) base);
             case Constants.NBT.TAG_INT_ARRAY:
-                return ((NBTTagIntArray) base).getIntArray();
+                return ((NBTTagIntArray) base).func_150302_c();
             case Constants.NBT.TAG_LONG_ARRAY:
                 return ((NBTTagLongArrayAccessor) base).accessor$getLongArray();
             default :
@@ -320,9 +320,9 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
     @Override
     public DataView addTo(NBTTagCompound compound, DataView container) {
-        for (String key : compound.getKeySet()) {
-            NBTBase base = compound.getTag(key);
-            byte type = base.getId();
+        for (String key : compound.func_150296_c()) {
+            NBTBase base = compound.func_74781_a(key);
+            byte type = base.func_74732_a();
             setInternal(base, type, container, key); // gotta love recursion
         }
         return container;

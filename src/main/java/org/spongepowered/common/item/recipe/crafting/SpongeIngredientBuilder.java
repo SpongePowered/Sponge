@@ -127,7 +127,7 @@ public class SpongeIngredientBuilder implements Ingredient.Builder {
     public Ingredient build() {
         if (this.predicates.isEmpty() && this.matchItems.equals(this.displayItems)) {
             final net.minecraft.item.ItemStack[] stacks = this.matchItems.stream().map(ItemStackUtil::toNative).toArray(net.minecraft.item.ItemStack[]::new);
-            return IngredientUtil.fromNative(net.minecraft.item.crafting.Ingredient.fromStacks(stacks));
+            return IngredientUtil.fromNative(net.minecraft.item.crafting.Ingredient.func_193369_a(stacks));
         }
         return IngredientUtil.fromNative(new CustomIngredient(this.predicates, this.matchItems, this.displayItems));
     }

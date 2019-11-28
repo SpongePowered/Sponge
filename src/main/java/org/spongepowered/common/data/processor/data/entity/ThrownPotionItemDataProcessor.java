@@ -53,18 +53,18 @@ public class ThrownPotionItemDataProcessor extends
     @Override
     protected boolean set(EntityPotion container, ItemStackSnapshot value) {
         final ItemStack itemStack = ItemStackUtil.fromSnapshotToNative(value);
-        if (itemStack.getItem() != Items.SPLASH_POTION && itemStack.getItem() != Items.LINGERING_POTION) {
+        if (itemStack.func_77973_b() != Items.field_185155_bH && itemStack.func_77973_b() != Items.field_185156_bI) {
             // Minecraft will throw a hissy fit if we do allow any other type of potion
             // so, we have to return false bec≈ause the item stack is invalid.
             return false;
         }
-        container.setItem(itemStack);
+        container.func_184541_a(itemStack);
         return true;
     }
 
     @Override
     protected Optional<ItemStackSnapshot> getVal(EntityPotion container) {
-        return Optional.of(ItemStackUtil.snapshotOf(container.getPotion()));
+        return Optional.of(ItemStackUtil.snapshotOf(container.func_184543_l()));
     }
 
     @Override

@@ -58,7 +58,7 @@ public abstract class EntityLivingMixin_RealTime extends EntityLivingBaseMixin_R
             this.idleTime = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();
         this.idleTime += ticks;
     }
 

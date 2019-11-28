@@ -41,26 +41,26 @@ public abstract class EntityBoatMixin extends EntityMixin {
     @Override
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.hasKey(Constants.Entity.Boat.BOAT_MAX_SPEED)) {
-            this.maxSpeed = compound.getDouble(Constants.Entity.Boat.BOAT_MAX_SPEED);
+        if (compound.func_74764_b(Constants.Entity.Boat.BOAT_MAX_SPEED)) {
+            this.maxSpeed = compound.func_74769_h(Constants.Entity.Boat.BOAT_MAX_SPEED);
         }
-        if (compound.hasKey(Constants.Entity.Boat.BOAT_MOVE_ON_LAND)) {
-            this.moveOnLand = compound.getBoolean(Constants.Entity.Boat.BOAT_MOVE_ON_LAND);
+        if (compound.func_74764_b(Constants.Entity.Boat.BOAT_MOVE_ON_LAND)) {
+            this.moveOnLand = compound.func_74767_n(Constants.Entity.Boat.BOAT_MOVE_ON_LAND);
         }
-        if (compound.hasKey(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED)) {
-            this.occupiedDecelerationSpeed = compound.getDouble(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED);
+        if (compound.func_74764_b(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED)) {
+            this.occupiedDecelerationSpeed = compound.func_74769_h(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED);
         }
-        if (compound.hasKey(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED)) {
-            this.unoccupiedDecelerationSpeed = compound.getDouble(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED);
+        if (compound.func_74764_b(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED)) {
+            this.unoccupiedDecelerationSpeed = compound.func_74769_h(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED);
         }
     }
 
     @Override
     public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        compound.setDouble(Constants.Entity.Boat.BOAT_MAX_SPEED, this.maxSpeed);
-        compound.setBoolean(Constants.Entity.Boat.BOAT_MOVE_ON_LAND, this.moveOnLand);
-        compound.setDouble(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED, this.occupiedDecelerationSpeed);
-        compound.setDouble(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED, this.unoccupiedDecelerationSpeed);
+        compound.func_74780_a(Constants.Entity.Boat.BOAT_MAX_SPEED, this.maxSpeed);
+        compound.func_74757_a(Constants.Entity.Boat.BOAT_MOVE_ON_LAND, this.moveOnLand);
+        compound.func_74780_a(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED, this.occupiedDecelerationSpeed);
+        compound.func_74780_a(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED, this.unoccupiedDecelerationSpeed);
     }
 }

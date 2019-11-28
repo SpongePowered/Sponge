@@ -50,7 +50,7 @@ public abstract class CommandDifficultyMixin_MultiWorldCommand {
             target = "Lnet/minecraft/server/MinecraftServer;setDifficultyForAllWorlds(Lnet/minecraft/world/EnumDifficulty;)V"))
     private void multiWorldCommand$adjustWorldGameDifficulty(final MinecraftServer server, final EnumDifficulty difficulty,
         final MinecraftServer server2, final ICommandSender sender, final String[] args) {
-        final World world = sender.getEntityWorld();
+        final World world = sender.func_130014_f_();
 
         WorldManager.adjustWorldForDifficulty((WorldServer) world, difficulty, true);
     }

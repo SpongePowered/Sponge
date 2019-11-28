@@ -62,7 +62,7 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
     private void lateInit(SlotProvider slots) {
         int base = this.base;
 
-        int hotbarSize = InventoryPlayer.getHotbarSize();
+        int hotbarSize = InventoryPlayer.func_70451_h();
 
         if (this.isContainer) {
             this.grid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);

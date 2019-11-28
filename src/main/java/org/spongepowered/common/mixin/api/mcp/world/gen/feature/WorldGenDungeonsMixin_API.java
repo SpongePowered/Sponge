@@ -81,7 +81,7 @@ public abstract class WorldGenDungeonsMixin_API extends WorldGenerator implement
             x = random.nextInt(size.getX());
             y = random.nextInt(size.getY());
             z = random.nextInt(size.getZ());
-            generate(world, random, chunkPos.add(x, y, z));
+            func_180709_b(world, random, chunkPos.func_177982_a(x, y, z));
         }
     }
 

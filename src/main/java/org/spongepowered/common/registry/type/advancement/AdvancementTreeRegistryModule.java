@@ -60,7 +60,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
         advancementList.bridge$getRootsSet().add(advancement);
         final AdvancementList.Listener listener = advancementList.bridge$getListener();
         if (listener != null) {
-            listener.rootAdvancementAdded(advancement);
+            listener.func_191931_a(advancement);
         }
     }
 
@@ -73,7 +73,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
         if (optTree.isPresent()) {
             super.register(optTree.get());
         } else {
-            SpongeImpl.getLogger().warn("Attempted to register a root advancement {} without a advancement tree?", rootAdvancement.getId());
+            SpongeImpl.getLogger().warn("Attempted to register a root advancement {} without a advancement tree?", rootAdvancement.func_192067_g());
         }
     }
 

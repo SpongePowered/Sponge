@@ -68,7 +68,7 @@ public abstract class WorldGenBigMushroomMixin_API extends WorldGenerator implem
     @Override
     public String getId() {
         if (this.api$id == null) {
-            this.api$id = this.mushroomType == Blocks.RED_MUSHROOM_BLOCK ? "minecraft:red" : "minecraft:brown";
+            this.api$id = this.mushroomType == Blocks.field_150419_aX ? "minecraft:red" : "minecraft:brown";
         }
         return this.api$id;
     }
@@ -76,7 +76,7 @@ public abstract class WorldGenBigMushroomMixin_API extends WorldGenerator implem
     @Override
     public String getName() {
         if (this.api$name == null) {
-            this.api$name = this.mushroomType == Blocks.RED_MUSHROOM_BLOCK ? "Red mushroom" : "Brown mushroom";
+            this.api$name = this.mushroomType == Blocks.field_150419_aX ? "Red mushroom" : "Brown mushroom";
         }
         return this.api$name;
     }
@@ -101,7 +101,7 @@ public abstract class WorldGenBigMushroomMixin_API extends WorldGenerator implem
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
-            final BlockPos pos = world.getHeight(chunkPos.add(x, 0, z));
+            final BlockPos pos = world.func_175645_m(chunkPos.func_177982_a(x, 0, z));
             if (this.api$override != null) {
                 final Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(pos));
                 type = this.api$override.apply(pos2);
@@ -112,8 +112,8 @@ public abstract class WorldGenBigMushroomMixin_API extends WorldGenerator implem
                 }
                 type = result.get(0);
             }
-            if (type.canPlaceAt((org.spongepowered.api.world.World) world, pos.getX(), pos.getY(), pos.getZ())) {
-                type.placeObject((org.spongepowered.api.world.World) world, random, pos.getX(), pos.getY(), pos.getZ());
+            if (type.canPlaceAt((org.spongepowered.api.world.World) world, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p())) {
+                type.placeObject((org.spongepowered.api.world.World) world, random, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
             }
         }
     }
@@ -154,7 +154,7 @@ public abstract class WorldGenBigMushroomMixin_API extends WorldGenerator implem
                     for (i1 = z - b0; i1 <= z + b0 && flag; ++i1) {
                         if (k >= 0 && k < 256) {
                             final BlockPos pos = new BlockPos(l, k, i1);
-                            final IBlockState state = worldIn.getBlockState(pos);
+                            final IBlockState state = worldIn.func_180495_p(pos);
                             if (!((WorldGeneratorBridge) this).bridge$isAir(state, worldIn, pos) && !((WorldGeneratorBridge) this).bridge$isLeaves(state, worldIn, pos)) {
                                 flag = false;
                             }
@@ -166,9 +166,9 @@ public abstract class WorldGenBigMushroomMixin_API extends WorldGenerator implem
             }
 
             if (flag) {
-                final Block block1 = worldIn.getBlockState(new BlockPos(x, y - 1, z)).getBlock();
+                final Block block1 = worldIn.func_180495_p(new BlockPos(x, y - 1, z)).func_177230_c();
 
-                if (block1 == Blocks.DIRT || block1 == Blocks.GRASS || block1 == Blocks.MYCELIUM) {
+                if (block1 == Blocks.field_150346_d || block1 == Blocks.field_150349_c || block1 == Blocks.field_150391_bh) {
                     return true;
                 }
             }
@@ -178,7 +178,7 @@ public abstract class WorldGenBigMushroomMixin_API extends WorldGenerator implem
 
     @Override
     public void placeObject(final org.spongepowered.api.world.World world, final Random random, final int x, final int y, final int z) {
-        generate((World) world, random, new BlockPos(x, y, z));
+        func_180709_b((World) world, random, new BlockPos(x, y, z));
     }
 
     @Override

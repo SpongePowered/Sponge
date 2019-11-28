@@ -29,32 +29,32 @@ import net.minecraft.entity.ai.EntityAIBase;
 public abstract class SpongeEntityAICommonSuperclass extends EntityAIBase {
 
     @Override
-    public boolean shouldExecute() {
+    public boolean func_75250_a() {
         return this.shouldUpdate();
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
+    public boolean func_75253_b() {
         return this.continueUpdating();
     }
 
     @Override
-    public void startExecuting() {
+    public void func_75249_e() {
         this.start();
     }
 
     @Override
-    public void resetTask() {
+    public void func_75251_c() {
         this.reset();
     }
 
     @Override
-    public void updateTask() {
+    public void func_75246_d() {
         this.update();
     }
 
     @Override
-    public boolean isInterruptible() {
+    public boolean func_75252_g() {
         return this.canBeInterrupted();
     }
 

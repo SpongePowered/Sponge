@@ -65,7 +65,7 @@ public abstract class BlockCropsMixin extends BlockMixin {
             if (growth > getMaxAge()) {
                 growth = getMaxAge();
             }
-            return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
+            return Optional.of((BlockState) blockState.func_177226_a(getAgeProperty(), growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -77,13 +77,13 @@ public abstract class BlockCropsMixin extends BlockMixin {
             if (growth > getMaxAge()) {
                 growth = getMaxAge();
             }
-            return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
+            return Optional.of((BlockState) blockState.func_177226_a(getAgeProperty(), growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData impl$getGrowthData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(getAgeProperty()), 0, getMaxAge());
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(getAgeProperty()), 0, getMaxAge());
     }
 
 }

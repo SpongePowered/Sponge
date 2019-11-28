@@ -91,7 +91,7 @@ public class SeaFloorBuilder implements SeaFloor.Builder {
     @Override
     public Builder reset() {
         this.check = WorldGenConstants.DIRT_OR_GRASS;
-        this.block = (BlockState) Blocks.SAND.getDefaultState();
+        this.block = (BlockState) Blocks.field_150354_m.func_176223_P();
         this.radius = VariableAmount.fixed(7);
         this.count = VariableAmount.fixed(3);
         this.depth = VariableAmount.fixed(2);

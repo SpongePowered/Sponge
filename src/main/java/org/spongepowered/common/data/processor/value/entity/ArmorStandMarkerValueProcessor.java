@@ -56,7 +56,7 @@ public class ArmorStandMarkerValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected Optional<Boolean> getVal(final EntityArmorStand container) {
-        return Optional.of(container.hasMarker());
+        return Optional.of(container.func_181026_s());
     }
 
     @Override

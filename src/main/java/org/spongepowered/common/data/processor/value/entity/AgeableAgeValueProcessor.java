@@ -53,13 +53,13 @@ public class AgeableAgeValueProcessor extends AbstractSpongeValueProcessor<Entit
 
     @Override
     protected boolean set(EntityAgeable container, Integer adult) {
-        container.setGrowingAge(adult);
+        container.func_70873_a(adult);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(EntityAgeable container) {
-        return Optional.of(container.getGrowingAge());
+        return Optional.of(container.func_70874_b());
     }
 
     @Override

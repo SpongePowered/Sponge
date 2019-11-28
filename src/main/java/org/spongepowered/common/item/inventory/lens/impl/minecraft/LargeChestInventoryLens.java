@@ -47,16 +47,16 @@ public class LargeChestInventoryLens extends RealLens {
     public LargeChestInventoryLens(final InventoryAdapter adapter, final SlotProvider slots) {
         super(0, adapter.bridge$getFabric().fabric$getSize(), OrderedInventoryAdapter.class);
         final InventoryLargeChestAccessor inventory = (InventoryLargeChestAccessor) adapter;
-        this.upperChest = inventory.accessor$getUpperChest().getSizeInventory();
-        this.lowerChest = inventory.accessor$getLowerChest().getSizeInventory();
+        this.upperChest = inventory.accessor$getUpperChest().func_70302_i_();
+        this.lowerChest = inventory.accessor$getLowerChest().func_70302_i_();
         this.initLargeChest(slots);
     }
 
     public LargeChestInventoryLens(final int base, final InventoryAdapter adapter, final SlotProvider slots) {
         super(base, adapter.bridge$getFabric().fabric$getSize(), OrderedInventoryAdapter.class);
         final InventoryLargeChestAccessor inventory = (InventoryLargeChestAccessor) adapter.bridge$getFabric().fabric$get(0);
-        this.upperChest = inventory.accessor$getUpperChest().getSizeInventory();
-        this.lowerChest = inventory.accessor$getLowerChest().getSizeInventory();
+        this.upperChest = inventory.accessor$getUpperChest().func_70302_i_();
+        this.lowerChest = inventory.accessor$getLowerChest().func_70302_i_();
         this.initLargeChest(slots);
     }
 

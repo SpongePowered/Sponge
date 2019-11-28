@@ -75,7 +75,7 @@ public abstract class EntityEnderman_AIPlaceBlockMixin extends EntityAIBase {
     )
     @Nullable
     private IBlockState onCanGrief(final EntityEnderman entityEnderman) {
-        final IBlockState heldBlockState = entityEnderman.getHeldBlockState();
+        final IBlockState heldBlockState = entityEnderman.func_175489_ck();
         return ((GrieferBridge) this.enderman).bridge$CanGrief() ? heldBlockState : null;
     }
 
@@ -95,7 +95,7 @@ public abstract class EntityEnderman_AIPlaceBlockMixin extends EntityAIBase {
     @Redirect(method = "canPlaceBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/state/IBlockState;isFullCube()Z"))
     private boolean onUpdateCancel(final IBlockState blockState, final World world, final BlockPos pos, final Block toPlace,
         final IBlockState old, final IBlockState state) {
-        if (state.isFullCube()) {
+        if (state.func_185917_h()) {
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
                 final Location<org.spongepowered.api.world.World> location =
                     new Location<org.spongepowered.api.world.World>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(pos));

@@ -133,16 +133,16 @@ public class ProjectileLauncher {
 
     // From EntityThrowable constructor
     private static void configureThrowable(EntityThrowable entity) {
-        entity.posX -= MathHelper.cos(entity.rotationYaw / 180.0F * (float) Math.PI) * 0.16F;
-        entity.posY -= 0.1D;
-        entity.posZ -= MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI) * 0.16F;
-        entity.setPosition(entity.posX, entity.posY, entity.posZ);
+        entity.field_70165_t -= MathHelper.func_76134_b(entity.field_70177_z / 180.0F * (float) Math.PI) * 0.16F;
+        entity.field_70163_u -= 0.1D;
+        entity.field_70161_v -= MathHelper.func_76126_a(entity.field_70177_z / 180.0F * (float) Math.PI) * 0.16F;
+        entity.func_70107_b(entity.field_70165_t, entity.field_70163_u, entity.field_70161_v);
         float f = 0.4F;
-        entity.motionX = -MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI)
-                * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f;
-        entity.motionZ = MathHelper.cos(entity.rotationYaw / 180.0F * (float) Math.PI)
-                * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f;
-        entity.motionY = -MathHelper.sin((entity.rotationPitch) / 180.0F * (float) Math.PI) * f;
+        entity.field_70159_w = -MathHelper.func_76126_a(entity.field_70177_z / 180.0F * (float) Math.PI)
+                * MathHelper.func_76134_b(entity.field_70125_A / 180.0F * (float) Math.PI) * f;
+        entity.field_70179_y = MathHelper.func_76134_b(entity.field_70177_z / 180.0F * (float) Math.PI)
+                * MathHelper.func_76134_b(entity.field_70125_A / 180.0F * (float) Math.PI) * f;
+        entity.field_70181_x = -MathHelper.func_76126_a((entity.field_70125_A) / 180.0F * (float) Math.PI) * f;
     }
 
     public static <T extends Projectile> void registerProjectileLogic(Class<T> projectileClass, ProjectileLogic<T> logic) {
@@ -199,76 +199,76 @@ public class ProjectileLauncher {
 
         registerProjectileSourceLogic(Shulker.class, new ShulkerSourceLogic());
 
-        registerProjectileLogic(TippedArrow.class, new SimpleItemLaunchLogic<TippedArrow>(TippedArrow.class, Items.ARROW) {
+        registerProjectileLogic(TippedArrow.class, new SimpleItemLaunchLogic<TippedArrow>(TippedArrow.class, Items.field_151032_g) {
 
             @Override
             protected Optional<TippedArrow> createProjectile(EntityLivingBase source, Location<?> loc) {
-                TippedArrow arrow = (TippedArrow) new EntityTippedArrow(source.world, source);
-                ((EntityTippedArrow) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
+                TippedArrow arrow = (TippedArrow) new EntityTippedArrow(source.field_70170_p, source);
+                ((EntityTippedArrow) arrow).func_184547_a(source, source.field_70125_A, source.field_70177_z, 0.0F, 3.0F, 0);
                 return doLaunch(loc.getExtent(), arrow);
             }
         });
-        registerProjectileLogic(SpectralArrow.class, new SimpleItemLaunchLogic<SpectralArrow>(SpectralArrow.class, Items.SPECTRAL_ARROW) {
+        registerProjectileLogic(SpectralArrow.class, new SimpleItemLaunchLogic<SpectralArrow>(SpectralArrow.class, Items.field_185166_h) {
 
             @Override
             protected Optional<SpectralArrow> createProjectile(EntityLivingBase source, Location<?> loc) {
-                SpectralArrow arrow = (SpectralArrow) new EntitySpectralArrow(source.world, source);
-                ((EntitySpectralArrow) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
+                SpectralArrow arrow = (SpectralArrow) new EntitySpectralArrow(source.field_70170_p, source);
+                ((EntitySpectralArrow) arrow).func_184547_a(source, source.field_70125_A, source.field_70177_z, 0.0F, 3.0F, 0);
                 return doLaunch(loc.getExtent(), arrow);
             }
         });
-        registerProjectileLogic(Arrow.class, new SimpleItemLaunchLogic<Arrow>(Arrow.class, Items.ARROW) {
+        registerProjectileLogic(Arrow.class, new SimpleItemLaunchLogic<Arrow>(Arrow.class, Items.field_151032_g) {
 
             @Override
             protected Optional<Arrow> createProjectile(EntityLivingBase source, Location<?> loc) {
-                TippedArrow arrow = (TippedArrow) new EntityTippedArrow(source.world, source);
-                ((EntityTippedArrow) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
+                TippedArrow arrow = (TippedArrow) new EntityTippedArrow(source.field_70170_p, source);
+                ((EntityTippedArrow) arrow).func_184547_a(source, source.field_70125_A, source.field_70177_z, 0.0F, 3.0F, 0);
                 return doLaunch(loc.getExtent(), arrow);
             }
         });
-        registerProjectileLogic(Egg.class, new SimpleItemLaunchLogic<Egg>(Egg.class, Items.EGG) {
+        registerProjectileLogic(Egg.class, new SimpleItemLaunchLogic<Egg>(Egg.class, Items.field_151110_aK) {
 
             @Override
             protected Optional<Egg> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Egg egg = (Egg) new EntityEgg(source.world, source);
-                ((EntityThrowable) egg).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
+                Egg egg = (Egg) new EntityEgg(source.field_70170_p, source);
+                ((EntityThrowable) egg).func_184538_a(source, source.field_70125_A, source.field_70177_z, 0.0F, 1.5F, 0);
                 return doLaunch(loc.getExtent(), egg);
             }
         });
-        registerProjectileLogic(SmallFireball.class, new SimpleItemLaunchLogic<SmallFireball>(SmallFireball.class, Items.FIRE_CHARGE) {
+        registerProjectileLogic(SmallFireball.class, new SimpleItemLaunchLogic<SmallFireball>(SmallFireball.class, Items.field_151059_bz) {
 
             @Override
             protected Optional<SmallFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Vec3d lookVec = source.getLook(1);
-                SmallFireball fireball = (SmallFireball) new EntitySmallFireball(source.world, source,
-                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
-                ((EntitySmallFireball) fireball).posY += source.getEyeHeight();
+                Vec3d lookVec = source.func_70676_i(1);
+                SmallFireball fireball = (SmallFireball) new EntitySmallFireball(source.field_70170_p, source,
+                        lookVec.field_72450_a * 4, lookVec.field_72448_b * 4, lookVec.field_72449_c * 4);
+                ((EntitySmallFireball) fireball).field_70163_u += source.func_70047_e();
                 return doLaunch(loc.getExtent(), fireball);
             }
         });
-        registerProjectileLogic(Firework.class, new SimpleItemLaunchLogic<Firework>(Firework.class, Items.FIREWORKS) {
+        registerProjectileLogic(Firework.class, new SimpleItemLaunchLogic<Firework>(Firework.class, Items.field_151152_bP) {
 
             @Override
             protected Optional<Firework> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Firework firework = (Firework) new EntityFireworkRocket(source.world, loc.getX(), loc.getY(), loc.getZ(), ItemStack.EMPTY);
+                Firework firework = (Firework) new EntityFireworkRocket(source.field_70170_p, loc.getX(), loc.getY(), loc.getZ(), ItemStack.field_190927_a);
                 return doLaunch(loc.getExtent(), firework);
             }
         });
-        registerProjectileLogic(Snowball.class, new SimpleItemLaunchLogic<Snowball>(Snowball.class, Items.SNOWBALL) {
+        registerProjectileLogic(Snowball.class, new SimpleItemLaunchLogic<Snowball>(Snowball.class, Items.field_151126_ay) {
 
             @Override
             protected Optional<Snowball> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Snowball snowball = (Snowball) new EntitySnowball(source.world, source);
-                ((EntityThrowable) snowball).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
+                Snowball snowball = (Snowball) new EntitySnowball(source.field_70170_p, source);
+                ((EntityThrowable) snowball).func_184538_a(source, source.field_70125_A, source.field_70177_z, 0.0F, 1.5F, 0);
                 return doLaunch(loc.getExtent(), snowball);
             }
         });
-        registerProjectileLogic(ThrownExpBottle.class, new SimpleItemLaunchLogic<ThrownExpBottle>(ThrownExpBottle.class, Items.EXPERIENCE_BOTTLE) {
+        registerProjectileLogic(ThrownExpBottle.class, new SimpleItemLaunchLogic<ThrownExpBottle>(ThrownExpBottle.class, Items.field_151062_by) {
 
             @Override
             protected Optional<ThrownExpBottle> createProjectile(EntityLivingBase source, Location<?> loc) {
-                ThrownExpBottle expBottle = (ThrownExpBottle) new EntityExpBottle(source.world, source);
-                ((EntityThrowable) expBottle).shoot(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.7F, 0);
+                ThrownExpBottle expBottle = (ThrownExpBottle) new EntityExpBottle(source.field_70170_p, source);
+                ((EntityThrowable) expBottle).func_184538_a(source, source.field_70125_A, source.field_70177_z, -20.0F, 0.7F, 0);
                 return doLaunch(loc.getExtent(), expBottle);
             }
         });
@@ -277,8 +277,8 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<EnderPearl> createProjectile(EntityLivingBase source, Location<?> loc) {
-                EnderPearl pearl = (EnderPearl) new EntityEnderPearl(source.world, source);
-                ((EntityThrowable) pearl).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
+                EnderPearl pearl = (EnderPearl) new EntityEnderPearl(source.field_70170_p, source);
+                ((EntityThrowable) pearl).func_184538_a(source, source.field_70125_A, source.field_70177_z, 0.0F, 1.5F, 0);
                 return doLaunch(loc.getExtent(), pearl);
             }
         });
@@ -286,10 +286,10 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<LargeFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Vec3d lookVec = source.getLook(1);
-                LargeFireball fireball = (LargeFireball) new EntityLargeFireball(source.world, source,
-                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
-                ((EntityLargeFireball) fireball).posY += source.getEyeHeight();
+                Vec3d lookVec = source.func_70676_i(1);
+                LargeFireball fireball = (LargeFireball) new EntityLargeFireball(source.field_70170_p, source,
+                        lookVec.field_72450_a * 4, lookVec.field_72448_b * 4, lookVec.field_72449_c * 4);
+                ((EntityLargeFireball) fireball).field_70163_u += source.func_70047_e();
                 return doLaunch(loc.getExtent(), fireball);
             }
 
@@ -300,13 +300,13 @@ public class ProjectileLauncher {
                 }
                 TileEntityDispenser dispenser = (TileEntityDispenser) source;
                 EnumFacing enumfacing = DispenserSourceLogic.getFacing(dispenser);
-                Random random = dispenser.getWorld().rand;
-                double d3 = random.nextGaussian() * 0.05D + enumfacing.getXOffset();
-                double d4 = random.nextGaussian() * 0.05D + enumfacing.getYOffset();
-                double d5 = random.nextGaussian() * 0.05D + enumfacing.getZOffset();
-                EntityLivingBase thrower = new EntityArmorStand(dispenser.getWorld(), loc.getX() + enumfacing.getXOffset(),
-                        loc.getY() + enumfacing.getYOffset(), loc.getZ() + enumfacing.getZOffset());
-                LargeFireball fireball = (LargeFireball) new EntityLargeFireball(dispenser.getWorld(), thrower, d3, d4, d5);
+                Random random = dispenser.func_145831_w().field_73012_v;
+                double d3 = random.nextGaussian() * 0.05D + enumfacing.func_82601_c();
+                double d4 = random.nextGaussian() * 0.05D + enumfacing.func_96559_d();
+                double d5 = random.nextGaussian() * 0.05D + enumfacing.func_82599_e();
+                EntityLivingBase thrower = new EntityArmorStand(dispenser.func_145831_w(), loc.getX() + enumfacing.func_82601_c(),
+                        loc.getY() + enumfacing.func_96559_d(), loc.getZ() + enumfacing.func_82599_e());
+                LargeFireball fireball = (LargeFireball) new EntityLargeFireball(dispenser.func_145831_w(), thrower, d3, d4, d5);
                 return doLaunch(loc.getExtent(), fireball);
             }
         });
@@ -314,10 +314,10 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<WitherSkull> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Vec3d lookVec = source.getLook(1);
-                WitherSkull skull = (WitherSkull) new EntityWitherSkull(source.world, source,
-                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
-                ((EntityWitherSkull) skull).posY += source.getEyeHeight();
+                Vec3d lookVec = source.func_70676_i(1);
+                WitherSkull skull = (WitherSkull) new EntityWitherSkull(source.field_70170_p, source,
+                        lookVec.field_72450_a * 4, lookVec.field_72448_b * 4, lookVec.field_72449_c * 4);
+                ((EntityWitherSkull) skull).field_70163_u += source.func_70047_e();
                 return doLaunch(loc.getExtent(), skull);
             }
         });
@@ -327,7 +327,7 @@ public class ProjectileLauncher {
             @Override
             protected Optional<FishHook> createProjectile(EntityLivingBase source, Location<?> loc) {
                 if (source instanceof EntityPlayer) {
-                    FishHook hook = (FishHook) new EntityFishHook(source.world, (EntityPlayer) source);
+                    FishHook hook = (FishHook) new EntityFishHook(source.field_70170_p, (EntityPlayer) source);
                     return doLaunch(loc.getExtent(), hook);
                 }
                 return super.createProjectile(source, loc);
@@ -337,8 +337,8 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<ThrownPotion> createProjectile(EntityLivingBase source, Location<?> loc) {
-                ThrownPotion potion = (ThrownPotion) new EntityPotion(source.world, source, new ItemStack(Items.SPLASH_POTION, 1));
-                ((EntityThrowable) potion).shoot(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.5F, 0);
+                ThrownPotion potion = (ThrownPotion) new EntityPotion(source.field_70170_p, source, new ItemStack(Items.field_185155_bH, 1));
+                ((EntityThrowable) potion).func_184538_a(source, source.field_70125_A, source.field_70177_z, -20.0F, 0.5F, 0);
                 return doLaunch(loc.getExtent(), potion);
             }
         });
@@ -355,9 +355,9 @@ public class ProjectileLauncher {
             @Override
             public Optional<LlamaSpit> createProjectile(ProjectileSource source, Class<LlamaSpit> projectileClass, Location<?> loc) {
                 EntityLlama llama = (EntityLlama) source;
-                LlamaSpit llamaSpit = (LlamaSpit) new EntityLlamaSpit(llama.world, (EntityLlama) source);
-                Vec3d lookVec = llama.getLook(1);
-                ((EntityLlamaSpit) llamaSpit).shoot(lookVec.x, lookVec.y, lookVec.z, 1.5F, 0);
+                LlamaSpit llamaSpit = (LlamaSpit) new EntityLlamaSpit(llama.field_70170_p, (EntityLlama) source);
+                Vec3d lookVec = llama.func_70676_i(1);
+                ((EntityLlamaSpit) llamaSpit).func_70186_c(lookVec.field_72450_a, lookVec.field_72448_b, lookVec.field_72449_c, 1.5F, 0);
                 return doLaunch(loc.getExtent(), llamaSpit);
             }
         });
@@ -365,10 +365,10 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<DragonFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Vec3d lookVec = source.getLook(1);
-                DragonFireball fireball = (DragonFireball) new EntityDragonFireball(source.world, source,
-                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
-                ((EntityDragonFireball) fireball).posY += source.getEyeHeight();
+                Vec3d lookVec = source.func_70676_i(1);
+                DragonFireball fireball = (DragonFireball) new EntityDragonFireball(source.field_70170_p, source,
+                        lookVec.field_72450_a * 4, lookVec.field_72448_b * 4, lookVec.field_72449_c * 4);
+                ((EntityDragonFireball) fireball).field_70163_u += source.func_70047_e();
                 return doLaunch(loc.getExtent(), fireball);
             }
         });

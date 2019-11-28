@@ -45,7 +45,7 @@ public abstract class NetworkManagerMixin_API extends SimpleChannelInboundHandle
     @Override
     public Player getPlayer() {
         if(this.packetListener instanceof NetHandlerPlayServer) {
-            return (Player) ((NetHandlerPlayServer) this.packetListener).player;
+            return (Player) ((NetHandlerPlayServer) this.packetListener).field_147369_b;
         }
         throw new IllegalStateException("Player is not currently available");
     }
@@ -53,7 +53,7 @@ public abstract class NetworkManagerMixin_API extends SimpleChannelInboundHandle
     @Override
     public int getLatency() {
         if(this.packetListener instanceof NetHandlerPlayServer) {
-            return ((NetHandlerPlayServer) this.packetListener).player.ping;
+            return ((NetHandlerPlayServer) this.packetListener).field_147369_b.field_71138_i;
         }
         throw new IllegalStateException("Latency is not currently available");
     }

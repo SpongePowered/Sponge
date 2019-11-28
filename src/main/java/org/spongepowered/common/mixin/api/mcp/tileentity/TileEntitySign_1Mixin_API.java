@@ -47,7 +47,7 @@ public abstract class TileEntitySign_1Mixin_API implements SignSource {
     @SuppressWarnings({"ConstantConditions", "RedundantCast"}) // This is an ICommandSender anonymous class
     @Override
     public CommandSource getOriginalSource() {
-        return WrapperCommandSource.of(((ICommandSender) (Object) this).getCommandSenderEntity());
+        return WrapperCommandSource.of(((ICommandSender) (Object) this).func_174793_f());
     }
 
     @Override
@@ -57,7 +57,7 @@ public abstract class TileEntitySign_1Mixin_API implements SignSource {
 
     @Override
     public World getWorld() {
-        return (World) this.field_174795_a.getWorld();
+        return (World) this.field_174795_a.func_145831_w();
     }
 
     @Override

@@ -60,24 +60,24 @@ public interface IPropertyMixin_API<T extends Comparable<T>> extends IProperty<T
 
     @Intrinsic
     default String trait$getName() {
-        return getName();
+        return func_177701_a();
     }
 
     default Collection<T> trait$getPossibleValues() {
-        return getAllowedValues();
+        return func_177700_c();
     }
 
     @Intrinsic
     default Class<T> trait$getValueClass() {
-        return getValueClass();
+        return func_177699_b();
     }
 
     default Predicate<T> trait$getPredicate() {
-        return Functional.predicateIn(getAllowedValues());
+        return Functional.predicateIn(func_177700_c());
     }
 
     @Intrinsic
     default Optional<T> trait$parseValue(final String value) {
-        return parseValue(value).toJavaUtil();
+        return func_185929_b(value).toJavaUtil();
     }
 }

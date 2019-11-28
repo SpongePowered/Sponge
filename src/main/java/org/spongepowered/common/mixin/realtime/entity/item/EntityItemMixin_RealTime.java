@@ -47,7 +47,7 @@ public abstract class EntityItemMixin_RealTime extends EntityMixin_RealTime {
             this.pickupDelay = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();
         this.pickupDelay = Math.max(0, this.pickupDelay - ticks);
     }
 
@@ -58,7 +58,7 @@ public abstract class EntityItemMixin_RealTime extends EntityMixin_RealTime {
             this.age = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();
         this.age += ticks;
     }
 

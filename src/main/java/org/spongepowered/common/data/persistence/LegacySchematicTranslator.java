@@ -146,7 +146,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                     Optional<BlockState> blockState = palette.get(palette_id);
                     if (!blockState.isPresent()) {
                         // At the very least get the default state id
-                        blockState = Optional.of(((BlockType) Block.REGISTRY.getObjectById(default_state_id)).getDefaultState());
+                        blockState = Optional.of(((BlockType) Block.field_149771_c.func_148754_a(default_state_id)).getDefaultState());
                     }
                     BlockState block = blockState.orElseGet(BlockTypes.COBBLESTONE::getDefaultState);
                     buffer.setBlock(x - offsetX, y - offsetY, z - offsetZ, block);
@@ -163,14 +163,14 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 final String tileType = tile.getString(TILE_ID).get();
                 final ResourceLocation name = new ResourceLocation(tileType);
                 TileEntityType type = TileEntityTypeRegistryModule.getInstance()
-                        .getForClass(TileEntityAccessor.accessor$getRegistry().getObject(name));
+                        .getForClass(TileEntityAccessor.accessor$getRegistry().func_82594_a(name));
                 final BlockState state = buffer.getBlock(x - offsetX, y - offsetY, z - offsetZ);
                 // Somehow we need to get some DataFixers in here, because some data may be legacy from older versions before data
                 // fixers.
                 final DataView upgraded;
 
                 NBTTagCompound tileNbt = NbtTranslator.getInstance().translate(tile);
-                tileNbt = VANILLA_FIXER.process(FixTypes.BLOCK_ENTITY, tileNbt, 0);
+                tileNbt = VANILLA_FIXER.func_188251_a(FixTypes.BLOCK_ENTITY, tileNbt, 0);
                 upgraded = NbtTranslator.getInstance().translate(tileNbt);
 
                 if (type!= null && SpongeImplHooks.hasBlockTileEntity(((Block) state.getType()), (IBlockState) state)) {
@@ -196,7 +196,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                     final DataView upgraded;
 
                     NBTTagCompound entityNbt = NbtTranslator.getInstance().translate(entity);
-                    entityNbt = VANILLA_FIXER.process(FixTypes.ENTITY, entityNbt, 0);
+                    entityNbt = VANILLA_FIXER.func_188251_a(FixTypes.ENTITY, entityNbt, 0);
                     upgraded = NbtTranslator.getInstance().translate(entityNbt);
                     upgraded.set(Queries.POSITION, new Vector3i(x - offsetX, y - offsetY, z - offsetZ));
                     final EntityArchetype build = new SpongeEntityArchetypeBuilder().type(type).entityData(upgraded).build();

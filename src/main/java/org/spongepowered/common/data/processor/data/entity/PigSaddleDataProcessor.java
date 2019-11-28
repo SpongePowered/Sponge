@@ -48,13 +48,13 @@ public class PigSaddleDataProcessor
 
     @Override
     protected boolean set(EntityPig entity, Boolean value) {
-        entity.setSaddled(value);
+        entity.func_70900_e(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityPig entity) {
-        return Optional.of(entity.getSaddled());
+        return Optional.of(entity.func_70901_n());
     }
 
     @Override

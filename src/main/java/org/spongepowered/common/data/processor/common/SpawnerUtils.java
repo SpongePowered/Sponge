@@ -61,9 +61,9 @@ public class SpawnerUtils {
     public static WeightedSerializableObject<EntityArchetype> getNextEntity(final MobSpawnerBaseLogicAccessor logic) {
         final int weight = ((WeightedRandom_ItemAccessor) logic.accessor$getSpawnData()).accessor$getItemWeight();
 
-        final EntityType type = EntityUtil.fromNameToType(logic.accessor$getSpawnData().getNbt().getString("id")).orElse(EntityTypes.PIG);
+        final EntityType type = EntityUtil.fromNameToType(logic.accessor$getSpawnData().func_185277_b().func_74779_i("id")).orElse(EntityTypes.PIG);
 
-        final NBTTagCompound data = logic.accessor$getSpawnData().getNbt();
+        final NBTTagCompound data = logic.accessor$getSpawnData().func_185277_b();
 
         final EntityArchetype archetype = EntityArchetype.builder()
                 .type(type)
@@ -76,21 +76,21 @@ public class SpawnerUtils {
     @SuppressWarnings("unchecked")
     public static void setNextEntity(final MobSpawnerBaseLogic logic, final WeightedSerializableObject<EntityArchetype> value) {
         final NBTTagCompound compound = NbtTranslator.getInstance().translateData(value.get().getEntityData());
-        if (!compound.hasKey(Constants.Entity.ENTITY_TYPE_ID)) {
-            final ResourceLocation key = EntityList.getKey((Class<? extends Entity>) value.get().getType().getEntityClass());
-            compound.setString(Constants.Entity.ENTITY_TYPE_ID, key != null ? key.toString() : "");
+        if (!compound.func_74764_b(Constants.Entity.ENTITY_TYPE_ID)) {
+            final ResourceLocation key = EntityList.func_191306_a((Class<? extends Entity>) value.get().getType().getEntityClass());
+            compound.func_74778_a(Constants.Entity.ENTITY_TYPE_ID, key != null ? key.toString() : "");
         }
 
-        logic.setNextSpawnData(new WeightedSpawnerEntity((int) value.getWeight(), compound));
+        logic.func_184993_a(new WeightedSpawnerEntity((int) value.getWeight(), compound));
     }
 
     public static WeightedTable<EntityArchetype> getEntities(final MobSpawnerBaseLogic logic) {
         final WeightedTable<EntityArchetype> possibleEntities = new WeightedTable<>();
         for (final WeightedSpawnerEntity weightedEntity : ((MobSpawnerBaseLogicAccessor) logic).accessor$getPotentialSpawns()) {
 
-            final NBTTagCompound nbt = weightedEntity.getNbt();
+            final NBTTagCompound nbt = weightedEntity.func_185277_b();
 
-            final EntityType type = EntityUtil.fromNameToType(nbt.getString(Constants.Entity.ENTITY_TYPE_ID)).orElse(EntityTypes.PIG);
+            final EntityType type = EntityUtil.fromNameToType(nbt.func_74779_i(Constants.Entity.ENTITY_TYPE_ID)).orElse(EntityTypes.PIG);
 
             final EntityArchetype archetype = EntityArchetype.builder()
                     .type(type)
@@ -113,9 +113,9 @@ public class SpawnerUtils {
             final WeightedObject<EntityArchetype> object = (WeightedObject<EntityArchetype>) entry;
 
             final NBTTagCompound compound = NbtTranslator.getInstance().translateData(object.get().getEntityData());
-            if (!compound.hasKey(Constants.Entity.ENTITY_TYPE_ID)) {
-                final ResourceLocation key = EntityList.getKey((Class<? extends Entity>) object.get().getType().getEntityClass());
-                compound.setString(Constants.Entity.ENTITY_TYPE_ID, key != null ? key.toString() : "");
+            if (!compound.func_74764_b(Constants.Entity.ENTITY_TYPE_ID)) {
+                final ResourceLocation key = EntityList.func_191306_a((Class<? extends Entity>) object.get().getType().getEntityClass());
+                compound.func_74778_a(Constants.Entity.ENTITY_TYPE_ID, key != null ? key.toString() : "");
             }
 
 

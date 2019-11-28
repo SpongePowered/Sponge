@@ -41,7 +41,7 @@ public abstract class CommandWeatherMixin_MultiWorldCommand {
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
     private WorldInfo multiWorldCommand$useWorld(final World world, final MinecraftServer server, final ICommandSender sender, final String[] args) {
-        return sender.getEntityWorld().getWorldInfo();
+        return sender.func_130014_f_().func_72912_H();
     }
 
 }

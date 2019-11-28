@@ -42,9 +42,9 @@ public class SpongeChestBuilder extends SpongeLockableBuilder<Chest> {
     protected Optional<Chest> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(chest -> {
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((TileEntityChest) chest).setCustomName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
+                ((TileEntityChest) chest).func_190575_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
-            ((TileEntityChest) chest).validate();
+            ((TileEntityChest) chest).func_145829_t();
             return chest;
         });
     }

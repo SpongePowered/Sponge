@@ -54,10 +54,10 @@ public abstract class EntityAIWatchClosestMixin extends EntityAIBase {
         net.minecraft.entity.Entity entity1 = null;
         double d0 = Double.MAX_VALUE;
 
-        for (final net.minecraft.entity.Entity foundEntity: (List< net.minecraft.entity.Entity>) world.getEntities(this.watchedClass,
-                EntitySelectors.NOT_SPECTATING)) {
-            if (foundEntity.getEntityBoundingBox().intersects(aabb) && foundEntity != entity) {
-                final double d1 = entity.getDistanceSq(foundEntity);
+        for (final net.minecraft.entity.Entity foundEntity: (List< net.minecraft.entity.Entity>) world.func_175644_a(this.watchedClass,
+                EntitySelectors.field_180132_d)) {
+            if (foundEntity.func_174813_aQ().func_72326_a(aabb) && foundEntity != entity) {
+                final double d1 = entity.func_70068_e(foundEntity);
 
                 if (d1 <= d0)
                 {

@@ -110,7 +110,7 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
             // Sponge start - check if structure is allowed to save
             if (this.structureSaving$canSaveStructures) {
                 // use hook since Forge supports per-world map storage
-                this.structureData = (MapGenStructureData)SpongeImplHooks.getWorldMapStorage(worldIn).getOrLoadData(MapGenStructureData.class, this.getStructureName());
+                this.structureData = (MapGenStructureData)SpongeImplHooks.getWorldMapStorage(worldIn).func_75742_a(MapGenStructureData.class, this.getStructureName());
             }
             else
             {
@@ -121,29 +121,29 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
             if (this.structureData == null)
             {
                 this.structureData = new MapGenStructureData(this.getStructureName());
-                worldIn.setData(this.getStructureName(), this.structureData);
+                worldIn.func_72823_a(this.getStructureName(), this.structureData);
             }
             else
             {
-                final NBTTagCompound nbttagcompound = this.structureData.getTagCompound();
+                final NBTTagCompound nbttagcompound = this.structureData.func_143041_a();
 
-                for (final String s : nbttagcompound.getKeySet())
+                for (final String s : nbttagcompound.func_150296_c())
                 {
-                    final NBTBase nbtbase = nbttagcompound.getTag(s);
+                    final NBTBase nbtbase = nbttagcompound.func_74781_a(s);
 
-                    if (nbtbase.getId() == 10)
+                    if (nbtbase.func_74732_a() == 10)
                     {
                         final NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbtbase;
 
-                        if (nbttagcompound1.hasKey("ChunkX") && nbttagcompound1.hasKey("ChunkZ"))
+                        if (nbttagcompound1.func_74764_b("ChunkX") && nbttagcompound1.func_74764_b("ChunkZ"))
                         {
-                            final int i = nbttagcompound1.getInteger("ChunkX");
-                            final int j = nbttagcompound1.getInteger("ChunkZ");
-                            final StructureStart structurestart = MapGenStructureIO.getStructureStart(nbttagcompound1, worldIn);
+                            final int i = nbttagcompound1.func_74762_e("ChunkX");
+                            final int j = nbttagcompound1.func_74762_e("ChunkZ");
+                            final StructureStart structurestart = MapGenStructureIO.func_143035_a(nbttagcompound1, worldIn);
 
                             if (structurestart != null)
                             {
-                                this.structureMap.put(ChunkPos.asLong(i, j), structurestart);
+                                this.structureMap.put(ChunkPos.func_77272_a(i, j), structurestart);
                             }
                         }
                     }

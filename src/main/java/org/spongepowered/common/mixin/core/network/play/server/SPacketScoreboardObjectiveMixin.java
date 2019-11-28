@@ -43,7 +43,7 @@ public abstract class SPacketScoreboardObjectiveMixin {
     )
     private IScoreCriteria.EnumRenderType spongeImpl$UseScoreObjectiveRenderType(final IScoreCriteria iScoreCriteria, final ScoreObjective objective,
         final int action) {
-        return objective.getRenderType();
+        return objective.func_178766_e();
     }
 
 }

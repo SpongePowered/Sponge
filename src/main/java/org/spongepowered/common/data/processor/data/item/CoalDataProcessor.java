@@ -48,7 +48,7 @@ import java.util.Optional;
 public class CoalDataProcessor extends AbstractItemSingleDataProcessor<CoalType, Value<CoalType>, CoalData, ImmutableCoalData> {
 
     public CoalDataProcessor() {
-        super(stack -> stack.getItem().equals(Items.COAL), Keys.COAL_TYPE);
+        super(stack -> stack.func_77973_b().equals(Items.field_151044_h), Keys.COAL_TYPE);
     }
 
     @Override
@@ -58,13 +58,13 @@ public class CoalDataProcessor extends AbstractItemSingleDataProcessor<CoalType,
 
     @Override
     protected boolean set(ItemStack itemStack, CoalType value) {
-        itemStack.setItemDamage(((SpongeCoalType) value).type);
+        itemStack.func_77964_b(((SpongeCoalType) value).type);
         return true;
     }
 
     @Override
     protected Optional<CoalType> getVal(ItemStack itemStack) {
-        final int coalmeta = itemStack.getItemDamage();
+        final int coalmeta = itemStack.func_77952_i();
         final List<CoalType> coalTypes = (List<CoalType>) SpongeImpl.getRegistry().getAllOf(CoalType.class);
         return Optional.ofNullable(coalTypes.get(coalmeta));
     }

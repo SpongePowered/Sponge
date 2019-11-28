@@ -51,13 +51,13 @@ public final class PickupRuleDataProcessor extends AbstractEntitySingleDataProce
 
     @Override
     protected boolean set(EntityArrow arrow, PickupRule value) {
-        arrow.pickupStatus = (EntityArrow.PickupStatus) (Object) value;
+        arrow.field_70251_a = (EntityArrow.PickupStatus) (Object) value;
         return true;
     }
 
     @Override
     protected Optional<PickupRule> getVal(EntityArrow arrow) {
-        return Optional.of((PickupRule) (Object) arrow.pickupStatus);
+        return Optional.of((PickupRule) (Object) arrow.field_70251_a);
     }
 
     @Override

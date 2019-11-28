@@ -184,9 +184,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             if (!((WorldAccessor) world).accessor$isValid(pos)) { // Invalid position. Inline this check
                 return false;
             }
-            final IBlockState current = world.getBlockState(pos);
+            final IBlockState current = world.func_180495_p(pos);
             final IBlockState replaced = (IBlockState) this.blockState;
-            if (!force && (current.getBlock() != replaced.getBlock() || current != replaced)) {
+            if (!force && (current.func_177230_c() != replaced.func_177230_c() || current != replaced)) {
                 return false;
             }
 
@@ -194,20 +194,20 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 //            if (current.getBlock().getClass() == BlockShulkerBox.class) {
 //                world.bridge$removeTileEntity(pos);
 //            }
-            world.removeTileEntity(pos);
+            world.func_175713_t(pos);
             PhaseTracker.getInstance().setBlockState(mixinWorldServer, pos, replaced, BlockChangeFlagRegistryModule.andNotifyClients(flag));
             if (this.compound != null) {
-                TileEntity te = world.getTileEntity(pos);
+                TileEntity te = world.func_175625_s(pos);
                 if (te != null) {
-                    te.readFromNBT(this.compound);
+                    te.func_145839_a(this.compound);
                 }
                 if (te == null) {
                     // Because, some mods will "unintentionally" only obey some of the rules but not all.
                     // In cases like this, we need to directly just say "fuck it" and deserialize from the compound directly.
                     try {
-                        te = TileEntity.create(world, this.compound);
+                        te = TileEntity.func_190200_a(world, this.compound);
                         if (te != null) {
-                            world.getChunk(pos).addTileEntity(te);
+                            world.func_175726_f(pos).func_150813_a(te);
                         }
                     } catch (Exception e) {
                         // Seriously? The mod should be broken then.
@@ -236,12 +236,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 }
 
                 if (te != null) {
-                    te.markDirty();
+                    te.func_70296_d();
                 }
 
             }
             // Finally, mark the location as being updated.
-            world.getPlayerChunkMap().markBlockForUpdate(pos);
+            world.func_184164_w().func_180244_a(pos);
             return true;
         }
     }
@@ -509,7 +509,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     public Optional<NBTTagCompound> getCompound() {
-        return this.compound == null ? Optional.<NBTTagCompound>empty() : Optional.of(this.compound.copy());
+        return this.compound == null ? Optional.<NBTTagCompound>empty() : Optional.of(this.compound.func_74737_b());
     }
 
     public SpongeBlockSnapshotBuilder createBuilder() {
@@ -566,7 +566,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         if (this.compound == null) { // We can't retrieve the TileEntityType
             return Optional.empty();
         }
-        final String tileId = this.compound.getString(Constants.Item.BLOCK_ENTITY_ID);
+        final String tileId = this.compound.func_74779_i(Constants.Item.BLOCK_ENTITY_ID);
         final Class<? extends TileEntity> tileClass = (Class<? extends TileEntity>) TileEntityTypeRegistryModule.getInstance().getById(tileId)
             .map(TileEntityType::getTileEntityType)
             .orElse(null);

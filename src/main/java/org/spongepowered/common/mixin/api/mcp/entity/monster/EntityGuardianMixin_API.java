@@ -43,7 +43,7 @@ public abstract class EntityGuardianMixin_API extends EntityMobMixin_API impleme
 
     @Override
     public Optional<Living> getBeamTarget() {
-        return Optional.ofNullable((Living) this.world.getEntityByID(this.dataManager.get(TARGET_ENTITY)));
+        return Optional.ofNullable((Living) this.world.func_73045_a(this.dataManager.func_187225_a(TARGET_ENTITY)));
     }
 
     @Override
@@ -51,7 +51,7 @@ public abstract class EntityGuardianMixin_API extends EntityMobMixin_API impleme
         if (entity == null) {
             this.setTargetedEntity(0);
         } else {
-            this.setTargetedEntity(((EntityLivingBase) entity).getEntityId());
+            this.setTargetedEntity(((EntityLivingBase) entity).func_145782_y());
         }
     }
 }

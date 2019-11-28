@@ -64,7 +64,7 @@ public abstract class BlockWallMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableWallData) {
             final BlockWall.EnumType wallType = (BlockWall.EnumType) (Object) ((ImmutableWallData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockWall.VARIANT, wallType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockWall.field_176255_P, wallType));
         }
         if (manipulator instanceof ImmutableConnectedDirectionData) {
             return Optional.of((BlockState) blockState);
@@ -76,7 +76,7 @@ public abstract class BlockWallMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.WALL_TYPE)) {
             final BlockWall.EnumType wallType = (BlockWall.EnumType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockWall.VARIANT, wallType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockWall.field_176255_P, wallType));
         }
         if (key.equals(Keys.CONNECTED_DIRECTIONS) || key.equals(Keys.CONNECTED_EAST) || key.equals(Keys.CONNECTED_NORTH)
                 || key.equals(Keys.CONNECTED_SOUTH) || key.equals(Keys.CONNECTED_WEST)) {
@@ -87,16 +87,16 @@ public abstract class BlockWallMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableWallData impl$getWallTypeFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) (Object) blockState.getValue(BlockWall.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) (Object) blockState.func_177229_b(BlockWall.field_176255_P));
     }
 
     private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.getValue(BlockWall.NORTH);
-        final Boolean east = blockState.getValue(BlockWall.EAST);
-        final Boolean west = blockState.getValue(BlockWall.WEST);
-        final Boolean south = blockState.getValue(BlockWall.SOUTH);
-        final Boolean up = blockState.getValue(BlockWall.UP);
+        final Boolean north = blockState.func_177229_b(BlockWall.field_176254_b);
+        final Boolean east = blockState.func_177229_b(BlockWall.field_176257_M);
+        final Boolean west = blockState.func_177229_b(BlockWall.field_176259_O);
+        final Boolean south = blockState.func_177229_b(BlockWall.field_176258_N);
+        final Boolean up = blockState.func_177229_b(BlockWall.field_176256_a);
         if (north) {
             directions.add(Direction.NORTH);
         }

@@ -68,18 +68,18 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
     public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.world);
+        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.func_149564_a(packetPlayer.field_70170_p);
         return entity == null;
     }
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
-        final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
+        final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.func_184586_b(useEntityPacket.func_186994_b()));
         if (stack != null) {
             context.itemUsed(stack);
         }
-        final HandType handType = (HandType) (Object) useEntityPacket.getHand();
+        final HandType handType = (HandType) (Object) useEntityPacket.func_186994_b();
         context.handUsed(handType);
     }
 
@@ -93,16 +93,16 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
         final EntityPlayerMP player = context.getPacketPlayer();
 
         final CPacketUseEntity useEntityPacket = context.getPacket();
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
+        final net.minecraft.entity.Entity entity = useEntityPacket.func_149564_a(player.field_70170_p);
         if (entity == null) {
             // Something happened?
             return;
         }
-        final World spongeWorld = (World) player.world;
+        final World spongeWorld = (World) player.field_70170_p;
         if (entity instanceof OwnershipTrackedBridge) {
             ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) player);
         } else {
-            ((Entity) entity).setNotifier(player.getUniqueID());
+            ((Entity) entity).setNotifier(player.func_110124_au());
         }
 
 
@@ -132,7 +132,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
             context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
                 for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                     final UUID entityUuid = entry.getKey();
-                    final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);
+                    final net.minecraft.entity.Entity entityFromUuid = player.func_71121_q().func_175733_a(entityUuid);
                     if (entityFromUuid != null) {
                         final List<Entity> entities = entry.getValue()
                             .stream()
@@ -154,7 +154,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
             });
             context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
                 final List<EntityItem> items =
-                    drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
+                    drops.stream().map(drop -> drop.create(player.func_71121_q())).collect(Collectors.toList());
                 final List<Entity> entities = items
                     .stream()
                     .map(entity1 -> (Entity) entity1)

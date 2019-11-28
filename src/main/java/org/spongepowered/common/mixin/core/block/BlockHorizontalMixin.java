@@ -55,7 +55,7 @@ public abstract class BlockHorizontalMixin extends BlockMixin {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
             final EnumFacing facing = Constants.DirectionFunctions.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockHorizontal.FACING, facing));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockHorizontal.field_185512_D, facing));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -65,7 +65,7 @@ public abstract class BlockHorizontalMixin extends BlockMixin {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
             final EnumFacing facing = Constants.DirectionFunctions.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockHorizontal.FACING, facing));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockHorizontal.field_185512_D, facing));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -74,7 +74,7 @@ public abstract class BlockHorizontalMixin extends BlockMixin {
     public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
-                .add(new ImmutableSpongeDirectionalData(Constants.DirectionFunctions.getFor(blockState.getValue(BlockHorizontal.FACING))))
+                .add(new ImmutableSpongeDirectionalData(Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockHorizontal.field_185512_D))))
                 .build();
     }
 }

@@ -220,7 +220,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
             component = SpongeTexts.fixActionBarFormatting(component);
         }
 
-        this.connection.sendPacket(new SPacketChat(component, (net.minecraft.util.text.ChatType) (Object) type));
+        this.connection.func_147359_a(new SPacketChat(component, (net.minecraft.util.text.ChatType) (Object) type));
     }
 
     @Override
@@ -265,7 +265,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         if (!packets.isEmpty()) {
             if (position.sub(this.posX, this.posY, this.posZ).lengthSquared() < (long) radius * (long) radius) {
                 for (final Packet<?> packet : packets) {
-                    this.connection.sendPacket(packet);
+                    this.connection.func_147359_a(packet);
                 }
             }
         }
@@ -283,7 +283,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
      */
     @Overwrite
     public String getPlayerIP() {
-        return NetworkUtil.getHostString(this.connection.netManager.getRemoteAddress());
+        return NetworkUtil.getHostString(this.connection.field_147371_a.func_74430_c());
     }
 
     @Override
@@ -343,7 +343,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
              // intentionally missing the lastCursor to not double throw close event
                 ) {
             ctx.buildAndSwitch();
-            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
+            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.func_70445_o());
             return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
         }
     }
@@ -376,7 +376,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     @Override
     public void kick(final Text message) {
         final ITextComponent component = SpongeTexts.toComponent(message);
-        this.connection.disconnect(component);
+        this.connection.func_194028_b(component);
     }
 
     @Override
@@ -395,15 +395,15 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         final SoundEvent event;
         try {
             // Check if the event is registered (ie has an integer ID)
-            event = SoundEvents.getRegisteredSoundEvent(sound.getId());
+            event = SoundEvents.func_187510_a(sound.getId());
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
-            this.connection.sendPacket(new SPacketCustomSound(sound.getId(), (net.minecraft.util.SoundCategory) (Object) category,
+            this.connection.func_147359_a(new SPacketCustomSound(sound.getId(), (net.minecraft.util.SoundCategory) (Object) category,
                     position.getX(), position.getY(), position.getZ(), (float) Math.max(minVolume, volume), (float) pitch));
             return;
         }
 
-        this.connection.sendPacket(new SPacketSoundEffect(event, (net.minecraft.util.SoundCategory) (Object) category, position.getX(),
+        this.connection.func_147359_a(new SPacketSoundEffect(event, (net.minecraft.util.SoundCategory) (Object) category, position.getX(),
                 position.getY(), position.getZ(), (float) Math.max(minVolume, volume), (float) pitch));
     }
 
@@ -428,7 +428,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     }
 
     private void stopSounds0(@Nullable final SoundType sound, @Nullable final SoundCategory category) {
-        this.connection.sendPacket(SoundEffectHelper.createStopSoundPacket(sound, category));
+        this.connection.func_147359_a(SoundEffectHelper.createStopSoundPacket(sound, category));
     }
 
     @Override
@@ -442,14 +442,14 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     }
 
     private void playRecord0(final Vector3i position, @Nullable final RecordType recordType) {
-        this.connection.sendPacket(SpongeRecordType.createPacket(position, recordType));
+        this.connection.func_147359_a(SpongeRecordType.createPacket(position, recordType));
     }
 
     @Override
     public void sendResourcePack(final ResourcePack pack) {
         final SPacketResourcePackSend packet = new SPacketResourcePackSend();
         ((SPacketResourcePackSendBridge) packet).bridge$setSpongePack(pack);
-        this.connection.sendPacket(packet);
+        this.connection.func_147359_a(packet);
     }
 
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
@@ -511,13 +511,13 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public GameModeData getGameModeData() {
-        return new SpongeGameModeData((GameMode) (Object) this.interactionManager.getGameType());
+        return new SpongeGameModeData((GameMode) (Object) this.interactionManager.func_73081_b());
     }
 
     @Override
     public Value<GameMode> gameMode() {
         return new SpongeValue<>(Keys.GAME_MODE, Constants.Catalog.DEFAULT_GAMEMODE,
-                (GameMode) (Object) this.interactionManager.getGameType());
+                (GameMode) (Object) this.interactionManager.func_73081_b());
     }
 
     @Override
@@ -529,9 +529,9 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     public void sendBlockChange(final BlockPos pos, final IBlockState state) {
         final SPacketBlockChange packet = new SPacketBlockChange();
-        packet.blockPosition = pos;
-        packet.blockState = state;
-        this.connection.sendPacket(packet);
+        packet.field_179828_a = pos;
+        packet.field_148883_d = state;
+        this.connection.func_147359_a(packet);
     }
 
     @Override
@@ -543,7 +543,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     @Override
     public void resetBlockChange(final int x, final int y, final int z) {
         final SPacketBlockChange packet = new SPacketBlockChange(this.world, new BlockPos(x, y, z));
-        this.connection.sendPacket(packet);
+        this.connection.func_147359_a(packet);
     }
 
     @Override
@@ -556,7 +556,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         if (this.getHealth() > 0.0F) {
             return false;
         }
-        this.connection.player = this.server.getPlayerList().recreatePlayerEntity((EntityPlayerMP) (Object) this, this.dimension, false);
+        this.connection.field_147369_b = this.server.func_184103_al().func_72368_a((EntityPlayerMP) (Object) this, this.dimension, false);
         return true;
     }
 
@@ -607,10 +607,10 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
             }
             this.api$worldBorder = border;
             if (this.api$worldBorder != null) {
-                ((net.minecraft.world.border.WorldBorder) this.api$worldBorder).addListener(((EntityPlayerMPBridge) this).bridge$getWorldBorderListener());
-                this.connection.sendPacket(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) this.api$worldBorder, SPacketWorldBorder.Action.INITIALIZE));
+                ((net.minecraft.world.border.WorldBorder) this.api$worldBorder).func_177737_a(((EntityPlayerMPBridge) this).bridge$getWorldBorderListener());
+                this.connection.func_147359_a(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) this.api$worldBorder, SPacketWorldBorder.Action.INITIALIZE));
             } else { //unset the border if null
-                this.connection.sendPacket(new SPacketWorldBorder(this.world.getWorldBorder(), SPacketWorldBorder.Action.INITIALIZE));
+                this.connection.func_147359_a(new SPacketWorldBorder(this.world.func_175723_af(), SPacketWorldBorder.Action.INITIALIZE));
             }
         }
     }
@@ -624,7 +624,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     public AdvancementProgress getProgress(final Advancement advancement) {
         checkNotNull(advancement, "advancement");
         checkState(((AdvancementBridge) advancement).bridge$isRegistered(), "The advancement must be registered");
-        return (AdvancementProgress) this.advancements.getProgress((net.minecraft.advancements.Advancement) advancement);
+        return (AdvancementProgress) this.advancements.func_192747_a((net.minecraft.advancements.Advancement) advancement);
     }
 
     @Override

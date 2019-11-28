@@ -54,19 +54,19 @@ public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
 
     @Override
     protected boolean set(TileEntityFurnace container, Integer value) {
-        if (!container.isBurning() && value > 0 || container.isBurning() && value == 0) {
-            final World world = (World) container.getWorld();
-            world.setBlockType(container.getPos().getX(), container.getPos().getY(),
-                    container.getPos().getZ(), value > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
-            container = (TileEntityFurnace) container.getWorld().getTileEntity(container.getPos());
+        if (!container.func_145950_i() && value > 0 || container.func_145950_i() && value == 0) {
+            final World world = (World) container.func_145831_w();
+            world.setBlockType(container.func_174877_v().func_177958_n(), container.func_174877_v().func_177956_o(),
+                    container.func_174877_v().func_177952_p(), value > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
+            container = (TileEntityFurnace) container.func_145831_w().func_175625_s(container.func_174877_v());
         }
-        container.setField(1, value);
+        container.func_174885_b(1, value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(TileEntityFurnace container) {
-        return Optional.of(container.getField(1));
+        return Optional.of(container.func_174887_a_(1));
     }
 
     @Override

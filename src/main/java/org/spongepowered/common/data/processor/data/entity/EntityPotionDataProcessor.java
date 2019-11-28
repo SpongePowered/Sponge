@@ -53,28 +53,28 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
 
     @Override
     protected boolean set(EntityLivingBase dataHolder, List<PotionEffect> value) {
-        dataHolder.clearActivePotions();
+        dataHolder.func_70674_bp();
         for (PotionEffect effect : value) {
             net.minecraft.potion.PotionEffect mcEffect =
-                new net.minecraft.potion.PotionEffect(((net.minecraft.potion.PotionEffect) effect).getPotion(), effect.getDuration(),
+                new net.minecraft.potion.PotionEffect(((net.minecraft.potion.PotionEffect) effect).func_188419_a(), effect.getDuration(),
                     effect.getAmplifier(), effect.isAmbient(),
                     effect.getShowParticles());
-            dataHolder.addPotionEffect(mcEffect);
+            dataHolder.func_70690_d(mcEffect);
         }
         return true;
     }
 
     @Override
     protected Optional<List<PotionEffect>> getVal(EntityLivingBase dataHolder) {
-        Collection<net.minecraft.potion.PotionEffect> effects = dataHolder.getActivePotionEffects();
+        Collection<net.minecraft.potion.PotionEffect> effects = dataHolder.func_70651_bq();
         if (effects.isEmpty()) {
             return Optional.empty();
         }
         List<PotionEffect> apiEffects = new ArrayList<>();
         for (net.minecraft.potion.PotionEffect potionEffect : effects) {
-            apiEffects.add((PotionEffect) new net.minecraft.potion.PotionEffect(potionEffect.getPotion(), potionEffect.getDuration(),
-                potionEffect.getAmplifier(),
-                potionEffect.getIsAmbient(), potionEffect.doesShowParticles()));
+            apiEffects.add((PotionEffect) new net.minecraft.potion.PotionEffect(potionEffect.func_188419_a(), potionEffect.func_76459_b(),
+                potionEffect.func_76458_c(),
+                potionEffect.func_82720_e(), potionEffect.func_188418_e()));
         }
         return Optional.of(apiEffects);
     }
@@ -101,7 +101,7 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
         }
         Optional<List<PotionEffect>> effects = getVal((EntityLivingBase) container);
         if (effects.isPresent()) {
-            ((EntityLivingBase) container).clearActivePotions();
+            ((EntityLivingBase) container).func_70674_bp();
             return DataTransactionResult.successRemove(constructImmutableValue(effects.get()));
         }
         return DataTransactionResult.successNoData();

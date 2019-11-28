@@ -35,7 +35,7 @@ public class BurningFuelPropertyStore extends AbstractItemStackPropertyStore<Bur
 
     @Override
     protected Optional<BurningFuelProperty> getFor(ItemStack itemStack) {
-        final int burnTime = TileEntityFurnace.getItemBurnTime(itemStack);
+        final int burnTime = TileEntityFurnace.func_145952_a(itemStack);
         if (burnTime > 0) {
             return Optional.of(new BurningFuelProperty(burnTime));
         }

@@ -28,6 +28,7 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITasks;
+import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
@@ -128,21 +129,21 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
 
         while (iterator.hasNext()) {
             final EntityAITasks.EntityAITaskEntry entityaitaskentry = (EntityAITasks.EntityAITaskEntry)iterator.next();
-            final EntityAIBase otherAiBase = entityaitaskentry.action;
+            final EntityAIBase otherAiBase = entityaitaskentry.field_75733_a;
 
             // Sponge start
             if (otherAiBase.equals(aiBase)) {
                 AITaskEvent.Remove event = null;
                 if (ShouldFire.A_I_TASK_EVENT_REMOVE && this.owner != null && !((EntityBridge) this.owner).bridge$isConstructing()) {
                     event = SpongeEventFactory.createAITaskEventRemove(Sponge.getCauseStackManager().getCurrentCause(),
-                            (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
+                            (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.field_75731_b);
                     SpongeImpl.postEvent(event);
                 }
                 if (event == null || !event.isCancelled()) {
 
-                    if (entityaitaskentry.using) {
-                        entityaitaskentry.using = false;
-                        otherAiBase.resetTask();
+                    if (entityaitaskentry.field_188524_c) {
+                        entityaitaskentry.field_188524_c = false;
+                        otherAiBase.func_75251_c();
                         this.executingTaskEntries.remove(entityaitaskentry);
                     }
 
@@ -165,7 +166,7 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     private boolean areTasksCompatible(final EntityAITasks.EntityAITaskEntry taskEntry1, final EntityAITasks.EntityAITaskEntry taskEntry2) {
-        return (((AITask) taskEntry2.action).canRunConcurrentWith((AITask) taskEntry1.action));
+        return (((AITask) taskEntry2.field_75733_a).canRunConcurrentWith((AITask) taskEntry1.field_75733_a));
     }
 
     @Override

@@ -184,7 +184,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
 
         WorldManager.loadAllWorlds(seed, type, generatorOptions);
 
-        this.getPlayerList().setPlayerManager(this.worlds);
+        this.getPlayerList().func_72364_a(this.worlds);
         this.setDifficultyForAllWorlds(this.getDifficulty());
     }
 
@@ -204,12 +204,12 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
 
     @Override
     public void bridge$prepareSpawnArea(final WorldServer worldServer) {
-        final WorldProperties worldProperties = (WorldProperties) worldServer.getWorldInfo();
+        final WorldProperties worldProperties = (WorldProperties) worldServer.func_72912_H();
         if (!((WorldInfoBridge) worldProperties).bridge$isValid() || !worldProperties.doesGenerateSpawnOnLoad()) {
             return;
         }
 
-        final ChunkProviderServerBridge chunkProviderServer = (ChunkProviderServerBridge) worldServer.getChunkProvider();
+        final ChunkProviderServerBridge chunkProviderServer = (ChunkProviderServerBridge) worldServer.func_72863_F();
         chunkProviderServer.bridge$setForceChunkRequests(true);
 
         try (final GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
@@ -218,13 +218,13 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
             context.buildAndSwitch();
             int i = 0;
             this.setUserMessage("menu.generatingTerrain");
-            LOGGER.info("Preparing start region for world {} ({}/{})", worldServer.getWorldInfo().getWorldName(),
-                ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(), ((WorldServerBridge) worldServer).bridge$getDimensionId());
-            final BlockPos blockpos = worldServer.getSpawnPoint();
-            long j = MinecraftServer.getCurrentTimeMillis();
+            LOGGER.info("Preparing start region for world {} ({}/{})", worldServer.func_72912_H().func_76065_j(),
+                ((DimensionType) (Object) worldServer.field_73011_w.func_186058_p()).getId(), ((WorldServerBridge) worldServer).bridge$getDimensionId());
+            final BlockPos blockpos = worldServer.func_175694_M();
+            long j = MinecraftServer.func_130071_aq();
             for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
                 for (int l = -192; l <= 192 && this.isServerRunning(); l += 16) {
-                    final long i1 = MinecraftServer.getCurrentTimeMillis();
+                    final long i1 = MinecraftServer.func_130071_aq();
 
                     if (i1 - j > 1000L) {
                         this.outputPercentRemaining("Preparing spawn area", i * 100 / 625);
@@ -232,7 +232,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
                     }
 
                     ++i;
-                    worldServer.getChunkProvider().provideChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
+                    worldServer.func_72863_F().func_186025_d(blockpos.func_177958_n() + k >> 4, blockpos.func_177952_p() + l >> 4);
                 }
             }
             this.clearCurrentTask();
@@ -303,7 +303,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     private static Location<World> getTarget(final ICommandSender sender, @Nullable final BlockPos pos) {
         @Nullable Location<World> targetPos = null;
         if (pos != null) {
-            targetPos = new Location<>((World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
+            targetPos = new Location<>((World) sender.func_130014_f_(), VecHelper.toVector3i(pos));
         }
         return targetPos;
     }
@@ -330,17 +330,17 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
 
                 final RayTraceResult result = SpongeImplHooks.rayTraceEyes(player, SpongeImplHooks.getBlockReachDistance(player) + 1);
                 // Hit non-air block
-                if (result != null && result.getBlockPos() != null) {
+                if (result != null && result.func_178782_a() != null) {
                     return;
                 }
 
-                if (!player.getHeldItemMainhand().isEmpty() && SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, null, blockSnapshot).isCancelled()) {
+                if (!player.func_184614_ca().func_190926_b() && SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.func_184614_ca(), EnumHand.MAIN_HAND, null, blockSnapshot).isCancelled()) {
                     SpongeCommonEventFactory.lastAnimationPacketTick = 0;
                     SpongeCommonEventFactory.lastAnimationPlayer = null;
                     return;
                 }
 
-                SpongeCommonEventFactory.callInteractBlockEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, null);
+                SpongeCommonEventFactory.callInteractBlockEventPrimary(player, player.func_184614_ca(), EnumHand.MAIN_HAND, null);
             }
             SpongeCommonEventFactory.lastAnimationPlayer = null;
         }
@@ -360,12 +360,12 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
             opcode = Opcodes.GETFIELD))
     private WorldProvider impl$getWorldProviderAndMaybeSetDimensionId(final WorldServer world) {
         //noinspection ConstantConditions
-        if (((WorldBridge) world).bridge$isFake() || world.getWorldInfo() == null) {
+        if (((WorldBridge) world).bridge$isFake() || world.func_72912_H() == null) {
             // Return overworld provider
-            return ((net.minecraft.world.World) Sponge.getServer().getWorlds().iterator().next()).provider;
+            return ((net.minecraft.world.World) Sponge.getServer().getWorlds().iterator().next()).field_73011_w;
         }
         this.dimensionId = ((WorldServerBridge) world).bridge$getDimensionId();
-        return world.provider;
+        return world.field_73011_w;
     }
 
     @Redirect(method = "addServerStatsToSnooper",
@@ -385,7 +385,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
 
         final int autoPlayerSaveInterval = SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getAutoPlayerSaveInterval();
         if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
-            this.getPlayerList().saveAllPlayerData();
+            this.getPlayerList().func_72389_g();
         }
 
         this.saveAllWorlds(true);
@@ -406,22 +406,22 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
             return;
         }
         for (final WorldServer world : this.worlds) {
-            final boolean save = world.getChunkProvider().canSave() && ((WorldProperties) world.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.NONE;
+            final boolean save = world.func_72863_F().func_73157_c() && ((WorldProperties) world.func_72912_H()).getSerializationBehavior() != SerializationBehaviors.NONE;
             boolean log = !dontLog;
 
             if (save) {
                 // Sponge start - check auto save interval in world config
                 if (this.isDedicatedServer() && this.isServerRunning()) {
-                    final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+                    final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.func_72912_H()).bridge$getConfigAdapter();
                     final int autoSaveInterval = configAdapter.getConfig().getWorld().getAutoSaveInterval();
                     if (log) {
                         log = configAdapter.getConfig().getLogging().logWorldAutomaticSaving();
                     }
                     if (autoSaveInterval <= 0
-                            || ((WorldProperties) world.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
+                            || ((WorldProperties) world.func_72912_H()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
                         if (log) {
-                            LOGGER.warn("Auto-saving has been disabled for level \'" + world.getWorldInfo().getWorldName() + "\'/"
-                                    + world.provider.getDimensionType().getName() + ". "
+                            LOGGER.warn("Auto-saving has been disabled for level \'" + world.func_72912_H().func_76065_j() + "\'/"
+                                    + world.field_73011_w.func_186058_p().func_186065_b() + ". "
                                     + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than"
                                     + " zero in the corresponding world config.");
                         }
@@ -431,11 +431,11 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
                         continue;
                     }
                     if (log) {
-                        LOGGER.info("Auto-saving chunks for level \'" + world.getWorldInfo().getWorldName() + "\'/"
+                        LOGGER.info("Auto-saving chunks for level \'" + world.func_72912_H().func_76065_j() + "\'/"
                                 + ((WorldServerBridge) world).bridge$getDimensionId());
                     }
                 } else if (log) {
-                    LOGGER.info("Saving chunks for level \'" + world.getWorldInfo().getWorldName() + "\'/"
+                    LOGGER.info("Saving chunks for level \'" + world.func_72912_H().func_76065_j() + "\'/"
                         + ((WorldServerBridge) world).bridge$getDimensionId());
                 }
 
@@ -453,7 +453,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     private void onStopServer(final CallbackInfo ci) {
         // If the server is already stopping, don't allow stopServer to be called off the main thread
         // (from the shutdown handler thread in MinecraftServer)
-        if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).isServerRunning() && !Sponge.getServer().isMainThread())) {
+        if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).func_71278_l() && !Sponge.getServer().isMainThread())) {
             ci.cancel();
         }
     }
@@ -506,7 +506,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
 
     @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
     private void onCrashReport(final CrashReport report, final CallbackInfoReturnable<CrashReport> cir) {
-        report.makeCategory("Sponge PhaseTracker").addDetail("Phase Stack", CauseTrackerCrashHandler.INSTANCE);
+        report.func_85058_a("Sponge PhaseTracker").func_189529_a("Phase Stack", CauseTrackerCrashHandler.INSTANCE);
         cir.setReturnValue(report);
     }
 

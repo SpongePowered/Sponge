@@ -74,7 +74,7 @@ public class ForestPopulator implements Forest {
         for (int i = 0; i < n; i++) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
-            pos = ((net.minecraft.world.World) world).getTopSolidOrLiquidBlock(new BlockPos(min.getX() + x, min.getY(), min.getZ() + z));
+            pos = ((net.minecraft.world.World) world).func_175672_r(new BlockPos(min.getX() + x, min.getY(), min.getZ() + z));
             if (this.override != null) {
                 Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(pos));
                 type = this.override.apply(pos2);
@@ -85,8 +85,8 @@ public class ForestPopulator implements Forest {
                 }
                 type = result.get(0);
             }
-            if (type.canPlaceAt(world, pos.getX(), pos.getY(), pos.getZ())) {
-                type.placeObject(world, random, pos.getX(), pos.getY(), pos.getZ());
+            if (type.canPlaceAt(world, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p())) {
+                type.placeObject(world, random, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
             }
         }
     }

@@ -83,24 +83,24 @@ public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<Enti
     @SuppressWarnings("unchecked")
     @Override
     protected boolean set(final EntityMinecartCommandBlock entity, final Map<Key<?>, Object> keyValues) {
-        final CommandBlockBaseLogic logic = entity.getCommandBlockLogic();
-        logic.setLastOutput(SpongeTexts.toComponent(((Optional<Text>) keyValues.get(Keys.LAST_COMMAND_OUTPUT)).orElse(Text.of())));
+        final CommandBlockBaseLogic logic = entity.func_145822_e();
+        logic.func_145750_b(SpongeTexts.toComponent(((Optional<Text>) keyValues.get(Keys.LAST_COMMAND_OUTPUT)).orElse(Text.of())));
         ((CommandBlockBaseLogicAccessor) logic).accessor$setCommandStored((String) keyValues.get(Keys.COMMAND));
         ((CommandBlockBaseLogicAccessor) logic).accessor$setSuccessCount((int) keyValues.get(Keys.SUCCESS_COUNT));
-        logic.setTrackOutput((boolean) keyValues.get(Keys.TRACKS_OUTPUT));
-        entity.onUpdate();
+        logic.func_175573_a((boolean) keyValues.get(Keys.TRACKS_OUTPUT));
+        entity.func_70071_h_();
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(final EntityMinecartCommandBlock entity) {
-        final CommandBlockBaseLogic logic = entity.getCommandBlockLogic();
+        final CommandBlockBaseLogic logic = entity.func_145822_e();
         final Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(4);
-        final Optional<Text> lastCommandOutput = logic.getLastOutput() != null ? Optional.of(SpongeTexts.toText(logic.getLastOutput())) : Optional.empty();
+        final Optional<Text> lastCommandOutput = logic.func_145749_h() != null ? Optional.of(SpongeTexts.toText(logic.func_145749_h())) : Optional.empty();
         values.put(Keys.LAST_COMMAND_OUTPUT, lastCommandOutput);
-        values.put(Keys.COMMAND, logic.getCommand());
-        values.put(Keys.SUCCESS_COUNT, logic.getSuccessCount());
-        values.put(Keys.TRACKS_OUTPUT, logic.shouldTrackOutput());
+        values.put(Keys.COMMAND, logic.func_145753_i());
+        values.put(Keys.SUCCESS_COUNT, logic.func_145760_g());
+        values.put(Keys.TRACKS_OUTPUT, logic.func_175571_m());
         return values;
     }
 

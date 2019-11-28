@@ -78,8 +78,8 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
 
     private void impl$markDirtyAndUpdate() {
         this.bridge$markDirty();
-        if (this.world != null && !this.world.isRemote) {
-            ((WorldServer) this.world).getPlayerChunkMap().markBlockForUpdate(this.getPos());
+        if (this.world != null && !this.world.field_72995_K) {
+            ((WorldServer) this.world).func_184164_w().func_180244_a(this.getPos());
         }
     }
 
@@ -87,13 +87,13 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
         this.impl$patternLayers.clear();
         if (this.patterns != null) {
             final SpongeGameRegistry registry = SpongeImpl.getRegistry();
-            for (int i = 0; i < this.patterns.tagCount(); i++) {
-                final NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
-                final String patternId = tagCompound.getString(Constants.TileEntity.Banner.BANNER_PATTERN_ID);
-                final int patternColor = tagCompound.getInteger(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR);
+            for (int i = 0; i < this.patterns.func_74745_c(); i++) {
+                final NBTTagCompound tagCompound = this.patterns.func_150305_b(i);
+                final String patternId = tagCompound.func_74779_i(Constants.TileEntity.Banner.BANNER_PATTERN_ID);
+                final int patternColor = tagCompound.func_74762_e(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR);
                 this.impl$patternLayers.add(new SpongePatternLayer(
                     registry.getType(BannerPatternShape.class, patternId).get(),
-                    registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(patternColor).getName()).get()));
+                    registry.getType(DyeColor.class, EnumDyeColor.func_176766_a(patternColor).func_176610_l()).get()));
             }
         }
         this.impl$markDirtyAndUpdate();
@@ -111,9 +111,9 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
         this.patterns = new NBTTagList();
         for (final PatternLayer layer : this.impl$patternLayers) {
             final NBTTagCompound compound = new NBTTagCompound();
-            compound.setString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, layer.getShape().getName());
-            compound.setInteger(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
-            this.patterns.appendTag(compound);
+            compound.func_74778_a(Constants.TileEntity.Banner.BANNER_PATTERN_ID, layer.getShape().getName());
+            compound.func_74768_a(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).func_176767_b());
+            this.patterns.func_74742_a(compound);
         }
         impl$markDirtyAndUpdate();
     }

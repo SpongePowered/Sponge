@@ -39,7 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class ShrubDataProcessor extends AbstractCatalogDataProcessor<ShrubType, Value<ShrubType>, ShrubData, ImmutableShrubData> {
 
     public ShrubDataProcessor() {
-        super(Keys.SHRUB_TYPE, input -> input.getItem() == ItemTypes.TALLGRASS);
+        super(Keys.SHRUB_TYPE, input -> input.func_77973_b() == ItemTypes.TALLGRASS);
     }
 
     @Override
@@ -54,12 +54,12 @@ public class ShrubDataProcessor extends AbstractCatalogDataProcessor<ShrubType, 
 
     @Override
     protected ShrubType getFromMeta(int meta) {
-        return (ShrubType) (Object) BlockTallGrass.EnumType.byMetadata(meta);
+        return (ShrubType) (Object) BlockTallGrass.EnumType.func_177045_a(meta);
     }
 
     @Override
     protected int setToMeta(ShrubType type) {
-        return ((BlockTallGrass.EnumType) (Object) type).getMeta();
+        return ((BlockTallGrass.EnumType) (Object) type).func_177044_a();
     }
 
     @Override

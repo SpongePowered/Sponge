@@ -236,11 +236,11 @@ public final class PacketPhase {
     // Inventory packet specific methods
 
     private static BasicInventoryPacketState fromWindowPacket(final CPacketClickWindow windowPacket) {
-        final int mode = 0x01 << 9 << windowPacket.getClickType().ordinal();
-        final int packed = windowPacket.getUsedButton();
+        final int mode = 0x01 << 9 << windowPacket.func_186993_f().ordinal();
+        final int packed = windowPacket.func_149543_e();
         final int unpacked = mode == Constants.Networking.MODE_DRAG ? (0x01 << 6 << (packed >> 2 & 3)) | (0x01 << 3 << (packed & 3)) : (0x01 << (packed & 3));
 
-        final BasicInventoryPacketState inventory = fromState(clickType(windowPacket.getSlotId()) | mode | unpacked);
+        final BasicInventoryPacketState inventory = fromState(clickType(windowPacket.func_149544_d()) | mode | unpacked);
         if (inventory == PacketPhase.Inventory.INVENTORY) {
             SpongeImpl.getLogger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
         }
@@ -285,7 +285,7 @@ public final class PacketPhase {
         this.packetTranslationMap.put(CPacketChatMessage.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(CPacketUseEntity.class, packet -> {
             final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
-            final CPacketUseEntity.Action action = useEntityPacket.getAction();
+            final CPacketUseEntity.Action action = useEntityPacket.func_149565_c();
             if (action == CPacketUseEntity.Action.INTERACT) {
                 return PacketPhase.General.INTERACT_ENTITY;
             } else if (action == CPacketUseEntity.Action.ATTACK) {
@@ -302,17 +302,17 @@ public final class PacketPhase {
         this.packetTranslationMap.put(CPacketPlayer.PositionRotation.class, packet -> PacketPhase.General.MOVEMENT);
         this.packetTranslationMap.put(CPacketPlayerDigging.class, packet -> {
             final CPacketPlayerDigging playerDigging = (CPacketPlayerDigging) packet;
-            final CPacketPlayerDigging.Action action = playerDigging.getAction();
+            final CPacketPlayerDigging.Action action = playerDigging.func_180762_c();
             final IPhaseState<? extends PacketContext<?>> state = INTERACTION_ACTION_MAPPINGS.get(action);
             return state == null ? PacketPhase.General.UNKNOWN : state;
         });
         this.packetTranslationMap.put(CPacketPlayerTryUseItemOnBlock.class, packet -> {
             // Note that CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
             final CPacketPlayerTryUseItemOnBlock blockPlace = (CPacketPlayerTryUseItemOnBlock) packet;
-            final BlockPos blockPos = blockPlace.getPos();
-            final EnumFacing front = blockPlace.getDirection();
+            final BlockPos blockPos = blockPlace.func_187023_a();
+            final EnumFacing front = blockPlace.func_187024_b();
             final MinecraftServer server = SpongeImpl.getServer();
-            if (blockPos.getY() < server.getBuildLimit() - 1 || front != EnumFacing.UP && blockPos.getY() < server.getBuildLimit()) {
+            if (blockPos.func_177956_o() < server.func_71207_Z() - 1 || front != EnumFacing.UP && blockPos.func_177956_o() < server.func_71207_Z()) {
                 return PacketPhase.General.PLACE_BLOCK;
             }
             return PacketPhase.General.INVALID;
@@ -322,7 +322,7 @@ public final class PacketPhase {
         this.packetTranslationMap.put(CPacketAnimation.class, packet -> PacketPhase.General.ANIMATION);
         this.packetTranslationMap.put(CPacketEntityAction.class, packet -> {
             final CPacketEntityAction playerAction = (CPacketEntityAction) packet;
-            final CPacketEntityAction.Action action = playerAction.getAction();
+            final CPacketEntityAction.Action action = playerAction.func_180764_b();
             return PLAYER_ACTION_MAPPINGS.get(action);
         });
         this.packetTranslationMap.put(CPacketInput.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
@@ -336,7 +336,7 @@ public final class PacketPhase {
         this.packetTranslationMap.put(CPacketTabComplete.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(CPacketClientStatus.class, packet -> {
             final CPacketClientStatus clientStatus = (CPacketClientStatus) packet;
-            final CPacketClientStatus.State status = clientStatus.getStatus();
+            final CPacketClientStatus.State status = clientStatus.func_149435_c();
             if (status == CPacketClientStatus.State.PERFORM_RESPAWN) {
                 return PacketPhase.General.REQUEST_RESPAWN;
             }

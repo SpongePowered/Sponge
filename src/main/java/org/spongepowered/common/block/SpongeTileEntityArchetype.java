@@ -77,25 +77,25 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     @Override
     public Optional<org.spongepowered.api.block.tileentity.TileEntity> apply(Location<World> location) {
         final BlockState currentState = location.getBlock();
-        final Block currentBlock = ((IBlockState) currentState).getBlock();
-        final Block newBlock = ((IBlockState) this.blockState).getBlock();
+        final Block currentBlock = ((IBlockState) currentState).func_177230_c();
+        final Block newBlock = ((IBlockState) this.blockState).func_177230_c();
         final net.minecraft.world.World minecraftWorld = (net.minecraft.world.World) location.getExtent();
 
         BlockPos blockpos = VecHelper.toBlockPos(location);
         if (currentBlock != newBlock) {
-            ((World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState, BlockChangeFlags.ALL);
+            ((World) minecraftWorld).setBlock(blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p(), this.blockState, BlockChangeFlags.ALL);
         }
-        final NBTTagCompound compound = this.data.copy();
+        final NBTTagCompound compound = this.data.func_74737_b();
 
-        TileEntity tileEntity = minecraftWorld.getTileEntity(blockpos);
+        TileEntity tileEntity = minecraftWorld.func_175625_s(blockpos);
         if (tileEntity == null) {
             return Optional.empty();
         }
-        compound.setInteger("x", blockpos.getX());
-        compound.setInteger("y", blockpos.getY());
-        compound.setInteger("z", blockpos.getZ());
-        tileEntity.readFromNBT(compound);
-        tileEntity.markDirty();
+        compound.func_74768_a("x", blockpos.func_177958_n());
+        compound.func_74768_a("y", blockpos.func_177956_o());
+        compound.func_74768_a("z", blockpos.func_177952_p());
+        tileEntity.func_145839_a(compound);
+        tileEntity.func_70296_d();
         return Optional.of((org.spongepowered.api.block.tileentity.TileEntity) tileEntity);
     }
 
@@ -103,7 +103,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     public BlockSnapshot toSnapshot(Location<World> location) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.blockState = this.blockState;
-        builder.compound = this.data.copy();
+        builder.compound = this.data.func_74737_b();
         builder.worldUuid = location.getExtent().getUniqueId();
         builder.coords = location.getBlockPosition();
         return builder.build();

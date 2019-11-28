@@ -542,7 +542,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             return true;
         }
         if (this.source != null && this.source instanceof EntityPlayer) {
-            if (!((TrackedInventoryBridge) ((EntityPlayer) this.source).inventory).bridge$getCapturedSlotTransactions().isEmpty()) {
+            if (!((TrackedInventoryBridge) ((EntityPlayer) this.source).field_71071_by).bridge$getCapturedSlotTransactions().isEmpty()) {
                 return true;
             }
         }

@@ -64,7 +64,7 @@ public class ICriterionTrigger_ListenerMixin implements ICriterionTrigger_Listen
         final org.spongepowered.api.advancement.Advancement advancement =
                 (org.spongepowered.api.advancement.Advancement) this.advancement;
         AdvancementCriterion advancementCriterion = (AdvancementCriterion)
-                this.advancement.getCriteria().get(this.criterionName);
+                this.advancement.func_192073_f().get(this.criterionName);
         final CriterionBridge mixinCriterion = (CriterionBridge) advancementCriterion;
         if (mixinCriterion.bridge$getScoreCriterion() != null) {
             advancementCriterion = mixinCriterion.bridge$getScoreCriterion();

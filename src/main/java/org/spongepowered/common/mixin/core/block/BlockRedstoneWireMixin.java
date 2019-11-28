@@ -93,25 +93,25 @@ public abstract class BlockRedstoneWireMixin extends BlockMixin {
     }
 
     private ImmutableRedstonePoweredData impl$getPowerFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.getValue(BlockRedstoneWire.POWER));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.func_177229_b(BlockRedstoneWire.field_176351_O));
     }
 
     private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final IStringSerializable north = blockState.getValue(BlockRedstoneWire.NORTH);
-        final IStringSerializable east = blockState.getValue(BlockRedstoneWire.EAST);
-        final IStringSerializable west = blockState.getValue(BlockRedstoneWire.WEST);
-        final IStringSerializable south = blockState.getValue(BlockRedstoneWire.SOUTH);
-        if (!north.getName().matches("none")) {
+        final IStringSerializable north = blockState.func_177229_b(BlockRedstoneWire.field_176348_a);
+        final IStringSerializable east = blockState.func_177229_b(BlockRedstoneWire.field_176347_b);
+        final IStringSerializable west = blockState.func_177229_b(BlockRedstoneWire.field_176350_N);
+        final IStringSerializable south = blockState.func_177229_b(BlockRedstoneWire.field_176349_M);
+        if (!north.func_176610_l().matches("none")) {
             directions.add(Direction.NORTH);
         }
-        if (!east.getName().matches("none")) {
+        if (!east.func_176610_l().matches("none")) {
             directions.add(Direction.EAST);
         }
-        if (!west.getName().matches("none")) {
+        if (!west.func_176610_l().matches("none")) {
             directions.add(Direction.WEST);
         }
-        if (!south.getName().matches("none")) {
+        if (!south.func_176610_l().matches("none")) {
             directions.add(Direction.SOUTH);
         }
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeConnectedDirectionData.class, directions);
@@ -120,10 +120,10 @@ public abstract class BlockRedstoneWireMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableWireAttachmentData impl$getWireAttachmentData(final IBlockState blockState) {
         final Map<Direction, WireAttachmentType> data = new HashMap<>();
-        data.put(Direction.NORTH, (WireAttachmentType) (Object) blockState.getValue(BlockRedstoneWire.NORTH));
-        data.put(Direction.SOUTH, (WireAttachmentType) (Object) blockState.getValue(BlockRedstoneWire.SOUTH));
-        data.put(Direction.EAST, (WireAttachmentType) (Object) blockState.getValue(BlockRedstoneWire.EAST));
-        data.put(Direction.WEST, (WireAttachmentType) (Object) blockState.getValue(BlockRedstoneWire.WEST));
+        data.put(Direction.NORTH, (WireAttachmentType) (Object) blockState.func_177229_b(BlockRedstoneWire.field_176348_a));
+        data.put(Direction.SOUTH, (WireAttachmentType) (Object) blockState.func_177229_b(BlockRedstoneWire.field_176349_M));
+        data.put(Direction.EAST, (WireAttachmentType) (Object) blockState.func_177229_b(BlockRedstoneWire.field_176347_b));
+        data.put(Direction.WEST, (WireAttachmentType) (Object) blockState.func_177229_b(BlockRedstoneWire.field_176350_N));
         return new ImmutableSpongeWireAttachmentData(data);
     }
 }

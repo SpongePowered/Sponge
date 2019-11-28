@@ -44,6 +44,6 @@ public abstract class EntitySilverfish_AIHideInStoneMixin extends EntityAIWander
     @Redirect(method = "shouldExecute",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockSilverfish;canContainSilverfish(Lnet/minecraft/block/state/IBlockState;)Z"))
     private boolean onCanGrief(final IBlockState blockState) {
-        return BlockSilverfish.canContainSilverfish(blockState) && ((GrieferBridge) this.entity).bridge$CanGrief();
+        return BlockSilverfish.func_176377_d(blockState) && ((GrieferBridge) this.field_75457_a).bridge$CanGrief();
     }
 }

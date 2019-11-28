@@ -49,7 +49,7 @@ public class GoldenAppleDataProcessor
         extends AbstractItemSingleDataProcessor<GoldenApple, Value<GoldenApple>, GoldenAppleData, ImmutableGoldenAppleData> {
 
     public GoldenAppleDataProcessor() {
-        super(input -> input.getItem().equals(Items.GOLDEN_APPLE), Keys.GOLDEN_APPLE_TYPE);
+        super(input -> input.func_77973_b().equals(Items.field_151153_ao), Keys.GOLDEN_APPLE_TYPE);
     }
 
     @Override
@@ -59,13 +59,13 @@ public class GoldenAppleDataProcessor
 
     @Override
     protected boolean set(ItemStack itemStack, GoldenApple value) {
-        itemStack.setItemDamage(((SpongeGoldenApple) value).type);
+        itemStack.func_77964_b(((SpongeGoldenApple) value).type);
         return true;
     }
 
     @Override
     protected Optional<GoldenApple> getVal(ItemStack itemStack) {
-        return Optional.of(Iterables.get(SpongeImpl.getRegistry().getAllOf(GoldenApple.class), itemStack.getMetadata()));
+        return Optional.of(Iterables.get(SpongeImpl.getRegistry().getAllOf(GoldenApple.class), itemStack.func_77960_j()));
     }
 
     @Override

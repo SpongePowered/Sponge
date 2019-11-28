@@ -67,12 +67,12 @@ public abstract class CommandSummonMixin extends CommandBase {
             target = "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;"))
     private Entity impl$throwConstructEvent(final NBTTagCompound nbt, final World world, final double x, final double y, final double z, final boolean b,
         final MinecraftServer server, final ICommandSender sender, final String[] args) {
-        if ("Minecart".equals(nbt.getString(Constants.Entity.ENTITY_TYPE_ID))) {
-            nbt.setString(Constants.Entity.ENTITY_TYPE_ID,
-                    EntityMinecart.Type.values()[nbt.getInteger(Constants.Entity.Minecart.MINECART_TYPE)].getName());
-            nbt.removeTag(Constants.Entity.Minecart.MINECART_TYPE);
+        if ("Minecart".equals(nbt.func_74779_i(Constants.Entity.ENTITY_TYPE_ID))) {
+            nbt.func_74778_a(Constants.Entity.ENTITY_TYPE_ID,
+                    EntityMinecart.Type.values()[nbt.func_74762_e(Constants.Entity.Minecart.MINECART_TYPE)].func_184954_b());
+            nbt.func_82580_o(Constants.Entity.Minecart.MINECART_TYPE);
         }
-        final Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(nbt.getString(Constants.Entity.ENTITY_TYPE_ID)));
+        final Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(nbt.func_74779_i(Constants.Entity.ENTITY_TYPE_ID)));
         if (entityClass == null) {
             return null;
         }
@@ -86,7 +86,7 @@ public abstract class CommandSummonMixin extends CommandBase {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
             SpongeImpl.postEvent(event);
-            return event.isCancelled() ? null : AnvilChunkLoader.readWorldEntityPos(nbt, world, x, y, z, b);
+            return event.isCancelled() ? null : AnvilChunkLoader.func_186054_a(nbt, world, x, y, z, b);
         }
     }
 

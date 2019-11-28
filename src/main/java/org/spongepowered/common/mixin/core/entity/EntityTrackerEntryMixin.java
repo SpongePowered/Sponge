@@ -63,18 +63,18 @@ public abstract class EntityTrackerEntryMixin {
     public void onSendSpawnPacket(final NetHandlerPlayServer thisCtx, final Packet<?> spawnPacket, final EntityPlayerMP playerIn) {
         if (!(this.trackedEntity instanceof EntityHuman)) {
             // This is the method call that was @Redirected
-            thisCtx.sendPacket(spawnPacket);
+            thisCtx.func_147359_a(spawnPacket);
             return;
         }
         final EntityHuman human = (EntityHuman) this.trackedEntity;
         // Adds the GameProfile to the client
-        thisCtx.sendPacket(human.createPlayerListPacket(SPacketPlayerListItem.Action.ADD_PLAYER));
+        thisCtx.func_147359_a(human.createPlayerListPacket(SPacketPlayerListItem.Action.ADD_PLAYER));
         // Actually spawn the human (a player)
-        thisCtx.sendPacket(spawnPacket);
+        thisCtx.func_147359_a(spawnPacket);
         // Remove from tab list
         final SPacketPlayerListItem removePacket = human.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER);
         if (human.canRemoveFromListImmediately()) {
-            thisCtx.sendPacket(removePacket);
+            thisCtx.func_147359_a(removePacket);
         } else {
             human.removeFromTabListDelayed(playerIn, removePacket);
         }
@@ -83,7 +83,7 @@ public abstract class EntityTrackerEntryMixin {
     @Redirect(method = "updatePlayerList", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityTrackerEntry;sendPacketToTrackedPlayers(Lnet/minecraft/network/Packet;)V", ordinal = 0))
     public void onSendPassengerPacket(EntityTrackerEntry entityTrackerEntry, Packet<?> packet) {
         // We need to notify a player of their passengers (since that can't normally happen in Vanilla)
-        entityTrackerEntry.sendToTrackingAndSelf(packet);
+        entityTrackerEntry.func_151261_b(packet);
     }
 
     // The spawn packet for a human is a player
@@ -104,13 +104,13 @@ public abstract class EntityTrackerEntryMixin {
         for (EntityPlayerMP player : this.trackingPlayers) {
             if (packets != null) {
                 for (Packet<?> packet : packets) {
-                    player.connection.sendPacket(packet);
+                    player.field_71135_a.func_147359_a(packet);
                 }
             }
             Packet<?>[] playerPackets = human.popQueuedPackets(player);
             if (playerPackets != null) {
                 for (Packet<?> packet : playerPackets) {
-                    player.connection.sendPacket(packet);
+                    player.field_71135_a.func_147359_a(packet);
                 }
             }
         }

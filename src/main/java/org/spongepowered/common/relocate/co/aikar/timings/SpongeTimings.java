@@ -145,6 +145,6 @@ public final class SpongeTimings {
 
     public static Timing getBlockTiming(Block block) {
         BlockType type = (BlockType) block;
-        return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + type != null ? type.getId() : block.getTranslationKey());
+        return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + type != null ? type.getId() : block.func_149739_a());
     }
 }

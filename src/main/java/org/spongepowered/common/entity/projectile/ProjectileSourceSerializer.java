@@ -49,7 +49,7 @@ public class ProjectileSourceSerializer {
             return new NBTTagString(((Entity) projectileSource).getUniqueId().toString());
         }
         if (projectileSource instanceof BlockProjectileSource) {
-            return new NBTTagLong(VecHelper.toBlockPos(((BlockProjectileSource) projectileSource).getLocation()).toLong());
+            return new NBTTagLong(VecHelper.toBlockPos(((BlockProjectileSource) projectileSource).getLocation()).func_177986_g());
         }
         return null;
     }
@@ -57,15 +57,15 @@ public class ProjectileSourceSerializer {
     public static ProjectileSource fromNbt(World worldObj, NBTBase tag) {
         if (tag instanceof NBTTagString) {
             Entity entity =
-                    ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(((NBTTagString) tag).getString())).orElse(null);
+                    ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(((NBTTagString) tag).func_150285_a_())).orElse(null);
             if (entity instanceof ProjectileSource) {
                 return (ProjectileSource) entity;
             }
         }
         if (tag instanceof NBTTagLong) {
-            BlockPos pos = BlockPos.fromLong(((NBTTagLong) tag).getLong());
-            if (worldObj.isBlockLoaded(pos)) {
-                TileEntity tileEntity = worldObj.getTileEntity(pos);
+            BlockPos pos = BlockPos.func_177969_a(((NBTTagLong) tag).func_150291_c());
+            if (worldObj.func_175667_e(pos)) {
+                TileEntity tileEntity = worldObj.func_175625_s(pos);
                 if (tileEntity instanceof ProjectileSource) {
                     return (ProjectileSource) tileEntity;
                 }
@@ -80,13 +80,13 @@ public class ProjectileSourceSerializer {
         }
         NBTBase projectileNbt = toNbt(projectileSource);
         if (projectileNbt != null) {
-            compound.setTag("projectileSource", projectileNbt);
+            compound.func_74782_a("projectileSource", projectileNbt);
         }
     }
 
     public static void readSourceFromNbt(NBTTagCompound compound, Projectile projectile) {
-        if (compound.hasKey("projectileSource")) {
-            projectile.setShooter(fromNbt((World) projectile.getWorld(), compound.getTag("projectileSource")));
+        if (compound.func_74764_b("projectileSource")) {
+            projectile.setShooter(fromNbt((World) projectile.getWorld(), compound.func_74781_a("projectileSource")));
         }
     }
 }

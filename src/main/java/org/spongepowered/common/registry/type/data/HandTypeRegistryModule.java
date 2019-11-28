@@ -30,6 +30,7 @@ import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.data.HandTypeRegistryModule.Holder;
 
 @RegisterCatalog(HandTypes.class)
 public class HandTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<EnumHand, HandType>

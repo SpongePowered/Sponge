@@ -39,17 +39,17 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class QuartzDataProcessor extends AbstractCatalogDataProcessor<QuartzType, Value<QuartzType>, QuartzData, ImmutableQuartzData> {
 
     public QuartzDataProcessor() {
-        super(Keys.QUARTZ_TYPE, input -> input.getItem() == ItemTypes.QUARTZ_BLOCK || input.getItem() == ItemTypes.QUARTZ_STAIRS);
+        super(Keys.QUARTZ_TYPE, input -> input.func_77973_b() == ItemTypes.QUARTZ_BLOCK || input.func_77973_b() == ItemTypes.QUARTZ_STAIRS);
     }
 
     @Override
     protected int setToMeta(QuartzType value) {
-        return ((BlockQuartz.EnumType) (Object) value).getMetadata();
+        return ((BlockQuartz.EnumType) (Object) value).func_176796_a();
     }
 
     @Override
     protected QuartzType getFromMeta(int meta) {
-        return (QuartzType) (Object) BlockQuartz.EnumType.byMetadata(meta);
+        return (QuartzType) (Object) BlockQuartz.EnumType.func_176794_a(meta);
     }
 
     @Override

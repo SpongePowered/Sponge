@@ -44,7 +44,7 @@ public class SpongeImplHooksMixin_Item_Pre_Merge {
     @Overwrite
     public static void addItemStackToListForSpawning(final Collection<ItemDropData> itemStacks, final ItemDropData data) {
         final net.minecraft.item.ItemStack itemStack = data.getStack();
-        if (itemStack.isEmpty()) {
+        if (itemStack.func_190926_b()) {
             return;
         }
         boolean addToList = true;
@@ -57,7 +57,7 @@ public class SpongeImplHooksMixin_Item_Pre_Merge {
 
         for (final ItemDropData existingData : itemStacks) {
             final net.minecraft.item.ItemStack existing = existingData.getStack();
-            if (existing.isEmpty()) {
+            if (existing.func_190926_b()) {
                 continue;
             }
             final boolean isExistingPlayer = existingData instanceof ItemDropData.Player;
@@ -76,37 +76,37 @@ public class SpongeImplHooksMixin_Item_Pre_Merge {
             }
 
 
-            if (existing.getItem() != itemStack.getItem()) {
+            if (existing.func_77973_b() != itemStack.func_77973_b()) {
                 continue;
-            } else if (existing.hasTagCompound() ^ itemStack.hasTagCompound()) {
+            } else if (existing.func_77942_o() ^ itemStack.func_77942_o()) {
                 continue;
-            } else if (existing.hasTagCompound() && !existing.getTagCompound().equals(itemStack.getTagCompound())) {
+            } else if (existing.func_77942_o() && !existing.func_77978_p().equals(itemStack.func_77978_p())) {
                 continue;
-            } else if (existing.isEmpty()) {
+            } else if (existing.func_190926_b()) {
                 continue;
-            } else if (existing.getItem().getHasSubtypes() && existing.getMetadata() != itemStack.getMetadata()) {
+            } else if (existing.func_77973_b().func_77614_k() && existing.func_77960_j() != itemStack.func_77960_j()) {
                 continue;
             }
             // now to actually merge the itemstacks
-            final int existingStackSize = existing.getCount();
-            final int addingStackSize = itemStack.getCount();
-            final int existingMaxStackSize = existing.getMaxStackSize();
+            final int existingStackSize = existing.func_190916_E();
+            final int addingStackSize = itemStack.func_190916_E();
+            final int existingMaxStackSize = existing.func_77976_d();
             final int proposedStackSize = existingStackSize + addingStackSize;
             if (existingMaxStackSize < proposedStackSize) {
-                existing.setCount(existingMaxStackSize);
-                itemStack.setCount(proposedStackSize - existingMaxStackSize);
+                existing.func_190920_e(existingMaxStackSize);
+                itemStack.func_190920_e(proposedStackSize - existingMaxStackSize);
                 addToList = true;
                 // Basically, if we are overflowing the current existing stack, we can delegate to the
                 // next "equals" item stack to potentially merge into that stack as well
             } else {
-                existing.setCount(proposedStackSize);
-                itemStack.setCount(0);
+                existing.func_190920_e(proposedStackSize);
+                itemStack.func_190920_e(0);
                 addToList = false;
                 break;
             }
         }
         if (addToList) {
-            if (!itemStack.isEmpty() || itemStack.getCount() > 0) {
+            if (!itemStack.func_190926_b() || itemStack.func_190916_E() > 0) {
                 itemStacks.add(data);
             }
         }

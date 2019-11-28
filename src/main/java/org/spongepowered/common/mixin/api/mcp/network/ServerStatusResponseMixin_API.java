@@ -63,8 +63,8 @@ public abstract class ServerStatusResponseMixin_API implements ClientPingServerE
     }
 
     @Override
-    public Optional<Players> getPlayers() {
-        return Optional.ofNullable((Players) this.players);
+    public Optional<org.spongepowered.api.event.server.ClientPingServerEvent.Response.Players> getPlayers() {
+        return Optional.ofNullable((org.spongepowered.api.event.server.ClientPingServerEvent.Response.Players) this.players);
     }
 
     @Override

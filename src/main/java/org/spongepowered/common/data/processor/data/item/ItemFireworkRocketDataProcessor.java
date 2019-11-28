@@ -48,7 +48,7 @@ public class ItemFireworkRocketDataProcessor
         extends AbstractItemSingleDataProcessor<Integer, MutableBoundedValue<Integer>, FireworkRocketData, ImmutableFireworkRocketData> {
 
     public ItemFireworkRocketDataProcessor() {
-        super(stack -> stack.getItem().equals(Items.FIREWORKS), Keys.FIREWORK_FLIGHT_MODIFIER);
+        super(stack -> stack.func_77973_b().equals(Items.field_151152_bP), Keys.FIREWORK_FLIGHT_MODIFIER);
     }
 
     @Override
@@ -63,26 +63,26 @@ public class ItemFireworkRocketDataProcessor
 
     @Override
     protected Optional<Integer> getVal(ItemStack itemStack) {
-        NBTTagCompound fireworks = itemStack.getOrCreateSubCompound("Fireworks");
-        if (fireworks.hasKey("Flight")) {
-            return Optional.of((int) fireworks.getByte("Flight"));
+        NBTTagCompound fireworks = itemStack.func_190925_c("Fireworks");
+        if (fireworks.func_74764_b("Flight")) {
+            return Optional.of((int) fireworks.func_74771_c("Flight"));
         }
         return Optional.empty();
     }
 
     @Override
     protected boolean set(ItemStack itemStack, Integer modifier) {
-        NBTTagCompound fireworks = itemStack.getOrCreateSubCompound("Fireworks");
-        fireworks.setByte("Flight", modifier.byteValue());
+        NBTTagCompound fireworks = itemStack.func_190925_c("Fireworks");
+        fireworks.func_74774_a("Flight", modifier.byteValue());
         return true;
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof ItemStack) {
-            NBTTagCompound fireworks = ((ItemStack) container).getSubCompound("Fireworks");
+            NBTTagCompound fireworks = ((ItemStack) container).func_179543_a("Fireworks");
             if (fireworks != null) {
-                fireworks.removeTag("Flight");
+                fireworks.func_82580_o("Flight");
             }
             return DataTransactionResult.successNoData();
         }

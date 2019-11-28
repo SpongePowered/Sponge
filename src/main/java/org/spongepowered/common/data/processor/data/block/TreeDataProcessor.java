@@ -54,30 +54,30 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
             .build();
 
     public TreeDataProcessor() {
-        super(Keys.TREE_TYPE, input -> input.getItem() == ItemTypes.PLANKS || input.getItem() == ItemTypes.LEAVES
-                || input.getItem() == ItemTypes.LEAVES2 || input.getItem() == ItemTypes.LOG
-                || input.getItem() == ItemTypes.LOG2 || input.getItem() == ItemTypes.SAPLING
-                || input.getItem() == ItemTypes.WOODEN_SLAB || boatMapping.containsKey((ItemType) input.getItem()));
+        super(Keys.TREE_TYPE, input -> input.func_77973_b() == ItemTypes.PLANKS || input.func_77973_b() == ItemTypes.LEAVES
+                || input.func_77973_b() == ItemTypes.LEAVES2 || input.func_77973_b() == ItemTypes.LOG
+                || input.func_77973_b() == ItemTypes.LOG2 || input.func_77973_b() == ItemTypes.SAPLING
+                || input.func_77973_b() == ItemTypes.WOODEN_SLAB || boatMapping.containsKey((ItemType) input.func_77973_b()));
     }
 
     @Override
     protected int setToMeta(TreeType value) {
-        return ((BlockPlanks.EnumType) (Object) value).getMetadata();
+        return ((BlockPlanks.EnumType) (Object) value).func_176839_a();
     }
 
     @Override
     protected TreeType getFromMeta(int meta) {
-        return (TreeType) (Object) BlockPlanks.EnumType.byMetadata(meta);
+        return (TreeType) (Object) BlockPlanks.EnumType.func_176837_a(meta);
     }
 
     @Override
     protected Optional<TreeType> getVal(ItemStack stack) {
-        if (stack.getItem() == ItemTypes.LEAVES2 || stack.getItem() == ItemTypes.LOG2) {
-            return Optional.of(getFromMeta(stack.getItemDamage() + 4));
-        } else if (boatMapping.containsKey((ItemType) stack.getItem())) {
-            return Optional.of(boatMapping.get(stack.getItem()));
+        if (stack.func_77973_b() == ItemTypes.LEAVES2 || stack.func_77973_b() == ItemTypes.LOG2) {
+            return Optional.of(getFromMeta(stack.func_77952_i() + 4));
+        } else if (boatMapping.containsKey((ItemType) stack.func_77973_b())) {
+            return Optional.of(boatMapping.get(stack.func_77973_b()));
         } else {
-            return Optional.of(getFromMeta(stack.getItemDamage()));
+            return Optional.of(getFromMeta(stack.func_77952_i()));
         }
     }
 
@@ -90,22 +90,22 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
     protected boolean set(ItemStack stack, TreeType value) {
         // TODO - the API needs to be changed, as its no longer possible to change an ItemStack's type
 
-        if (stack.getItem() == ItemTypes.LOG || stack.getItem() == ItemTypes.LEAVES) {
+        if (stack.func_77973_b() == ItemTypes.LOG || stack.func_77973_b() == ItemTypes.LEAVES) {
             if (value == TreeTypes.ACACIA || value == TreeTypes.DARK_OAK) {
                 return false; // TODO
             }
-            stack.setItemDamage(this.setToMeta(value));
+            stack.func_77964_b(this.setToMeta(value));
             return true;
         }
-        else if (stack.getItem() == ItemTypes.LOG2 || stack.getItem() == ItemTypes.LEAVES2) {
+        else if (stack.func_77973_b() == ItemTypes.LOG2 || stack.func_77973_b() == ItemTypes.LEAVES2) {
             if (value == TreeTypes.OAK || value == TreeTypes.SPRUCE || value == TreeTypes.BIRCH || value == TreeTypes.JUNGLE) {
                 return false; // TODO
             }
-            stack.setItemDamage(this.setToMeta(value) - 4);
+            stack.func_77964_b(this.setToMeta(value) - 4);
             return true;
         }
         else {
-            stack.setItemDamage(this.setToMeta(value));
+            stack.func_77964_b(this.setToMeta(value));
             return true;
         }
     }

@@ -33,7 +33,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-
+import org.spongepowered.common.mixin.handler.TerminateVM.MasqueradeClassLoader;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 

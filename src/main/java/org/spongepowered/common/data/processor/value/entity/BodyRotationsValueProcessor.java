@@ -60,12 +60,12 @@ public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<En
 
     @Override
     protected boolean set(final EntityArmorStand container, final Map<BodyPart, Vector3d> value) {
-        container.setHeadRotation(VecHelper.toRotation(value.get(BodyParts.HEAD)));
-        container.setBodyRotation(VecHelper.toRotation(value.get(BodyParts.CHEST)));
-        container.setLeftArmRotation(VecHelper.toRotation(value.get(BodyParts.LEFT_ARM)));
-        container.setRightArmRotation(VecHelper.toRotation(value.get(BodyParts.RIGHT_ARM)));
-        container.setLeftLegRotation(VecHelper.toRotation(value.get(BodyParts.LEFT_LEG)));
-        container.setRightLegRotation(VecHelper.toRotation(value.get(BodyParts.RIGHT_LEG)));
+        container.func_175415_a(VecHelper.toRotation(value.get(BodyParts.HEAD)));
+        container.func_175424_b(VecHelper.toRotation(value.get(BodyParts.CHEST)));
+        container.func_175405_c(VecHelper.toRotation(value.get(BodyParts.LEFT_ARM)));
+        container.func_175428_d(VecHelper.toRotation(value.get(BodyParts.RIGHT_ARM)));
+        container.func_175417_e(VecHelper.toRotation(value.get(BodyParts.LEFT_LEG)));
+        container.func_175427_f(VecHelper.toRotation(value.get(BodyParts.RIGHT_LEG)));
         return true;
     }
 
@@ -73,8 +73,8 @@ public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<En
     protected Optional<Map<BodyPart, Vector3d>> getVal(final EntityArmorStand container) {
         final Map<BodyPart, Vector3d> values = Maps.newHashMap();
         
-        values.put(BodyParts.HEAD, VecHelper.toVector3d(container.getHeadRotation()));
-        values.put(BodyParts.CHEST, VecHelper.toVector3d(container.getBodyRotation()));
+        values.put(BodyParts.HEAD, VecHelper.toVector3d(container.func_175418_s()));
+        values.put(BodyParts.CHEST, VecHelper.toVector3d(container.func_175408_t()));
         values.put(BodyParts.LEFT_ARM, VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getleftArmRotation()));
         values.put(BodyParts.RIGHT_ARM, VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getrightArmRotation()));
         values.put(BodyParts.LEFT_LEG, VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getleftLegRotation()));

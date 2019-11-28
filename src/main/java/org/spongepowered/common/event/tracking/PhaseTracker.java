@@ -140,7 +140,7 @@ public final class PhaseTracker {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.FORCED);
                     for (net.minecraft.entity.Entity entity : entities) {
                         // At this point, we don't care what the causes are...
-                        PhaseTracker.getInstance().spawnEntityWithCause((World) entity.getEntityWorld(), (Entity) entity);
+                        PhaseTracker.getInstance().spawnEntityWithCause((World) entity.func_130014_f_(), (Entity) entity);
                     }
                 }
 
@@ -668,7 +668,7 @@ public final class PhaseTracker {
                     // If we didn't map the tile entity yet, we should apply the mapping
                     // based on whether the source is the same as the TileEntity.
                     if (!contained) {
-                        if (pos.equals(currentContext.getSource(TileEntity.class).get().getPos())) {
+                        if (pos.equals(currentContext.getSource(TileEntity.class).get().func_174877_v())) {
                             autoFixedTiles.put(type.getId(), true);
                         } else {
                             autoFixedTiles.put(type.getId(), false);
@@ -676,19 +676,19 @@ public final class PhaseTracker {
                     }
                     final boolean useTile = contained && autoFixedTiles.get(type.getId());
                     if (useTile) {
-                        blockIn = ((TileEntity) currentContext.getSource()).getBlockType();
+                        blockIn = ((TileEntity) currentContext.getSource()).func_145838_q();
                     } else {
-                        blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
-                                  ? chunk.getBlockState(pos).getBlock()
-                                  : worldServer.getBlockState(pos).getBlock();
+                        blockIn = (pos.func_177958_n() >> 4 == chunk.field_76635_g && pos.func_177952_p() >> 4 == chunk.field_76647_h)
+                                  ? chunk.func_177435_g(pos).func_177230_c()
+                                  : worldServer.func_180495_p(pos).func_177230_c();
                     }
                     if (!contained && trackerConfig.isReportNullSourceBlocks()) {
                         printNullSourceBlockWithTile(pos, blockIn, otherPos, type, useTile, new NullPointerException("Null Source Block For TileEntity Neighbor Notification"));
                     }
                 } else {
-                    blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
-                              ? chunk.getBlockState(pos).getBlock()
-                              : worldServer.getBlockState(pos).getBlock();
+                    blockIn = (pos.func_177958_n() >> 4 == chunk.field_76635_g && pos.func_177952_p() >> 4 == chunk.field_76647_h)
+                              ? chunk.func_177435_g(pos).func_177230_c()
+                              : worldServer.func_180495_p(pos).func_177230_c();
                     if (trackerConfig.isReportNullSourceBlocks()) {
                         printNullSourceBlockNeighborNotificationWithNoTileSource(pos, blockIn, otherPos,
                             new NullPointerException("Null Source Block For Neighbor Notification"));
@@ -696,9 +696,9 @@ public final class PhaseTracker {
                 }
 
             } else {
-                blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
-                          ? chunk.getBlockState(pos).getBlock()
-                          : worldServer.getBlockState(pos).getBlock();
+                blockIn = (pos.func_177958_n() >> 4 == chunk.field_76635_g && pos.func_177952_p() >> 4 == chunk.field_76647_h)
+                          ? chunk.func_177435_g(pos).func_177230_c()
+                          : worldServer.func_180495_p(pos).func_177230_c();
                 if (trackerConfig.isReportNullSourceBlocks()) {
                     printNullSourceForBlock(worldServer, pos, blockIn, otherPos, new NullPointerException("Null Source Block For Neighbor Notification"));
                 }
@@ -760,7 +760,7 @@ public final class PhaseTracker {
             // Sponge start - prepare notification
             final PhaseContext<?> peek = this.stack.peek();
             final IPhaseState state = peek.state;
-            if (!((BlockBridge) notifyState.getBlock()).bridge$hasNeighborChangedLogic()) {
+            if (!((BlockBridge) notifyState.func_177230_c()).bridge$hasNeighborChangedLogic()) {
                 // A little short-circuit so we do not waste expense to call neighbor notifications on blocks that do
                 // not override the method neighborChanged
                 return;
@@ -772,11 +772,11 @@ public final class PhaseTracker {
                 peek.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyState, notifyPos, sourceBlock, sourcePos);
                 return;
             }
-            state.associateNeighborStateNotifier(peek, sourcePos, notifyState.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
+            state.associateNeighborStateNotifier(peek, sourcePos, notifyState.func_177230_c(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             final LocatableBlock block = new SpongeLocatableBlockBuilder()
                 .world(((World) mixinWorld))
-                .position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
-                .state((BlockState) sourceBlock.getDefaultState()).build();
+                .position(sourcePos.func_177958_n(), sourcePos.func_177956_o(), sourcePos.func_177952_p())
+                .state((BlockState) sourceBlock.func_176223_P()).build();
             try (final NeighborNotificationContext context = TickPhase.Tick.NEIGHBOR_NOTIFY.createPhaseContext()
                 .source(block)
                 .sourceBlock(sourceBlock)
@@ -798,20 +798,20 @@ public final class PhaseTracker {
                 }
                 // Sponge End
 
-                notifyState.neighborChanged(((WorldServer) mixinWorld), notifyPos, sourceBlock, sourcePos);
+                notifyState.func_189546_a(((WorldServer) mixinWorld), notifyPos, sourceBlock, sourcePos);
             }
         } catch (final Throwable throwable) {
-            final CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
-            final CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
-            crashreportcategory.addDetail("Source block type", () -> {
+            final CrashReport crashreport = CrashReport.func_85055_a(throwable, "Exception while updating neighbours");
+            final CrashReportCategory crashreportcategory = crashreport.func_85058_a("Block being updated");
+            crashreportcategory.func_189529_a("Source block type", () -> {
                 try {
-                    return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(sourceBlock),
-                        sourceBlock.getTranslationKey(), sourceBlock.getClass().getCanonicalName());
+                    return String.format("ID #%d (%s // %s)", Block.func_149682_b(sourceBlock),
+                        sourceBlock.func_149739_a(), sourceBlock.getClass().getCanonicalName());
                 } catch (final Throwable var2) {
-                    return "ID #" + Block.getIdFromBlock(sourceBlock);
+                    return "ID #" + Block.func_149682_b(sourceBlock);
                 }
             });
-            CrashReportCategory.addBlockInfo(crashreportcategory, notifyPos, notifyState);
+            CrashReportCategory.func_175750_a(crashreportcategory, notifyPos, notifyState);
             throw new ReportedException(crashreport);
         }
     }
@@ -833,7 +833,7 @@ public final class PhaseTracker {
                 .addWrapped(ASYNC_BLOCK_CHANGE_MESSAGE)
                 .add()
                 .add(" %s : %s", "World", mixinWorld)
-                .add(" %s : %d, %d, %d", "Block Pos", pos.getX(), pos.getY(), pos.getZ())
+                .add(" %s : %d, %d, %d", "Block Pos", pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p())
                 .add(" %s : %s", "BlockState", newState)
                 .add()
                 .addWrapped("Sponge is not going to allow this block change to take place as doing so can "
@@ -847,16 +847,16 @@ public final class PhaseTracker {
         final net.minecraft.world.World minecraftWorld = (WorldServer) mixinWorld;
 
         // Vanilla start - get the chunk
-        final Chunk chunk = minecraftWorld.getChunk(pos);
+        final Chunk chunk = minecraftWorld.func_175726_f(pos);
         // Sponge - double check the chunk is not empty.
         // It is now possible for setBlockState to be called on an empty chunk due to our optimization
         // for returning empty chunks when we don't want a chunk to load.
         // If chunk is empty, we simply return to avoid any further logic.
-        if (chunk.isEmpty()) {
+        if (chunk.func_76621_g()) {
             return false;
         }
         // Sponge End
-        final IBlockState currentState = chunk.getBlockState(pos);
+        final IBlockState currentState = chunk.func_177435_g(pos);
         // Forge patches - allows getting the light changes to check for relighting.
         final int oldLight = SpongeImplHooks.getChunkPosLight(currentState, minecraftWorld, pos);
         final int oldOpacity = SpongeImplHooks.getBlockLightOpacity(currentState, minecraftWorld, pos);
@@ -865,7 +865,7 @@ public final class PhaseTracker {
         if (currentState == newState) {
             // Some micro optimization in case someone is trying to set the new state to the same as current
             final SpongeProxyBlockAccess proxyAccess = mixinWorld.bridge$getProxyAccess();
-            if (proxyAccess.hasProxy() && proxyAccess.getBlockState(pos) != currentState) {
+            if (proxyAccess.hasProxy() && proxyAccess.func_180495_p(pos) != currentState) {
                 proxyAccess.onChunkChanged(pos, newState);
             }
             return false;
@@ -899,9 +899,9 @@ public final class PhaseTracker {
         // Forge changes the BlockState.getLightOpacity to use Forge's hook.
         if (SpongeImplHooks.getBlockLightOpacity(newState, minecraftWorld, pos) != oldOpacity || SpongeImplHooks.getChunkPosLight(newState, minecraftWorld, pos) != oldLight) {
             // Sponge - End
-            minecraftWorld.profiler.startSection("checkLight");
-            minecraftWorld.checkLight(pos);
-            minecraftWorld.profiler.endSection();
+            minecraftWorld.field_72984_F.func_76320_a("checkLight");
+            minecraftWorld.func_175664_x(pos);
+            minecraftWorld.field_72984_F.func_76319_b();
         }
 
         // Sponge Start - At this point, we can stop and check for captures.
@@ -980,20 +980,20 @@ public final class PhaseTracker {
         // !this.isRemote is guaranteed since we are on the server
         // chunks are never null
         // if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (chunk == null || chunk.isPopulated()))
-        if (spongeFlag.isNotifyClients() && chunk.isPopulated()) {
+        if (spongeFlag.isNotifyClients() && chunk.func_150802_k()) {
             // Sponge End
-            minecraftWorld.notifyBlockUpdate(pos, originalBlockState, newState, spongeFlag.getRawFlag());
+            minecraftWorld.func_184138_a(pos, originalBlockState, newState, spongeFlag.getRawFlag());
         }
 
-        final Block block = newState.getBlock();
+        final Block block = newState.func_177230_c();
         if (spongeFlag.updateNeighbors()) { // Sponge - Replace flags & 1 != 0 with BlockChangeFlag#updateNeighbors
-            minecraftWorld.notifyNeighborsRespectDebug(pos, originalBlockState.getBlock(), true);
+            minecraftWorld.func_175722_b(pos, originalBlockState.func_177230_c(), true);
 
-            if (newState.hasComparatorInputOverride()) {
-                minecraftWorld.updateComparatorOutputLevel(pos, block);
+            if (newState.func_185912_n()) {
+                minecraftWorld.func_175666_e(pos, block);
             }
         } else if ( spongeFlag.notifyObservers()) { // Sponge - Replace flags & 16 == 0 with BlockChangeFlag#notifyObservers.
-            minecraftWorld.updateObservingBlocksAt(pos, block);
+            minecraftWorld.func_190522_c(pos, block);
         }
 
         return true;
@@ -1028,7 +1028,7 @@ public final class PhaseTracker {
         final WorldServerBridge mixinWorldServer = (WorldServerBridge) world;
         final PhaseContext<?> context = this.stack.peek();
         final IPhaseState<?> phaseState = context.state;
-        final boolean isForced = entity.forceSpawn || entity instanceof EntityPlayer;
+        final boolean isForced = entity.field_98038_p || entity instanceof EntityPlayer;
 
         // Certain phases disallow entity spawns (such as block restoration)
         if (!isForced && !phaseState.doesAllowEntitySpawns()) {
@@ -1036,33 +1036,33 @@ public final class PhaseTracker {
         }
 
         // Sponge End - continue with vanilla mechanics
-        final int chunkX = MathHelper.floor(entity.posX / 16.0D);
-        final int chunkZ = MathHelper.floor(entity.posZ / 16.0D);
+        final int chunkX = MathHelper.func_76128_c(entity.field_70165_t / 16.0D);
+        final int chunkZ = MathHelper.func_76128_c(entity.field_70161_v / 16.0D);
 
         if (!isForced && !((WorldServerAccessor) world).accessor$isChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         }
         if (entity instanceof EntityPlayer) {
             final EntityPlayer entityplayer = (EntityPlayer) entity;
-            world.playerEntities.add(entityplayer);
-            world.updateAllPlayersSleepingFlag();
+            world.field_73010_i.add(entityplayer);
+            world.func_72854_c();
             SpongeImplHooks.firePlayerJoinSpawnEvent((EntityPlayerMP) entityplayer);
         } else {
             // Sponge start - check for vanilla owner
             if (entity instanceof IEntityOwnable) {
                 final IEntityOwnable ownable = (IEntityOwnable) entity;
-                final net.minecraft.entity.Entity owner = ownable.getOwner();
+                final net.minecraft.entity.Entity owner = ownable.func_70902_q();
                 if (owner instanceof EntityPlayer) {
                     context.owner = (User) owner;
                     if (entity instanceof OwnershipTrackedBridge) {
                         ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) owner);
                     } else {
-                        ((Entity) entity).setCreator(ownable.getOwnerId());
+                        ((Entity) entity).setCreator(ownable.func_184753_b());
                     }
                 }
             } else if (entity instanceof EntityThrowable) {
                 final EntityThrowable throwable = (EntityThrowable) entity;
-                final EntityLivingBase thrower = throwable.getThrower();
+                final EntityLivingBase thrower = throwable.func_85052_h();
                 if (thrower != null) {
                     final User user;
                     if (thrower instanceof OwnershipTrackedBridge) {
@@ -1108,8 +1108,8 @@ public final class PhaseTracker {
         final net.minecraft.entity.Entity customEntity = SpongeImplHooks.getCustomEntityIfItem(entity);
         final net.minecraft.entity.Entity finalEntityToSpawn = customEntity == null ? entity : customEntity;
         // Sponge end - continue on with the checks.
-        world.getChunk(chunkX, chunkZ).addEntity(finalEntityToSpawn);
-        world.loadedEntityList.add(finalEntityToSpawn);
+        world.func_72964_e(chunkX, chunkZ).func_76612_a(finalEntityToSpawn);
+        world.field_72996_f.add(finalEntityToSpawn);
         // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
         ((WorldServerAccessor) world).accessor$onEntityAdded(finalEntityToSpawn);
         return true;
@@ -1137,9 +1137,9 @@ public final class PhaseTracker {
         final WorldServerBridge mixinWorldServer = (WorldServerBridge) worldServer;
         // Sponge End - continue with vanilla mechanics
 
-        final int chunkX = MathHelper.floor(minecraftEntity.posX / 16.0D);
-        final int chunkZ = MathHelper.floor(minecraftEntity.posZ / 16.0D);
-        final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
+        final int chunkX = MathHelper.func_76128_c(minecraftEntity.field_70165_t / 16.0D);
+        final int chunkZ = MathHelper.func_76128_c(minecraftEntity.field_70161_v / 16.0D);
+        final boolean isForced = minecraftEntity.field_98038_p || minecraftEntity instanceof EntityPlayer;
 
         if (!isForced && !((WorldServerAccessor) world).accessor$isChunkLoaded(chunkX, chunkZ, true)) {
             return false;
@@ -1171,7 +1171,7 @@ public final class PhaseTracker {
      * @return True if the entity spawn is on the main thread.
      */
     public static boolean isEntitySpawnInvalid(final Entity entity) {
-        if (Sponge.isServerAvailable() && (Sponge.getServer().isMainThread() || SpongeImpl.getServer().isServerStopped())) {
+        if (Sponge.isServerAvailable() && (Sponge.getServer().isMainThread() || SpongeImpl.getServer().func_71241_aa())) {
             return false;
         }
         // We aren't in the server thread at this point, and an entity is spawning on the server....

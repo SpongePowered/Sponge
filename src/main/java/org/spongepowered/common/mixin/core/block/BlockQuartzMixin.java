@@ -59,7 +59,7 @@ public abstract class BlockQuartzMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableQuartzData) {
             final BlockQuartz.EnumType quartzType = (BlockQuartz.EnumType) (Object) ((ImmutableQuartzData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockQuartz.VARIANT, quartzType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockQuartz.field_176335_a, quartzType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -68,7 +68,7 @@ public abstract class BlockQuartzMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.QUARTZ_TYPE)) {
             final BlockQuartz.EnumType quartzType = (BlockQuartz.EnumType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockQuartz.VARIANT, quartzType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockQuartz.field_176335_a, quartzType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -76,6 +76,6 @@ public abstract class BlockQuartzMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableQuartzData impl$getQuartzTypeFor(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeQuartzData.class,
-                (QuartzType) (Object) blockState.getValue(BlockQuartz.VARIANT));
+                (QuartzType) (Object) blockState.func_177229_b(BlockQuartz.field_176335_a));
     }
 }

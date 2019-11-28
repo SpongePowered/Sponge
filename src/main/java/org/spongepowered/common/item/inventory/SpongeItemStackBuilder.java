@@ -137,10 +137,10 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.type = itemStack.getType();
         this.quantity = itemStack.getQuantity();
         if (itemStack instanceof net.minecraft.item.ItemStack) {
-            this.damageValue = ((net.minecraft.item.ItemStack) itemStack).getItemDamage();
-            final NBTTagCompound itemCompound = ((net.minecraft.item.ItemStack) itemStack).getTagCompound();
+            this.damageValue = ((net.minecraft.item.ItemStack) itemStack).func_77952_i();
+            final NBTTagCompound itemCompound = ((net.minecraft.item.ItemStack) itemStack).func_77978_p();
             if (itemCompound != null) {
-                this.compound = itemCompound.copy();
+                this.compound = itemCompound.func_74737_b();
             }
             this.itemDataSet.addAll(((CustomDataHolderBridge) itemStack).bridge$getCustomManipulators());
 
@@ -169,8 +169,8 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.damageValue = getData(container, Constants.ItemStack.DAMAGE_VALUE, Integer.class);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
-            if (compound.hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-                compound.removeTag(Constants.Sponge.SPONGE_DATA);
+            if (compound.func_150297_b(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+                compound.func_82580_o(Constants.Sponge.SPONGE_DATA);
             }
             this.compound = compound;
         }
@@ -215,11 +215,11 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         quantity(1);
         if (blockSnapshot instanceof SpongeBlockSnapshot) {
             final Block block = (Block) blockType;
-            this.damageValue = block.damageDropped((IBlockState) blockSnapshot.getState());
+            this.damageValue = block.func_180651_a((IBlockState) blockSnapshot.getState());
             final Optional<NBTTagCompound> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
             if (compound.isPresent()) {
                 this.compound = new NBTTagCompound();
-                this.compound.setTag(Constants.Item.BLOCK_ENTITY_TAG, compound.get());
+                this.compound.func_74782_a(Constants.Item.BLOCK_ENTITY_TAG, compound.get());
             }
             // todo probably needs more testing, but this'll do donkey...
         } else { // TODO handle through the API specifically handling the rest of the data stuff
@@ -242,7 +242,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             return this;
         }
         itemType(item.get());
-        this.damageValue = minecraftState.getBlock().damageDropped(minecraftState);
+        this.damageValue = minecraftState.func_177230_c().func_180651_a(minecraftState);
         return this;
     }
 
@@ -280,7 +280,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             fixEnchantmentData(itemType, compound);
-            itemStack.setTagCompound(compound);
+            itemStack.func_77982_d(compound);
         }
         if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
@@ -313,12 +313,12 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 
         if (this.type == ItemTypes.NONE || this.quantity <= 0) {
             // If either type is none(air) or quantity is 0 return the vanilla EMPTY item
-            return ((ItemStack) net.minecraft.item.ItemStack.EMPTY);
+            return ((ItemStack) net.minecraft.item.ItemStack.field_190927_a);
         }
 
         final ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, this.damageValue);
         if (this.compound != null) {
-            ((net.minecraft.item.ItemStack) stack).setTagCompound(this.compound.copy());
+            ((net.minecraft.item.ItemStack) stack).func_77982_d(this.compound.func_74737_b());
         }
         if (this.itemDataSet != null) {
             this.itemDataSet.forEach(stack::offer);
@@ -327,8 +327,8 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (this.keyValues != null) {
             this.keyValues.forEach((key, value) -> stack.offer((Key) key, value));
         }
-        if (this.compound != null && this.compound.hasKey(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
-            final NBTTagCompound compoundTag = this.compound.getCompoundTag(Constants.Forge.FORGE_CAPS);
+        if (this.compound != null && this.compound.func_150297_b(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
+            final NBTTagCompound compoundTag = this.compound.func_74775_l(Constants.Forge.FORGE_CAPS);
             if (compoundTag != null) {
                 SpongeImplHooks.setCapabilitiesFromSpongeBuilder(stack, compoundTag);
             }
@@ -346,19 +346,19 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
      */
     public static void fixEnchantmentData(ItemType itemType, NBTTagCompound compound) {
         NBTTagList nbttaglist;
-        if (itemType == Items.ENCHANTED_BOOK) {
-            nbttaglist = compound.getTagList(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
+        if (itemType == Items.field_151134_bR) {
+            nbttaglist = compound.func_150295_c(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
         } else {
-            nbttaglist = compound.getTagList(Constants.Item.ITEM_ENCHANTMENT_LIST, Constants.NBT.TAG_COMPOUND);
+            nbttaglist = compound.func_150295_c(Constants.Item.ITEM_ENCHANTMENT_LIST, Constants.NBT.TAG_COMPOUND);
         }
-        for (int i = 0; i < nbttaglist.tagCount(); ++i)
+        for (int i = 0; i < nbttaglist.func_74745_c(); ++i)
         {
-            NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-            short id = nbttagcompound.getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
-            short lvl = nbttagcompound.getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
+            NBTTagCompound nbttagcompound = nbttaglist.func_150305_b(i);
+            short id = nbttagcompound.func_74765_d(Constants.Item.ITEM_ENCHANTMENT_ID);
+            short lvl = nbttagcompound.func_74765_d(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
 
-            nbttagcompound.setShort(Constants.Item.ITEM_ENCHANTMENT_ID, id);
-            nbttagcompound.setShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, lvl);
+            nbttagcompound.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_ID, id);
+            nbttagcompound.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_LEVEL, lvl);
         }
     }
 }

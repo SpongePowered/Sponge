@@ -107,7 +107,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
     @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
     private void onStateChange(final int state, final CallbackInfo ci) {
         bridge$setFuseDuration(this.fuseDuration);
-        if (this.world.isRemote) {
+        if (this.world.field_72995_K) {
             return;
         }
 
@@ -122,7 +122,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
 
     @Inject(method = "setCreeperState(I)V", at = @At("RETURN"))
     private void postStateChange(final int state, final CallbackInfo ci) {
-        if (this.world.isRemote) {
+        if (this.world.field_72995_K) {
             return;
         }
 
@@ -172,7 +172,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
                                                                               + "(ILnet/minecraft/entity/EntityLivingBase;)V"))
     private void onDamageFlintAndSteel(final ItemStack fas, final int amount, final EntityLivingBase player) {
         if (!this.interactPrimeCancelled) {
-            fas.damageItem(amount, player);
+            fas.func_77972_a(amount, player);
             // TODO put this in the cause somehow?
 //            this.primeCause = Cause.of(NamedCause.of(NamedCause.IGNITER, player));
 //            this.detonationCause = this.primeCause;

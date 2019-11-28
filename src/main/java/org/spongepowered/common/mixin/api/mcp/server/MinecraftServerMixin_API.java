@@ -141,12 +141,12 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public boolean hasWhitelist() {
-        return this.getPlayerList().isWhiteListEnabled();
+        return this.getPlayerList().func_72383_n();
     }
 
     @Override
     public void setHasWhitelist(final boolean enabled) {
-        this.getPlayerList().setWhiteListEnabled(enabled);
+        this.getPlayerList().func_72371_a(enabled);
     }
 
     @Override
@@ -157,10 +157,10 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Player> getOnlinePlayers() {
-        if (getPlayerList() == null || getPlayerList().getPlayers() == null) {
+        if (getPlayerList() == null || getPlayerList().func_181057_v() == null) {
             return ImmutableList.of();
         }
-        return ImmutableList.copyOf((List) getPlayerList().getPlayers());
+        return ImmutableList.copyOf((List) getPlayerList().func_181057_v());
     }
 
     @Override
@@ -168,7 +168,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
         if (getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) getPlayerList().getPlayerByUUID(uniqueId));
+        return Optional.ofNullable((Player) getPlayerList().func_177451_a(uniqueId));
     }
 
     @Override
@@ -176,7 +176,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
         if (getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) getPlayerList().getPlayerByUsername(name));
+        return Optional.ofNullable((Player) getPlayerList().func_152612_a(name));
     }
 
     @Override
@@ -189,7 +189,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
         if (getPlayerList() == null) {
             return 0;
         }
-        return getPlayerList().getMaxPlayers();
+        return getPlayerList().func_72352_l();
     }
 
     @Override
@@ -199,7 +199,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public double getTicksPerSecond() {
-        final double nanoSPerTick = MathHelper.average(this.tickTimeArray);
+        final double nanoSPerTick = MathHelper.func_76127_a(this.tickTimeArray);
         // Cap at 20 TPS
         return 1000 / Math.max(50, nanoSPerTick / 1000000);
     }
@@ -328,7 +328,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
-        return WorldManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
+        return WorldManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.func_96441_U());
     }
 
     @Override

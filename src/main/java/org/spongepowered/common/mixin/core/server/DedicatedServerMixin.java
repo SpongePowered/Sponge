@@ -72,10 +72,10 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/PropertyManager;getIntProperty(Ljava/lang/String;I)I"))
     private int fixWrongDefaultDifficulty(final PropertyManager propertyManager, final String key, final int defaultValue) {
         if ("difficulty".equalsIgnoreCase(key)) {
-            return propertyManager.getIntProperty(key, WorldInfo.DEFAULT_DIFFICULTY.getId());
+            return propertyManager.func_73669_a(key, WorldInfo.field_176156_a.func_151525_a());
         }
 
-        return propertyManager.getIntProperty(key, defaultValue);
+        return propertyManager.func_73669_a(key, defaultValue);
     }
 
     /**
@@ -97,18 +97,18 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
             }
         }
 
-        final BlockPos spawnPoint = worldIn.getSpawnPoint();
+        final BlockPos spawnPoint = worldIn.func_175694_M();
         final int protectionRadius = this.getSpawnProtectionSize();
 
         return protectionRadius > 0
-               && Math.max(Math.abs(pos.getX() - spawnPoint.getX()), Math.abs(pos.getZ() - spawnPoint.getZ())) <= protectionRadius
+               && Math.max(Math.abs(pos.func_177958_n() - spawnPoint.func_177958_n()), Math.abs(pos.func_177952_p() - spawnPoint.func_177952_p())) <= protectionRadius
                && !((Player) playerIn).hasPermission("minecraft.spawn-protection.override");
     }
 
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerProfileCache;save()V"))
     private void onSave(final PlayerProfileCache cache) {
         ((PlayerProfileCacheBridge) this.getPlayerProfileCache()).bridge$setCanSave(true);
-        this.getPlayerProfileCache().save();
+        this.getPlayerProfileCache().func_152658_c();
         ((PlayerProfileCacheBridge) this.getPlayerProfileCache()).bridge$setCanSave(false);
     }
 

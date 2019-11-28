@@ -67,35 +67,35 @@ public abstract class TextMixin implements TextBridge {
     private ITextComponent initializeComponent() {
         if (this.component == null) {
             this.component = createComponent();
-            Style style = this.component.getStyle();
+            Style style = this.component.func_150256_b();
 
             if (this.format.getColor() != TextColors.NONE) {
-                style.setColor(((SpongeTextColor) this.format.getColor()).getHandle());
+                style.func_150238_a(((SpongeTextColor) this.format.getColor()).getHandle());
             }
 
             if (!this.format.getStyle().isEmpty()) {
-                style.setBold(this.format.getStyle().isBold().orElse(null));
-                style.setItalic(this.format.getStyle().isItalic().orElse(null));
-                style.setUnderlined(this.format.getStyle().hasUnderline().orElse(null));
-                style.setStrikethrough(this.format.getStyle().hasStrikethrough().orElse(null));
-                style.setObfuscated(this.format.getStyle().isObfuscated().orElse(null));
+                style.func_150227_a(this.format.getStyle().isBold().orElse(null));
+                style.func_150217_b(this.format.getStyle().isItalic().orElse(null));
+                style.func_150228_d(this.format.getStyle().hasUnderline().orElse(null));
+                style.func_150225_c(this.format.getStyle().hasStrikethrough().orElse(null));
+                style.func_150237_e(this.format.getStyle().isObfuscated().orElse(null));
             }
 
             if (this.clickAction.isPresent()) {
-                style.setClickEvent(SpongeClickAction.getHandle(this.clickAction.get()));
+                style.func_150241_a(SpongeClickAction.getHandle(this.clickAction.get()));
             }
 
             if (this.hoverAction.isPresent()) {
-                style.setHoverEvent(SpongeHoverAction.getHandle(this.hoverAction.get()));
+                style.func_150209_a(SpongeHoverAction.getHandle(this.hoverAction.get()));
             }
 
             if (this.shiftClickAction.isPresent()) {
                 ShiftClickAction.InsertText insertion = (ShiftClickAction.InsertText) this.shiftClickAction.get();
-                style.setInsertion(insertion.getResult());
+                style.func_179989_a(insertion.getResult());
             }
 
             for (Text child : this.children) {
-                this.component.appendSibling(((TextBridge) child).bridge$toComponent());
+                this.component.func_150257_a(((TextBridge) child).bridge$toComponent());
             }
         }
 
@@ -108,7 +108,7 @@ public abstract class TextMixin implements TextBridge {
 
     @Override
     public ITextComponent bridge$toComponent() {
-        return getHandle().createCopy(); // Mutable instances are not nice :(
+        return getHandle().func_150259_f(); // Mutable instances are not nice :(
     }
 
     /**
@@ -134,13 +134,13 @@ public abstract class TextMixin implements TextBridge {
      */
     @Overwrite
     public final String toPlainSingle() {
-        return getHandle().getUnformattedComponentText();
+        return getHandle().func_150261_e();
     }
 
     @Override
     public String bridge$toJson() {
         if (this.json == null) {
-            this.json = ITextComponent.Serializer.componentToJson(getHandle());
+            this.json = ITextComponent.Serializer.func_150696_a(getHandle());
         }
 
         return this.json;

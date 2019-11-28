@@ -77,9 +77,9 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            final NBTTagCompound tag = stack.getTagCompound();
+            final NBTTagCompound tag = stack.func_77978_p();
             if (tag != null) {
-                tag.setTag(Constants.Item.Book.ITEM_BOOK_PAGES, new NBTTagList());
+                tag.func_74782_a(Constants.Item.Book.ITEM_BOOK_PAGES, new NBTTagList());
             }
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
@@ -91,31 +91,31 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
     protected boolean set(final ItemStack itemStack, final List<T> value) {
         final NBTTagList list = new NBTTagList();
         for (final T page : value) {
-            list.appendTag(this.translateTo(page));
+            list.func_74742_a(this.translateTo(page));
         }
-        itemStack.setTagInfo(Constants.Item.Book.ITEM_BOOK_PAGES, list);
-        final NBTTagCompound compound = itemStack.getTagCompound();
-        if (!compound.hasKey(Constants.Item.Book.ITEM_BOOK_TITLE)) {
-            compound.setString(Constants.Item.Book.ITEM_BOOK_TITLE, Constants.Item.Book.INVALID_TITLE);
+        itemStack.func_77983_a(Constants.Item.Book.ITEM_BOOK_PAGES, list);
+        final NBTTagCompound compound = itemStack.func_77978_p();
+        if (!compound.func_74764_b(Constants.Item.Book.ITEM_BOOK_TITLE)) {
+            compound.func_74778_a(Constants.Item.Book.ITEM_BOOK_TITLE, Constants.Item.Book.INVALID_TITLE);
         }
-        if (!compound.hasKey(Constants.Item.Book.ITEM_BOOK_AUTHOR)) {
-            compound.setString(Constants.Item.Book.ITEM_BOOK_AUTHOR, Constants.Item.Book.INVALID_TITLE);
+        if (!compound.func_74764_b(Constants.Item.Book.ITEM_BOOK_AUTHOR)) {
+            compound.func_74778_a(Constants.Item.Book.ITEM_BOOK_AUTHOR, Constants.Item.Book.INVALID_TITLE);
         }
-        compound.setBoolean(Constants.Item.Book.ITEM_BOOK_RESOLVED, true);
+        compound.func_74757_a(Constants.Item.Book.ITEM_BOOK_RESOLVED, true);
         return true;
     }
 
     @Override
     protected Optional<List<T>> getVal(final ItemStack itemStack) {
-        final NBTTagCompound tagCompound = itemStack.getTagCompound();
-        if (tagCompound == null || !tagCompound.hasKey(Constants.Item.Book.ITEM_BOOK_PAGES)) {
+        final NBTTagCompound tagCompound = itemStack.func_77978_p();
+        if (tagCompound == null || !tagCompound.func_74764_b(Constants.Item.Book.ITEM_BOOK_PAGES)) {
             return Optional.empty();
         }
-        final NBTTagList list = tagCompound.getTagList(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
+        final NBTTagList list = tagCompound.func_150295_c(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
         final List<T> stringList = new ArrayList<>();
-        if (!list.isEmpty()) {
-            for (int i = 0; i < list.tagCount(); i++) {
-                stringList.add(this.translateFrom(list.getStringTagAt(i)));
+        if (!list.func_82582_d()) {
+            for (int i = 0; i < list.func_74745_c(); i++) {
+                stringList.add(this.translateFrom(list.func_150307_f(i)));
             }
         }
         return Optional.of(stringList);

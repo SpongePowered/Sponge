@@ -45,8 +45,8 @@ public abstract class EntityAISwimmingMixin_API implements SwimmingAITask {
      */
     @Overwrite
     public void updateTask() {
-        if (this.entity.getRNG().nextFloat() < this.api$swimChance) {
-            this.entity.getJumpHelper().setJumping();
+        if (this.entity.func_70681_au().nextFloat() < this.api$swimChance) {
+            this.entity.func_70683_ar().func_75660_a();
         }
     }
 

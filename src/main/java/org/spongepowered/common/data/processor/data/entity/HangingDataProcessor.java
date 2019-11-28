@@ -61,7 +61,7 @@ public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcesso
 
     @Override
     protected Optional<Direction> getVal(EntityHanging dataHolder) {
-        return Optional.of(dataHolder.facingDirection == null ? Direction.NONE : Constants.DirectionFunctions.getFor(dataHolder.facingDirection));
+        return Optional.of(dataHolder.field_174860_b == null ? Direction.NONE : Constants.DirectionFunctions.getFor(dataHolder.field_174860_b));
     }
 
     @Override

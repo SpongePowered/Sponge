@@ -70,7 +70,7 @@ public abstract class StatBaseMixin implements StatBaseBridge {
 
     @Override
     public NumberFormat bridge$getFormat() {
-        if (this.formatter.equals(StatBase.simpleStatType)) {
+        if (this.formatter.equals(StatBase.field_75980_h)) {
             return numberFormat;
         }
         return decimalFormat;

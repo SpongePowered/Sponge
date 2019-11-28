@@ -42,8 +42,8 @@ public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigge
     }
 
     @Override
-    public ResourceLocation getId() {
-        return this.triggerType.getId();
+    public ResourceLocation func_192244_a() {
+        return this.triggerType.func_192163_a();
     }
 
     @Override

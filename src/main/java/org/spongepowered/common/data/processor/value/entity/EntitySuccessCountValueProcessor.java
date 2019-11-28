@@ -58,13 +58,13 @@ public class EntitySuccessCountValueProcessor extends AbstractSpongeValueProcess
 
     @Override
     protected boolean set(final EntityMinecartCommandBlock container, final Integer value) {
-        container.getCommandBlockLogic().setSuccessCount(value);
+        container.func_145822_e().func_184167_a(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(final EntityMinecartCommandBlock container) {
-        return Optional.of(container.getCommandBlockLogic().getSuccessCount());
+        return Optional.of(container.func_145822_e().func_145760_g());
     }
 
     @Override

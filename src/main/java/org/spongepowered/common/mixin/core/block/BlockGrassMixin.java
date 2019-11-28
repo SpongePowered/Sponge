@@ -70,6 +70,6 @@ public abstract class BlockGrassMixin extends BlockMixin {
     }
 
     private ImmutableSnowedData impl$getIsSnowedFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.getValue(BlockGrass.SNOWY));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.func_177229_b(BlockGrass.field_176498_a));
     }
 }

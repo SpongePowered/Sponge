@@ -55,7 +55,7 @@ public class EndermiteExpirableDataProcessor extends
 
     @Override
     protected boolean set(final EntityEndermite entity, final Integer value) {
-        if (entity.isNoDespawnRequired()) {
+        if (entity.func_104002_bU()) {
             return false;
         }
         checkArgument(value >= 0);
@@ -66,7 +66,7 @@ public class EndermiteExpirableDataProcessor extends
 
     @Override
     protected Optional<Integer> getVal(final EntityEndermite entity) {
-        return entity.isNoDespawnRequired() ? Optional.empty() : Optional.of(((EntityEndermiteAccessor) entity).accessor$getLifetime());
+        return entity.func_104002_bU() ? Optional.empty() : Optional.of(((EntityEndermiteAccessor) entity).accessor$getLifetime());
     }
 
     @Override

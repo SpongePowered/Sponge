@@ -57,10 +57,10 @@ public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTarg
         ((EntityTippedArrowAccessor) dataHolder).accessor$getCustomPotionEffects().clear();
         for (final PotionEffect effect : value) {
             final net.minecraft.potion.PotionEffect mcEffect =
-                new net.minecraft.potion.PotionEffect(((net.minecraft.potion.PotionEffect) effect).getPotion(), effect.getDuration(),
+                new net.minecraft.potion.PotionEffect(((net.minecraft.potion.PotionEffect) effect).func_188419_a(), effect.getDuration(),
                     effect.getAmplifier(), effect.isAmbient(),
                     effect.getShowParticles());
-            dataHolder.addEffect(mcEffect);
+            dataHolder.func_184558_a(mcEffect);
         }
         return false;
     }
@@ -73,9 +73,9 @@ public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTarg
         }
         final List<PotionEffect> apiEffects = new ArrayList<>();
         for (final net.minecraft.potion.PotionEffect potionEffect : effects) {
-            apiEffects.add((PotionEffect) new net.minecraft.potion.PotionEffect(potionEffect.getPotion(), potionEffect.getDuration(),
-                potionEffect.getAmplifier(),
-                potionEffect.getIsAmbient(), potionEffect.doesShowParticles()));
+            apiEffects.add((PotionEffect) new net.minecraft.potion.PotionEffect(potionEffect.func_188419_a(), potionEffect.func_76459_b(),
+                potionEffect.func_76458_c(),
+                potionEffect.func_82720_e(), potionEffect.func_188418_e()));
         }
         return Optional.of(apiEffects);
     }

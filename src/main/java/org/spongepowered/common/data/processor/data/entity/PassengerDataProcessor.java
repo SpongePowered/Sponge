@@ -54,15 +54,15 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
     @Override
     protected boolean set(net.minecraft.entity.Entity entity, List<UUID> uuids) {
         final List<net.minecraft.entity.Entity> passengers = uuids.stream()
-                .map((uuid -> ((World) entity.getEntityWorld()).getEntity(uuid)))
+                .map((uuid -> ((World) entity.func_130014_f_()).getEntity(uuid)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(tickingEntity -> (net.minecraft.entity.Entity) tickingEntity)
                 .collect(Collectors.toList());
 
         for (net.minecraft.entity.Entity passenger : passengers) {
-            if (!entity.isPassenger(passenger)) {
-                entity.getPassengers().add(passenger);
+            if (!entity.func_184196_w(passenger)) {
+                entity.func_184188_bt().add(passenger);
             }
         }
         return true;
@@ -70,10 +70,10 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
 
     @Override
     protected Optional<List<UUID>> getVal(net.minecraft.entity.Entity dataHolder) {
-        if (dataHolder.getPassengers().isEmpty()) {
+        if (dataHolder.func_184188_bt().isEmpty()) {
             return Optional.empty();
         }
-        final List<UUID> passengers = dataHolder.getPassengers()
+        final List<UUID> passengers = dataHolder.func_184188_bt()
                 .stream()
                 .map(entity -> (Entity) entity)
                 .map(Entity::getUniqueId)
@@ -95,13 +95,13 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (this.supports(container)) {
             net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) container);
-            if (entity.getPassengers().isEmpty()) {
-                final ImmutableList<UUID> passengers = entity.getPassengers()
+            if (entity.func_184188_bt().isEmpty()) {
+                final ImmutableList<UUID> passengers = entity.func_184188_bt()
                         .stream()
                         .map(entity1 -> (Entity) entity1)
                         .map(Entity::getUniqueId)
                         .collect(ImmutableList.toImmutableList());
-                entity.removePassengers();
+                entity.func_184226_ay();
                 return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(constructImmutableValue(passengers)).build();
             }
             return DataTransactionResult.successNoData();

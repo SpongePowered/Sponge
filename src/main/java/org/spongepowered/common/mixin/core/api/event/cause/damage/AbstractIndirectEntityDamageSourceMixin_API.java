@@ -59,16 +59,16 @@ public abstract class AbstractIndirectEntityDamageSourceMixin_API implements Ind
             commonIndirect.bridge$setDamageBypassesArmor();
         }
         if (isExplosive()) {
-            commonIndirect.setExplosion();
+            commonIndirect.func_94540_d();
         }
         if (isMagic()) {
-            commonIndirect.setMagicDamage();
+            commonIndirect.func_82726_p();
         }
         if (isScaledByDifficulty()) {
-            commonIndirect.setDifficultyScaled();
+            commonIndirect.func_76351_m();
         }
         if (doesAffectCreative()) {
-            commonIndirect.canHarmInCreative();
+            commonIndirect.func_76357_e();
         }
     }
 

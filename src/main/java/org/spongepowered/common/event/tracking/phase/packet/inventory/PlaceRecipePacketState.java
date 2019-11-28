@@ -58,8 +58,8 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
 
     @Override
     public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final InventoryPacketContext context) {
-        ((TrackedInventoryBridge) playerMP.openContainer).bridge$setCaptureInventory(true);
-        ((ContainerBridge) playerMP.openContainer).bridge$setFirePreview(false);
+        ((TrackedInventoryBridge) playerMP.field_71070_bA).bridge$setCaptureInventory(true);
+        ((ContainerBridge) playerMP.field_71070_bA).bridge$setFirePreview(false);
     }
 
     @Override
@@ -69,42 +69,42 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
         final IRecipe recipe = packet.func_194317_b();
 
         final EntityPlayerMP player = context.getPacketPlayer();
-        ((ContainerBridge)player.openContainer).bridge$detectAndSendChanges(true);
-        ((TrackedInventoryBridge) player.openContainer).bridge$setCaptureInventory(false);
-        ((ContainerBridge) player.openContainer).bridge$setFirePreview(true);
+        ((ContainerBridge)player.field_71070_bA).bridge$detectAndSendChanges(true);
+        ((TrackedInventoryBridge) player.field_71070_bA).bridge$setCaptureInventory(false);
+        ((ContainerBridge) player.field_71070_bA).bridge$setFirePreview(true);
 
-        final Inventory craftInv = ((Inventory) player.openContainer).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+        final Inventory craftInv = ((Inventory) player.field_71070_bA).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
             SpongeImpl.getLogger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
             return;
         }
 
-        final List<SlotTransaction> previewTransactions = ((ContainerBridge) player.openContainer).bridge$getPreviewTransactions();
+        final List<SlotTransaction> previewTransactions = ((ContainerBridge) player.field_71070_bA).bridge$getPreviewTransactions();
         if (previewTransactions.isEmpty()) {
             final CraftingOutput slot = ((CraftingInventory) craftInv).getResult();
             final SlotTransaction st = new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(slot.peek().orElse(ItemStack.empty())));
             previewTransactions.add(st);
         }
         SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) craftInv), previewTransactions.get(0),
-                ((CraftingRecipe) recipe), player.openContainer, previewTransactions);
+                ((CraftingRecipe) recipe), player.field_71070_bA, previewTransactions);
         previewTransactions.clear();
 
         final Entity spongePlayer = (Entity) player;
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
-            frame.pushCause(player.openContainer);
+            frame.pushCause(player.field_71070_bA);
 
-            final List<SlotTransaction> transactions = ((TrackedInventoryBridge) player.openContainer).bridge$getCapturedSlotTransactions();
-            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
+            final List<SlotTransaction> transactions = ((TrackedInventoryBridge) player.field_71070_bA).bridge$getCapturedSlotTransactions();
+            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(player.field_71071_by.func_70445_o());
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(cursor, cursor);
             final ClickInventoryEvent event;
 
             if (shift) {
                 event = SpongeEventFactory.createClickInventoryEventRecipeAll(frame.getCurrentCause(),
-                        cursorTransaction, (Recipe) recipe, Optional.empty(),((Container) player.openContainer), transactions);
+                        cursorTransaction, (Recipe) recipe, Optional.empty(),((Container) player.field_71070_bA), transactions);
             } else {
                 event = SpongeEventFactory.createClickInventoryEventRecipeSingle(frame.getCurrentCause(),
-                        cursorTransaction, (Recipe) recipe, Optional.empty(), ((Container) player.openContainer), transactions);
+                        cursorTransaction, (Recipe) recipe, Optional.empty(), ((Container) player.field_71070_bA), transactions);
             }
             SpongeImpl.postEvent(event);
             if (event.isCancelled() || !event.getCursorTransaction().isValid()) {
@@ -112,7 +112,7 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
             } else {
                 PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
             }
-            PacketPhaseUtil.handleSlotRestore(player, player.openContainer, event.getTransactions(), event.isCancelled());
+            PacketPhaseUtil.handleSlotRestore(player, player.field_71070_bA, event.getTransactions(), event.isCancelled());
             event.getTransactions().clear();
         }
     }

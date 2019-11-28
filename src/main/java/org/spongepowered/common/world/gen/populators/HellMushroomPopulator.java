@@ -83,7 +83,7 @@ public class HellMushroomPopulator implements Mushroom {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
             y = random.nextInt(128);
-            final BlockPos height = chunkPos.add(x, y, z);
+            final BlockPos height = chunkPos.func_177982_a(x, y, z);
             if (this.featureM.getSupplierOverride().isPresent()) {
                 final Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(height));
                 type = this.featureM.getSupplierOverride().get().apply(pos2);
@@ -95,11 +95,11 @@ public class HellMushroomPopulator implements Mushroom {
                 type = result.get(0);
             }
             if (type == MushroomTypes.BROWN) {
-                ((WorldGenBushAccessor) this.feature).accessor$setBushBlock(Blocks.BROWN_MUSHROOM);
+                ((WorldGenBushAccessor) this.feature).accessor$setBushBlock(Blocks.field_150338_P);
             } else {
-                ((WorldGenBushAccessor) this.feature).accessor$setBushBlock(Blocks.RED_MUSHROOM);
+                ((WorldGenBushAccessor) this.feature).accessor$setBushBlock(Blocks.field_150337_Q);
             }
-            this.feature.generate((World) world, random, height);
+            this.feature.func_180709_b((World) world, random, height);
 
         }
     }

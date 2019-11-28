@@ -51,13 +51,13 @@ public class RotationalDataProcessor
 
     @Override
     protected boolean set(EntityItemFrame entity, Rotation value) {
-        entity.setItemRotation(value.getAngle() / 45);
+        entity.func_82336_g(value.getAngle() / 45);
         return true;
     }
 
     @Override
     protected Optional<Rotation> getVal(EntityItemFrame entity) {
-        return Optional.of(SpongeImpl.getGame().getRegistry().getRotationFromDegree(entity.getRotation() * 45).get());
+        return Optional.of(SpongeImpl.getGame().getRegistry().getRotationFromDegree(entity.func_82333_j() * 45).get());
     }
 
     @Override

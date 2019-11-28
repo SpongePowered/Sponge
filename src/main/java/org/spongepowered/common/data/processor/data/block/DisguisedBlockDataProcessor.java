@@ -40,17 +40,17 @@ public class DisguisedBlockDataProcessor extends
         AbstractCatalogDataProcessor<DisguisedBlockType, Value<DisguisedBlockType>, DisguisedBlockData, ImmutableDisguisedBlockData> {
 
     public DisguisedBlockDataProcessor() {
-        super(Keys.DISGUISED_BLOCK_TYPE, input -> input.getItem() == ItemTypes.MONSTER_EGG);
+        super(Keys.DISGUISED_BLOCK_TYPE, input -> input.func_77973_b() == ItemTypes.MONSTER_EGG);
     }
 
     @Override
     protected int setToMeta(DisguisedBlockType value) {
-        return ((BlockSilverfish.EnumType) value).getMetadata();
+        return ((BlockSilverfish.EnumType) value).func_176881_a();
     }
 
     @Override
     protected DisguisedBlockType getFromMeta(int meta) {
-        return (DisguisedBlockType) BlockSilverfish.EnumType.byMetadata(meta);
+        return (DisguisedBlockType) BlockSilverfish.EnumType.func_176879_a(meta);
     }
 
     @Override

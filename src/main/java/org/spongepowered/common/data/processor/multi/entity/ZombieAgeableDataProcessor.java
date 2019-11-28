@@ -62,7 +62,7 @@ public class ZombieAgeableDataProcessor extends AbstractEntityDataProcessor<Enti
         boolean adult = (Boolean) keyValues.get(Keys.IS_ADULT);
 
         EntityZombie entity = entityCast;
-        entity.setChild(!adult);
+        entity.func_82227_f(!adult);
         return true;
     }
 
@@ -70,8 +70,8 @@ public class ZombieAgeableDataProcessor extends AbstractEntityDataProcessor<Enti
     protected Map<Key<?>, ?> getValues(EntityZombie entity) {
         int age;
         boolean adult;
-        age = entity.isChild() ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        adult = !entity.isChild();
+        age = entity.func_70631_g_() ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        adult = !entity.func_70631_g_();
         return ImmutableMap.<Key<?>, Object>of(Keys.AGE, age, Keys.IS_ADULT, adult);
     }
 

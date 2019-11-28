@@ -49,13 +49,13 @@ public class CanDropAsItemValueProcessor extends AbstractSpongeValueProcessor<En
 
     @Override
     protected boolean set(EntityFallingBlock container, Boolean value) {
-        container.shouldDropItem = value;
+        container.field_145813_c = value;
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityFallingBlock container) {
-        return Optional.of(container.shouldDropItem);
+        return Optional.of(container.field_145813_c);
     }
 
     @Override

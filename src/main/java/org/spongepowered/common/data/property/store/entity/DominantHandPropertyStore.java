@@ -41,7 +41,7 @@ public class DominantHandPropertyStore extends AbstractEntityPropertyStore<Domin
             return Optional.empty();
         }
 
-        EnumHandSide hand = ((EntityPlayer) entity).getPrimaryHand();
+        EnumHandSide hand = ((EntityPlayer) entity).func_184591_cq();
         HandPreference type = (HandPreference) (Object) hand;
         return Optional.of(new DominantHandProperty(type));
     }

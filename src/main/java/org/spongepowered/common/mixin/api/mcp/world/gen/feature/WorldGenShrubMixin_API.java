@@ -53,7 +53,7 @@ public abstract class WorldGenShrubMixin_API extends WorldGenerator implements P
 
     @Override
     public void placeObject(World world, Random random, int x, int y, int z) {
-        generate((net.minecraft.world.World) world, random, new BlockPos(x, y, z));
+        func_180709_b((net.minecraft.world.World) world, random, new BlockPos(x, y, z));
     }
 
 }

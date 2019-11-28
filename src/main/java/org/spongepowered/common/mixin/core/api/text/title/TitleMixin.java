@@ -56,7 +56,7 @@ public abstract class TitleMixin implements TitleBridge {
     @Override
     public void bridge$send(EntityPlayerMP player) {
         for (SPacketTitle packet : this.getPackets()) {
-            player.connection.sendPacket(packet);
+            player.field_71135_a.func_147359_a(packet);
         }
     }
 

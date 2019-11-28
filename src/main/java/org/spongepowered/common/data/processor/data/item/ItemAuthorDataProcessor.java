@@ -48,7 +48,7 @@ import java.util.Optional;
 public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Text, Value<Text>, AuthorData, ImmutableAuthorData> {
 
     public ItemAuthorDataProcessor() {
-        super(input -> input.getItem() == Items.WRITABLE_BOOK || input.getItem() == Items.WRITTEN_BOOK, Keys.BOOK_AUTHOR);
+        super(input -> input.func_77973_b() == Items.field_151099_bA || input.func_77973_b() == Items.field_151164_bB, Keys.BOOK_AUTHOR);
     }
 
     @Override
@@ -63,16 +63,16 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
 
     @Override
     protected boolean set(final ItemStack itemStack, final Text value) {
-        itemStack.setTagInfo(Constants.Item.Book.ITEM_BOOK_AUTHOR, new NBTTagString(SpongeTexts.toLegacy(value)));
+        itemStack.func_77983_a(Constants.Item.Book.ITEM_BOOK_AUTHOR, new NBTTagString(SpongeTexts.toLegacy(value)));
         return true;
     }
 
     @Override
     protected Optional<Text> getVal(final ItemStack itemStack) {
-        if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(Constants.Item.Book.ITEM_BOOK_AUTHOR)) {
+        if (!itemStack.func_77942_o() || !itemStack.func_77978_p().func_74764_b(Constants.Item.Book.ITEM_BOOK_AUTHOR)) {
             return Optional.empty();
         }
-        final String json = itemStack.getTagCompound().getString(Constants.Item.Book.ITEM_BOOK_AUTHOR);
+        final String json = itemStack.func_77978_p().func_74779_i(Constants.Item.Book.ITEM_BOOK_AUTHOR);
         final Text author = TextSerializers.JSON.deserializeUnchecked(json);
         return Optional.of(author);
     }

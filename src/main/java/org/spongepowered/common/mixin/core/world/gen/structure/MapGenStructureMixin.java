@@ -63,25 +63,25 @@ public abstract class MapGenStructureMixin extends MapGenBase {
         if (impl$isGeneratingStructures) {
             return false;
         }
-        final Chunk chunk = ((ChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(chunkCoord.x, chunkCoord.z);
+        final Chunk chunk = ((ChunkProviderBridge) worldIn.func_72863_F()).bridge$getLoadedChunkWithoutMarkingActive(chunkCoord.field_77276_a, chunkCoord.field_77275_b);
         if (chunk == null) {
             return false;
         }
 
         this.initializeStructureData(worldIn);
-        final int i = (chunkCoord.x << 4) + 8;
-        final int j = (chunkCoord.z << 4) + 8;
+        final int i = (chunkCoord.field_77276_a << 4) + 8;
+        final int j = (chunkCoord.field_77275_b << 4) + 8;
         boolean flag = false;
 
         impl$isGeneratingStructures = true;
         for (final StructureStart structurestart : this.structureMap.values())
         {
-            if (structurestart.isSizeableStructure() && structurestart.isValidForPostProcess(chunkCoord) && structurestart.getBoundingBox().intersectsWith(i, j, i + 15, j + 15))
+            if (structurestart.func_75069_d() && structurestart.func_175788_a(chunkCoord) && structurestart.func_75071_a().func_78885_a(i, j, i + 15, j + 15))
             {
-                structurestart.generateStructure(worldIn, randomIn, new StructureBoundingBox(i, j, i + 15, j + 15));
-                structurestart.notifyPostProcessAt(chunkCoord);
+                structurestart.func_75068_a(worldIn, randomIn, new StructureBoundingBox(i, j, i + 15, j + 15));
+                structurestart.func_175787_b(chunkCoord);
                 flag = true;
-                this.setStructureStart(structurestart.getChunkPosX(), structurestart.getChunkPosZ(), structurestart);
+                this.setStructureStart(structurestart.func_143019_e(), structurestart.func_143018_f(), structurestart);
             }
         }
         impl$isGeneratingStructures = false;

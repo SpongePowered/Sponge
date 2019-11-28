@@ -89,24 +89,24 @@ public abstract class ContainerRepairMixin extends ContainerMixin implements Len
             return;
         }
 
-        final ItemStack itemstack = this.inputSlots.getStackInSlot(0);
-        final ItemStack itemstack2 = this.inputSlots.getStackInSlot(1);
-        final ItemStack result = this.outputSlot.getStackInSlot(0);
+        final ItemStack itemstack = this.inputSlots.func_70301_a(0);
+        final ItemStack itemstack2 = this.inputSlots.func_70301_a(1);
+        final ItemStack result = this.outputSlot.func_70301_a(0);
         final UpdateAnvilEvent event = SpongeCommonEventFactory.callUpdateAnvilEvent((ContainerRepair) (Object) this, itemstack, itemstack2, result, this.repairedItemName, this.maximumCost, this.materialCost);
 
         final ItemStackSnapshot finalItem = event.getResult().getFinal();
         if (event.isCancelled() || finalItem.isEmpty()) {
-            this.outputSlot.setInventorySlotContents(0, ItemStack.EMPTY);
+            this.outputSlot.func_70299_a(0, ItemStack.field_190927_a);
             this.maximumCost = 0;
             this.materialCost = 0;
             this.detectAndSendChanges();
             return;
         }
 
-        this.outputSlot.setInventorySlotContents(0, ItemStackUtil.fromSnapshotToNative(event.getResult().getFinal()));
+        this.outputSlot.func_70299_a(0, ItemStackUtil.fromSnapshotToNative(event.getResult().getFinal()));
         this.maximumCost = event.getCosts().getFinal().getLevelCost();
         this.materialCost = event.getCosts().getFinal().getMaterialCost();
-        this.listeners.forEach(l -> l.sendWindowProperty(((ContainerRepair)(Object) this), 0, this.maximumCost));
+        this.listeners.forEach(l -> l.func_71112_a(((ContainerRepair)(Object) this), 0, this.maximumCost));
         this.detectAndSendChanges();
     }
 

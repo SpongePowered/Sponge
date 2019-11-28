@@ -65,7 +65,7 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     @Override
     public final String getId() {
         if (this.api$id == null || this.api$id.isEmpty()) {
-            final ResourceLocation id = REGISTRY.getNameForObject((Enchantment) (Object) this);
+            final ResourceLocation id = REGISTRY.func_177774_c((Enchantment) (Object) this);
             if (id != null) {
                 this.api$id = id.toString();
             }
@@ -75,7 +75,7 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public int getWeight() {
-        return this.rarity.getWeight();
+        return this.rarity.func_185270_a();
     }
 
     @Override

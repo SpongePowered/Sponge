@@ -61,11 +61,11 @@ public class PotionEntityPotionDataProcessor extends AbstractSingleDataSingleTar
 
     @Override
     protected Optional<List<PotionEffect>> getVal(EntityPotion dataHolder) {
-        ItemStack potionItem = dataHolder.getPotion();
+        ItemStack potionItem = dataHolder.func_184543_l();
         if (potionItem == null) {
             return Optional.empty();
         }
-        Collection<net.minecraft.potion.PotionEffect> effects = PotionUtils.getEffectsFromStack(potionItem);
+        Collection<net.minecraft.potion.PotionEffect> effects = PotionUtils.func_185189_a(potionItem);
         if (effects == null || effects.isEmpty()) {
             return Optional.empty();
         }
@@ -98,7 +98,7 @@ public class PotionEntityPotionDataProcessor extends AbstractSingleDataSingleTar
         }
         Optional<List<PotionEffect>> effects = getVal((EntityPotion) container);
         if (effects.isPresent()) {
-            ((EntityPotion) container).setItem(new ItemStack(Items.POTIONITEM, 1, 0));
+            ((EntityPotion) container).func_184541_a(new ItemStack(Items.field_151068_bn, 1, 0));
             return DataTransactionResult.successRemove(constructImmutableValue(effects.get()));
         }
         return DataTransactionResult.successNoData();

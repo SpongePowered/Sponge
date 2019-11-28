@@ -36,6 +36,6 @@ public abstract class BlockCarpetMixin extends BlockMixin implements DyeableBloc
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setPropertyForDyeableBlock(final CallbackInfo ci) {
-        this.bridge$setColorPropertyEnum(BlockCarpet.COLOR);
+        this.bridge$setColorPropertyEnum(BlockCarpet.field_176330_a);
     }
 }

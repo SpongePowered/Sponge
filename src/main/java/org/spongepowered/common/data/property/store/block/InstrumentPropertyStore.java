@@ -51,26 +51,26 @@ public class InstrumentPropertyStore extends AbstractBlockPropertyStore<Instrume
 
     @SuppressWarnings("deprecation")
     private InstrumentType getInstrumentType(IBlockState block) {
-        final Block blockType = block.getBlock();
-        if (blockType == Blocks.CLAY) {
+        final Block blockType = block.func_177230_c();
+        if (blockType == Blocks.field_150435_aG) {
             return InstrumentTypes.FLUTE;
-        } else if (blockType == Blocks.GOLD_BLOCK) {
+        } else if (blockType == Blocks.field_150340_R) {
             return InstrumentTypes.BELL;
-        } else if (blockType == Blocks.WOOL) {
+        } else if (blockType == Blocks.field_150325_L) {
             return InstrumentTypes.GUITAR;
-        } else if (blockType == Blocks.PACKED_ICE) {
+        } else if (blockType == Blocks.field_150403_cj) {
             return InstrumentTypes.CHIME;
-        } else if (blockType == Blocks.BONE_BLOCK) {
+        } else if (blockType == Blocks.field_189880_di) {
             return InstrumentTypes.XYLOPHONE;
         }
-        final Material material = block.getBlock().getMaterial(block);
-        if (material == Material.ROCK) {
+        final Material material = block.func_177230_c().func_149688_o(block);
+        if (material == Material.field_151576_e) {
             return InstrumentTypes.BASS_DRUM;
-        } else if (material == Material.SAND) {
+        } else if (material == Material.field_151595_p) {
             return InstrumentTypes.SNARE;
-        } else if (material == Material.GLASS) {
+        } else if (material == Material.field_151592_s) {
             return InstrumentTypes.HIGH_HAT;
-        } else if (material == Material.WOOD) {
+        } else if (material == Material.field_151575_d) {
             return InstrumentTypes.BASS_ATTACK;
         }
         return InstrumentTypes.HARP;

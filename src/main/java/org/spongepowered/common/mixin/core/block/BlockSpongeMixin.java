@@ -44,7 +44,7 @@ import java.util.Optional;
 public abstract class BlockSpongeMixin extends BlockMixin {
 
     private ImmutableWetData impl$getWetData(final IBlockState blockState) {
-        final boolean isWet = blockState.getValue(BlockSponge.WET);
+        final boolean isWet = blockState.func_177229_b(BlockSponge.field_176313_a);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWetData.class, isWet);
     }
 
@@ -57,7 +57,7 @@ public abstract class BlockSpongeMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableWetData) {
             final boolean isWet = ((ImmutableWetData) manipulator).wet().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockSponge.WET, isWet));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockSponge.field_176313_a, isWet));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -66,7 +66,7 @@ public abstract class BlockSpongeMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.IS_WET)) {
             final boolean isWet = (Boolean) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockSponge.WET, isWet));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockSponge.field_176313_a, isWet));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

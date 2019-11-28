@@ -63,20 +63,20 @@ public class SpongeHoverAction {
                 HoverAction.ShowEntity.Ref entity = ((HoverAction.ShowEntity) action).getResult();
 
                 NBTTagCompound nbt = new NBTTagCompound();
-                nbt.setString("id", entity.getUniqueId().toString());
+                nbt.func_74778_a("id", entity.getUniqueId().toString());
 
                 if (entity.getType().isPresent()) {
-                    nbt.setString("type", EntityList.getKey(((SpongeEntityType) entity.getType().get()).entityClass).toString());
+                    nbt.func_74778_a("type", EntityList.func_191306_a(((SpongeEntityType) entity.getType().get()).entityClass).toString());
                 }
 
-                nbt.setString("name", entity.getName());
+                nbt.func_74778_a("name", entity.getName());
                 component = new TextComponentString(nbt.toString());
                 break;
             }
             case SHOW_ITEM: {
                 ItemStack item = (ItemStack) ((ItemStackSnapshot) action.getResult()).createStack();
                 NBTTagCompound nbt = new NBTTagCompound();
-                item.writeToNBT(nbt);
+                item.func_77955_b(nbt);
                 component = new TextComponentString(nbt.toString());
                 break;
             }

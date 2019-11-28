@@ -58,7 +58,7 @@ public abstract class BlockSilverfishMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDisguisedBlockData) {
             final BlockSilverfish.EnumType disguisedBlockType = (BlockSilverfish.EnumType) ((ImmutableDisguisedBlockData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockSilverfish.VARIANT, disguisedBlockType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockSilverfish.field_176378_a, disguisedBlockType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -67,12 +67,12 @@ public abstract class BlockSilverfishMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DISGUISED_BLOCK_TYPE)) {
             final BlockSilverfish.EnumType disguisedBlockType = (BlockSilverfish.EnumType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockSilverfish.VARIANT, disguisedBlockType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockSilverfish.field_176378_a, disguisedBlockType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableDisguisedBlockData impl$getSilverfishTypeFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisguisedBlockData.class, (DisguisedBlockType) blockState.getValue(BlockSilverfish.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisguisedBlockData.class, (DisguisedBlockType) blockState.func_177229_b(BlockSilverfish.field_176378_a));
     }
 }

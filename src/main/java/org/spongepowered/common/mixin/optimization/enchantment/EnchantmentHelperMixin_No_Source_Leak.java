@@ -60,11 +60,11 @@ public abstract class EnchantmentHelperMixin_No_Source_Leak {
      */
     @Overwrite
     public static int getEnchantmentModifierDamage(final Iterable<ItemStack> stacks, final DamageSource source) {
-        ENCHANTMENT_MODIFIER_DAMAGE.damageModifier = 0;
-        ENCHANTMENT_MODIFIER_DAMAGE.source = source;
+        ENCHANTMENT_MODIFIER_DAMAGE.field_77497_a = 0;
+        ENCHANTMENT_MODIFIER_DAMAGE.field_77496_b = source;
         applyEnchantmentModifierArray(ENCHANTMENT_MODIFIER_DAMAGE, stacks);
-        ENCHANTMENT_MODIFIER_DAMAGE.source = null; // Sponge - Remove reference to Damagesource.
-        return ENCHANTMENT_MODIFIER_DAMAGE.damageModifier;
+        ENCHANTMENT_MODIFIER_DAMAGE.field_77496_b = null; // Sponge - Remove reference to Damagesource.
+        return ENCHANTMENT_MODIFIER_DAMAGE.field_77497_a;
     }
 
 
@@ -75,19 +75,19 @@ public abstract class EnchantmentHelperMixin_No_Source_Leak {
      */
     @Overwrite
     public static void applyThornEnchantments(@Nullable final EntityLivingBase p_151384_0_, final Entity p_151384_1_) {
-        ENCHANTMENT_ITERATOR_HURT.attacker = p_151384_1_;
-        ENCHANTMENT_ITERATOR_HURT.user = p_151384_0_;
+        ENCHANTMENT_ITERATOR_HURT.field_151363_b = p_151384_1_;
+        ENCHANTMENT_ITERATOR_HURT.field_151364_a = p_151384_0_;
 
         if (p_151384_0_ != null) {
-            applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_HURT, p_151384_0_.getEquipmentAndArmor());
+            applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_HURT, p_151384_0_.func_184209_aF());
         }
 
         if (p_151384_1_ instanceof EntityPlayer) {
-            applyEnchantmentModifier(ENCHANTMENT_ITERATOR_HURT, p_151384_0_.getHeldItemMainhand());
+            applyEnchantmentModifier(ENCHANTMENT_ITERATOR_HURT, p_151384_0_.func_184614_ca());
         }
         // Sponge Start - remove references to entity objects to avoid memory leaks
-        ENCHANTMENT_ITERATOR_HURT.attacker = null;
-        ENCHANTMENT_ITERATOR_HURT.user = null;
+        ENCHANTMENT_ITERATOR_HURT.field_151363_b = null;
+        ENCHANTMENT_ITERATOR_HURT.field_151364_a = null;
         // Sponge end
 
     }
@@ -99,19 +99,19 @@ public abstract class EnchantmentHelperMixin_No_Source_Leak {
      */
     @Overwrite
     public static void applyArthropodEnchantments(@Nullable final EntityLivingBase p_151385_0_, final Entity p_151385_1_) {
-        ENCHANTMENT_ITERATOR_DAMAGE.user = p_151385_0_;
-        ENCHANTMENT_ITERATOR_DAMAGE.target = p_151385_1_;
+        ENCHANTMENT_ITERATOR_DAMAGE.field_151366_a = p_151385_0_;
+        ENCHANTMENT_ITERATOR_DAMAGE.field_151365_b = p_151385_1_;
 
         if (p_151385_0_ != null) {
-            applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_DAMAGE, p_151385_0_.getEquipmentAndArmor());
+            applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_DAMAGE, p_151385_0_.func_184209_aF());
         }
 
         if (p_151385_0_ instanceof EntityPlayer) {
-            applyEnchantmentModifier(ENCHANTMENT_ITERATOR_DAMAGE, p_151385_0_.getHeldItemMainhand());
+            applyEnchantmentModifier(ENCHANTMENT_ITERATOR_DAMAGE, p_151385_0_.func_184614_ca());
         }
         // Sponge Start - remove references to entity objects to avoid memory leaks
-        ENCHANTMENT_ITERATOR_DAMAGE.user = null;
-        ENCHANTMENT_ITERATOR_DAMAGE.target = null;
+        ENCHANTMENT_ITERATOR_DAMAGE.field_151366_a = null;
+        ENCHANTMENT_ITERATOR_DAMAGE.field_151365_b = null;
         // Sponge end
     }
 }

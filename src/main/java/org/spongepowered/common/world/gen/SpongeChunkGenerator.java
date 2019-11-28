@@ -135,11 +135,11 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         this.genpop = Lists.newArrayList();
         this.pop = Lists.newArrayList();
         this.biomeSettings = Maps.newHashMap();
-        this.rand = new Random(world.getSeed());
+        this.rand = new Random(world.func_72905_C());
         this.noise4 = new NoiseGeneratorPerlin(this.rand, 4);
         this.stoneNoise = new double[256];
 
-        ((WorldProviderAccessor) this.world.provider).accessor$setBiomeProvider(CustomBiomeProvider.of(this.biomeGenerator));
+        ((WorldProviderAccessor) this.world.field_73011_w).accessor$setBiomeProvider(CustomBiomeProvider.of(this.biomeGenerator));
         if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
             ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(this.biomeGenerator);
         }
@@ -204,7 +204,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public void setBiomeGenerator(BiomeGenerator biomeGenerator) {
         this.biomeGenerator = biomeGenerator;
-        ((WorldProviderAccessor) this.world.provider).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
+        ((WorldProviderAccessor) this.world.field_73011_w).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
         if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
             ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
         }
@@ -238,7 +238,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     @Override
-    public Chunk generateChunk(int chunkX, int chunkZ) {
+    public Chunk func_185932_a(int chunkX, int chunkZ) {
         this.rand.setSeed(chunkX * 341873128712L + chunkZ * 132897987541L);
         this.cachedBiomes.reuse(new Vector3i(chunkX * 16, 0, chunkZ * 16));
         this.biomeGenerator.generateBiomes(this.cachedBiomes);
@@ -285,23 +285,23 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             ((ChunkBridge) chunk).bridge$fill(chunkprimer);
         } else {
             chunk = new Chunk(this.world, chunkprimer, chunkX, chunkZ);
-            this.cachedBiomes.fill(chunk.getBiomeArray());
+            this.cachedBiomes.fill(chunk.func_76605_m());
         }
-        chunk.generateSkylightMap();
+        chunk.func_76603_b();
         return chunk;
     }
 
     @Override
-    public void populate(int chunkX, int chunkZ) {
+    public void func_185931_b(int chunkX, int chunkZ) {
         WorldServerBridge world = (WorldServerBridge) this.world;
         world.bridge$getTimingsHandler().chunkPopulate.startTimingIfSync();
         this.chunkGeneratorTiming.startTimingIfSync();
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        this.rand.setSeed(this.world.getSeed());
+        this.rand.setSeed(this.world.func_72905_C());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
         long j1 = this.rand.nextLong() / 2L * 2L + 1L;
-        this.rand.setSeed(chunkX * i1 + chunkZ * j1 ^ this.world.getSeed());
-        BlockFalling.fallInstantly = true;
+        this.rand.setSeed(chunkX * i1 + chunkZ * j1 ^ this.world.func_72905_C());
+        BlockFalling.field_149832_M = true;
 
         // Have to regeneate the biomes so that any virtual biomes can be passed
         // to the populator.
@@ -310,9 +310,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         ImmutableBiomeVolume biomeBuffer = this.cachedBiomes.getImmutableBiomeCopy();
 
         BlockPos blockpos = new BlockPos(chunkX * 16, 0, chunkZ * 16);
-        BiomeType biome = (BiomeType) this.world.getBiome(blockpos.add(16, 0, 16));
+        BiomeType biome = (BiomeType) this.world.func_180494_b(blockpos.func_177982_a(16, 0, 16));
 
-        org.spongepowered.api.world.Chunk chunk = (org.spongepowered.api.world.Chunk) this.world.getChunk(chunkX, chunkZ);
+        org.spongepowered.api.world.Chunk chunk = (org.spongepowered.api.world.Chunk) this.world.func_72964_e(chunkX, chunkZ);
 
         BiomeGenerationSettings settings = getBiomeSettings(biome);
 
@@ -383,7 +383,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                 timing = spongePopulator.bridge$getTimingsHandler();
                 timing.startTimingIfSync();
             }
-            ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).populate(chunkX, chunkZ);
+            ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).func_185931_b(chunkX, chunkZ);
             if (Timings.isTimingsEnabled()) {
                 timing.stopTimingIfSync();
             }
@@ -392,16 +392,16 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         PopulateChunkEvent.Post event = SpongeEventFactory.createPopulateChunkEventPost(Sponge.getCauseStackManager().getCurrentCause(), ImmutableList.copyOf(populators), chunk);
         SpongeImpl.postEvent(event);
 
-        BlockFalling.fallInstantly = false;
+        BlockFalling.field_149832_M = false;
         this.chunkGeneratorTiming.stopTimingIfSync();
         world.bridge$getTimingsHandler().chunkPopulate.stopTimingIfSync();
     }
 
     @Override
     @SuppressWarnings("try")
-    public boolean generateStructures(Chunk chunk, int chunkX, int chunkZ) {
+    public boolean func_185933_a(Chunk chunk, int chunkX, int chunkZ) {
         boolean flag = false;
-        if (chunk.getInhabitedTime() < 3600L) {
+        if (chunk.func_177416_w() < 3600L) {
             for (Populator populator : this.pop) {
                 if (populator instanceof StructureOceanMonument) {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
@@ -409,7 +409,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                              .world(this.world)
                              .populator(populator.getType())
                             .buildAndSwitch()) {
-                        flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
+                        flag |= ((StructureOceanMonument) populator).func_175794_a(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
                     }
                 }
             }
@@ -418,22 +418,22 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     @Override
-    public List<SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos) {
+    public List<SpawnListEntry> func_177458_a(EnumCreatureType creatureType, BlockPos pos) {
         if (this.baseGenerator instanceof IChunkGenerator) {
-            return ((IChunkGenerator) this.baseGenerator).getPossibleCreatures(creatureType, pos);
+            return ((IChunkGenerator) this.baseGenerator).func_177458_a(creatureType, pos);
         }
 
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            return ((SpongeGenerationPopulator) this.baseGenerator).getChunkGenerator().getPossibleCreatures(creatureType, pos);
+            return ((SpongeGenerationPopulator) this.baseGenerator).getChunkGenerator().func_177458_a(creatureType, pos);
         }
 
-        Biome biome = this.world.getBiome(pos);
-        return biome.getSpawnableList(creatureType);
+        Biome biome = this.world.func_180494_b(pos);
+        return biome.func_76747_a(creatureType);
     }
 
     @Nullable
     @Override
-    public BlockPos getNearestStructurePos(World worldIn, String structureName, BlockPos position, boolean p_180513_4_) {
+    public BlockPos func_180513_a(World worldIn, String structureName, BlockPos position, boolean p_180513_4_) {
         Class<? extends MapGenStructure> target = null;
         switch (structureName) {
             case "Stronghold":
@@ -464,20 +464,20 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (target != null) {
             for (GenerationPopulator gen : this.genpop) {
                 if (target.isInstance(gen)) {
-                    return ((MapGenStructure) gen).getNearestStructurePos(worldIn, position, p_180513_4_);
+                    return ((MapGenStructure) gen).func_180706_b(worldIn, position, p_180513_4_);
                 }
             }
         }
 
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getNearestStructurePos(worldIn, structureName, position, p_180513_4_);
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).func_180513_a(worldIn, structureName, position, p_180513_4_);
         }
 
         return null;
     }
 
     @Override
-    public boolean isInsideStructure(World worldIn, String structureName, BlockPos position) {
+    public boolean func_193414_a(World worldIn, String structureName, BlockPos position) {
         Class<? extends MapGenStructure> target = null;
         switch (structureName) {
             case "Stronghold":
@@ -508,42 +508,42 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (target != null) {
             for (GenerationPopulator gen : this.genpop) {
                 if (target.isInstance(gen)) {
-                    return ((MapGenStructure) gen).isInsideStructure(position);
+                    return ((MapGenStructure) gen).func_175795_b(position);
                 }
             }
         }
 
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).isInsideStructure(worldIn, structureName, position);
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).func_193414_a(worldIn, structureName, position);
         }
 
         return false;
 }
 
     @Override
-    public void recreateStructures(Chunk chunkIn, int x, int z) {
-        if (!this.world.getWorldInfo().isMapFeaturesEnabled()) {
+    public void func_180514_a(Chunk chunkIn, int x, int z) {
+        if (!this.world.func_72912_H().func_76089_r()) {
             return;
         }
 
         if (this.baseGenerator instanceof IChunkGenerator) {
-            ((IChunkGenerator) this.baseGenerator).recreateStructures(chunkIn, x, z);
+            ((IChunkGenerator) this.baseGenerator).func_180514_a(chunkIn, x, z);
         }
 
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).recreateStructures(chunkIn, x, z);
+            ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).func_180514_a(chunkIn, x, z);
         }
 
         for (GenerationPopulator populator : this.genpop) {
             if (populator instanceof MapGenStructure) {
-                ((MapGenStructure) populator).generate(chunkIn.getWorld(), x, z, null);
+                ((MapGenStructure) populator).func_186125_a(chunkIn.func_177412_p(), x, z, null);
             }
         }
     }
 
     public void replaceBiomeBlocks(World world, Random rand, int x, int z, ChunkPrimer chunk, ImmutableBiomeVolume biomes) {
         double d0 = 0.03125D;
-        this.stoneNoise = this.noise4.getRegion(this.stoneNoise, x * 16, z * 16, 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
+        this.stoneNoise = this.noise4.func_151599_a(this.stoneNoise, x * 16, z * 16, 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
         Vector3i min = biomes.getBiomeMin();
         for (int x0 = 0; x0 < 16; ++x0) {
             for (int z0 = 0; z0 < 16; ++z0) {
@@ -559,17 +559,17 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (groundcover.isEmpty()) {
             return;
         }
-        int seaLevel = worldIn.getSeaLevel();
+        int seaLevel = worldIn.func_181545_F();
         IBlockState currentPlacement = null;
         int layerProgress = -1;
         int relativeX = x & 15;
         int relativeZ = z & 15;
         int layerDepth = 0;
         for (int currentY = 255; currentY >= 0; --currentY) {
-            IBlockState nextBlock = chunk.getBlockState(relativeX, currentY, relativeZ);
-            if (nextBlock.getMaterial() == Material.AIR) {
+            IBlockState nextBlock = chunk.func_177856_a(relativeX, currentY, relativeZ);
+            if (nextBlock.func_185904_a() == Material.field_151579_a) {
                 layerProgress = -1;
-            } else if (nextBlock.getBlock() == Blocks.STONE) {
+            } else if (nextBlock.func_177230_c() == Blocks.field_150348_b) {
                 if (layerProgress == -1) {
                     if (groundcover.isEmpty()) {
                         layerProgress = 0;
@@ -584,7 +584,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                     }
 
                     if (currentY >= seaLevel - 1) {
-                        chunk.setBlockState(relativeX, currentY, relativeZ, currentPlacement);
+                        chunk.func_177855_a(relativeX, currentY, relativeZ, currentPlacement);
                         ++layerDepth;
                         if (layerDepth < groundcover.size()) {
                             layer = groundcover.get(layerDepth);
@@ -593,19 +593,19 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                         }
                     } else if (currentY < seaLevel - 7 - layerProgress) {
                         layerProgress = 0;
-                        chunk.setBlockState(relativeX, currentY, relativeZ, Blocks.GRAVEL.getDefaultState());
+                        chunk.func_177855_a(relativeX, currentY, relativeZ, Blocks.field_150351_n.func_176223_P());
                     } else {
                         ++layerDepth;
                         if (layerDepth < groundcover.size()) {
                             layer = groundcover.get(layerDepth);
                             layerProgress = layer.getDepth(currentY).getFlooredAmount(rand, stoneNoise);
                             currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
-                            chunk.setBlockState(relativeX, currentY, relativeZ, currentPlacement);
+                            chunk.func_177855_a(relativeX, currentY, relativeZ, currentPlacement);
                         }
                     }
                 } else if (layerProgress > 0) {
                     --layerProgress;
-                    chunk.setBlockState(relativeX, currentY, relativeZ, currentPlacement);
+                    chunk.func_177855_a(relativeX, currentY, relativeZ, currentPlacement);
 
                     if (layerProgress == 0) {
                         ++layerDepth;

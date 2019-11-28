@@ -34,6 +34,6 @@ public class SmeltablePropertyStore extends AbstractItemStackPropertyStore<Smelt
 
     @Override
     protected Optional<SmeltableProperty> getFor(ItemStack itemStack) {
-        return Optional.of(new SmeltableProperty(!FurnaceRecipes.instance().getSmeltingResult(itemStack).isEmpty()));
+        return Optional.of(new SmeltableProperty(!FurnaceRecipes.func_77602_a().func_151395_a(itemStack).func_190926_b()));
     }
 }

@@ -74,9 +74,9 @@ public class SpongeInternalListeners {
             if (event.getTargetWorld().getUniqueId().equals(Sponge.getServer().getDefaultWorld().get().getUniqueId())) {
                 SpongeUsernameCache.save();
                 final MinecraftServer server = SpongeImpl.getServer();
-                ((PlayerProfileCacheBridge) server.getPlayerProfileCache()).bridge$setCanSave(true);
-                server.getPlayerProfileCache().save();
-                ((PlayerProfileCacheBridge) server.getPlayerProfileCache()).bridge$setCanSave(false);
+                ((PlayerProfileCacheBridge) server.func_152358_ax()).bridge$setCanSave(true);
+                server.func_152358_ax().func_152658_c();
+                ((PlayerProfileCacheBridge) server.func_152358_ax()).bridge$setCanSave(false);
             }
         }
     }

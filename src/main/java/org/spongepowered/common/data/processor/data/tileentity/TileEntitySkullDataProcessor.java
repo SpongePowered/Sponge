@@ -61,7 +61,7 @@ public class TileEntitySkullDataProcessor
 
     @Override
     protected Optional<SkullType> getVal(final TileEntitySkull skull) {
-        return Optional.of(SkullUtils.getSkullType(skull.getSkullType()));
+        return Optional.of(SkullUtils.getSkullType(skull.func_145904_a()));
     }
 
     @Override
@@ -72,10 +72,10 @@ public class TileEntitySkullDataProcessor
 
     @Override
     protected boolean set(final TileEntitySkull skull, final SkullType type) {
-        skull.setType(((SpongeSkullType) type).getByteId());
-        skull.markDirty();
-        final IBlockState blockState = skull.getWorld().getBlockState(skull.getPos());
-        skull.getWorld().notifyBlockUpdate(skull.getPos(), blockState, blockState, 3);
+        skull.func_152107_a(((SpongeSkullType) type).getByteId());
+        skull.func_70296_d();
+        final IBlockState blockState = skull.func_145831_w().func_180495_p(skull.func_174877_v());
+        skull.func_145831_w().func_184138_a(skull.func_174877_v(), blockState, blockState, 3);
         return true;
     }
 

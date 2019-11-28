@@ -91,7 +91,7 @@ public abstract class EntityFishHookMixin extends EntityMixin {
      */
     @Overwrite
     public int handleHookRetraction() {
-        if (!this.world.isRemote && this.angler != null) {
+        if (!this.world.field_72995_K && this.angler != null) {
             int i = 0;
 
             // Sponge start
@@ -99,9 +99,9 @@ public abstract class EntityFishHookMixin extends EntityMixin {
             if (this.ticksCatchable > 0) {
                 // Moved from below
                 LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.world);
-                lootcontext$builder.withLuck(this.luck + this.angler.getLuck());
-                transactions = this.world.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING)
-                        .generateLootForPools(this.rand, lootcontext$builder.build())
+                lootcontext$builder.func_186469_a(this.luck + this.angler.func_184817_da());
+                transactions = this.world.func_184146_ak().func_186521_a(LootTableList.field_186387_al)
+                        .func_186462_a(this.rand, lootcontext$builder.func_186471_a())
                         .stream()
                         .map(s -> {
                             ItemStackSnapshot snapshot = ((org.spongepowered.api.item.inventory.ItemStack) s).createSnapshot();
@@ -120,7 +120,7 @@ public abstract class EntityFishHookMixin extends EntityMixin {
 
             if (this.caughtEntity != null) {
                 this.bringInHookedEntity();
-                this.world.setEntityState((net.minecraft.entity.Entity) (Object) this, (byte) 31);
+                this.world.func_72960_a((net.minecraft.entity.Entity) (Object) this, (byte) 31);
                 i = this.caughtEntity instanceof EntityItem ? 3 : 5;
             } // Sponge: Remove else
 
@@ -138,21 +138,21 @@ public abstract class EntityFishHookMixin extends EntityMixin {
                     // Sponge end
 
                     EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack);
-                    double d0 = this.angler.posX - this.posX;
-                    double d1 = this.angler.posY - this.posY;
-                    double d2 = this.angler.posZ - this.posZ;
-                    double d3 = MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                    double d0 = this.angler.field_70165_t - this.posX;
+                    double d1 = this.angler.field_70163_u - this.posY;
+                    double d2 = this.angler.field_70161_v - this.posZ;
+                    double d3 = MathHelper.func_76133_a(d0 * d0 + d1 * d1 + d2 * d2);
                     //double d4 = 0.1D;
-                    entityitem.motionX = d0 * 0.1D;
-                    entityitem.motionY = d1 * 0.1D + MathHelper.sqrt(d3) * 0.08D;
-                    entityitem.motionZ = d2 * 0.1D;
-                    this.world.spawnEntity(entityitem);
-                    this.angler.world.spawnEntity(new EntityXPOrb(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D,
+                    entityitem.field_70159_w = d0 * 0.1D;
+                    entityitem.field_70181_x = d1 * 0.1D + MathHelper.func_76133_a(d3) * 0.08D;
+                    entityitem.field_70179_y = d2 * 0.1D;
+                    this.world.func_72838_d(entityitem);
+                    this.angler.field_70170_p.func_72838_d(new EntityXPOrb(this.angler.field_70170_p, this.angler.field_70165_t, this.angler.field_70163_u + 0.5D, this.angler.field_70161_v + 0.5D,
                             this.rand.nextInt(6) + 1));
-                    Item item = itemstack.getItem();
+                    Item item = itemstack.func_77973_b();
 
-                    if (item == Items.FISH || item == Items.COOKED_FISH) {
-                        this.angler.addStat(StatList.FISH_CAUGHT, 1);
+                    if (item == Items.field_151115_aP || item == Items.field_179566_aV) {
+                        this.angler.func_71064_a(StatList.field_188071_E, 1);
                     }
                 }
                 Sponge.getCauseStackManager().popCause();

@@ -40,7 +40,7 @@ public abstract class CommandWorldBorderMixin_MultiWorldCommand {
             target = "Lnet/minecraft/command/CommandWorldBorder;getWorldBorder(Lnet/minecraft/server/MinecraftServer;)Lnet/minecraft/world/border/WorldBorder;"))
     private WorldBorder multiWorldCommand$useSenderWorld(final CommandWorldBorder self, final MinecraftServer server, final MinecraftServer server2,
         final ICommandSender sender, final String[] args) {
-        return sender.getEntityWorld().getWorldBorder();
+        return sender.func_130014_f_().func_175723_af();
     }
 
 }

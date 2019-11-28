@@ -48,7 +48,7 @@ public abstract class EntityPlayerMixin_RealTime extends EntityLivingBaseMixin_R
         if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
             this.xpCooldown = modifier;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();
         this.xpCooldown = Math.max(0, this.xpCooldown - ticks);
     }
 
@@ -75,7 +75,7 @@ public abstract class EntityPlayerMixin_RealTime extends EntityLivingBaseMixin_R
         if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
             this.sleepTimer = modifier;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();
         this.sleepTimer += ticks;
     }
 
@@ -102,7 +102,7 @@ public abstract class EntityPlayerMixin_RealTime extends EntityLivingBaseMixin_R
         if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
             this.sleepTimer = modifier;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();
         this.sleepTimer += ticks;
     }
 

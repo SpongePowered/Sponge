@@ -125,14 +125,14 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
                 .sourceExplosive(((Firework) this))
                 .location(((Firework) this).getLocation())
                 .radius(this.impl$explosionRadius))
-                .ifPresent(explosion -> world.setEntityState(self, state));
+                .ifPresent(explosion -> world.func_72960_a(self, state));
         }
     }
 
     @SuppressWarnings("deprecation")
     @Inject(method = "onUpdate", at = @At("RETURN"))
     private void onUpdate(final CallbackInfo ci) {
-        if (this.fireworkAge == 1 && !this.world.isRemote) {
+        if (this.fireworkAge == 1 && !this.world.field_72995_K) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.THROWER, ((Firework) this).getShooter()); // TODO - Remove in 1.13/API 8
@@ -146,9 +146,9 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
             + "(Lnet/minecraft/util/DamageSource;F)Z"))
     private boolean useEntitySource(final EntityLivingBase entityLivingBase, final DamageSource source, final float amount) {
         try {
-            final DamageSource fireworks = new EntityDamageSource(DamageSource.FIREWORKS.damageType, (Entity) (Object) this).setExplosion();
+            final DamageSource fireworks = new EntityDamageSource(DamageSource.field_191552_t.field_76373_n, (Entity) (Object) this).func_94540_d();
             ((DamageSourceBridge) fireworks).bridge$setFireworksSource();
-            return entityLivingBase.attackEntityFrom(DamageSource.FIREWORKS, amount);
+            return entityLivingBase.func_70097_a(DamageSource.field_191552_t, amount);
         } finally {
             ((DamageSourceBridge) source).bridge$setFireworksSource();
         }

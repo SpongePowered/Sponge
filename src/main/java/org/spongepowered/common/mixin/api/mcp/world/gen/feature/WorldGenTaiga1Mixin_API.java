@@ -77,7 +77,7 @@ public abstract class WorldGenTaiga1Mixin_API extends WorldGenAbstractTree imple
                 for (j1 = x - k2; j1 <= x + k2 && flag; ++j1) {
                     for (k1 = z - k2; k1 <= z + k2 && flag; ++k1) {
                         if (i1 >= 0 && i1 < 256) {
-                            if (!this.canGrowInto(worldIn.getBlockState(new BlockPos(j1, i1, k1)).getBlock())) {
+                            if (!this.func_150523_a(worldIn.func_180495_p(new BlockPos(j1, i1, k1)).func_177230_c())) {
                                 flag = false;
                             }
                         } else {
@@ -91,8 +91,8 @@ public abstract class WorldGenTaiga1Mixin_API extends WorldGenAbstractTree imple
                 return false;
             }
             final BlockPos down = new BlockPos(x, y - 1, z);
-            final Block block = worldIn.getBlockState(down).getBlock();
-            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.SAPLING) && y < 256 - i - 1) {
+            final Block block = worldIn.func_180495_p(down).func_177230_c();
+            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.field_150345_g) && y < 256 - i - 1) {
                 return true;
             }
         }
@@ -102,9 +102,9 @@ public abstract class WorldGenTaiga1Mixin_API extends WorldGenAbstractTree imple
     @Override
     public void placeObject(final World world, final Random random, final int x, final int y, final int z) {
         final BlockPos pos = new BlockPos(x, y, z);
-        setDecorationDefaults();
-        if (generate((net.minecraft.world.World) world, random, pos)) {
-            generateSaplings((net.minecraft.world.World) world, random, pos);
+        func_175904_e();
+        if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
+            func_180711_a((net.minecraft.world.World) world, random, pos);
         }
     }
 

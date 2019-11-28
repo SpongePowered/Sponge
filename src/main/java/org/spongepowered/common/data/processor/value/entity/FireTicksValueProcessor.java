@@ -50,7 +50,7 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 builder.replace(getApiValueFromContainer(container).get().asImmutable());
                 builder.replace(container.getValue(Keys.FIRE_DAMAGE_DELAY).get().asImmutable());
-                ((Entity) container).extinguish();
+                ((Entity) container).func_70066_B();
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }

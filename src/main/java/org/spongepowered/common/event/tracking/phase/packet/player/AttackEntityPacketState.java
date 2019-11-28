@@ -79,13 +79,13 @@ public final class AttackEntityPacketState extends BasicPacketState {
         // There are cases where a player is interacting with an entity that
         // doesn't exist on the server.
         @Nullable
-        net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.world);
+        net.minecraft.entity.Entity entity = useEntityPacket.func_149564_a(packetPlayer.field_70170_p);
         return entity == null;
     }
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
-        context.itemUsed(ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand()))
+        context.itemUsed(ItemStackUtil.cloneDefensive(playerMP.func_184614_ca()))
             .handUsed(HandTypes.MAIN_HAND);
     }
 
@@ -94,16 +94,16 @@ public final class AttackEntityPacketState extends BasicPacketState {
     public void unwind(BasicPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
         final CPacketUseEntity useEntityPacket = context.getPacket();
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
+        final net.minecraft.entity.Entity entity = useEntityPacket.func_149564_a(player.field_70170_p);
         if (entity == null) {
             // Something happened?
             return;
         }
-        final World spongeWorld = (World) player.world;
+        final World spongeWorld = (World) player.field_70170_p;
         if (entity instanceof OwnershipTrackedBridge) {
             ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) player);
         } else {
-            ((Entity) entity).setNotifier(player.getUniqueID());
+            ((Entity) entity).setNotifier(player.func_110124_au());
         }
 
         context.getCapturedItemsSupplier()
@@ -138,7 +138,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
                 if (!items.isEmpty()) {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         final List<Entity> itemEntities = items.stream()
-                            .map(data -> data.create(((WorldServer) player.world)))
+                            .map(data -> data.create(((WorldServer) player.field_70170_p)))
                             .map(entity1 -> (Entity) entity1)
                             .collect(Collectors.toList());
                         frame.pushCause(player);

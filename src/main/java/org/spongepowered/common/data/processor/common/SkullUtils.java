@@ -59,31 +59,31 @@ public class SkullUtils {
     }
 
     public static boolean isValidItemStack(final Object container) {
-        return container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.SKULL);
+        return container instanceof ItemStack && ((ItemStack) container).func_77973_b().equals(Items.field_151144_bL);
     }
 
     public static boolean setProfile(final TileEntitySkull tileEntitySkull, @Nullable final GameProfile profile) {
-        if (SkullUtils.getSkullType(tileEntitySkull.getSkullType()).equals(SkullTypes.PLAYER)) {
+        if (SkullUtils.getSkullType(tileEntitySkull.func_145904_a()).equals(SkullTypes.PLAYER)) {
             final GameProfile newProfile = SpongeRepresentedPlayerData.NULL_PROFILE.equals(profile) ? null : resolveProfileIfNecessary(profile);
-            tileEntitySkull.setPlayerProfile((com.mojang.authlib.GameProfile) newProfile);
-            tileEntitySkull.markDirty();
-            tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
-                    .getBlockState(tileEntitySkull.getPos()), 3);
+            tileEntitySkull.func_152106_a((com.mojang.authlib.GameProfile) newProfile);
+            tileEntitySkull.func_70296_d();
+            tileEntitySkull.func_145831_w().func_184138_a(tileEntitySkull.func_174877_v(), tileEntitySkull.func_145831_w().func_180495_p(tileEntitySkull.func_174877_v()), tileEntitySkull.func_145831_w()
+                    .func_180495_p(tileEntitySkull.func_174877_v()), 3);
             return true;
         }
         return false;
     }
 
     public static boolean setProfile(final ItemStack skull, @Nullable final GameProfile profile) {
-        if (isValidItemStack(skull) && SkullUtils.getSkullType(skull.getMetadata()).equals(SkullTypes.PLAYER)) {
+        if (isValidItemStack(skull) && SkullUtils.getSkullType(skull.func_77960_j()).equals(SkullTypes.PLAYER)) {
             if (profile == null || profile.equals(SpongeRepresentedPlayerData.NULL_PROFILE)) {
-                if (skull.getTagCompound() != null) {
-                    skull.getTagCompound().removeTag(Constants.Item.Skull.ITEM_SKULL_OWNER);
+                if (skull.func_77978_p() != null) {
+                    skull.func_77978_p().func_82580_o(Constants.Item.Skull.ITEM_SKULL_OWNER);
                 }
             } else {
                 final NBTTagCompound nbt = new NBTTagCompound();
-                NBTUtil.writeGameProfile(nbt, (com.mojang.authlib.GameProfile) resolveProfileIfNecessary(profile));
-                skull.setTagInfo(Constants.Item.Skull.ITEM_SKULL_OWNER, nbt);
+                NBTUtil.func_180708_a(nbt, (com.mojang.authlib.GameProfile) resolveProfileIfNecessary(profile));
+                skull.func_77983_a(Constants.Item.Skull.ITEM_SKULL_OWNER, nbt);
             }
             return true;
         }

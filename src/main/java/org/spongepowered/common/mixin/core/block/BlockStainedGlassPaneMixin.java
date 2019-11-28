@@ -36,7 +36,7 @@ public abstract class BlockStainedGlassPaneMixin extends BlockMixin implements D
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$SetPropertyOnInit(final CallbackInfo ci) {
-        this.bridge$setColorPropertyEnum(BlockStainedGlassPane.COLOR);
+        this.bridge$setColorPropertyEnum(BlockStainedGlassPane.field_176245_a);
     }
 
 }

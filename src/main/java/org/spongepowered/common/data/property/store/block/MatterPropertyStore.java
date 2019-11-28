@@ -50,9 +50,9 @@ public class MatterPropertyStore extends AbstractBlockPropertyStore<MatterProper
 
     @Override
     protected Optional<MatterProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        if (block.getBlock() instanceof BlockLiquid) {
+        if (block.func_177230_c() instanceof BlockLiquid) {
             return Optional.of(LIQUID);
-        } else if (block.getMaterial() == Material.AIR) {
+        } else if (block.func_185904_a() == Material.field_151579_a) {
             return Optional.of(GAS);
         } else {
             return Optional.of(SOLID);

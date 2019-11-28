@@ -42,7 +42,7 @@ public class SpongeDimension implements Dimension {
 
     @Override
     public DimensionType getType() {
-        return (DimensionType) (Object) this.worldProvider.getDimensionType();
+        return (DimensionType) (Object) this.worldProvider.func_186058_p();
     }
 
     @Override
@@ -52,34 +52,34 @@ public class SpongeDimension implements Dimension {
 
     @Override
     public boolean allowsPlayerRespawns() {
-        return this.worldProvider.canRespawnHere();
+        return this.worldProvider.func_76567_e();
     }
 
     @Override
     public int getMinimumSpawnHeight() {
-        return this.worldProvider.getAverageGroundLevel();
+        return this.worldProvider.func_76557_i();
     }
 
     @Override
     public boolean doesWaterEvaporate() {
-        return this.worldProvider.doesWaterVaporize();
+        return this.worldProvider.func_177500_n();
     }
 
     @Override
     public boolean hasSky() {
-        return !this.worldProvider.isNether();
+        return !this.worldProvider.func_177495_o();
     }
 
     @Override
     public Context getContext() {
-        return ((DimensionTypeBridge) (Object) this.worldProvider.getDimensionType()).bridge$getContext();
+        return ((DimensionTypeBridge) (Object) this.worldProvider.func_186058_p()).bridge$getContext();
     }
 
     // These methods are overwritten in SpongeForge
 
     @Override
     public int getHeight() {
-        return this.worldProvider.isNether() ? 128 : 256;
+        return this.worldProvider.func_177495_o() ? 128 : 256;
     }
 
     @Override

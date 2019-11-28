@@ -106,7 +106,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         final P unwindingContext, final BlockPos sourcePos, final Block block, final BlockPos notifyPos, final WorldServer minecraftWorld,
         final PlayerTracker.Type notifier) {
         final Player player = unwindingContext.getSpongePlayer();
-        final Chunk chunk = minecraftWorld.getChunk(notifyPos);
+        final Chunk chunk = minecraftWorld.func_175726_f(notifyPos);
         ((ChunkBridge) chunk).bridge$setBlockNotifier(notifyPos, player.getUniqueId());
     }
 

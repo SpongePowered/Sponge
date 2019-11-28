@@ -43,16 +43,16 @@ public class ToolTypePropertyStore extends AbstractItemStackPropertyStore<ToolTy
     @SuppressWarnings({"ConstantConditions", "LocalCanBeFinal"})
     @Override
     protected Optional<ToolTypeProperty> getFor(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ItemToolAccessor) {
-            final ItemToolAccessor tool = (ItemToolAccessor) itemStack.getItem();
+        if (itemStack.func_77973_b() instanceof ItemToolAccessor) {
+            final ItemToolAccessor tool = (ItemToolAccessor) itemStack.func_77973_b();
             final Item.ToolMaterial toolMaterial = tool.accessor$getToolMaterial();
             return Optional.of(new ToolTypeProperty((ToolType) (Object) toolMaterial));
-        } else if (itemStack.getItem() instanceof ItemSwordAccessor) {
-            final ItemSwordAccessor itemSword = (ItemSwordAccessor) itemStack.getItem();
+        } else if (itemStack.func_77973_b() instanceof ItemSwordAccessor) {
+            final ItemSwordAccessor itemSword = (ItemSwordAccessor) itemStack.func_77973_b();
             final Item.ToolMaterial swordMaterial = itemSword.accessor$getToolMaterial();
             return Optional.of(new ToolTypeProperty((ToolType) (Object) swordMaterial));
-        } else if (itemStack.getItem() instanceof ItemHoeAccessor) {
-            final ItemHoeAccessor itemHoe = (ItemHoeAccessor) itemStack.getItem();
+        } else if (itemStack.func_77973_b() instanceof ItemHoeAccessor) {
+            final ItemHoeAccessor itemHoe = (ItemHoeAccessor) itemStack.func_77973_b();
             final Item.ToolMaterial hoeMaterial = itemHoe.accessor$getToolMaterial();
             return Optional.of(new ToolTypeProperty((ToolType) (Object) hoeMaterial));
         }

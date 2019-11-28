@@ -40,7 +40,7 @@ public class SpongeComparatorBuilder extends AbstractTileBuilder<Comparator> {
     @Override
     protected Optional<Comparator> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(comparator -> {
-            ((TileEntityComparator) comparator).validate();
+            ((TileEntityComparator) comparator).func_145829_t();
             return comparator;
         });
     }

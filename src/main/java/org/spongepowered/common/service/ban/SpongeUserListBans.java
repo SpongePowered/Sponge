@@ -61,7 +61,7 @@ public class SpongeUserListBans extends UserListBans {
     }
 
     @Override
-    public String[] getKeys() {
+    public String[] func_152685_a() {
         List<String> names = new ArrayList<>();
         for (Ban.Profile ban : getService().getProfileBans()) {
             ban.getProfile().getName().ifPresent(names::add);
@@ -75,7 +75,7 @@ public class SpongeUserListBans extends UserListBans {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean func_152690_d() {
         return getService().getProfileBans().isEmpty();
     }
 
@@ -86,7 +86,7 @@ public class SpongeUserListBans extends UserListBans {
 
     @Override
     @Nullable
-    public com.mojang.authlib.GameProfile getBannedProfile(String username) {
+    public com.mojang.authlib.GameProfile func_152703_a(String username) {
         for (Ban.Profile ban : getService().getProfileBans()) {
             if (ban.getProfile().getName().isPresent() && ban.getProfile().getName().get().equals(username)) {
                 return (com.mojang.authlib.GameProfile) ban.getProfile();

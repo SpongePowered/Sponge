@@ -54,7 +54,7 @@ public class NextTickListEntryMixin_API implements ScheduledBlockUpdate {
         if (this.world == null) {
             return Integer.MAX_VALUE;
         }
-        return (int) (this.scheduledTime - this.world.getWorldInfo().getWorldTotalTime());
+        return (int) (this.scheduledTime - this.world.func_72912_H().func_82573_f());
     }
 
     @Override
@@ -62,7 +62,7 @@ public class NextTickListEntryMixin_API implements ScheduledBlockUpdate {
         if (this.world == null) {
             return;
         }
-        this.scheduledTime = this.world.getWorldInfo().getWorldTotalTime() + ticks;
+        this.scheduledTime = this.world.func_72912_H().func_82573_f() + ticks;
     }
 
     @Override

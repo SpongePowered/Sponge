@@ -98,23 +98,23 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
 
     @Override
     public void registerDefaults() {
-        for (Potion potion : Potion.REGISTRY) {
+        for (Potion potion : Potion.field_188414_b) {
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 this.potionList.add(potionEffectType);
-                this.potionEffectTypeMap.put(Potion.REGISTRY.getNameForObject(potion).toString(), potionEffectType);
+                this.potionEffectTypeMap.put(Potion.field_188414_b.func_177774_c(potion).toString(), potionEffectType);
             }
         }
     }
 
     @AdditionalRegistration
     public void additionalRegistration() { // I'm guessing that this should work very well.
-        for (Potion potion : Potion.REGISTRY) {
+        for (Potion potion : Potion.field_188414_b) {
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 if (!this.potionList.contains(potionEffectType)) {
                     this.potionList.add(potionEffectType);
-                    this.potionEffectTypeMap.put(Potion.REGISTRY.getNameForObject(potion).toString(), potionEffectType);
+                    this.potionEffectTypeMap.put(Potion.field_188414_b.func_177774_c(potion).toString(), potionEffectType);
                 }
             }
         }

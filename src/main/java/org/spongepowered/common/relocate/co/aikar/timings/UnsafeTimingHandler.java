@@ -33,7 +33,7 @@ class UnsafeTimingHandler extends TimingHandler {
     }
 
     private static void checkThread() {
-        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+        if (!SpongeImpl.getServer().func_152345_ab()) {
             throw new IllegalStateException("Calling Timings from Async Operation");
         }
     }

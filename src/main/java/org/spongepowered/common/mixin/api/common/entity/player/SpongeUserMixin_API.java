@@ -77,7 +77,7 @@ public abstract class SpongeUserMixin_API implements User {
     @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<Player> getPlayer() {
-        return Optional.ofNullable((Player) SpongeImpl.getServer().getPlayerList().getPlayerByUUID(this.profile.getId()));
+        return Optional.ofNullable((Player) SpongeImpl.getServer().func_184103_al().func_177451_a(this.profile.getId()));
     }
 
     @Override

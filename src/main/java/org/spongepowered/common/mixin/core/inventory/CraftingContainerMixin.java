@@ -61,12 +61,12 @@ public abstract class CraftingContainerMixin extends ContainerMixin {
             for (final Object inventory : bridge$getFabric().fabric$allInventories()) {
                 for (final IContainerListener listener : this.listeners) {
                     //listener.sendAllWindowProperties(this$, inventory);
-                    listener.sendAllContents((Container) (Object) this, getInventory());
+                    listener.func_71110_a((Container) (Object) this, getInventory());
                 }
             }
         } else {
             for (final IContainerListener listener : this.listeners) {
-                listener.sendSlotContents((Container) (Object) this, 0, this.getInventory().get(0));
+                listener.func_71111_a((Container) (Object) this, 0, this.getInventory().get(0));
             }
         }
 

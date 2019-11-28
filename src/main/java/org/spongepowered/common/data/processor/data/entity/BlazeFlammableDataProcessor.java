@@ -58,13 +58,13 @@ public final class BlazeFlammableDataProcessor
 
     @Override
     protected boolean set(EntityBlaze dataHolder, Boolean value) {
-        dataHolder.setOnFire(value);
+        dataHolder.func_70844_e(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityBlaze dataHolder) {
-        return Optional.of(dataHolder.isBurning());
+        return Optional.of(dataHolder.func_70027_ad());
     }
 
     @Override

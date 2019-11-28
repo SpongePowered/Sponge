@@ -72,7 +72,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
     // the call and do it ourselves.
     private void impl$doTeamUpdate() {
         if (this.scoreboard != null) {
-            this.scoreboard.broadcastTeamInfoUpdate((ScorePlayerTeam) (Object) this);
+            this.scoreboard.func_96538_b((ScorePlayerTeam) (Object) this);
         }
     }
 
@@ -89,7 +89,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
             target = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V"))
     private void impl$nullCheckScoreboard(@Nullable final Scoreboard scoreboard, final ScorePlayerTeam team) {
         if (scoreboard != null) {
-            scoreboard.broadcastTeamInfoUpdate(team);
+            scoreboard.func_96538_b(team);
         }
     }
 
@@ -216,7 +216,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
     @Override
     public MessageChannel bridge$getNonTeamChannel() {
         return MessageChannel.fixed(Sponge.getGame().getServer().getOnlinePlayers().stream()
-                .filter(player -> ((EntityPlayerMP) player).getTeam() != (Object) this)
+                .filter(player -> ((EntityPlayerMP) player).func_96124_cp() != (Object) this)
                 .collect(Collectors.toSet()));
     }
 }

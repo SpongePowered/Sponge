@@ -71,7 +71,7 @@ public abstract class SPacketChunkDataMixin {
     private int spongeImpl$surroundExtractingChunkDataWithExceptionPrinter(final SPacketChunkData this$0, final PacketBuffer buf, final Chunk chunkIn,
         final boolean writeSkylight, final int changedSectionFilter) {
         try {
-            return this$0.extractChunkData(buf, chunkIn, writeSkylight, changedSectionFilter);
+            return this$0.func_189555_a(buf, chunkIn, writeSkylight, changedSectionFilter);
         } catch (Exception e) {
             spongeImpl$printVerbosity(chunkIn, writeSkylight, changedSectionFilter, e);
             throw new RuntimeException(String.format("Exception creating chunk packet for chunk at '%s %s'!", this.chunkX, this.chunkZ), e);
@@ -86,7 +86,7 @@ public abstract class SPacketChunkDataMixin {
                             + "specifically provide as much information as possible about the issue.")
             .add()
             .add("%s : %s, %s", "Chunk Information", this.chunkX, this.chunkZ)
-            .add("%s : %s", "World", chunkIn.getWorld())
+            .add("%s : %s", "World", chunkIn.func_177412_p())
             .add("%s : %s", "Writing Skylight", writeSkylight)
             .add("%s : %s", "Full Chunk", this.fullChunk)
             .add("%s : %s", "ByteArraySize", this.buffer.length)
@@ -96,36 +96,36 @@ public abstract class SPacketChunkDataMixin {
             .add();
         printer.add("Printing ExtendedStorage data")
             .add();
-        final ExtendedBlockStorage[] aextendedblockstorage = chunkIn.getBlockStorageArray();
+        final ExtendedBlockStorage[] aextendedblockstorage = chunkIn.func_76587_i();
         int j = 0;
 
         for (final int k = aextendedblockstorage.length; j < k; ++j)
         {
             final ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[j];
 
-            if (extendedblockstorage != Chunk.NULL_BLOCK_STORAGE && (changedSectionFilter & 1 << j) != 0)
+            if (extendedblockstorage != Chunk.field_186036_a && (changedSectionFilter & 1 << j) != 0)
             {
-                final BlockStateContainer data = extendedblockstorage.getData();
+                final BlockStateContainer data = extendedblockstorage.func_186049_g();
                 printer.add(" - %s : %s", j, "ExtendedArrayIndex");
                 // TODO - Eventually can be moved to using BlockStateContainerAccessor once mixins allows referencing accessors
                 // within mixin classes
                 final BlockStateContainerBridge mixinData = (BlockStateContainerBridge) data;
                 printer.add("  - %s : %s", "ContainerBits", mixinData.bridge$getBits())
-                    .add("  - %s : %s", "Palette Size", mixinData.bridge$getPalette().getSerializedSize())
-                    .add("  - %s : %s", "BackingArray", mixinData.bridge$getStorage().getBackingLongArray())
-                    .add("  - %s : %s", "BlockLight", extendedblockstorage.getBlockLight().getData());
+                    .add("  - %s : %s", "Palette Size", mixinData.bridge$getPalette().func_186040_a())
+                    .add("  - %s : %s", "BackingArray", mixinData.bridge$getStorage().func_188143_a())
+                    .add("  - %s : %s", "BlockLight", extendedblockstorage.func_76661_k().func_177481_a());
 
 
                 if (writeSkylight)
                 {
-                    printer.add("  - %s : %s", "SkyLight", extendedblockstorage.getSkyLight().getData());
+                    printer.add("  - %s : %s", "SkyLight", extendedblockstorage.func_76671_l().func_177481_a());
                 }
             }
         }
 
         if (this.fullChunk)
         {
-            printer.add(" - %s : %s", "BiomeArray", chunkIn.getBiomeArray());
+            printer.add(" - %s : %s", "BiomeArray", chunkIn.func_76605_m());
         }
 
         printer

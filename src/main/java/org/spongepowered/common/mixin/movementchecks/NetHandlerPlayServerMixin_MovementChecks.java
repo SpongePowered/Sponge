@@ -44,7 +44,7 @@ public class NetHandlerPlayServerMixin_MovementChecks {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 0))
     private boolean movementCheck$onPlayerMovedTooQuicklyCheck(final EntityPlayerMP player) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().playerMovedTooQuickly()) {
-            return player.isInvulnerableDimensionChange();
+            return player.func_184850_K();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
     }
@@ -53,7 +53,7 @@ public class NetHandlerPlayServerMixin_MovementChecks {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 1))
     private boolean movementCheck$onMovedWronglyCheck(final EntityPlayerMP player) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().movedWrongly()) {
-            return player.isInvulnerableDimensionChange();
+            return player.func_184850_K();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
     }

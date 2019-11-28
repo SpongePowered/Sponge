@@ -59,7 +59,7 @@ public abstract class BlockRedstoneRepeaterMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDelayableData) {
             final int delay = ((ImmutableDelayableData) manipulator).delay().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneRepeater.DELAY, delay));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockRedstoneRepeater.field_176410_b, delay));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -68,13 +68,13 @@ public abstract class BlockRedstoneRepeaterMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DELAY)) {
             final int delay = (Integer) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneRepeater.DELAY, delay));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockRedstoneRepeater.field_176410_b, delay));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableDelayableData impl$getDelayableData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDelayableData.class, blockState.getValue(BlockRedstoneRepeater.DELAY));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDelayableData.class, blockState.func_177229_b(BlockRedstoneRepeater.field_176410_b));
     }
 
 }

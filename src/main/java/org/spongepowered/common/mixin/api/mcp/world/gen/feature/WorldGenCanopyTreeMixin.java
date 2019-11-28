@@ -76,7 +76,7 @@ public abstract class WorldGenCanopyTreeMixin extends WorldGenAbstractTree imple
                 for (k = x - b0; k <= x + b0 && flag; ++k) {
                     for (l = z - b0; l <= z + b0 && flag; ++l) {
                         if (j >= 0 && j < 256) {
-                            if (!this.canGrowInto(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
+                            if (!this.func_150523_a(worldIn.func_180495_p(new BlockPos(k, j, l)).func_177230_c())) {
                                 flag = false;
                             }
                         } else {
@@ -89,9 +89,9 @@ public abstract class WorldGenCanopyTreeMixin extends WorldGenAbstractTree imple
             if (!flag) {
                 return false;
             }
-            Block block = worldIn.getBlockState(new BlockPos(x, y - 1, z)).getBlock();
+            Block block = worldIn.func_180495_p(new BlockPos(x, y - 1, z)).func_177230_c();
 
-            if ((block == Blocks.GRASS || block == Blocks.DIRT) && y < 256 - i - 1) {
+            if ((block == Blocks.field_150349_c || block == Blocks.field_150346_d) && y < 256 - i - 1) {
                 return true;
             }
         }
@@ -101,9 +101,9 @@ public abstract class WorldGenCanopyTreeMixin extends WorldGenAbstractTree imple
     @Override
     public void placeObject(World world, Random random, int x, int y, int z) {
         BlockPos pos = new BlockPos(x, y, z);
-        setDecorationDefaults();
-        if (generate((net.minecraft.world.World) world, random, pos)) {
-            generateSaplings((net.minecraft.world.World) world, random, pos);
+        func_175904_e();
+        if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
+            func_180711_a((net.minecraft.world.World) world, random, pos);
         }
     }
 

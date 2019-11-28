@@ -320,7 +320,7 @@ public class SpongeCommandManager implements CommandManager {
         }
 
         try {
-            final TrackedInventoryBridge inventory = source instanceof EntityPlayer ? ((TrackedInventoryBridge) ((EntityPlayer) source).inventory) : null;
+            final TrackedInventoryBridge inventory = source instanceof EntityPlayer ? ((TrackedInventoryBridge) ((EntityPlayer) source).field_71071_by) : null;
             try (// Since we know we are in the main thread, this is safe to do without a thread check
                  CommandPhaseContext context = GeneralPhase.State.COMMAND.createPhaseContext()
                          .source(source)

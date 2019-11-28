@@ -53,38 +53,38 @@ public abstract class EntityAIRunAroundLikeCrazyMixin extends EntityAIBaseMixin 
      */
     @Overwrite
     public void updateTask() {
-        if (this.horseHost.getRNG().nextInt(50) == 0) {
-            Entity entity = this.horseHost.getPassengers().get(0);
+        if (this.horseHost.func_70681_au().nextInt(50) == 0) {
+            Entity entity = this.horseHost.func_184188_bt().get(0);
 
             if (entity == null) {
                 return;
             }
 
             if (entity instanceof EntityPlayer) {
-                int i = this.horseHost.getTemper();
-                int j = this.horseHost.getMaxTemper();
+                int i = this.horseHost.func_110252_cg();
+                int j = this.horseHost.func_190676_dC();
 
-                if (j > 0 && this.horseHost.getRNG().nextInt(j) < i) {
+                if (j > 0 && this.horseHost.func_70681_au().nextInt(j) < i) {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         frame.pushCause(entity);
                         if (SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (Horse) this.horseHost))) {
                             return;
                         }
                     }
-                    this.horseHost.setTamedBy((EntityPlayer)entity);
-                    this.horseHost.world.setEntityState(this.horseHost, (byte)7);
+                    this.horseHost.func_110263_g((EntityPlayer)entity);
+                    this.horseHost.field_70170_p.func_72960_a(this.horseHost, (byte)7);
                     return;
                 }
 
-                this.horseHost.increaseTemper(5);
+                this.horseHost.func_110198_t(5);
             }
 
             // Sponge start - Throw an event before calling entity states
             // this.horseHost.removePassengers(); // Vanilla
             if (((EntityBridge) this.horseHost).bridge$removePassengers(DismountTypes.DERAIL)) {
                 // Sponge end
-                this.horseHost.makeMad();
-                this.horseHost.world.setEntityState(this.horseHost, (byte)6);
+                this.horseHost.func_190687_dF();
+                this.horseHost.field_70170_p.func_72960_a(this.horseHost, (byte)6);
             }
         }
     }

@@ -44,12 +44,12 @@ public abstract class CriterionMixin_API implements IScoreCriteria { // Trick to
 
     @Intrinsic
     public String criterion$getName() {
-        return this.getName();
+        return this.func_96636_a();
     }
 
     public String criterion$getId() {
         if (this.spongeId == null) {
-            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.getName().replace("count", "s"));
+            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.func_96636_a().replace("count", "s"));
         }
         return this.spongeId;
     }

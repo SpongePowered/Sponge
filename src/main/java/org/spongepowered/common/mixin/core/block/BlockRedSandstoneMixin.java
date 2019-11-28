@@ -60,7 +60,7 @@ public abstract class BlockRedSandstoneMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableSandstoneData) {
             final BlockSandStone.EnumType sandstoneType = (BlockSandStone.EnumType) (Object) ((ImmutableSandstoneData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockRedSandstone.TYPE, impl$convertType(sandstoneType)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockRedSandstone.field_176336_a, impl$convertType(sandstoneType)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -69,22 +69,22 @@ public abstract class BlockRedSandstoneMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.SANDSTONE_TYPE)) {
             final BlockSandStone.EnumType sandstoneType = (BlockSandStone.EnumType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockRedSandstone.TYPE, impl$convertType(sandstoneType)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockRedSandstone.field_176336_a, impl$convertType(sandstoneType)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableSandstoneData impl$getSandstoneTypeFor(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSandstoneData.class,
-               impl$convertType(blockState.getValue(BlockRedSandstone.TYPE)));
+               impl$convertType(blockState.func_177229_b(BlockRedSandstone.field_176336_a)));
     }
     
     @SuppressWarnings("ConstantConditions")
     private SandstoneType impl$convertType(final BlockRedSandstone.EnumType type){
-        return (SandstoneType) (Object) BlockSandStone.EnumType.byMetadata(type.getMetadata());
+        return (SandstoneType) (Object) BlockSandStone.EnumType.func_176673_a(type.func_176827_a());
     }
     
     private BlockRedSandstone.EnumType impl$convertType(final BlockSandStone.EnumType type){
-        return BlockRedSandstone.EnumType.byMetadata(type.getMetadata());
+        return BlockRedSandstone.EnumType.func_176825_a(type.func_176675_a());
     }
 }

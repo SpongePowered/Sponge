@@ -64,11 +64,11 @@ public abstract class BlockStemMixin extends BlockMixin {
             if (growth > 7) {
                 growth = 7;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockStem.AGE, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStem.field_176484_a, growth));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.withProperty(BlockStem.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStem.field_176483_b, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -80,22 +80,22 @@ public abstract class BlockStemMixin extends BlockMixin {
             if (growth > 7) {
                 growth = 7;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockStem.AGE, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStem.field_176484_a, growth));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown((Direction) value);
-            return Optional.of((BlockState) blockState.withProperty(BlockStem.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStem.field_176483_b, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData impl$getGrowthData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockStem.AGE), 0, 7);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(BlockStem.field_176484_a), 0, 7);
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.getValue(BlockStem.FACING)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockStem.field_176483_b)));
     }
 
 }

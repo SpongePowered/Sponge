@@ -156,9 +156,9 @@ public abstract class ChunkMixin_API implements Chunk {
     public boolean loadChunk(final boolean generate) {
         final WorldServer worldserver = (WorldServer) this.world;
         if (!generate) {
-            return worldserver.getChunkProvider().loadChunk(this.x, this.z) != null;
+            return worldserver.func_72863_F().func_186028_c(this.x, this.z) != null;
         }
-        return worldserver.getChunkProvider().provideChunk(this.x, this.z) != null;
+        return worldserver.func_72863_F().func_186025_d(this.x, this.z) != null;
     }
 
     @Override
@@ -168,7 +168,7 @@ public abstract class ChunkMixin_API implements Chunk {
         }
         // Spawn point checks occur in queueUnload() and are reflected in
         // this.unloadQueued.
-        ((WorldServer) this.world).getChunkProvider().queueUnload((net.minecraft.world.chunk.Chunk) (Object) this);
+        ((WorldServer) this.world).func_72863_F().func_189549_a((net.minecraft.world.chunk.Chunk) (Object) this);
         return this.unloadQueued;
     }
 
@@ -184,12 +184,12 @@ public abstract class ChunkMixin_API implements Chunk {
 
     @Override
     public double getRegionalDifficultyFactor() {
-        final boolean flag = this.world.getDifficulty() == EnumDifficulty.HARD;
-        final float moon = this.world.getCurrentMoonPhaseFactor();
-        final float f2 = MathHelper.clamp((this.world.getWorldTime() - 72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
+        final boolean flag = this.world.func_175659_aa() == EnumDifficulty.HARD;
+        final float moon = this.world.func_130001_d();
+        final float f2 = MathHelper.func_76131_a((this.world.func_72820_D() - 72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
         float f3 = 0.0F;
-        f3 += MathHelper.clamp(this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
-        f3 += MathHelper.clamp(moon * 0.25F, 0.0F, f2);
+        f3 += MathHelper.func_76131_a(this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
+        f3 += MathHelper.func_76131_a(moon * 0.25F, 0.0F, f2);
         return f3;
     }
 
@@ -213,7 +213,7 @@ public abstract class ChunkMixin_API implements Chunk {
     @Override
     public BiomeType getBiome(final int x, final int y, final int z) {
         checkBiomeBounds(x, y, z);
-        return (BiomeType) getBiome(new BlockPos(x, y, z), this.world.getBiomeProvider());
+        return (BiomeType) getBiome(new BlockPos(x, y, z), this.world.func_72959_q());
     }
 
     @Override
@@ -223,11 +223,11 @@ public abstract class ChunkMixin_API implements Chunk {
         final byte[] biomeArray = getBiomeArray();
         final int i = x & 15;
         final int j = z & 15;
-        biomeArray[j << 4 | i] = (byte) (Biome.getIdForBiome((Biome) biome) & 255);
+        biomeArray[j << 4 | i] = (byte) (Biome.func_185362_a((Biome) biome) & 255);
         setBiomeArray(biomeArray);
 
         if (this.world instanceof WorldServer) {
-            final PlayerChunkMapEntry entry = ((WorldServer) this.world).getPlayerChunkMap().getEntry(this.x, this.z);
+            final PlayerChunkMapEntry entry = ((WorldServer) this.world).func_184164_w().func_187301_b(this.x, this.z);
             if (entry != null) {
                 ((PlayerChunkMapEntryBridge) entry).bridge$markBiomesForUpdate();
             }
@@ -243,19 +243,19 @@ public abstract class ChunkMixin_API implements Chunk {
     @Override
     public boolean setBlock(final int x, final int y, final int z, final BlockState block) {
         checkBlockBounds(x, y, z);
-        return this.world.setBlockState(new BlockPos(x, y, z), (IBlockState) block, Constants.BlockChangeFlags.ALL);
+        return this.world.func_180501_a(new BlockPos(x, y, z), (IBlockState) block, Constants.BlockChangeFlags.ALL);
     }
 
     @Override
     public boolean setBlock(final int x, final int y, final int z, final BlockState block, final BlockChangeFlag flag) {
         checkBlockBounds(x, y, z);
-        return this.world.setBlockState(new BlockPos(x, y, z), (IBlockState) block, ((SpongeBlockChangeFlag) flag).getRawFlag());
+        return this.world.func_180501_a(new BlockPos(x, y, z), (IBlockState) block, ((SpongeBlockChangeFlag) flag).getRawFlag());
     }
 
     @Override
     public BlockType getBlockType(final int x, final int y, final int z) {
         checkBlockBounds(x, y, z);
-        return (BlockType) getBlockState(x, y, z).getBlock();
+        return (BlockType) getBlockState(x, y, z).func_177230_c();
     }
 
     @Override
@@ -280,7 +280,7 @@ public abstract class ChunkMixin_API implements Chunk {
 
     @Override
     public int getPrecipitationLevelAt(final int x, final int z) {
-        return this.getPrecipitationHeight(new BlockPos(x, 0, z)).getY();
+        return this.getPrecipitationHeight(new BlockPos(x, 0, z)).func_177956_o();
     }
 
     @Override

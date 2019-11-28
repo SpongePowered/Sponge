@@ -372,8 +372,8 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Override
     public Optional<String> getGameRule(final String gameRule) {
         checkNotNull(gameRule, "The gamerule cannot be null!");
-        if (this.gameRules.hasRule(gameRule)) {
-            return Optional.of(this.gameRules.getString(gameRule));
+        if (this.gameRules.func_82765_e(gameRule)) {
+            return Optional.of(this.gameRules.func_82767_a(gameRule));
         }
         return Optional.empty();
     }
@@ -381,8 +381,8 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Override
     public Map<String, String> getGameRules() {
         final ImmutableMap.Builder<String, String> ruleMap = ImmutableMap.builder();
-        for (final String rule : this.gameRules.getRules()) {
-            ruleMap.put(rule, this.gameRules.getString(rule));
+        for (final String rule : this.gameRules.func_82763_b()) {
+            ruleMap.put(rule, this.gameRules.func_82767_a(rule));
         }
         return ruleMap.build();
     }
@@ -391,7 +391,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     public void setGameRule(final String gameRule, final String value) {
         checkNotNull(gameRule, "The gamerule cannot be null!");
         checkNotNull(value, "The gamerule value cannot be null!");
-        this.gameRules.setOrCreateGameRule(gameRule, value);
+        this.gameRules.func_82764_b(gameRule, value);
     }
 
     @Override
@@ -450,7 +450,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         } else if (((WorldInfoBridge) this).bridge$getIsMod() && !keepSpawnLoaded) { // If disabled and a mod dimension, validate
             final Integer dimensionId = ((WorldInfoBridge) this).bridge$getDimensionId();
 
-            if (dimensionId != null && dimensionId == ((net.minecraft.world.DimensionType)(Object) ((WorldInfoBridge) this).bridge$getDimensionType()).getId()) {
+            if (dimensionId != null && dimensionId == ((net.minecraft.world.DimensionType)(Object) ((WorldInfoBridge) this).bridge$getDimensionType()).func_186068_a()) {
                 if (((DimensionTypeBridge)((WorldInfoBridge) this).bridge$getDimensionType()).bridge$shouldKeepSpawnLoaded()) {
                     this.setKeepSpawnLoaded(true);
                     keepSpawnLoaded = true;
@@ -517,9 +517,9 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public Optional<DataView> getPropertySection(final DataQuery path) {
-        if ( ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().hasKey(path.toString())) {
+        if ( ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74764_b(path.toString())) {
             try {
-                final NBTTagCompound property = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().getCompoundTag(path.toString());
+                final NBTTagCompound property = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74775_l(path.toString());
                 return Optional.of(NbtTranslator.getInstance().translateFrom(property));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -532,7 +532,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Override
     public void setPropertySection(final DataQuery path, final DataView data) {
         final NBTTagCompound nbt = NbtTranslator.getInstance().translateData(data);
-        ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().setTag(path.toString(), nbt);
+        ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74782_a(path.toString(), nbt);
     }
 
     @Intrinsic
@@ -543,8 +543,8 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public DataContainer getAdditionalProperties() {
-        final NBTTagCompound additionalProperties = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().copy();
-        additionalProperties.removeTag(SpongeImpl.ECOSYSTEM_NAME);
+        final NBTTagCompound additionalProperties = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74737_b();
+        additionalProperties.func_82580_o(SpongeImpl.ECOSYSTEM_NAME);
         return NbtTranslator.getInstance().translateFrom(additionalProperties);
     }
 

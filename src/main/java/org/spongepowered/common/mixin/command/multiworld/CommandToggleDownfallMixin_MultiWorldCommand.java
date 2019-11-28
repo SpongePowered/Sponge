@@ -40,8 +40,8 @@ public abstract class CommandToggleDownfallMixin_MultiWorldCommand {
             target = "Lnet/minecraft/command/CommandToggleDownfall;toggleRainfall(Lnet/minecraft/server/MinecraftServer;)V"))
     private void multiWorldCommand$toggleWorldDownfall(final CommandToggleDownfall self, final MinecraftServer server, final MinecraftServer server2,
         final ICommandSender sender, final String[] args) {
-        final WorldInfo worldInfo = sender.getEntityWorld().getWorldInfo();
-        worldInfo.setRaining(!worldInfo.isRaining());
+        final WorldInfo worldInfo = sender.func_130014_f_().func_72912_H();
+        worldInfo.func_76084_b(!worldInfo.func_76059_o());
     }
 
 }

@@ -419,12 +419,12 @@ public class SpongeGameRegistry implements GameRegistry {
     public Optional<EntityStatistic> getEntityStatistic(StatisticType statType, EntityType entityType) {
         checkNotNull(statType, "null stat type");
         checkNotNull(entityType, "null entity type");
-        EntityList.EntityEggInfo eggInfo = EntityList.ENTITY_EGGS.get(new ResourceLocation(entityType.getId()));
+        EntityList.EntityEggInfo eggInfo = EntityList.field_75627_a.get(new ResourceLocation(entityType.getId()));
         if (statType.equals(StatisticTypes.ENTITIES_KILLED)) {
-            return Optional.of((EntityStatistic) eggInfo.killEntityStat);
+            return Optional.of((EntityStatistic) eggInfo.field_151512_d);
         }
         if (statType.equals(StatisticTypes.KILLED_BY_ENTITY)) {
-            return Optional.of((EntityStatistic) eggInfo.entityKilledByStat);
+            return Optional.of((EntityStatistic) eggInfo.field_151513_e);
         }
         throw new IllegalArgumentException("invalid entity stat type");
     }
@@ -436,19 +436,19 @@ public class SpongeGameRegistry implements GameRegistry {
         checkNotNull(itemType, "null item type");
         Item item = (Item) itemType;
         if (statType.equals(StatisticTypes.ITEMS_CRAFTED)) {
-            return Optional.of((ItemStatistic) StatList.getCraftStats(item));
+            return Optional.of((ItemStatistic) StatList.func_188060_a(item));
         }
         if (statType.equals(StatisticTypes.ITEMS_USED)) {
-            return Optional.of((ItemStatistic) StatList.getObjectUseStats(item));
+            return Optional.of((ItemStatistic) StatList.func_188057_b(item));
         }
         if (statType.equals(StatisticTypes.ITEMS_BROKEN)) {
-            return Optional.of((ItemStatistic) StatList.getObjectBreakStats(item));
+            return Optional.of((ItemStatistic) StatList.func_188059_c(item));
         }
         if (statType.equals(StatisticTypes.ITEMS_PICKED_UP)) {
-            return Optional.of((ItemStatistic) StatList.getObjectsPickedUpStats(item));
+            return Optional.of((ItemStatistic) StatList.func_188056_d(item));
         }
         if (statType.equals(StatisticTypes.ITEMS_DROPPED)) {
-            return Optional.of((ItemStatistic) StatList.getDroppedObjectStats(item));
+            return Optional.of((ItemStatistic) StatList.func_188058_e(item));
         }
         throw new IllegalArgumentException("invalid item stat type");
     }
@@ -459,7 +459,7 @@ public class SpongeGameRegistry implements GameRegistry {
         if (!statType.equals(StatisticTypes.BLOCKS_BROKEN)) {
             throw new IllegalArgumentException("invalid block stat type");
         }
-        return Optional.of((BlockStatistic) StatList.getBlockStats((Block) blockType));
+        return Optional.of((BlockStatistic) StatList.func_188055_a((Block) blockType));
     }
 
     @Override
@@ -505,7 +505,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public SmeltingRecipeRegistry getSmeltingRecipeRegistry() {
-        return (SmeltingRecipeRegistry) FurnaceRecipes.instance();
+        return (SmeltingRecipeRegistry) FurnaceRecipes.func_77602_a();
     }
 
     @Override

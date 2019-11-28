@@ -51,50 +51,50 @@ public abstract class SpongeCommonDamageSource extends DamageSource implements o
      * @param type The damage type id
      */
     public void setDamageType(final String type) {
-        this.damageType = type;
+        this.field_76373_n = type;
     }
 
     @Override
-    public boolean isExplosion() {
+    public boolean func_94541_c() {
         return this.isExplosive();
     }
 
     @Override
-    public boolean isUnblockable() {
+    public boolean func_76363_c() {
         return this.isBypassingArmor();
     }
 
     @Override
-    public boolean canHarmInCreative() {
+    public boolean func_76357_e() {
         return this.doesAffectCreative();
     }
 
     @Override
-    public boolean isDamageAbsolute() {
+    public boolean func_151517_h() {
         return this.isAbsolute();
     }
 
     @Override
-    public boolean isDifficultyScaled() {
+    public boolean func_76350_n() {
         return this.isScaledByDifficulty();
     }
 
     @Override
-    public boolean isMagicDamage() {
+    public boolean func_82725_o() {
         return this.isMagic();
     }
 
     @Override
-    public float getHungerDamage() {
+    public float func_76345_d() {
         return (float) this.getExhaustion();
     }
 
 
     public void bridge$setDamageIsAbsolute() {
-        this.setDamageIsAbsolute();
+        this.func_151518_m();
     }
     public void bridge$setDamageBypassesArmor() {
-        this.setDamageBypassesArmor();
+        this.func_76348_h();
     }
 
 

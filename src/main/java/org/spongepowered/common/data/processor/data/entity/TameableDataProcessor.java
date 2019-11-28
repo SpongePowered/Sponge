@@ -50,7 +50,7 @@ public class TameableDataProcessor
 
     @Override
     protected Optional<Optional<UUID>> getVal(EntityTameable tameable) {
-        return Optional.of(Optional.ofNullable(tameable.getOwnerId()));
+        return Optional.of(Optional.ofNullable(tameable.func_184753_b()));
     }
 
     @Override
@@ -68,8 +68,8 @@ public class TameableDataProcessor
 
     @Override
     protected boolean set(EntityTameable tameable, Optional<UUID> uuidOptional) {
-        tameable.setOwnerId(uuidOptional.orElse(null));
-        tameable.setTamed(uuidOptional.isPresent());
+        tameable.func_184754_b(uuidOptional.orElse(null));
+        tameable.func_70903_f(uuidOptional.isPresent());
         return true;
     }
 

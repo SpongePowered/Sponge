@@ -42,7 +42,7 @@ public abstract class CommandFeedbackReceiverMixin implements ICommandSender {
             target = "Lnet/minecraft/world/WorldServer;getGameRules()Lnet/minecraft/world/GameRules;"))
     private GameRules impl$useSenderWorldGamerules(final WorldServer overworld) {
         // Check the game rules of the current world instead of overworld game rules
-        return getEntityWorld().getGameRules();
+        return func_130014_f_().func_82736_K();
     }
 
 }

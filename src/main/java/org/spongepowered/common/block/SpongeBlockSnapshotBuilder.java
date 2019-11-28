@@ -136,9 +136,9 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     public SpongeBlockSnapshotBuilder position(final Vector3i position) {
         this.coords = checkNotNull(position);
         if (this.compound != null) {
-            this.compound.setInteger(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X, position.getX());
-            this.compound.setInteger(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y, position.getY());
-            this.compound.setInteger(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Z, position.getZ());
+            this.compound.func_74768_a(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X, position.getX());
+            this.compound.func_74768_a(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y, position.getY());
+            this.compound.func_74768_a(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Z, position.getZ());
         }
         return this;
     }
@@ -152,7 +152,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
             if (location.hasTileEntity()) {
                 this.compound = new NBTTagCompound();
                 final org.spongepowered.api.block.tileentity.TileEntity te = location.getTileEntity().get();
-                ((TileEntity) te).writeToNBT(this.compound);
+                ((TileEntity) te).func_189515_b(this.compound);
                 this.manipulators = ((CustomDataHolderBridge) te).bridge$getCustomManipulators().stream()
                         .map(DataManipulator::asImmutable)
                         .collect(Collectors.toList());
@@ -174,7 +174,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     public SpongeBlockSnapshotBuilder unsafeNbt(final NBTTagCompound compound) {
-        this.compound = compound.copy();
+        this.compound = compound.func_74737_b();
         return this;
     }
 
@@ -230,7 +230,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         if (holder instanceof SpongeBlockSnapshot) {
             final NBTTagCompound compound = ((SpongeBlockSnapshot) holder).compound;
             if (compound != null) {
-                this.compound = compound.copy();
+                this.compound = compound.func_74737_b();
             }
         }
         return this;
@@ -238,7 +238,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     public SpongeBlockSnapshotBuilder reset() {
-        this.blockState = (BlockState) Blocks.AIR.getDefaultState();
+        this.blockState = (BlockState) Blocks.field_150350_a.func_176223_P();
         this.extendedState = null;
         this.worldUuid = null;
         this.creatorUuid = null;

@@ -41,7 +41,7 @@ import java.util.Set;
 public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
 
     // Materials it is NOT safe to put players on top of.
-    private static final Set<Material> NOT_SAFE_FLOOR = ImmutableSet.of(Material.AIR, Material.CACTUS, Material.FIRE, Material.LAVA);
+    private static final Set<Material> NOT_SAFE_FLOOR = ImmutableSet.of(Material.field_151579_a, Material.field_151570_A, Material.field_151581_o, Material.field_151587_i);
 
     @Override
     public String getId() {
@@ -55,33 +55,33 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return !NOT_SAFE_FLOOR.contains(((IBlockState) blockState).getMaterial());
+        return !NOT_SAFE_FLOOR.contains(((IBlockState) blockState).func_185904_a());
     }
 
     @Override
     public boolean isSafeBodyMaterial(BlockState blockState) {
         IBlockState state = (IBlockState) blockState;
-        Material material = state.getMaterial();
+        Material material = state.func_185904_a();
 
         // Deny blocks that suffocate
-        if (state.causesSuffocation()) {
+        if (state.func_191058_s()) {
             return false;
         }
         // Deny dangerous lava
-        if (material == Material.LAVA) {
+        if (material == Material.field_151587_i) {
             return false;
         }
 
         // Sadly there is no easy way to check for this using vanilla right now as Blocks like Cauldron are technically marked as passable.
 
         // Deny non-passable non "full" blocks
-        return !(state.getBlock() instanceof BlockSlab ||
-                 state.getBlock() instanceof BlockCauldron ||
-                 state.getBlock() instanceof BlockAnvil ||
-                 state.getBlock() instanceof BlockFence ||
-                 state.getBlock() instanceof BlockChorusPlant ||
-                 state.getBlock() instanceof BlockSnow ||
-                 material == Material.GLASS ||
-                 material == Material.LEAVES);
+        return !(state.func_177230_c() instanceof BlockSlab ||
+                 state.func_177230_c() instanceof BlockCauldron ||
+                 state.func_177230_c() instanceof BlockAnvil ||
+                 state.func_177230_c() instanceof BlockFence ||
+                 state.func_177230_c() instanceof BlockChorusPlant ||
+                 state.func_177230_c() instanceof BlockSnow ||
+                 material == Material.field_151592_s ||
+                 material == Material.field_151584_j);
     }
 }

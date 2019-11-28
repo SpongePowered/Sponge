@@ -69,9 +69,9 @@ public final class CookedFishRegistryModule implements AlternateCatalogRegistryM
     @Override
     public void registerDefaults() {
         for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
-            if (fishType.canCook()) {
+            if (fishType.func_150973_i()) {
                 CookedFish cooked = new SpongeCookedFish(fishType.name(),
-                        new SpongeTranslation("item.fish." + fishType.getTranslationKey() + ".cooked.name"), fishType);
+                        new SpongeTranslation("item.fish." + fishType.func_150972_b() + ".cooked.name"), fishType);
                 this.fishMap.put(cooked.getId().toLowerCase(Locale.ENGLISH), cooked);
             }
         }
@@ -80,9 +80,9 @@ public final class CookedFishRegistryModule implements AlternateCatalogRegistryM
     @AdditionalRegistration
     public void registerAdditional() {
         for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
-            if (fishType.canCook() && !this.fishMap.containsKey(fishType.name().toLowerCase(Locale.ENGLISH))) {
+            if (fishType.func_150973_i() && !this.fishMap.containsKey(fishType.name().toLowerCase(Locale.ENGLISH))) {
                 CookedFish cooked = new SpongeCookedFish(fishType.name(),
-                        new SpongeTranslation("item.fish." + fishType.getTranslationKey() + ".cooked.name"), fishType);
+                        new SpongeTranslation("item.fish." + fishType.func_150972_b() + ".cooked.name"), fishType);
                 this.fishMap.put(cooked.getId().toLowerCase(Locale.ENGLISH), cooked);
             }
         }

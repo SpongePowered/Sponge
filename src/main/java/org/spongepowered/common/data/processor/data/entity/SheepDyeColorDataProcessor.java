@@ -55,13 +55,13 @@ public class SheepDyeColorDataProcessor extends AbstractEntitySingleDataProcesso
 
     @Override
     protected boolean set(EntitySheep container, DyeColor value) {
-        container.setFleeceColor((EnumDyeColor) (Object) value);
+        container.func_175512_b((EnumDyeColor) (Object) value);
         return true;
     }
 
     @Override
     protected Optional<DyeColor> getVal(EntitySheep container) {
-        return Optional.of((DyeColor) (Object) container.getFleeceColor());
+        return Optional.of((DyeColor) (Object) container.func_175509_cj());
     }
 
     @Override

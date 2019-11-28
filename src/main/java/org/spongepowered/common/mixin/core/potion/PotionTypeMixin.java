@@ -47,7 +47,7 @@ public abstract class PotionTypeMixin {
         final net.minecraft.potion.PotionType mcPotion = (net.minecraft.potion.PotionType) potion;
 
         PotionTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionType) mcPotion);
-        registry.register(id, location, potion);
+        registry.func_177775_a(id, location, potion);
     }
 
 }

@@ -49,13 +49,13 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
 
     @Override
     protected boolean doesDataExist(ItemStack dataHolder) {
-        return dataHolder.hasTagCompound();
+        return dataHolder.func_77942_o();
     }
 
     @Override
     protected boolean set(ItemStack dataHolder, Map<Key<?>, Object> keyValues) {
-        if (!dataHolder.hasTagCompound()) {
-            dataHolder.setTagCompound(new NBTTagCompound());
+        if (!dataHolder.func_77942_o()) {
+            dataHolder.func_77982_d(new NBTTagCompound());
         }
         int flag = 0;
         if ((boolean) keyValues.get(Keys.HIDE_ENCHANTMENTS)) {
@@ -76,17 +76,17 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
         if ((boolean) keyValues.get(Keys.HIDE_MISCELLANEOUS)) {
             flag |= Constants.Item.HIDE_MISCELLANEOUS_FLAG;
         }
-        dataHolder.getTagCompound().setInteger(Constants.Item.ITEM_HIDE_FLAGS, flag);
+        dataHolder.func_77978_p().func_74768_a(Constants.Item.ITEM_HIDE_FLAGS, flag);
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(ItemStack dataHolder) {
-        if (!dataHolder.hasTagCompound()) {
+        if (!dataHolder.func_77942_o()) {
             return Maps.newHashMap();
         }
         Map<Key<?>, Boolean> map = Maps.newHashMap();
-        int flag = dataHolder.getTagCompound().getInteger(Constants.Item.ITEM_HIDE_FLAGS);
+        int flag = dataHolder.func_77978_p().func_74762_e(Constants.Item.ITEM_HIDE_FLAGS);
 
         map.put(Keys.HIDE_MISCELLANEOUS, (flag & Constants.Item.HIDE_MISCELLANEOUS_FLAG) != 0);
         map.put(Keys.HIDE_CAN_PLACE, (flag & Constants.Item.HIDE_CAN_PLACE_FLAG) != 0);
@@ -123,8 +123,8 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (supports(dataHolder)) {
             ItemStack data = (ItemStack) dataHolder;
-            if (data.hasTagCompound() && data.getTagCompound().hasKey(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
-                data.getTagCompound().removeTag(Constants.Item.ITEM_HIDE_FLAGS);
+            if (data.func_77942_o() && data.func_77978_p().func_150297_b(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
+                data.func_77978_p().func_82580_o(Constants.Item.ITEM_HIDE_FLAGS);
             }
             return DataTransactionResult.successNoData();
         }

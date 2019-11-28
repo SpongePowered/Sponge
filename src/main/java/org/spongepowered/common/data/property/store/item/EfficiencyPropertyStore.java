@@ -36,8 +36,8 @@ public class EfficiencyPropertyStore extends AbstractItemStackPropertyStore<Effi
 
     @Override
     protected Optional<EfficiencyProperty> getFor(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ItemToolAccessor) {
-            final ItemToolAccessor tool = (ItemToolAccessor) itemStack.getItem();
+        if (itemStack.func_77973_b() instanceof ItemToolAccessor) {
+            final ItemToolAccessor tool = (ItemToolAccessor) itemStack.func_77973_b();
             return Optional.of(new EfficiencyProperty(tool.accessor$getEfficiency()));
         }
         return Optional.empty();

@@ -74,9 +74,9 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
     public void registerDefaults() {
         DUMMY_ROOT_ADVANCEMENT = new net.minecraft.advancements.Advancement(
                 new ResourceLocation("sponge", "dummy_root"), null, null,
-                AdvancementRewards.EMPTY, dummyCriteria, dummyRequirements) {
+                AdvancementRewards.field_192114_a, dummyCriteria, dummyRequirements) {
             @Override
-            public void addChild(net.minecraft.advancements.Advancement child) {
+            public void func_192071_a(net.minecraft.advancements.Advancement child) {
                 // Prevent children to be added so that there
                 // aren't any leftover references from this instance
             }
@@ -89,13 +89,13 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
         ((AdvancementBridge) advancement).bridge$setRegistered();
         final net.minecraft.advancements.Advancement mcAdv = (net.minecraft.advancements.Advancement) advancement;
         final AdvancementListBridge advList = getAdvancementList();
-        advList.bridge$getAdvancements().put(mcAdv.getId(), mcAdv);
+        advList.bridge$getAdvancements().put(mcAdv.func_192067_g(), mcAdv);
         // If the parent != null, that means that its not a root advancement
-        if (mcAdv.getParent() != null && mcAdv.getParent() != DUMMY_ROOT_ADVANCEMENT &&
+        if (mcAdv.func_192070_b() != null && mcAdv.func_192070_b() != DUMMY_ROOT_ADVANCEMENT &&
                 advList.bridge$getNonRootsSet().add(mcAdv)) { // Only update if the root wasn't already present for some reason
             final AdvancementList.Listener listener = advList.bridge$getListener();
             if (listener != null) {
-                listener.nonRootAdvancementAdded(mcAdv);
+                listener.func_191932_c(mcAdv);
             }
         }
     }
@@ -105,7 +105,7 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
     }
 
     void remove(net.minecraft.advancements.Advancement advancement) {
-        this.catalogTypeMap.remove(advancement.getId().toString());
+        this.catalogTypeMap.remove(advancement.func_192067_g().toString());
     }
 
     void clear() {

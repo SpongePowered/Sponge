@@ -79,9 +79,9 @@ public class ItemDropData {
     public EntityItem create(WorldServer worldServer) {
         final EntityItem entityItem = new EntityItem(worldServer, this.position.getX(), this.position.getY(), this.position.getZ(), this.stack);
         if (this.motion != Vector3d.ZERO) {
-            entityItem.motionX = this.motion.getX();
-            entityItem.motionY = this.motion.getY();
-            entityItem.motionZ = this.motion.getZ();
+            entityItem.field_70159_w = this.motion.getX();
+            entityItem.field_70181_x = this.motion.getY();
+            entityItem.field_70179_y = this.motion.getZ();
         }
         return entityItem;
     }
@@ -166,8 +166,8 @@ public class ItemDropData {
 
     public static final class Player extends ItemDropData {
 
-        public static Builder player(EntityPlayer player) {
-            return new Builder(player);
+        public static org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder player(EntityPlayer player) {
+            return new org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder(player);
         }
 
         private final boolean trace;
@@ -175,7 +175,7 @@ public class ItemDropData {
         private final boolean dropAround;
         private final Random random;
 
-        Player(Builder builder) {
+        Player(org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder builder) {
             super(builder);
             this.trace = builder.trace;
             this.playerName = builder.playerName;
@@ -203,9 +203,9 @@ public class ItemDropData {
         @Override
         public EntityItem create(WorldServer worldServer) {
             final EntityItem entityItem = super.create(worldServer);
-            entityItem.setPickupDelay(40);
+            entityItem.func_174867_a(40);
             if (this.trace) {
-                entityItem.setThrower(this.playerName);
+                entityItem.func_145799_b(this.playerName);
             }
             return entityItem;
         }
@@ -256,45 +256,45 @@ public class ItemDropData {
             Random random;
 
             Builder(EntityPlayer player) {
-                this.playerName = player.getName();
+                this.playerName = player.func_70005_c_();
                 this.random = ((org.spongepowered.api.entity.Entity) player).getRandom();
             }
 
-            public Builder stack(ItemStack stack) {
+            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder stack(ItemStack stack) {
                 this.stack = stack;
                 return this;
             }
 
-            public Builder trace(boolean trace) {
+            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder trace(boolean trace) {
                 this.trace = trace;
                 return this;
             }
 
-            public Builder dropAround(boolean dropAround) {
+            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder dropAround(boolean dropAround) {
                 this.dropAround = dropAround;
                 return this;
             }
 
             @Override
-            public Builder position(Vector3d position) {
+            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder position(Vector3d position) {
                 super.position(position);
                 return this;
             }
 
             @Override
-            public Builder pitch(double pitch) {
+            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder pitch(double pitch) {
                 super.pitch(pitch);
                 return this;
             }
 
             @Override
-            public Builder yaw(double yaw) {
+            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder yaw(double yaw) {
                 super.yaw(yaw);
                 return this;
             }
 
             @Override
-            public Builder motion(Vector3d motion) {
+            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder motion(Vector3d motion) {
                 super.motion(motion);
                 return this;
             }

@@ -107,7 +107,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     public void associateNeighborStateNotifier(final CommandPhaseContext context, @Nullable final BlockPos sourcePos, final Block block,
         final BlockPos notifyPos, final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
         context.getSource(Player.class)
-            .ifPresent(player -> ((ChunkBridge) minecraftWorld.getChunk(notifyPos))
+            .ifPresent(player -> ((ChunkBridge) minecraftWorld.func_175726_f(notifyPos))
                 .bridge$addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER));
     }
 
@@ -117,11 +117,11 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         final CauseStackManager csm = Sponge.getCauseStackManager();
         if (playerSource.isPresent()) {
             // Post event for inventory changes
-            ((TrackedInventoryBridge) playerSource.get().inventory).bridge$setCaptureInventory(false);
-            final List<SlotTransaction> list = ((TrackedInventoryBridge) playerSource.get().inventory).bridge$getCapturedSlotTransactions();
+            ((TrackedInventoryBridge) playerSource.get().field_71071_by).bridge$setCaptureInventory(false);
+            final List<SlotTransaction> list = ((TrackedInventoryBridge) playerSource.get().field_71071_by).bridge$getCapturedSlotTransactions();
             if (!list.isEmpty()) {
                 final ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.getCurrentCause(),
-                        ((Inventory) playerSource.get().inventory), list);
+                        ((Inventory) playerSource.get().field_71071_by), list);
                 SpongeImpl.postEvent(event);
                 PacketPhaseUtil.handleSlotRestore(playerSource.get(), null, list, event.isCancelled());
                 list.clear();
@@ -151,7 +151,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                     net.minecraft.entity.Entity foundEntity = null;
                     for (final WorldServer worldServer : WorldManager.getWorlds())
                     {
-                        final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
+                        final net.minecraft.entity.Entity entityFromUuid = worldServer.func_175733_a(key);
                         if (entityFromUuid != null)
                         {
                             foundEntity = entityFromUuid;

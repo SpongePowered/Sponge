@@ -60,34 +60,34 @@ public class FlowerPotDataProcessor extends
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        flowerPot.setItemStack(ItemStack.EMPTY);
-        flowerPot.markDirty();
+        flowerPot.func_190614_a(ItemStack.field_190927_a);
+        flowerPot.func_70296_d();
         return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
     }
 
     @Override
     protected boolean set(TileEntityFlowerPot flowerPot, ItemStackSnapshot stackSnapshot) {
         if (stackSnapshot == ItemStackSnapshot.NONE) {
-            flowerPot.setItemStack(ItemStack.EMPTY);
+            flowerPot.func_190614_a(ItemStack.field_190927_a);
         } else {
             ItemStack stack = (ItemStack) stackSnapshot.createStack();
-            if (!((BlockFlowerPotAccessor) Blocks.FLOWER_POT).accessor$canItemBePotted(stack)) {
+            if (!((BlockFlowerPotAccessor) Blocks.field_150457_bL).accessor$canItemBePotted(stack)) {
                 return false;
             }
-            flowerPot.setItemStack(stack);
+            flowerPot.func_190614_a(stack);
         }
-        flowerPot.markDirty();
-        flowerPot.getWorld().notifyBlockUpdate(flowerPot.getPos(), flowerPot.getWorld().getBlockState(flowerPot.getPos()), flowerPot.getWorld()
-                .getBlockState(flowerPot.getPos()), 3);
+        flowerPot.func_70296_d();
+        flowerPot.func_145831_w().func_184138_a(flowerPot.func_174877_v(), flowerPot.func_145831_w().func_180495_p(flowerPot.func_174877_v()), flowerPot.func_145831_w()
+                .func_180495_p(flowerPot.func_174877_v()), 3);
         return true;
     }
 
     @Override
     protected Optional<ItemStackSnapshot> getVal(TileEntityFlowerPot flowerPot) {
-        if (flowerPot.getFlowerPotItem() == null) {
+        if (flowerPot.func_145965_a() == null) {
             return Optional.empty();
         }
-        ItemStack stack = new ItemStack(flowerPot.getFlowerPotItem(), 1, flowerPot.getFlowerPotData());
+        ItemStack stack = new ItemStack(flowerPot.func_145965_a(), 1, flowerPot.func_145966_b());
         return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot());
     }
 

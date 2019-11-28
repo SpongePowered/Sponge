@@ -65,19 +65,19 @@ public interface CustomDataHolderBridge {
     default void bridge$removeCustomFromNbt(DataManipulator<?, ?> manipulator) {
         if (this instanceof DataCompoundHolder) {
             final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
-            if (spongeData.hasKey(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
-                final NBTTagList tagList = spongeData.getTagList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
-                if (!tagList.isEmpty()) {
+            if (spongeData.func_150297_b(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
+                final NBTTagList tagList = spongeData.func_150295_c(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
+                if (!tagList.func_82582_d()) {
                     String id = DataUtil.getRegistrationFor(manipulator).getId();
-                    for (int i = 0; i < tagList.tagCount(); i++) {
-                        final NBTTagCompound tag = tagList.getCompoundTagAt(i);
-                        if (id.equals(tag.getString(Constants.Sponge.MANIPULATOR_ID))) {
-                            tagList.removeTag(i);
+                    for (int i = 0; i < tagList.func_74745_c(); i++) {
+                        final NBTTagCompound tag = tagList.func_150305_b(i);
+                        if (id.equals(tag.func_74779_i(Constants.Sponge.MANIPULATOR_ID))) {
+                            tagList.func_74744_a(i);
                             break;
                         }
-                        final String dataClass = tag.getString(Constants.Sponge.CUSTOM_DATA_CLASS);
+                        final String dataClass = tag.func_74779_i(Constants.Sponge.CUSTOM_DATA_CLASS);
                         if (dataClass.equalsIgnoreCase(manipulator.getClass().getName())) {
-                            tagList.removeTag(i);
+                            tagList.func_74744_a(i);
                             break;
                         }
                     }

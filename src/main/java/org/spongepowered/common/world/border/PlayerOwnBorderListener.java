@@ -41,36 +41,36 @@ public class PlayerOwnBorderListener implements IBorderListener {
     }
 
     @Override
-    public void onSizeChanged(WorldBorder border, double newSize) {
+    public void func_177694_a(WorldBorder border, double newSize) {
         sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_SIZE));
     }
 
     @Override
-    public void onTransitionStarted(WorldBorder border, double oldSize, double newSize, long time) {
+    public void func_177692_a(WorldBorder border, double oldSize, double newSize, long time) {
         sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.LERP_SIZE));
     }
 
     @Override
-    public void onCenterChanged(WorldBorder border, double x, double z) {
+    public void func_177693_a(WorldBorder border, double x, double z) {
         sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_CENTER));
     }
 
     @Override
-    public void onWarningTimeChanged(WorldBorder border, int newTime) {
+    public void func_177691_a(WorldBorder border, int newTime) {
         sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_WARNING_TIME));
     }
 
     @Override
-    public void onWarningDistanceChanged(WorldBorder border, int newDistance) {
+    public void func_177690_b(WorldBorder border, int newDistance) {
         sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_WARNING_BLOCKS));
     }
 
     @Override
-    public void onDamageAmountChanged(WorldBorder border, double newAmount) {
+    public void func_177696_b(WorldBorder border, double newAmount) {
     }
 
     @Override
-    public void onDamageBufferChanged(WorldBorder border, double newSize) {
+    public void func_177695_c(WorldBorder border, double newSize) {
     }
     
     /**
@@ -81,6 +81,6 @@ public class PlayerOwnBorderListener implements IBorderListener {
     }
 
     private void sendBorderPacket(Packet<?> packet) {
-        this.player.connection.sendPacket(packet);
+        this.player.field_71135_a.func_147359_a(packet);
     }
 }

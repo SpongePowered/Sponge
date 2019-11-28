@@ -66,7 +66,7 @@ public abstract class PlayerInteractionManagerMixin_RealTime {
             this.curblockDamage = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.world.getMinecraftServer()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) this.world.func_73046_m()).realTimeBridge$getRealTimeTicks();
         this.curblockDamage += ticks;
     }
 

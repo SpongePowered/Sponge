@@ -62,7 +62,7 @@ public abstract class WorldGenCactusMixin_API extends WorldGenerator implements 
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
-            generate(world, random, world.getTopSolidOrLiquidBlock(chunkPos.add(x, 0, z)));
+            func_180709_b(world, random, world.func_175672_r(chunkPos.func_177982_a(x, 0, z)));
         }
     }
 

@@ -61,12 +61,12 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
 
     @Override
     default BlockType getType() {
-        return (BlockType) getBlock();
+        return (BlockType) func_177230_c();
     }
 
     @Override
     default BlockState withExtendedProperties(final Location<World> location) {
-        return (BlockState) this.getActualState((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
+        return (BlockState) this.func_185899_b((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
 
     }
 
@@ -79,7 +79,7 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
     @SuppressWarnings({"unchecked"})
     @Override
     default <T extends Comparable<T>> Optional<T> getTraitValue(final BlockTrait<T> blockTrait) {
-        for (final Map.Entry<IProperty<?>, Comparable<?>> entry : getProperties().entrySet()) {
+        for (final Map.Entry<IProperty<?>, Comparable<?>> entry : func_177228_b().entrySet()) {
             //noinspection EqualsBetweenInconvertibleTypes
             if (entry.getKey() == blockTrait) {
                 return Optional.of((T) entry.getValue());
@@ -91,8 +91,8 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
     @SuppressWarnings("rawtypes")
     @Override
     default Optional<BlockTrait<?>> getTrait(final String blockTrait) {
-        for (final IProperty property : getProperties().keySet()) {
-            if (property.getName().equalsIgnoreCase(blockTrait)) {
+        for (final IProperty property : func_177228_b().keySet()) {
+            if (property.func_177701_a().equalsIgnoreCase(blockTrait)) {
                 return Optional.of((BlockTrait<?>) property);
             }
         }
@@ -111,12 +111,12 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
                 }
             }
             if (foundValue != null) {
-                return Optional.of((BlockState) this.withProperty((IProperty) trait, foundValue));
+                return Optional.of((BlockState) this.func_177226_a((IProperty) trait, foundValue));
             }
         }
         if (value instanceof Comparable) {
-            if (getProperties().containsKey((IProperty) trait) && ((IProperty) trait).getAllowedValues().contains(value)) {
-                return Optional.of((BlockState) this.withProperty((IProperty) trait, (Comparable) value));
+            if (func_177228_b().containsKey((IProperty) trait) && ((IProperty) trait).func_177700_c().contains(value)) {
+                return Optional.of((BlockState) this.func_177226_a((IProperty) trait, (Comparable) value));
             }
         }
         return Optional.empty();
@@ -135,20 +135,20 @@ public interface IBlockStateMixin_API extends IBlockState, BlockState {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     default Map<BlockTrait<?>, ?> getTraitMap() {
-        return (ImmutableMap) getProperties();
+        return (ImmutableMap) func_177228_b();
     }
 
     @Override
     default String getId() {
         final StringBuilder builder = new StringBuilder();
-        builder.append(((BlockType) getBlock()).getId());
-        final ImmutableMap<IProperty<?>, Comparable<?>> properties =  this.getProperties();
+        builder.append(((BlockType) func_177230_c()).getId());
+        final ImmutableMap<IProperty<?>, Comparable<?>> properties =  this.func_177228_b();
         if (!properties.isEmpty()) {
             builder.append('[');
             final Joiner joiner = Joiner.on(',');
             final List<String> propertyValues = new ArrayList<>();
             for (final Map.Entry<IProperty<?>, Comparable<?>> entry : properties.entrySet()) {
-                propertyValues.add(entry.getKey().getName() + "=" + entry.getValue());
+                propertyValues.add(entry.getKey().func_177701_a() + "=" + entry.getValue());
             }
             builder.append(joiner.join(propertyValues));
             builder.append(']');

@@ -202,7 +202,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                 final BlockState state = transaction.getOriginal().getState();
                 final BlockType type = state.getType();
                 final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, (IBlockState) state);
-                final BlockPos pos = context.getSource(net.minecraft.tileentity.TileEntity.class).get().getPos();
+                final BlockPos pos = context.getSource(net.minecraft.tileentity.TileEntity.class).get().func_174877_v();
                 final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
                 if (pos.equals(blockPos) && !transaction.isValid()) {
                     return true;

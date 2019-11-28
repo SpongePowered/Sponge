@@ -71,10 +71,10 @@ public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBu
             accessor.accessor$setDamageAllowedInCreativeMode();
         }
         if (this.scales) {
-            damageSource.setDifficultyScaled();
+            damageSource.func_76351_m();
         }
         if (this.magical) {
-            damageSource.setMagicDamage();
+            damageSource.func_82726_p();
         }
         if (this.bypasses) {
             accessor.accessor$setDamageBypassesArmor();
@@ -83,7 +83,7 @@ public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBu
             accessor.accessor$setDamageIsAbsolute();
         }
         if (this.explosion) {
-            damageSource.setExplosion();
+            damageSource.func_94540_d();
         }
         if (this.exhaustion != null) {
             accessor.accessor$setHungerDamage(this.exhaustion.floatValue());

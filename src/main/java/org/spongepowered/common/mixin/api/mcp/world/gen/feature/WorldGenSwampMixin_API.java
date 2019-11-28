@@ -61,7 +61,7 @@ public abstract class WorldGenSwampMixin_API extends WorldGenAbstractTree implem
         final net.minecraft.world.World worldIn = (net.minecraft.world.World) world;
         final int i;
         BlockPos position = new BlockPos(x, y, z);
-        for (i = 5; worldIn.getBlockState(position.down()).getMaterial() == Material.WATER; position = position.down());
+        for (i = 5; worldIn.func_180495_p(position.func_177977_b()).func_185904_a() == Material.field_151586_h; position = position.func_177977_b());
 
         boolean flag = true;
 
@@ -84,9 +84,9 @@ public abstract class WorldGenSwampMixin_API extends WorldGenAbstractTree implem
                     for (l = z - b0; l <= z + b0 && flag; ++l) {
                         if (j >= 0 && j < 256) {
                             final BlockPos pos = new BlockPos(k, j, l);
-                            final IBlockState state = worldIn.getBlockState(pos);
+                            final IBlockState state = worldIn.func_180495_p(pos);
                             if (!((WorldGeneratorBridge) this).bridge$isAir(state, worldIn, pos) && !((WorldGeneratorBridge) this).bridge$isLeaves(state, worldIn, pos)) {
-                                if (state.getBlock() != Blocks.WATER && state.getBlock() != Blocks.FLOWING_WATER) {
+                                if (state.func_177230_c() != Blocks.field_150355_j && state.func_177230_c() != Blocks.field_150358_i) {
                                     flag = false;
                                 } else if (j > y) {
                                     flag = false;
@@ -103,8 +103,8 @@ public abstract class WorldGenSwampMixin_API extends WorldGenAbstractTree implem
                 return false;
             }
             final BlockPos down = new BlockPos(x, y - 1, z);
-            final Block block = worldIn.getBlockState(down).getBlock();
-            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.SAPLING) && y < 256 - i - 1) {
+            final Block block = worldIn.func_180495_p(down).func_177230_c();
+            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.field_150345_g) && y < 256 - i - 1) {
 
                 return true;
             }
@@ -114,7 +114,7 @@ public abstract class WorldGenSwampMixin_API extends WorldGenAbstractTree implem
 
     @Override
     public void placeObject(final World world, final Random random, final int x, final int y, final int z) {
-        generate((net.minecraft.world.World) world, random, new BlockPos(x, y, z));
+        func_180709_b((net.minecraft.world.World) world, random, new BlockPos(x, y, z));
     }
 
 }

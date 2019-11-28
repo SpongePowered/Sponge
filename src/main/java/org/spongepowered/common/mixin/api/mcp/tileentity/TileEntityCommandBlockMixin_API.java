@@ -51,24 +51,24 @@ public abstract class TileEntityCommandBlockMixin_API extends TileEntityMixin_AP
 
     @Override
     public void execute() {
-        getCommandBlockLogic().trigger(this.world);
+        getCommandBlockLogic().func_145755_a(this.world);
     }
 
     @Override
     public String getName() {
-        return getCommandBlockLogic().getName();
+        return getCommandBlockLogic().func_70005_c_();
     }
 
     @Override
     @SuppressWarnings("deprecated")
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(Constants.TileEntity.CommandBlock.STORED_COMMAND, this.getCommandBlockLogic().getCommand());
-        container.set(Constants.TileEntity.CommandBlock.SUCCESS_COUNT, this.getCommandBlockLogic().getSuccessCount());
-        container.set(Constants.TileEntity.CUSTOM_NAME, this.getCommandBlockLogic().getName());
-        container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.getCommandBlockLogic().shouldTrackOutput());
-        if (this.getCommandBlockLogic().shouldTrackOutput()) {
-            container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, SpongeTexts.toLegacy(this.getCommandBlockLogic().getLastOutput()));
+        container.set(Constants.TileEntity.CommandBlock.STORED_COMMAND, this.getCommandBlockLogic().func_145753_i());
+        container.set(Constants.TileEntity.CommandBlock.SUCCESS_COUNT, this.getCommandBlockLogic().func_145760_g());
+        container.set(Constants.TileEntity.CUSTOM_NAME, this.getCommandBlockLogic().func_70005_c_());
+        container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.getCommandBlockLogic().func_175571_m());
+        if (this.getCommandBlockLogic().func_175571_m()) {
+            container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, SpongeTexts.toLegacy(this.getCommandBlockLogic().func_145749_h()));
         }
         return container;
     }

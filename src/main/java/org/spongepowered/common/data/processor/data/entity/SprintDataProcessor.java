@@ -52,13 +52,13 @@ public class SprintDataProcessor extends AbstractEntitySingleDataProcessor<Entit
 
     @Override
     protected boolean set(Entity entity, Boolean value) {
-        entity.setSprinting(value);
+        entity.func_70031_b(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(Entity entity) {
-        return Optional.of(entity.isSprinting());
+        return Optional.of(entity.func_70051_ag());
     }
 
     @Override

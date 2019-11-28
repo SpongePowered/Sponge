@@ -48,7 +48,7 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
     @Nullable final ItemType baseType;
     final List<BiConsumer<ItemStack.Builder, Random>> biConsumers;
 
-    private SpongeItemStackGenerator(Builder builder) {
+    private SpongeItemStackGenerator(org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator.Builder builder) {
         this.biConsumers = ImmutableList.copyOf(builder.consumers);
         this.baseType = builder.baseItem;
     }
@@ -95,19 +95,19 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
         @Nullable ItemType baseItem;
 
         @Override
-        public Builder add(BiConsumer<ItemStack.Builder, Random> consumer) {
+        public org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator.Builder add(BiConsumer<ItemStack.Builder, Random> consumer) {
             this.consumers.add(checkNotNull(consumer, "Consumer cannot be null!"));
             return this;
         }
 
         @Override
-        public Builder addAll(Collection<BiConsumer<ItemStack.Builder, Random>> collection) {
+        public org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator.Builder addAll(Collection<BiConsumer<ItemStack.Builder, Random>> collection) {
             this.consumers.addAll(checkNotNull(collection, "Collecton cannot be null!"));
             return this;
         }
 
         @Override
-        public Builder baseItem(ItemType itemType) {
+        public org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator.Builder baseItem(ItemType itemType) {
             this.baseItem = itemType;
             return this;
         }
@@ -132,7 +132,7 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
         }
 
         @Override
-        public Builder reset() {
+        public org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator.Builder reset() {
             this.consumers.clear();
             this.baseItem = null;
             return this;

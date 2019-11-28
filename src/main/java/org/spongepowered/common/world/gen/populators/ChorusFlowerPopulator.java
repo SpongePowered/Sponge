@@ -82,12 +82,12 @@ public class ChorusFlowerPopulator implements ChorusFlower {
                 for (int n = 0; n < count; ++n) {
                     int x = rand.nextInt(size.getX());
                     int y = rand.nextInt(size.getZ());
-                    int z = worldObj.getHeight(chunkPos.add(x, 0, y)).getY();
+                    int z = worldObj.func_175645_m(chunkPos.func_177982_a(x, 0, y)).func_177956_o();
 
                     if (z > 0) {
-                        if (worldObj.isAirBlock(chunkPos.add(x, z, y))
-                                && worldObj.getBlockState(chunkPos.add(x, z - 1, y)).getBlock() == Blocks.END_STONE) {
-                            BlockChorusFlower.generatePlant(worldObj, chunkPos.add(x, z, y), rand, 8);
+                        if (worldObj.func_175623_d(chunkPos.func_177982_a(x, z, y))
+                                && worldObj.func_180495_p(chunkPos.func_177982_a(x, z - 1, y)).func_177230_c() == Blocks.field_150377_bs) {
+                            BlockChorusFlower.func_185603_a(worldObj, chunkPos.func_177982_a(x, z, y), rand, 8);
                         }
                     }
                 }
@@ -98,7 +98,7 @@ public class ChorusFlowerPopulator implements ChorusFlower {
     private float func_185960_a(int x, int z, int p_185960_3_, int p_185960_4_) {
         float f = x * 2 + p_185960_3_;
         float f1 = z * 2 + p_185960_4_;
-        float f2 = 100.0F - MathHelper.sqrt(f * f + f1 * f1) * 8.0F;
+        float f2 = 100.0F - MathHelper.func_76129_c(f * f + f1 * f1) * 8.0F;
 
         if (f2 > 80.0F) {
             f2 = 80.0F;
@@ -113,11 +113,11 @@ public class ChorusFlowerPopulator implements ChorusFlower {
                 long k = x + i;
                 long l = z + j;
 
-                if (k * k + l * l > 4096L && this.noise.getValue(k, l) < -0.8999999761581421D) {
-                    float f3 = (MathHelper.abs(k) * 3439.0F + MathHelper.abs(l) * 147.0F) % 13.0F + 9.0F;
+                if (k * k + l * l > 4096L && this.noise.func_151605_a(k, l) < -0.8999999761581421D) {
+                    float f3 = (MathHelper.func_76135_e(k) * 3439.0F + MathHelper.func_76135_e(l) * 147.0F) % 13.0F + 9.0F;
                     f = p_185960_3_ - i * 2;
                     f1 = p_185960_4_ - j * 2;
-                    float f4 = 100.0F - MathHelper.sqrt(f * f + f1 * f1) * f3;
+                    float f4 = 100.0F - MathHelper.func_76129_c(f * f + f1 * f1) * f3;
 
                     if (f4 > 80.0F) {
                         f4 = 80.0F;

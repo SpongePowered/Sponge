@@ -67,7 +67,7 @@ public abstract class CommandTPMixin extends CommandBase {
      */
     @Override
     @Overwrite
-    public void execute(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException
+    public void func_184881_a(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException
     {
         if (args.length < 1)
         {
@@ -80,11 +80,11 @@ public abstract class CommandTPMixin extends CommandBase {
 
             if (args.length != 2 && args.length != 4 && args.length != 6)
             {
-                entity = getCommandSenderAsPlayer(sender);
+                entity = func_71521_c(sender);
             }
             else
             {
-                entity = getEntity(server, sender, args[0]);
+                entity = func_184885_b(server, sender, args[0]);
                 i = 1;
             }
 
@@ -94,15 +94,15 @@ public abstract class CommandTPMixin extends CommandBase {
                 {
                     throw new WrongUsageException("commands.tp.usage", new Object[0]);
                 }
-                else if (entity.world != null)
+                else if (entity.field_70170_p != null)
                 {
                     // int j = 4096;
                     int lvt_6_2_ = i + 1;
-                    final CommandBase.CoordinateArg commandbase$coordinatearg = parseCoordinate(entity.posX, args[i], true);
-                    final CommandBase.CoordinateArg commandbase$coordinatearg1 = parseCoordinate(entity.posY, args[lvt_6_2_++], -4096, 4096, false);
-                    final CommandBase.CoordinateArg commandbase$coordinatearg2 = parseCoordinate(entity.posZ, args[lvt_6_2_++], true);
-                    final CommandBase.CoordinateArg commandbase$coordinatearg3 = parseCoordinate((double)entity.rotationYaw, args.length > lvt_6_2_ ? args[lvt_6_2_++] : "~", false);
-                    final CommandBase.CoordinateArg commandbase$coordinatearg4 = parseCoordinate((double)entity.rotationPitch, args.length > lvt_6_2_ ? args[lvt_6_2_] : "~", false);
+                    final CommandBase.CoordinateArg commandbase$coordinatearg = func_175770_a(entity.field_70165_t, args[i], true);
+                    final CommandBase.CoordinateArg commandbase$coordinatearg1 = func_175767_a(entity.field_70163_u, args[lvt_6_2_++], -4096, 4096, false);
+                    final CommandBase.CoordinateArg commandbase$coordinatearg2 = func_175770_a(entity.field_70161_v, args[lvt_6_2_++], true);
+                    final CommandBase.CoordinateArg commandbase$coordinatearg3 = func_175770_a((double)entity.field_70177_z, args.length > lvt_6_2_ ? args[lvt_6_2_++] : "~", false);
+                    final CommandBase.CoordinateArg commandbase$coordinatearg4 = func_175770_a((double)entity.field_70125_A, args.length > lvt_6_2_ ? args[lvt_6_2_] : "~", false);
                     // Sponge start - check impl$shouldNotifyCommandListener before calling 'notifyCommandListener'
 
                     // Guard against any possible re-entrance
@@ -110,7 +110,7 @@ public abstract class CommandTPMixin extends CommandBase {
 
                     teleportEntityToCoordinates(entity, commandbase$coordinatearg, commandbase$coordinatearg1, commandbase$coordinatearg2, commandbase$coordinatearg3, commandbase$coordinatearg4);
                     if (impl$shouldNotifyCommandListener) {
-                        notifyCommandListener(sender, this, "commands.tp.success.coordinates", new Object[] {entity.getName(), Double.valueOf(commandbase$coordinatearg.getResult()), Double.valueOf(commandbase$coordinatearg1.getResult()), Double.valueOf(commandbase$coordinatearg2.getResult())});
+                        func_152373_a(sender, this, "commands.tp.success.coordinates", new Object[] {entity.func_70005_c_(), Double.valueOf(commandbase$coordinatearg.func_179628_a()), Double.valueOf(commandbase$coordinatearg1.func_179628_a()), Double.valueOf(commandbase$coordinatearg2.func_179628_a())});
                     }
                     impl$shouldNotifyCommandListener = shouldNotify;
                     // Sponge end
@@ -118,15 +118,15 @@ public abstract class CommandTPMixin extends CommandBase {
             }
             else
             {
-                final Entity entity1 = getEntity(server, sender, args[args.length - 1]);
+                final Entity entity1 = func_184885_b(server, sender, args[args.length - 1]);
 
-                if (entity1.world != entity.world)
+                if (entity1.field_70170_p != entity.field_70170_p)
                 {
                     throw new CommandException("commands.tp.notSameDimension", new Object[0]);
                 }
                 else
                 {
-                    entity.dismountRidingEntity();
+                    entity.func_184210_p();
 
                     if (entity instanceof EntityPlayerMP)
                     {
@@ -134,13 +134,13 @@ public abstract class CommandTPMixin extends CommandBase {
                         final EntityPlayerMP player = (EntityPlayerMP) entity;
                         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.COMMAND);
-                            final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
+                            final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.field_70165_t, entity1.field_70163_u, entity1.field_70161_v, entity1.field_70177_z, entity1.field_70125_A);
                             if (event.isCancelled()) {
                                 return;
                             }
 
                             final Vector3d position = event.getToTransform().getPosition();
-                            player.connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                            player.field_71135_a.func_147364_a(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
                         }
                         // Sponge end
                     }
@@ -149,18 +149,18 @@ public abstract class CommandTPMixin extends CommandBase {
                         // Sponge Start - Events
                         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.COMMAND);
-                            final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
+                            final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.field_70165_t, entity1.field_70163_u, entity1.field_70161_v, entity1.field_70177_z, entity1.field_70125_A);
                             if (event.isCancelled()) {
                                 return;
                             }
 
                             final Vector3d position = event.getToTransform().getPosition();
-                            entity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                            entity.func_70012_b(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
                         }
                         // Sponge End
                     }
 
-                    notifyCommandListener(sender, this, "commands.tp.success", new Object[] {entity.getName(), entity1.getName()});
+                    func_152373_a(sender, this, "commands.tp.success", new Object[] {entity.func_70005_c_(), entity1.func_70005_c_()});
                 }
             }
         }
@@ -177,86 +177,86 @@ public abstract class CommandTPMixin extends CommandBase {
         {
             final Set<SPacketPlayerPosLook.EnumFlags> set = EnumSet.<SPacketPlayerPosLook.EnumFlags>noneOf(SPacketPlayerPosLook.EnumFlags.class);
 
-            if (p_189863_1_.isRelative())
+            if (p_189863_1_.func_179630_c())
             {
                 set.add(SPacketPlayerPosLook.EnumFlags.X);
             }
 
-            if (p_189863_2_.isRelative())
+            if (p_189863_2_.func_179630_c())
             {
                 set.add(SPacketPlayerPosLook.EnumFlags.Y);
             }
 
-            if (p_189863_3_.isRelative())
+            if (p_189863_3_.func_179630_c())
             {
                 set.add(SPacketPlayerPosLook.EnumFlags.Z);
             }
 
-            if (p_189863_5_.isRelative())
+            if (p_189863_5_.func_179630_c())
             {
                 set.add(SPacketPlayerPosLook.EnumFlags.X_ROT);
             }
 
-            if (p_189863_4_.isRelative())
+            if (p_189863_4_.func_179630_c())
             {
                 set.add(SPacketPlayerPosLook.EnumFlags.Y_ROT);
             }
 
-            float f = (float)p_189863_4_.getAmount();
+            float f = (float)p_189863_4_.func_179629_b();
 
-            if (!p_189863_4_.isRelative())
+            if (!p_189863_4_.func_179630_c())
             {
-                f = MathHelper.wrapDegrees(f);
+                f = MathHelper.func_76142_g(f);
             }
 
-            float f1 = (float)p_189863_5_.getAmount();
+            float f1 = (float)p_189863_5_.func_179629_b();
 
-            if (!p_189863_5_.isRelative())
+            if (!p_189863_5_.func_179630_c())
             {
-                f1 = MathHelper.wrapDegrees(f1);
+                f1 = MathHelper.func_76142_g(f1);
             }
 
             // Sponge start
             final EntityPlayerMP player = (EntityPlayerMP) p_189863_0_;
-            final double x = p_189863_1_.getAmount();
-            final double y = p_189863_2_.getAmount();
-            final double z = p_189863_3_.getAmount();
+            final double x = p_189863_1_.func_179629_b();
+            final double y = p_189863_2_.func_179629_b();
+            final double z = p_189863_3_.func_179629_b();
             final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, x, y, z, f, f1);
             if (event.isCancelled()) {
                 return;
             }
 
-            p_189863_0_.dismountRidingEntity();
+            p_189863_0_.func_184210_p();
             final Vector3d position = event.getToTransform().getPosition();
-            ((EntityPlayerMP)p_189863_0_).connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch(), set);
-            p_189863_0_.setRotationYawHead((float) event.getToTransform().getYaw());
+            ((EntityPlayerMP)p_189863_0_).field_71135_a.func_175089_a(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch(), set);
+            p_189863_0_.func_70034_d((float) event.getToTransform().getYaw());
             // Sponge end
         }
         else
         {
-            final float f2 = (float)MathHelper.wrapDegrees(p_189863_4_.getResult());
-            float f3 = (float)MathHelper.wrapDegrees(p_189863_5_.getResult());
-            f3 = MathHelper.clamp(f3, -90.0F, 90.0F);
+            final float f2 = (float)MathHelper.func_76138_g(p_189863_4_.func_179628_a());
+            float f3 = (float)MathHelper.func_76138_g(p_189863_5_.func_179628_a());
+            f3 = MathHelper.func_76131_a(f3, -90.0F, 90.0F);
 
             // Sponge start
-            final double x = p_189863_1_.getResult();
-            final double y = p_189863_2_.getResult();
-            final double z = p_189863_3_.getResult();
+            final double x = p_189863_1_.func_179628_a();
+            final double y = p_189863_2_.func_179628_a();
+            final double z = p_189863_3_.func_179628_a();
             final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(p_189863_0_, x, y, z, f2, f3);
             if (event.isCancelled()) {
                 return;
             }
 
             final Vector3d position = event.getToTransform().getPosition();
-            p_189863_0_.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
-            p_189863_0_.setRotationYawHead((float) event.getToTransform().getYaw());
+            p_189863_0_.func_70012_b(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+            p_189863_0_.func_70034_d((float) event.getToTransform().getYaw());
             // Sponge end
         }
 
-        if (!(p_189863_0_ instanceof EntityLivingBase) || !((EntityLivingBase)p_189863_0_).isElytraFlying())
+        if (!(p_189863_0_ instanceof EntityLivingBase) || !((EntityLivingBase)p_189863_0_).func_184613_cA())
         {
-            p_189863_0_.motionY = 0.0D;
-            p_189863_0_.onGround = true;
+            p_189863_0_.field_70181_x = 0.0D;
+            p_189863_0_.field_70122_E = true;
         }
 
         // Sponge start - set 'impl$shouldNotifyCommandListener' to 'true' if we make it to the end of the method (the event wasn't cancelled)

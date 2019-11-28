@@ -56,7 +56,7 @@ public class ArmorStandArmsValueProcessor extends AbstractSpongeValueProcessor<E
 
     @Override
     protected Optional<Boolean> getVal(final EntityArmorStand container) {
-        return Optional.of(container.getShowArms());
+        return Optional.of(container.func_175402_q());
     }
 
     @Override

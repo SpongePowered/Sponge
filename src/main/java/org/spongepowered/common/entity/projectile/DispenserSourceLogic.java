@@ -53,24 +53,24 @@ public class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
         if (projectile.isPresent()) {
             EnumFacing enumfacing = getFacing((TileEntityDispenser) source);
             net.minecraft.entity.Entity projectileEntity = (net.minecraft.entity.Entity) projectile.get();
-            projectileEntity.motionX = enumfacing.getXOffset();
-            projectileEntity.motionY = enumfacing.getYOffset() + 0.1F;
-            projectileEntity.motionZ = enumfacing.getZOffset();
+            projectileEntity.field_70159_w = enumfacing.func_82601_c();
+            projectileEntity.field_70181_x = enumfacing.func_96559_d() + 0.1F;
+            projectileEntity.field_70179_y = enumfacing.func_82599_e();
         }
         return projectile;
     }
 
     public static EnumFacing getFacing(TileEntityDispenser dispenser) {
-        IBlockState state = dispenser.getWorld().getBlockState(dispenser.getPos());
-        return state.getValue(BlockDispenser.FACING);
+        IBlockState state = dispenser.func_145831_w().func_180495_p(dispenser.func_174877_v());
+        return state.func_177229_b(BlockDispenser.field_176441_a);
     }
 
     @SuppressWarnings("unchecked")
     private <P extends Projectile> Optional<P> launch(TileEntityDispenser dispenser, Class<P> projectileClass, Item item) {
-        BehaviorDefaultDispenseItem behavior = (BehaviorDefaultDispenseItem) BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(item);
-        List<Entity> entityList = dispenser.getWorld().loadedEntityList;
+        BehaviorDefaultDispenseItem behavior = (BehaviorDefaultDispenseItem) BlockDispenser.field_149943_a.func_82594_a(item);
+        List<Entity> entityList = dispenser.func_145831_w().field_72996_f;
         int numEntities = entityList.size();
-        behavior.dispense(new BlockSourceImpl(dispenser.getWorld(), dispenser.getPos()), new ItemStack(item));
+        behavior.func_82482_a(new BlockSourceImpl(dispenser.func_145831_w(), dispenser.func_174877_v()), new ItemStack(item));
         // Hack - get the projectile that was spawned from dispense()
         for (int i = entityList.size() - 1; i >= numEntities; i--) {
             if (projectileClass.isInstance(entityList.get(i))) {

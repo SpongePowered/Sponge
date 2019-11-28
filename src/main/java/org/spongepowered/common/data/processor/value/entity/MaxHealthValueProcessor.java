@@ -54,13 +54,13 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Entity
 
     @Override
     protected boolean set(final EntityLivingBase container, final Double value) {
-        container.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(value);
+        container.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(value);
         return true;
     }
 
     @Override
     protected Optional<Double> getVal(final EntityLivingBase container) {
-        return Optional.of((double) container.getMaxHealth());
+        return Optional.of((double) container.func_110138_aP());
     }
 
     @Override

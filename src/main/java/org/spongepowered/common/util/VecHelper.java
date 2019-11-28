@@ -71,7 +71,7 @@ public final class VecHelper {
         if (pos == null) {
             return null;
         }
-        return new Vector3i(pos.getX(), pos.getY(), pos.getZ());
+        return new Vector3i(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
     }
 
     // === MC BlockPos --> Flow Vector3d ==
@@ -80,7 +80,7 @@ public final class VecHelper {
         if (pos == null) {
             return null;
         }
-        return new Vector3d(pos.getX(), pos.getY(), pos.getZ());
+        return new Vector3d(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
     }
     
     // === Rotations --> Flow Vector ===
@@ -89,7 +89,7 @@ public final class VecHelper {
         if (rotation == null) {
             return null;
         }
-        return new Vector3d(rotation.getX(), rotation.getY(), rotation.getZ());
+        return new Vector3d(rotation.func_179415_b(), rotation.func_179416_c(), rotation.func_179413_d());
     }
 
     // === MC Vec3i --> Flow Vector3i ===
@@ -98,7 +98,7 @@ public final class VecHelper {
         if (vector == null) {
             return null;
         }
-        return new Vector3i(vector.getX(), vector.getY(), vector.getZ());
+        return new Vector3i(vector.func_177958_n(), vector.func_177956_o(), vector.func_177952_p());
     }
 
     // === Flow Vector3i --> MC Vec3i ===
@@ -125,7 +125,7 @@ public final class VecHelper {
         if (pos == null) {
             return null;
         }
-        return new Vec3d(pos.getX(), pos.getY(), pos.getZ());
+        return new Vec3d(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
     }
 
     // === MC ChunkCoordIntPair ---> Flow Vector3i ===
@@ -134,7 +134,7 @@ public final class VecHelper {
         if (pos == null) {
             return null;
         }
-        return new Vector3i(pos.x, 0, pos.z);
+        return new Vector3i(pos.field_77276_a, 0, pos.field_77275_b);
     }
 
     // === Flow Vector3i --> MC ChunkCoordIntPair ===
@@ -152,7 +152,7 @@ public final class VecHelper {
         if (vector == null) {
             return null;
         }
-        return new Vector3d(vector.x, vector.y, vector.z);
+        return new Vector3d(vector.field_72450_a, vector.field_72448_b, vector.field_72449_c);
     }
 
     // === Flow Vector3d --> MC Vec3 ==
@@ -203,8 +203,8 @@ public final class VecHelper {
             return null;
         }
         return new AABB(
-            new Vector3d(box.minX, box.minY, box.minZ),
-            new Vector3d(box.maxX, box.maxY, box.maxZ)
+            new Vector3d(box.field_72340_a, box.field_72338_b, box.field_72339_c),
+            new Vector3d(box.field_72336_d, box.field_72337_e, box.field_72334_f)
         );
     }
 }

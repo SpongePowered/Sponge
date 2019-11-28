@@ -77,11 +77,11 @@ public abstract class BlockBedMixin extends BlockHorizontalMixin {
     }
 
     private ImmutableOccupiedData impl$getIsOccupiedFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOccupiedData.class, blockState.getValue(BlockBed.OCCUPIED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOccupiedData.class, blockState.func_177229_b(BlockBed.field_176471_b));
     }
 
     @Inject(method = "hasRoomForPlayer", at = @At(value = "RETURN"), cancellable = true)
     private static void onHasRoomForPlayer(final World world, final BlockPos pos, final CallbackInfoReturnable<Boolean> ci ) {
-        ci.setReturnValue(ci.getReturnValue() && world.getWorldBorder().contains(pos));
+        ci.setReturnValue(ci.getReturnValue() && world.func_175723_af().func_177746_a(pos));
     }
 }

@@ -44,7 +44,7 @@ public final class ResourcePackState extends BasicPacketState {
     public void unwind(BasicPacketContext phaseContext) {
         final EntityPlayerMP player = phaseContext.getPacketPlayer();
 
-        final NetHandlerPlayServer connection = player.connection;
+        final NetHandlerPlayServer connection = player.field_71135_a;
         final NetHandlerPlayServerBridge mixinHandler = (NetHandlerPlayServerBridge) connection;
         final CPacketResourcePackStatusAccessor resource = phaseContext.getPacket();
         final ResourcePackStatusEvent.ResourcePackStatus status;

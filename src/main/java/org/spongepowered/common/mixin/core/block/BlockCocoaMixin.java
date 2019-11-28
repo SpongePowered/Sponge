@@ -62,7 +62,7 @@ public abstract class BlockCocoaMixin extends BlockHorizontalMixin {
             if (growth > 2) {
                 growth = 2;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockCocoa.AGE, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockCocoa.field_176501_a, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -74,13 +74,13 @@ public abstract class BlockCocoaMixin extends BlockHorizontalMixin {
             if (growth > 2) {
                 growth = 2;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockCocoa.AGE, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockCocoa.field_176501_a, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData impl$getGrowthData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockCocoa.AGE), 0, 2);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(BlockCocoa.field_176501_a), 0, 2);
     }
 
 }

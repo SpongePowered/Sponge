@@ -54,15 +54,15 @@ public abstract class NetHandlerStatusServerMixin {
     @Overwrite
     public void processServerQuery(final CPacketServerQuery packetIn) {
         if (this.handled) {
-            this.networkManager.closeChannel(EXIT_MESSAGE);
+            this.networkManager.func_150718_a(EXIT_MESSAGE);
         } else {
             this.handled = true;
 
             final ServerStatusResponse response = SpongeStatusResponse.post(this.server, new SpongeStatusClient(this.networkManager));
             if (response != null) {
-                this.networkManager.sendPacket(new SPacketServerInfo(response));
+                this.networkManager.func_179290_a(new SPacketServerInfo(response));
             } else {
-                this.networkManager.closeChannel(null);
+                this.networkManager.func_150718_a(null);
             }
         }
     }

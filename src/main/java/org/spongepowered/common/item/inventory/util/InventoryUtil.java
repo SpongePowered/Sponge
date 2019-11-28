@@ -57,7 +57,7 @@ public final class InventoryUtil {
 
     @SuppressWarnings("rawtypes")
     public static CraftingGridInventory toSpongeInventory(InventoryCrafting inv) {
-        CraftingGridInventoryLensImpl lens = new CraftingGridInventoryLensImpl(0, inv.getWidth(), inv.getHeight(), inv.getWidth(), SlotLensImpl::new);
+        CraftingGridInventoryLensImpl lens = new CraftingGridInventoryLensImpl(0, inv.func_174922_i(), inv.func_174923_h(), inv.func_174922_i(), SlotLensImpl::new);
 
         return new CraftingGridInventoryAdapter((Fabric) inv, lens);
     }
@@ -87,11 +87,11 @@ public final class InventoryUtil {
     public static Optional<Inventory> getDoubleChestInventory(TileEntityChest chest) {
         // BlockChest#getContainer(World, BlockPos, boolean) without isBlocked() check
         for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-            BlockPos blockpos = chest.getPos().offset(enumfacing);
+            BlockPos blockpos = chest.func_174877_v().func_177972_a(enumfacing);
 
-            TileEntity tileentity1 = chest.getWorld().getTileEntity(blockpos);
+            TileEntity tileentity1 = chest.func_145831_w().func_175625_s(blockpos);
 
-            if (tileentity1 instanceof TileEntityChest && tileentity1.getBlockType() == chest.getBlockType()) {
+            if (tileentity1 instanceof TileEntityChest && tileentity1.func_145838_q() == chest.func_145838_q()) {
 
                 InventoryLargeChest inventory;
 

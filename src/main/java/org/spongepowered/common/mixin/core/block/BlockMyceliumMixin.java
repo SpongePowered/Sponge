@@ -70,6 +70,6 @@ public abstract class BlockMyceliumMixin extends BlockMixin {
     }
 
     private ImmutableSnowedData impl$getIsSnowedFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.getValue(BlockMycelium.SNOWY));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.func_177229_b(BlockMycelium.field_176384_a));
     }
 }

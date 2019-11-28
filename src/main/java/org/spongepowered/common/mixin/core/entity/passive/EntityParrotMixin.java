@@ -46,14 +46,14 @@ public abstract class EntityParrotMixin extends EntityAgeableMixin {
     @Redirect(method = "processInteract",
         at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     private int impl$TameEntityAndGetRandom(Random rand, int bound, EntityPlayer player, EnumHand hand) {
-        ItemStack stack = player.getHeldItem(hand);
+        ItemStack stack = player.func_184586_b(hand);
         int random = rand.nextInt(bound);
         if (random == 0) {
-            stack.setCount(stack.getCount() + 1);
+            stack.func_190920_e(stack.func_190916_E() + 1);
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
                 if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (Parrot) this))) {
-                    stack.setCount(stack.getCount() - 1);
+                    stack.func_190920_e(stack.func_190916_E() - 1);
                     return random;
                 }
             }

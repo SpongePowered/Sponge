@@ -70,6 +70,6 @@ public abstract class BlockDaylightDetectorMixin extends BlockMixin {
     }
 
     private ImmutableRedstonePoweredData impl$getPowerFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.getValue(BlockDaylightDetector.POWER));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.func_177229_b(BlockDaylightDetector.field_176436_a));
     }
 }

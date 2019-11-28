@@ -58,7 +58,7 @@ public abstract class BlockStoneMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableStoneData) {
             final BlockStone.EnumType stoneType = (BlockStone.EnumType) (Object) ((ImmutableStoneData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockStone.VARIANT, stoneType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStone.field_176247_a, stoneType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -67,13 +67,13 @@ public abstract class BlockStoneMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.STONE_TYPE)) {
             final BlockStone.EnumType stoneType = (BlockStone.EnumType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockStone.VARIANT, stoneType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStone.field_176247_a, stoneType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableStoneData impl$getStoneTypeFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeStoneData.class, (StoneType) (Object) blockState.getValue(BlockStone.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeStoneData.class, (StoneType) (Object) blockState.func_177229_b(BlockStone.field_176247_a));
     }
 
 }

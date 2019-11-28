@@ -74,9 +74,9 @@ public abstract class WorldGenDesertWellsMixin_API extends WorldGenerator implem
         if (random.nextDouble() < this.api$spawnProbability) {
             final int x = random.nextInt(size.getX());
             final int z = random.nextInt(size.getZ());
-            final BlockPos pos = world.getTopSolidOrLiquidBlock(chunkPos.add(x, 0, z)).up();
-            if (this.api$obj.canPlaceAt((org.spongepowered.api.world.World) world, pos.getX(), pos.getY(), pos.getZ())) {
-                this.api$obj.placeObject((org.spongepowered.api.world.World) world, random, pos.getX(), pos.getY(), pos.getZ());
+            final BlockPos pos = world.func_175672_r(chunkPos.func_177982_a(x, 0, z)).func_177984_a();
+            if (this.api$obj.canPlaceAt((org.spongepowered.api.world.World) world, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p())) {
+                this.api$obj.placeObject((org.spongepowered.api.world.World) world, random, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
             }
         }
     }
@@ -105,18 +105,18 @@ public abstract class WorldGenDesertWellsMixin_API extends WorldGenerator implem
     public boolean canPlaceAt(final org.spongepowered.api.world.World world, final int x, final int y, final int z) {
         final World worldIn = (World) world;
         BlockPos position = new BlockPos(x, y, z);
-        while (worldIn.isAirBlock(position) && position.getY() > 2)
+        while (worldIn.func_175623_d(position) && position.func_177956_o() > 2)
         {
-            position = position.down();
+            position = position.func_177977_b();
         }
-        if (!IS_SAND.apply(worldIn.getBlockState(position))) {
+        if (!IS_SAND.apply(worldIn.func_180495_p(position))) {
             return false;
         }
         int i;
         int j;
         for (i = -2; i <= 2; ++i) {
             for (j = -2; j <= 2; ++j) {
-                if (worldIn.isAirBlock(position.add(i, -1, j)) && worldIn.isAirBlock(position.add(i, -2, j))) {
+                if (worldIn.func_175623_d(position.func_177982_a(i, -1, j)) && worldIn.func_175623_d(position.func_177982_a(i, -2, j))) {
                     return false;
                 }
             }
@@ -126,6 +126,6 @@ public abstract class WorldGenDesertWellsMixin_API extends WorldGenerator implem
 
     @Override
     public void placeObject(final org.spongepowered.api.world.World world, final Random random, final int x, final int y, final int z) {
-        generate((World) world, random, new BlockPos(x, y, z));
+        func_180709_b((World) world, random, new BlockPos(x, y, z));
     }
 }

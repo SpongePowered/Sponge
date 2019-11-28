@@ -58,10 +58,10 @@ public abstract class BlockFlowerMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePlantData) {
             final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) (Object) ((ImmutablePlantData) manipulator).type().get();
-            if(flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()){
+            if(flowerType.func_176964_a() != ((BlockFlower) blockState.func_177230_c()).func_176495_j()){
                 return Optional.empty();
             }
-            return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));
+            return Optional.of((BlockState) blockState.func_177226_a(((BlockFlower) blockState.func_177230_c()).func_176494_l(), flowerType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -70,10 +70,10 @@ public abstract class BlockFlowerMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.PLANT_TYPE)) {
             final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) value;
-            if(flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()){
+            if(flowerType.func_176964_a() != ((BlockFlower) blockState.func_177230_c()).func_176495_j()){
                 return Optional.empty();
             }
-            return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));
+            return Optional.of((BlockState) blockState.func_177226_a(((BlockFlower) blockState.func_177230_c()).func_176494_l(), flowerType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -81,6 +81,6 @@ public abstract class BlockFlowerMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutablePlantData impl$getFlowerTypeFor(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePlantData.class,
-                (PlantType) (Object) blockState.getValue(((BlockFlower) blockState.getBlock()).getTypeProperty()));
+                (PlantType) (Object) blockState.func_177229_b(((BlockFlower) blockState.func_177230_c()).func_176494_l()));
     }
 }

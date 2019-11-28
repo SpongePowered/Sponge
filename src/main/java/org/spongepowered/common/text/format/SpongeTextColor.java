@@ -54,7 +54,7 @@ public class SpongeTextColor implements TextColor {
 
     @Override
     public String getName() {
-        return this.handle.getFriendlyName();
+        return this.handle.func_96297_d();
     }
 
     @Override

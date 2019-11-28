@@ -40,13 +40,13 @@ import java.util.Set;
 public final class BreakablePlaceableUtils {
 
     public static boolean set(final ItemStack stack, final String nbtKey, final Set<? extends BlockType> value) {
-        NBTTagCompound stackTag = stack.getTagCompound();
+        NBTTagCompound stackTag = stack.func_77978_p();
 
         if (value.isEmpty()) {
             if (stackTag != null) {
-                stackTag.removeTag(nbtKey);
-                if (stackTag.isEmpty()) {
-                    stack.setTagCompound(null);
+                stackTag.func_82580_o(nbtKey);
+                if (stackTag.func_82582_d()) {
+                    stack.func_77982_d(null);
                 }
             }
         } else {
@@ -56,30 +56,30 @@ public final class BreakablePlaceableUtils {
                 if (id.startsWith("minecraft:")) {
                     id = id.substring("minecraft:".length());
                 }
-                breakableIds.appendTag(new NBTTagString(id));
+                breakableIds.func_74742_a(new NBTTagString(id));
             }
             if (stackTag == null) {
                 stackTag = new NBTTagCompound();
-                stack.setTagCompound(stackTag);
+                stack.func_77982_d(stackTag);
             }
-            stackTag.setTag(nbtKey, breakableIds);
+            stackTag.func_74782_a(nbtKey, breakableIds);
         }
 
         return true;
     }
 
     public static Optional<Set<BlockType>> get(final ItemStack stack, final String nbtKey) {
-        final NBTTagCompound tag = stack.getTagCompound();
+        final NBTTagCompound tag = stack.func_77978_p();
         if (tag == null) {
             return Optional.empty();
         }
-        final NBTTagList blockIds = tag.getTagList(nbtKey, Constants.NBT.TAG_STRING);
-        if (blockIds.isEmpty()) {
+        final NBTTagList blockIds = tag.func_150295_c(nbtKey, Constants.NBT.TAG_STRING);
+        if (blockIds.func_82582_d()) {
             return Optional.empty();
         }
-        final Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.tagCount());
-        for (int i = 0; i < blockIds.tagCount(); i++) {
-            BlockTypeRegistryModule.getInstance().getById(blockIds.getStringTagAt(i)).ifPresent(blockTypes::add);
+        final Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.func_74745_c());
+        for (int i = 0; i < blockIds.func_74745_c(); i++) {
+            BlockTypeRegistryModule.getInstance().getById(blockIds.func_150307_f(i)).ifPresent(blockTypes::add);
         }
         return Optional.of(blockTypes);
     }

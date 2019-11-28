@@ -39,7 +39,7 @@ public class ApplicableEffectPropertyStore extends AbstractItemStackPropertyStor
     @SuppressWarnings("unchecked")
     @Override
     public Optional<ApplicableEffectProperty> getFor(final ItemStack propertyHolder) {
-        final List<PotionEffect> effectsFromStack = PotionUtils.getEffectsFromStack(propertyHolder);
+        final List<PotionEffect> effectsFromStack = PotionUtils.func_185189_a(propertyHolder);
         if (effectsFromStack.isEmpty()) {
             return Optional.empty();
         }

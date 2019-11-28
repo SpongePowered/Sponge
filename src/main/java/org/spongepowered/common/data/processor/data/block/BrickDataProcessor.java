@@ -39,17 +39,17 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class BrickDataProcessor extends AbstractCatalogDataProcessor<BrickType, Value<BrickType>, BrickData, ImmutableBrickData> {
 
     public BrickDataProcessor() {
-        super(Keys.BRICK_TYPE, input -> input.getItem() == ItemTypes.STONEBRICK || input.getItem() == ItemTypes.STONE_BRICK_STAIRS);
+        super(Keys.BRICK_TYPE, input -> input.func_77973_b() == ItemTypes.STONEBRICK || input.func_77973_b() == ItemTypes.STONE_BRICK_STAIRS);
     }
 
     @Override
     protected int setToMeta(BrickType value) {
-        return ((BlockStoneBrick.EnumType) (Object) value).getMetadata();
+        return ((BlockStoneBrick.EnumType) (Object) value).func_176612_a();
     }
 
     @Override
     protected BrickType getFromMeta(int meta) {
-        return (BrickType) (Object) BlockStoneBrick.EnumType.byMetadata(meta);
+        return (BrickType) (Object) BlockStoneBrick.EnumType.func_176613_a(meta);
     }
 
     @Override

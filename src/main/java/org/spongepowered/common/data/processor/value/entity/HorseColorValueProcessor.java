@@ -56,7 +56,7 @@ public class HorseColorValueProcessor extends AbstractSpongeValueProcessor<Entit
     @Override
     protected boolean set(EntityHorse container, HorseColor value) {
         final SpongeHorseStyle style = (SpongeHorseStyle) HorseStyleRegistryModule.getHorseStyle(container);
-        container.setHorseVariant(((SpongeHorseColor) value).getBitMask() | style.getBitMask());
+        container.func_110235_q(((SpongeHorseColor) value).getBitMask() | style.getBitMask());
         return true;
     }
 

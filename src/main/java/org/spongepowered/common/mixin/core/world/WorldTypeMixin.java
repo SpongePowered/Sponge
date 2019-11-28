@@ -77,7 +77,7 @@ public abstract class WorldTypeMixin implements WorldTypeBridge {
         }
 
         final WorldType other = (WorldType) obj;
-        return this.name.equals(other.getName()) && this.id == other.getId();
+        return this.name.equals(other.func_77127_a()) && this.id == other.func_82747_f();
     }
 
     @Override

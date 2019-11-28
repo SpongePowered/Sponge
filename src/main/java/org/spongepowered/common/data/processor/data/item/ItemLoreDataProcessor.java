@@ -69,8 +69,8 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            if(stack.getSubCompound(Constants.Item.ITEM_DISPLAY) != null) {
-                stack.getSubCompound(Constants.Item.ITEM_DISPLAY).removeTag(Constants.Item.ITEM_LORE);
+            if(stack.func_179543_a(Constants.Item.ITEM_DISPLAY) != null) {
+                stack.func_179543_a(Constants.Item.ITEM_DISPLAY).func_82580_o(Constants.Item.ITEM_LORE);
             }
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
@@ -85,20 +85,20 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
     @Override
     protected boolean set(ItemStack itemStack, List<Text> value) {
         final NBTTagList list =  SpongeTexts.asLegacy(value);
-        itemStack.getOrCreateSubCompound(Constants.Item.ITEM_DISPLAY).setTag(Constants.Item.ITEM_LORE, list); // setSubCompound
+        itemStack.func_190925_c(Constants.Item.ITEM_DISPLAY).func_74782_a(Constants.Item.ITEM_LORE, list); // setSubCompound
         return true;
     }
 
     @Override
     protected Optional<List<Text>> getVal(ItemStack itemStack) {
-        final NBTTagCompound subCompound = itemStack.getSubCompound(Constants.Item.ITEM_DISPLAY);
+        final NBTTagCompound subCompound = itemStack.func_179543_a(Constants.Item.ITEM_DISPLAY);
         if (subCompound == null) {
             return Optional.empty();
         }
-        if (!subCompound.hasKey(Constants.Item.ITEM_LORE, Constants.NBT.TAG_LIST)) {
+        if (!subCompound.func_150297_b(Constants.Item.ITEM_LORE, Constants.NBT.TAG_LIST)) {
             return Optional.empty();
         }
-        final NBTTagList list = subCompound.getTagList(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
+        final NBTTagList list = subCompound.func_150295_c(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
         return Optional.of(SpongeTexts.fromNbtLegacy(list));
     }
 

@@ -34,7 +34,11 @@ import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.inject.provider.PathAsFileProvider;
-
+import org.spongepowered.common.inject.provider.config.PluginConfigurationModule.CommentedConfigurationNodeProvider;
+import org.spongepowered.common.inject.provider.config.PluginConfigurationModule.PrivateCommentedConfigurationNode;
+import org.spongepowered.common.inject.provider.config.PluginConfigurationModule.SharedCommentedConfigurationNode;
+import org.spongepowered.common.inject.provider.config.PluginConfigurationModule.SharedDirAsFile;
+import org.spongepowered.common.inject.provider.config.PluginConfigurationModule.SharedDirAsPath;
 import java.io.File;
 import java.nio.file.Path;
 

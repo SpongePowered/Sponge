@@ -60,7 +60,7 @@ public abstract class ServerWorldEventHandlerMixin implements ServerWorldEventHa
     @Override
     public void bridge$playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category, double x, double y, double z,
             float volume, float pitch) {
-        this.server.getPlayerList().sendToAllNearExcept(player, x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D,
+        this.server.func_184103_al().func_148543_a(player, x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D,
                 ((WorldServerBridge) this.world).bridge$getDimensionId(), new SPacketCustomSound(soundIn, category, x, y, z, volume, pitch));
     }
 }

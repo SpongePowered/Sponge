@@ -47,7 +47,7 @@ import java.util.Optional;
 public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<BlockState, Value<BlockState>, BlockItemData, ImmutableBlockItemData> {
 
     public BlockItemDataProcessor() {
-        super(stack -> stack.getItem() instanceof ItemBlock, Keys.ITEM_BLOCKSTATE);
+        super(stack -> stack.func_77973_b() instanceof ItemBlock, Keys.ITEM_BLOCKSTATE);
     }
 
     @Override
@@ -58,21 +58,21 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
     @Override
     protected boolean set(ItemStack stack, BlockState value) {
         final IBlockState blockState = (IBlockState) value;
-        final Block baseBlock = blockState.getBlock();
-        if (Block.getBlockFromItem(stack.getItem()) != baseBlock) {
+        final Block baseBlock = blockState.func_177230_c();
+        if (Block.func_149634_a(stack.func_77973_b()) != baseBlock) {
             // Invalid state for this stack.
             return false;
         }
-        stack.setItemDamage(baseBlock.damageDropped(blockState));
+        stack.func_77964_b(baseBlock.func_180651_a(blockState));
         return true;
     }
 
     @SuppressWarnings("deprecation")
     @Override
     protected Optional<BlockState> getVal(ItemStack stack) {
-        final Block block = ((ItemBlock) stack.getItem()).getBlock();
-        final int blockMeta = stack.getItem().getMetadata(stack.getItemDamage());
-        return Optional.of((BlockState) block.getStateFromMeta(blockMeta));
+        final Block block = ((ItemBlock) stack.func_77973_b()).func_179223_d();
+        final int blockMeta = stack.func_77973_b().func_77647_b(stack.func_77952_i());
+        return Optional.of((BlockState) block.func_176203_a(blockMeta));
     }
 
     @Override

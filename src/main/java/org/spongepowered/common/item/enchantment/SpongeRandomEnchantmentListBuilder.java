@@ -95,7 +95,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
         List<EnchantmentData> enchantments;
         if (this.pool == null || this.pool.isEmpty()) {
             checkNotNull(item, "The item cannot be null");
-            enchantments = EnchantmentHelper.buildEnchantmentList(new Random(this.seed + this.option),
+            enchantments = EnchantmentHelper.func_77513_b(new Random(this.seed + this.option),
                                         ItemStackUtil.toNative(this.item), this.level, this.treasure);
 
 
@@ -117,18 +117,18 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
         // Same code as net.minecraft.enchantment.EnchantmentHelper#buildEnchantmentList
         if (!list1.isEmpty())
         {
-            list.add(WeightedRandom.getRandomItem(randomIn, list1));
+            list.add(WeightedRandom.func_76271_a(randomIn, list1));
 
             while (randomIn.nextInt(50) <= this.level)
             {
-                EnchantmentHelper.removeIncompatible(list1, (EnchantmentData) Util.getLastElement(list));
+                EnchantmentHelper.func_185282_a(list1, (EnchantmentData) Util.func_184878_a(list));
 
                 if (list1.isEmpty())
                 {
                     break;
                 }
 
-                list.add(WeightedRandom.getRandomItem(randomIn, list1));
+                list.add(WeightedRandom.func_76271_a(randomIn, list1));
                 this.level /= 2;
             }
         }
@@ -137,7 +137,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     }
 
     public static List<Enchantment> fromNative(List<EnchantmentData> list) {
-        return list.stream().map(data -> Enchantment.of(((EnchantmentType) data.enchantment), data.enchantmentLevel)).collect(Collectors.toList());
+        return list.stream().map(data -> Enchantment.of(((EnchantmentType) data.field_76302_b), data.field_76303_c)).collect(Collectors.toList());
     }
 
     public static List<EnchantmentData> toNative(List<Enchantment> list) {

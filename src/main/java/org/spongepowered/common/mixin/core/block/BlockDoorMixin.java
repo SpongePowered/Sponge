@@ -73,21 +73,21 @@ public abstract class BlockDoorMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableHingeData) {
             final BlockDoor.EnumHingePosition hinge = (BlockDoor.EnumHingePosition) (Object) ((ImmutableHingeData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.HINGE, hinge));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoor.field_176521_M, hinge));
         }
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoor.field_176519_b, isOpen));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoor.field_176522_N, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoor.field_176520_a, Constants.DirectionFunctions.getFor(dir)));
         }
         if (manipulator instanceof ImmutablePortionData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.HALF,
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoor.field_176523_O,
                     impl$convertPortionType(((ImmutablePortionData) manipulator).type().get())));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
@@ -97,21 +97,21 @@ public abstract class BlockDoorMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.HINGE_POSITION)) {
             final BlockDoor.EnumHingePosition hinge = (BlockDoor.EnumHingePosition) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.HINGE, hinge));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoor.field_176521_M, hinge));
         }
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoor.field_176519_b, isOpen));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoor.field_176522_N, (Boolean) value));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoor.field_176520_a, Constants.DirectionFunctions.getFor(dir)));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.HALF, impl$convertPortionType((PortionType) value)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockDoor.field_176523_O, impl$convertPortionType((PortionType) value)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -121,24 +121,24 @@ public abstract class BlockDoorMixin extends BlockMixin {
     }
 
     private ImmutableHingeData impl$getHingeFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeHingeData.class, (Hinge) (Object) blockState.getValue(BlockDoor.HINGE));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeHingeData.class, (Hinge) (Object) blockState.func_177229_b(BlockDoor.field_176521_M));
     }
 
     private ImmutableOpenData impl$getIsOpenFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.getValue(BlockDoor.OPEN));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.func_177229_b(BlockDoor.field_176519_b));
     }
 
     private ImmutablePoweredData impl$getIsPoweredFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockDoor.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(BlockDoor.field_176522_N));
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.getValue(BlockDoor.FACING)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockDoor.field_176520_a)));
     }
 
     private ImmutablePortionData impl$getPortionData(final IBlockState blockState) {
-        final EnumDoorHalf half = blockState.getValue(BlockDoor.HALF);
+        final EnumDoorHalf half = blockState.func_177229_b(BlockDoor.field_176523_O);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
                 half == EnumDoorHalf.LOWER ? PortionTypes.BOTTOM : PortionTypes.TOP);
     }

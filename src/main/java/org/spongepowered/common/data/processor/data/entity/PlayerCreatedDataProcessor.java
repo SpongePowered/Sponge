@@ -48,13 +48,13 @@ public class PlayerCreatedDataProcessor
 
     @Override
     protected boolean set(EntityIronGolem entity, Boolean value) {
-        entity.setPlayerCreated(value);
+        entity.func_70849_f(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityIronGolem entity) {
-        return Optional.of(entity.isPlayerCreated());
+        return Optional.of(entity.func_70850_q());
     }
 
     @Override

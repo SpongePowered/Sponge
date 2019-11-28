@@ -55,7 +55,7 @@ public class ItemSkullDataProcessor
 
     @Override
     protected Optional<SkullType> getVal(ItemStack itemStack) {
-        return Optional.of(SkullUtils.getSkullType(itemStack.getMetadata()));
+        return Optional.of(SkullUtils.getSkullType(itemStack.func_77960_j()));
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ItemSkullDataProcessor
 
     @Override
     protected boolean set(ItemStack itemStack, SkullType type) {
-        itemStack.setItemDamage(((SpongeSkullType) type).getByteId());
+        itemStack.func_77964_b(((SpongeSkullType) type).getByteId());
         return true;
     }
 

@@ -54,17 +54,17 @@ public final class SpongeEntityStatistic extends StatBase implements EntityStati
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.statId);
+        return new SpongeTranslation(this.field_75975_e);
     }
 
     @Override
     public Optional<Criterion> getCriterion() {
-        return Optional.ofNullable((Criterion) getCriteria());
+        return Optional.ofNullable((Criterion) func_150952_k());
     }
 
     @Override
     public String getName() {
-        return getStatName().getUnformattedText();
+        return func_150951_e().func_150260_c();
     }
 
     @Override

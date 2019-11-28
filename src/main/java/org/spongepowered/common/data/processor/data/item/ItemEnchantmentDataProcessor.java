@@ -66,15 +66,15 @@ public class ItemEnchantmentDataProcessor
     @Override
     protected boolean set(final ItemStack itemStack, final List<Enchantment> value) {
         final NBTTagCompound compound;
-        if (itemStack.getTagCompound() == null) {
+        if (itemStack.func_77978_p() == null) {
             compound = new NBTTagCompound();
-            itemStack.setTagCompound(compound);
+            itemStack.func_77982_d(compound);
         } else {
-            compound = itemStack.getTagCompound();
+            compound = itemStack.func_77978_p();
         }
 
         if (value.isEmpty()) { // if there's no enchantments, remove the tag that says there's enchantments
-            compound.removeTag(Constants.Item.ITEM_ENCHANTMENT_LIST);
+            compound.func_82580_o(Constants.Item.ITEM_ENCHANTMENT_LIST);
         } else {
             final Map<EnchantmentType, Integer> valueMap = Maps.newLinkedHashMap();
             for (final Enchantment enchantment : value) { // convert ItemEnchantment to map
@@ -83,12 +83,12 @@ public class ItemEnchantmentDataProcessor
             final NBTTagList newList = new NBTTagList(); // construct the enchantment list
             for (final Map.Entry<EnchantmentType, Integer> entry : valueMap.entrySet()) {
                 final NBTTagCompound enchantmentCompound = new NBTTagCompound();
-                enchantmentCompound.setShort(Constants.Item.ITEM_ENCHANTMENT_ID,
-                    (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
-                enchantmentCompound.setShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
-                newList.appendTag(enchantmentCompound);
+                enchantmentCompound.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_ID,
+                    (short) net.minecraft.enchantment.Enchantment.func_185258_b((net.minecraft.enchantment.Enchantment) entry.getKey()));
+                enchantmentCompound.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
+                newList.func_74742_a(enchantmentCompound);
             }
-            compound.setTag(Constants.Item.ITEM_ENCHANTMENT_LIST, newList);
+            compound.func_74782_a(Constants.Item.ITEM_ENCHANTMENT_LIST, newList);
         }
 
         return true;
@@ -96,7 +96,7 @@ public class ItemEnchantmentDataProcessor
 
     @Override
     protected Optional<List<Enchantment>> getVal(final ItemStack itemStack) {
-        if (itemStack.isItemEnchanted()) {
+        if (itemStack.func_77948_v()) {
             return Optional.of(Constants.NBT.getItemEnchantments(itemStack));
         }
         return Optional.empty();
@@ -130,7 +130,7 @@ public class ItemEnchantmentDataProcessor
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            stack.getTagCompound().removeTag(Constants.Item.ITEM_ENCHANTMENT_LIST);
+            stack.func_77978_p().func_82580_o(Constants.Item.ITEM_ENCHANTMENT_LIST);
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();

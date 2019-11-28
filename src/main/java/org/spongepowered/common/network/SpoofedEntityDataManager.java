@@ -48,37 +48,37 @@ public class SpoofedEntityDataManager extends EntityDataManager {
     }
 
     @Override
-    public <T> void register(DataParameter<T> key, T value) {
-        this.cached.register(key, value);
+    public <T> void func_187214_a(DataParameter<T> key, T value) {
+        this.cached.func_187214_a(key, value);
     }
 
     @Override
-    public <T> T get(DataParameter<T> key) {
-        return this.cached.get(key);
+    public <T> T func_187225_a(DataParameter<T> key) {
+        return this.cached.func_187225_a(key);
     }
 
     @Override
-    public <T> void set(DataParameter<T> key, T value) {
-        this.cached.set(key, value);
+    public <T> void func_187227_b(DataParameter<T> key, T value) {
+        this.cached.func_187227_b(key, value);
     }
 
     @Override
-    public <T> void setDirty(DataParameter<T> key) {
-        this.cached.setDirty(key);
+    public <T> void func_187217_b(DataParameter<T> key) {
+        this.cached.func_187217_b(key);
     }
 
     @Override
-    public boolean isDirty() {
-        return this.cached.isDirty();
+    public boolean func_187223_a() {
+        return this.cached.func_187223_a();
     }
 
     @Nullable
     @Override
-    public List<DataEntry<?>> getDirty() {
-         final List<DataEntry<?>> dirtyEntries = this.cached.getDirty();
+    public List<DataEntry<?>> func_187221_b() {
+         final List<DataEntry<?>> dirtyEntries = this.cached.func_187221_b();
         final List<DataEntry<?>> dirty = new ArrayList<>(dirtyEntries.size());
         for (DataEntry<?> dataEntry : dirtyEntries) {
-            if (dataEntry.getKey() == EntityLivingBaseAccessor.accessor$getHealthParameter()) {
+            if (dataEntry.func_187205_a() == EntityLivingBaseAccessor.accessor$getHealthParameter()) {
                 dirty.add(new DataEntry<>(EntityLivingBaseAccessor.accessor$getHealthParameter(), ((EntityPlayerMPBridge) ((EntityDataManagerAccessor) this).accessor$getEntity()).bridge$getInternalScaledHealth()));
             } else {
                 dirty.add(dataEntry);
@@ -88,23 +88,23 @@ public class SpoofedEntityDataManager extends EntityDataManager {
     }
 
     @Override
-    public void writeEntries(PacketBuffer buf) throws IOException {
-        this.cached.writeEntries(buf);
+    public void func_187216_a(PacketBuffer buf) throws IOException {
+        this.cached.func_187216_a(buf);
     }
 
     @Nullable
     @Override
-    public List<DataEntry<?>> getAll() {
-        return this.cached.getAll();
+    public List<DataEntry<?>> func_187231_c() {
+        return this.cached.func_187231_c();
     }
 
     @Override
-    public boolean isEmpty() {
-        return this.cached.isEmpty();
+    public boolean func_187228_d() {
+        return this.cached.func_187228_d();
     }
 
     @Override
-    public void setClean() {
-        this.cached.setClean();
+    public void func_187230_e() {
+        this.cached.func_187230_e();
     }
 }

@@ -54,9 +54,9 @@ public class JukeboxDataProcessor extends
 
     @Override
     protected boolean set(BlockJukebox.TileEntityJukebox jukebox, ItemStackSnapshot stackSnapshot) {
-        IBlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
+        IBlockState block = jukebox.func_145831_w().func_180495_p(jukebox.func_174877_v());
         if (stackSnapshot == ItemStackSnapshot.NONE) {
-            if (jukebox.getRecord() == null) {
+            if (jukebox.func_145856_a() == null) {
                 return true;
             }
             return remove(jukebox);
@@ -65,22 +65,22 @@ public class JukeboxDataProcessor extends
             return false;
         }
         ((Jukebox) jukebox).insertRecord(stackSnapshot.createStack());
-        block = jukebox.getWorld().getBlockState(jukebox.getPos());
-        return block.getBlock() instanceof BlockJukebox && block.getValue(BlockJukebox.HAS_RECORD);
+        block = jukebox.func_145831_w().func_180495_p(jukebox.func_174877_v());
+        return block.func_177230_c() instanceof BlockJukebox && block.func_177229_b(BlockJukebox.field_176432_a);
     }
 
     @Override
     protected Optional<ItemStackSnapshot> getVal(BlockJukebox.TileEntityJukebox jukebox) {
-        if (jukebox.getRecord() == null) {
+        if (jukebox.func_145856_a() == null) {
             return Optional.empty();
         }
-        return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) jukebox.getRecord()).createSnapshot());
+        return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) jukebox.func_145856_a()).createSnapshot());
     }
 
     private boolean remove(BlockJukebox.TileEntityJukebox jukebox) {
         ((Jukebox) jukebox).ejectRecord();
-        IBlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
-        return block.getBlock() instanceof BlockJukebox && !block.getValue(BlockJukebox.HAS_RECORD);
+        IBlockState block = jukebox.func_145831_w().func_180495_p(jukebox.func_174877_v());
+        return block.func_177230_c() instanceof BlockJukebox && !block.func_177229_b(BlockJukebox.field_176432_a);
     }
 
     @Override

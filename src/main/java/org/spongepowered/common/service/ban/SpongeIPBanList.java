@@ -97,10 +97,10 @@ public class SpongeIPBanList extends UserListIPBans {
     }
 
     @Override
-    public String[] getKeys() {
+    public String[] func_152685_a() {
         List<String> ips = new ArrayList<>();
         for (Ban.Ip ban : getService().getIpBans()) {
-            ips.add(this.addressToString(new InetSocketAddress(ban.getAddress(), 0)));
+            ips.add(this.func_152707_c(new InetSocketAddress(ban.getAddress(), 0)));
         }
         return ips.toArray(new String[ips.size()]);
     }
@@ -111,7 +111,7 @@ public class SpongeIPBanList extends UserListIPBans {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean func_152690_d() {
         return getService().getIpBans().isEmpty();
     }
 
@@ -121,7 +121,7 @@ public class SpongeIPBanList extends UserListIPBans {
      *     inspecting SocketAddress#toString()) to support IPv6 addresses
      */
     @Override
-    public String addressToString(SocketAddress address) {
+    public String func_152707_c(SocketAddress address) {
         return NetworkUtil.getHostString(address);
     }
 

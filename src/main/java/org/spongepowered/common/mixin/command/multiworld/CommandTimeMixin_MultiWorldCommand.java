@@ -44,7 +44,7 @@ public abstract class CommandTimeMixin_MultiWorldCommand {
             target = "Lnet/minecraft/command/CommandTime;setAllWorldTimes(Lnet/minecraft/server/MinecraftServer;I)V"))
     private void multiWorldCommand$setWorldTime(final CommandTime self, final MinecraftServer server, final int time, final MinecraftServer server2,
         final ICommandSender sender, final String[] args) {
-        sender.getEntityWorld().setWorldTime(time);
+        sender.func_130014_f_().func_72877_b(time);
     }
 
     /**
@@ -58,7 +58,7 @@ public abstract class CommandTimeMixin_MultiWorldCommand {
     private void multiWorldCommand$incrementWorldTime(
         final CommandTime self, final MinecraftServer server, final int time, final MinecraftServer server2, final ICommandSender sender,
         final String[] args) {
-        sender.getEntityWorld().setWorldTime(sender.getEntityWorld().getWorldTime() + time);
+        sender.func_130014_f_().func_72877_b(sender.func_130014_f_().func_72820_D() + time);
     }
 
 }

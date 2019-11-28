@@ -36,20 +36,20 @@ public class SpongeUserInventoryEnderchest extends InventoryEnderChest {
     }
 
     @Override
-    public ItemStack removeStackFromSlot(int index) {
+    public ItemStack func_70304_b(int index) {
         this.user.markDirty();
-        return super.removeStackFromSlot(index);
+        return super.func_70304_b(index);
     }
 
     @Override
-    public ItemStack decrStackSize(int index, int count) {
+    public ItemStack func_70298_a(int index, int count) {
         this.user.markDirty();
-        return super.decrStackSize(index, count);
+        return super.func_70298_a(index, count);
     }
 
     @Override
-    public void setInventorySlotContents(int index, ItemStack stack) {
+    public void func_70299_a(int index, ItemStack stack) {
         this.user.markDirty();
-        super.setInventorySlotContents(index, stack);
+        super.func_70299_a(index, stack);
     }
 }

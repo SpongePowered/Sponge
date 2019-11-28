@@ -37,7 +37,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
  */
 public class ChunkBufferPrimer extends ChunkPrimer {
 
-    private static final IBlockState defaultState = Blocks.AIR.getDefaultState();
+    private static final IBlockState defaultState = Blocks.field_150350_a.func_176223_P();
     private final MutableBlockVolume buffer;
     private final Vector3i min;
 
@@ -47,19 +47,19 @@ public class ChunkBufferPrimer extends ChunkPrimer {
     }
 
     @Override
-    public IBlockState getBlockState(int x, int y, int z) {
+    public IBlockState func_177856_a(int x, int y, int z) {
         return (IBlockState) this.buffer.getBlock(this.min.getX() + x, this.min.getY() + y, this.min.getZ() + z);
     }
 
     @Override
-    public void setBlockState(int x, int y, int z, IBlockState state) {
+    public void func_177855_a(int x, int y, int z, IBlockState state) {
         this.buffer.setBlock(this.min.getX() + x, this.min.getY() + y, this.min.getZ() + z, (BlockState) state);
     }
 
     @Override
-    public int findGroundBlockIdx(int x, int z) {
+    public int func_186138_a(int x, int z) {
         for (int y = 255; y >= 0; --y) {
-            IBlockState iblockstate = getBlockState(x, y, z);
+            IBlockState iblockstate = func_177856_a(x, y, z);
 
             if (iblockstate != null && iblockstate != defaultState) {
                 return y;

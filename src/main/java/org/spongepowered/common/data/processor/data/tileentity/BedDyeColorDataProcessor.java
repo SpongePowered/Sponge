@@ -52,13 +52,13 @@ public class BedDyeColorDataProcessor extends AbstractTileEntitySingleDataProces
 
     @Override
     protected boolean set(TileEntityBed dataHolder, DyeColor value) {
-        dataHolder.setColor((EnumDyeColor) (Object) value);
+        dataHolder.func_193052_a((EnumDyeColor) (Object) value);
         return true;
     }
 
     @Override
     protected Optional<DyeColor> getVal(TileEntityBed dataHolder) {
-        return Optional.of((DyeColor) (Object) dataHolder.getColor());
+        return Optional.of((DyeColor) (Object) dataHolder.func_193048_a());
     }
 
     @Override

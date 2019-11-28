@@ -88,12 +88,12 @@ public final class CommandPermissions {
     public static void populateMinecraftPermissions(ICommandSender sender, MemorySubjectData data) {
         // ICommandSenders have a *very* basic understanding of permissions, so
         // get what we can.
-        populateNonCommandPermissions(data, sender::canUseCommand);
+        populateNonCommandPermissions(data, sender::func_70003_b);
         for (CommandMapping command : SpongeImpl.getGame().getCommandManager().getCommands()) {
             if (command.getCallable() instanceof MinecraftCommandWrapper) {
                 MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
                 data.setPermission(SubjectData.GLOBAL_CONTEXT, wrapper.getCommandPermission(),
-                        Tristate.fromBoolean(wrapper.command.checkPermission(sender.getServer(), sender)));
+                        Tristate.fromBoolean(wrapper.command.func_184882_a(sender.func_184102_h(), sender)));
             }
         }
     }

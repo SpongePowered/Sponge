@@ -50,7 +50,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipes implements CatalogTy
     }
 
     @Override
-    public boolean isDynamic() {
+    public boolean func_192399_d() {
         return true; // For RecipeBook
     }
 }

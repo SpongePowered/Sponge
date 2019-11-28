@@ -53,16 +53,16 @@ import java.util.Optional;
 public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<EntityType, Value<EntityType>, SpawnableData, ImmutableSpawnableData> {
 
     public SpawnableDataProcessor() {
-        super(input -> input.getItem().equals(Items.SPAWN_EGG), Keys.SPAWNABLE_ENTITY_TYPE);
+        super(input -> input.func_77973_b().equals(Items.field_151063_bx), Keys.SPAWNABLE_ENTITY_TYPE);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean set(final ItemStack itemStack, final EntityType value) {
-        final ResourceLocation name = EntityList.getKey((Class<? extends Entity>) value.getEntityClass());
-        if (EntityList.ENTITY_EGGS.containsKey(name)) {
-            itemStack.getOrCreateSubCompound(Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG)
-                .setString(Constants.Entity.ENTITY_TYPE_ID, name.toString());
+        final ResourceLocation name = EntityList.func_191306_a((Class<? extends Entity>) value.getEntityClass());
+        if (EntityList.field_75627_a.containsKey(name)) {
+            itemStack.func_190925_c(Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG)
+                .func_74778_a(Constants.Entity.ENTITY_TYPE_ID, name.toString());
             return true;
         }
         return false;
@@ -70,7 +70,7 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
 
     @Override
     public Optional<EntityType> getVal(final ItemStack itemStack) {
-        final ResourceLocation name = ItemMonsterPlacer.getNamedIdFrom(itemStack);
+        final ResourceLocation name = ItemMonsterPlacer.func_190908_h(itemStack);
         if (name != null) {
             final Class<? extends Entity> entity = SpongeImplHooks.getEntityClass(name);
             return Optional.ofNullable(EntityTypeRegistryModule.getInstance().getForClass(entity));
@@ -104,9 +104,9 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
             return DataTransactionResult.successNoData();
         }
         try {
-            final NBTTagCompound tag = itemStack.getTagCompound();
+            final NBTTagCompound tag = itemStack.func_77978_p();
             if (tag != null) {
-                tag.removeTag(Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG);
+                tag.func_82580_o(Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG);
             }
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         } catch (final Exception e) {

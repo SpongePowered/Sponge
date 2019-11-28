@@ -63,22 +63,22 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
     @SuppressWarnings("ConstantConditions")
     @Override
     protected boolean set(final EntityPainting entity, final Art value) {
-        if (!entity.world.isRemote) {
-            final EntityPainting.EnumArt oldArt = entity.art;
-            entity.art = (EntityPainting.EnumArt) (Object) value;
-            ((EntityHangingAccessor) entity).accessor$updateFacingWithBoundingBox(entity.facingDirection);
-            if (!entity.onValidSurface()) {
-                entity.art = oldArt;
-                ((EntityHangingAccessor) entity).accessor$updateFacingWithBoundingBox(entity.facingDirection);
+        if (!entity.field_70170_p.field_72995_K) {
+            final EntityPainting.EnumArt oldArt = entity.field_70522_e;
+            entity.field_70522_e = (EntityPainting.EnumArt) (Object) value;
+            ((EntityHangingAccessor) entity).accessor$updateFacingWithBoundingBox(entity.field_174860_b);
+            if (!entity.func_70518_d()) {
+                entity.field_70522_e = oldArt;
+                ((EntityHangingAccessor) entity).accessor$updateFacingWithBoundingBox(entity.field_174860_b);
                 return false;
             }
 
-            final EntityTracker paintingTracker = ((WorldServer) entity.world).getEntityTracker();
-            final EntityTrackerEntry paintingEntry = ((EntityTrackerAccessor) paintingTracker).accessor$getTrackedEntityTable().lookup(entity.getEntityId());
+            final EntityTracker paintingTracker = ((WorldServer) entity.field_70170_p).func_73039_n();
+            final EntityTrackerEntry paintingEntry = ((EntityTrackerAccessor) paintingTracker).accessor$getTrackedEntityTable().func_76041_a(entity.func_145782_y());
             final List<EntityPlayerMP> playerMPs = new ArrayList<>();
             for (final EntityPlayerMP player : ((EntityTrackerEntryAccessor) paintingEntry).accessor$getTrackingPlayers()) {
-                final SPacketDestroyEntities packet = new SPacketDestroyEntities(entity.getEntityId());
-                player.connection.sendPacket(packet);
+                final SPacketDestroyEntities packet = new SPacketDestroyEntities(entity.func_145782_y());
+                player.field_71135_a.func_147359_a(packet);
                 playerMPs.add(player);
             }
             for (final EntityPlayerMP playerMP : playerMPs) {
@@ -86,7 +86,7 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
                         .delayTicks(SpongeImpl.getGlobalConfigAdapter().getConfig().getEntity().getPaintingRespawnDelaly())
                         .execute(() -> {
                             final SPacketSpawnPainting packet = new SPacketSpawnPainting(entity);
-                            playerMP.connection.sendPacket(packet);
+                            playerMP.field_71135_a.func_147359_a(packet);
                         })
                         .submit(SpongeImpl.getPlugin());
             }
@@ -97,7 +97,7 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
 
     @Override
     protected Optional<Art> getVal(final EntityPainting entity) {
-        return Optional.of((Art) (Object) entity.art);
+        return Optional.of((Art) (Object) entity.field_70522_e);
     }
 
     @Override

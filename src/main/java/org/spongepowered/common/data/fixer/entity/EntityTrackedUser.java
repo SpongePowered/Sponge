@@ -34,16 +34,16 @@ import java.util.UUID;
 public class EntityTrackedUser implements IFixableData {
 
     @Override
-    public int getFixVersion() {
+    public int func_188216_a() {
         return Constants.Legacy.Entity.TRACKER_ID_VERSION;
     }
 
     @Override
-    public NBTTagCompound fixTagCompound(NBTTagCompound compound) {
-        final NBTBase forgeCompound = compound.getTag(Constants.Forge.FORGE_DATA);
+    public NBTTagCompound func_188217_a(NBTTagCompound compound) {
+        final NBTBase forgeCompound = compound.func_74781_a(Constants.Forge.FORGE_DATA);
         if (forgeCompound != null) {
             final NBTTagCompound forgeData = (NBTTagCompound) forgeCompound;
-            final NBTBase spongeCompound = forgeData.getTag(Constants.Sponge.SPONGE_DATA);
+            final NBTBase spongeCompound = forgeData.func_74781_a(Constants.Sponge.SPONGE_DATA);
             if (spongeCompound != null) {
                 final NBTTagCompound spongeData = (NBTTagCompound) spongeCompound;
                 process(spongeData, Constants.Sponge.SPONGE_ENTITY_CREATOR);
@@ -54,14 +54,14 @@ public class EntityTrackedUser implements IFixableData {
     }
 
     private static void process(NBTTagCompound spongeData, String type) {
-        if (spongeData.hasKey(type, Constants.NBT.TAG_COMPOUND)) {
-            final NBTTagCompound creatorTag = spongeData.getCompoundTag(type);
-            final long least = creatorTag.getLong(Constants.Legacy.Entity.UUID_LEAST_1_8);
-            final long most = creatorTag.getLong(Constants.Legacy.Entity.UUID_MOST_1_8);
+        if (spongeData.func_150297_b(type, Constants.NBT.TAG_COMPOUND)) {
+            final NBTTagCompound creatorTag = spongeData.func_74775_l(type);
+            final long least = creatorTag.func_74763_f(Constants.Legacy.Entity.UUID_LEAST_1_8);
+            final long most = creatorTag.func_74763_f(Constants.Legacy.Entity.UUID_MOST_1_8);
             final UUID creator = new UUID(most, least);
-            creatorTag.removeTag(Constants.Legacy.Entity.UUID_LEAST_1_8);
-            creatorTag.removeTag(Constants.Legacy.Entity.UUID_MOST_1_8);
-            creatorTag.setUniqueId(Constants.UUID, creator);
+            creatorTag.func_82580_o(Constants.Legacy.Entity.UUID_LEAST_1_8);
+            creatorTag.func_82580_o(Constants.Legacy.Entity.UUID_MOST_1_8);
+            creatorTag.func_186854_a(Constants.UUID, creator);
         }
     }
 }

@@ -52,7 +52,7 @@ public interface SpongeGameDictionaryEntry extends GameDictionary.Entry {
 
         @Override
         public boolean matches(org.spongepowered.api.item.inventory.ItemStack stack) {
-            return this.getType().equals(stack.getType()) && this.damage == ((ItemStack) stack).getItemDamage();
+            return this.getType().equals(stack.getType()) && this.damage == ((ItemStack) stack).func_77952_i();
         }
 
         @Override
@@ -103,9 +103,9 @@ public interface SpongeGameDictionaryEntry extends GameDictionary.Entry {
     }
 
     public static SpongeGameDictionaryEntry of(ItemStack stack, int wildcardValue) {
-        if (stack.getItemDamage() == wildcardValue) {
-            return (SpongeGameDictionaryEntry) stack.getItem();
+        if (stack.func_77952_i() == wildcardValue) {
+            return (SpongeGameDictionaryEntry) stack.func_77973_b();
         }
-        return new Specific(stack.getItem(), stack.getItemDamage());
+        return new Specific(stack.func_77973_b(), stack.func_77952_i());
     }
 }

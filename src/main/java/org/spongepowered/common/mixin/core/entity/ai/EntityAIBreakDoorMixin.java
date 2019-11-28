@@ -54,7 +54,7 @@ public abstract class EntityAIBreakDoorMixin extends EntityAIDoorInteract {
         )
     )
     private boolean spongeShouldExecuteForGriefer(final EntityAIDoorInteract entityAIDoorInteract) {
-        return super.shouldExecute() && ((GrieferBridge) this.entity).bridge$CanGrief();
+        return super.func_75250_a() && ((GrieferBridge) this.field_75356_a).bridge$CanGrief();
 
     }
 }

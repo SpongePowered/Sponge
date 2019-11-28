@@ -60,10 +60,10 @@ public class FlyingDataProcessor extends AbstractEntitySingleDataProcessor<Entit
     protected boolean set(Entity entity, Boolean value) {
         if (entity instanceof EntityPlayer) {
             EntityPlayer entityPlayer = (EntityPlayer)entity;
-            entityPlayer.capabilities.isFlying = value;
-            entityPlayer.sendPlayerAbilities();
+            entityPlayer.field_71075_bZ.field_75100_b = value;
+            entityPlayer.func_71016_p();
         } else {
-            entity.isAirBorne = value;
+            entity.field_70160_al = value;
         }
         return true;
     }
@@ -71,9 +71,9 @@ public class FlyingDataProcessor extends AbstractEntitySingleDataProcessor<Entit
     @Override
     protected Optional<Boolean> getVal(Entity entity) {
         if (entity instanceof EntityPlayer) {
-            return Optional.of(((EntityPlayer) entity).capabilities.isFlying);
+            return Optional.of(((EntityPlayer) entity).field_71075_bZ.field_75100_b);
         }
-        return Optional.of(entity.isAirBorne);
+        return Optional.of(entity.field_70160_al);
     }
 
     @Override

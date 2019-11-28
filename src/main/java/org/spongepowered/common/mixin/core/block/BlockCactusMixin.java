@@ -56,14 +56,14 @@ public abstract class BlockCactusMixin extends BlockMixin {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     private boolean impl$reAssignForBlockDamageSource(final Entity entity, final DamageSource source, final float damage,
         final net.minecraft.world.World world, final BlockPos pos, final IBlockState state, final Entity entityIn) {
-        if (world.isRemote) {
-            return entity.attackEntityFrom(source, damage);
+        if (world.field_72995_K) {
+            return entity.func_70097_a(source, damage);
         }
         try {
-            final Location<World> location = new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ());
+            final Location<World> location = new Location<>((World) world, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
             final MinecraftBlockDamageSource cactus = new MinecraftBlockDamageSource("cactus", location);
             ((DamageSourceBridge) cactus).bridge$setCactusSource();
-            return entity.attackEntityFrom(DamageSource.CACTUS, damage);
+            return entity.func_70097_a(DamageSource.field_76367_g, damage);
         } finally {
             ((DamageSourceBridge) source).bridge$setCactusSource();
         }
@@ -84,7 +84,7 @@ public abstract class BlockCactusMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             final int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockCactus.AGE, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockCactus.field_176587_a, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -93,13 +93,13 @@ public abstract class BlockCactusMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             final int growth = (Integer) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockCactus.AGE, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockCactus.field_176587_a, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData impl$getGrowthData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockCactus.AGE), 0, 15);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(BlockCactus.field_176587_a), 0, 15);
     }
 
 }

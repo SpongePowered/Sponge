@@ -50,7 +50,7 @@ public class ExtentBufferUtil {
                 if(type instanceof VirtualBiomeType) {
                     type = ((VirtualBiomeType) type).getPersistedType();
                 }
-                copy[i++] = (byte) Biome.getIdForBiome((Biome) type);
+                copy[i++] = (byte) Biome.func_185362_a((Biome) type);
             }
         }
         return copy;
@@ -68,7 +68,7 @@ public class ExtentBufferUtil {
         for (int x = min.getX(); x <= max.getX(); x++) {
             for (int z = min.getZ(); z <= max.getZ(); z++) {
                 for (int y = min.getY(); y <= max.getY(); y++) {
-                    copy[i++] = (char) Block.BLOCK_STATE_IDS.get((IBlockState) volume.getBlock(x, y, z));
+                    copy[i++] = (char) Block.field_176229_d.func_148747_b((IBlockState) volume.getBlock(x, y, z));
                 }
             }
         }

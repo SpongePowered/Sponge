@@ -53,9 +53,9 @@ public abstract class ItemFishingRodMixin extends Item {
     @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
             target = "Lnet/minecraft/entity/projectile/EntityFishHook;handleHookRetraction()I"), cancellable = true)
     private void cancelHookRetraction(World world, EntityPlayer player, EnumHand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
-        if (player.fishEntity != null) {
+        if (player.field_71104_cf != null) {
             // Event was cancelled
-            cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand)));
+            cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, player.func_184586_b(hand)));
         }
     }
 
@@ -63,7 +63,7 @@ public abstract class ItemFishingRodMixin extends Item {
             + "(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", ordinal = 1),
             cancellable = true)
     private void onThrowEvent(World world, EntityPlayer player, EnumHand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
-        if (world.isRemote) {
+        if (world.field_72995_K) {
             // Only fire event on server-side to avoid crash on client
             return;
         }
@@ -71,8 +71,8 @@ public abstract class ItemFishingRodMixin extends Item {
         EntityFishHook fishHook = new EntityFishHook(world, player);
         Sponge.getCauseStackManager().pushCause(player);
         if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getCauseStackManager().getCurrentCause(), (FishHook) fishHook))) {
-            fishHook.setDead(); // Bye
-            cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand)));
+            fishHook.func_70106_y(); // Bye
+            cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, player.func_184586_b(hand)));
         } else {
             this.fishHook = fishHook;
         }

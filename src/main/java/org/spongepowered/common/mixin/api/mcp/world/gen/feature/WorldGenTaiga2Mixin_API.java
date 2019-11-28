@@ -76,7 +76,7 @@ public abstract class WorldGenTaiga2Mixin_API extends WorldGenAbstractTree imple
                     for (int k1 = z - i3; k1 <= z + i3 && flag; ++k1) {
                         if (i1 >= 0 && i1 < 256) {
                             final BlockPos pos = new BlockPos(j1, i1, k1);
-                            final IBlockState state = worldIn.getBlockState(pos);
+                            final IBlockState state = worldIn.func_180495_p(pos);
                             if (!((WorldGeneratorBridge) this).bridge$isAir(state, worldIn, pos) && !((WorldGeneratorBridge) this).bridge$isLeaves(state, worldIn, pos)) {
                                 flag = false;
                             }
@@ -91,8 +91,8 @@ public abstract class WorldGenTaiga2Mixin_API extends WorldGenAbstractTree imple
                 return false;
             }
             final BlockPos down = new BlockPos(x, y - 1, z);
-            final Block block = worldIn.getBlockState(down).getBlock();
-            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.SAPLING) && y < 256 - i - 1) {
+            final Block block = worldIn.func_180495_p(down).func_177230_c();
+            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.field_150345_g) && y < 256 - i - 1) {
                 return true;
             }
         }
@@ -102,9 +102,9 @@ public abstract class WorldGenTaiga2Mixin_API extends WorldGenAbstractTree imple
     @Override
     public void placeObject(final World world, final Random random, final int x, final int y, final int z) {
         final BlockPos pos = new BlockPos(x, y, z);
-        setDecorationDefaults();
-        if (generate((net.minecraft.world.World) world, random, pos)) {
-            generateSaplings((net.minecraft.world.World) world, random, pos);
+        func_175904_e();
+        if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
+            func_180711_a((net.minecraft.world.World) world, random, pos);
         }
     }
 

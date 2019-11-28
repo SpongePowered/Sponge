@@ -61,12 +61,12 @@ public final class BiomeTypeRegistryModule
 
     @Override
     public void registerDefaults() {
-        for (Biome biome : Biome.REGISTRY) {
+        for (Biome biome : Biome.field_185377_q) {
             if (biome != null) {
                 String id = ((BiomeType) biome).getId();
                 if (id == null) {
-                    ResourceLocation reg_id = Biome.REGISTRY.getNameForObject(biome);
-                    ((BiomeBridge) biome).bridge$setModId(reg_id.getNamespace());
+                    ResourceLocation reg_id = Biome.field_185377_q.func_177774_c(biome);
+                    ((BiomeBridge) biome).bridge$setModId(reg_id.func_110624_b());
                     id = reg_id.toString();
                     ((BiomeBridge) biome).bridge$setId(id);
                 }
@@ -78,12 +78,12 @@ public final class BiomeTypeRegistryModule
 
     @AdditionalRegistration
     public void registerAdditional() {
-        for (Biome biome : Biome.REGISTRY) {
+        for (Biome biome : Biome.field_185377_q) {
             if (biome != null && !this.biomeTypes.contains(biome)) {
                 String id = ((BiomeType) biome).getId();
                 if (id == null) {
-                    ResourceLocation reg_id = Biome.REGISTRY.getNameForObject(biome);
-                    ((BiomeBridge) biome).bridge$setModId(reg_id.getNamespace());
+                    ResourceLocation reg_id = Biome.field_185377_q.func_177774_c(biome);
+                    ((BiomeBridge) biome).bridge$setModId(reg_id.func_110624_b());
                     id = reg_id.toString();
                     ((BiomeBridge) biome).bridge$setId(id);
                 }

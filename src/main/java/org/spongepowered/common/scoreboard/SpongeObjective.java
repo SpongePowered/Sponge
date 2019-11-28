@@ -83,7 +83,7 @@ public class SpongeObjective implements Objective {
     private void updateDisplayName() {
         for (final ScoreObjective objective: this.objectives.values()) {
             ((ScoreObjectiveAccessor) objective).accessor$setDisplayName(SpongeTexts.toLegacy(this.displayName));
-            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().onObjectiveDisplayNameChanged(objective);
+            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().func_96532_b(objective);
         }
     }
 
@@ -108,7 +108,7 @@ public class SpongeObjective implements Objective {
     private void updateDisplayMode() {
         for (final ScoreObjective objective: this.objectives.values()) {
             ((ScoreObjectiveAccessor) objective).accessor$setRenderType((IScoreCriteria.EnumRenderType) (Object) this.displayMode);
-            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().onObjectiveDisplayNameChanged(objective);
+            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().func_96532_b(objective);
         }
     }
 
@@ -147,7 +147,7 @@ public class SpongeObjective implements Objective {
     }
 
     private void addScoreToScoreboard(final net.minecraft.scoreboard.Scoreboard scoreboard, final net.minecraft.scoreboard.Score score) {
-        final String name = score.getPlayerName();
+        final String name = score.func_96653_e();
         final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectivesMap()
             .computeIfAbsent(name, k -> Maps.newHashMap());
 
@@ -155,7 +155,7 @@ public class SpongeObjective implements Objective {
 
         // Trigger refresh
         ((ScoreAccessor) score).accessor$setForceUpdate(true);
-        score.setScorePoints(((ScoreAccessor) score).accessor$getScorePoints());
+        score.func_96647_c(((ScoreAccessor) score).accessor$getScorePoints());
     }
 
     @Override
@@ -196,10 +196,10 @@ public class SpongeObjective implements Objective {
                     final Map<?, ?> map1 = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectivesMap().remove(name);
 
                     if (map1 != null) {
-                        scoreboard.broadcastScoreUpdate(name);
+                        scoreboard.func_96516_a(name);
                     }
                 } else if (score != null) {
-                    scoreboard.broadcastScoreUpdate(name, objective);
+                    scoreboard.func_178820_a(name, objective);
                 }
             }
             ((SpongeScore) spongeScore).removeScoreFor(objective);

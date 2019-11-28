@@ -71,16 +71,16 @@ public class BiomeTreeTypeRegistryModule extends AbstractPrefixAlternateCatalogT
         register(create("tall_taiga", new WorldGenTaiga2(false), tall_megapine));
         register(create("pointy_taiga", new WorldGenTaiga1(), megapine));
 
-        IBlockState jlog = Blocks.LOG.getDefaultState()
-            .withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+        IBlockState jlog = Blocks.field_150364_r.func_176223_P()
+            .func_177226_a(BlockOldLog.field_176301_b, BlockPlanks.EnumType.JUNGLE);
 
-        IBlockState jleaf = Blocks.LEAVES.getDefaultState()
-            .withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE)
-            .withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IBlockState jleaf = Blocks.field_150362_t.func_176223_P()
+            .func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE)
+            .func_177226_a(BlockLeaves.field_176236_b, Boolean.valueOf(false));
 
-        IBlockState leaf = Blocks.LEAVES.getDefaultState()
-            .withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE)
-            .withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IBlockState leaf = Blocks.field_150362_t.func_176223_P()
+            .func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE)
+            .func_177226_a(BlockLeaves.field_176236_b, Boolean.valueOf(false));
 
         WorldGenTreesBridge trees = (WorldGenTreesBridge) new WorldGenTrees(false, 4, jlog, jleaf, true);
         trees.bridge$setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));

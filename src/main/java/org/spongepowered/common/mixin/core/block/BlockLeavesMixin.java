@@ -79,13 +79,13 @@ public abstract class BlockLeavesMixin extends BlockMixin {
         try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                                            .source(new SpongeLocatableBlockBuilder()
                                                .world((World) worldIn)
-                                               .position(pos.getX(), pos.getY(), pos.getZ())
+                                               .position(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p())
                                                .state((BlockState) state)
                                                .build())) {
             if (context != null) {
                 context.buildAndSwitch();
             }
-            return worldIn.setBlockState(pos, state, flags);
+            return worldIn.func_180501_a(pos, state, flags);
         }
     }
 
@@ -103,7 +103,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
      */
     @Overwrite
     private void destroy(final net.minecraft.world.World worldIn, final BlockPos pos) {
-        final IBlockState state = worldIn.getBlockState(pos);
+        final IBlockState state = worldIn.func_180495_p(pos);
         // Sponge Start - Cause tracking
         if (!((WorldBridge) worldIn).bridge$isFake()) {
             final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
@@ -111,29 +111,29 @@ public abstract class BlockLeavesMixin extends BlockMixin {
             try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                 .source(new SpongeLocatableBlockBuilder()
                     .world((World) worldIn)
-                    .position(pos.getX(), pos.getY(), pos.getZ())
+                    .position(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p())
                     .state((BlockState) state)
                     .build())) {
                 if (context != null) {
                     context.buildAndSwitch();
                 }
                 this.dropBlockAsItem(worldIn, pos, state, 0);
-                worldIn.setBlockToAir(pos);
+                worldIn.func_175698_g(pos);
             }
             return;
         }
         // Sponge End
         this.dropBlockAsItem(worldIn, pos, state , 0);
-        worldIn.setBlockToAir(pos);
+        worldIn.func_175698_g(pos);
 
     }
 
     private ImmutableTreeData impl$getTreeData(final IBlockState blockState) {
         final BlockPlanks.EnumType type;
-        if (blockState.getBlock() instanceof BlockOldLeaf) {
-            type = blockState.getValue(BlockOldLeaf.VARIANT);
-        } else if (blockState.getBlock() instanceof BlockNewLeaf) {
-            type = blockState.getValue(BlockNewLeaf.VARIANT);
+        if (blockState.func_177230_c() instanceof BlockOldLeaf) {
+            type = blockState.func_177229_b(BlockOldLeaf.field_176239_P);
+        } else if (blockState.func_177230_c() instanceof BlockNewLeaf) {
+            type = blockState.func_177229_b(BlockNewLeaf.field_176240_P);
         } else {
             type = BlockPlanks.EnumType.OAK;
         }
@@ -144,7 +144,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
     }
 
     private ImmutableDecayableData impl$getIsDecayableFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.getValue(BlockLeaves.DECAYABLE));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.func_177229_b(BlockLeaves.field_176237_a));
     }
 
     @Override
@@ -157,23 +157,23 @@ public abstract class BlockLeavesMixin extends BlockMixin {
         if (manipulator instanceof ImmutableTreeData) {
             final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
-            if (blockState.getBlock() instanceof BlockOldLeaf) {
+            if (blockState.func_177230_c() instanceof BlockOldLeaf) {
                 if (treeType.equals(TreeTypes.OAK) ||
                         treeType.equals(TreeTypes.BIRCH) ||
                         treeType.equals(TreeTypes.SPRUCE) ||
                         treeType.equals(TreeTypes.JUNGLE)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockOldLeaf.VARIANT, type));
+                    return Optional.of((BlockState) blockState.func_177226_a(BlockOldLeaf.field_176239_P, type));
                 }
-            } else if (blockState.getBlock() instanceof BlockNewLeaf) {
+            } else if (blockState.func_177230_c() instanceof BlockNewLeaf) {
                 if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockNewLeaf.VARIANT, type));
+                    return Optional.of((BlockState) blockState.func_177226_a(BlockNewLeaf.field_176240_P, type));
                 }
             }
             return Optional.empty();
         }
         if (manipulator instanceof ImmutableDecayableData) {
             final boolean decayable = ((ImmutableDecayableData) manipulator).decayable().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockLeaves.DECAYABLE, decayable));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockLeaves.field_176237_a, decayable));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -183,23 +183,23 @@ public abstract class BlockLeavesMixin extends BlockMixin {
         if (key.equals(Keys.TREE_TYPE)) {
             final TreeType treeType = (TreeType) value;
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
-            if (blockState.getBlock() instanceof BlockOldLeaf) {
+            if (blockState.func_177230_c() instanceof BlockOldLeaf) {
                 if (treeType.equals(TreeTypes.OAK) ||
                         treeType.equals(TreeTypes.BIRCH) ||
                         treeType.equals(TreeTypes.SPRUCE) ||
                         treeType.equals(TreeTypes.JUNGLE)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockOldLeaf.VARIANT, type));
+                    return Optional.of((BlockState) blockState.func_177226_a(BlockOldLeaf.field_176239_P, type));
                 }
-            } else if (blockState.getBlock() instanceof BlockNewLeaf) {
+            } else if (blockState.func_177230_c() instanceof BlockNewLeaf) {
                 if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockNewLeaf.VARIANT, type));
+                    return Optional.of((BlockState) blockState.func_177226_a(BlockNewLeaf.field_176240_P, type));
                 }
             }
             return Optional.empty();
         }
         if (key.equals(Keys.DECAYABLE)) {
             final boolean decayable = (Boolean) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockLeaves.DECAYABLE, decayable));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockLeaves.field_176237_a, decayable));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

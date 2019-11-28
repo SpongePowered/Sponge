@@ -74,14 +74,14 @@ public abstract class EntityDataManagerMixin {
         final EntityDataManager.DataEntry<T> dataentry = this.<T>getEntry(key);
 
         // Sponge Start - set up the current value, so we don't have to retrieve it multiple times
-        final T currentValue = dataentry.getValue();
+        final T currentValue = dataentry.func_187206_b();
         final T incomingValue = value;
         if (ObjectUtils.notEqual(value, currentValue)) { // Sponge - change dataentry.getValue() to use local variable
             // Sponge Start - retrieve the associated key, if available
             // Client side can have an entity, because reasons.......
             // Really silly reasons......
             // I don't know, ask Grum....
-            if (this.entity != null && this.entity.world != null && !this.entity.world.isRemote) { // We only want to spam the server world ;)
+            if (this.entity != null && this.entity.field_70170_p != null && !this.entity.field_70170_p.field_72995_K) { // We only want to spam the server world ;)
                 final Optional<DataParameterConverter<T>> converter = ((DataParameterBridge) key).bridge$getDataConverter();
                 // At this point it is changing
                 if (converter.isPresent()) {
@@ -109,9 +109,9 @@ public abstract class EntityDataManagerMixin {
                 }
             }
             // Sponge End
-            dataentry.setValue(value);
-            this.entity.notifyDataManagerChange(key);
-            dataentry.setDirty(true);
+            dataentry.func_187210_a(value);
+            this.entity.func_184206_a(key);
+            dataentry.func_187208_a(true);
             this.dirty = true;
         }
     }

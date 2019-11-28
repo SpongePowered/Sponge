@@ -47,32 +47,32 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected Value<BlockState> constructValue(final BlockState value) {
-        return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), value);
+        return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.field_150350_a.func_176223_P(), value);
     }
 
     @Override
     protected boolean set(final EntityMinecart container, final BlockState value) {
-        container.setDisplayTile((IBlockState) value);
+        container.func_174899_a((IBlockState) value);
         return true;
     }
 
     @Override
     protected Optional<BlockState> getVal(final EntityMinecart container) {
-        if(!container.hasDisplayTile()) return Optional.empty();
-        return Optional.of((BlockState) container.getDisplayTile());
+        if(!container.func_94100_s()) return Optional.empty();
+        return Optional.of((BlockState) container.func_174897_t());
     }
 
     @Override
     protected ImmutableValue<BlockState> constructImmutableValue(final BlockState value) {
-        return new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), value);
+        return new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.field_150350_a.func_176223_P(), value);
     }
 
     @Override
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if(container instanceof EntityMinecart) {
             final EntityMinecart cart = (EntityMinecart) container;
-            final ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
-            cart.setHasDisplayTile(false);
+            final ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.func_174897_t());
+            cart.func_94096_e(false);
             return DataTransactionResult.builder().replace(block).build();
         }
         return DataTransactionResult.failNoData();

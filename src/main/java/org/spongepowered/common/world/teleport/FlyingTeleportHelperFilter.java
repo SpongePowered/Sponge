@@ -42,7 +42,7 @@ public class FlyingTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return ((IBlockState) blockState).getMaterial() != Material.CACTUS;
+        return ((IBlockState) blockState).func_185904_a() != Material.field_151570_A;
     }
 
 }

@@ -94,7 +94,7 @@ public abstract class WorldGenBirchTreeMixin_API extends WorldGenAbstractTree im
                 for (k = x - b0; k <= x + b0 && flag; ++k) {
                     for (l = z - b0; l <= z + b0 && flag; ++l) {
                         if (j >= 0 && j < 256) {
-                            if (!this.canGrowInto(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
+                            if (!this.func_150523_a(worldIn.func_180495_p(new BlockPos(k, j, l)).func_177230_c())) {
                                 flag = false;
                             }
                         } else {
@@ -106,8 +106,8 @@ public abstract class WorldGenBirchTreeMixin_API extends WorldGenAbstractTree im
 
             if (flag) {
                 final BlockPos down = new BlockPos(x, y - 1, z);
-                final Block block1 = worldIn.getBlockState(down).getBlock();
-                return ((WorldGeneratorBridge) this).bridge$canSustainPlant(block1, worldIn, down, EnumFacing.UP, Blocks.SAPLING) && y < 256 - i - 1;
+                final Block block1 = worldIn.func_180495_p(down).func_177230_c();
+                return ((WorldGeneratorBridge) this).bridge$canSustainPlant(block1, worldIn, down, EnumFacing.UP, Blocks.field_150345_g) && y < 256 - i - 1;
             }
         }
         return false;
@@ -116,9 +116,9 @@ public abstract class WorldGenBirchTreeMixin_API extends WorldGenAbstractTree im
     @Override
     public void placeObject(final World world, final Random random, final int x, final int y, final int z) {
         final BlockPos pos = new BlockPos(x, y, z);
-        setDecorationDefaults();
-        if (generate((net.minecraft.world.World) world, random, pos)) {
-            generateSaplings((net.minecraft.world.World) world, random, pos);
+        func_175904_e();
+        if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
+            func_180711_a((net.minecraft.world.World) world, random, pos);
         }
     }
 

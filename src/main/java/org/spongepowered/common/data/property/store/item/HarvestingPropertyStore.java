@@ -45,14 +45,14 @@ public class HarvestingPropertyStore extends AbstractItemStackPropertyStore<Harv
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     protected Optional<HarvestingProperty> getFor(ItemStack itemStack) {
-        final Item item = itemStack.getItem();
+        final Item item = itemStack.func_77973_b();
         if (item instanceof ItemToolAccessor && !(item instanceof ItemPickaxe)) {
             final ImmutableSet<BlockType> blocks = ImmutableSet.copyOf((Set) ((ItemToolAccessor) item).accessor$getEffectiveBlocks());
             return Optional.of(new HarvestingProperty(blocks));
         }
         final Collection<BlockType> blockTypes = SpongeImpl.getRegistry().getAllOf(BlockType.class);
         final ImmutableSet.Builder<BlockType> builder = ImmutableSet.builder();
-        blockTypes.stream().filter(blockType -> item.canHarvestBlock((IBlockState) blockType.getDefaultState())).forEach(builder::add);
+        blockTypes.stream().filter(blockType -> item.func_150897_b((IBlockState) blockType.getDefaultState())).forEach(builder::add);
         final ImmutableSet<BlockType> blocks = builder.build();
         if (blocks.isEmpty()) {
             return Optional.empty();

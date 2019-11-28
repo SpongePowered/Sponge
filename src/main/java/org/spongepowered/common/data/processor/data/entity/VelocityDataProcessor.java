@@ -66,7 +66,7 @@ public class VelocityDataProcessor extends AbstractEntitySingleDataProcessor<Ent
 
     @Override
     protected Optional<Vector3d> getVal(Entity entity) {
-        return Optional.of(new Vector3d(entity.motionX, entity.motionY, entity.motionZ));
+        return Optional.of(new Vector3d(entity.field_70159_w, entity.field_70181_x, entity.field_70179_y));
     }
 
     @Override

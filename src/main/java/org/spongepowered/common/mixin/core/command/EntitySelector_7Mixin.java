@@ -39,9 +39,9 @@ public class EntitySelector_7Mixin {
             target = "Lnet/minecraft/entity/Entity;getCachedUniqueIdString()Ljava/lang/String;"))
     private String impl$getEntityIdString(final Entity entity) {
         if (entity instanceof EntityHuman) {
-            return entity.getCustomNameTag();
+            return entity.func_95999_t();
         }
-        return entity.getCachedUniqueIdString();
+        return entity.func_189512_bd();
     }
 
 }

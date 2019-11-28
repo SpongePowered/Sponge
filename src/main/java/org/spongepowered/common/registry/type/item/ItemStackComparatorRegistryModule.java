@@ -65,8 +65,8 @@ public final class ItemStackComparatorRegistryModule implements RegistryModule {
         ItemDataComparator itemData = new ItemDataComparator();
         this.comparators.put("item_data", itemData);
         this.comparators.put("item_data_ignore_damage", new ItemDataComparator(DurabilityData.class));
-        this.comparators.put("ignore_size", type.thenComparing(properties).thenComparing(itemData).thenComparingInt(i -> ItemStackUtil.toNative(i).getItemDamage()));
-        this.comparators.put("all", type.thenComparing(size).thenComparing(properties).thenComparing(itemData).thenComparingInt(i -> ItemStackUtil.toNative(i).getItemDamage()));
+        this.comparators.put("ignore_size", type.thenComparing(properties).thenComparing(itemData).thenComparingInt(i -> ItemStackUtil.toNative(i).func_77952_i()));
+        this.comparators.put("all", type.thenComparing(size).thenComparing(properties).thenComparing(itemData).thenComparingInt(i -> ItemStackUtil.toNative(i).func_77952_i()));
     }
 
     private static final class Properties implements Comparator<ItemStack> {

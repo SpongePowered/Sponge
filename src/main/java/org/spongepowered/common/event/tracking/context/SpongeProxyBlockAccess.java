@@ -246,7 +246,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     }
 
     @Override
-    public TileEntity getTileEntity(final BlockPos pos) {
+    public TileEntity func_175625_s(final BlockPos pos) {
         return this.affectedTileEntities.get(pos);
     }
 
@@ -263,18 +263,18 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     }
 
     @Override
-    public IBlockState getBlockState(final BlockPos pos) {
+    public IBlockState func_180495_p(final BlockPos pos) {
         return this.processed.get(pos);
     }
 
     @Override
-    public boolean isAirBlock(final BlockPos pos) {
-        return this.processingWorld.isAirBlock(pos);
+    public boolean func_175623_d(final BlockPos pos) {
+        return this.processingWorld.func_175623_d(pos);
     }
 
     @Override
-    public int getStrongPower(final BlockPos pos, final EnumFacing direction) {
-        return this.processingWorld.getStrongPower(pos, direction);
+    public int func_175627_a(final BlockPos pos, final EnumFacing direction) {
+        return this.processingWorld.func_175627_a(pos, direction);
     }
 
     public void onChunkChanged(final BlockPos pos, final IBlockState newState) {
@@ -337,12 +337,12 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         if (((WorldAccessor) this.processingWorld).accessor$getProcessingLoadedTiles()) {
             ((WorldAccessor) this.processingWorld).accessor$getAddedTileEntityList().remove(removed);
             if (!(removed instanceof ITickable)) { //Forge: If they are not tickable they wont be removed in the update loop.
-                this.processingWorld.loadedTileEntityList.remove(removed);
+                this.processingWorld.field_147482_g.remove(removed);
             }
         } else {
             ((WorldAccessor) this.processingWorld).accessor$getAddedTileEntityList().remove(removed);
-            this.processingWorld.loadedTileEntityList.remove(removed);
-            this.processingWorld.tickableTileEntities.remove(removed);
+            this.processingWorld.field_147482_g.remove(removed);
+            this.processingWorld.field_175730_i.remove(removed);
         }
         final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) removed).bridge$getActiveChunk();
         if (activeChunk != null) {
@@ -360,21 +360,21 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         final TileEntity existing = this.affectedTileEntities.remove(targetPos);
         if (existing != null && existing != added) {
             ((TileEntityBridge) existing).bridge$setCaptured(false);
-            existing.invalidate();
+            existing.func_145843_s();
         }
         ((TileEntityBridge) added).bridge$setCaptured(false);
         if (((WorldAccessor) this.processingWorld).accessor$getProcessingLoadedTiles()) {
-            added.setPos(targetPos);
-            if (added.getWorld() != this.processingWorld) {
-                added.setWorld(this.processingWorld);
+            added.func_174878_a(targetPos);
+            if (added.func_145831_w() != this.processingWorld) {
+                added.func_145834_a(this.processingWorld);
             }
             ((WorldAccessor) this.processingWorld).accessor$getAddedTileEntityList().add(added);
         } else {
-            final Chunk chunk = this.processingWorld.getChunk(targetPos);
-            if (!chunk.isEmpty()) {
+            final Chunk chunk = this.processingWorld.func_175726_f(targetPos);
+            if (!chunk.func_76621_g()) {
                 ((ChunkBridge) chunk).bridge$setTileEntity(targetPos, added);
             }
-            this.processingWorld.addTileEntity(added);
+            this.processingWorld.func_175700_a(added);
         }
     }
 
@@ -396,8 +396,8 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         this.affectedTileEntities.put(pos, added);
         // Also, remove the position from being marked as removed.
         this.markedRemoved.remove(pos);
-        if (added != null && added.getWorld() != this.processingWorld) {
-            added.setWorld(this.processingWorld);
+        if (added != null && added.func_145831_w() != this.processingWorld) {
+            added.func_145834_a(this.processingWorld);
         }
         this.queuedTiles.put(pos, added);
     }
@@ -414,7 +414,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         if (removed != null) {
             // Set the tile entity to the affected tile entities so it is retrieved
             // by the hooks in WorldServerMixin for getting tiles for removal.
-            final BlockPos pos = removed.getPos();
+            final BlockPos pos = removed.func_174877_v();
             this.affectedTileEntities.put(pos, null);
             markRemovedTile(pos);
             if (!this.queuedRemovals.containsEntry(pos, removed)) {
@@ -430,13 +430,13 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         // retrieved by the target world will return the new added tile entity
         // without it actually being added yet to the world/chunk. Likewise, it will
         // not be removed from the world/chunk until the BlockTransaction is processed.
-        final TileEntity existing = this.affectedTileEntities.put(removed.getPos(), added);
-        this.markedRemoved.remove(removed.getPos());
+        final TileEntity existing = this.affectedTileEntities.put(removed.func_174877_v(), added);
+        this.markedRemoved.remove(removed.func_174877_v());
         if (existing != null && existing != removed) {
             // Someone went and changed? Maybe it's already removed?
-            this.queuedRemovals.put(existing.getPos(), existing);
+            this.queuedRemovals.put(existing.func_174877_v(), existing);
         }
-        this.queuedTiles.put(added.getPos(), added);
+        this.queuedTiles.put(added.func_174877_v(), added);
     }
 
     public boolean succeededInAdding(final BlockPos pos, final TileEntity tileEntity) {

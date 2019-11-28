@@ -61,14 +61,14 @@ public class TriggerTypeRegistryModule extends AbstractPrefixAlternateCatalogTyp
     @Override
     public void registerDefaults() {
         // Force the vanilla trigger types to load
-        CriteriaTriggers.getAll();
+        CriteriaTriggers.func_192120_a();
     }
 
     private static final class Holder {
         static final TriggerTypeRegistryModule INSTANCE = new TriggerTypeRegistryModule();
         static {
             // Just need to class initialize
-            CriteriaTriggers.getAll();
+            CriteriaTriggers.func_192120_a();
         }
     }
 }

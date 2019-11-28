@@ -40,7 +40,7 @@ public class SpongeEnderChestBuilder extends AbstractTileBuilder<EnderChest> {
     @Override
     protected Optional<EnderChest> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(enderChest -> {
-            ((TileEntityEnderChest) enderChest).validate();
+            ((TileEntityEnderChest) enderChest).func_145829_t();
             return enderChest;
         });
     }

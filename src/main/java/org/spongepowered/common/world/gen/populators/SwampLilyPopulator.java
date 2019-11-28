@@ -48,7 +48,7 @@ public class SwampLilyPopulator implements GenerationPopulator {
         Vector3i max = buffer.getBlockMax();
         for (int x = min.getX(); x < max.getX(); x++) {
             for (int z = min.getZ(); z < max.getZ(); z++) {
-                double d1 = this.noise.getValue(x * 0.25D, z * 0.25D);
+                double d1 = this.noise.func_151601_a(x * 0.25D, z * 0.25D);
 
                 if (d1 > 0.0D) {
 

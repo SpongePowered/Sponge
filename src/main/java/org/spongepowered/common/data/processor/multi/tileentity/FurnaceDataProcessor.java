@@ -71,19 +71,19 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEn
             return false;
         }
 
-        final boolean needsUpdate = !tileEntity.isBurning() && maxBurnTime > 0 || tileEntity.isBurning() && maxBurnTime == 0;
+        final boolean needsUpdate = !tileEntity.func_145950_i() && maxBurnTime > 0 || tileEntity.func_145950_i() && maxBurnTime == 0;
 
         if (needsUpdate) {
-            final World world = (World) tileEntity.getWorld();
-            world.setBlockType(tileEntity.getPos().getX(), tileEntity.getPos().getY(),
-                    tileEntity.getPos().getZ(), maxBurnTime > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
-            tileEntity = (TileEntityFurnace) tileEntity.getWorld().getTileEntity(tileEntity.getPos());
+            final World world = (World) tileEntity.func_145831_w();
+            world.setBlockType(tileEntity.func_174877_v().func_177958_n(), tileEntity.func_174877_v().func_177956_o(),
+                    tileEntity.func_174877_v().func_177952_p(), maxBurnTime > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
+            tileEntity = (TileEntityFurnace) tileEntity.func_145831_w().func_175625_s(tileEntity.func_174877_v());
         }
 
-        tileEntity.setField(0, maxBurnTime - passedBurnTime);
-        tileEntity.setField(1, maxBurnTime);
-        tileEntity.setField(2, passedCookTime);
-        tileEntity.setField(3, maxCookTime);
+        tileEntity.func_174885_b(0, maxBurnTime - passedBurnTime);
+        tileEntity.func_174885_b(1, maxBurnTime);
+        tileEntity.func_174885_b(2, passedCookTime);
+        tileEntity.func_174885_b(3, maxCookTime);
 
         return true;
     }
@@ -92,10 +92,10 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEn
     protected Map<Key<?>, ?> getValues(TileEntityFurnace tileEntity) {
         HashMap<Key<?>, Integer> values = Maps.newHashMapWithExpectedSize(3);
 
-        final int passedBurnTime = tileEntity.getField(1) - tileEntity.getField(0);
-        final int maxBurnTime = tileEntity.getField(1);
-        final int passedCookTime = tileEntity.getField(2);
-        final int maxCookTime = tileEntity.getField(3);
+        final int passedBurnTime = tileEntity.func_174887_a_(1) - tileEntity.func_174887_a_(0);
+        final int maxBurnTime = tileEntity.func_174887_a_(1);
+        final int passedCookTime = tileEntity.func_174887_a_(2);
+        final int maxCookTime = tileEntity.func_174887_a_(3);
 
         values.put(Keys.PASSED_BURN_TIME, passedBurnTime);
         values.put(Keys.MAX_BURN_TIME, maxBurnTime);

@@ -51,14 +51,14 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
             }
             // Have to consider custom names as an option
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((TileEntityBrewingStand) brewingStand).setName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
+                ((TileEntityBrewingStand) brewingStand).func_145937_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
 
             final BrewingStandData brewingData = Sponge.getDataManager().getManipulatorBuilder(BrewingStandData.class).get().create();
             brewingData.remainingBrewTime().set(container.getInt(BREW_TIME_QUERY).get());
             brewingStand.offer(brewingData);
 
-            ((TileEntityBrewingStand) brewingStand).validate();
+            ((TileEntityBrewingStand) brewingStand).func_145829_t();
             return brewingStand;
         });
     }

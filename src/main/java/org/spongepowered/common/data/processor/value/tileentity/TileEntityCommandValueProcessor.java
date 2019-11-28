@@ -54,16 +54,16 @@ public class TileEntityCommandValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected boolean set(final TileEntityCommandBlock container, final String value) {
-        final CommandBlockBaseLogic logic = container.getCommandBlockLogic();
-        final int successCount = logic.getSuccessCount();
-        logic.setCommand(value);
-        logic.setSuccessCount(successCount);
+        final CommandBlockBaseLogic logic = container.func_145993_a();
+        final int successCount = logic.func_145760_g();
+        logic.func_145752_a(value);
+        logic.func_184167_a(successCount);
         return true;
     }
 
     @Override
     protected Optional<String> getVal(final TileEntityCommandBlock container) {
-        return Optional.ofNullable(container.getCommandBlockLogic().getCommand());
+        return Optional.ofNullable(container.func_145993_a().func_145753_i());
     }
 
     @Override

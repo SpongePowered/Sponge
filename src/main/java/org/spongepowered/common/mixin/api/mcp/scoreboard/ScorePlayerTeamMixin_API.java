@@ -185,7 +185,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
             throw new IllegalArgumentException(String.format("Member is %s characters long! It must be at most 40.", legacyName.length()));
         }
         if (this.scoreboard != null) {
-            this.scoreboard.addPlayerToTeam(legacyName, this.name);
+            this.scoreboard.func_151392_a(legacyName, this.name);
         } else {
             this.membershipSet.add(legacyName); // this is normally done by addPlayerToTeam
         }
@@ -196,10 +196,10 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
     public boolean removeMember(final Text member) {
         final String legacyName = SpongeTexts.toLegacy(member);
         if (this.scoreboard != null) {
-            final ScorePlayerTeam realTeam = this.scoreboard.getPlayersTeam(legacyName);
+            final ScorePlayerTeam realTeam = this.scoreboard.func_96509_i(legacyName);
 
             if (realTeam == (ScorePlayerTeam) (Object) this) {
-                this.scoreboard.removePlayerFromTeam(legacyName, realTeam);
+                this.scoreboard.func_96512_b(legacyName, realTeam);
                 return true;
             }
             return false;
@@ -217,7 +217,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
         if (this.scoreboard == null) {
             return false;
         }
-        this.scoreboard.removeTeam((ScorePlayerTeam) (Object) this);
+        this.scoreboard.func_96511_d((ScorePlayerTeam) (Object) this);
         this.scoreboard = null;
         return true;
     }

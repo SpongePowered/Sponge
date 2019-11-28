@@ -92,7 +92,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
                                                final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
-            final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.getChunk(notifyPos);
+            final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.func_175726_f(notifyPos);
             mixinChunk.bridge$addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
         });
     }
@@ -115,7 +115,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();
         final BlockPos changedBlockPos = original.getBlockPos();
         original.getWorldServer().ifPresent(worldServer -> {
-            final ChunkBridge changedMixinChunk = (ChunkBridge) worldServer.getChunk(changedBlockPos);
+            final ChunkBridge changedMixinChunk = (ChunkBridge) worldServer.func_175726_f(changedBlockPos);
             changedMixinChunk.bridge$getBlockOwner(changedBlockPos)
                 .ifPresent(owner -> changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER));
             changedMixinChunk.bridge$getBlockNotifier(changedBlockPos)
@@ -148,7 +148,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             final LocatableBlock source = (LocatableBlock) context.getSource();
             // Basically, if the source was a tile entity, and during the block event, it changed?
             // and if any of the transaction cancelled, the whole thing should be cancelled.
-            if (SpongeImplHooks.hasBlockTileEntity(((IBlockState) source.getBlockState()).getBlock(), (IBlockState) source.getBlockState())) {
+            if (SpongeImplHooks.hasBlockTileEntity(((IBlockState) source.getBlockState()).func_177230_c(), (IBlockState) source.getBlockState())) {
                 context.setWasNotCancelled(noCancelledTransactions);
                 return !noCancelledTransactions;
             }

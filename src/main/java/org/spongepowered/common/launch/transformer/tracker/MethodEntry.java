@@ -25,7 +25,7 @@
 package org.spongepowered.common.launch.transformer.tracker;
 
 import org.objectweb.asm.Type;
-
+import org.spongepowered.common.launch.transformer.tracker.MethodEntry.TargetTracker;
 import java.util.HashMap;
 import java.util.Map;
 

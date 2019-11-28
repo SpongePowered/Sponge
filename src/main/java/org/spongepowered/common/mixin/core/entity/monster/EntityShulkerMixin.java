@@ -47,23 +47,23 @@ public abstract class EntityShulkerMixin extends EntityLivingMixin implements En
     @SuppressWarnings("ConstantConditions")
     @Override
     public DyeColor bridge$getColor() {
-        return (DyeColor) (Object) EnumDyeColor.byMetadata(this.dataManager.get(COLOR) & 15);
+        return (DyeColor) (Object) EnumDyeColor.func_176764_b(this.dataManager.func_187225_a(COLOR) & 15);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public void bridge$setColor(final DyeColor color) {
-        this.dataManager.set(COLOR, (byte) (this.dataManager.get(COLOR) & 240 | ((EnumDyeColor) (Object) color).getMetadata() & 15));
+        this.dataManager.func_187227_b(COLOR, (byte) (this.dataManager.func_187225_a(COLOR) & 240 | ((EnumDyeColor) (Object) color).func_176765_a() & 15));
     }
 
     @Override
     public Direction bridge$getDirection() {
-        return Constants.DirectionFunctions.getFor(this.dataManager.get(ATTACHED_FACE));
+        return Constants.DirectionFunctions.getFor(this.dataManager.func_187225_a(ATTACHED_FACE));
     }
 
     @Override
     public void bridge$setDirection(final Direction direction) {
-        this.dataManager.set(ATTACHED_FACE, Constants.DirectionFunctions.getFor(direction));
+        this.dataManager.func_187227_b(ATTACHED_FACE, Constants.DirectionFunctions.getFor(direction));
     }
 
 }

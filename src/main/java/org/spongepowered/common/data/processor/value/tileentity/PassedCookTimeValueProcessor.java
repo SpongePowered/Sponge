@@ -53,17 +53,17 @@ public class PassedCookTimeValueProcessor extends AbstractSpongeValueProcessor<T
 
     @Override
     protected boolean set(TileEntityFurnace container, Integer value) {
-        if(container.getStackInSlot(0).isEmpty() || value > container.getField(3)){ //The passedCookTime of nothing cannot be set | Cannot be higher than the maximum
+        if(container.func_70301_a(0).func_190926_b() || value > container.func_174887_a_(3)){ //The passedCookTime of nothing cannot be set | Cannot be higher than the maximum
             return false;
         }
 
-        container.setField(2, value);
+        container.func_174885_b(2, value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(TileEntityFurnace container) {
-        return Optional.of(container.getStackInSlot(0).isEmpty() ? container.getField(2) : 0); //The passedCookTime of nothing cannot be set
+        return Optional.of(container.func_70301_a(0).func_190926_b() ? container.func_174887_a_(2) : 0); //The passedCookTime of nothing cannot be set
     }
 
     @Override

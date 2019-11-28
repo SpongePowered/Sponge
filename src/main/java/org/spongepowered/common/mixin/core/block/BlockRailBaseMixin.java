@@ -76,12 +76,12 @@ public abstract class BlockRailBaseMixin extends BlockMixin {
                 return state;
             }
             // For mods that extend BlockRailBase
-            for (final Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.getProperties().entrySet
+            for (final Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.func_177228_b().entrySet
                     ()) {
                 if (entry.getValue() instanceof BlockRailBase.EnumRailDirection) {
-                    if (entry.getKey().getAllowedValues().contains(railDirection)) {
+                    if (entry.getKey().func_177700_c().contains(railDirection)) {
                         final PropertyEnum<BlockRailBase.EnumRailDirection> property = (PropertyEnum<BlockRailBase.EnumRailDirection>) entry.getKey();
-                        final IBlockState newState = blockState.withProperty(property, railDirection);
+                        final IBlockState newState = blockState.func_177226_a(property, railDirection);
                         return Optional.of((BlockState) newState);
                     }
                 }
@@ -104,36 +104,36 @@ public abstract class BlockRailBaseMixin extends BlockMixin {
     }
 
     private Optional<BlockState> impl$getStateForDirection(final IBlockState blockState, final BlockRailBase.EnumRailDirection railDirection) {
-        if (blockState.getBlock() instanceof BlockRail) {
-            return Optional.of((BlockState) blockState.withProperty(BlockRail.SHAPE, railDirection));
+        if (blockState.func_177230_c() instanceof BlockRail) {
+            return Optional.of((BlockState) blockState.func_177226_a(BlockRail.field_176565_b, railDirection));
         }
-        if (blockState.getBlock() instanceof BlockRailPowered) {
-            if (!BlockRailPowered.SHAPE.getAllowedValues().contains(railDirection)) {
+        if (blockState.func_177230_c() instanceof BlockRailPowered) {
+            if (!BlockRailPowered.field_176568_b.func_177700_c().contains(railDirection)) {
                 return Optional.empty();
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockRailPowered.SHAPE, railDirection));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockRailPowered.field_176568_b, railDirection));
         }
-        if (blockState.getBlock() instanceof BlockRailDetector) {
-            if (!BlockRailDetector.SHAPE.getAllowedValues().contains(railDirection)) {
+        if (blockState.func_177230_c() instanceof BlockRailDetector) {
+            if (!BlockRailDetector.field_176573_b.func_177700_c().contains(railDirection)) {
                 return Optional.empty();
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockRailDetector.SHAPE, railDirection));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockRailDetector.field_176573_b, railDirection));
         }
         return Optional.empty();
     }
 
     @Nullable
     private ImmutableRailDirectionData impl$getRailDirectionFor(final IBlockState blockState) {
-        if (blockState.getBlock() instanceof BlockRail) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.getValue(BlockRail.SHAPE));
+        if (blockState.func_177230_c() instanceof BlockRail) {
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.func_177229_b(BlockRail.field_176565_b));
         }
-        if (blockState.getBlock() instanceof BlockRailPowered) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.getValue(BlockRailPowered.SHAPE));
+        if (blockState.func_177230_c() instanceof BlockRailPowered) {
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.func_177229_b(BlockRailPowered.field_176568_b));
         }
-        if (blockState.getBlock() instanceof BlockRailDetector) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.getValue(BlockRailDetector.SHAPE));
+        if (blockState.func_177230_c() instanceof BlockRailDetector) {
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.func_177229_b(BlockRailDetector.field_176573_b));
         } // For mods extending BlockRailBase
-        for (final Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.getProperties().entrySet()) {
+        for (final Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.func_177228_b().entrySet()) {
             if (entry.getValue() instanceof BlockRailBase.EnumRailDirection) {
                 return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, entry.getValue());
             }

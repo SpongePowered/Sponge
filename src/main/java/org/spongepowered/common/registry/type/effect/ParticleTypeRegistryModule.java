@@ -94,14 +94,14 @@ public final class ParticleTypeRegistryModule extends AbstractPrefixCheckCatalog
         this.addParticleType("angry_villager", EnumParticleTypes.VILLAGER_ANGRY, false);
         this.addParticleType("barrier", EnumParticleTypes.BARRIER, false);
         this.addParticleType("block_crack", EnumParticleTypes.BLOCK_CRACK, true, ImmutableMap.of(
-                ParticleOptions.BLOCK_STATE, Blocks.STONE.getDefaultState(),
-                ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.STONE))));
+                ParticleOptions.BLOCK_STATE, Blocks.field_150348_b.func_176223_P(),
+                ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.field_150348_b))));
         this.addParticleType("block_dust", EnumParticleTypes.BLOCK_DUST, true, ImmutableMap.of(
-                ParticleOptions.BLOCK_STATE, Blocks.STONE.getDefaultState(),
-                ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.STONE))));
+                ParticleOptions.BLOCK_STATE, Blocks.field_150348_b.func_176223_P(),
+                ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.field_150348_b))));
         this.addEffectType("break_block", null, ImmutableMap.of(
-                ParticleOptions.BLOCK_STATE, Blocks.STONE.getDefaultState(),
-                ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.STONE))));
+                ParticleOptions.BLOCK_STATE, Blocks.field_150348_b.func_176223_P(),
+                ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.field_150348_b))));
         this.addParticleType("cloud", EnumParticleTypes.CLOUD, true);
         this.addParticleType("critical_hit", EnumParticleTypes.CRIT, true);
         this.addParticleType("damage_indicator", EnumParticleTypes.DAMAGE_INDICATOR, true);
@@ -114,8 +114,8 @@ public final class ParticleTypeRegistryModule extends AbstractPrefixCheckCatalog
         this.addEffectType("ender_teleport", null, ImmutableMap.of());
         this.addParticleType("explosion", EnumParticleTypes.EXPLOSION_NORMAL, true);
         this.addParticleType("falling_dust", EnumParticleTypes.FALLING_DUST, false, ImmutableMap.of(
-                ParticleOptions.BLOCK_STATE, Blocks.STONE.getDefaultState(),
-                ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.STONE))));
+                ParticleOptions.BLOCK_STATE, Blocks.field_150348_b.func_176223_P(),
+                ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.field_150348_b))));
         this.addEffectType("fertilizer", null, ImmutableMap.of(
                 ParticleOptions.QUANTITY, 15));
         this.addParticleType("fireworks_spark", EnumParticleTypes.FIREWORKS_SPARK, true);
@@ -133,7 +133,7 @@ public final class ParticleTypeRegistryModule extends AbstractPrefixCheckCatalog
         this.addParticleType("instant_spell", EnumParticleTypes.SPELL_INSTANT, true, ImmutableMap.of(
                 ParticleOptions.SLOW_HORIZONTAL_VELOCITY, false));
         this.addParticleType("item_crack", EnumParticleTypes.ITEM_CRACK, true, ImmutableMap.of(
-                ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.STONE))));
+                ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.field_150348_b))));
         this.addParticleType("large_explosion", EnumParticleTypes.EXPLOSION_LARGE, false, ImmutableMap.of(
                 ParticleOptions.SCALE, 1.0));
         this.addParticleType("large_smoke", EnumParticleTypes.SMOKE_LARGE, true);

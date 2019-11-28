@@ -34,6 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Teleporter;
+import net.minecraft.world.Teleporter.PortalPosition;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
@@ -103,16 +104,16 @@ public class TeleporterMixin_API implements PortalAgent {
     public Optional<Location<World>> findPortal(Location<World> searchLocation) {
         double closest = -1.0D;
         boolean addToCache = true;
-        BlockPos portalPosition = BlockPos.ORIGIN;
+        BlockPos portalPosition = BlockPos.field_177992_a;
         // Sponge - use the chunk coords instead of block coords
         Vector3i chunkPosition = searchLocation.getChunkPosition();
-        long targetPosition = ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ());
+        long targetPosition = ChunkPos.func_77272_a(chunkPosition.getX(), chunkPosition.getZ());
 
         if (this.destinationCoordinateCache.containsKey(targetPosition)) {
             Teleporter.PortalPosition teleporter$portalposition = this.destinationCoordinateCache.get(targetPosition);
             closest = 0.0D;
             portalPosition = teleporter$portalposition;
-            teleporter$portalposition.lastUpdateTime = this.world.getTotalWorldTime();
+            teleporter$portalposition.field_85087_d = this.world.func_82737_E();
             addToCache = false;
         } else {
             BlockPos blockSearchPosition = VecHelper.toBlockPos(searchLocation);
@@ -122,16 +123,16 @@ public class TeleporterMixin_API implements PortalAgent {
 
                 for (int j1 = -this.api$searchRadius; j1 <= this.api$searchRadius; ++j1) {
                     for (BlockPos blockpos1 =
-                         blockSearchPosition.add(i1, this.world.getActualHeight() - 1 - blockSearchPosition.getY(), j1); blockpos1
-                                    .getY() >= 0; blockpos1 = blockpos2) {
-                        blockpos2 = blockpos1.down();
+                         blockSearchPosition.func_177982_a(i1, this.world.func_72940_L() - 1 - blockSearchPosition.func_177956_o(), j1); blockpos1
+                                    .func_177956_o() >= 0; blockpos1 = blockpos2) {
+                        blockpos2 = blockpos1.func_177977_b();
 
-                        if (this.world.getBlockState(blockpos1).getBlock() == Blocks.PORTAL) {
-                            while (this.world.getBlockState(blockpos2 = blockpos1.down()).getBlock() == Blocks.PORTAL) {
+                        if (this.world.func_180495_p(blockpos1).func_177230_c() == Blocks.field_150427_aO) {
+                            while (this.world.func_180495_p(blockpos2 = blockpos1.func_177977_b()).func_177230_c() == Blocks.field_150427_aO) {
                                 blockpos1 = blockpos2;
                             }
 
-                            double distance = blockpos1.distanceSq(blockSearchPosition);
+                            double distance = blockpos1.func_177951_i(blockSearchPosition);
 
                             if (closest < 0.0D || distance < closest) {
                                 closest = distance;
@@ -145,7 +146,7 @@ public class TeleporterMixin_API implements PortalAgent {
 
         if (closest >= 0.0D) {
             if (addToCache) {
-                this.destinationCoordinateCache.put(targetPosition, ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.world.getTotalWorldTime()));
+                this.destinationCoordinateCache.put(targetPosition, ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.world.func_82737_E()));
             }
 
             return Optional.of(new Location<>(searchLocation.getExtent(), VecHelper.toVector3d(portalPosition)));
@@ -174,9 +175,9 @@ public class TeleporterMixin_API implements PortalAgent {
                 double d2 = l2 + 0.5D - toLocation.getBlockZ();
                 label142:
 
-                for (int j3 = this.world.getActualHeight() - 1; j3 >= 0; --j3) {
-                    if (this.world.isAirBlock(blockpos$mutableblockpos.setPos(j2, j3, l2))) {
-                        while (j3 > 0 && this.world.isAirBlock(blockpos$mutableblockpos.setPos(j2, j3 - 1, l2))) {
+                for (int j3 = this.world.func_72940_L() - 1; j3 >= 0; --j3) {
+                    if (this.world.func_175623_d(blockpos$mutableblockpos.func_181079_c(j2, j3, l2))) {
+                        while (j3 > 0 && this.world.func_175623_d(blockpos$mutableblockpos.func_181079_c(j2, j3 - 1, l2))) {
                             --j3;
                         }
 
@@ -195,10 +196,10 @@ public class TeleporterMixin_API implements PortalAgent {
                                         int i5 = j2 + (k4 - 1) * l3 + j4 * i4;
                                         int j5 = j3 + l4;
                                         int k5 = l2 + (k4 - 1) * i4 - j4 * l3;
-                                        blockpos$mutableblockpos.setPos(i5, j5, k5);
+                                        blockpos$mutableblockpos.func_181079_c(i5, j5, k5);
 
-                                        if (l4 < 0 && !this.world.getBlockState(blockpos$mutableblockpos).getMaterial()
-                                                .isSolid() || l4 >= 0 && !this.world.isAirBlock(blockpos$mutableblockpos)) {
+                                        if (l4 < 0 && !this.world.func_180495_p(blockpos$mutableblockpos).func_185904_a()
+                                                .func_76220_a() || l4 >= 0 && !this.world.func_175623_d(blockpos$mutableblockpos)) {
                                             continue label142;
                                         }
                                     }
@@ -229,9 +230,9 @@ public class TeleporterMixin_API implements PortalAgent {
                     double d4 = j6 + 0.5D - toLocation.getBlockZ();
                     label562:
 
-                    for (int i7 = this.world.getActualHeight() - 1; i7 >= 0; --i7) {
-                        if (this.world.isAirBlock(blockpos$mutableblockpos.setPos(l5, i7, j6))) {
-                            while (i7 > 0 && this.world.isAirBlock(blockpos$mutableblockpos.setPos(l5, i7 - 1, j6))) {
+                    for (int i7 = this.world.func_72940_L() - 1; i7 >= 0; --i7) {
+                        if (this.world.func_175623_d(blockpos$mutableblockpos.func_181079_c(l5, i7, j6))) {
+                            while (i7 > 0 && this.world.func_175623_d(blockpos$mutableblockpos.func_181079_c(l5, i7 - 1, j6))) {
                                 --i7;
                             }
 
@@ -244,10 +245,10 @@ public class TeleporterMixin_API implements PortalAgent {
                                         int j12 = l5 + (j10 - 1) * j8;
                                         int i13 = i7 + j11;
                                         int j13 = j6 + (j10 - 1) * j9;
-                                        blockpos$mutableblockpos.setPos(j12, i13, j13);
+                                        blockpos$mutableblockpos.func_181079_c(j12, i13, j13);
 
-                                        if (j11 < 0 && !this.world.getBlockState(blockpos$mutableblockpos).getMaterial()
-                                                .isSolid() || j11 >= 0 && !this.world.isAirBlock(blockpos$mutableblockpos)) {
+                                        if (j11 < 0 && !this.world.func_180495_p(blockpos$mutableblockpos).func_185904_a()
+                                                .func_76220_a() || j11 >= 0 && !this.world.func_175623_d(blockpos$mutableblockpos)) {
                                             continue label562;
                                         }
                                     }
@@ -282,7 +283,7 @@ public class TeleporterMixin_API implements PortalAgent {
         }
 
         if (closest < 0.0D) {
-            yAdjustedTarget = MathHelper.clamp(yAdjustedTarget, 70, this.world.getActualHeight() - 10);
+            yAdjustedTarget = MathHelper.func_76125_a(yAdjustedTarget, 70, this.world.func_72940_L() - 10);
             yFinalTarget = yAdjustedTarget;
 
             for (int j7 = -1; j7 <= 1; ++j7) {
@@ -292,14 +293,14 @@ public class TeleporterMixin_API implements PortalAgent {
                         int k10 = yFinalTarget + k8;
                         int k11 = zFinalTarget + (l7 - 1) * targetDirOffset - j7 * targetDirection;
                         boolean flag = k8 < 0;
-                        this.world.setBlockState(new BlockPos(k9, k10, k11),
-                                flag ? Blocks.OBSIDIAN.getDefaultState() : Blocks.AIR.getDefaultState());
+                        this.world.func_175656_a(new BlockPos(k9, k10, k11),
+                                flag ? Blocks.field_150343_Z.func_176223_P() : Blocks.field_150350_a.func_176223_P());
                     }
                 }
             }
         }
 
-        IBlockState iblockstate = Blocks.PORTAL.getDefaultState().withProperty(BlockPortal.AXIS, targetDirection != 0 ? EnumFacing.Axis.X : EnumFacing.Axis.Z);
+        IBlockState iblockstate = Blocks.field_150427_aO.func_176223_P().func_177226_a(BlockPortal.field_176550_a, targetDirection != 0 ? EnumFacing.Axis.X : EnumFacing.Axis.Z);
 
         for (int i8 = 0; i8 < 4; ++i8) {
             for (int l8 = 0; l8 < 4; ++l8) {
@@ -308,7 +309,7 @@ public class TeleporterMixin_API implements PortalAgent {
                     int l11 = yFinalTarget + l9;
                     int k12 = zFinalTarget + (l8 - 1) * targetDirOffset;
                     boolean flag1 = l8 == 0 || l8 == 3 || l9 == -1 || l9 == 3;
-                    this.world.setBlockState(new BlockPos(l10, l11, k12), flag1 ? Blocks.OBSIDIAN.getDefaultState() : iblockstate, 2);
+                    this.world.func_180501_a(new BlockPos(l10, l11, k12), flag1 ? Blocks.field_150343_Z.func_176223_P() : iblockstate, 2);
                 }
             }
 
@@ -318,7 +319,7 @@ public class TeleporterMixin_API implements PortalAgent {
                     int i12 = yFinalTarget + i10;
                     int l12 = zFinalTarget + (i9 - 1) * targetDirOffset;
                     BlockPos blockpos = new BlockPos(i11, i12, l12);
-                    this.world.neighborChanged(blockpos, this.world.getBlockState(blockpos).getBlock(), blockpos);
+                    this.world.func_190524_a(blockpos, this.world.func_180495_p(blockpos).func_177230_c(), blockpos);
                 }
             }
         }

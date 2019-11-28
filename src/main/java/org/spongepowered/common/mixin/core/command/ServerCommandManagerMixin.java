@@ -81,7 +81,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
     private GameRules impl$useSenderWorldGamerules(final WorldServer overworld, final ICommandSender sender, final ICommand command,
         final int flags, final String translationKey, final Object... translationArgs) {
         // Check the game rules of the current world instead of overworld game rules
-        return sender.getEntityWorld().getGameRules();
+        return sender.func_130014_f_().func_82736_K();
     }
 
     /**
@@ -97,7 +97,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
      *  their packet handling threads and end up causing exceptions
      */
     @Override
-    public int executeCommand(final ICommandSender sender, String command) {
+    public int func_71556_a(final ICommandSender sender, String command) {
         command = command.trim();
         if (command.startsWith("/")) {
             command = command.substring(1);
@@ -123,7 +123,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
                         .add("Details of the command:")
                         .add("%s : %s", "Command", command)
                         .add("%s : %s", "Offending Mod", id)
-                        .add("%s : %s", "Sender", sender.getDisplayName() == null ? "null" : sender.getDisplayName().getUnformattedText())
+                        .add("%s : %s", "Sender", sender.func_145748_c_() == null ? "null" : sender.func_145748_c_().func_150260_c())
                         .add("Stacktrace")
                         .add(new Exception("Async Command Executor"))
                         .trace(SpongeImpl.getLogger(), Level.WARN);
@@ -146,7 +146,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
                         .add("Details of the command:")
                         .add("%s : %s", "Command", command)
                         .add("%s : %s", "Offending Mod", id)
-                        .add("%s : %s", "Sender", sender == null || sender.getDisplayName() == null ? "null" : sender.getDisplayName().getUnformattedText())
+                        .add("%s : %s", "Sender", sender == null || sender.func_145748_c_() == null ? "null" : sender.func_145748_c_().func_150260_c())
                         .add("Stacktrace")
                         .add(new Exception("Async Command Executor"))
                         .trace(SpongeImpl.getLogger(), Level.WARN);
@@ -155,7 +155,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
             }
             Task.builder().name("Sponge Async to Sync Command Executor")
                 .execute(() -> {
-                    executeCommand(sender, cleanedCommand);
+                    func_71556_a(sender, cleanedCommand);
                 })
                 .submit(activeModContainer);
             return 0;
@@ -163,11 +163,11 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
 
         final CommandSource source = WrapperCommandSource.of(sender);
         final CommandResult result = SpongeImpl.getGame().getCommandManager().process(source, cleanedCommand);
-        result.getAffectedBlocks().ifPresent(integer4 -> sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, integer4));
-        result.getAffectedEntities().ifPresent(integer3 -> sender.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, integer3));
-        result.getAffectedItems().ifPresent(integer2 -> sender.setCommandStat(CommandResultStats.Type.AFFECTED_ITEMS, integer2));
-        result.getQueryResult().ifPresent(integer1 -> sender.setCommandStat(CommandResultStats.Type.QUERY_RESULT, integer1));
-        result.getSuccessCount().ifPresent(integer -> sender.setCommandStat(CommandResultStats.Type.SUCCESS_COUNT, integer));
+        result.getAffectedBlocks().ifPresent(integer4 -> sender.func_174794_a(CommandResultStats.Type.AFFECTED_BLOCKS, integer4));
+        result.getAffectedEntities().ifPresent(integer3 -> sender.func_174794_a(CommandResultStats.Type.AFFECTED_ENTITIES, integer3));
+        result.getAffectedItems().ifPresent(integer2 -> sender.func_174794_a(CommandResultStats.Type.AFFECTED_ITEMS, integer2));
+        result.getQueryResult().ifPresent(integer1 -> sender.func_174794_a(CommandResultStats.Type.QUERY_RESULT, integer1));
+        result.getSuccessCount().ifPresent(integer -> sender.func_174794_a(CommandResultStats.Type.SUCCESS_COUNT, integer));
         return result.getSuccessCount().orElse(0);
 
         //return super.executeCommand(sender, command); // Try Vanilla instead
@@ -180,7 +180,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
      * Reasoning: All commands should go through one system -- we need none of the MC handling code
      */
     @Override
-    public ICommand registerCommand(final ICommand command) {
+    public ICommand func_71560_a(final ICommand command) {
         final MinecraftCommandWrapper cmd = bridge$wrapCommand(command);
         if ("minecraft".equalsIgnoreCase(cmd.getOwner().getId())) {
             this.impl$lowPriorityCommands.add(cmd);
@@ -190,7 +190,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
             SpongeImpl.getGame().getCommandManager().register(cmd.getOwner(), cmd, cmd.getNames());
             registerDefaultPermissions(SpongeImpl.getGame(), cmd);
         }
-        return super.registerCommand(command);
+        return super.func_71560_a(command);
     }
 
     @Override
@@ -244,10 +244,10 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
      * We redirect this method in MinecraftServer, to provide the real value of 'usingBlock'. This override is just for mods
      */
     @Override
-    public List<String> getTabCompletions(final ICommandSender sender, final String input, @Nullable final BlockPos pos) {
+    public List<String> func_180524_a(final ICommandSender sender, final String input, @Nullable final BlockPos pos) {
         @Nullable Location<org.spongepowered.api.world.World> targetPos = null;
         if (pos != null) {
-            targetPos = new Location<>((org.spongepowered.api.world.World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
+            targetPos = new Location<>((org.spongepowered.api.world.World) sender.func_130014_f_(), VecHelper.toVector3i(pos));
         }
         return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, targetPos, false);
     }

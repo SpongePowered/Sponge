@@ -58,7 +58,7 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<EntityL
     protected boolean set(EntityLivingBase dataHolder, Map<Key<?>, Object> keyValues) {
         final Optional<EntitySnapshot> lastAttacker = (Optional<EntitySnapshot>) keyValues.get(Keys.LAST_ATTACKER);
         if (lastAttacker == null || !lastAttacker.isPresent()) {
-            dataHolder.setRevengeTarget(null);
+            dataHolder.func_70604_c(null);
             return true;
         }
         if (lastAttacker.get().getUniqueId().isPresent()) {
@@ -66,7 +66,7 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<EntityL
             if (optionalEntity.isPresent()) {
                 final Entity entity = optionalEntity.get();
                 if (entity.isLoaded() && entity instanceof EntityLivingBase) {
-                    dataHolder.setRevengeTarget((EntityLivingBase) entity);
+                    dataHolder.func_70604_c((EntityLivingBase) entity);
                     ((EntityLivingBaseAccessor) dataHolder).accessor$setLastDamage(((Optional<Double>)keyValues.get(Keys.LAST_DAMAGE)).orElse(0D).floatValue());
                     return true;
                 }
@@ -77,9 +77,9 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<EntityL
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityLivingBase dataHolder) {
-        EntitySnapshot snapshot = dataHolder.getAttackingEntity() != null ? ((Entity) dataHolder.getAttackingEntity()).createSnapshot() : null;
+        EntitySnapshot snapshot = dataHolder.func_94060_bK() != null ? ((Entity) dataHolder.func_94060_bK()).createSnapshot() : null;
         return ImmutableMap.of(Keys.LAST_ATTACKER, Optional.ofNullable(snapshot),
-                Keys.LAST_DAMAGE, Optional.ofNullable(dataHolder.getAttackingEntity() == null ? null : ((EntityLivingBaseAccessor) dataHolder).accessor$getLastDamage()));
+                Keys.LAST_DAMAGE, Optional.ofNullable(dataHolder.func_94060_bK() == null ? null : ((EntityLivingBaseAccessor) dataHolder).accessor$getLastDamage()));
     }
 
     @Override

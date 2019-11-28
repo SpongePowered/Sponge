@@ -46,7 +46,7 @@ public interface ICriterionTriggerMixin_API<C extends FilteredTriggerConfigurati
 
     @Override
     default String getName() {
-        return shadow$getId().getPath();
+        return shadow$getId().func_110623_a();
     }
 
     @Override

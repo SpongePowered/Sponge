@@ -42,15 +42,15 @@ public abstract class InventoryBasicMixin implements IInventory, LensProviderBri
 
     @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
-        if (this.getSizeInventory() == 0) {
+        if (this.func_70302_i_() == 0) {
             return new DefaultEmptyLens(adapter);
         }
-        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, adapter.bridge$getSlotProvider());
+        return new OrderedInventoryLensImpl(0, this.func_70302_i_(), 1, adapter.bridge$getSlotProvider());
     }
 
     @Override
     public SlotProvider bridge$slotProvider(final Fabric fabric, final InventoryAdapter adapter) {
-        return new SlotCollection.Builder().add(this.getSizeInventory()).build();
+        return new SlotCollection.Builder().add(this.func_70302_i_()).build();
     }
 
 }

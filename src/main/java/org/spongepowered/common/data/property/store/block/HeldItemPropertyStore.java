@@ -44,7 +44,7 @@ public class HeldItemPropertyStore extends AbstractBlockPropertyStore<HeldItemPr
 
     @Override
     protected Optional<HeldItemProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        final Item item = Item.getItemFromBlock(block.getBlock());
+        final Item item = Item.func_150898_a(block.func_177230_c());
         if (item instanceof ItemBlock) {
             return Optional.of(new HeldItemProperty((ItemType) item));
         }

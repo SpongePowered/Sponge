@@ -35,6 +35,6 @@ public abstract class BlockSaplingMixin_API extends BlockMixin_API {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + "." + BlockPlanks.EnumType.OAK.getTranslationKey() + ".name");
+        return new SpongeTranslation(this.getTranslationKey() + "." + BlockPlanks.EnumType.OAK.func_176840_c() + ".name");
     }
 }

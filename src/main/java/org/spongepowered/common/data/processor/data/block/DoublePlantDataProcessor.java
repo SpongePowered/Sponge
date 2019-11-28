@@ -40,7 +40,7 @@ public class DoublePlantDataProcessor extends
         AbstractCatalogDataProcessor<DoublePlantType, Value<DoublePlantType>, DoublePlantData, ImmutableDoublePlantData> {
 
     public DoublePlantDataProcessor() {
-        super(Keys.DOUBLE_PLANT_TYPE, input -> input.getItem() == ItemTypes.DOUBLE_PLANT);
+        super(Keys.DOUBLE_PLANT_TYPE, input -> input.func_77973_b() == ItemTypes.DOUBLE_PLANT);
     }
 
     @Override
@@ -55,12 +55,12 @@ public class DoublePlantDataProcessor extends
 
     @Override
     protected int setToMeta(DoublePlantType value) {
-        return ((BlockDoublePlant.EnumPlantType) (Object) value).getMeta();
+        return ((BlockDoublePlant.EnumPlantType) (Object) value).func_176936_a();
     }
 
     @Override
     protected DoublePlantType getFromMeta(int meta) {
-        return (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.byMetadata(meta);
+        return (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.func_176938_a(meta);
     }
 
     @Override

@@ -48,22 +48,22 @@ public abstract class WorldGeneratorMixin implements WorldGeneratorBridge {
     //These are overridden in forge to call the forge added Block.isAir/isLeaves
     @Override
     public boolean bridge$isAir(final IBlockState state, final World worldIn, final BlockPos pos) {
-        return state.getMaterial() == Material.AIR;
+        return state.func_185904_a() == Material.field_151579_a;
     }
 
     @Override
     public boolean bridge$isLeaves(final IBlockState state, final World worldIn, final BlockPos pos) {
-        return state.getMaterial() == Material.LEAVES;
+        return state.func_185904_a() == Material.field_151584_j;
     }
 
     @Override
     public boolean birdge$isWood(final IBlockState state, final World worldIn, final BlockPos pos) {
-        return state.getMaterial() == Material.WOOD;
+        return state.func_185904_a() == Material.field_151575_d;
     }
     
     @Override
     public boolean bridge$canSustainPlant(final Block block, final World worldIn, final BlockPos pos, final EnumFacing direction, final Block plant) {
-        return block == Blocks.GRASS || block == Blocks.DIRT || block == Blocks.FARMLAND;
+        return block == Blocks.field_150349_c || block == Blocks.field_150346_d || block == Blocks.field_150458_ak;
     }
     
 }

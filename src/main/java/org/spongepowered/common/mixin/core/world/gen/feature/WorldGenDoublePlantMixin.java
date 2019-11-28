@@ -86,13 +86,13 @@ public abstract class WorldGenDoublePlantMixin extends WorldGeneratorMixin imple
             ((DoublePlant) this).getPossibleTypes().add(new WeightedObject<>((DoublePlantType) (Object) this.plantType, 1));
         }
         for (int i = 0; i < 8; ++i) {
-            final BlockPos next = position.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4),
+            final BlockPos next = position.func_177982_a(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4),
                     rand.nextInt(8) - rand.nextInt(8));
 
-            if (worldIn.isAirBlock(next) && (!worldIn.provider.isNether() || next.getY() < 254)
-                    && Blocks.DOUBLE_PLANT.canPlaceBlockAt(worldIn, next)) {
+            if (worldIn.func_175623_d(next) && (!worldIn.field_73011_w.func_177495_o() || next.func_177956_o() < 254)
+                    && Blocks.field_150398_cm.func_176196_c(worldIn, next)) {
                 final DoublePlantType type = impl$getType(VecHelper.toVector3i(next), rand);
-                Blocks.DOUBLE_PLANT.placeAt(worldIn, next,
+                Blocks.field_150398_cm.func_176491_a(worldIn, next,
                         (BlockDoublePlant.EnumPlantType) (Object) type, 2);
                 flag = true;
             }

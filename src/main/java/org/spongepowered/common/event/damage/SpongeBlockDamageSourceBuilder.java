@@ -66,13 +66,13 @@ public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<
             accessor.accessor$setDamageBypassesArmor();
         }
         if (this.scales) {
-            damageSource.setDifficultyScaled();
+            damageSource.func_76351_m();
         }
         if (this.explosion) {
-            damageSource.setExplosion();
+            damageSource.func_94540_d();
         }
         if (this.magical) {
-            damageSource.setMagicDamage();
+            damageSource.func_82726_p();
         }
         if (this.creative) {
             accessor.accessor$setDamageAllowedInCreativeMode();

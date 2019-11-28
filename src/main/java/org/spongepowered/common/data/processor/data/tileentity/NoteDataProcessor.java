@@ -54,14 +54,14 @@ public class NoteDataProcessor
 
     @Override
     protected boolean set(TileEntityNote entity, NotePitch value) {
-        entity.note = ((SpongeNotePitch) checkNotNull(value)).getByteId();
-        entity.markDirty();
+        entity.field_145879_a = ((SpongeNotePitch) checkNotNull(value)).getByteId();
+        entity.func_70296_d();
         return true;
     }
 
     @Override
     protected Optional<NotePitch> getVal(TileEntityNote entity) {
-        return Optional.of(NotePitchRegistryModule.getPitch(entity.note));
+        return Optional.of(NotePitchRegistryModule.getPitch(entity.field_145879_a));
     }
 
     @Override

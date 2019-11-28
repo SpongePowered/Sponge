@@ -36,7 +36,7 @@ public abstract class BlockConcretePowderMixin extends BlockMixin implements Dye
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$SetColorProperty(final CallbackInfo ci) {
-        this.bridge$setColorPropertyEnum(BlockConcretePowder.COLOR);
+        this.bridge$setColorPropertyEnum(BlockConcretePowder.field_192426_a);
     }
 
 }

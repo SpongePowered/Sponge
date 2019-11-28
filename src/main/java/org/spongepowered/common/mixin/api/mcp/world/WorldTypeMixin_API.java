@@ -68,14 +68,14 @@ public abstract class WorldTypeMixin_API implements GeneratorType {
         // Minecraft stores the generator settings as a string. For the flat
         // world, they use a custom format, for WorldType.CUSTOMIZED they use
         // a serialized JSON string
-        if (((WorldType) (Object) this) == WorldType.FLAT) {
-            String defaultSettings = FlatGeneratorInfo.getDefaultFlatGenerator().toString();
+        if (((WorldType) (Object) this) == WorldType.field_77138_c) {
+            String defaultSettings = FlatGeneratorInfo.func_82649_e().toString();
             return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS, defaultSettings);
         }
-        if (((WorldType) (Object) this) == WorldType.CUSTOMIZED) {
+        if (((WorldType) (Object) this) == WorldType.field_180271_f) {
             // They easiest way to go from ChunkProviderSettings to DataContainer is via json and NBT
             try {
-                return JsonDataFormat.serialize(ChunkGeneratorSettings.Factory.JSON_ADAPTER, new ChunkGeneratorSettings.Factory());
+                return JsonDataFormat.serialize(ChunkGeneratorSettings.Factory.field_177901_a, new ChunkGeneratorSettings.Factory());
             } catch (JsonParseException | IOException e) {
                 throw new AssertionError("Failed to serialize default settings of CUSTOMIZED world type", e);
             }

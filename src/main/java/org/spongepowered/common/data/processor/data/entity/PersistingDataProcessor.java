@@ -55,7 +55,7 @@ public class PersistingDataProcessor
 
     @Override
     protected Optional<Boolean> getVal(final EntityLiving entity) {
-        return Optional.of(entity.isNoDespawnRequired());
+        return Optional.of(entity.func_104002_bU());
     }
 
     @Override

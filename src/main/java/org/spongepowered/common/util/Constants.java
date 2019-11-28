@@ -183,9 +183,9 @@ public final class Constants {
          * Serialize this BlockPos into a short value
          */
         public static short blockPosToShort(final BlockPos pos) {
-            short serialized = (short) setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
-            serialized = (short) setNibble(serialized, pos.getY() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
-            serialized = (short) setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
+            short serialized = (short) setNibble(0, pos.func_177958_n() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+            serialized = (short) setNibble(serialized, pos.func_177956_o() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
+            serialized = (short) setNibble(serialized, pos.func_177952_p() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
             return serialized;
         }
 
@@ -193,9 +193,9 @@ public final class Constants {
          * Serialize this BlockPos into an int value
          */
         public static int blockPosToInt(final BlockPos pos) {
-            int serialized = setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
-            serialized = setNibble(serialized, pos.getY() & Constants.Chunk.Y_INT_MASK, 1, Constants.Chunk.NUM_INT_Y_BITS);
-            serialized = setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 7, Constants.Chunk.NUM_XZ_BITS);
+            int serialized = setNibble(0, pos.func_177958_n() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+            serialized = setNibble(serialized, pos.func_177956_o() & Constants.Chunk.Y_INT_MASK, 1, Constants.Chunk.NUM_INT_Y_BITS);
+            serialized = setNibble(serialized, pos.func_177952_p() & Constants.Chunk.XZ_MASK, 7, Constants.Chunk.NUM_XZ_BITS);
             return serialized;
         }
 
@@ -961,39 +961,39 @@ public final class Constants {
         public static final byte TAG_ANY_NUMERIC = 99;
 
         public static NBTTagCompound filterSpongeCustomData(final NBTTagCompound rootCompound) {
-            if (rootCompound.hasKey(Forge.FORGE_DATA, TAG_COMPOUND)) {
-                final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(Forge.FORGE_DATA);
-                if (forgeCompound.hasKey(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
+            if (rootCompound.func_150297_b(Forge.FORGE_DATA, TAG_COMPOUND)) {
+                final NBTTagCompound forgeCompound = rootCompound.func_74775_l(Forge.FORGE_DATA);
+                if (forgeCompound.func_150297_b(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
                     cleanseInnerCompound(forgeCompound);
                 }
-                if (forgeCompound.isEmpty()) {
-                    rootCompound.removeTag(Forge.FORGE_DATA);
+                if (forgeCompound.func_82582_d()) {
+                    rootCompound.func_82580_o(Forge.FORGE_DATA);
                 }
-            } else if (rootCompound.hasKey(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
+            } else if (rootCompound.func_150297_b(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
                 cleanseInnerCompound(rootCompound);
             }
             return rootCompound;
         }
 
         private static void cleanseInnerCompound(final NBTTagCompound compound) {
-            final NBTTagCompound inner = compound.getCompoundTag(Sponge.SPONGE_DATA);
-            if (inner.isEmpty()) {
-                compound.removeTag(Sponge.SPONGE_DATA);
+            final NBTTagCompound inner = compound.func_74775_l(Sponge.SPONGE_DATA);
+            if (inner.func_82582_d()) {
+                compound.func_82580_o(Sponge.SPONGE_DATA);
             }
         }
 
         public static List<Enchantment> getItemEnchantments(final net.minecraft.item.ItemStack itemStack) {
-            if (!itemStack.isItemEnchanted()) {
+            if (!itemStack.func_77948_v()) {
                 return Collections.emptyList();
             }
             final List<Enchantment> enchantments = Lists.newArrayList();
-            final NBTTagList list = itemStack.getEnchantmentTagList();
-            for (int i = 0; i < list.tagCount(); i++) {
-                final NBTTagCompound compound = list.getCompoundTagAt(i);
-                final short enchantmentId = compound.getShort(Item.ITEM_ENCHANTMENT_ID);
-                final short level = compound.getShort(Item.ITEM_ENCHANTMENT_LEVEL);
+            final NBTTagList list = itemStack.func_77986_q();
+            for (int i = 0; i < list.func_74745_c(); i++) {
+                final NBTTagCompound compound = list.func_150305_b(i);
+                final short enchantmentId = compound.func_74765_d(Item.ITEM_ENCHANTMENT_ID);
+                final short level = compound.func_74765_d(Item.ITEM_ENCHANTMENT_LEVEL);
 
-                final EnchantmentType enchantmentType = (EnchantmentType) net.minecraft.enchantment.Enchantment.getEnchantmentByID(enchantmentId);
+                final EnchantmentType enchantmentType = (EnchantmentType) net.minecraft.enchantment.Enchantment.func_185262_c(enchantmentId);
                 if (enchantmentType == null) {
                     continue;
                 }
@@ -1006,7 +1006,7 @@ public final class Constants {
             final NBTTagList nbttaglist = new NBTTagList();
 
             for (final double d1 : numbers) {
-                nbttaglist.appendTag(new NBTTagDouble(d1));
+                nbttaglist.func_74742_a(new NBTTagDouble(d1));
             }
 
             return nbttaglist;
@@ -1016,7 +1016,7 @@ public final class Constants {
             final NBTTagList nbttaglist = new NBTTagList();
 
             for (final float f : numbers) {
-                nbttaglist.appendTag(new NBTTagFloat(f));
+                nbttaglist.func_74742_a(new NBTTagFloat(f));
             }
 
             return nbttaglist;

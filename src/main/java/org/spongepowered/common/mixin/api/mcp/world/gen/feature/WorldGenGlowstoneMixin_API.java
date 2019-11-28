@@ -68,7 +68,7 @@ public abstract class WorldGenGlowstoneMixin_API extends WorldGenerator implemen
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
             y = this.api$height.getFlooredAmount(random);
-            generate(world, random, position.add(x, y, z));
+            func_180709_b(world, random, position.func_177982_a(x, y, z));
         }
     }
 

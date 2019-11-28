@@ -70,12 +70,12 @@ public abstract class ItemMixin implements ItemBridge, SpongeGameDictionaryEntry
 
     @Override
     public void bridge$gatherManipulators(final ItemStack itemStack, final List<DataManipulator<?, ?>> list) {
-        if (!itemStack.hasTagCompound()) {
+        if (!itemStack.func_77942_o()) {
             return;
         }
 
         final org.spongepowered.api.item.inventory.ItemStack spongeStack = ((org.spongepowered.api.item.inventory.ItemStack) itemStack);
-        if (itemStack.isItemEnchanted()) {
+        if (itemStack.func_77948_v()) {
             list.add(((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(EnchantmentData.class).get());
         }
         spongeStack.get(DisplayNameData.class).ifPresent(list::add);

@@ -48,24 +48,24 @@ import java.util.Optional;
 public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<DyeColor, Value<DyeColor>, DyeableData, ImmutableDyeableData> {
 
     public ItemDyeColorDataProcessor() {
-        super(x -> isDyeable(x.getItem()), Keys.DYE_COLOR);
+        super(x -> isDyeable(x.func_77973_b()), Keys.DYE_COLOR);
     }
 
     public static boolean isDyeable(Item item) {
-        if (item.equals(Items.DYE) || item.equals(Items.BED)) {
+        if (item.equals(Items.field_151100_aR) || item.equals(Items.field_151104_aV)) {
             return true;
         }
 
-        final Block block = Block.getBlockFromItem(item);
+        final Block block = Block.func_149634_a(item);
 
-        return block.equals(Blocks.WOOL)
-                || block.equals(Blocks.STANDING_BANNER)
-                || block.equals(Blocks.STAINED_GLASS)
-                || block.equals(Blocks.CARPET)
-                || block.equals(Blocks.STAINED_GLASS_PANE)
-                || block.equals(Blocks.STAINED_HARDENED_CLAY)
-                || block.equals(Blocks.CONCRETE)
-                || block.equals(Blocks.CONCRETE_POWDER);
+        return block.equals(Blocks.field_150325_L)
+                || block.equals(Blocks.field_180393_cK)
+                || block.equals(Blocks.field_150399_cn)
+                || block.equals(Blocks.field_150404_cg)
+                || block.equals(Blocks.field_150397_co)
+                || block.equals(Blocks.field_150406_ce)
+                || block.equals(Blocks.field_192443_dR)
+                || block.equals(Blocks.field_192444_dS);
     }
 
     @Override
@@ -75,24 +75,24 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
 
     @Override
     protected boolean set(ItemStack container, DyeColor value) {
-        Item item = container.getItem();
+        Item item = container.func_77973_b();
 
-        if(item.equals(Items.DYE) || item.equals(Items.BANNER)) {
-            container.setItemDamage(((EnumDyeColor) (Object) value).getDyeDamage());
+        if(item.equals(Items.field_151100_aR) || item.equals(Items.field_179564_cE)) {
+            container.func_77964_b(((EnumDyeColor) (Object) value).func_176767_b());
         } else {
-            container.setItemDamage(((EnumDyeColor) (Object) value).getMetadata());
+            container.func_77964_b(((EnumDyeColor) (Object) value).func_176765_a());
         }
         return true;
     }
 
     @Override
     protected Optional<DyeColor> getVal(ItemStack container) {
-        Item item = container.getItem();
+        Item item = container.func_77973_b();
 
-        if(item.equals(Items.DYE) || item.equals(Items.BANNER)) {
-            return Optional.of((DyeColor) (Object) EnumDyeColor.byDyeDamage(container.getItemDamage()));
+        if(item.equals(Items.field_151100_aR) || item.equals(Items.field_179564_cE)) {
+            return Optional.of((DyeColor) (Object) EnumDyeColor.func_176766_a(container.func_77952_i()));
         }
-        return Optional.of((DyeColor) (Object) EnumDyeColor.byMetadata(container.getItemDamage()));
+        return Optional.of((DyeColor) (Object) EnumDyeColor.func_176764_b(container.func_77952_i()));
     }
 
     @Override

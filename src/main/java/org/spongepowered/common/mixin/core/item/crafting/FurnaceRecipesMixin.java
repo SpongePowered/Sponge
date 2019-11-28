@@ -84,7 +84,7 @@ public abstract class FurnaceRecipesMixin implements SpongeAdditionalCatalogRegi
         } else {
             for (ItemStack nativeIngredient : this.nativeIngredientToCustomRecipe.keySet()) {
                 if (this.compareItemStacks(nativeIngredient, stack)) {
-                    cir.setReturnValue(ItemStack.EMPTY);
+                    cir.setReturnValue(ItemStack.field_190927_a);
                     return;
                 }
             }

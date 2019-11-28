@@ -62,13 +62,13 @@ public class StuckArrowsDataProcessor extends
     @Override
     protected boolean set(EntityLivingBase entity, Integer arrows) {
         checkArgument(arrows >= 0, "Stuck arrows must be greater than or equal to zero");
-        entity.setArrowCountInEntity(arrows);
+        entity.func_85034_r(arrows);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(EntityLivingBase entity) {
-        return Optional.of(entity.getArrowCountInEntity());
+        return Optional.of(entity.func_85035_bI());
     }
 
     @Override

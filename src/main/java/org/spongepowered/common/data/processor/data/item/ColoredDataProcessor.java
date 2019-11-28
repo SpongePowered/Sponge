@@ -60,9 +60,9 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
             if (!ColorUtil.hasColorInNbt(stack)) {
                 return DataTransactionResult.failNoData();
             }
-            final NBTTagCompound display = stack.getSubCompound(Constants.Item.ITEM_DISPLAY);
+            final NBTTagCompound display = stack.func_179543_a(Constants.Item.ITEM_DISPLAY);
             if(display != null) {
-                display.removeTag(Constants.Item.ITEM_COLOR);
+                display.func_82580_o(Constants.Item.ITEM_COLOR);
             }
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }

@@ -46,9 +46,9 @@ public abstract class VillageMixin {
         if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
-        final Chunk chunk = ((ChunkProviderBridge) this.world.getChunkProvider())
-            .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
-        if (chunk == null || chunk.isEmpty()) {
+        final Chunk chunk = ((ChunkProviderBridge) this.world.func_72863_F())
+            .bridge$getLoadedChunkWithoutMarkingActive(pos.func_177958_n() >> 4, pos.func_177952_p() >> 4);
+        if (chunk == null || chunk.func_76621_g()) {
             cir.setReturnValue(false);
         }
     }

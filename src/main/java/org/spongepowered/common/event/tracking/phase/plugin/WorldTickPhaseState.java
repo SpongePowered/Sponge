@@ -63,8 +63,8 @@ final class WorldTickPhaseState extends ListenerPhaseState<WorldTickContext> {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                     final LocatableBlock
                         block =
-                        new SpongeLocatableBlockBuilder().world((World) phaseContext.getWorld()).position(key.getX(), key.getY(),
-                            key.getZ()).build();
+                        new SpongeLocatableBlockBuilder().world((World) phaseContext.getWorld()).position(key.func_177958_n(), key.func_177956_o(),
+                            key.func_177952_p()).build();
                     frame.pushCause(container);
                     frame.pushCause(block);
                     final List<Entity> items = value.stream().map(entity -> (Entity) entity).collect(Collectors.toList());

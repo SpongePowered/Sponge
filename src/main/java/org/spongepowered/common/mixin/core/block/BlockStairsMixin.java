@@ -69,15 +69,15 @@ public abstract class BlockStairsMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableStairShapeData) {
             final BlockStairs.EnumShape stairShapeType = (BlockStairs.EnumShape) (Object) ((ImmutableStairShapeData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockStairs.SHAPE, stairShapeType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStairs.field_176310_M, stairShapeType));
         }
         if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockStairs.HALF, impl$convertType((BlockSlab.EnumBlockHalf) (Object) portionType)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStairs.field_176308_b, impl$convertType((BlockSlab.EnumBlockHalf) (Object) portionType)));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.withProperty(BlockStairs.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStairs.field_176309_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -86,14 +86,14 @@ public abstract class BlockStairsMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.STAIR_SHAPE)) {
             final BlockStairs.EnumShape stairShapeType = (BlockStairs.EnumShape) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockStairs.SHAPE, stairShapeType));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStairs.field_176310_M, stairShapeType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockStairs.HALF, impl$convertType((BlockSlab.EnumBlockHalf) value)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStairs.field_176308_b, impl$convertType((BlockSlab.EnumBlockHalf) value)));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.withProperty(BlockStairs.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockStairs.field_176309_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -101,25 +101,25 @@ public abstract class BlockStairsMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableStairShapeData impl$getStairShapeFor(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeStairShapeData.class,
-                (StairShape) (Object) blockState.getValue(BlockStairs.SHAPE));
+                (StairShape) (Object) blockState.func_177229_b(BlockStairs.field_176310_M));
     }
 
     private ImmutablePortionData impl$getPortionTypeFor(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
-                impl$convertType(blockState.getValue(BlockStairs.HALF)));
+                impl$convertType(blockState.func_177229_b(BlockStairs.field_176308_b)));
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.getValue(BlockStairs.FACING)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockStairs.field_176309_a)));
     }
 
     @SuppressWarnings("ConstantConditions")
     private PortionType impl$convertType(final BlockStairs.EnumHalf type) {
-        return (PortionType) (Object) BlockSlab.EnumBlockHalf.valueOf(type.getName().toUpperCase());
+        return (PortionType) (Object) BlockSlab.EnumBlockHalf.valueOf(type.func_176610_l().toUpperCase());
     }
 
     private BlockStairs.EnumHalf impl$convertType(final BlockSlab.EnumBlockHalf type) {
-        return BlockStairs.EnumHalf.valueOf(type.getName().toUpperCase());
+        return BlockStairs.EnumHalf.valueOf(type.func_176610_l().toUpperCase());
     }
 }

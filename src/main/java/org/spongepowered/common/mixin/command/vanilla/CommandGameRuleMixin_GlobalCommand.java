@@ -42,8 +42,8 @@ public abstract class CommandGameRuleMixin_GlobalCommand {
     @Redirect(method = "execute", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/GameRules;setOrCreateGameRule(Ljava/lang/String;Ljava/lang/String;)V"))
     private void globalCommand$setAllWorldGamerules(final GameRules gameRules, final String key, final String value) {
-        for (final WorldServer world : SpongeImpl.getServer().worlds) {
-            world.getGameRules().setOrCreateGameRule(key, value);
+        for (final WorldServer world : SpongeImpl.getServer().field_71305_c) {
+            world.func_82736_K().func_82764_b(key, value);
         }
     }
 

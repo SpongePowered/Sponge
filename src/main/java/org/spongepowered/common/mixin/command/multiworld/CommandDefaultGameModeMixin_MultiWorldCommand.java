@@ -51,13 +51,13 @@ public abstract class CommandDefaultGameModeMixin_MultiWorldCommand {
     private void multiWorldCommand$onSetDefaultGameType(final CommandDefaultGameMode self, final GameType type, final MinecraftServer server,
         final MinecraftServer server2, final ICommandSender sender, final String[] args) {
 
-        final World world = sender.getEntityWorld();
-        world.getWorldInfo().setGameType(type);
+        final World world = sender.func_130014_f_();
+        world.func_72912_H().func_76060_a(type);
 
-        if (server.getForceGamemode()) {
-            for (final EntityPlayer player : world.playerEntities) {
+        if (server.func_104056_am()) {
+            for (final EntityPlayer player : world.field_73010_i) {
                 if (!((EntityPlayerMPBridge) player).bridge$hasForcedGamemodeOverridePermission()) {
-                    player.setGameType(type);
+                    player.func_71033_a(type);
                 }
             }
         }

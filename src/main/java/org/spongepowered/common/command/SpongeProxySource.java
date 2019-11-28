@@ -90,7 +90,7 @@ public class SpongeProxySource implements ProxySource, CommandSourceBridge {
     @Override
     public void sendMessage(Text message) {
         checkNotNull(message, "message");
-        this.minecraft.sendMessage(SpongeTexts.toComponent(message));
+        this.minecraft.func_145747_a(SpongeTexts.toComponent(message));
     }
 
     @Override
@@ -106,7 +106,7 @@ public class SpongeProxySource implements ProxySource, CommandSourceBridge {
 
     @Override
     public String getName() {
-        return bridge$asICommandSender().getName();
+        return bridge$asICommandSender().func_70005_c_();
     }
 
     @Override
@@ -197,12 +197,12 @@ public class SpongeProxySource implements ProxySource, CommandSourceBridge {
 
         @Override
         public Location<World> getLocation() {
-            return new Location<>((World) this.minecraft.getEntityWorld(), VecHelper.toVector3d(this.minecraft.getPositionVector()));
+            return new Location<>((World) this.minecraft.func_130014_f_(), VecHelper.toVector3d(this.minecraft.func_174791_d()));
         }
 
         @Override
         public World getWorld() {
-            return (World) this.minecraft.getEntityWorld();
+            return (World) this.minecraft.func_130014_f_();
         }
     }
 }

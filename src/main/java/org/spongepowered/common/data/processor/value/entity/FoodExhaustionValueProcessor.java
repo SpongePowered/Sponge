@@ -55,13 +55,13 @@ public class FoodExhaustionValueProcessor extends AbstractSpongeValueProcessor<E
 
     @Override
     protected boolean set(final EntityPlayer container, final Double value) {
-        ((FoodStatsAccessor) container.getFoodStats()).accessor$setFoodExhaustionLevel(value.floatValue());
+        ((FoodStatsAccessor) container.func_71024_bL()).accessor$setFoodExhaustionLevel(value.floatValue());
         return true;
     }
 
     @Override
     protected Optional<Double> getVal(final EntityPlayer container) {
-        return Optional.of((double) ((FoodStatsAccessor) container.getFoodStats()).accessor$getFoodExhaustionLevel());
+        return Optional.of((double) ((FoodStatsAccessor) container.func_71024_bL()).accessor$getFoodExhaustionLevel());
     }
 
     @Override

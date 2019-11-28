@@ -58,7 +58,7 @@ public class RabbitDataProcessor
     @Override
     protected boolean set(EntityRabbit entity, RabbitType value) {
         if (value instanceof SpongeRabbitType) {
-            entity.setRabbitType(((SpongeRabbitType) value).type);
+            entity.func_175529_r(((SpongeRabbitType) value).type);
             return true;
         }
         return false;
@@ -66,7 +66,7 @@ public class RabbitDataProcessor
 
     @Override
     protected Optional<RabbitType> getVal(EntityRabbit entity) {
-        return Optional.ofNullable(RabbitTypeRegistryModule.RABBIT_IDMAP.get(entity.getRabbitType()));
+        return Optional.ofNullable(RabbitTypeRegistryModule.RABBIT_IDMAP.get(entity.func_175531_cl()));
     }
 
     @Override

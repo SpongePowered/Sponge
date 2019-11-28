@@ -51,7 +51,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
     protected Optional<Banner> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(banner1 -> {
             if (!container.contains(Constants.TileEntity.Banner.BASE) || !container.contains(Constants.TileEntity.Banner.PATTERNS)) {
-                ((TileEntity) banner1).invalidate();
+                ((TileEntity) banner1).func_145843_s();
                 return Optional.empty();
             }
             final BannerData bannerData = new SpongeBannerData(); // TODO when banner data is implemented.
@@ -69,7 +69,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
             patternsList.forEach(patternLayers::add);
             bannerData.set(patternLayers);
             banner1.offer(bannerData);
-            ((TileEntityBanner) banner1).validate();
+            ((TileEntityBanner) banner1).func_145829_t();
             return Optional.of(banner1);
         });
 

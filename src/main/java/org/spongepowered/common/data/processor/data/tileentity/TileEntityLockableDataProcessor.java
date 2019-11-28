@@ -57,20 +57,20 @@ public final class TileEntityLockableDataProcessor
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        tile.setLockCode(LockCode.EMPTY_CODE);
+        tile.func_174892_a(LockCode.field_180162_a);
         return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
     }
 
     @Override
     protected boolean set(TileEntityLockable tile, String value) {
-        tile.setLockCode(value.length() == 0 ? LockCode.EMPTY_CODE : new LockCode(value));
+        tile.func_174892_a(value.length() == 0 ? LockCode.field_180162_a : new LockCode(value));
         return true;
     }
 
     @Override
     protected Optional<String> getVal(TileEntityLockable tile) {
-        if (tile.isLocked()) {
-            return Optional.of(tile.getLockCode().getLock());
+        if (tile.func_174893_q_()) {
+            return Optional.of(tile.func_174891_i().func_180159_b());
         }
         return Optional.empty();
     }

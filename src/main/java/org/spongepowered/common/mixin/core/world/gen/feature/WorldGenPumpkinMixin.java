@@ -51,12 +51,12 @@ public abstract class WorldGenPumpkinMixin extends WorldGeneratorMixin {
         final int n = ((Pumpkin) this).getPumpkinsPerChunk().getFlooredAmount(rand);
         for (int i = 0; i < n; ++i) {
             final BlockPos blockpos1 =
-                    p_180709_3_.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
+                    p_180709_3_.func_177982_a(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
 
-            if (worldIn.isAirBlock(blockpos1) && worldIn.getBlockState(blockpos1.down()).getBlock() == Blocks.GRASS
-                    && Blocks.PUMPKIN.canPlaceBlockAt(worldIn, blockpos1)) {
-                worldIn.setBlockState(blockpos1,
-                        Blocks.PUMPKIN.getDefaultState().withProperty(BlockHorizontal.FACING, EnumFacing.Plane.HORIZONTAL.random(rand)), 2);
+            if (worldIn.func_175623_d(blockpos1) && worldIn.func_180495_p(blockpos1.func_177977_b()).func_177230_c() == Blocks.field_150349_c
+                    && Blocks.field_150423_aK.func_176196_c(worldIn, blockpos1)) {
+                worldIn.func_180501_a(blockpos1,
+                        Blocks.field_150423_aK.func_176223_P().func_177226_a(BlockHorizontal.field_185512_D, EnumFacing.Plane.HORIZONTAL.func_179518_a(rand)), 2);
             }
         }
 

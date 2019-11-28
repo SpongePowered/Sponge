@@ -61,7 +61,7 @@ public abstract class WorldGenVinesMixin_API extends WorldGenerator implements V
         for (int i = 0; i < n; i++) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getX());
-            generate(world, random, position.add(x, 128, z));
+            func_180709_b(world, random, position.func_177982_a(x, 128, z));
         }
     }
 

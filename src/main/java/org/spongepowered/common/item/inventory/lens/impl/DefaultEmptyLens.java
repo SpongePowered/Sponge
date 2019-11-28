@@ -78,7 +78,7 @@ public class DefaultEmptyLens implements Lens {
 
     @Override
     public ItemStack getStack(final Fabric inv, final int ordinal) {
-        return ItemStack.EMPTY;
+        return ItemStack.field_190927_a;
     }
     
     @Override

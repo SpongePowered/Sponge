@@ -42,7 +42,7 @@ public abstract class EntityAgeableMixin_Activation extends EntityMixin_Activati
     public void activation$inactiveTick() {
         super.activation$inactiveTick();
 
-        if (this.world.isRemote) {
+        if (this.world.field_72995_K) {
             this.setScaleForAge(this.isChild());
         } else {
             int i = this.getGrowingAge();

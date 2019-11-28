@@ -57,7 +57,7 @@ public class SpongeUserListWhitelist extends UserListWhitelist {
     }
 
     @Override
-    public String[] getKeys() {
+    public String[] func_152685_a() {
         final List<String> names = new ArrayList<>();
         for (final GameProfile profile : getService().getWhitelistedProfiles()) {
             profile.getName().ifPresent(names::add);
@@ -77,13 +77,13 @@ public class SpongeUserListWhitelist extends UserListWhitelist {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean func_152690_d() {
         return getService().getWhitelistedProfiles().isEmpty();
     }
 
     @Override
     @Nullable
-    public com.mojang.authlib.GameProfile getByName(final String profileName) {
+    public com.mojang.authlib.GameProfile func_152706_a(final String profileName) {
         for (final GameProfile profile : Sponge.getServiceManager().provideUnchecked(WhitelistService.class).getWhitelistedProfiles()) {
             if (profile.getName().isPresent() && profile.getName().get().equals(profileName)) {
                 return (com.mojang.authlib.GameProfile) profile;

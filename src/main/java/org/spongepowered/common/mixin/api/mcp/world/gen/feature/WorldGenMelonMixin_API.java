@@ -58,13 +58,13 @@ public abstract class WorldGenMelonMixin_API extends WorldGeneratorMixin impleme
         final int n = this.api$count.getFlooredAmount(random);
         final int x = random.nextInt(size.getX());
         final int z = random.nextInt(size.getZ());
-        final int y = apiImpl$nextInt(random, Math.min(world.getHeight(position.add(x, 0, z)).getY() * 2, 255));
-        position = position.add(x, y, z);
+        final int y = apiImpl$nextInt(random, Math.min(world.func_175645_m(position.func_177982_a(x, 0, z)).func_177956_o() * 2, 255));
+        position = position.func_177982_a(x, y, z);
         for (int i = 0; i < n; ++i) {
-            final BlockPos blockpos1 = position.add(random.nextInt(8) - random.nextInt(8), random.nextInt(4) - random.nextInt(4), random.nextInt(8) - random.nextInt(8));
+            final BlockPos blockpos1 = position.func_177982_a(random.nextInt(8) - random.nextInt(8), random.nextInt(4) - random.nextInt(4), random.nextInt(8) - random.nextInt(8));
 
-            if (Blocks.MELON_BLOCK.canPlaceBlockAt(world, blockpos1) && world.getBlockState(blockpos1.down()).getBlock() == Blocks.GRASS) {
-                world.setBlockState(blockpos1, Blocks.MELON_BLOCK.getDefaultState(), 2);
+            if (Blocks.field_150440_ba.func_176196_c(world, blockpos1) && world.func_180495_p(blockpos1.func_177977_b()).func_177230_c() == Blocks.field_150349_c) {
+                world.func_180501_a(blockpos1, Blocks.field_150440_ba.func_176223_P(), 2);
             }
         }
     }

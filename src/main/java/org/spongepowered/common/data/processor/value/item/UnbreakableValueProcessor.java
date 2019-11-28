@@ -45,7 +45,7 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
 
     @Override
     public boolean supports(ItemStack container) {
-        return container.getItem().isDamageable();
+        return container.func_77973_b().func_77645_m();
     }
 
     @Override
@@ -56,19 +56,19 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
     @Override
     public boolean set(ItemStack container, Boolean value) {
         if (value) {
-            container.setItemDamage(0);
+            container.func_77964_b(0);
         }
-        if (!container.hasTagCompound()) {
-            container.setTagCompound(new NBTTagCompound());
+        if (!container.func_77942_o()) {
+            container.func_77982_d(new NBTTagCompound());
         }
-        container.getTagCompound().setBoolean(Constants.Item.ITEM_UNBREAKABLE, value);
+        container.func_77978_p().func_74757_a(Constants.Item.ITEM_UNBREAKABLE, value);
         return true;
     }
 
     @Override
     public Optional<Boolean> getVal(ItemStack container) {
-        if (container.hasTagCompound() && container.getTagCompound().hasKey(Constants.Item.ITEM_UNBREAKABLE)) {
-            return Optional.of(container.getTagCompound().getBoolean(Constants.Item.ITEM_UNBREAKABLE));
+        if (container.func_77942_o() && container.func_77978_p().func_74764_b(Constants.Item.ITEM_UNBREAKABLE)) {
+            return Optional.of(container.func_77978_p().func_74767_n(Constants.Item.ITEM_UNBREAKABLE));
         }
         return Optional.of(false);
     }

@@ -57,27 +57,27 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     @Override
     protected boolean set(final ItemStack container, final Text value) {
         final String legacy = SpongeTexts.toLegacy(value);
-        if (container.getItem() == Items.WRITTEN_BOOK) {
-            container.setTagInfo(Constants.Item.Book.ITEM_BOOK_TITLE, new NBTTagString(legacy));
+        if (container.func_77973_b() == Items.field_151164_bB) {
+            container.func_77983_a(Constants.Item.Book.ITEM_BOOK_TITLE, new NBTTagString(legacy));
         } else {
-            container.setStackDisplayName(legacy);
+            container.func_151001_c(legacy);
         }
         return true;
     }
 
     @Override
     protected Optional<Text> getVal(final ItemStack container) {
-        if (container.getItem() == Items.WRITTEN_BOOK) {
-            final NBTTagCompound mainCompound = container.getTagCompound();
+        if (container.func_77973_b() == Items.field_151164_bB) {
+            final NBTTagCompound mainCompound = container.func_77978_p();
             if (mainCompound == null) {
                 return Optional.empty(); // Basically, this book wasn't initialized properly.
             }
-            final String titleString = mainCompound.getString(Constants.Item.Book.ITEM_BOOK_TITLE);
+            final String titleString = mainCompound.func_74779_i(Constants.Item.Book.ITEM_BOOK_TITLE);
             return Optional.of(SpongeTexts.fromLegacy(titleString));
         }
-        final NBTTagCompound mainCompound = container.getSubCompound(Constants.Item.ITEM_DISPLAY);
-        if (mainCompound != null && mainCompound.hasKey(Constants.Item.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
-            final String displayString = mainCompound.getString(Constants.Item.ITEM_DISPLAY_NAME);
+        final NBTTagCompound mainCompound = container.func_179543_a(Constants.Item.ITEM_DISPLAY);
+        if (mainCompound != null && mainCompound.func_150297_b(Constants.Item.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
+            final String displayString = mainCompound.func_74779_i(Constants.Item.ITEM_DISPLAY_NAME);
             return Optional.of(SpongeTexts.fromLegacy(displayString));
         }
         return Optional.empty();
@@ -95,7 +95,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
             final Optional<Text> optional = getValueFromContainer(container);
             if (optional.isPresent()) {
                 try {
-                    ((ItemStack) container).clearCustomName();
+                    ((ItemStack) container).func_135074_t();
                     return builder.replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (final Exception e) {
                     SpongeImpl.getLogger().error("There was an issue removing the displayname from an itemstack!", e);

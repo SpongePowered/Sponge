@@ -61,7 +61,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
                                                final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
-            final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.getChunk(notifyPos);
+            final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.func_175726_f(notifyPos);
             mixinChunk.bridge$addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
         });
     }
@@ -75,7 +75,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
             final Block block = (Block) original.getState().getType();
             final BlockPos changedBlockPos = original.getBlockPos();
             original.getWorldServer().ifPresent(worldServer -> {
-                final ChunkBridge changedMixinChunk = (ChunkBridge) worldServer.getChunk(changedBlockPos);
+                final ChunkBridge changedMixinChunk = (ChunkBridge) worldServer.func_175726_f(changedBlockPos);
                 changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
                 // and check for owner, if it's available, only if the block change was placement
                 // We don't want to set owners on modify because that would mean the current context owner

@@ -87,8 +87,8 @@ public abstract class WorldGenFlowersMixin_API extends WorldGenerator implements
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
-            y = apiImpl$nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() + 32);
-            blockpos = chunkPos.add(x, y, z);
+            y = apiImpl$nextInt(random, world.func_175645_m(chunkPos.func_177982_a(x, 0, z)).func_177956_o() + 32);
+            blockpos = chunkPos.func_177982_a(x, y, z);
             if(this.api$override != null) {
                 final Location<Extent> pos = new Location<>(extent, VecHelper.toVector3i(blockpos));
                 type = this.api$override.apply(pos);
@@ -100,11 +100,11 @@ public abstract class WorldGenFlowersMixin_API extends WorldGenerator implements
                 type = result.get(0);
             }
             final BlockFlower.EnumFlowerType enumflowertype = (BlockFlower.EnumFlowerType) (Object) type;
-            final BlockFlower blockflower = enumflowertype.getBlockType().getBlock();
+            final BlockFlower blockflower = enumflowertype.func_176964_a().func_180346_a();
 
-            if (enumflowertype != null && blockflower.getDefaultState().getMaterial() != Material.AIR) {
+            if (enumflowertype != null && blockflower.func_176223_P().func_185904_a() != Material.field_151579_a) {
                 setGeneratedBlock(blockflower, enumflowertype);
-                generate(world, random, blockpos);
+                func_180709_b(world, random, blockpos);
             }
         }
     }

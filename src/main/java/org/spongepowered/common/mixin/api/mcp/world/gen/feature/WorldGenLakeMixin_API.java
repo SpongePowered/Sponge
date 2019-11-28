@@ -71,7 +71,7 @@ public abstract class WorldGenLakeMixin_API extends WorldGenerator implements La
             final int x = random.nextInt(size.getX());
             final int y = this.api$height.getFlooredAmount(random);
             final int z = random.nextInt(size.getZ());
-            generate(world, random, new BlockPos(x + min.getX(), y + min.getY(), z + min.getZ()));
+            func_180709_b(world, random, new BlockPos(x + min.getX(), y + min.getY(), z + min.getZ()));
         }
     }
 
@@ -86,7 +86,7 @@ public abstract class WorldGenLakeMixin_API extends WorldGenerator implements La
 
     @Override
     public BlockState getLiquidType() {
-        return (BlockState) this.block.getDefaultState();
+        return (BlockState) this.block.func_176223_P();
     }
 
     @Override

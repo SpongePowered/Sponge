@@ -52,10 +52,10 @@ public abstract class MinecraftServerMixin_MapOptimization {
         // Mods, such as TwilightForest, may add themselves to this list when ticking which will cause a CME.
         if (!SpongeImplHooks.isVanilla()) {
             data = new ArrayList<>(
-                ((MapStorageAccessor) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList());
+                ((MapStorageAccessor) (WorldManager.getWorldByDimensionId(0).orElse(null).func_175693_T())).getLoadedDataList());
         }
         else {
-            data = ((MapStorageAccessor) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList();
+            data = ((MapStorageAccessor) (WorldManager.getWorldByDimensionId(0).orElse(null).func_175693_T())).getLoadedDataList();
         }
 
         data

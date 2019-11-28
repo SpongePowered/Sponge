@@ -168,12 +168,12 @@ class PaginationCalculator {
         for(ITextComponent child : children) {
             PrimitiveIterator.OfInt i_it;
             if(child instanceof TextComponentString || child instanceof TextComponentTranslation) {
-                i_it = child.getUnformattedComponentText().codePoints().iterator();
+                i_it = child.func_150261_e().codePoints().iterator();
             } else {
                 continue;
             }
 
-            boolean bold = child.getStyle().getBold();
+            boolean bold = child.func_150256_b().func_150223_b();
 
             Integer cp;
             boolean newLine = false;

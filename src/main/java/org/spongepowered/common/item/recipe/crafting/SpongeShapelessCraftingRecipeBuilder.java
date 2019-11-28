@@ -48,7 +48,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
         implements ShapelessCraftingRecipe.Builder.EndStep, ShapelessCraftingRecipe.Builder.ResultStep {
 
     private ItemStackSnapshot exemplaryResult = ItemStackSnapshot.NONE;
-    private NonNullList<Ingredient> ingredients = NonNullList.create();
+    private NonNullList<Ingredient> ingredients = NonNullList.func_191196_a();
     private String groupName = "";
 
     @Override
@@ -98,7 +98,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
         checkState(this.exemplaryResult != null && this.exemplaryResult != ItemStackSnapshot.NONE, "The result is not set.");
         checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
         // Copy the ingredient list
-        final NonNullList<Ingredient> ingredients = NonNullList.create();
+        final NonNullList<Ingredient> ingredients = NonNullList.func_191196_a();
         ingredients.addAll(this.ingredients);
         return ((ShapelessCraftingRecipe) new SpongeShapelessRecipe(plugin.getId() + ':' + id, this.groupName,
                 ItemStackUtil.toNative(this.exemplaryResult.createStack()), ingredients));

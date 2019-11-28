@@ -40,7 +40,7 @@ public class SpongeDaylightBuilder extends AbstractTileBuilder<DaylightDetector>
     @Override
     protected Optional<DaylightDetector> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(daylightDetector -> {
-            ((TileEntityDaylightDetector) daylightDetector).validate();
+            ((TileEntityDaylightDetector) daylightDetector).func_145829_t();
             return daylightDetector;
         });
     }

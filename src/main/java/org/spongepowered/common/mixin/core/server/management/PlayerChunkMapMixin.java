@@ -73,8 +73,8 @@ public abstract class PlayerChunkMapMixin implements PlayerChunkMapBridge {
 
         if (((WorldServerBridge) this.world).bridge$getChunkGCTickInterval() <= 0
                 || ((WorldServerBridge) this.world).bridge$getChunkUnloadDelay() <= 0) {
-            chunkProvider.queueUnload(chunk);
-        } else if (!((ChunkBridge) chunk).bridge$isPersistedChunk() && this.world.provider.canDropChunk(chunk.x, chunk.z)) {
+            chunkProvider.func_189549_a(chunk);
+        } else if (!((ChunkBridge) chunk).bridge$isPersistedChunk() && this.world.field_73011_w.func_186056_c(chunk.field_76635_g, chunk.field_76647_h)) {
             ((ChunkBridge) chunk).bridge$setScheduledForUnload(System.currentTimeMillis());
         }
     }

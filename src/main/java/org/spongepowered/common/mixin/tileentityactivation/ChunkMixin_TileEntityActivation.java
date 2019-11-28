@@ -49,14 +49,14 @@ public class ChunkMixin_TileEntityActivation {
     @Inject(method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V", at = @At("RETURN"))
     private void tileActivationImpl$onAddTileEntityActivateCheck(
         final BlockPos pos, final TileEntity tileEntityIn, final CallbackInfo ci) {
-        if (tileEntityIn.getWorld() == null) {
-            tileEntityIn.setWorld(this.world);
+        if (tileEntityIn.func_145831_w() == null) {
+            tileEntityIn.func_145834_a(this.world);
         }
         if (!(tileEntityIn instanceof ITickable)) {
             return;
         }
 
-        if (((WorldInfoBridge) this.world.getWorldInfo()).bridge$isValid()) {
+        if (((WorldInfoBridge) this.world.func_72912_H()).bridge$isValid()) {
             final ActivationCapability spongeTile = (ActivationCapability) tileEntityIn;
             final ChunkBridge spongeChunk = (ChunkBridge) this;
             if (spongeChunk.bridge$isPersistedChunk()) {

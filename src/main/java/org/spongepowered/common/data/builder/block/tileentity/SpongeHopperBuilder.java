@@ -44,14 +44,14 @@ public class SpongeHopperBuilder extends SpongeLockableBuilder<Hopper> {
     protected Optional<Hopper> buildContent(final DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(hopper -> {
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((TileEntityHopper) hopper).setCustomName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
+                ((TileEntityHopper) hopper).func_190575_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
             if (!container.contains(Keys.COOLDOWN.getQuery())) {
-                ((TileEntityHopper) hopper).invalidate();
+                ((TileEntityHopper) hopper).func_145843_s();
                 return Optional.empty();
             }
             ((TileEntityHopperAccessor) hopper).accessor$setTransferCooldown(container.getInt(Keys.COOLDOWN.getQuery()).get());
-            ((TileEntityHopper) hopper).validate();
+            ((TileEntityHopper) hopper).func_145829_t();
             return Optional.of(hopper);
         });
     }

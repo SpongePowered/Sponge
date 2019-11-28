@@ -74,7 +74,7 @@ public abstract class CommandPardonIpMixin {
             this.address = null;
         }
 
-        banList.removeEntry((String) address);
+        banList.func_152684_c((String) address);
     }
 
 }

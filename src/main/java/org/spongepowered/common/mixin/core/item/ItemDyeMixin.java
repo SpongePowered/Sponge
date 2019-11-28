@@ -82,7 +82,7 @@ public abstract class ItemDyeMixin extends ItemMixin {
     )
     private static void onGrowableVanilla(IGrowable iGrowable, World worldIn, Random rand, BlockPos pos, IBlockState blockState, ItemStack stack, World sameWorld, BlockPos target) {
         if (((WorldBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_GROW) {
-            iGrowable.grow(worldIn, rand, pos, blockState);
+            iGrowable.func_176474_b(worldIn, rand, pos, blockState);
             return;
         }
 
@@ -98,7 +98,7 @@ public abstract class ItemDyeMixin extends ItemMixin {
                 .block(blockState)
                 .pos(pos)) {
                 context.buildAndSwitch();
-                iGrowable.grow(worldIn, rand, pos, blockState);
+                iGrowable.func_176474_b(worldIn, rand, pos, blockState);
             }
         }
 

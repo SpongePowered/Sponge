@@ -65,7 +65,7 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Rec
     }
 
     public Optional<RecordType> getByItem(Item itemType) {
-        final ResourceLocation resourceLocation = Item.REGISTRY.getNameForObject(itemType);
+        final ResourceLocation resourceLocation = Item.field_150901_e.func_177774_c(itemType);
         if (resourceLocation == null) {
             return Optional.empty();
         }
@@ -97,11 +97,11 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Rec
 
     @CustomCatalogRegistration
     public void customRegistration() {
-        for (Map.Entry<SoundEvent, ItemRecord> recordEntry : ((ItemRecordAccessor) Items.RECORD_CAT).accessor$getRecords().entrySet()) {
+        for (Map.Entry<SoundEvent, ItemRecord> recordEntry : ((ItemRecordAccessor) Items.field_151093_ce).accessor$getRecords().entrySet()) {
             final ItemRecord recordItem = recordEntry.getValue();
-            final String key = Item.REGISTRY.getNameForObject(recordItem).toString();
+            final String key = Item.field_150901_e.func_177774_c(recordItem).toString();
             if(!mappings.containsKey(key)) {
-                this.add(new SpongeRecordType(key, recordItem.getTranslationKey(), (ItemType) recordItem, (SoundType) ((ItemRecordAccessor) recordItem).accessor$getSoundEvent()));
+                this.add(new SpongeRecordType(key, recordItem.func_77658_a(), (ItemType) recordItem, (SoundType) ((ItemRecordAccessor) recordItem).accessor$getSoundEvent()));
             }
         }
 

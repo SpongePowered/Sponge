@@ -49,13 +49,13 @@ public class FallTimeValueProcessor extends AbstractSpongeValueProcessor<EntityF
 
     @Override
     protected boolean set(EntityFallingBlock container, Integer value) {
-        container.fallTime = value;
+        container.field_145812_b = value;
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(EntityFallingBlock container) {
-        return Optional.of(container.fallTime);
+        return Optional.of(container.field_145812_b);
     }
 
     @Override

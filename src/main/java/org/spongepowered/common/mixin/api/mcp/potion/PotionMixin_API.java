@@ -56,7 +56,7 @@ public abstract class PotionMixin_API implements PotionEffectType {
     @Intrinsic
     public String potion$getId() {
         if (this.spongeResourceID == null) {
-            final ResourceLocation location = REGISTRY.getNameForObject((Potion) (Object) this);
+            final ResourceLocation location = REGISTRY.func_177774_c((Potion) (Object) this);
             if (location == null) {
                 this.spongeResourceID = "unknown";
             } else {

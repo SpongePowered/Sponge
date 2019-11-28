@@ -48,7 +48,7 @@ public abstract class MapGenVillageMixin_API extends MapGenStructure implements 
     public void populate(final org.spongepowered.api.world.World worldIn, final Extent extent, final Random random) {
         final Vector3i min = extent.getBlockMin();
         final World world = (World) worldIn;
-        generateStructure(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
+        func_175794_a(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
     }
 
 }

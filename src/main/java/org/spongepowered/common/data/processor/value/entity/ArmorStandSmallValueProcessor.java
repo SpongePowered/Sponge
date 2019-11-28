@@ -56,7 +56,7 @@ public class ArmorStandSmallValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Optional<Boolean> getVal(final EntityArmorStand container) {
-        return Optional.of(container.isSmall());
+        return Optional.of(container.func_175410_n());
     }
 
     @Override

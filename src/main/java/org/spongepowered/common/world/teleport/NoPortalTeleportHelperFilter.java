@@ -42,11 +42,11 @@ public class NoPortalTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return ((IBlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeFloorMaterial(blockState);
+        return ((IBlockState) blockState).func_185904_a() != Material.field_151567_E && super.isSafeFloorMaterial(blockState);
     }
 
     @Override
     public boolean isSafeBodyMaterial(BlockState blockState) {
-        return ((IBlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeBodyMaterial(blockState);
+        return ((IBlockState) blockState).func_185904_a() != Material.field_151567_E && super.isSafeBodyMaterial(blockState);
     }
 }

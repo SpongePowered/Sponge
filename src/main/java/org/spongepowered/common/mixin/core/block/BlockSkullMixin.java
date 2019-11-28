@@ -61,11 +61,11 @@ public abstract class BlockSkullMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDropData) {
             final boolean shouldDrop = ((ImmutableDropData) manipulator).willDrop().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockSkull.NODROP, !shouldDrop));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockSkull.field_176417_b, !shouldDrop));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockSkull.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockSkull.field_176418_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -74,22 +74,22 @@ public abstract class BlockSkullMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.SHOULD_DROP)) {
             final boolean shouldDrop = (Boolean) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockSkull.NODROP, !shouldDrop));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockSkull.field_176417_b, !shouldDrop));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockSkull.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockSkull.field_176418_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableDropData impl$getShouldDropFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDropData.class, !blockState.getValue(BlockSkull.NODROP));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDropData.class, !blockState.func_177229_b(BlockSkull.field_176417_b));
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.getValue(BlockSkull.FACING)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockSkull.field_176418_a)));
     }
 
 }

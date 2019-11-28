@@ -54,7 +54,7 @@ public class AreaEffectCloudWaitTimeProcessor extends AbstractSpongeValueProcess
 
     @Override
     protected boolean set(EntityAreaEffectCloud container, Integer value) {
-        container.setWaitTime(value);
+        container.func_184485_d(value);
         return true;
     }
 

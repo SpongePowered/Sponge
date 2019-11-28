@@ -154,9 +154,9 @@ public class RedstoneWireTurbo {
      * reorganized.
     */
     public static BlockPos[] computeAllNeighbors(final BlockPos pos) {
-        final int x = pos.getX();
-        final int y = pos.getY();
-        final int z = pos.getZ();
+        final int x = pos.func_177958_n();
+        final int y = pos.func_177956_o();
+        final int z = pos.func_177952_p();
         final BlockPos[] n = new BlockPos[24];
 
         // Immediate neighbors, in the same order as 
@@ -318,13 +318,13 @@ public class RedstoneWireTurbo {
      */
     private void identifyNode(final World worldIn, final UpdateNode upd1) {
         final BlockPos pos = upd1.self;
-        final IBlockState oldState = worldIn.getBlockState(pos);
+        final IBlockState oldState = worldIn.func_180495_p(pos);
         upd1.currentState = oldState;
 
         // Some neighbors of redstone wire are other kinds of blocks.
         // These need to receive block updates to inform them that
         // redstone wire values have changed.                              
-        final Block block = oldState.getBlock();
+        final Block block = oldState.func_177230_c();
         if (block != this.wire) {
             // Mark this block as not redstone wire and therefore
             // requiring updates
@@ -343,10 +343,10 @@ public class RedstoneWireTurbo {
         // others are processed internally by the breadth first search
         // algorithm.  To preserve this game behavior, this check must
         // be replicated here.
-        if (!this.wire.canPlaceBlockAt(worldIn, pos)) {
+        if (!this.wire.func_176196_c(worldIn, pos)) {
             // Pop off the redstone dust
-            this.wire.dropBlockAsItem(worldIn, pos, oldState, 0);
-            worldIn.setBlockToAir(pos);
+            this.wire.func_176226_b(worldIn, pos, oldState, 0);
+            worldIn.func_175698_g(pos);
             
             // Mark this position as not being redstone wire
             upd1.type = UpdateNode.Type.OTHER;
@@ -685,7 +685,7 @@ public class RedstoneWireTurbo {
                     // already keeping track of all of the neighbor positions
                     // that need to be updated.  All on its own, handling neighbors 
                     // this way reduces block updates by 1/3 (24 instead of 36).
-                    worldIn.neighborChanged(upd.self, this.wire, upd.parent);
+                    worldIn.func_190524_a(upd.self, this.wire, upd.parent);
                 }
             }
 
@@ -857,7 +857,7 @@ public class RedstoneWireTurbo {
     private IBlockState calculateCurrentChanges(final World worldIn, final UpdateNode upd)
     {
         IBlockState state = upd.currentState;
-        final int i = state.getValue(BlockRedstoneWire.POWER).intValue();
+        final int i = state.func_177229_b(BlockRedstoneWire.field_176351_O).intValue();
         int j = 0;
         j = getMaxCurrentStrength(upd, j);
         int l = 0;
@@ -868,7 +868,7 @@ public class RedstoneWireTurbo {
         // elsewhere in Minecraft into this accelerator.  So sadly, we must
         // suffer the performance hit of this very expensive call.  If there
         // is consistency to what this call returns, we may be able to cache it.
-        final int k = worldIn.getRedstonePowerFromNeighbors(upd.self);
+        final int k = worldIn.func_175687_A(upd.self);
         ((BlockRedstoneWireAccessor_Eigen) this.wire).accessor$setCanProvidePower(true);
 
         // The variable 'k' holds the maximum redstone power value of any adjacent blocks.
@@ -887,7 +887,7 @@ public class RedstoneWireTurbo {
             // position directly above the node being calculated is always
             // at index 1.
             UpdateNode center_up = upd.neighbor_nodes[1];
-            boolean center_up_is_cube = center_up.currentState.isNormalCube();
+            boolean center_up_is_cube = center_up.currentState.func_185915_l();
 
             for (int m=0; m<4; m++) {
                 // Get the neighbor array index of each of the four cardinal
@@ -901,7 +901,7 @@ public class RedstoneWireTurbo {
 
                 // Also check the positions above and below the cardinal
                 // neighbors
-                boolean neighbor_is_cube = neighbor.currentState.isNormalCube();
+                boolean neighbor_is_cube = neighbor.currentState.func_185915_l();
                 if (!neighbor_is_cube) {
                     UpdateNode neighbor_down = upd.neighbor_nodes[rs_neighbors_dn[m]];
                     l = getMaxCurrentStrength(neighbor_down, l);
@@ -927,8 +927,8 @@ public class RedstoneWireTurbo {
             // and set it in the world.  
             // Possible optimization:  Don't commit state changes to the world until they
             // need to be known by some nearby non-redstone-wire block.
-            state = state.withProperty(BlockRedstoneWire.POWER, Integer.valueOf(j));
-            worldIn.setBlockState(upd.self, state, 2);
+            state = state.func_177226_a(BlockRedstoneWire.field_176351_O, Integer.valueOf(j));
+            worldIn.func_180501_a(upd.self, state, 2);
         }
 
         return state;
@@ -940,7 +940,7 @@ public class RedstoneWireTurbo {
      */
     private static int getMaxCurrentStrength(final UpdateNode upd, final int strength) {   
         if (upd.type != UpdateNode.Type.REDSTONE) return strength;
-        final int i = upd.currentState.getValue(BlockRedstoneWire.POWER).intValue();
+        final int i = upd.currentState.func_177229_b(BlockRedstoneWire.field_176351_O).intValue();
         return i > strength ? i : strength;
     }
 }

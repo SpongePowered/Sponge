@@ -36,6 +36,7 @@ import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResu
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.item.inventory.EmptyInventoryImpl.EmptyIterator;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;

@@ -57,9 +57,9 @@ public abstract class WorldGenPumpkinMixin_API extends WorldGenerator implements
         if (random.nextDouble() < this.api$chance) {
             final int x = min.getX() + random.nextInt(size.getX());
             final int z = min.getZ() + random.nextInt(size.getZ());
-            final int height = world.getHeight(new BlockPos(x, 0, z)).getY();
+            final int height = world.func_175645_m(new BlockPos(x, 0, z)).func_177956_o();
             final int y = min.getY() + height < 1 ? 0 : random.nextInt(height * 2);
-            generate(world, random, new BlockPos(x, y, z));
+            func_180709_b(world, random, new BlockPos(x, y, z));
         }
     }
 

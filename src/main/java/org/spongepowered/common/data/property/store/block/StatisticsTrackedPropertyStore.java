@@ -44,7 +44,7 @@ public class StatisticsTrackedPropertyStore extends AbstractBlockPropertyStore<S
 
     @Override
     protected Optional<StatisticsTrackedProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        return Optional.of(block.getBlock().getEnableStats() ? TRUE : FALSE);
+        return Optional.of(block.func_177230_c().func_149652_G() ? TRUE : FALSE);
     }
 
 }

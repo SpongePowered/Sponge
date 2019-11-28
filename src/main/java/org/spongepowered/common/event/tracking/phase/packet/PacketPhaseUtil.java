@@ -88,38 +88,38 @@ public final class PacketPhaseUtil {
                 slot.set(((org.spongepowered.api.item.inventory.ItemStack) originalStack));
             } else {
                 final int slotNumber = slot.slotNumber;
-                final Slot nmsSlot = openContainer.getSlot(slotNumber);
+                final Slot nmsSlot = openContainer.func_75139_a(slotNumber);
                 if (nmsSlot != null) {
-                    nmsSlot.putStack(originalStack);
+                    nmsSlot.func_75215_d(originalStack);
                 }
             }
         }
         if (openContainer != null) {
             final boolean capture = ((TrackedInventoryBridge) openContainer).bridge$capturingInventory();
             ((TrackedInventoryBridge) openContainer).bridge$setCaptureInventory(false);
-            openContainer.detectAndSendChanges();
+            openContainer.func_75142_b();
             ((TrackedInventoryBridge) openContainer).bridge$setCaptureInventory(capture);
             // If event is cancelled, always resync with player
             // we must also validate the player still has the same container open after the event has been processed
-            if (eventCancelled && player.openContainer == openContainer && player instanceof EntityPlayerMP) {
-                ((EntityPlayerMP) player).sendContainerToPlayer(openContainer);
+            if (eventCancelled && player.field_71070_bA == openContainer && player instanceof EntityPlayerMP) {
+                ((EntityPlayerMP) player).func_71120_a(openContainer);
             }
         }
     }
 
     public static void handleCustomCursor(final EntityPlayer player, final ItemStackSnapshot customCursor) {
         final ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
-        player.inventory.setItemStack(cursor);
+        player.field_71071_by.func_70437_b(cursor);
         if (player instanceof EntityPlayerMP) {
-            ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(-1, -1, cursor));
+            ((EntityPlayerMP) player).field_71135_a.func_147359_a(new SPacketSetSlot(-1, -1, cursor));
         }
     }
 
     public static void validateCapturedTransactions(final int slotId, final Container openContainer, final List<SlotTransaction> capturedTransactions) {
-        if (capturedTransactions.size() == 0 && slotId >= 0 && slotId < openContainer.inventorySlots.size()) {
-            final Slot slot = openContainer.getSlot(slotId);
+        if (capturedTransactions.size() == 0 && slotId >= 0 && slotId < openContainer.field_75151_b.size()) {
+            final Slot slot = openContainer.func_75139_a(slotId);
             if (slot != null) {
-                final ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
+                final ItemStackSnapshot snapshot = slot.func_75216_d() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.func_75211_c()).createSnapshot() : ItemStackSnapshot.NONE;
                 final SlotTransaction slotTransaction = new SlotTransaction(ContainerUtil.getSlot(openContainer, slotId), snapshot, snapshot);
                 capturedTransactions.add(slotTransaction);
             }
@@ -127,24 +127,24 @@ public final class PacketPhaseUtil {
     }
 
     public static void handlePlayerSlotRestore(final EntityPlayerMP player, final ItemStack itemStack, final EnumHand hand) {
-        if (itemStack.isEmpty()) { // No need to check if it's NONE, NONE is checked by isEmpty.
+        if (itemStack.func_190926_b()) { // No need to check if it's NONE, NONE is checked by isEmpty.
             return;
         }
 
-        player.isChangingQuantityOnly = false;
+        player.field_71137_h = false;
         int slotId = 0;
         if (hand == EnumHand.OFF_HAND) {
-            player.inventory.offHandInventory.set(0, itemStack);
-            slotId = (player.inventory.mainInventory.size() + InventoryPlayer.getHotbarSize());
+            player.field_71071_by.field_184439_c.set(0, itemStack);
+            slotId = (player.field_71071_by.field_70462_a.size() + InventoryPlayer.func_70451_h());
         } else {
-            player.inventory.mainInventory.set(player.inventory.currentItem, itemStack);
-            final Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
-            slotId = slot.slotNumber;
+            player.field_71071_by.field_70462_a.set(player.field_71071_by.field_70461_c, itemStack);
+            final Slot slot = player.field_71070_bA.func_75147_a(player.field_71071_by, player.field_71071_by.field_70461_c);
+            slotId = slot.field_75222_d;
         }
 
-        player.openContainer.detectAndSendChanges();
-        player.isChangingQuantityOnly = false;
-        player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotId, itemStack));
+        player.field_71070_bA.func_75142_b();
+        player.field_71137_h = false;
+        player.field_71135_a.func_147359_a(new SPacketSetSlot(player.field_71070_bA.field_75152_c, slotId, itemStack));
     }
 
     // Check if all transactions are invalid
@@ -166,7 +166,7 @@ public final class PacketPhaseUtil {
     public static void onProcessPacket(final Packet packetIn, final INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
+                EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).field_147369_b;
                 frame.pushCause(packetPlayer);
                 if (SpongeImplHooks.creativeExploitCheck(packetIn, packetPlayer)) {
                     return;
@@ -178,7 +178,7 @@ public final class PacketPhaseUtil {
                     final CPacketPlayer movingPacket = ((CPacketPlayer) packetIn);
                     if (movingPacket instanceof CPacketPlayer.Rotation) {
                         ignoreMovementCapture = true;
-                    } else if (packetPlayer.posX == movingPacket.x && packetPlayer.posY == movingPacket.y && packetPlayer.posZ == movingPacket.z) {
+                    } else if (packetPlayer.field_70165_t == movingPacket.field_149479_a && packetPlayer.field_70163_u == movingPacket.field_149477_b && packetPlayer.field_70161_v == movingPacket.field_149478_c) {
                         ignoreMovementCapture = true;
                     } else {
                         ignoreMovementCapture = false;
@@ -187,9 +187,9 @@ public final class PacketPhaseUtil {
                     ignoreMovementCapture = false;
                 }
                 if (ignoreMovementCapture || (packetIn instanceof CPacketClientSettings)) {
-                    packetIn.processPacket(netHandler);
+                    packetIn.func_148833_a(netHandler);
                 } else {
-                    final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
+                    final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.field_71071_by.func_70445_o());
                     final IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
                     // At the very least make an unknown packet state case.
                     final PacketContext<?> context = packetState.createPhaseContext();
@@ -206,19 +206,19 @@ public final class PacketPhaseUtil {
                     }
                     try (final PhaseContext<?> packetContext = context) {
                         packetContext.buildAndSwitch();
-                        packetIn.processPacket(netHandler);
+                        packetIn.func_148833_a(netHandler);
 
                     }
 
                     if (packetIn instanceof CPacketClientStatus) {
                         // update the reference of player
-                        packetPlayer = ((NetHandlerPlayServer) netHandler).player;
+                        packetPlayer = ((NetHandlerPlayServer) netHandler).field_147369_b;
                     }
-                    ((EntityPlayerMPBridge) packetPlayer).bridge$setPacketItem(ItemStack.EMPTY);
+                    ((EntityPlayerMPBridge) packetPlayer).bridge$setPacketItem(ItemStack.field_190927_a);
                 }
             }
         } else { // client
-            packetIn.processPacket(netHandler);
+            packetIn.func_148833_a(netHandler);
         }
     }
 
@@ -232,9 +232,9 @@ public final class PacketPhaseUtil {
      */
     @Nullable
     public static DataParameter<?> findModifiedEntityInteractDataParameter(final ItemStack stack, final Entity entity) {
-        final Item item = stack.getItem();
+        final Item item = stack.func_77973_b();
 
-        if (item == Items.DYE) {
+        if (item == Items.field_151100_aR) {
             // ItemDye.itemInteractionForEntity
             if (entity instanceof EntitySheep) {
                 return EntitySheepAccessor.accessor$getDyeColorParameter();
@@ -248,17 +248,17 @@ public final class PacketPhaseUtil {
             return null;
         }
 
-        if (item == Items.NAME_TAG) {
+        if (item == Items.field_151057_cb) {
             // ItemNameTag.itemInteractionForEntity
-            return entity instanceof EntityLivingBase && !(entity instanceof EntityPlayer) && stack.hasDisplayName() ? EntityAccessor.accessor$getCustomNameParameter() : null;
+            return entity instanceof EntityLivingBase && !(entity instanceof EntityPlayer) && stack.func_82837_s() ? EntityAccessor.accessor$getCustomNameParameter() : null;
         }
 
-        if (item == Items.SADDLE) {
+        if (item == Items.field_151141_av) {
             // ItemSaddle.itemInteractionForEntity
             return entity instanceof EntityPig ? EntityPigAccessor.accessor$getSaddledParameter() : null;
         }
 
-        if (item instanceof ItemBlock && ((ItemBlock) item).getBlock() == Blocks.CHEST) {
+        if (item instanceof ItemBlock && ((ItemBlock) item).func_179223_d() == Blocks.field_150486_ae) {
             // AbstractChestHorse.processInteract
             return entity instanceof AbstractChestHorse ? AbstractChestHorseAccessor.accessor$getDataIdChestParameter() : null;
         }

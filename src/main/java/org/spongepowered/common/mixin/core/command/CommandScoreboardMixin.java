@@ -83,7 +83,7 @@ public abstract class CommandScoreboardMixin extends CommandBase implements ICom
 
     private void impl$onGetUUID(final Entity entity) {
         if (entity instanceof EntityHuman) {
-            this.impl$realName = entity.getCustomNameTag();
+            this.impl$realName = entity.func_95999_t();
         }
     }
 
@@ -93,7 +93,7 @@ public abstract class CommandScoreboardMixin extends CommandBase implements ICom
             this.impl$realName = null;
             return newString;
         }
-        return CommandBase.getEntityName(server, sender, string);
+        return CommandBase.func_184891_e(server, sender, string);
     }
 
     @Redirect(method = "leaveTeam",
@@ -103,13 +103,13 @@ public abstract class CommandScoreboardMixin extends CommandBase implements ICom
                      + "(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;Ljava/lang/String;)Ljava/lang/String;",
             ordinal = 1))
     private String onGetEntityNameLeaveSecond(final MinecraftServer server, final ICommandSender sender, final String string) throws CommandException {
-        final String entityName = CommandBase.getEntityName(server, sender, string);
+        final String entityName = CommandBase.func_184891_e(server, sender, string);
         if (this.bridge$isExpandedSelector()) {
             try {
                 final UUID uuid = UUID.fromString(entityName);
-                final Entity entity = sender.getServer().getEntityFromUuid(uuid);
+                final Entity entity = sender.func_184102_h().func_175576_a(uuid);
                 if (entity != null && entity instanceof EntityHuman) {
-                    return entity.getCustomNameTag();
+                    return entity.func_95999_t();
                 }
             } catch (IllegalArgumentException e) {
                 // Fall through to normal return

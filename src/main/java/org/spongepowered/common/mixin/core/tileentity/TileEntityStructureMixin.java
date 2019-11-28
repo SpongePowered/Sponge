@@ -40,7 +40,7 @@ public abstract class TileEntityStructureMixin extends TileEntityMixin implement
 
     @Shadow private String author;
     @Shadow private BlockPos position;
-    @Shadow private BlockPos size = BlockPos.ORIGIN;
+    @Shadow private BlockPos size = BlockPos.field_177992_a;
     @Shadow private TileEntityStructure.Mode mode;
     @Shadow private boolean ignoreEntities;
     @Shadow private boolean showAir;

@@ -66,10 +66,10 @@ public abstract class BlockFenceGateMixin extends BlockHorizontalMixin {
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockFenceGate.field_176466_a, isOpen));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockFenceGate.field_176465_b, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableInWallData) {
             return Optional.of((BlockState) blockState);
@@ -81,10 +81,10 @@ public abstract class BlockFenceGateMixin extends BlockHorizontalMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockFenceGate.field_176466_a, isOpen));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockFenceGate.field_176465_b, (Boolean) value));
         }
         if (key.equals(Keys.IN_WALL)) {
             return Optional.of((BlockState) blockState);
@@ -93,14 +93,14 @@ public abstract class BlockFenceGateMixin extends BlockHorizontalMixin {
     }
 
     private ImmutableOpenData impl$getIsOpenFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.getValue(BlockFenceGate.OPEN));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.func_177229_b(BlockFenceGate.field_176466_a));
     }
 
     private ImmutablePoweredData impl$getIsPoweredFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockFenceGate.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(BlockFenceGate.field_176465_b));
     }
 
     private ImmutableInWallData impl$getInWallFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInWallData.class, blockState.getValue(BlockFenceGate.IN_WALL));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInWallData.class, blockState.func_177229_b(BlockFenceGate.field_176467_M));
     }
 }

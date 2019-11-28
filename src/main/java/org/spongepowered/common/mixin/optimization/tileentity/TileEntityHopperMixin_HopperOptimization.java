@@ -41,7 +41,7 @@ public class TileEntityHopperMixin_HopperOptimization extends TileEntityMixin_Ho
         if (iInventory instanceof HopperOptimizationBridge) {
             ((HopperOptimizationBridge) iInventory).hopperBridge$setCancelDirtyUpdate(true);
         }
-        iInventory.setInventorySlotContents(index, stack);
+        iInventory.func_70299_a(index, stack);
         if (iInventory instanceof HopperOptimizationBridge) {
             ((HopperOptimizationBridge) iInventory).hopperBridge$setCancelDirtyUpdate(false);
         }

@@ -41,14 +41,14 @@ public class EntitySelectorsMixin {
         !(entity instanceof VanishableBridge)
         || !((VanishableBridge) entity).bridge$isVanished()
         || !(entity instanceof EntityPlayer)
-        || !((EntityPlayer) entity).isSpectator();
+        || !((EntityPlayer) entity).func_175149_v();
 
     @Shadow @Final @Mutable public static Predicate<Entity> CAN_AI_TARGET = entity ->
         !(entity instanceof VanishableBridge)
         || !(((VanishableBridge) entity).bridge$isVanished() && ((VanishableBridge) entity).bridge$isUntargetable())
         || !(entity instanceof EntityPlayer)
-        || !((EntityPlayer) entity).isSpectator()
-           && !((EntityPlayer)entity).isCreative();
+        || !((EntityPlayer) entity).func_175149_v()
+           && !((EntityPlayer)entity).func_184812_l_();
 
 
 }

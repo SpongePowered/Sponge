@@ -40,7 +40,7 @@ public class SpongeMobSpawnerBuilder extends AbstractTileBuilder<MobSpawner> {
     @Override
     protected Optional<MobSpawner> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(mobSpawner -> {
-            ((TileEntityMobSpawner) mobSpawner).validate();
+            ((TileEntityMobSpawner) mobSpawner).func_145829_t();
             return mobSpawner;
         });
     }

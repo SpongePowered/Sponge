@@ -52,13 +52,13 @@ public class BrewingStandDataProcessor extends
             return false;
         }
 
-        entity.setField(0, value);
+        entity.func_174885_b(0, value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(final TileEntityBrewingStand entity) {
-        return Optional.of(((TileEntityBrewingStandAccessor) entity).accessor$canBrew() ? entity.getField(0) : 0);
+        return Optional.of(((TileEntityBrewingStandAccessor) entity).accessor$canBrew() ? entity.func_174887_a_(0) : 0);
     }
 
     @Override

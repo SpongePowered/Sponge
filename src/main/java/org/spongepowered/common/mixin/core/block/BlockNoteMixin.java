@@ -61,17 +61,17 @@ public abstract class BlockNoteMixin extends BlockMixin {
         }
 
         //No noteblock sounds if the block above it isn't air
-        if (worldIn.getBlockState(pos.up()).getMaterial() != Material.AIR) {
+        if (worldIn.func_180495_p(pos.func_177984_a()).func_185904_a() != Material.field_151579_a) {
             return;
         }
 
         //InstrumentProperty doesn't return what we wan't for the noteblock directly, so we have to check the block under it.
-        InstrumentProperty instrumentProperty = ((org.spongepowered.api.world.World) worldIn).getBlock(pos.getX(), pos.getY() - 1, pos.getZ()).getProperty(InstrumentProperty.class).orElse(null);
+        InstrumentProperty instrumentProperty = ((org.spongepowered.api.world.World) worldIn).getBlock(pos.func_177958_n(), pos.func_177956_o() - 1, pos.func_177952_p()).getProperty(InstrumentProperty.class).orElse(null);
         if (instrumentProperty == null) {
             return;
         }
 
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
+        TileEntity tileEntity = worldIn.func_175625_s(pos);
         if (!(tileEntity instanceof Note)) {
             return;
         }

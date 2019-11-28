@@ -89,6 +89,6 @@ public abstract class EntityAIEatGrassMixin extends EntityAIBase {
         )
     )
     private Block onSpongeGetBlockForgriefing(final IBlockState state) {
-        return ((GrieferBridge) this.grassEaterEntity).bridge$CanGrief() ? state.getBlock() : Blocks.AIR;
+        return ((GrieferBridge) this.grassEaterEntity).bridge$CanGrief() ? state.func_177230_c() : Blocks.field_150350_a;
     }
 }

@@ -448,7 +448,7 @@ public final class CommonModuleRegistry {
                 .registerModule(TransformationRegistryModule.getInstance())
                 .registerModule(StructureMode.class, new StructureModeRegistryModule())
                 .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
-                .registerModule(SmeltingRecipe.class, (CatalogRegistryModule<SmeltingRecipe>) FurnaceRecipes.instance())
+                .registerModule(SmeltingRecipe.class, (CatalogRegistryModule<SmeltingRecipe>) FurnaceRecipes.func_77602_a())
                 .registerModule(EventContextKey.class, EventContextKeysModule.getInstance())
                 .registerModule(RecordType.class, RecordTypeRegistryModule.getInstance())
                 .registerModule(HorseStyle.class, HorseStyleRegistryModule.getInstance())
