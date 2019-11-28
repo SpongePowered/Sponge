@@ -32,7 +32,7 @@ import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.comp.CraftingGridInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 
 import java.util.Optional;
 

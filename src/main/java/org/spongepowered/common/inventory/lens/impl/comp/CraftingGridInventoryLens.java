@@ -28,14 +28,12 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.inventory.lens.comp.CraftingGridInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.collections.SlotLensProvider;
 
+public class CraftingGridInventoryLens extends GridInventoryLens {
 
-public class CraftingGridInventoryLens extends GridInventoryLens implements CraftingGridInventoryLens {
-
-    public CraftingGridInventoryLens(int base, int width, int height, int stride, SlotLensProvider slots) {
-        super(base, width, height, stride, slots);
+    public CraftingGridInventoryLens(int base, int width, int height, SlotLensProvider slots) {
+        super(base, width, height, slots);
     }
 
     @Override

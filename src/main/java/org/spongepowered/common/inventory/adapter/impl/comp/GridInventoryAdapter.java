@@ -34,9 +34,9 @@ import org.spongepowered.api.item.inventory.type.InventoryRow;
 import org.spongepowered.common.inventory.adapter.impl.AdapterLogic;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.inventory.lens.comp.InventoryColumnLens;
-import org.spongepowered.common.inventory.lens.comp.InventoryRowLens;
+import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.comp.InventoryColumnLens;
+import org.spongepowered.common.inventory.lens.impl.comp.InventoryRowLens;
 import org.spongepowered.math.vector.Vector2i;
 
 import java.util.ArrayList;

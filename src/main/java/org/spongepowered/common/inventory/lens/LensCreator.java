@@ -22,8 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory.lens.slots;
+package org.spongepowered.common.inventory.lens;
 
-public interface CraftingOutputSlotLens extends OutputSlotLens {
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
+public interface LensCreator {
+
+    Lens createLens(SlotLensProvider slotProvider);
 
 }

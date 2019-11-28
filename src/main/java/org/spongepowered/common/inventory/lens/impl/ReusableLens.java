@@ -31,9 +31,7 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.ReusableLensInventoryAdapaterBridge;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.ReusableLensProvider;
-import org.spongepowered.common.inventory.lens.SlotProvider;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 import java.util.HashMap;
@@ -68,7 +66,7 @@ public class ReusableLens<T extends Lens> {
                 adapterLenses = reusableLenses.computeIfAbsent(adapter.getClass(), k -> new HashMap<>());
         Int2ObjectMap<ReusableLens> lenses = adapterLenses.computeIfAbsent(lensType, k -> new Int2ObjectOpenHashMap<>());
         return lenses.computeIfAbsent(adapter.bridge$getFabric().fabric$getSize(), k -> {
-            SlotProvider sl = slots.get();
+            SlotLensProvider sl = slots.get();
             return new ReusableLens(sl, lens);
         });
     }
@@ -102,7 +100,7 @@ public class ReusableLens<T extends Lens> {
         if (slotCount == 0) {
             return new DefaultEmptyLens(adapter);
         } else {
-            return new DefaultIndexedLens(0, slotCount, 1, slots);
+            return new DefaultIndexedLens(0, slotCount, slots);
         }
     }
 

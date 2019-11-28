@@ -40,6 +40,10 @@ import org.spongepowered.common.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.InputSlotLens;
+import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLensImpl;
+import org.spongepowered.common.inventory.lens.slots.InputSlotLens;
 
 import javax.annotation.Nullable;
 

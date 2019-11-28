@@ -30,9 +30,8 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.ReusableLensProvider;
 import org.spongepowered.common.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.impl.minecraft.LargeChestInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 @Mixin(DoubleSidedInventory.class)

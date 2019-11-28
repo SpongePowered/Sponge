@@ -25,14 +25,12 @@
 package org.spongepowered.common.inventory.lens.impl.comp;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensProvider;
-import org.spongepowered.common.inventory.lens.slots.CraftingOutputSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 public class CraftingInventoryLens extends DefaultIndexedLens {
 

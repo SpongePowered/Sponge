@@ -38,6 +38,11 @@ import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollecti
 import org.spongepowered.common.inventory.lens.impl.slots.SlotLensProvider;
 
 import java.util.Map;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 @Mixin(CustomInventory.class)
 public abstract class CustomInventoryMixin implements InventoryAdapter, InventoryAdapterBridge {

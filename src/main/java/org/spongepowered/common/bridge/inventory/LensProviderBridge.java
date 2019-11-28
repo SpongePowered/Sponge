@@ -27,7 +27,7 @@ package org.spongepowered.common.bridge.inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 public interface LensProviderBridge {
 

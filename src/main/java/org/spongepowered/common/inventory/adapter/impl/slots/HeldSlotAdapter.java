@@ -27,47 +27,41 @@ package org.spongepowered.common.inventory.adapter.impl.slots;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.slot.FilteringSlot;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.HeldHandSlotLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
 import java.util.function.Predicate;
 
-public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
-    
-    protected final FilteringSlotLens filteringSlot;
+public class HeldSlotAdapter extends SlotAdapter implements EquipmentSlot {
 
-    public FilteringSlotAdapter(Fabric fabric, FilteringSlotLens lens, Inventory parent) {
+    protected final HeldHandSlotLens equipmentSlot;
+
+    public HeldSlotAdapter(Fabric fabric, HeldHandSlotLens lens, Inventory parent) {
         super(fabric, lens, parent);
-        this.filteringSlot = lens;
+        this.equipmentSlot = lens;
+    }
+
+    @Override
+    public boolean isValidItem(EquipmentType type) {
+        Predicate<EquipmentType> filter = this.equipmentSlot.getEquipmentTypeFilter();
+        return filter == null || filter.test(type);
     }
 
     @Override
     public boolean isValidItem(ItemStack stack) {
-        Predicate<ItemStack> filter = this.filteringSlot.getItemStackFilter();
+        Predicate<ItemStack> filter = this.equipmentSlot.getItemStackFilter();
         return filter == null || filter.test(stack);
     }
 
     @Override
     public boolean isValidItem(ItemType type) {
-        Predicate<ItemType> filter = this.filteringSlot.getItemTypeFilter();
+        Predicate<ItemType> filter = this.equipmentSlot.getItemTypeFilter();
         return filter == null || filter.test(type);
     }
-
-    /*
-    @Override
-    public InventoryTransactionResult offer(ItemStack stack) {
-        final boolean canOffer = isValidItem(stack);
-        if (!canOffer) {
-            final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE);
-            result.reject(ItemStackUtil.cloneDefensive(stack));
-            return result.build();
-        }
-
-        return super.offer(stack);
-    }
-    */
 
     @Override
     public InventoryTransactionResult set(ItemStack stack) {

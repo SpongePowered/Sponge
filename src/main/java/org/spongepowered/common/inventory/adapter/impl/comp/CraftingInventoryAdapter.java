@@ -29,7 +29,7 @@ import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.comp.CraftingInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
 
 public class CraftingInventoryAdapter extends OrderedInventoryAdapter implements CraftingInventory {
 

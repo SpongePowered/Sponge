@@ -243,8 +243,13 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
-    public Translation getName() {
-        return EmptyInventoryImpl.EMPTY_NAME;
+    public boolean containsChild(Inventory child) {
+        return this == child;
+    }
+
+    @Override
+    public Optional<ViewableInventory> asViewable() {
+        return Optional.empty();
     }
 
     @Override

@@ -33,7 +33,6 @@ import org.spongepowered.common.inventory.adapter.impl.slots.CraftingOutputAdapt
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLensImpl;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;

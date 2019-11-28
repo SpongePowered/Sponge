@@ -27,7 +27,7 @@ package org.spongepowered.common.inventory.adapter.impl.comp;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.InventoryRow;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.comp.InventoryRowLens;
+import org.spongepowered.common.inventory.lens.impl.comp.InventoryRowLens;
 
 public class InventoryRowAdapter extends Inventory2DAdapter implements InventoryRow {
 

@@ -31,9 +31,8 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.HotbarAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.inventory.lens.comp.HotbarLens;
 
-public class HotbarLens extends InventoryRowLens implements HotbarLens {
+public class HotbarLens extends InventoryRowLens {
 
     public HotbarLens(int base, int width, SlotLensProvider slots) {
         this(base, width, 0, 0, HotbarAdapter.class, slots);
@@ -48,7 +47,6 @@ public class HotbarLens extends InventoryRowLens implements HotbarLens {
         return new HotbarAdapter(fabric, this, parent);
     }
 
-    @Override
     public int getSelectedSlotIndex(Fabric fabric) {
         for (Object inner : fabric.fabric$allInventories()) {
             if (inner instanceof InventoryPlayerBridge) {
@@ -58,11 +56,11 @@ public class HotbarLens extends InventoryRowLens implements HotbarLens {
         return 0;
     }
 
-    @Override
     public void setSelectedSlotIndex(Fabric fabric, int index) {
-        fabric.fabric$allInventories().stream().filter(inner -> inner instanceof InventoryPlayerBridge).forEach(inner -> {
-            ((InventoryPlayerBridge) inner).bridge$setSelectedItem(index, true);
-        });
+        fabric.fabric$allInventories().stream()
+                .filter(InventoryPlayerBridge.class::isInstance)
+                .map(InventoryPlayerBridge.class::cast)
+                .forEach(inner -> inner.bridge$setSelectedItem(index, true));
     }
 
 }

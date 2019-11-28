@@ -24,51 +24,83 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import net.minecraft.item.ItemStack;
+import net.minecraft.entity.player.PlayerInventory;
 import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.EquipmentSlotAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.HeldSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.InvalidOrdinalException;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /**
- * Base Lens for Slots
+ * Single Slot pointing to a players {@link EquipmentTypes#MAIN_HAND} slot.
  */
-public class BasicSlotLens extends AbstractLens implements SlotLens {
+public class HeldHandSlotLens implements SlotLens {
 
-    public static final Translation SLOT_NAME = new SpongeTranslation("slot.name");
-
-    protected int maxStackSize = -1;
-
-    public BasicSlotLens(int index) {
-        this(index, SlotAdapter.class);
-    }
-
-    public BasicSlotLens(int index, Class<? extends Inventory> adapterType) {
-        super(index, 1, adapterType);
+    private PlayerInventory getInventoryPlayer(Fabric fabric) {
+        return (PlayerInventory) fabric.fabric$get(0); // Only players have this lens
     }
 
     @Override
-    public Translation getName(Fabric fabric) {
-        return BasicSlotLens.SLOT_NAME;
+    public net.minecraft.item.ItemStack getStack(Fabric fabric) {
+        PlayerInventory inv = this.getInventoryPlayer(fabric);
+        return inv.getCurrentItem();
+    }
+
+    @Override
+    public boolean setStack(Fabric fabric, net.minecraft.item.ItemStack stack) {
+        PlayerInventory inv = this.getInventoryPlayer(fabric);
+        inv.mainInventory.set(inv.currentItem, stack);
+        return true;
+    }
+
+    @Override
+    public int getOrdinal(Fabric fabric) {
+        PlayerInventory inv = this.getInventoryPlayer(fabric);
+        return inv.currentItem;
+    }
+
+    @Override
+    public Lens getParent() {
+        return null;
+    }
+
+    @Override
+    public Class<? extends Inventory> getAdapterType() {
+        return EquipmentSlotAdapter.class;
     }
 
     @Override
     public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
-        return new SlotAdapter(fabric, this, parent);
+        return new HeldSlotAdapter(fabric, this, parent);
+    }
+
+    @Override
+    public Translation getName(Fabric fabric) {
+        return fabric.fabric$getDisplayName();
+    }
+
+    @Override public int slotCount() {
+        return 1;
+    }
+
+    @Override
+    public int getMaxStackSize(Fabric fabric) {
+        return fabric.fabric$getMaxStackSize();
     }
 
     @Override
@@ -82,35 +114,8 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public int getOrdinal(Fabric fabric) {
-        return this.base;
-    }
-
-    @Override
-    public ItemStack getStack(Fabric fabric, int ordinal) {
-        if (ordinal != 0) {
-            throw new InvalidOrdinalException("Non-zero slot ordinal");
-        }
-        return this.getStack(fabric);
-    }
-
-    @Override
-    public ItemStack getStack(Fabric fabric) {
-        return checkNotNull(fabric, "Target inventory").fabric$getStack(this.base);
-    }
-
-    @Override
-    public boolean setStack(Fabric fabric, int ordinal, ItemStack stack) {
-        if (ordinal != 0) {
-            throw new InvalidOrdinalException("Non-zero slot ordinal");
-        }
-        return this.setStack(fabric, stack);
-    }
-
-    @Override
-    public boolean setStack(Fabric fabric, ItemStack stack) {
-        checkNotNull(fabric, "Target inventory").fabric$setStack(this.base, stack);
-        return true;
+    public List<SlotLens> getSlots() {
+        return Collections.singletonList(this);
     }
 
     @Override
@@ -120,6 +125,11 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
 
     @Override
     public Map<Property<?>, Object> getProperties(int index) {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<Property<?>, Object> getProperties(Lens lens) {
         return Collections.emptyMap();
     }
 
@@ -141,14 +151,21 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
         return this;
     }
 
-    @Override
-    public List<SlotLens> getSlots() {
-        return Collections.singletonList(this);
+    public Predicate<EquipmentType> getEquipmentTypeFilter() {
+        return (e) -> e == EquipmentTypes.MAIN_HAND;
+    }
+
+    public Predicate<ItemStack> getItemStackFilter() {
+        return (i) -> true;
+    }
+
+    public Predicate<ItemType> getItemTypeFilter() {
+        return (i) -> true;
     }
 
     @Override
     public String toString(int deep) {
-        return "[" + this.base + "]";
+        return "[HeldSlot]";
     }
 
     @Override
@@ -156,4 +173,8 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
         return this.toString(0);
     }
 
+    @Override
+    public List<Lens> children() {
+        return Collections.singletonList(this);
+    }
 }

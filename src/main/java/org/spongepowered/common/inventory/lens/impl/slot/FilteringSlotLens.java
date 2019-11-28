@@ -30,11 +30,11 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.FilteringSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.slots.FilteringSlotLens;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.function.Predicate;
 
-public class FilteringSlotLens extends BasicSlotLens implements FilteringSlotLens {
+public class FilteringSlotLens extends BasicSlotLens {
 
     private final Predicate<ItemStack> stackFilter;
     private final Predicate<ItemType> typeFilter;
@@ -52,15 +52,12 @@ public class FilteringSlotLens extends BasicSlotLens implements FilteringSlotLen
 
     @Override
     public boolean setStack(Fabric fabric, net.minecraft.item.ItemStack stack) {
-        return this.getItemStackFilter().test((ItemStack) stack) && super.setStack(fabric, stack);
+        return this.getItemStackFilter().test(ItemStackUtil.fromNative(stack)) && super.setStack(fabric, stack);
     }
-
-    @Override
     public Predicate<ItemStack> getItemStackFilter() {
         return this.stackFilter;
     }
 
-    @Override
     public Predicate<ItemType> getItemTypeFilter() {
         return this.typeFilter;
     }

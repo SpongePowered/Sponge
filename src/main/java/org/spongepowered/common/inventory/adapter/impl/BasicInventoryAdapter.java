@@ -39,6 +39,7 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.ReusableLens;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
@@ -58,7 +59,7 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
     public static final Translation DEFAULT_NAME = new SpongeTranslation("inventory.default.title");
 
     private final Fabric fabric;
-    protected final SlotLensProvider slots;
+    protected final SlotLensProvider slotLenses;
     protected final Lens lens;
     protected final List<Inventory> children = new ArrayList<>();
 
@@ -80,12 +81,12 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
         this.fabric = fabric;
         this.parent = this;
         if (fabric.fabric$getSize() == 0) {
-            this.slots = new SlotLensCollection(0);
+            this.slotLenses = new SlotLensCollection(0);
             this.lens = new DefaultEmptyLens(this);
         } else {
             final ReusableLens<T> lens = ReusableLens.getLens(lensType, this, () -> this.initSlots(fabric, this.parent),
                     (slots) -> (T) new DefaultIndexedLens(0, fabric.fabric$getSize(), this.getClass(), slots));
-            this.slots = lens.getSlots();
+            this.slotLenses = lens.getSlots();
             this.lens = lens.getLens();
         }
     }
@@ -93,8 +94,23 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
     public BasicInventoryAdapter(final Fabric fabric, @Nullable final Lens root, @Nullable final Inventory parent) {
         this.fabric = fabric;
         this.parent = parent == null ? this : parent;
-        this.slots = this.initSlots(fabric, parent);
+        this.slotLenses = this.initSlots(fabric, parent);
         this.lens = root != null ? root : checkNotNull(this.initRootLens(), "root lens");
+    }
+
+    // Constructs inventory with given list of inventories
+    // TODO check if this is correct
+    public BasicInventoryAdapter(Fabric fabric, List<Inventory> children, Inventory parent) {
+        this.fabric = fabric;
+        this.parent = parent == null ? this : parent;
+        this.slotLenses = this.initSlots(fabric, parent);
+
+        this.lens = new QueryLens(
+                children.stream()
+                        .map(InventoryBridge.class::cast)
+                        .map(InventoryBridge::bridge$getAdapter)
+                        .map(InventoryAdapter::bridge$getRootLens).collect(Collectors.toList()));
+        this.children = children; // Init cached children
     }
 
     private SlotLensProvider initSlots(final Fabric fabric, @Nullable final Inventory parent) {
@@ -122,7 +138,7 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
 
     @Override
     public SlotLensProvider bridge$getSlotProvider() {
-        return this.slots;
+        return this.slotLenses;
     }
 
     @Override
