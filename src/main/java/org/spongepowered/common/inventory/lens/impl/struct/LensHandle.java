@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.inventory.lens.impl.struct;
 
-import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.common.inventory.PropertyEntry;
 import org.spongepowered.common.inventory.lens.Lens;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Nullable;
 
 /**
  * A relationship between a lens and properties for the lens when viewed through
@@ -51,8 +53,7 @@ public final class LensHandle {
     /**
      * Properties for the lens when viewed through the parent lens
      */
-    private Collection<InventoryProperty<?, ?>> properties;
-
+    private Map<Property<?>, Object> properties;
     /**
      * Create an "empty" lens handle
      */
@@ -67,11 +68,13 @@ public final class LensHandle {
      * @param lens
      * @param properties
      */
-    public LensHandle(Lens lens, InventoryProperty<?, ?>... properties) {
+    public LensHandle(Lens lens, PropertyEntry... properties) {
         this.lens = lens;
         if (properties != null && properties.length > 0) {
-            this.properties = new ArrayList<>();
-            Collections.addAll(this.properties, properties);
+            this.properties = new HashMap<>();
+            for (PropertyEntry entry : properties) {
+                this.properties.put(entry.getProperty(), entry.getValue());
+            }
         }
     }
 
@@ -82,58 +85,50 @@ public final class LensHandle {
      * @param lens
      * @param properties
      */
-    public LensHandle(Lens lens, Collection<InventoryProperty<?, ?>> properties) {
+    public LensHandle(Lens lens, Map<Property<?>, Object> properties) {
         this.lens = lens;
         if (properties != null && properties.size() > 0) {
-            this.properties = new ArrayList<>(properties);
+            this.properties = new HashMap<>(properties);
         }
     }
 
-    public Collection<InventoryProperty<?, ?>> getProperties() {
+    public Map<Property<?>, Object> getProperties() {
         if (this.properties == null) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
-        return Collections.unmodifiableCollection(this.properties);
+        return Collections.unmodifiableMap(this.properties);
     }
 
-    public <T, K, V> InventoryProperty<K, V> getProperty(Class<T> property) {
-        return this.getProperty(property, null);
-    }
-
+    @Nullable
     @SuppressWarnings("unchecked")
-    public <T, K, V> InventoryProperty<K, V> getProperty(Class<T> property, Object key) {
+    public <V> V getProperty(Property<V> property) {
         if (this.properties != null) {
-            for (InventoryProperty<?, ?> prop : this.properties) {
-                if (prop.getClass().equals(property) && (key == null || key.equals(prop.getKey()))) {
-                    return (InventoryProperty<K, V>) prop;
-                }
-            }
+            return (V) this.properties.get(property);
         }
         return null;
     }
 
-    public void setProperty(InventoryProperty<?, ?> property) {
+    @SuppressWarnings("unchecked")
+    public void setProperty(PropertyEntry tuple) {
+        setProperty((Property) tuple.getProperty(), tuple.getValue());
+    }
+
+    public <V> void setProperty(Property<V> property, V value) {
         if (this.properties == null) {
-            this.properties = new ArrayList<InventoryProperty<?, ?>>();
-        } else {
-            this.removeMatchingProperties( property);
+            this.properties = new HashMap<>();
         }
-        this.properties.add(property);
+        this.properties.put(property, value);
     }
 
-    public void removeProperty(InventoryProperty<?, ?> property) {
+    public void removeProperty(Property<?> property) {
         if (this.properties != null) {
-            this.removeMatchingProperties(property);
+            this.properties.remove(property);
         }
     }
 
-    private void removeMatchingProperties(InventoryProperty<?, ?> property) {
-        for (Iterator<InventoryProperty<?, ?>> iter = this.properties.iterator(); iter.hasNext();) {
-            InventoryProperty<?, ?> prop = iter.next();
-            if (prop.getClass() == property.getClass() && prop.getKey().equals(property.getKey())) {
-                iter.remove();
-            }
-        }
+    @Override
+    public String toString() {
+        return this.lens.toString();
     }
 
 }

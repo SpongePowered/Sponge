@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
@@ -42,6 +42,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Base Lens for Slots
@@ -58,7 +59,6 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
 
     public BasicSlotLens(int index, Class<? extends Inventory> adapterType) {
         super(index, 1, adapterType);
-        this.availableSlots.add(this.getOrdinal(null));
     }
 
     @Override
@@ -84,11 +84,6 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     @Override
     public int getOrdinal(Fabric fabric) {
         return this.base;
-    }
-
-    @Override
-    public int getRealIndex(Fabric fabric, int ordinal) {
-        return (ordinal != 0) ? -1 : this.getOrdinal(fabric);
     }
 
     @Override
@@ -124,8 +119,8 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(int index) {
-        return Collections.emptyList();
+    public Map<Property<?>, Object> getProperties(int index) {
+        return Collections.emptyMap();
     }
 
     @Override
@@ -145,4 +140,20 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
         }
         return this;
     }
+
+    @Override
+    public List<SlotLens> getSlots() {
+        return Collections.singletonList(this);
+    }
+
+    @Override
+    public String toString(int deep) {
+        return "[" + this.base + "]";
+    }
+
+    @Override
+    public String toString() {
+        return this.toString(0);
+    }
+
 }

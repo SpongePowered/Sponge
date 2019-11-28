@@ -33,7 +33,7 @@ import org.spongepowered.api.item.inventory.type.Inventory2D;
 import org.spongepowered.common.inventory.adapter.impl.AdapterLogic;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.comp.Inventory2DLens;
+import org.spongepowered.common.inventory.lens.impl.comp.Inventory2DLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.Optional;
@@ -42,8 +42,8 @@ public class Inventory2DAdapter extends OrderedInventoryAdapter implements Inven
 
     protected Inventory2DLens lens2d;
 
-    public Inventory2DAdapter(import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;entory, Inventory2DLens root, Inventory parent) {
-        super(inventory, root, parent);
+    public Inventory2DAdapter(Fabric fabric, Inventory2DLens root, Inventory parent) {
+        super(fabric, root, parent);
         this.lens2d = root;
     }
     
@@ -59,22 +59,18 @@ public class Inventory2DAdapter extends OrderedInventoryAdapter implements Inven
         }
     }
 
-    @Override
     public Optional<Slot> getSlot(SlotPos pos) {
         return BasicInventoryAdapter.forSlot(this.bridge$getFabric(), this.getSlotLens(pos), this);
     }
 
-    @Override
     public Optional<ItemStack> poll(SlotPos pos) {
         return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(pos));
     }
 
-    @Override
     public Optional<ItemStack> poll(SlotPos pos, int limit) {
         return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(pos), limit);
     }
 
-    @Override
     public Optional<ItemStack> peek(SlotPos pos) {
         return AdapterLogic.peekSequential(this.bridge$getFabric(), this.getSlotLens(pos));
     }

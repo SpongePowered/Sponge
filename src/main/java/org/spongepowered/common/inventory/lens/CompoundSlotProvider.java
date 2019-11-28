@@ -27,8 +27,8 @@ package org.spongepowered.common.inventory.lens;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,7 @@ public class CompoundSlotProvider implements SlotLensProvider {
     }
 
     @Override
-    public SlotLens getSlot(int index) {
+    public SlotLens getSlotLens(int index) {
         return this.slotList.get(index);
     }
 

@@ -24,22 +24,23 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.SlotCollection;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.DynamicLensCollectionImpl;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensProvider;
+
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("unchecked")
-public class SlotLensCollection extends DynamicLensCollectionImpl implements SlotLensProvider {
+public class SlotLensCollection implements SlotLensProvider {
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes"})
     public static class Builder {
 
         private List<Tuple<Class<? extends SlotAdapter>, SlotLensProvider>> slotTypes = new ArrayList<>();
@@ -75,46 +76,36 @@ public class SlotLensCollection extends DynamicLensCollectionImpl implements Slo
             return this;
         }
 
-        public int size() {
-            return this.slotTypes.size();
-        }
-
-        SlotLensProvider getProvider(int index) {
-            return this.slotTypes.get(index).getSecond();
-        }
-
         public SlotLensCollection build() {
-            return new SlotLensCollection(this.size(), this);
+            final List<SlotLens> lenses = new ArrayList<>();
+
+            for (int i = 0; i < this.slotTypes.size(); i++) {
+                lenses.add(this.slotTypes.get(i).getSecond().getSlotLens(i));
+            }
+
+            return new SlotLensCollection(lenses);
         }
 
     }
 
-    private org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection.Builder builder;
+    private final List<SlotLens> lenses;
 
-    public SlotLensCollection(int size) {
-        this(size, null);
-    }
-
-    private SlotLensCollection(int size, org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection.Builder builder) {
-        super(size);
-        this.builder = builder;
-        this.populate();
-    }
-
-    private void populate() {
-        for (int index = 0; index < this.size(); index++) {
-            this.lenses[index] = this.createSlotLens(index);
-        }
-    }
-
-    @SuppressWarnings("rawtypes")
-    private SlotLens createSlotLens(int slotIndex) {
-        return this.builder == null ? new BasicSlotLens(slotIndex, SlotAdapter.class) : this.builder.getProvider(slotIndex).createSlotLens(slotIndex);
+    public SlotLensCollection(List<SlotLens> lenses) {
+        this.lenses = lenses;
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public SlotLens getSlot(int index) {
-        return (SlotLens) this.get(index);
+    public SlotLens getSlotLens(int index) {
+        return this.lenses.get(index);
     }
+
+    public SlotCollection getSlots(InventoryAdapter adapter) {
+        return this.getSlots(((Inventory) adapter), adapter.bridge$getFabric(), adapter.bridge$getRootLens());
+    }
+
+    private SlotCollection getSlots(Inventory parent, Fabric inv, Lens lens) {
+        return new SlotCollection(parent, inv, lens, this);
+    }
+
+
 }

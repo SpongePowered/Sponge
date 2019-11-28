@@ -30,12 +30,10 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.CraftingOutputAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.slots.CraftingOutputSlotLens;
 
 import java.util.function.Predicate;
 
-
-public class CraftingOutputSlotLens extends OutputSlotLens implements CraftingOutputSlotLens {
+public class CraftingOutputSlotLens extends OutputSlotLens {
 
     public CraftingOutputSlotLens(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
         this(index, CraftingOutputAdapter.class, stackFilter, typeFilter);

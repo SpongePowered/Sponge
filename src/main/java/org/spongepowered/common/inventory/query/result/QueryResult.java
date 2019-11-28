@@ -36,16 +36,15 @@ public interface QueryResult extends Result {
 
     abstract class QueryLens extends AbstractLens {
 
-        private final MutableLensSet resultSet;
-
-        public QueryLens(int size, MutableLensSet resultSet) {
-            super(0, size, QueryResult.class);
-            this.resultSet = resultSet;
-
-            for (Lens result : this.resultSet) {
-                Collection<InventoryProperty<?, ?>> properties = this.resultSet.getProperties(result);
-                this.addSpanningChild(result, properties.toArray(new InventoryProperty[0]));
-            }
+    public QueryLens(Collection<Lens> lenses) {
+        super(0, lenses.stream().map(Lens::slotCount).mapToInt(i -> i).sum(), BasicInventoryAdapter.class);
+        for (Lens match : lenses) {
+            this.addSpanningChild(match); // TODO properties?
         }
+    }
+
+    @Override
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+        return new BasicInventoryAdapter(fabric, this, parent);
     }
 }

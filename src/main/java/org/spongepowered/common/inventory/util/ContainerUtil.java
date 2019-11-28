@@ -75,17 +75,13 @@ import org.spongepowered.common.inventory.adapter.impl.slots.CraftingOutputAdapt
 import org.spongepowered.common.inventory.custom.CustomContainer;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.comp.CraftingInventoryLens;
-import org.spongepowered.common.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.inventory.lens.comp.Inventory2DLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.DelegatingLens;
+import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.minecraft.FurnaceInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.minecraft.LargeChestInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
@@ -231,7 +227,7 @@ public final class ContainerUtil {
                             itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
                 } else if (subInventory instanceof CraftingInventory) { // InventoryCrafting has width and height and is Input
                     final CraftingInventory craftGrid = (CraftingInventory) subInventory;
-                    lens = new org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens(index, craftGrid.getWidth(), craftGrid.getHeight(), craftGrid.getWidth(), InputSlot.class, slots);
+                    lens = new GridInventoryLens(index, craftGrid.getWidth(), craftGrid.getHeight(), craftGrid.getWidth(), InputSlot.class, slots);
                 } else if (slotCount == 1) { // Unknown - A single Slot
                     lens = new BasicSlotLens(index);
                 }
@@ -259,9 +255,9 @@ public final class ContainerUtil {
         final List<Lens> additional = new ArrayList<>();
         try {
             if (crafting.out != null && crafting.base != null && crafting.grid != null) {
-                additional.add(new org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens(crafting.out, crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
+                additional.add(new CraftingInventoryLens(crafting.out, crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
             } else if (crafting.base != null && crafting.grid != null) {
-                additional.add(new org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens(crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), crafting.grid.getWidth(), slots));
+                additional.add(new GridInventoryLens(crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), crafting.grid.getWidth(), slots));
             }
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Error while creating CraftingInventoryLensImpl or GridInventoryLensImpl for " + container.getClass().getName(), e);

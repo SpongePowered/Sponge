@@ -30,12 +30,11 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.InputSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
+import org.spongepowered.common.inventory.lens.slots.InputSlotLens;
 
 import java.util.function.Predicate;
 
-
-public class InputSlotLens extends FilteringSlotLens implements InputSlotLens {
+public class InputSlotLens extends FilteringSlotLens {
 
     public InputSlotLens(int index) {
         this(index, (s) -> true, (s) -> true);

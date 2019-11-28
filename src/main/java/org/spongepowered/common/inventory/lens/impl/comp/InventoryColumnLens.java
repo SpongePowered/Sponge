@@ -28,9 +28,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.InventoryColumnAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensProvider;
-import org.spongepowered.common.inventory.lens.comp.InventoryColumnLens;
-
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 public class InventoryColumnLens extends Inventory2DLens implements InventoryColumnLens {
 

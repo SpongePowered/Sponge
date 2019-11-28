@@ -28,7 +28,6 @@ import net.minecraft.inventory.ISidedInventory;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.SingleBlockCarrier;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
@@ -44,11 +43,8 @@ public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
         if (thisThing instanceof ISidedInventory) {
             net.minecraft.util.Direction facing = DirectionFacingProvider.getInstance().get(from).get();
             int[] slots = ((ISidedInventory) thisThing).getSlotsForFace(facing);
-            SlotIndex[] indices = new SlotIndex[slots.length];
-            for (int i = 0; i < slots.length; i++) {
-                indices[i] = SlotIndex.of(slots[i]);
-            }
-            return thisThing.getInventory().query(indices);
+            // TODO query
+            return thisThing.getInventory().query(slots);
         }
         return thisThing.getInventory();
     }

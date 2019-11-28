@@ -28,7 +28,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.slots.EquipmentSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.EquipmentSlotLens;
 
 import java.util.function.Predicate;
 
@@ -44,7 +44,7 @@ public class EquipmentSlotAdapter extends FilteringSlotAdapter implements Equipm
     @Override
     public boolean isValidItem(EquipmentType type) {
         Predicate<EquipmentType> filter = this.equipmentSlot.getEquipmentTypeFilter();
-        return filter == null ? true : filter.test(type);
+        return filter == null || filter.test(type);
     }
 
 }

@@ -31,12 +31,10 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.slots.EquipmentSlotLens;
 
 import java.util.function.Predicate;
 
-
-public class EquipmentSlotLens extends FilteringSlotLens implements EquipmentSlotLens {
+public class EquipmentSlotLens extends FilteringSlotLens {
     
     private final Predicate<EquipmentType> equipmentTypeFilter;
 
@@ -49,7 +47,6 @@ public class EquipmentSlotLens extends FilteringSlotLens implements EquipmentSlo
         this.equipmentTypeFilter = equipmentTypeFilter;
     }
 
-    @Override
     public Predicate<EquipmentType> getEquipmentTypeFilter() {
         return this.equipmentTypeFilter;
     }

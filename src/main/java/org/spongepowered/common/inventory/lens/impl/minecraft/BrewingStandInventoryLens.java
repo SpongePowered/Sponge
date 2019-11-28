@@ -27,8 +27,8 @@ package org.spongepowered.common.inventory.lens.impl.minecraft;
 import static org.spongepowered.api.item.ItemTypes.BLAZE_POWDER;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.slot.OutputSlot;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.slot.FuelSlotLens;
@@ -40,6 +40,11 @@ public class BrewingStandInventoryLens extends RealLens {
     private DefaultIndexedLens potions;
     private InputSlotLens ingredient;
     private InputSlotLens fuel;
+
+    public BrewingStandInventoryLens(SlotLensProvider slots) {
+        super(0, 5, BasicInventoryAdapter.class);
+        this.init(slots);
+    }
 
     @SuppressWarnings("unchecked")
     public BrewingStandInventoryLens(final InventoryAdapter adapter, final SlotLensProvider slots) {
@@ -55,7 +60,7 @@ public class BrewingStandInventoryLens extends RealLens {
 
     protected void init(final SlotLensProvider slots) {
 
-        this.potions = new DefaultIndexedLens(0, 3, 1, OutputSlot.class, slots);
+        this.potions = new DefaultIndexedLens(0, 3, slots); // TODO correct type
         this.ingredient = new InputSlotLens(3, (i) -> true, (i) -> true); // TODO filter PotionIngredients
         this.fuel = new FuelSlotLens(4, (i) -> BLAZE_POWDER.equals(i.getType()), BLAZE_POWDER::equals);
 

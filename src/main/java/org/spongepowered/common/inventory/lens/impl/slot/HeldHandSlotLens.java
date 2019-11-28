@@ -38,6 +38,7 @@ import org.spongepowered.common.inventory.adapter.impl.slots.HeldSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.InvalidOrdinalException;
 import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.Collection;
 import java.util.Collections;

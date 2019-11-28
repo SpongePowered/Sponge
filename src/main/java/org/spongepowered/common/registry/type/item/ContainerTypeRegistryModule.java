@@ -32,6 +32,11 @@ import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeContainerType;
+import org.spongepowered.common.data.type.SpongeContainerTypeEntity;
+import org.spongepowered.common.inventory.lens.LensCreator;
+import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.FurnaceInventoryLens;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,8 +79,8 @@ public class ContainerTypeRegistryModule implements CatalogRegistryModule<Contai
         this.register("minecraft:shulker_box");
     }
 
-    private void register(String id) {
-        this.guiIdMap.put(id, new SpongeContainerType(id));
+    private void register(final String key, ContainerProvider provider, int width, int height) {
+        this.register(CatalogKey.minecraft(key), provider, sp -> new GridInventoryLens(0, width, height, sp), width * height, width, height);
     }
 
     private void register(String id, String internalId) {

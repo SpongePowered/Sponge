@@ -25,20 +25,26 @@
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.common.inventory.PropertyEntry;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.slot.FuelSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slots.InputSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slots.OutputSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slots.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.OutputSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 public class FurnaceInventoryLens extends RealLens {
 
     private InputSlotLens input;
     private FuelSlotLens fuel;
     private OutputSlotLens output;
+
+    public FurnaceInventoryLens(SlotLensProvider sp) {
+        super(0, 3, BasicInventoryAdapter.class);
+        this.init(sp);
+    }
 
     public FurnaceInventoryLens(final InventoryAdapter adapter, final SlotLensProvider slots) {
         this(0, adapter, slots);
@@ -51,7 +57,7 @@ public class FurnaceInventoryLens extends RealLens {
     }
 
     protected void init(final SlotLensProvider slots) {
-        this.addChild(new DefaultIndexedLens(0, 3, 1, slots));
+        this.addChild(new DefaultIndexedLens(0, 3, slots));
 
         this.input = new InputSlotLens(0, (i) -> true, (i) -> true);
         this.fuel = new FuelSlotLens(1, (i) -> true, (i) -> true);       // TODO SlotFurnaceFuel
@@ -59,8 +65,8 @@ public class FurnaceInventoryLens extends RealLens {
         // TODO represent the filtering in the API somehow
         this.output = new OutputSlotLens(2, (i) -> true, (i) -> true); // SlotFurnaceOutput
 
-        this.addSpanningChild(this.input, new SlotIndex(0));
-        this.addSpanningChild(this.fuel, new SlotIndex(1));
-        this.addSpanningChild(this.output, new SlotIndex(2));
+        this.addSpanningChild(this.input, PropertyEntry.slotIndex(0));
+        this.addSpanningChild(this.fuel, PropertyEntry.slotIndex(1));
+        this.addSpanningChild(this.output, PropertyEntry.slotIndex(2));
     }
 }
