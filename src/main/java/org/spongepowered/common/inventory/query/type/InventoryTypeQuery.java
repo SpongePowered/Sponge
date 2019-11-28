@@ -40,7 +40,7 @@ public final class InventoryTypeQuery extends SpongeQuery<Class<? extends Invent
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+    public boolean matches(Lens lens, Lens parent, Fabric fabric) {
         return this.targetType.isAssignableFrom(lens.getAdapterType());
     }
 

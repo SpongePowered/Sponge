@@ -51,7 +51,7 @@ public class InventoryColumnLens extends Inventory2DLens implements InventoryCol
     }
     
     @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
+    public int getRealIndex(Fabric fabric, int ordinal) {
         if (ordinal < 0 || ordinal >= this.size) {
             return -1;
         }
@@ -60,8 +60,8 @@ public class InventoryColumnLens extends Inventory2DLens implements InventoryCol
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
-        return new InventoryColumnAdapter(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+        return new InventoryColumnAdapter(fabric, this, parent);
     }
     
 }

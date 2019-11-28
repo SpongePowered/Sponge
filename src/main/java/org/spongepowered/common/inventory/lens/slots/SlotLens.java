@@ -30,10 +30,10 @@ import org.spongepowered.common.inventory.lens.Lens;
 
 public interface SlotLens extends Lens {
 
-    ItemStack getStack(Fabric inv);
+    ItemStack getStack(Fabric fabric);
 
-    boolean setStack(Fabric inv, ItemStack stack);
+    boolean setStack(Fabric fabric, ItemStack stack);
 
-    int getOrdinal(Fabric inv);
+    int getOrdinal(Fabric fabric);
     
 }

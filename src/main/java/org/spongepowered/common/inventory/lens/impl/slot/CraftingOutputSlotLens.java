@@ -46,8 +46,8 @@ public class CraftingOutputSlotLens extends OutputSlotLens implements CraftingOu
     }
     
     @Override
-    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
-        return new CraftingOutputAdapter(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+        return new CraftingOutputAdapter(fabric, this, parent);
     }
 
 }

@@ -33,8 +33,8 @@ public class InventoryRowAdapter extends Inventory2DAdapter implements Inventory
 
     private InventoryRowLens rowLens;
 
-    public InventoryRowAdapter(Fabric inventory, InventoryRowLens root, Inventory parent) {
-        super(inventory, root, parent);
+    public InventoryRowAdapter(Fabric fabric, InventoryRowLens root, Inventory parent) {
+        super(fabric, root, parent);
         this.rowLens = root;
     }
 

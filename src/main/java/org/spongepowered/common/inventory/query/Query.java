@@ -41,7 +41,7 @@ public class Query {
 
     public interface ResultAdapterProvider {
 
-        QueryResult getResultAdapter(Fabric inventory, MutableLensSet matches, Inventory parent);
+        QueryResult getResultAdapter(Fabric fabric, MutableLensSet matches, Inventory parent);
 
     }
 
@@ -49,7 +49,7 @@ public class Query {
 
     private final InventoryAdapter adapter;
 
-    private final Fabric inventory;
+    private final Fabric fabric;
 
     private final Lens lens;
 
@@ -57,7 +57,7 @@ public class Query {
 
     private Query(final InventoryAdapter adapter, final org.spongepowered.api.item.inventory.query.Query<?>[] queries) {
         this.adapter = adapter;
-        this.inventory = adapter.bridge$getFabric();
+        this.fabric = adapter.bridge$getFabric();
         this.lens = adapter.bridge$getRootLens();
         this.queries = queries;
     }
@@ -68,8 +68,8 @@ public class Query {
     }
 
     public Inventory execute(final org.spongepowered.common.inventory.query.Query.ResultAdapterProvider resultProvider) {
-        if (this.matches(this.lens, null, this.inventory)) {
-            return (Inventory) this.lens.getAdapter(this.inventory, (Inventory) this.adapter);
+        if (this.matches(this.lens, null, this.fabric)) {
+            return (Inventory) this.lens.getAdapter(this.fabric, (Inventory) this.adapter);
         }
 
         return this.toResult(resultProvider, this.reduce(this.lens, this.depthFirstSearch(this.lens)));
@@ -81,14 +81,14 @@ public class Query {
             return new EmptyInventoryImpl((Inventory) this.adapter);
         }
         if (matches.size() == 1) {
-            return (Inventory) matches.getLens(0).getAdapter(this.inventory, (Inventory) this.adapter);
+            return (Inventory) matches.getLens(0).getAdapter(this.fabric, (Inventory) this.adapter);
         }
 
         if (resultProvider != null) {
-            return (Inventory) resultProvider.getResultAdapter(this.inventory, matches, (Inventory) this.adapter);
+            return (Inventory) resultProvider.getResultAdapter(this.fabric, matches, (Inventory) this.adapter);
         }
 
-        return (Inventory) Query.defaultResultProvider.getResultAdapter(this.inventory, matches, (Inventory) this.adapter);
+        return (Inventory) Query.defaultResultProvider.getResultAdapter(this.fabric, matches, (Inventory) this.adapter);
     }
 
     private MutableLensSet depthFirstSearch(final Lens lens) {
@@ -101,7 +101,7 @@ public class Query {
             if (!child.getChildren().isEmpty()) {
                 matches.addAll(this.depthFirstSearch(child));
             }
-            if (this.matches(child, lens, this.inventory)) {
+            if (this.matches(child, lens, this.fabric)) {
                 matches.add(child);
             }
         }
@@ -115,9 +115,9 @@ public class Query {
     }
 
     @SuppressWarnings({"rawtypes"})
-    private boolean matches(final Lens lens, final Lens parent, final Fabric inventory) {
+    private boolean matches(final Lens lens, final Lens parent, final Fabric fabric) {
         for (final org.spongepowered.api.item.inventory.query.Query<?> operation : this.queries) {
-            if (((SpongeQuery) operation).matches(lens, parent, inventory)) {
+            if (((SpongeQuery) operation).matches(lens, parent, fabric)) {
                 return true;
             }
         }

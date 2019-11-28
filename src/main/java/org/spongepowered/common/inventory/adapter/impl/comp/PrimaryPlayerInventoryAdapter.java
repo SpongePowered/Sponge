@@ -35,8 +35,8 @@ public class PrimaryPlayerInventoryAdapter extends GridInventoryAdapter implemen
 
     private final PrimaryPlayerInventoryLens root;
 
-    public PrimaryPlayerInventoryAdapter(Fabric inv, PrimaryPlayerInventoryLens lens, Inventory parent) {
-        super(inv, lens, parent);
+    public PrimaryPlayerInventoryAdapter(Fabric fabric, PrimaryPlayerInventoryLens lens, Inventory parent) {
+        super(fabric, lens, parent);
         this.root = lens;
     }
 

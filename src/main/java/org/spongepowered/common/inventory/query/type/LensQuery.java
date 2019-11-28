@@ -39,7 +39,7 @@ public final class LensQuery extends SpongeQuery<Lens> {
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+    public boolean matches(Lens lens, Lens parent, Fabric fabric) {
         return this.lens.equals(lens);
     }
 

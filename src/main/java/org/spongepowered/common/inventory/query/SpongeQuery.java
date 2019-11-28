@@ -42,7 +42,6 @@ public abstract class SpongeQuery<T> implements Query<T> {
         return this.type;
     }
 
-    public abstract boolean matches(Lens lens, Lens parent,
-            Fabric inventory);
+    public abstract boolean matches(Lens lens, Lens parent, Fabric fabric);
 
 }

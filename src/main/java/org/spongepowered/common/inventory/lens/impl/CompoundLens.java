@@ -61,8 +61,8 @@ public class CompoundLens extends SlotBasedLens {
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
-        return new BasicInventoryAdapter(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+        return new BasicInventoryAdapter(fabric, this, parent);
     }
 
     public static Builder builder() {

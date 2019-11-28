@@ -50,12 +50,12 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
     protected final List<InventoryRow> rows = new ArrayList<InventoryRow>();
     protected final List<InventoryColumn> columns = new ArrayList<InventoryColumn>();
 
-    public GridInventoryAdapter(Fabric inventory, GridInventoryLens root) {
-        this(inventory, root, null);
+    public GridInventoryAdapter(Fabric fabric, GridInventoryLens root) {
+        this(fabric, root, null);
     }
 
-    public GridInventoryAdapter(Fabric inventory, GridInventoryLens root, Inventory parent) {
-        super(inventory, root, parent);
+    public GridInventoryAdapter(Fabric fabric, GridInventoryLens root, Inventory parent) {
+        super(fabric, root, parent);
         this.gridLens = root;
     }
     

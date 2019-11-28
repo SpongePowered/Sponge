@@ -62,13 +62,13 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public Translation getName(Fabric inv) {
+    public Translation getName(Fabric fabric) {
         return BasicSlotLens.SLOT_NAME;
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
-        return new SlotAdapter(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+        return new SlotAdapter(fabric, this, parent);
     }
 
     @Override
@@ -82,39 +82,39 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public int getOrdinal(Fabric inv) {
+    public int getOrdinal(Fabric fabric) {
         return this.base;
     }
 
     @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
-        return (ordinal != 0) ? -1 : this.getOrdinal(inv);
+    public int getRealIndex(Fabric fabric, int ordinal) {
+        return (ordinal != 0) ? -1 : this.getOrdinal(fabric);
     }
 
     @Override
-    public ItemStack getStack(Fabric inv, int ordinal) {
+    public ItemStack getStack(Fabric fabric, int ordinal) {
         if (ordinal != 0) {
             throw new InvalidOrdinalException("Non-zero slot ordinal");
         }
-        return this.getStack(inv);
+        return this.getStack(fabric);
     }
 
     @Override
-    public ItemStack getStack(Fabric inv) {
-        return checkNotNull(inv, "Target inventory").fabric$getStack(this.base);
+    public ItemStack getStack(Fabric fabric) {
+        return checkNotNull(fabric, "Target inventory").fabric$getStack(this.base);
     }
 
     @Override
-    public boolean setStack(Fabric inv, int ordinal, ItemStack stack) {
+    public boolean setStack(Fabric fabric, int ordinal, ItemStack stack) {
         if (ordinal != 0) {
             throw new InvalidOrdinalException("Non-zero slot ordinal");
         }
-        return this.setStack(inv, stack);
+        return this.setStack(fabric, stack);
     }
 
     @Override
-    public boolean setStack(Fabric inv, ItemStack stack) {
-        checkNotNull(inv, "Target inventory").fabric$setStack(this.base, stack);
+    public boolean setStack(Fabric fabric, ItemStack stack) {
+        checkNotNull(fabric, "Target inventory").fabric$setStack(this.base, stack);
         return true;
     }
 

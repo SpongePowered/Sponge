@@ -45,12 +45,12 @@ public class DefaultIndexedLens extends AbstractLens {
     }
 
     @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
+    public int getRealIndex(Fabric fabric, int ordinal) {
         return ordinal >= this.base + this.size ? -1 : Math.max(-1, this.base + ordinal);
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
-        return new BasicInventoryAdapter(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+        return new BasicInventoryAdapter(fabric, this, parent);
     }
 }
