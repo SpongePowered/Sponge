@@ -59,7 +59,7 @@ public abstract class BlockWallSignMixin extends BlockSignMixin {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
             final net.minecraft.util.Direction facing = Constants.DirectionFunctions.getFor(direction);
-            return Optional.of((BlockState) blockState.func_177226_a(WallSignBlock.FACING, facing));
+            return Optional.of((BlockState) blockState.withProperty(WallSignBlock.FACING, facing));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -69,7 +69,7 @@ public abstract class BlockWallSignMixin extends BlockSignMixin {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
             final net.minecraft.util.Direction facing = Constants.DirectionFunctions.getFor(direction);
-            return Optional.of((BlockState) blockState.func_177226_a(WallSignBlock.FACING, facing));
+            return Optional.of((BlockState) blockState.withProperty(WallSignBlock.FACING, facing));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

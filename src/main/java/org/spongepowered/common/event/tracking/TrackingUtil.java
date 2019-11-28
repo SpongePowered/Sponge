@@ -272,7 +272,7 @@ public final class TrackingUtil {
              final Timing timing = ((TimingBridge) state.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             context.buildAndSwitch();
-            block.func_180650_b(world, pos, state, random);
+            block.updateTick(world, pos, state, random);
         } catch (Exception | NoClassDefFoundError e) {
             PhaseTracker.getInstance().printExceptionFromPhase(e, phaseContext);
 
@@ -306,7 +306,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
         try (final PhaseContext<?> context = phaseContext) {
             context.buildAndSwitch();
-            block.func_180645_a(world, pos, state, random);
+            block.randomTick(world, pos, state, random);
         } catch (Exception | NoClassDefFoundError e) {
             PhaseTracker.getInstance().printExceptionFromPhase(e, phaseContext);
         }
@@ -702,7 +702,7 @@ public final class TrackingUtil {
         final Block newBlock = newState.getBlock();
         if (originalState.getBlock() != newBlock && changeFlag.performBlockPhysics()
             && (!SpongeImplHooks.hasBlockTileEntity(newBlock, newState))) {
-            newBlock.func_176213_c(world, pos, newState);
+            newBlock.onBlockAdded(world, pos, newState);
             ((IPhaseState) phaseContext.state).performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
         }
     }
@@ -720,7 +720,7 @@ public final class TrackingUtil {
             final BlockSnapshot previousNeighbor = context.neighborNotificationSource;
             context.neighborNotificationSource = newBlockSnapshot;
             if (changeFlag.updateNeighbors()) {
-                ((ServerWorld) mixinWorld).func_175722_b(pos, newState.getBlock(), changeFlag.notifyObservers());
+                ((ServerWorld) mixinWorld).notifyNeighborsRespectDebug(pos, newState.getBlock(), changeFlag.notifyObservers());
 
                 if (newState.hasComparatorInputOverride()) {
                     ((ServerWorld) mixinWorld).updateComparatorOutputLevel(pos, newState.getBlock());
@@ -728,7 +728,7 @@ public final class TrackingUtil {
             }
             context.neighborNotificationSource = previousNeighbor;
         } else if (changeFlag.notifyObservers()) {
-            ((net.minecraft.world.World) mixinWorld).func_190522_c(pos, newBlock);
+            ((net.minecraft.world.World) mixinWorld).updateObservingBlocksAt(pos, newBlock);
         }
 
         phaseState.performPostBlockNotificationsAndNeighborUpdates(phaseContext, newState, changeFlag, currentDepth + 1);

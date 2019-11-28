@@ -104,7 +104,7 @@ public abstract class DragonFightManagerMixin implements DragonFightManagerBridg
                     this.generatePortal(false);
                 }
 
-                final List<EnderDragonEntity> list = this.world.func_175644_a(EnderDragonEntity.class, EntityPredicates.IS_ALIVE);
+                final List<EnderDragonEntity> list = this.world.getEntities(EnderDragonEntity.class, EntityPredicates.IS_ALIVE);
 
                 if (list.isEmpty()) {
                     this.dragonKilled = true;
@@ -144,7 +144,7 @@ public abstract class DragonFightManagerMixin implements DragonFightManagerBridg
             if (!this.dragonKilled) {
                 if (this.dragonUniqueId == null || ++this.ticksSinceDragonSeen >= 1200) {
                     this.loadChunks();
-                    final List<EnderDragonEntity> list1 = this.world.func_175644_a(EnderDragonEntity.class, EntityPredicates.IS_ALIVE);
+                    final List<EnderDragonEntity> list1 = this.world.getEntities(EnderDragonEntity.class, EntityPredicates.IS_ALIVE);
 
                     if (list1.isEmpty()) {
                         LOGGER.debug("Haven\'t seen the dragon, respawning it");

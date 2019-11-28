@@ -53,9 +53,9 @@ public class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
         if (projectile.isPresent()) {
             Direction enumfacing = getFacing((DispenserTileEntity) source);
             net.minecraft.entity.Entity projectileEntity = (net.minecraft.entity.Entity) projectile.get();
-            projectileEntity.field_70159_w = enumfacing.getXOffset();
-            projectileEntity.field_70181_x = enumfacing.getYOffset() + 0.1F;
-            projectileEntity.field_70179_y = enumfacing.getZOffset();
+            projectileEntity.motionX = enumfacing.getXOffset();
+            projectileEntity.motionY = enumfacing.getYOffset() + 0.1F;
+            projectileEntity.motionZ = enumfacing.getZOffset();
         }
         return projectile;
     }
@@ -68,9 +68,9 @@ public class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
     @SuppressWarnings("unchecked")
     private <P extends Projectile> Optional<P> launch(DispenserTileEntity dispenser, Class<P> projectileClass, Item item) {
         DefaultDispenseItemBehavior behavior = (DefaultDispenseItemBehavior) DispenserBlock.DISPENSE_BEHAVIOR_REGISTRY.getOrDefault(item);
-        List<Entity> entityList = dispenser.getWorld().field_72996_f;
+        List<Entity> entityList = dispenser.getWorld().loadedEntityList;
         int numEntities = entityList.size();
-        behavior.func_82482_a(new ProxyBlockSource(dispenser.getWorld(), dispenser.getPos()), new ItemStack(item));
+        behavior.dispense(new ProxyBlockSource(dispenser.getWorld(), dispenser.getPos()), new ItemStack(item));
         // Hack - get the projectile that was spawned from dispense()
         for (int i = entityList.size() - 1; i >= numEntities; i--) {
             if (projectileClass.isInstance(entityList.get(i))) {

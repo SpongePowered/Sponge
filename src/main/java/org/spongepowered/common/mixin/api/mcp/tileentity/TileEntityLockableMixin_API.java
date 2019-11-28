@@ -62,7 +62,7 @@ public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
         if (this.code != null) {
-            container.set(Constants.TileEntity.LOCK_CODE, this.code.func_180159_b());
+            container.set(Constants.TileEntity.LOCK_CODE, this.code.getLock());
         }
         final List<DataView> items = Lists.newArrayList();
         for (int i = 0; i < ((IInventory) this).getSizeInventory(); i++) {

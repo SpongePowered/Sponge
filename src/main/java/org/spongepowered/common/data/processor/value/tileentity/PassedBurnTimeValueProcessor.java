@@ -52,16 +52,16 @@ public class PassedBurnTimeValueProcessor extends AbstractSpongeValueProcessor<F
 
     @Override
     protected boolean set(FurnaceTileEntity container, Integer value) {
-        if(value > container.func_174887_a_(1)){ //value cannot be higher than the maximum
+        if(value > container.getField(1)){ //value cannot be higher than the maximum
             return false;
         }
-        container.func_174885_b(0, container.func_174887_a_(1) - value);
+        container.setField(0, container.getField(1) - value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(FurnaceTileEntity container) {
-        return Optional.of(container.func_145950_i() ? container.func_174887_a_(1) - container.func_174887_a_(0) : 0); //When the furnace is not burning, the value is 0
+        return Optional.of(container.isBurning() ? container.getField(1) - container.getField(0) : 0); //When the furnace is not burning, the value is 0
     }
 
     @Override

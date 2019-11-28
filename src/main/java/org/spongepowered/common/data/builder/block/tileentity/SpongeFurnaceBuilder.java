@@ -45,7 +45,7 @@ public class SpongeFurnaceBuilder extends SpongeLockableBuilder<Furnace> {
         return super.buildContent(container).flatMap(furnace -> {
             final FurnaceTileEntity tileEntityFurnace = (FurnaceTileEntity) furnace;
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                tileEntityFurnace.func_145951_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
+                tileEntityFurnace.setCustomInventoryName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
 
             if (!container.contains(Keys.PASSED_BURN_TIME.getQuery(), Keys.MAX_BURN_TIME.getQuery(),
@@ -57,10 +57,10 @@ public class SpongeFurnaceBuilder extends SpongeLockableBuilder<Furnace> {
             final int maxBurnTime = container.getInt(Keys.MAX_BURN_TIME.getQuery()).get();
             final int passedCookTime = container.getInt(Keys.PASSED_COOK_TIME.getQuery()).get();
             final int maxCookTime = container.getInt(Keys.MAX_COOK_TIME.getQuery()).get();
-            tileEntityFurnace.func_174885_b(0, maxBurnTime - burnTime);
-            tileEntityFurnace.func_174885_b(1, maxBurnTime);
-            tileEntityFurnace.func_174885_b(2, passedCookTime);
-            tileEntityFurnace.func_174885_b(3, maxCookTime);
+            tileEntityFurnace.setField(0, maxBurnTime - burnTime);
+            tileEntityFurnace.setField(1, maxBurnTime);
+            tileEntityFurnace.setField(2, passedCookTime);
+            tileEntityFurnace.setField(3, maxCookTime);
             tileEntityFurnace.markDirty();
             return Optional.of(furnace);
         });

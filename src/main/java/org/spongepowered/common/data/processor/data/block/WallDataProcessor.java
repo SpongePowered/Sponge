@@ -44,12 +44,12 @@ public class WallDataProcessor extends AbstractCatalogDataProcessor<WallType, Va
 
     @Override
     protected int setToMeta(WallType value) {
-        return ((WallBlock.EnumType) (Object) value).func_176657_a();
+        return ((WallBlock.EnumType) (Object) value).getMetadata();
     }
 
     @Override
     protected WallType getFromMeta(int meta) {
-        return (WallType) (Object) WallBlock.EnumType.func_176660_a(meta);
+        return (WallType) (Object) WallBlock.EnumType.byMetadata(meta);
     }
 
     @Override

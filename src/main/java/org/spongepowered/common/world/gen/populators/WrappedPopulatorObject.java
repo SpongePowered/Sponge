@@ -61,7 +61,7 @@ public class WrappedPopulatorObject implements PopulatorObject {
 
     @Override
     public void placeObject(World world, Random random, int x, int y, int z) {
-        this.gen.func_180709_b((net.minecraft.world.World) world, random, new BlockPos(x, y, z));
+        this.gen.generate((net.minecraft.world.World) world, random, new BlockPos(x, y, z));
     }
 
 }

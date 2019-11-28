@@ -72,8 +72,8 @@ public abstract class WorldGenBigTreeMixin_API extends AbstractTreeFeature imple
     @Override
     public void placeObject(final World world, final Random random, final int x, final int y, final int z) {
         final BlockPos pos = new BlockPos(x, y, z);
-        func_175904_e();
-        if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
+        setDecorationDefaults();
+        if (generate((net.minecraft.world.World) world, random, pos)) {
             generateSaplings((net.minecraft.world.World) world, random, pos);
         }
     }

@@ -78,9 +78,9 @@ public class ItemDropData {
     public ItemEntity create(ServerWorld worldServer) {
         final ItemEntity entityItem = new ItemEntity(worldServer, this.position.getX(), this.position.getY(), this.position.getZ(), this.stack);
         if (this.motion != Vector3d.ZERO) {
-            entityItem.field_70159_w = this.motion.getX();
-            entityItem.field_70181_x = this.motion.getY();
-            entityItem.field_70179_y = this.motion.getZ();
+            entityItem.motionX = this.motion.getX();
+            entityItem.motionY = this.motion.getY();
+            entityItem.motionZ = this.motion.getZ();
         }
         return entityItem;
     }
@@ -204,7 +204,7 @@ public class ItemDropData {
             final ItemEntity entityItem = super.create(worldServer);
             entityItem.setPickupDelay(40);
             if (this.trace) {
-                entityItem.func_145799_b(this.playerName);
+                entityItem.setThrower(this.playerName);
             }
             return entityItem;
         }
@@ -255,7 +255,7 @@ public class ItemDropData {
             Random random;
 
             Builder(PlayerEntity player) {
-                this.playerName = player.func_70005_c_();
+                this.playerName = player.getName();
                 this.random = ((org.spongepowered.api.entity.Entity) player).getRandom();
             }
 

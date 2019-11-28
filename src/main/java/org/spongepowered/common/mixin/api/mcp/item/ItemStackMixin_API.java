@@ -145,7 +145,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
                 }
             }
             Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
-            if (!compound.func_82582_d()) {
+            if (!compound.isEmpty()) {
                 final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
                 container.set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
             }

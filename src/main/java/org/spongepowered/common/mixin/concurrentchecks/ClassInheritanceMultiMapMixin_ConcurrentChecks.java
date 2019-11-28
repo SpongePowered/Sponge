@@ -39,7 +39,7 @@ public class ClassInheritanceMultiMapMixin_ConcurrentChecks {
     @Inject(method = "addForClass", at = @At("HEAD"), cancellable = true)
     private void concurrentCheck$checkServerThreadedSide(final Object entity, final Class<?> parentClass, final CallbackInfo ci) {
         // This class gets used on the client, but we only care about the server
-        if (!(SpongeImpl.getGame().getPlatform().getExecutionType() == Platform.Type.CLIENT) && !SpongeImpl.getServer().func_152345_ab()) {
+        if (!(SpongeImpl.getGame().getPlatform().getExecutionType() == Platform.Type.CLIENT) && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             Thread.dumpStack();
             SpongeImpl.getLogger().error("Detected attempt to add entity '" + entity + "' to ClassInheritanceMultiMap asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
@@ -50,7 +50,7 @@ public class ClassInheritanceMultiMapMixin_ConcurrentChecks {
 
     @Inject(method = "remove", at = @At("HEAD"), cancellable = true)
     private void concurrentCheck$checkServerThreadSide(final Object entity, final CallbackInfoReturnable<Boolean> cir) {
-        if (!(SpongeImpl.getGame().getPlatform().getExecutionType() == Platform.Type.CLIENT) && !SpongeImpl.getServer().func_152345_ab()) {
+        if (!(SpongeImpl.getGame().getPlatform().getExecutionType() == Platform.Type.CLIENT) && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             Thread.dumpStack();
             SpongeImpl.getLogger().error("Detected attempt to remove entity '" + entity + "' from ClassInheritanceMultiMap asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"

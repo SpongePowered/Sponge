@@ -238,7 +238,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
         // This change is not needed as all worlds in Sponge use separate save handlers.
         final WorldInfo originalWorldInfo = worldIn.getWorldInfo();
-        worldProvider.func_76558_a(worldIn);
+        worldProvider.setWorld(worldIn);
         this.worldInfo = originalWorldInfo;
     }
 
@@ -287,7 +287,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         final ServerWorld overWorld = WorldManager.getWorldByDimensionId(0).orElse(null);
         // if overworld has loaded, use its mapstorage
         if (this.impl$dimensionId != 0 && overWorld != null) {
-            return overWorld.func_175693_T();
+            return overWorld.getMapStorage();
         }
 
         // if we are loading overworld, create a new mapstorage
@@ -305,7 +305,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if ("scoreboard".equals(name) && this.impl$dimensionId != 0) {
             return;
         }
-        storage.func_75745_a(name, data);
+        storage.setData(name, data);
     }
 
     @Redirect(method = "init",
@@ -475,7 +475,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             });
         final BiomeProvider biomeProvider = ((WorldTypeBridge) worldType).bridge$getBiomeProvider()
             .map(func -> func.apply(worldServer))
-            .orElseGet(worldServer.dimension::func_177499_m);
+            .orElseGet(worldServer.dimension::getBiomeProvider);
         return new SpongeWorldGenerator(worldServer, (BiomeGenerator) biomeProvider, SpongeGenerationPopulator.of(worldServer, chunkGenerator));
     }
     /**
@@ -495,11 +495,11 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         final net.minecraft.world.chunk.Chunk chunk = ((ChunkProviderBridge) this.getChunkProvider())
             .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
 
-        if (chunk == null || chunk.field_189550_d) {
+        if (chunk == null || chunk.unloadQueued) {
             return false;
         }
 
-        return chunk.func_177444_d(pos);
+        return chunk.canSeeSky(pos);
     }
 
     @Override
@@ -510,7 +510,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         }
         final Chunk chunk = ((ChunkProviderBridge) ((ServerWorld) (Object) this).getChunkProvider())
             .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
-        if (chunk == null || chunk.field_189550_d) {
+        if (chunk == null || chunk.unloadQueued) {
             cir.setReturnValue(0);
         }
     }
@@ -529,18 +529,18 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
         if (this.worldInfo.getGenerator() == WorldType.DEBUG_ALL_BLOCK_STATES)
         {
-            final Iterator<net.minecraft.world.chunk.Chunk> iterator1 = this.playerChunkMap.func_187300_b();
+            final Iterator<net.minecraft.world.chunk.Chunk> iterator1 = this.playerChunkMap.getChunkIterator();
 
             while (iterator1.hasNext())
             {
-                iterator1.next().func_150804_b(false);
+                iterator1.next().onTick(false);
             }
             return; // Sponge: Add return
         }
         // else // Sponge - Remove unnecessary else
         // { //
 
-        final int i = this.shadow$getGameRules().func_180263_c("randomTickSpeed");
+        final int i = this.shadow$getGameRules().getInt("randomTickSpeed");
         final boolean flag = this.isRaining();
         final boolean flag1 = this.isThundering();
         this.profiler.startSection("pollingChunks");
@@ -552,22 +552,22 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             this.profiler.startSection("getChunk");
             final net.minecraft.world.chunk.Chunk chunk = iterator.next();
             final net.minecraft.world.World world = chunk.getWorld();
-            final int j = chunk.field_76635_g * 16;
-            final int k = chunk.field_76647_h * 16;
-            this.profiler.func_76318_c("checkNextLight");
+            final int j = chunk.x * 16;
+            final int k = chunk.z * 16;
+            this.profiler.endStartSection("checkNextLight");
             this.impl$timings.updateBlocksCheckNextLight.startTiming(); // Sponge - Timings
-            chunk.func_76594_o();
+            chunk.enqueueRelightChecks();
             this.impl$timings.updateBlocksCheckNextLight.stopTiming(); // Sponge - Timings
-            this.profiler.func_76318_c("tickChunk");
+            this.profiler.endStartSection("tickChunk");
             this.impl$timings.updateBlocksChunkTick.startTiming(); // Sponge - Timings
-            chunk.func_150804_b(false);
+            chunk.onTick(false);
             this.impl$timings.updateBlocksChunkTick.stopTiming(); // Sponge - Timings
             // Sponge start - if surrounding neighbors are not loaded, skip
             if (!((ChunkBridge) chunk).bridge$areNeighborsLoaded()) {
                 continue;
             }
             // Sponge end
-            this.profiler.func_76318_c("thunder");
+            this.profiler.endStartSection("thunder");
             // Sponge start
             this.impl$timings.updateBlocksThunder.startTiming();
 
@@ -593,7 +593,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                                 transform =
                                 new Transform<>(((org.spongepowered.api.world.World) this), VecHelper.toVector3d(blockpos).toDouble());
 
-                        if (world.getGameRules().func_82766_b("doMobSpawning") && this.rand.nextDouble() < (double) difficultyinstance.getAdditionalDifficulty() * 0.01D) {
+                        if (world.getGameRules().getBoolean("doMobSpawning") && this.rand.nextDouble() < (double) difficultyinstance.getAdditionalDifficulty() * 0.01D) {
                             // Sponge Start - Throw construction events
                             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 frame.pushCause(((org.spongepowered.api.world.World) this).getWeather());
@@ -654,7 +654,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
                 this.impl$timings.updateBlocksThunder.stopTiming(); // Sponge - Stop thunder timing
                 this.impl$timings.updateBlocksIceAndSnow.startTiming(); // Sponge - Start thunder timing
-                this.profiler.func_76318_c("iceandsnow");
+                this.profiler.endStartSection("iceandsnow");
 
                 // if (this.rand.nextInt(16) == 0) // Sponge - Rewrite to use our boolean, and forge hook
                 if (this.impl$weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.provider, chunk) && this.rand.nextInt(16) == 0) {
@@ -670,10 +670,10 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                     }
 
                     if (flag && this.canSnowAt(blockpos1, true)) {
-                        this.setBlockState(blockpos1, Blocks.field_150431_aC.getDefaultState());
+                        this.setBlockState(blockpos1, Blocks.SNOW_LAYER.getDefaultState());
                     }
 
-                    if (flag && this.getBiome(blockpos2).func_76738_d()) {
+                    if (flag && this.getBiome(blockpos2).canRain()) {
                         this.getBlockState(blockpos2).getBlock().fillWithRain((ServerWorld) (Object) this, blockpos2);
                     }
                 }
@@ -681,7 +681,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
             this.impl$timings.updateBlocksIceAndSnow.stopTiming(); // Sponge - Stop ice and snow timing
             this.impl$timings.updateBlocksRandomTick.startTiming(); // Sponge - Start random block tick timing
-            this.profiler.func_76318_c("tickBlocks");
+            this.profiler.endStartSection("tickBlocks");
 
             if (i > 0)
             {
@@ -706,14 +706,14 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                                 // Remove the random tick for cause tracking
                                 // block.randomTick(this, new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k), iblockstate, this.rand);
 
-                                final BlockPos pos = new BlockPos(k1 + j, i2 + extendedblockstorage.func_76662_d(), l1 + k);
+                                final BlockPos pos = new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k);
                                 final BlockBridge spongeBlock = (BlockBridge) block;
                                 try (final Timing timing = ((TimingBridge) block).bridge$getTimingsHandler()) {
                                     timing.startTiming();
                                     final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
                                     final IPhaseState phaseState = context.state;
                                     if (phaseState.alreadyCapturingBlockTicks(context)) {
-                                        block.func_180645_a(world, pos, iblockstate, this.rand);
+                                        block.randomTick(world, pos, iblockstate, this.rand);
                                     } else {
                                         TrackingUtil.randomTickBlock(this, block, pos, iblockstate, this.rand);
                                     }
@@ -787,7 +787,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState<?> phaseState = context.state;
         if (((IPhaseState) phaseState).alreadyCapturingBlockTicks(context) || ((IPhaseState) phaseState).ignoresBlockUpdateTick(context)) {
-            block.func_180650_b(worldIn, pos, state, rand);
+            block.updateTick(worldIn, pos, state, rand);
             return;
         }
         TrackingUtil.updateTickBlock(this, block, pos, state, rand);
@@ -805,7 +805,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             return;
         }
 
-        sbu.func_82753_a(priority);
+        sbu.setPriority(priority);
         ((NextTickListEntryBridge) sbu).bridge$setWorld((ServerWorld) (Object) this);
         this.impl$tmpScheduledObj = sbu;
     }
@@ -846,7 +846,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState phaseState = context.state;
         if (phaseState.alreadyCapturingBlockTicks(context) || phaseState.ignoresBlockUpdateTick(context)) {
-            block.func_180650_b(worldIn, pos, state, rand);
+            block.updateTick(worldIn, pos, state, rand);
             return;
         }
         TrackingUtil.updateTickBlock(this, block, pos, state, rand);
@@ -1128,19 +1128,19 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         }
 
         final ServerChunkProvider chunkProviderServer = this.getChunkProvider();
-        for (final net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.func_189548_a()) {
+        for (final net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.getLoadedChunks()) {
             final ChunkBridge spongeChunk = (ChunkBridge) chunk;
-            if (chunk.field_189550_d || spongeChunk.bridge$isPersistedChunk() || !this.provider.func_186056_c(chunk.field_76635_g, chunk.field_76647_h)) {
+            if (chunk.unloadQueued || spongeChunk.bridge$isPersistedChunk() || !this.provider.canDropChunk(chunk.x, chunk.z)) {
                 continue;
             }
 
             // If a player is currently using the chunk, skip it
-            if (((PlayerChunkMapBridge) this.getPlayerChunkMap()).bridge$isChunkInUse(chunk.field_76635_g, chunk.field_76647_h)) {
+            if (((PlayerChunkMapBridge) this.getPlayerChunkMap()).bridge$isChunkInUse(chunk.x, chunk.z)) {
                 continue;
             }
 
             // If we reach this point the chunk leaked so queue for unload
-            chunkProviderServer.func_189549_a(chunk);
+            chunkProviderServer.queueUnload(chunk);
             SpongeHooks.logChunkGCQueueUnload((ServerWorld) (Object) this, chunk);
         }
     }
@@ -1168,23 +1168,23 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     {
         final ServerChunkProvider chunkproviderserver = this.getChunkProvider();
 
-        if (chunkproviderserver.func_73157_c())
+        if (chunkproviderserver.canSave())
         {
             final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
             Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPre(currentCause, ((org.spongepowered.api.world.World) this)));
             if (progressCallback != null)
             {
-                progressCallback.func_73720_a("Saving level");
+                progressCallback.displaySavingString("Saving level");
             }
 
             this.saveLevel();
 
             if (progressCallback != null)
             {
-                progressCallback.func_73719_c("Saving chunks");
+                progressCallback.displayLoadingString("Saving chunks");
             }
 
-            chunkproviderserver.func_186027_a(all);
+            chunkproviderserver.saveChunks(all);
             Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPost(currentCause, ((org.spongepowered.api.world.World) this)));
 
             // The chunk GC handles all queuing for chunk unloads so we return here to avoid it during a save.
@@ -1192,11 +1192,11 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                 return;
             }
 
-            for (final Chunk chunk : Lists.newArrayList(chunkproviderserver.func_189548_a()))
+            for (final Chunk chunk : Lists.newArrayList(chunkproviderserver.getLoadedChunks()))
             {
-                if (chunk != null && !this.playerChunkMap.func_152621_a(chunk.field_76635_g, chunk.field_76647_h))
+                if (chunk != null && !this.playerChunkMap.contains(chunk.x, chunk.z))
                 {
-                    chunkproviderserver.func_189549_a(chunk);
+                    chunkproviderserver.queueUnload(chunk);
                 }
             }
         }
@@ -1298,7 +1298,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             // This prevents invisible entities from loading into the world and blocking the position.
             for (final Entity entity : entityList) {
                 if (!chunkLoad.getEntities().contains(entity)) {
-                    ((net.minecraft.world.World) (Object) this).func_72973_f((net.minecraft.entity.Entity) entity);
+                    ((net.minecraft.world.World) (Object) this).removeEntityDangerously((net.minecraft.entity.Entity) entity);
                 }
             }
             callbackInfo.cancel();
@@ -1451,7 +1451,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             }
         }
         // Sponge End
-        this.playEvent(2001, pos, Block.func_176210_f(iblockstate));
+        this.playEvent(2001, pos, Block.getStateId(iblockstate));
 
         if (dropBlock) {
             // Sponge Start - since we are going to perform block drops, we need
@@ -1467,7 +1467,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                 previousPos = null;
             }
             // Sponge End
-            block.func_176226_b((ServerWorld) (Object) this, pos, iblockstate, 0);
+            block.dropBlockAsItem((ServerWorld) (Object) this, pos, iblockstate, 0);
             // Sponge Start
             if (isCapturingBlockDrops) {
                 // we need to reset the capture pos because we've been capturing item and entity drops this way.
@@ -1806,12 +1806,12 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if (chunk == null) {
             return (SpongeBlockSnapshot) BlockSnapshot.NONE;
         }
-        final net.minecraft.block.BlockState blockState = chunk.func_177435_g(pos);
+        final net.minecraft.block.BlockState blockState = chunk.getBlockState(pos);
         builder.worldId(((org.spongepowered.api.world.World) this).getUniqueId());
         builder.position(new Vector3i(pos.getX(), pos.getY(), pos.getZ()));
         builder.blockState(blockState);
         try {
-            builder.extendedState(blockState.func_185899_b((ServerWorld) (Object) this, pos));
+            builder.extendedState(blockState.getActualState((ServerWorld) (Object) this, pos));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1966,7 +1966,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                 return blockState;
             }
             final net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
-            return chunk.func_177435_g(pos);
+            return chunk.getBlockState(pos);
         } finally {
             if (entered) {
                 ((ChunkProviderServerBridge) this.getChunkProvider()).bridge$setForceChunkRequests(forceChunkRequests);
@@ -2041,7 +2041,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @Override
     public int getLight(BlockPos pos, final boolean checkNeighbors) {
         if (((BlockPosBridge) pos).bridge$isValidXZPosition()) { // Sponge - Replace with inlined method
-            if (checkNeighbors && this.getBlockState(pos).func_185916_f()) {
+            if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
                 int i1 = this.getLight(pos.up(), false);
                 final int i = this.getLight(pos.east(), false);
                 final int j = this.getLight(pos.west(), false);
@@ -2110,13 +2110,13 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if (chunk == null) {
             return type.defaultLightValue;
         }
-        return chunk.func_177413_a(type, pos);
+        return chunk.getLightFor(type, pos);
     }
 
     @Override
     public boolean bridge$isLightLevel(final Chunk chunk, BlockPos pos, final int level) {
         if (((BlockPosBridge) pos).bridge$isValidPosition()) {
-            if (this.getBlockState(pos).func_185916_f()) {
+            if (this.getBlockState(pos).useNeighborBrightness()) {
                 if (this.getLight(pos.up(), false) >= level) {
                     return true;
                 }
@@ -2492,7 +2492,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     private void setMemoryViewDistance(final int viewDistance) {
-        this.playerChunkMap.func_152622_a(viewDistance);
+        this.playerChunkMap.setPlayerViewRadius(viewDistance);
     }
 
     private int chooseViewDistanceValue(final int value) {

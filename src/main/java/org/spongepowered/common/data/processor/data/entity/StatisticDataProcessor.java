@@ -83,7 +83,7 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<Se
         final Map<Stat, TupleIntJsonSerializable> data = ((StatisticsManagerBridge) stats).bridge$getStatsData();
         final Map<Statistic, Long> statMap = Maps.newHashMap();
         for (final Entry<Stat, TupleIntJsonSerializable> statEntry : data.entrySet()) {
-            statMap.put((Statistic) statEntry.getKey(), (long) statEntry.getValue().func_151189_a());
+            statMap.put((Statistic) statEntry.getKey(), (long) statEntry.getValue().getIntegerValue());
         }
         return Optional.of(statMap);
     }

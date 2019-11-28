@@ -46,7 +46,7 @@ public interface EntityVillager_ITradeListMixin_API extends TradeOfferListMutato
         for (final TradeOffer offer : tradeOffers) {
             tempList.add(TradeOfferUtil.toNative(offer));
         }
-        func_190888_a((IMerchant) owner, tempList, random);
+        addMerchantRecipe((IMerchant) owner, tempList, random);
         tradeOffers.clear();
         for (final MerchantRecipe recipe : tempList) {
             tradeOffers.add(TradeOfferUtil.fromNative(recipe));

@@ -91,7 +91,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
         try {
             // If the returned NBT is empty, then we should warn the user.
             CompoundNBT spongeRootLevelNBT = ((WorldInfoBridge) worldInformation).bridge$getSpongeRootLevelNbt();
-            if (spongeRootLevelNBT.func_82582_d()) {
+            if (spongeRootLevelNBT.isEmpty()) {
                 Integer dimensionId = ((WorldInfoBridge) worldInformation).bridge$getDimensionId();
                 String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
 
@@ -333,7 +333,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
         ((WorldInfoBridge) info).bridge$setSpongeRootLevelNBT(compound);
         if (compound.contains(Constants.Sponge.SPONGE_DATA)) {
             final CompoundNBT spongeCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
-            DataUtil.spongeDataFixer.func_188257_a(FixTypes.LEVEL, spongeCompound);
+            DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
             ((WorldInfoBridge) info).bridge$readSpongeNbt(spongeCompound);
         }
 

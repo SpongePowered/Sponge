@@ -147,7 +147,7 @@ public final class SpongeImplHooks {
     // Entity
 
     public static boolean isCreatureOfType(final Entity entity, final EntityClassification type) {
-        return type.func_75598_a().isAssignableFrom(entity.getClass());
+        return type.getCreatureClass().isAssignableFrom(entity.getClass());
     }
 
     public static boolean isFakePlayer(final Entity entity) {
@@ -178,16 +178,16 @@ public final class SpongeImplHooks {
 
     @Nullable
     public static Class<? extends Entity> getEntityClass(final ResourceLocation name) {
-        return EntityList.field_191308_b.getOrDefault(name);
+        return EntityList.REGISTRY.getOrDefault(name);
     }
 
     @Nullable
     public static String getEntityTranslation(final ResourceLocation name) {
-        return EntityList.func_191302_a(name);
+        return EntityList.getTranslationName(name);
     }
 
     public static int getEntityId(final Class<? extends Entity> entityClass) {
-        return EntityList.field_191308_b.getId(entityClass);
+        return EntityList.REGISTRY.getId(entityClass);
     }
 
     // Block
@@ -197,7 +197,7 @@ public final class SpongeImplHooks {
     }
 
     public static int getBlockLightOpacity(final BlockState state, final IBlockAccess world, final BlockPos pos) {
-        return state.func_185891_c();
+        return state.getLightOpacity();
     }
 
 	public static int getChunkPosLight(final BlockState blockState, final World world, final BlockPos pos) {
@@ -208,7 +208,7 @@ public final class SpongeImplHooks {
     @Nullable
     public static TileEntity createTileEntity(final Block block, final net.minecraft.world.World world, final BlockState state) {
         if (block instanceof ITileEntityProvider) {
-            return ((ITileEntityProvider) block).func_149915_a(world, block.func_176201_c(state));
+            return ((ITileEntityProvider) block).createNewTileEntity(world, block.getMetaFromState(state));
         }
         return null;
     }
@@ -228,7 +228,7 @@ public final class SpongeImplHooks {
     // World
 
     public static Iterator<Chunk> getChunkIterator(final ServerWorld world) {
-        return world.func_184164_w().func_187300_b();
+        return world.getPlayerChunkMap().getChunkIterator();
     }
 
     public static void registerPortalAgentType(@Nullable final ForgeITeleporterBridge teleporter) {
@@ -265,7 +265,7 @@ public final class SpongeImplHooks {
                 spawnFuzz = 2;
             }
             final int spawnFuzzHalf = spawnFuzz / 2;
-            ret = world.func_175672_r(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
+            ret = world.getTopSolidOrLiquidBlock(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
         }
 
         return ret;
@@ -281,11 +281,11 @@ public final class SpongeImplHooks {
     }
 
     public static MapStorage getWorldMapStorage(final World world) {
-        return world.func_175693_T();
+        return world.getMapStorage();
     }
 
     public static int countEntities(final ServerWorld worldServer, final net.minecraft.entity.EntityClassification type, final boolean forSpawnCount) {
-        return worldServer.func_72907_a(type.func_75598_a());
+        return worldServer.countEntities(type.getCreatureClass());
     }
 
     public static int getMaxSpawnPackSize(final MobEntity entityLiving) {
@@ -293,7 +293,7 @@ public final class SpongeImplHooks {
     }
 
     public static SpawnerSpawnType canEntitySpawnHere(final MobEntity entityLiving, final boolean entityNotColliding) {
-        if (entityLiving.func_70601_bi() && entityNotColliding) {
+        if (entityLiving.getCanSpawnHere() && entityNotColliding) {
             return SpawnerSpawnType.NORMAL;
         }
         return SpawnerSpawnType.NONE;
@@ -305,7 +305,7 @@ public final class SpongeImplHooks {
         try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
                 .source(task))  {
             context.buildAndSwitch();
-            final Object o = Util.func_181617_a(task, logger);
+            final Object o = Util.runTask(task, logger);
             return o;
         } catch (Exception e) {
             phaseTracker
@@ -324,7 +324,7 @@ public final class SpongeImplHooks {
     }
 
     public static void blockExploded(final Block block, final World world, final BlockPos blockpos, final Explosion explosion) {
-        world.func_175698_g(blockpos);
+        world.setBlockToAir(blockpos);
         block.onExplosionDestroy(world, blockpos, explosion);
     }
 
@@ -375,16 +375,16 @@ public final class SpongeImplHooks {
     }
 
     public static Optional<CraftingRecipe> findMatchingRecipe(final CraftingGridInventory inventory, final org.spongepowered.api.world.World world) {
-        final IRecipe recipe = CraftingManager.func_192413_b(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
+        final IRecipe recipe = CraftingManager.findMatchingRecipe(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
         return Optional.ofNullable(((CraftingRecipe) recipe));
     }
 
     public static Collection<CraftingRecipe> getCraftingRecipes() {
-        return Streams.stream(CraftingManager.field_193380_a.iterator()).map(CraftingRecipe.class::cast).collect(ImmutableList.toImmutableList());
+        return Streams.stream(CraftingManager.REGISTRY.iterator()).map(CraftingRecipe.class::cast).collect(ImmutableList.toImmutableList());
     }
 
     public static Optional<CraftingRecipe> getRecipeById(final String id) {
-        final IRecipe recipe = CraftingManager.field_193380_a.getOrDefault(new ResourceLocation(id));
+        final IRecipe recipe = CraftingManager.REGISTRY.getOrDefault(new ResourceLocation(id));
         if (recipe == null) {
             return Optional.empty();
         }
@@ -392,7 +392,7 @@ public final class SpongeImplHooks {
     }
 
     public static void register(final ResourceLocation name, final IRecipe recipe) {
-        CraftingManager.func_193372_a(name, recipe);
+        CraftingManager.register(name, recipe);
     }
 
     @Nullable
@@ -418,7 +418,7 @@ public final class SpongeImplHooks {
     public static RayTraceResult rayTraceEyes(final LivingEntity entity, final double length) {
         final Vec3d startPos = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
         final Vec3d endPos = startPos.add(entity.getLookVec().scale(length));
-        return entity.world.func_72933_a(startPos, endPos);
+        return entity.world.rayTraceBlocks(startPos, endPos);
     }
 
     public static boolean shouldKeepSpawnLoaded(final net.minecraft.world.dimension.DimensionType dimensionType, final int dimensionId) {
@@ -698,7 +698,7 @@ public final class SpongeImplHooks {
      */
     @Nullable
     public static ResourceLocation getItemResourceLocation(final Item mixinItem_api) {
-        return Item.field_150901_e.getKey(mixinItem_api);
+        return Item.REGISTRY.getKey(mixinItem_api);
     }
 
     public static void registerItemForSpongeRegistry(final int id, final ResourceLocation textualID, final Item itemIn) {

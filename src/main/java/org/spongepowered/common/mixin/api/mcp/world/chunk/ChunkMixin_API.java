@@ -155,9 +155,9 @@ public abstract class ChunkMixin_API implements Chunk {
     public boolean loadChunk(final boolean generate) {
         final ServerWorld worldserver = (ServerWorld) this.world;
         if (!generate) {
-            return worldserver.getChunkProvider().func_186028_c(this.x, this.z) != null;
+            return worldserver.getChunkProvider().loadChunk(this.x, this.z) != null;
         }
-        return worldserver.getChunkProvider().func_186025_d(this.x, this.z) != null;
+        return worldserver.getChunkProvider().provideChunk(this.x, this.z) != null;
     }
 
     @Override
@@ -167,7 +167,7 @@ public abstract class ChunkMixin_API implements Chunk {
         }
         // Spawn point checks occur in queueUnload() and are reflected in
         // this.unloadQueued.
-        ((ServerWorld) this.world).getChunkProvider().func_189549_a((net.minecraft.world.chunk.Chunk) (Object) this);
+        ((ServerWorld) this.world).getChunkProvider().queueUnload((net.minecraft.world.chunk.Chunk) (Object) this);
         return this.unloadQueued;
     }
 
@@ -212,7 +212,7 @@ public abstract class ChunkMixin_API implements Chunk {
     @Override
     public BiomeType getBiome(final int x, final int y, final int z) {
         checkBiomeBounds(x, y, z);
-        return (BiomeType) getBiome(new BlockPos(x, y, z), this.world.func_72959_q());
+        return (BiomeType) getBiome(new BlockPos(x, y, z), this.world.getBiomeProvider());
     }
 
     @Override
@@ -222,11 +222,11 @@ public abstract class ChunkMixin_API implements Chunk {
         final byte[] biomeArray = getBiomeArray();
         final int i = x & 15;
         final int j = z & 15;
-        biomeArray[j << 4 | i] = (byte) (Biome.func_185362_a((Biome) biome) & 255);
+        biomeArray[j << 4 | i] = (byte) (Biome.getIdForBiome((Biome) biome) & 255);
         setBiomeArray(biomeArray);
 
         if (this.world instanceof ServerWorld) {
-            final PlayerChunkMapEntry entry = ((ServerWorld) this.world).func_184164_w().func_187301_b(this.x, this.z);
+            final PlayerChunkMapEntry entry = ((ServerWorld) this.world).getPlayerChunkMap().getEntry(this.x, this.z);
             if (entry != null) {
                 ((PlayerChunkMapEntryBridge) entry).bridge$markBiomesForUpdate();
             }

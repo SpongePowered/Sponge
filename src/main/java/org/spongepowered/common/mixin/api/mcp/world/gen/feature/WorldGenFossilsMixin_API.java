@@ -55,7 +55,7 @@ public abstract class WorldGenFossilsMixin_API extends Feature implements Fossil
         int z = volume.getBlockMin().getZ();
         // Here, we want to reset the coordinates to the origin point or (0,0) in relation to the
         // chunk being generated.
-        func_180709_b((net.minecraft.world.World) world, random, new BlockPos((x >> 4) << 4, 0, (z >> 4) << 4));
+        generate((net.minecraft.world.World) world, random, new BlockPos((x >> 4) << 4, 0, (z >> 4) << 4));
     }
 
     @Override

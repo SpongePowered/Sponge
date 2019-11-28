@@ -259,7 +259,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                         }
 
                         ((ServerWorld) location.getExtent()).getChunkProvider()
-                            .func_186028_c(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
+                            .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
                     }
                     player.connection
                         .setPlayerLocation(location.getX(), location.getY(), location.getZ(), ((Entity) (Object) this).rotationYaw,
@@ -597,7 +597,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         try {
             final CompoundNBT compound = new CompoundNBT();
             writeToNBT(compound);
-            final Entity entity = EntityList.func_188429_b(new ResourceLocation(this.entityType.getId()), this.world);
+            final Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(this.entityType.getId()), this.world);
             compound.putUniqueId(Constants.UUID, entity.getUniqueID());
             entity.read(compound);
             return (org.spongepowered.api.entity.Entity) entity;

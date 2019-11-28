@@ -58,17 +58,17 @@ public abstract class BlockDoubleStoneSlabMixin extends BlockStoneSlabMixin {
     private ImmutableSlabData impl$getSlabTypeFor(final BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSlabData.class,
                 blockState.getBlock() instanceof BlockStoneSlab
-                        ? (SlabType) (Object) blockState.get(BlockStoneSlab.field_176556_M)
+                        ? (SlabType) (Object) blockState.get(BlockStoneSlab.VARIANT)
                         : blockState.getBlock() instanceof BlockStoneSlabNew
-                                ? (SlabType) (Object) blockState.get(BlockStoneSlabNew.field_176559_M)
+                                ? (SlabType) (Object) blockState.get(BlockStoneSlabNew.VARIANT)
                                 : SlabTypes.COBBLESTONE);
     }
 
     private ImmutableSeamlessData impl$getIsSeamlessFor(final BlockState blockState) {
         if (blockState.getBlock() instanceof BlockStoneSlab) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.get(BlockStoneSlab.field_176555_b));
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.get(BlockStoneSlab.SEAMLESS));
         }
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.get(BlockStoneSlabNew.field_176558_b));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.get(BlockStoneSlabNew.SEAMLESS));
     }
 
 }

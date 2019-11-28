@@ -129,21 +129,21 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
             final ListNBT newList = new ListNBT();
             final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(this.bridge$getCustomManipulators());
             for (DataView dataView : manipulatorViews) {
-                newList.func_74742_a(NbtTranslator.getInstance().translateData(dataView));
+                newList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
             final CompoundNBT spongeCompound = getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
-            spongeCompound.func_74782_a(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, newList);
+            spongeCompound.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else if (!this.failedData.isEmpty()) {
             final ListNBT newList = new ListNBT();
             for (DataView failedDatum : this.failedData) {
-                newList.func_74742_a(NbtTranslator.getInstance().translateData(failedDatum));
+                newList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
             }
             final CompoundNBT spongeCompound = getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
-            spongeCompound.func_74782_a(Constants.Sponge.FAILED_CUSTOM_DATA, newList);
+            spongeCompound.setTag(Constants.Sponge.FAILED_CUSTOM_DATA, newList);
         } else {
             if (hasTagCompound()) {
                 this.getTagCompound().remove(Constants.Sponge.SPONGE_DATA);
-                if (this.getTagCompound().func_82582_d()) {
+                if (this.getTagCompound().isEmpty()) {
                     this.setTagCompound(null);
                 }
             }

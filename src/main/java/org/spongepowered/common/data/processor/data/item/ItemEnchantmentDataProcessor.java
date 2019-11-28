@@ -84,11 +84,11 @@ public class ItemEnchantmentDataProcessor
             for (final Map.Entry<EnchantmentType, Integer> entry : valueMap.entrySet()) {
                 final CompoundNBT enchantmentCompound = new CompoundNBT();
                 enchantmentCompound.putShort(Constants.Item.ITEM_ENCHANTMENT_ID,
-                    (short) net.minecraft.enchantment.Enchantment.func_185258_b((net.minecraft.enchantment.Enchantment) entry.getKey()));
+                    (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
                 enchantmentCompound.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
-                newList.func_74742_a(enchantmentCompound);
+                newList.appendTag(enchantmentCompound);
             }
-            compound.func_74782_a(Constants.Item.ITEM_ENCHANTMENT_LIST, newList);
+            compound.setTag(Constants.Item.ITEM_ENCHANTMENT_LIST, newList);
         }
 
         return true;

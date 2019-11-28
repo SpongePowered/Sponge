@@ -64,11 +64,11 @@ public abstract class BlockPistonMovingMixin extends BlockMixin {
         if (manipulator instanceof ImmutablePistonData) {
             final PistonHeadBlock.EnumPistonType pistonType =
                     (PistonHeadBlock.EnumPistonType) (Object) ((ImmutablePistonData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(MovingPistonBlock.field_176425_b, pistonType));
+            return Optional.of((BlockState) blockState.withProperty(MovingPistonBlock.TYPE, pistonType));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            return Optional.of((BlockState) blockState.func_177226_a(MovingPistonBlock.field_176426_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(MovingPistonBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -77,11 +77,11 @@ public abstract class BlockPistonMovingMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.PISTON_TYPE)) {
             final PistonHeadBlock.EnumPistonType pistonType = (PistonHeadBlock.EnumPistonType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(MovingPistonBlock.field_176425_b, pistonType));
+            return Optional.of((BlockState) blockState.withProperty(MovingPistonBlock.TYPE, pistonType));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            return Optional.of((BlockState) blockState.func_177226_a(MovingPistonBlock.field_176426_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(MovingPistonBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -89,11 +89,11 @@ public abstract class BlockPistonMovingMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutablePistonData impl$getPistonTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePistonData.class,
-                (PistonType) (Object) blockState.get(MovingPistonBlock.field_176425_b));
+                (PistonType) (Object) blockState.get(MovingPistonBlock.TYPE));
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.get(MovingPistonBlock.field_176426_a)));
+                Constants.DirectionFunctions.getFor(blockState.get(MovingPistonBlock.FACING)));
     }
 }

@@ -87,9 +87,9 @@ public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalo
         register(new PointyTaigaTreeFeature());
         register(new MegaPineTree(false, true));
         register(new MegaPineTree(false, false));
-        BlockState jlog = Blocks.field_150364_r.getDefaultState().func_177226_a(BlockOldLog.field_176301_b, BlockPlanks.EnumType.JUNGLE);
-        BlockState jleaf = Blocks.field_150362_t.getDefaultState().func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE).func_177226_a(LeavesBlock.field_176236_b, Boolean.valueOf(false));
-        BlockState leaf = Blocks.field_150362_t.getDefaultState().func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE).func_177226_a(LeavesBlock.field_176236_b, Boolean.valueOf(false));
+        BlockState jlog = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+        BlockState jleaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(LeavesBlock.CHECK_DECAY, Boolean.valueOf(false));
+        BlockState leaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(LeavesBlock.CHECK_DECAY, Boolean.valueOf(false));
         WorldGenTreesBridge trees = (WorldGenTreesBridge) new TreeFeature(false, 4, jlog, jleaf, true);
         trees.bridge$setId("minecraft:jungle");
         trees.bridge$setName("Jungle tree");

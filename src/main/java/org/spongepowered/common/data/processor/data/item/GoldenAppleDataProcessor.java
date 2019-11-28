@@ -59,13 +59,13 @@ public class GoldenAppleDataProcessor
 
     @Override
     protected boolean set(ItemStack itemStack, GoldenApple value) {
-        itemStack.func_77964_b(((SpongeGoldenApple) value).type);
+        itemStack.setItemDamage(((SpongeGoldenApple) value).type);
         return true;
     }
 
     @Override
     protected Optional<GoldenApple> getVal(ItemStack itemStack) {
-        return Optional.of(Iterables.get(SpongeImpl.getRegistry().getAllOf(GoldenApple.class), itemStack.func_77960_j()));
+        return Optional.of(Iterables.get(SpongeImpl.getRegistry().getAllOf(GoldenApple.class), itemStack.getMetadata()));
     }
 
     @Override

@@ -59,13 +59,13 @@ public class SkullUtils {
     }
 
     public static boolean isValidItemStack(final Object container) {
-        return container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.field_151144_bL);
+        return container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.SKULL);
     }
 
     public static boolean setProfile(final SkullTileEntity tileEntitySkull, @Nullable final GameProfile profile) {
-        if (SkullUtils.getSkullType(tileEntitySkull.func_145904_a()).equals(SkullTypes.PLAYER)) {
+        if (SkullUtils.getSkullType(tileEntitySkull.getSkullType()).equals(SkullTypes.PLAYER)) {
             final GameProfile newProfile = SpongeRepresentedPlayerData.NULL_PROFILE.equals(profile) ? null : resolveProfileIfNecessary(profile);
-            tileEntitySkull.func_152106_a((com.mojang.authlib.GameProfile) newProfile);
+            tileEntitySkull.setPlayerProfile((com.mojang.authlib.GameProfile) newProfile);
             tileEntitySkull.markDirty();
             tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
                     .getBlockState(tileEntitySkull.getPos()), 3);
@@ -75,7 +75,7 @@ public class SkullUtils {
     }
 
     public static boolean setProfile(final ItemStack skull, @Nullable final GameProfile profile) {
-        if (isValidItemStack(skull) && SkullUtils.getSkullType(skull.func_77960_j()).equals(SkullTypes.PLAYER)) {
+        if (isValidItemStack(skull) && SkullUtils.getSkullType(skull.getMetadata()).equals(SkullTypes.PLAYER)) {
             if (profile == null || profile.equals(SpongeRepresentedPlayerData.NULL_PROFILE)) {
                 if (skull.getTag() != null) {
                     skull.getTag().remove(Constants.Item.Skull.ITEM_SKULL_OWNER);

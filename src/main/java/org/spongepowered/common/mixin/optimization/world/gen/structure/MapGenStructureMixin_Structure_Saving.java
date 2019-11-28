@@ -110,7 +110,7 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
             // Sponge start - check if structure is allowed to save
             if (this.structureSaving$canSaveStructures) {
                 // use hook since Forge supports per-world map storage
-                this.structureData = (StructureSavedData)SpongeImplHooks.getWorldMapStorage(worldIn).func_75742_a(StructureSavedData.class, this.getStructureName());
+                this.structureData = (StructureSavedData)SpongeImplHooks.getWorldMapStorage(worldIn).getOrLoadData(StructureSavedData.class, this.getStructureName());
             }
             else
             {
@@ -121,11 +121,11 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
             if (this.structureData == null)
             {
                 this.structureData = new StructureSavedData(this.getStructureName());
-                worldIn.func_72823_a(this.getStructureName(), this.structureData);
+                worldIn.setData(this.getStructureName(), this.structureData);
             }
             else
             {
-                final CompoundNBT nbttagcompound = this.structureData.func_143041_a();
+                final CompoundNBT nbttagcompound = this.structureData.getTagCompound();
 
                 for (final String s : nbttagcompound.keySet())
                 {
@@ -139,7 +139,7 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
                         {
                             final int i = nbttagcompound1.getInt("ChunkX");
                             final int j = nbttagcompound1.getInt("ChunkZ");
-                            final StructureStart structurestart = StructureIO.func_143035_a(nbttagcompound1, worldIn);
+                            final StructureStart structurestart = StructureIO.getStructureStart(nbttagcompound1, worldIn);
 
                             if (structurestart != null)
                             {

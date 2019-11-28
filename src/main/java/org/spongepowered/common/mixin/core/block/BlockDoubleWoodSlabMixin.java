@@ -51,6 +51,6 @@ public abstract class BlockDoubleWoodSlabMixin extends BlockWoodSlabMixin {
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableTreeData impl$getTreeTypeFor(final BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.get(BlockPlanks.field_176383_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.get(BlockPlanks.VARIANT));
     }
 }

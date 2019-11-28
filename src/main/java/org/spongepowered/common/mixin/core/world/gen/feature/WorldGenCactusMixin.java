@@ -66,7 +66,7 @@ public abstract class WorldGenCactusMixin extends WorldGeneratorMixin {
         if (worldIn.isAirBlock(position)) {
             final int height = ((Cactus) this).getHeight().getFlooredAmount(rand);
             for (int k = 0; k < height; ++k) {
-                if (Blocks.CACTUS.func_176586_d(worldIn, position)) {
+                if (Blocks.CACTUS.canBlockStay(worldIn, position)) {
                     worldIn.setBlockState(position.up(k), Blocks.CACTUS.getDefaultState(), 2);
                 } else {
                     break;

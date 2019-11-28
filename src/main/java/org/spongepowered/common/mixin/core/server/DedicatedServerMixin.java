@@ -72,10 +72,10 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/PropertyManager;getIntProperty(Ljava/lang/String;I)I"))
     private int fixWrongDefaultDifficulty(final PropertyManager propertyManager, final String key, final int defaultValue) {
         if ("difficulty".equalsIgnoreCase(key)) {
-            return propertyManager.func_73669_a(key, WorldInfo.DEFAULT_DIFFICULTY.getId());
+            return propertyManager.getIntProperty(key, WorldInfo.DEFAULT_DIFFICULTY.getId());
         }
 
-        return propertyManager.func_73669_a(key, defaultValue);
+        return propertyManager.getIntProperty(key, defaultValue);
     }
 
     /**

@@ -50,15 +50,15 @@ public class SnowPopulator implements Populator {
         BlockPos blockpos = new BlockPos(min.getX(), min.getY(), min.getZ());
         for (int x = 0; x < size.getX(); ++x) {
             for (int y = 0; y < size.getZ(); ++y) {
-                BlockPos blockpos1 = worldObj.func_175725_q(blockpos.add(x, 0, y));
+                BlockPos blockpos1 = worldObj.getPrecipitationHeight(blockpos.add(x, 0, y));
                 BlockPos blockpos2 = blockpos1.down();
 
-                if (worldObj.func_175675_v(blockpos2)) {
+                if (worldObj.canBlockFreezeWater(blockpos2)) {
                     worldObj.setBlockState(blockpos2, Blocks.ICE.getDefaultState(), 2);
                 }
 
-                if (worldObj.func_175708_f(blockpos1, true)) {
-                    worldObj.setBlockState(blockpos1, Blocks.field_150431_aC.getDefaultState(), 2);
+                if (worldObj.canSnowAt(blockpos1, true)) {
+                    worldObj.setBlockState(blockpos1, Blocks.SNOW_LAYER.getDefaultState(), 2);
                 }
             }
         }

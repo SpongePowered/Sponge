@@ -199,7 +199,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
         ((ScoreboardBridge) this).accessor$getTeams().put(team.getName(), team);
 
         for (final String entry: team.getMembershipCollection()) {
-            this.func_151392_a(entry, team.getName());
+            this.addPlayerToTeam(entry, team.getName());
         }
         this.onTeamAdded(team);
     }

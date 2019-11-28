@@ -56,7 +56,7 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
     @Override
     public boolean set(ItemStack container, Boolean value) {
         if (value) {
-            container.func_77964_b(0);
+            container.setItemDamage(0);
         }
         if (!container.hasTag()) {
             container.setTag(new CompoundNBT());

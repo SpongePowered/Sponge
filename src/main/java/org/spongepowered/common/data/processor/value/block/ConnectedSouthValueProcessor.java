@@ -54,8 +54,8 @@ public class ConnectedSouthValueProcessor extends
 
     @Override
     protected Optional<Boolean> getVal(ChestTileEntity container) {
-        container.func_145979_i();
-        return Optional.of(container.field_145988_l != null);
+        container.checkForAdjacentChests();
+        return Optional.of(container.adjacentChestZPos != null);
     }
 
     @Override

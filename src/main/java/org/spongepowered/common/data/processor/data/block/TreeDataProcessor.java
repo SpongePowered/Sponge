@@ -62,12 +62,12 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
 
     @Override
     protected int setToMeta(TreeType value) {
-        return ((BlockPlanks.EnumType) (Object) value).func_176839_a();
+        return ((BlockPlanks.EnumType) (Object) value).getMetadata();
     }
 
     @Override
     protected TreeType getFromMeta(int meta) {
-        return (TreeType) (Object) BlockPlanks.EnumType.func_176837_a(meta);
+        return (TreeType) (Object) BlockPlanks.EnumType.byMetadata(meta);
     }
 
     @Override
@@ -94,18 +94,18 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
             if (value == TreeTypes.ACACIA || value == TreeTypes.DARK_OAK) {
                 return false; // TODO
             }
-            stack.func_77964_b(this.setToMeta(value));
+            stack.setItemDamage(this.setToMeta(value));
             return true;
         }
         else if (stack.getItem() == ItemTypes.LOG2 || stack.getItem() == ItemTypes.LEAVES2) {
             if (value == TreeTypes.OAK || value == TreeTypes.SPRUCE || value == TreeTypes.BIRCH || value == TreeTypes.JUNGLE) {
                 return false; // TODO
             }
-            stack.func_77964_b(this.setToMeta(value) - 4);
+            stack.setItemDamage(this.setToMeta(value) - 4);
             return true;
         }
         else {
-            stack.func_77964_b(this.setToMeta(value));
+            stack.setItemDamage(this.setToMeta(value));
             return true;
         }
     }

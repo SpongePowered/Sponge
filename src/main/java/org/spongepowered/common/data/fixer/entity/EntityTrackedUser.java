@@ -34,12 +34,12 @@ import java.util.UUID;
 public class EntityTrackedUser implements IFixableData {
 
     @Override
-    public int func_188216_a() {
+    public int getFixVersion() {
         return Constants.Legacy.Entity.TRACKER_ID_VERSION;
     }
 
     @Override
-    public CompoundNBT func_188217_a(CompoundNBT compound) {
+    public CompoundNBT fixTagCompound(CompoundNBT compound) {
         final NBTBase forgeCompound = compound.get(Constants.Forge.FORGE_DATA);
         if (forgeCompound != null) {
             final CompoundNBT forgeData = (CompoundNBT) forgeCompound;

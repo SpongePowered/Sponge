@@ -60,11 +60,11 @@ public abstract class BlockButtonMixin extends BlockMixin {
     @Override
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.func_177226_a(AbstractButtonBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.withProperty(AbstractButtonBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            return Optional.of((BlockState) blockState.func_177226_a(DirectionalBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(DirectionalBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -72,11 +72,11 @@ public abstract class BlockButtonMixin extends BlockMixin {
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.func_177226_a(AbstractButtonBlock.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.withProperty(AbstractButtonBlock.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            return Optional.of((BlockState) blockState.func_177226_a(DirectionalBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(DirectionalBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

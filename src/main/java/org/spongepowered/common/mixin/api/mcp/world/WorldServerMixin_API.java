@@ -178,7 +178,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public boolean save() throws IOException {
-        if (!getChunkProvider().func_73157_c()) {
+        if (!getChunkProvider().canSave()) {
             return false;
         }
 
@@ -251,8 +251,8 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             final ServerChunkProvider chunkProviderServer = (ServerChunkProvider) chunk.getWorld().getChunkProvider();
             ((ChunkProviderServerBridge) chunkProviderServer).bridge$unloadChunkAndSave(chunk);
             // TODO - Move to accessor with Mixin 0.8
-            final net.minecraft.world.chunk.Chunk newChunk = ((ChunkProviderServerBridge) chunkProviderServer).accessor$getChunkGenerator().func_185932_a(cx, cz);
-            final PlayerChunkMapEntry playerChunk = ((ServerWorld) chunk.getWorld()).func_184164_w().func_187301_b(cx, cz);
+            final net.minecraft.world.chunk.Chunk newChunk = ((ChunkProviderServerBridge) chunkProviderServer).accessor$getChunkGenerator().generateChunk(cx, cz);
+            final PlayerChunkMapEntry playerChunk = ((ServerWorld) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
             if (playerChunk != null) {
                 ((PlayerChunkMapEntryBridge) playerChunk).bridge$setChunk(newChunk);
             }
@@ -260,7 +260,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             if (newChunk != null) {
                 final ServerWorld world = (ServerWorld) newChunk.getWorld();
                 ((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getLoadedChunks().put(ChunkPos.asLong(cx, cz), newChunk);
-                newChunk.func_76631_c();
+                newChunk.onLoad();
                 ((ChunkBridge) newChunk).accessor$populate(((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getChunkGenerator());
                 for (final net.minecraft.entity.Entity entity: entityList) {
                     newChunk.addEntity(entity);
@@ -270,7 +270,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
                     return Optional.of((org.spongepowered.api.world.Chunk) newChunk);
                 }
 
-                final PlayerChunkMapEntry playerChunkMapEntry = ((ServerWorld) newChunk.getWorld()).func_184164_w().func_187301_b(cx, cz);
+                final PlayerChunkMapEntry playerChunkMapEntry = ((ServerWorld) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
                 if (playerChunkMapEntry != null) {
                     final List<ServerPlayerEntity> chunkPlayers = ((PlayerChunkMapEntryBridge) playerChunkMapEntry).accessor$getPlayers();
                     // We deliberately send two packets, to avoid sending a 'fullChunk' packet
@@ -323,10 +323,10 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         builder.worldId(this.getUniqueId())
             .position(new Vector3i(x, y, z));
         final Chunk chunk = this.getChunk(pos);
-        final net.minecraft.block.BlockState state = chunk.func_186032_a(x, y, z);
+        final net.minecraft.block.BlockState state = chunk.getBlockState(x, y, z);
         builder.blockState(state);
         try {
-            builder.extendedState((BlockState) state.func_185899_b((ServerWorld) (Object) this, pos));
+            builder.extendedState((BlockState) state.getActualState((ServerWorld) (Object) this, pos));
         } catch (Throwable throwable) {
             // do nothing
         }
@@ -457,7 +457,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         final SoundEvent event;
         try {
             // Check if the event is registered (ie has an integer ID)
-            event = SoundEvents.func_187510_a(sound.getId());
+            event = SoundEvents.getRegisteredSoundEvent(sound.getId());
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
             this.eventListeners.stream()
@@ -618,7 +618,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     @SuppressWarnings("deprecation")
     @Override
     public void setViewDistance(final int viewDistance) {
-        this.playerChunkMap.func_152622_a(viewDistance);
+        this.playerChunkMap.setPlayerViewRadius(viewDistance);
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.getWorldInfo()).bridge$getConfigAdapter();
         // don't use the parameter, use the field that has been clamped
         configAdapter.getConfig().getWorld().setViewDistance(((PlayerChunkMapBridge) this.playerChunkMap).accessor$getViewDistance());

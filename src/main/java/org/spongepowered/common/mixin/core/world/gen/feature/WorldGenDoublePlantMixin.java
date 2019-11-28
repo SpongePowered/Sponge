@@ -90,9 +90,9 @@ public abstract class WorldGenDoublePlantMixin extends WorldGeneratorMixin imple
                     rand.nextInt(8) - rand.nextInt(8));
 
             if (worldIn.isAirBlock(next) && (!worldIn.dimension.isNether() || next.getY() < 254)
-                    && Blocks.field_150398_cm.func_176196_c(worldIn, next)) {
+                    && Blocks.DOUBLE_PLANT.canPlaceBlockAt(worldIn, next)) {
                 final DoublePlantType type = impl$getType(VecHelper.toVector3i(next), rand);
-                Blocks.field_150398_cm.func_176491_a(worldIn, next,
+                Blocks.DOUBLE_PLANT.placeAt(worldIn, next,
                         (DoublePlantBlock.EnumPlantType) (Object) type, 2);
                 flag = true;
             }

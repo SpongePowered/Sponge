@@ -54,7 +54,7 @@ public abstract class SpongeEntityAICommonSuperclass extends Goal {
     }
 
     @Override
-    public boolean func_75252_g() {
+    public boolean isInterruptible() {
         return this.canBeInterrupted();
     }
 

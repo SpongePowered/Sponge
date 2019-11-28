@@ -73,7 +73,7 @@ public class SeaFloorPopulator implements SeaFloor {
             BlockPos pos = position.add(random.nextInt(size.getX()), 0, random.nextInt(size.getZ()));
             // This method is incorrectly named, it simply gets the top block
             // that blocks movement and isn't leaves
-            pos = world.func_175672_r(pos);
+            pos = world.getTopSolidOrLiquidBlock(pos);
             if (world.getBlockState(pos).getMaterial() != Material.WATER) {
                 continue;
             }

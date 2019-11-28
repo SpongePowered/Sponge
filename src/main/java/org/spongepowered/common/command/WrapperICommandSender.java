@@ -53,7 +53,7 @@ public class WrapperICommandSender implements ICommandSender {
     }
 
     @Override
-    public String func_70005_c_() {
+    public String getName() {
         return this.source.getName();
     }
 
@@ -68,7 +68,7 @@ public class WrapperICommandSender implements ICommandSender {
     }
 
     @Override
-    public boolean func_70003_b(int permLevel, String commandName) {
+    public boolean canUseCommand(int permLevel, String commandName) {
         return CommandPermissions.testPermission(this.source, commandName);
     }
 
@@ -97,7 +97,7 @@ public class WrapperICommandSender implements ICommandSender {
     }
 
     @Override
-    public Entity func_174793_f() {
+    public Entity getCommandSenderEntity() {
         if (this.source instanceof Entity) {
             return (Entity) this.source;
         }
@@ -105,12 +105,12 @@ public class WrapperICommandSender implements ICommandSender {
     }
 
     @Override
-    public boolean func_174792_t_() {
+    public boolean sendCommandFeedback() {
         return true;
     }
 
     @Override
-    public void func_174794_a(CommandResultStats.Type type, int amount) {
+    public void setCommandStat(CommandResultStats.Type type, int amount) {
 
     }
 

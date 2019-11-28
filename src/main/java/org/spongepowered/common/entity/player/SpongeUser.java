@@ -155,7 +155,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         }
 
         // Note: Uses the overworld's player data
-        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) worldServer.get().func_72860_G();
+        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) worldServer.get().getSaveHandler();
         final File file = new File(saveHandler.accessor$getPlayersDirectory(), this.profile.getId().toString() + ".dat");
         if (!file.exists()) {
             return;
@@ -367,7 +367,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
         // extra data
 
-        if (!spongeCompound.func_82582_d()) {
+        if (!spongeCompound.isEmpty()) {
             this.isVanished = spongeCompound.getBoolean(Constants.Sponge.Entity.IS_VANISHED);
             this.isInvisible = spongeCompound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE);
             if (this.isVanished) {
@@ -377,7 +377,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
             final ListNBT spawnList = spongeCompound.getList(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
 
-            for (int i = 0; i < spawnList.func_74745_c(); i++) {
+            for (int i = 0; i < spawnList.tagCount(); i++) {
                 final CompoundNBT spawnCompound = spawnList.getCompound(i);
 
                 final UUID uuid = spawnCompound.getUniqueId(Constants.UUID);
@@ -429,13 +429,13 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
         this.loadInventory();
         this.loadEnderInventory();
-        compound.func_74782_a(Constants.Entity.Player.INVENTORY, this.inventory.writeToNBT(new ListNBT()));
-        compound.func_74782_a(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.write());
+        compound.setTag(Constants.Entity.Player.INVENTORY, this.inventory.writeToNBT(new ListNBT()));
+        compound.setTag(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.write());
         compound.putInt(Constants.Entity.Player.SELECTED_ITEM_SLOT, this.inventory.currentItem);
 
-        compound.func_74782_a(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(this.posX, this.posY, this.posZ));
+        compound.setTag(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(this.posX, this.posY, this.posZ));
         compound.putInt(Constants.Entity.ENTITY_DIMENSION, this.dimension);
-        compound.func_74782_a(Constants.Entity.ENTITY_ROTATION, Constants.NBT.newFloatNBTList(this.rotationYaw, this.rotationPitch));
+        compound.setTag(Constants.Entity.ENTITY_ROTATION, Constants.NBT.newFloatNBTList(this.rotationYaw, this.rotationPitch));
 
         compound.putBoolean(Constants.Entity.Player.INVULNERABLE, this.invulnerable);
 
@@ -457,11 +457,11 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             spawnCompound.putDouble(Constants.Sponge.User.USER_SPAWN_Y, respawn.getPosition().getY());
             spawnCompound.putDouble(Constants.Sponge.User.USER_SPAWN_Z, respawn.getPosition().getZ());
             spawnCompound.putBoolean(Constants.Sponge.User.USER_SPAWN_FORCED, false); // No way to know
-            spawnList.func_74742_a(spawnCompound);
+            spawnList.appendTag(spawnCompound);
         }
 
-        if (!spawnList.func_82582_d()) {
-            spongeCompound.func_74782_a(Constants.Sponge.User.USER_SPAWN_LIST, spawnList);
+        if (!spawnList.isEmpty()) {
+            spongeCompound.setTag(Constants.Sponge.User.USER_SPAWN_LIST, spawnList);
         }
         if (this.isVanished) {
             spongeCompound.putBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
@@ -472,8 +472,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             spongeCompound.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
         }
         
-	forgeCompound.func_74782_a(Constants.Sponge.SPONGE_DATA, spongeCompound);
-        compound.func_74782_a(Constants.Forge.FORGE_DATA, forgeCompound);
+	forgeCompound.setTag(Constants.Sponge.SPONGE_DATA, spongeCompound);
+        compound.setTag(Constants.Forge.FORGE_DATA, forgeCompound);
 
         DataUtil.writeCustomData(spongeCompound, (DataHolder) this);
     }
@@ -592,7 +592,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     public void save() {
         Preconditions.checkState(isInitialized(), "User {} is not initialized", this.profile.getId());
-        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) WorldManager.getWorldByDimensionId(0).get().func_72860_G();
+        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
         final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), getUniqueId() + ".dat");
         CompoundNBT tag;
         try {

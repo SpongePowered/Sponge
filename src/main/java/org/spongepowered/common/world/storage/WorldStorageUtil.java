@@ -81,7 +81,7 @@ public class WorldStorageUtil {
         }
         File worldDir = ((AnvilChunkLoaderBridge) chunkLoader).bridge$getWorldDir().toFile();
         return SpongeImpl.getScheduler().submitAsyncTask(() -> {
-            DataInputStream stream = RegionFileCache.func_76549_c(worldDir, x, z);
+            DataInputStream stream = RegionFileCache.getChunkInputStream(worldDir, x, z);
             return Optional.ofNullable(readDataFromRegion(stream));
         });
     }
@@ -121,7 +121,7 @@ public class WorldStorageUtil {
             return regionFile;
         }
         if (RegionFileCacheAccessor.accessor$getRegionsByFileMap().size() >= 256) {
-            RegionFileCache.func_76551_a();
+            RegionFileCache.clearRegionFileReferences();
         }
         regionFile = new RegionFile(file);
         RegionFileCacheAccessor.accessor$getRegionsByFileMap().put(file, regionFile);

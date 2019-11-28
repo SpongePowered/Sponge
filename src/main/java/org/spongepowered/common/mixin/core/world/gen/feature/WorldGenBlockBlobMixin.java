@@ -83,7 +83,7 @@ public abstract class WorldGenBlockBlobMixin extends WorldGeneratorMixin {
                 final int l = impl$getRadiusInstance(rand);
                 final float f = (j + k + l) * 0.333F + 0.5F;
 
-                for (final BlockPos blockpos1 : BlockPos.func_177980_a(position.add(-j, -k, -l), position.add(j, k, l))) {
+                for (final BlockPos blockpos1 : BlockPos.getAllInBox(position.add(-j, -k, -l), position.add(j, k, l))) {
                     if (blockpos1.distanceSq(position) <= f * f) {
 //                        worldIn.setBlockState(blockpos1, this.field_150545_a.getDefaultState(), 4);
                         worldIn.setBlockState(blockpos1, (BlockState) ((BlockBlob) this).getBlock(), 4);

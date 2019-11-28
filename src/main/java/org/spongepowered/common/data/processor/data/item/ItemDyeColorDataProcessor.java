@@ -51,20 +51,20 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
     }
 
     public static boolean isDyeable(Item item) {
-        if (item.equals(Items.field_151100_aR) || item.equals(Items.field_151104_aV)) {
+        if (item.equals(Items.DYE) || item.equals(Items.BED)) {
             return true;
         }
 
         final Block block = Block.getBlockFromItem(item);
 
-        return block.equals(Blocks.field_150325_L)
-                || block.equals(Blocks.field_180393_cK)
-                || block.equals(Blocks.field_150399_cn)
-                || block.equals(Blocks.field_150404_cg)
-                || block.equals(Blocks.field_150397_co)
-                || block.equals(Blocks.field_150406_ce)
-                || block.equals(Blocks.field_192443_dR)
-                || block.equals(Blocks.field_192444_dS);
+        return block.equals(Blocks.WOOL)
+                || block.equals(Blocks.STANDING_BANNER)
+                || block.equals(Blocks.STAINED_GLASS)
+                || block.equals(Blocks.CARPET)
+                || block.equals(Blocks.STAINED_GLASS_PANE)
+                || block.equals(Blocks.STAINED_HARDENED_CLAY)
+                || block.equals(Blocks.CONCRETE)
+                || block.equals(Blocks.CONCRETE_POWDER);
     }
 
     @Override
@@ -76,10 +76,10 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
     protected boolean set(ItemStack container, DyeColor value) {
         Item item = container.getItem();
 
-        if(item.equals(Items.field_151100_aR) || item.equals(Items.field_179564_cE)) {
-            container.func_77964_b(((net.minecraft.item.DyeColor) (Object) value).func_176767_b());
+        if(item.equals(Items.DYE) || item.equals(Items.BANNER)) {
+            container.setItemDamage(((net.minecraft.item.DyeColor) (Object) value).getDyeDamage());
         } else {
-            container.func_77964_b(((net.minecraft.item.DyeColor) (Object) value).func_176765_a());
+            container.setItemDamage(((net.minecraft.item.DyeColor) (Object) value).getMetadata());
         }
         return true;
     }
@@ -88,10 +88,10 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
     protected Optional<DyeColor> getVal(ItemStack container) {
         Item item = container.getItem();
 
-        if(item.equals(Items.field_151100_aR) || item.equals(Items.field_179564_cE)) {
-            return Optional.of((DyeColor) (Object) net.minecraft.item.DyeColor.func_176766_a(container.getDamage()));
+        if(item.equals(Items.DYE) || item.equals(Items.BANNER)) {
+            return Optional.of((DyeColor) (Object) net.minecraft.item.DyeColor.byDyeDamage(container.getDamage()));
         }
-        return Optional.of((DyeColor) (Object) net.minecraft.item.DyeColor.func_176764_b(container.getDamage()));
+        return Optional.of((DyeColor) (Object) net.minecraft.item.DyeColor.byMetadata(container.getDamage()));
     }
 
     @Override

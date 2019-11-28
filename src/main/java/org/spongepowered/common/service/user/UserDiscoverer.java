@@ -139,7 +139,7 @@ class UserDiscoverer {
 
         // check mojang cache
         final PlayerProfileCache cache = SpongeImpl.getServer().getPlayerProfileCache();
-        final HashSet<String> names = Sets.newHashSet(cache.func_152654_a());
+        final HashSet<String> names = Sets.newHashSet(cache.getUsernames());
         if (names.contains(username.toLowerCase(Locale.ROOT))) {
             final GameProfile profile = cache.getGameProfileForUsername(username);
             if (profile != null) {
@@ -171,7 +171,7 @@ class UserDiscoverer {
         userCache.asMap().values().stream().map(User::getProfile).forEach(p -> profiles.put(p.getUniqueId(), p));
 
         // Add all known profiles from the data files
-        final SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().func_72860_G();
+        final SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
         final String[] uuids = saveHandler.func_75754_f();
         final PlayerProfileCache profileCache = SpongeImpl.getServer().getPlayerProfileCache();
         for (final String playerUuid : uuids) {
@@ -344,7 +344,7 @@ class UserDiscoverer {
         }
 
         // Note: Uses the overworld's player data
-        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) worldServer.get().func_72860_G();
+        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) worldServer.get().getSaveHandler();
         final File file = new File(saveHandler.accessor$getPlayersDirectory(), uniqueId.toString() + ".dat");
         if (file.exists()) {
             return file;

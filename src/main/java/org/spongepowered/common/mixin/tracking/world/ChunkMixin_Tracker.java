@@ -260,7 +260,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         if (uuid.isPresent()) {
             final UUID userUniqueId = uuid.get();
             // get player if online
-            final PlayerEntity player = this.world.func_152378_a(userUniqueId);
+            final PlayerEntity player = this.world.getPlayerEntityByUUID(userUniqueId);
             if (player != null) {
                 return Optional.of((User) player);
             }

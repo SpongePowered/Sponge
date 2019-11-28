@@ -60,7 +60,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
         if (container.getItem() == Items.WRITTEN_BOOK) {
             container.setTagInfo(Constants.Item.Book.ITEM_BOOK_TITLE, new StringNBT(legacy));
         } else {
-            container.func_151001_c(legacy);
+            container.setStackDisplayName(legacy);
         }
         return true;
     }

@@ -54,9 +54,9 @@ public abstract class BlockLogMixin extends BlockMixin {
     private ImmutableTreeData getTreeData(final net.minecraft.block.BlockState blockState) {
         final BlockPlanks.EnumType type;
         if(blockState.getBlock() instanceof BlockOldLog) {
-            type = blockState.get(BlockOldLog.field_176301_b);
+            type = blockState.get(BlockOldLog.VARIANT);
         } else if(blockState.getBlock() instanceof BlockNewLog) {
-            type = blockState.get(BlockNewLog.field_176300_b);
+            type = blockState.get(BlockNewLog.VARIANT);
         } else {
             type = BlockPlanks.EnumType.OAK;
         }
@@ -68,7 +68,7 @@ public abstract class BlockLogMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableLogAxisData getLogAxisData(final net.minecraft.block.BlockState blockState) {
-        final LogAxis logAxis = (LogAxis) (Object) blockState.get(LogBlock.field_176299_a);
+        final LogAxis logAxis = (LogAxis) (Object) blockState.get(LogBlock.LOG_AXIS);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLogAxisData.class, logAxis);
     }
 
@@ -88,7 +88,7 @@ public abstract class BlockLogMixin extends BlockMixin {
         }
         if (manipulator instanceof ImmutableLogAxisData) {
             final LogAxis logAxis = ((ImmutableLogAxisData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(LogBlock.field_176299_a, (LogBlock.EnumAxis) (Object) logAxis));
+            return Optional.of((BlockState) blockState.withProperty(LogBlock.LOG_AXIS, (LogBlock.EnumAxis) (Object) logAxis));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -100,7 +100,7 @@ public abstract class BlockLogMixin extends BlockMixin {
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
             return impl$processLogType(blockState, type, treeType);
         } else if (key.equals(Keys.LOG_AXIS)) {
-            return Optional.of((BlockState) blockState.func_177226_a(LogBlock.field_176299_a, (LogBlock.EnumAxis) value));
+            return Optional.of((BlockState) blockState.withProperty(LogBlock.LOG_AXIS, (LogBlock.EnumAxis) value));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -111,11 +111,11 @@ public abstract class BlockLogMixin extends BlockMixin {
                 treeType.equals(TreeTypes.BIRCH) ||
                 treeType.equals(TreeTypes.SPRUCE) ||
                 treeType.equals(TreeTypes.JUNGLE)) {
-                return Optional.of((BlockState) blockState.func_177226_a(BlockOldLog.field_176301_b, type));
+                return Optional.of((BlockState) blockState.withProperty(BlockOldLog.VARIANT, type));
             }
         } else if (blockState.getBlock() instanceof BlockNewLog) {
             if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
-                return Optional.of((BlockState) blockState.func_177226_a(BlockNewLog.field_176300_b, type));
+                return Optional.of((BlockState) blockState.withProperty(BlockNewLog.VARIANT, type));
             }
         }
         return Optional.empty();

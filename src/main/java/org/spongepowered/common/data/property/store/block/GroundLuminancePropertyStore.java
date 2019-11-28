@@ -44,7 +44,7 @@ public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<Gr
             final Location<?> location = (Location<?>) propertyHolder;
             if (location.getExtent() instanceof Chunk) {
                 final Chunk chunk = (Chunk) location.getExtent();
-                final float light = chunk.func_177413_a(LightType.BLOCK, VecHelper.toBlockPos(location));
+                final float light = chunk.getLightFor(LightType.BLOCK, VecHelper.toBlockPos(location));
                 return Optional.of(new GroundLuminanceProperty(light));
             }
         }

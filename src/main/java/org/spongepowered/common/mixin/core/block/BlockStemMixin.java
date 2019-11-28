@@ -63,11 +63,11 @@ public abstract class BlockStemMixin extends BlockMixin {
             if (growth > 7) {
                 growth = 7;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.AGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(StemBlock.AGE, growth));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.field_176483_b, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(StemBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -79,11 +79,11 @@ public abstract class BlockStemMixin extends BlockMixin {
             if (growth > 7) {
                 growth = 7;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.AGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(StemBlock.AGE, growth));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown((Direction) value);
-            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.field_176483_b, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(StemBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -94,7 +94,7 @@ public abstract class BlockStemMixin extends BlockMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.get(StemBlock.field_176483_b)));
+                Constants.DirectionFunctions.getFor(blockState.get(StemBlock.FACING)));
     }
 
 }

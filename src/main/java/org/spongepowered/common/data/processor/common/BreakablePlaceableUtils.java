@@ -45,7 +45,7 @@ public final class BreakablePlaceableUtils {
         if (value.isEmpty()) {
             if (stackTag != null) {
                 stackTag.remove(nbtKey);
-                if (stackTag.func_82582_d()) {
+                if (stackTag.isEmpty()) {
                     stack.setTag(null);
                 }
             }
@@ -56,13 +56,13 @@ public final class BreakablePlaceableUtils {
                 if (id.startsWith("minecraft:")) {
                     id = id.substring("minecraft:".length());
                 }
-                breakableIds.func_74742_a(new StringNBT(id));
+                breakableIds.appendTag(new StringNBT(id));
             }
             if (stackTag == null) {
                 stackTag = new CompoundNBT();
                 stack.setTag(stackTag);
             }
-            stackTag.func_74782_a(nbtKey, breakableIds);
+            stackTag.setTag(nbtKey, breakableIds);
         }
 
         return true;
@@ -74,11 +74,11 @@ public final class BreakablePlaceableUtils {
             return Optional.empty();
         }
         final ListNBT blockIds = tag.getList(nbtKey, Constants.NBT.TAG_STRING);
-        if (blockIds.func_82582_d()) {
+        if (blockIds.isEmpty()) {
             return Optional.empty();
         }
-        final Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.func_74745_c());
-        for (int i = 0; i < blockIds.func_74745_c(); i++) {
+        final Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.tagCount());
+        for (int i = 0; i < blockIds.tagCount(); i++) {
             BlockTypeRegistryModule.getInstance().getById(blockIds.getString(i)).ifPresent(blockTypes::add);
         }
         return Optional.of(blockTypes);

@@ -59,7 +59,7 @@ public abstract class BlockSnowMixin extends BlockMixin {
             if (layers < 1) {
                 layers = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(SnowBlock.LAYERS, layers));
+            return Optional.of((BlockState) blockState.withProperty(SnowBlock.LAYERS, layers));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -71,7 +71,7 @@ public abstract class BlockSnowMixin extends BlockMixin {
             if (layers < 1) {
                 layers = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(SnowBlock.LAYERS, layers));
+            return Optional.of((BlockState) blockState.withProperty(SnowBlock.LAYERS, layers));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

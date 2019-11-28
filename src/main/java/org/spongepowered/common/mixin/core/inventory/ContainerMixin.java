@@ -446,7 +446,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
             }
             final SlotTransaction previewTransaction = this.impl$capturedCraftPreviewTransactions.get(this.impl$capturedCraftPreviewTransactions.size() - 1);
 
-            final IRecipe recipe = CraftingManager.func_192413_b(craftingInventory, world);
+            final IRecipe recipe = CraftingManager.findMatchingRecipe(craftingInventory, world);
             SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) inv), previewTransaction, ((CraftingRecipe) recipe),
                     ((Container)(Object) this), this.impl$capturedCraftPreviewTransactions);
             this.impl$capturedCraftPreviewTransactions.clear();

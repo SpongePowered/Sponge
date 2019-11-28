@@ -54,7 +54,7 @@ public abstract class BlockTNTMixin extends BlockMixin {
     private boolean primeCancelled;
 
     private boolean impl$onRemove(final World world, final BlockPos pos) {
-        final boolean removed = !this.primeCancelled && world.func_175698_g(pos);
+        final boolean removed = !this.primeCancelled && world.setBlockToAir(pos);
         this.primeCancelled = false;
         return removed;
     }

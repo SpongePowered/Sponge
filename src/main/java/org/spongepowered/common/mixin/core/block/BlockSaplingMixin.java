@@ -61,14 +61,14 @@ public abstract class BlockSaplingMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableStoneData) {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) (Object) ((ImmutableStoneData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.field_176480_a, treeType));
+            return Optional.of((BlockState) blockState.withProperty(SaplingBlock.TYPE, treeType));
         }
         if (manipulator instanceof ImmutableGrowthData) {
             int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
             if (growth > 1) {
                 growth = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.STAGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(SaplingBlock.STAGE, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -77,21 +77,21 @@ public abstract class BlockSaplingMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.TREE_TYPE)) {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.field_176480_a, treeType));
+            return Optional.of((BlockState) blockState.withProperty(SaplingBlock.TYPE, treeType));
         }
         if (key.equals(Keys.GROWTH_STAGE)) {
             int growth = (Integer) value;
             if (growth > 1) {
                 growth = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.STAGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(SaplingBlock.STAGE, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableSpongeTreeData impl$getTreeTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.get(SaplingBlock.field_176480_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.get(SaplingBlock.TYPE));
     }
 
     private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {

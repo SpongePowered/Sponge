@@ -79,23 +79,23 @@ public final class PotionTypeRegistryModule implements SpongeAdditionalCatalogRe
 
     @Override
     public void registerDefaults() {
-        for (net.minecraft.potion.Potion potion : net.minecraft.potion.Potion.field_185176_a) {
+        for (net.minecraft.potion.Potion potion : net.minecraft.potion.Potion.REGISTRY) {
             if (potion != null) {
                 PotionType potionType = (PotionType) potion;
                 this.potionList.add(potionType);
-                this.potionTypeMap.put(net.minecraft.potion.Potion.field_185176_a.getKey(potion).toString(), potionType);
+                this.potionTypeMap.put(net.minecraft.potion.Potion.REGISTRY.getKey(potion).toString(), potionType);
             }
         }
     }
 
     @AdditionalRegistration
     public void additionalRegistration() { // I'm guessing that this should work very well.
-        for (net.minecraft.potion.Potion potion : net.minecraft.potion.Potion.field_185176_a) {
+        for (net.minecraft.potion.Potion potion : net.minecraft.potion.Potion.REGISTRY) {
             if (potion != null) {
                 PotionType potionType = (PotionType) potion;
                 if (!this.potionList.contains(potionType)) {
                     this.potionList.add(potionType);
-                    this.potionTypeMap.put(net.minecraft.potion.Potion.field_185176_a.getKey(potion).toString(), potionType);
+                    this.potionTypeMap.put(net.minecraft.potion.Potion.REGISTRY.getKey(potion).toString(), potionType);
                 }
             }
         }

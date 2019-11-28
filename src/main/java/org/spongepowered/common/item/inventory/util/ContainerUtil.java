@@ -176,9 +176,9 @@ public final class ContainerUtil {
 
                         final ItemEntity entityitem = new ItemEntity(worldServer, x + f, y + f1, z + f2, itemStack.split(i));
 
-                        entityitem.field_70159_w = RANDOM.nextGaussian() * 0.05;
-                        entityitem.field_70181_x = RANDOM.nextGaussian() * 0.05 + 0.2;
-                        entityitem.field_70179_y = RANDOM.nextGaussian() * 0.05;
+                        entityitem.motionX = RANDOM.nextGaussian() * 0.05;
+                        entityitem.motionY = RANDOM.nextGaussian() * 0.05 + 0.2;
+                        entityitem.motionZ = RANDOM.nextGaussian() * 0.05;
                         itemStacks.add(entityitem);
                     }
                 }
@@ -240,7 +240,7 @@ public final class ContainerUtil {
                 }
                 else if (subInventory instanceof net.minecraft.inventory.Inventory && subInventory.getClass().isAnonymousClass()) {
                     // Anonymous InventoryBasic -> Check for Vanilla Containers:
-                    switch (subInventory.func_70005_c_()) {
+                    switch (subInventory.getName()) {
                         case "Enchant": // Container InputSlots
                         case "Repair": // Container InputSlots
                             lens = new OrderedInventoryLensImpl(index, slotCount, 1, InputSlot.class, slots);
@@ -440,7 +440,7 @@ public final class ContainerUtil {
         } else if (container instanceof ContainerBrewingStandAccessor) {
             return carrierOrNull(((ContainerBrewingStandAccessor) container).accessor$getBrewingStandInventory());
         } else if (container instanceof BeaconContainer) {
-            return carrierOrNull(((BeaconContainer) container).func_180611_e());
+            return carrierOrNull(((BeaconContainer) container).getTileEntity());
         } else if (container instanceof ContainerHorseInventoryAccessor) {
             return (Carrier) ((ContainerHorseInventoryAccessor) container).accessor$getHorseCarrier();
         } else if (container instanceof ContainerMerchantAccessor && ((ContainerMerchantAccessor) container).accessor$getMerchantCarrier() instanceof Carrier) {

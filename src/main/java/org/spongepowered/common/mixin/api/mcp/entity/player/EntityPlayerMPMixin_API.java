@@ -394,7 +394,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         final SoundEvent event;
         try {
             // Check if the event is registered (ie has an integer ID)
-            event = SoundEvents.func_187510_a(sound.getId());
+            event = SoundEvents.getRegisteredSoundEvent(sound.getId());
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
             this.connection.sendPacket(new SPlaySoundPacket(sound.getId(), (net.minecraft.util.SoundCategory) (Object) category,
@@ -529,7 +529,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     public void sendBlockChange(final BlockPos pos, final net.minecraft.block.BlockState state) {
         final SChangeBlockPacket packet = new SChangeBlockPacket();
         packet.pos = pos;
-        packet.field_148883_d = state;
+        packet.blockState = state;
         this.connection.sendPacket(packet);
     }
 

@@ -56,7 +56,7 @@ public abstract class BlockReedMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             final int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            return Optional.of((BlockState) blockState.func_177226_a(SugarCaneBlock.AGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(SugarCaneBlock.AGE, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -65,7 +65,7 @@ public abstract class BlockReedMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             final int growth = (Integer) value;
-            return Optional.of((BlockState) blockState.func_177226_a(SugarCaneBlock.AGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(SugarCaneBlock.AGE, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

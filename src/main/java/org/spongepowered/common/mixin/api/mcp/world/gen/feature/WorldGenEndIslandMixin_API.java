@@ -119,9 +119,9 @@ public abstract class WorldGenEndIslandMixin_API extends Feature implements EndI
             final float f = this.implClone$chunkGeneratorEnd$getIslandHeightValue(chunkX, chunkZ, 1, 1);
 
             if (f < -20.0F && rand.nextInt(14) == 0) {
-                func_180709_b(world, rand, chunkPos.add(rand.nextInt(size.getX()), 55 + rand.nextInt(16), rand.nextInt(size.getZ())));
+                generate(world, rand, chunkPos.add(rand.nextInt(size.getX()), 55 + rand.nextInt(16), rand.nextInt(size.getZ())));
                 if (rand.nextInt(4) == 0) {
-                    func_180709_b((World) worldIn, rand, chunkPos.add(rand.nextInt(size.getX()), 55 + rand.nextInt(16), rand.nextInt(size.getZ())));
+                    generate((World) worldIn, rand, chunkPos.add(rand.nextInt(size.getX()), 55 + rand.nextInt(16), rand.nextInt(size.getZ())));
                 }
             }
         }

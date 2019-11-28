@@ -138,11 +138,11 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     @Overwrite
     public void queueUnload(final Chunk chunkIn)
     {
-        if (!((ChunkBridge) chunkIn).bridge$isPersistedChunk() && this.world.dimension.func_186056_c(chunkIn.field_76635_g, chunkIn.field_76647_h))
+        if (!((ChunkBridge) chunkIn).bridge$isPersistedChunk() && this.world.dimension.canDropChunk(chunkIn.x, chunkIn.z))
         {
             // Sponge - we avoid using the queue and simply check the unloaded flag during unloads
             //this.droppedChunksSet.add(Long.valueOf(ChunkPos.asLong(chunkIn.x, chunkIn.z)));
-            chunkIn.field_189550_d = true;
+            chunkIn.unloadQueued = true;
         }
     }
 
@@ -218,7 +218,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     }
 
     private boolean impl$canDenyChunkRequest() {
-        if (!SpongeImpl.getServer().func_152345_ab()) {
+        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             return true;
         }
 
@@ -276,14 +276,14 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
             while (chunksUnloaded < this.impl$maxChunkUnloads && iterator.hasNext()) {
                 final Chunk chunk = iterator.next();
                 final ChunkBridge spongeChunk = (ChunkBridge) chunk;
-                if (chunk != null && chunk.field_189550_d && !spongeChunk.bridge$isPersistedChunk()) {
+                if (chunk != null && chunk.unloadQueued && !spongeChunk.bridge$isPersistedChunk()) {
                     if (this.bridge$getChunkUnloadDelay() > 0) {
                         if ((now - spongeChunk.bridge$getScheduledForUnload()) < this.impl$chunkUnloadDelay) {
                             continue;
                         }
                         spongeChunk.bridge$setScheduledForUnload(-1);
                     }
-                    chunk.func_76623_d();
+                    chunk.onUnload();
                     this.saveChunkData(chunk);
                     this.saveChunkExtraData(chunk);
                     iterator.remove();
@@ -293,7 +293,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
             ((WorldServerBridge) this.world).bridge$getTimingsHandler().doChunkUnload.stopTiming();
         }
 
-        this.chunkLoader.func_75817_a();
+        this.chunkLoader.chunkTick();
         return false;
     }
 
@@ -329,17 +329,17 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     @Override
     public void bridge$unloadChunkAndSave(final Chunk chunk) {
         boolean saveChunk = false;
-        if (chunk.func_76601_a(true)) {
+        if (chunk.needsSaving(true)) {
             saveChunk = true;
         }
 
-        chunk.func_76623_d();
+        chunk.onUnload();
 
         if (saveChunk) {
             this.saveChunkData(chunk);
         }
 
-        this.loadedChunks.remove(ChunkPos.asLong(chunk.field_76635_g, chunk.field_76647_h));
+        this.loadedChunks.remove(ChunkPos.asLong(chunk.x, chunk.z));
         ((ChunkBridge) chunk).bridge$setScheduledForUnload(-1);
     }
 }

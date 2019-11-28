@@ -126,8 +126,8 @@ public abstract class EntityMinecartMixin extends EntityMixin implements EntityM
         super.spongeImpl$writeToSpongeCompound(compound);
         compound.putDouble(Constants.Entity.Minecart.MAX_SPEED, this.impl$maxSpeed);
         compound.putBoolean(Constants.Entity.Minecart.SLOW_WHEN_EMPTY, this.impl$slowWhenEmpty);
-        compound.func_74782_a(Constants.Entity.Minecart.AIRBORNE_MODIFIER, VectorSerializer.toNbt(this.impl$airborneMod));
-        compound.func_74782_a(Constants.Entity.Minecart.DERAILED_MODIFIER, VectorSerializer.toNbt(this.impl$derailedMod));
+        compound.setTag(Constants.Entity.Minecart.AIRBORNE_MODIFIER, VectorSerializer.toNbt(this.impl$airborneMod));
+        compound.setTag(Constants.Entity.Minecart.DERAILED_MODIFIER, VectorSerializer.toNbt(this.impl$derailedMod));
     }
 
     @Override

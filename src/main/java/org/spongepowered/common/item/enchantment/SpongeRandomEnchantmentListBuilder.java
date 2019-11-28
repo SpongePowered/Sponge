@@ -121,7 +121,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
 
             while (randomIn.nextInt(50) <= this.level)
             {
-                EnchantmentHelper.removeIncompatible(list1, (EnchantmentData) Util.func_184878_a(list));
+                EnchantmentHelper.removeIncompatible(list1, (EnchantmentData) Util.getLastElement(list));
 
                 if (list1.isEmpty())
                 {

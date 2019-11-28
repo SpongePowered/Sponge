@@ -35,6 +35,6 @@ public abstract class TileEntityEnchantmentTableMixin extends TileEntityMixin im
 
     @Override
     public void bridge$setCustomDisplayName(String customName) {
-        ((EnchantingTableTileEntity) (Object) this).func_145920_a(customName);
+        ((EnchantingTableTileEntity) (Object) this).setCustomName(customName);
     }
 }

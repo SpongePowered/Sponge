@@ -584,7 +584,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         // so, the requests for the actual states sometimes may cause issues with mods and their
         // extended state handling logic if what the world sees is different from what our tracker
         // saw, so, we have to just provide the new state (extended states are calculated anyways).
-        final BlockState newActualState = this.head != null ? newState : newState.func_185899_b(worldServer, blockPos);
+        final BlockState newActualState = this.head != null ? newState : newState.getActualState(worldServer, blockPos);
         final BlockSnapshot newSnapshot =
             ((WorldServerBridge) worldServer).bridge$createSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
         // Up until this point, we can create a default Transaction

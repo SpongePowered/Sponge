@@ -61,7 +61,7 @@ public abstract class BlockPortalMixin extends BlockMixin {
             if (axis == Axis.Y) {
                 return Optional.of((BlockState) blockState);
             }
-            return Optional.of((BlockState) blockState.func_177226_a(NetherPortalBlock.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.withProperty(NetherPortalBlock.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -73,7 +73,7 @@ public abstract class BlockPortalMixin extends BlockMixin {
             if (axis == Axis.Y) {
                 return Optional.of((BlockState) blockState);
             }
-            return Optional.of((BlockState) blockState.func_177226_a(NetherPortalBlock.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.withProperty(NetherPortalBlock.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

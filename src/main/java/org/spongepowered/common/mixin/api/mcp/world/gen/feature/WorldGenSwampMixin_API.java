@@ -86,7 +86,7 @@ public abstract class WorldGenSwampMixin_API extends AbstractTreeFeature impleme
                             final BlockPos pos = new BlockPos(k, j, l);
                             final BlockState state = worldIn.getBlockState(pos);
                             if (!((WorldGeneratorBridge) this).bridge$isAir(state, worldIn, pos) && !((WorldGeneratorBridge) this).bridge$isLeaves(state, worldIn, pos)) {
-                                if (state.getBlock() != Blocks.WATER && state.getBlock() != Blocks.field_150358_i) {
+                                if (state.getBlock() != Blocks.WATER && state.getBlock() != Blocks.FLOWING_WATER) {
                                     flag = false;
                                 } else if (j > y) {
                                     flag = false;
@@ -104,7 +104,7 @@ public abstract class WorldGenSwampMixin_API extends AbstractTreeFeature impleme
             }
             final BlockPos down = new BlockPos(x, y - 1, z);
             final Block block = worldIn.getBlockState(down).getBlock();
-            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, Direction.UP, Blocks.field_150345_g) && y < 256 - i - 1) {
+            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, Direction.UP, Blocks.SAPLING) && y < 256 - i - 1) {
 
                 return true;
             }
@@ -114,7 +114,7 @@ public abstract class WorldGenSwampMixin_API extends AbstractTreeFeature impleme
 
     @Override
     public void placeObject(final World world, final Random random, final int x, final int y, final int z) {
-        func_180709_b((net.minecraft.world.World) world, random, new BlockPos(x, y, z));
+        generate((net.minecraft.world.World) world, random, new BlockPos(x, y, z));
     }
 
 }

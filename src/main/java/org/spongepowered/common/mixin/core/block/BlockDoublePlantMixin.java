@@ -63,9 +63,9 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
         if (manipulator instanceof ImmutableDoublePlantData) {
             final DoublePlantBlock.EnumPlantType doublePlantType =
                     (DoublePlantBlock.EnumPlantType) (Object) ((ImmutableDoublePlantData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.field_176493_a, doublePlantType));
+            return Optional.of((BlockState) blockState.withProperty(DoublePlantBlock.VARIANT, doublePlantType));
         } else if (manipulator instanceof ImmutablePortionData) {
-            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.HALF,
+            return Optional.of((BlockState) blockState.withProperty(DoublePlantBlock.HALF,
                     impl$convertPortionType(((ImmutablePortionData) manipulator).type().get())));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
@@ -75,10 +75,10 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DOUBLE_PLANT_TYPE)) {
             final DoublePlantBlock.EnumPlantType doublePlantType = (DoublePlantBlock.EnumPlantType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.field_176493_a, doublePlantType));
+            return Optional.of((BlockState) blockState.withProperty(DoublePlantBlock.VARIANT, doublePlantType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.HALF, impl$convertPortionType((PortionType) value)));
+            return Optional.of((BlockState) blockState.withProperty(DoublePlantBlock.HALF, impl$convertPortionType((PortionType) value)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -90,7 +90,7 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableDoublePlantData impl$getDoublePlantTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDoublePlantData.class,
-                (DoublePlantType) (Object) blockState.get(DoublePlantBlock.field_176493_a));
+                (DoublePlantType) (Object) blockState.get(DoublePlantBlock.VARIANT));
     }
 
     private ImmutablePortionData impl$getPortionData(final net.minecraft.block.BlockState blockState) {

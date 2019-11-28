@@ -75,7 +75,7 @@ public abstract class RConConsoleSourceMixin implements ICommandSender, CommandS
 
     @Override
     public String bridge$getIdentifier() {
-        return func_70005_c_();
+        return getName();
     }
 
     @Override

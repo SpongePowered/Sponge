@@ -73,8 +73,8 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<Painting
                 return false;
             }
 
-            final EntityTracker paintingTracker = ((ServerWorld) entity.world).func_73039_n();
-            final EntityTrackerEntry paintingEntry = ((EntityTrackerAccessor) paintingTracker).accessor$getTrackedEntityTable().func_76041_a(entity.getEntityId());
+            final EntityTracker paintingTracker = ((ServerWorld) entity.world).getEntityTracker();
+            final EntityTrackerEntry paintingEntry = ((EntityTrackerAccessor) paintingTracker).accessor$getTrackedEntityTable().lookup(entity.getEntityId());
             final List<ServerPlayerEntity> playerMPs = new ArrayList<>();
             for (final ServerPlayerEntity player : ((EntityTrackerEntryAccessor) paintingEntry).accessor$getTrackingPlayers()) {
                 final SDestroyEntitiesPacket packet = new SDestroyEntitiesPacket(entity.getEntityId());

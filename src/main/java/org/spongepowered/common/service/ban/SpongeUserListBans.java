@@ -86,7 +86,7 @@ public class SpongeUserListBans extends BanList {
 
     @Override
     @Nullable
-    public com.mojang.authlib.GameProfile func_152703_a(String username) {
+    public com.mojang.authlib.GameProfile getBannedProfile(String username) {
         for (Ban.Profile ban : getService().getProfileBans()) {
             if (ban.getProfile().getName().isPresent() && ban.getProfile().getName().get().equals(username)) {
                 return (com.mojang.authlib.GameProfile) ban.getProfile();

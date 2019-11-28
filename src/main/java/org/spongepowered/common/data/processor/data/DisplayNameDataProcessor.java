@@ -107,7 +107,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             return Optional.empty();
         } else if (holder instanceof INameable) {
             if (((INameable) holder).hasCustomName()) {
-                final String customName = ((INameable) holder).func_70005_c_();
+                final String customName = ((INameable) holder).getName();
                 final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(customName));
                 return Optional.of(data);
             }
@@ -145,7 +145,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
                 if (stack.getItem() == Items.WRITTEN_BOOK) {
                     stack.setTagInfo(Constants.Item.Book.ITEM_BOOK_TITLE, new StringNBT(SpongeTexts.toLegacy(newValue)));
                 } else {
-                    stack.func_151001_c(SpongeTexts.toLegacy(newValue));
+                    stack.setStackDisplayName(SpongeTexts.toLegacy(newValue));
                 }
             }
         } catch (final Exception e) {

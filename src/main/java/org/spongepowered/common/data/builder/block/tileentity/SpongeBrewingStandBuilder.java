@@ -51,7 +51,7 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
             }
             // Have to consider custom names as an option
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((BrewingStandTileEntity) brewingStand).func_145937_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
+                ((BrewingStandTileEntity) brewingStand).setName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
 
             final BrewingStandData brewingData = Sponge.getDataManager().getManipulatorBuilder(BrewingStandData.class).get().create();

@@ -57,7 +57,7 @@ public class ChunkMixin_Collisions {
     private void collisionsImpl$checkForCollisionRules(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
         final Predicate<? super Entity> predicate, final CallbackInfo ci) {
         // ignore players and entities with parts (ex. EnderDragon)
-        if (this.world.isRemote || entityIn == null || entityIn instanceof PlayerEntity || entityIn.func_70021_al() != null) {
+        if (this.world.isRemote || entityIn == null || entityIn instanceof PlayerEntity || entityIn.getParts() != null) {
             return;
         }
         // Run hook in EntityLivingBase to support maxEntityCramming

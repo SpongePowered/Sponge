@@ -51,7 +51,7 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
 
     @Override
     protected SlabType getFromMeta(int meta) {
-        return (SlabType) (Object) BlockStoneSlab.EnumType.func_176625_a(meta);
+        return (SlabType) (Object) BlockStoneSlab.EnumType.byMetadata(meta);
     }
 
     @Override
@@ -65,12 +65,12 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
         Object oValue = value;
         if (stack.getItem() == ItemTypes.STONE_SLAB) {
             if (oValue instanceof BlockStoneSlab.EnumType) {
-                stack.func_77964_b(((BlockStoneSlab.EnumType) oValue).func_176624_a());
+                stack.setItemDamage(((BlockStoneSlab.EnumType) oValue).getMetadata());
                 return true;
             }
         } else if (stack.getItem() == ItemTypes.STONE_SLAB2) {
             if (oValue instanceof BlockStoneSlabNew.EnumType) {
-                stack.func_77964_b(((BlockStoneSlabNew.EnumType) oValue).func_176915_a());
+                stack.setItemDamage(((BlockStoneSlabNew.EnumType) oValue).getMetadata());
                 return true;
             }
         }

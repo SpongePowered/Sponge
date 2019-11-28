@@ -371,8 +371,8 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Override
     public Optional<String> getGameRule(final String gameRule) {
         checkNotNull(gameRule, "The gamerule cannot be null!");
-        if (this.gameRules.func_82765_e(gameRule)) {
-            return Optional.of(this.gameRules.func_82767_a(gameRule));
+        if (this.gameRules.hasRule(gameRule)) {
+            return Optional.of(this.gameRules.getString(gameRule));
         }
         return Optional.empty();
     }
@@ -380,8 +380,8 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Override
     public Map<String, String> getGameRules() {
         final ImmutableMap.Builder<String, String> ruleMap = ImmutableMap.builder();
-        for (final String rule : this.gameRules.func_82763_b()) {
-            ruleMap.put(rule, this.gameRules.func_82767_a(rule));
+        for (final String rule : this.gameRules.getRules()) {
+            ruleMap.put(rule, this.gameRules.getString(rule));
         }
         return ruleMap.build();
     }
@@ -390,7 +390,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     public void setGameRule(final String gameRule, final String value) {
         checkNotNull(gameRule, "The gamerule cannot be null!");
         checkNotNull(value, "The gamerule value cannot be null!");
-        this.gameRules.func_82764_b(gameRule, value);
+        this.gameRules.setOrCreateGameRule(gameRule, value);
     }
 
     @Override
@@ -531,7 +531,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Override
     public void setPropertySection(final DataQuery path, final DataView data) {
         final CompoundNBT nbt = NbtTranslator.getInstance().translateData(data);
-        ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74782_a(path.toString(), nbt);
+        ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().setTag(path.toString(), nbt);
     }
 
     @Intrinsic

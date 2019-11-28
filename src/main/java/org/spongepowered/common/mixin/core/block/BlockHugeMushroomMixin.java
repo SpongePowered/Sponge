@@ -58,7 +58,7 @@ public abstract class BlockHugeMushroomMixin extends BlockMixin {
         if (manipulator instanceof ImmutableBigMushroomData) {
             final HugeMushroomBlock.EnumType bigMushroomType =
                     (HugeMushroomBlock.EnumType) (Object) ((ImmutableBigMushroomData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(HugeMushroomBlock.field_176380_a, bigMushroomType));
+            return Optional.of((BlockState) blockState.withProperty(HugeMushroomBlock.VARIANT, bigMushroomType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -67,7 +67,7 @@ public abstract class BlockHugeMushroomMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.BIG_MUSHROOM_TYPE)) {
             final HugeMushroomBlock.EnumType bigMushroomType = (HugeMushroomBlock.EnumType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(HugeMushroomBlock.field_176380_a, bigMushroomType));
+            return Optional.of((BlockState) blockState.withProperty(HugeMushroomBlock.VARIANT, bigMushroomType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -75,6 +75,6 @@ public abstract class BlockHugeMushroomMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableBigMushroomData impl$getBigMushroomTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeBigMushroomData.class,
-                (BigMushroomType) (Object) blockState.get(HugeMushroomBlock.field_176380_a));
+                (BigMushroomType) (Object) blockState.get(HugeMushroomBlock.VARIANT));
     }
 }

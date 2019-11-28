@@ -284,7 +284,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                     i = SpongeImplHooks.getLootingEnchantmentModifier((LivingEntity) (Object) this, (LivingEntity) entity, cause);
                 }
 
-                if (this.canDropLoot() && this.world.getGameRules().func_82766_b("doMobLoot")) {
+                if (this.canDropLoot() && this.world.getGameRules().getBoolean("doMobLoot")) {
                     final boolean flag = this.recentlyHit > 0;
                     this.dropLoot(flag, i, cause);
                 }
@@ -596,7 +596,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     private void spawnItemParticle(final World world, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord, final double zCoord, final double xOffset,
             final double yOffset, final double zOffset, final int ... p_175688_14_) {
         if (!this.bridge$isVanished()) {
-            this.world.func_175688_a(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }
 
@@ -657,7 +657,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 // We still sanity check if a mod is calling to damage the entity with an anvil or falling block
                 // without using our mixin redirects in EntityFallingBlockMixin.
                 if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.ANVIL || damageSource == DamageSource.FALLING_BLOCK && !helmet.isEmpty()) {
-                    helmet.func_77972_a((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (LivingEntity) (Object) this);
+                    helmet.damageItem((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (LivingEntity) (Object) this);
                 }
 
                 // Shield
@@ -769,7 +769,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 }
                 // Sponge end
 
-                if (world.func_184144_a((Entity) (Object) this, this.getEntityBoundingBox()).isEmpty() && !world.containsAnyLiquid(this.getEntityBoundingBox()))
+                if (world.getCollisionBoxes((Entity) (Object) this, this.getEntityBoundingBox()).isEmpty() && !world.containsAnyLiquid(this.getEntityBoundingBox()))
                 {
                     flag = true;
                 }
@@ -809,7 +809,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 final double d3 = d0 + (this.posX - d0) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
                 final double d4 = d1 + (this.posY - d1) * d6 + random.nextDouble() * (double)this.height;
                 final double d5 = d2 + (this.posZ - d2) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
-                world.func_175688_a(EnumParticleTypes.PORTAL, d3, d4, d5, (double)f, (double)f1, (double)f2);
+                world.spawnParticle(EnumParticleTypes.PORTAL, d3, d4, d5, (double)f, (double)f1, (double)f2);
             }
 
             if ((LivingEntity) (Object) this instanceof CreatureEntity)
@@ -866,7 +866,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         final ServerWorld worldServer, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord,
             final double zCoord, final int numberOfParticles, final double xOffset, final double yOffset, final double zOffset, final double particleSpeed, final int... extraArgs) {
         if (!this.bridge$isVanished()) {
-            worldServer.func_175739_a(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, extraArgs);
+            worldServer.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, extraArgs);
         }
 
     }

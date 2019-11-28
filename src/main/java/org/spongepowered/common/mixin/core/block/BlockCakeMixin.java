@@ -59,7 +59,7 @@ public abstract class BlockCakeMixin extends BlockMixin {
             if (layers > 6) {
                 layers = 6;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(CakeBlock.BITES, layers));
+            return Optional.of((BlockState) blockState.withProperty(CakeBlock.BITES, layers));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -71,7 +71,7 @@ public abstract class BlockCakeMixin extends BlockMixin {
             if (layers > 6) {
                 layers = 6;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(CakeBlock.BITES, layers));
+            return Optional.of((BlockState) blockState.withProperty(CakeBlock.BITES, layers));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

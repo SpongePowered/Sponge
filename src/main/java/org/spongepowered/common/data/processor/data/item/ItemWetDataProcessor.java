@@ -48,7 +48,7 @@ public class ItemWetDataProcessor extends AbstractItemSingleDataProcessor<Boolea
 
     @Override
     protected boolean set(ItemStack itemStack, Boolean value) {
-        itemStack.func_77964_b(value ? 1 : 0);
+        itemStack.setItemDamage(value ? 1 : 0);
         return true;
     }
 

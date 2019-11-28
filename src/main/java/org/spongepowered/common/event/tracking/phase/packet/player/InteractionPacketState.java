@@ -235,7 +235,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                     if (entry.getKey().equals(player.getUniqueID())) {
                         throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
                     } else {
-                        final net.minecraft.entity.Entity spawnedEntity = ((ServerWorld) player.world).func_175733_a(entry.getKey());
+                        final net.minecraft.entity.Entity spawnedEntity = ((ServerWorld) player.world).getEntityFromUuid(entry.getKey());
                         if (spawnedEntity != null) {
                             try (final CauseStackManager.StackFrame entityFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 entityFrame.pushCause(spawnedEntity);

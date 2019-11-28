@@ -88,7 +88,7 @@ public class RandomBlockPopulator implements RandomBlock {
                 }
                 // Liquids force a block update tick so they may flow during world gen
                 try {
-                    ((ServerWorld) world).func_189507_a(VecHelper.toBlockPos(pos), (net.minecraft.block.BlockState) this.state, random);
+                    ((ServerWorld) world).immediateBlockTick(VecHelper.toBlockPos(pos), (net.minecraft.block.BlockState) this.state, random);
                 } catch(IllegalArgumentException e) {
                     // ignore
                 }

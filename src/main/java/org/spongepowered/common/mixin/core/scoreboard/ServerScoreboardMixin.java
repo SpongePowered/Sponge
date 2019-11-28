@@ -77,7 +77,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public ScoreObjective func_96535_a(final String name, final ScoreCriteria criteria) {
+    public ScoreObjective addScoreObjective(final String name, final ScoreCriteria criteria) {
         final SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
         objective.setDisplayMode((ObjectiveDisplayMode) (Object) criteria.getRenderType());
         ((org.spongepowered.api.scoreboard.Scoreboard) this).addObjective(objective);

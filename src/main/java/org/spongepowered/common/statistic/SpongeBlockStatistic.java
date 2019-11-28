@@ -50,23 +50,23 @@ public final class SpongeBlockStatistic extends StatCrafting implements BlockSta
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.field_75975_e);
+        return new SpongeTranslation(this.statId);
     }
 
     @Override
     public ItemType getItemType() {
         return ItemTypeRegistryModule.getInstance().getById(
-            this.field_75975_e.substring(this.field_75975_e.lastIndexOf('.') + 1)).get();
+            this.statId.substring(this.statId.lastIndexOf('.') + 1)).get();
     }
 
     @Override
     public Optional<Criterion> getCriterion() {
-        return Optional.ofNullable((Criterion) func_150952_k());
+        return Optional.ofNullable((Criterion) getCriteria());
     }
 
     @Override
     public String getName() {
-        return func_150951_e().func_150260_c();
+        return getStatName().getUnformattedText();
     }
 
     @Override

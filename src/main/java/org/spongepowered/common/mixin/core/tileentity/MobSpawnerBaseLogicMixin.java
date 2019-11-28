@@ -133,7 +133,7 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
         }
         final Entity entity;
         try {
-            entity = EntityList.func_75615_a(compound, world);
+            entity = EntityList.createEntityFromNBT(compound, world);
         } catch (Exception e) {
             return null;
         }
@@ -152,7 +152,7 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
         if (compound.contains(Constants.Entity.PASSENGERS, Constants.NBT.TAG_LIST)) {
             final ListNBT passengerList = compound.getList(Constants.Entity.PASSENGERS, Constants.NBT.TAG_COMPOUND);
 
-            for (int i = 0; i < passengerList.func_74745_c(); i++) {
+            for (int i = 0; i < passengerList.tagCount(); i++) {
                 final Entity passenger = impl$ThrowEventAndConstruct(passengerList.getCompound(i), world, x, y, z, doesNotForceSpawn);
                 if (passenger != null) {
                     passenger.startRiding(entity, true);

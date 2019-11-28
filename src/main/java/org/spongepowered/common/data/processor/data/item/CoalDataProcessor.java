@@ -58,7 +58,7 @@ public class CoalDataProcessor extends AbstractItemSingleDataProcessor<CoalType,
 
     @Override
     protected boolean set(ItemStack itemStack, CoalType value) {
-        itemStack.func_77964_b(((SpongeCoalType) value).type);
+        itemStack.setItemDamage(((SpongeCoalType) value).type);
         return true;
     }
 

@@ -100,7 +100,7 @@ public class FlowerBuilder implements Flower.Builder {
     public Flower build() throws IllegalStateException {
         // these values passed in really don't matter, they are set immediately
         // before the populator is first called from the chunk
-        Flower populator = (Flower) new FlowersFeature(Blocks.field_150327_N, FlowerBlock.EnumFlowerType.DANDELION);
+        Flower populator = (Flower) new FlowersFeature(Blocks.YELLOW_FLOWER, FlowerBlock.EnumFlowerType.DANDELION);
         populator.setFlowersPerChunk(this.count);
         populator.getFlowerTypes().addAll(this.flowers);
         populator.setSupplierOverride(this.override);

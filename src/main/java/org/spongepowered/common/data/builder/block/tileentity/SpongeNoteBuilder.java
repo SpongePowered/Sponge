@@ -46,7 +46,7 @@ public class SpongeNoteBuilder extends AbstractTileBuilder<Note> {
                 ((TileEntity) note1).remove();
                 return Optional.empty();
             }
-            ((TileEntityNote) note1).field_145879_a = container.getInt(Constants.TileEntity.NOTE_ID).get().byteValue();
+            ((TileEntityNote) note1).note = container.getInt(Constants.TileEntity.NOTE_ID).get().byteValue();
             ((TileEntityNote) note1).validate();
             return Optional.of(note1);
         });

@@ -65,7 +65,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
 
     @Override
     default BlockState withExtendedProperties(final Location<World> location) {
-        return (BlockState) this.func_185899_b((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
+        return (BlockState) this.getActualState((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
 
     }
 
@@ -78,7 +78,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     @SuppressWarnings({"unchecked"})
     @Override
     default <T extends Comparable<T>> Optional<T> getTraitValue(final BlockTrait<T> blockTrait) {
-        for (final Map.Entry<IProperty<?>, Comparable<?>> entry : func_177228_b().entrySet()) {
+        for (final Map.Entry<IProperty<?>, Comparable<?>> entry : getProperties().entrySet()) {
             //noinspection EqualsBetweenInconvertibleTypes
             if (entry.getKey() == blockTrait) {
                 return Optional.of((T) entry.getValue());
@@ -90,7 +90,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     @SuppressWarnings("rawtypes")
     @Override
     default Optional<BlockTrait<?>> getTrait(final String blockTrait) {
-        for (final IProperty property : func_177228_b().keySet()) {
+        for (final IProperty property : getProperties().keySet()) {
             if (property.getName().equalsIgnoreCase(blockTrait)) {
                 return Optional.of((BlockTrait<?>) property);
             }
@@ -110,12 +110,12 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
                 }
             }
             if (foundValue != null) {
-                return Optional.of((BlockState) this.func_177226_a((IProperty) trait, foundValue));
+                return Optional.of((BlockState) this.withProperty((IProperty) trait, foundValue));
             }
         }
         if (value instanceof Comparable) {
-            if (func_177228_b().containsKey((IProperty) trait) && ((IProperty) trait).getAllowedValues().contains(value)) {
-                return Optional.of((BlockState) this.func_177226_a((IProperty) trait, (Comparable) value));
+            if (getProperties().containsKey((IProperty) trait) && ((IProperty) trait).getAllowedValues().contains(value)) {
+                return Optional.of((BlockState) this.withProperty((IProperty) trait, (Comparable) value));
             }
         }
         return Optional.empty();
@@ -134,14 +134,14 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     default Map<BlockTrait<?>, ?> getTraitMap() {
-        return (ImmutableMap) func_177228_b();
+        return (ImmutableMap) getProperties();
     }
 
     @Override
     default String getId() {
         final StringBuilder builder = new StringBuilder();
         builder.append(((BlockType) getBlock()).getId());
-        final ImmutableMap<IProperty<?>, Comparable<?>> properties =  this.func_177228_b();
+        final ImmutableMap<IProperty<?>, Comparable<?>> properties =  this.getProperties();
         if (!properties.isEmpty()) {
             builder.append('[');
             final Joiner joiner = Joiner.on(',');

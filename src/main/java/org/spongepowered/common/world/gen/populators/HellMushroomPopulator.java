@@ -99,7 +99,7 @@ public class HellMushroomPopulator implements Mushroom {
             } else {
                 ((WorldGenBushAccessor) this.feature).accessor$setBushBlock(Blocks.RED_MUSHROOM);
             }
-            this.feature.func_180709_b((World) world, random, height);
+            this.feature.generate((World) world, random, height);
 
         }
     }

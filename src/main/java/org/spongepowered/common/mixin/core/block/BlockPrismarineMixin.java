@@ -58,7 +58,7 @@ public abstract class BlockPrismarineMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePrismarineData) {
             final BlockPrismarine.EnumType prismarineType = (BlockPrismarine.EnumType) (Object) ((ImmutablePrismarineData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockPrismarine.field_176332_a, prismarineType));
+            return Optional.of((BlockState) blockState.withProperty(BlockPrismarine.VARIANT, prismarineType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -67,7 +67,7 @@ public abstract class BlockPrismarineMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.PRISMARINE_TYPE)) {
             final BlockPrismarine.EnumType prismarineType = (BlockPrismarine.EnumType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockPrismarine.field_176332_a, prismarineType));
+            return Optional.of((BlockState) blockState.withProperty(BlockPrismarine.VARIANT, prismarineType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -75,7 +75,7 @@ public abstract class BlockPrismarineMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutablePrismarineData impl$getPrismarineTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePrismarineData.class,
-                (PrismarineType) (Object) blockState.get(BlockPrismarine.field_176332_a));
+                (PrismarineType) (Object) blockState.get(BlockPrismarine.VARIANT));
     }
 
 }

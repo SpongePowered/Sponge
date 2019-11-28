@@ -67,7 +67,7 @@ public abstract class BlockFarmlandMixin extends BlockMixin {
             if (moisture > 7) {
                 moisture = 7;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(FarmlandBlock.MOISTURE, moisture));
+            return Optional.of((BlockState) blockState.withProperty(FarmlandBlock.MOISTURE, moisture));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -79,7 +79,7 @@ public abstract class BlockFarmlandMixin extends BlockMixin {
             if (moisture > 7) {
                 moisture = 7;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(FarmlandBlock.MOISTURE, moisture));
+            return Optional.of((BlockState) blockState.withProperty(FarmlandBlock.MOISTURE, moisture));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

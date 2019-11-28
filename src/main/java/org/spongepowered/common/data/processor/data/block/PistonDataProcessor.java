@@ -66,10 +66,10 @@ public class PistonDataProcessor extends AbstractCatalogDataProcessor<PistonType
         boolean isSticky = (oldMeta & 8) > 0;
         boolean isStickyValue = value.equals(PistonTypes.STICKY);
         if (isSticky && !isStickyValue) {
-            itemStack.func_77964_b(oldMeta - 8);
+            itemStack.setItemDamage(oldMeta - 8);
         }
         if (!isSticky && isStickyValue) {
-            itemStack.func_77964_b(oldMeta + 8);
+            itemStack.setItemDamage(oldMeta + 8);
         }
         return true;
     }

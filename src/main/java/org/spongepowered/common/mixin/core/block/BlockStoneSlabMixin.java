@@ -67,26 +67,26 @@ public abstract class BlockStoneSlabMixin extends BlockMixin {
             if (blockState.getBlock() instanceof BlockStoneSlab) {
                 if (!type.equals(SlabTypes.RED_SAND)) {
                     final BlockStoneSlab.EnumType slabType = (BlockStoneSlab.EnumType) (Object) type;
-                    return Optional.of((BlockState) blockState.func_177226_a(BlockStoneSlab.field_176556_M, slabType));
+                    return Optional.of((BlockState) blockState.withProperty(BlockStoneSlab.VARIANT, slabType));
                 }
             } else if (blockState.getBlock() instanceof BlockStoneSlabNew) {
                 if (type.equals(SlabTypes.RED_SAND)) {
                     final BlockStoneSlabNew.EnumType slabType = (BlockStoneSlabNew.EnumType) (Object) type;
-                    return Optional.of((BlockState) blockState.func_177226_a(BlockStoneSlabNew.field_176559_M, slabType));
+                    return Optional.of((BlockState) blockState.withProperty(BlockStoneSlabNew.VARIANT, slabType));
                 }
             }
             return Optional.empty();
         } else if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(SlabBlock.field_176554_a, (SlabBlock.EnumBlockHalf) (Object) portionType));
+            return Optional.of((BlockState) blockState.withProperty(SlabBlock.HALF, (SlabBlock.EnumBlockHalf) (Object) portionType));
         }
         if (manipulator instanceof ImmutableSeamlessData) {
             final boolean seamless = ((ImmutableSeamlessData) manipulator).seamless().get();
             if (blockState.getBlock() instanceof BlockStoneSlab) {
-                return Optional.of((BlockState) blockState.func_177226_a(BlockStoneSlab.field_176555_b, seamless));
+                return Optional.of((BlockState) blockState.withProperty(BlockStoneSlab.SEAMLESS, seamless));
             }
             if (blockState.getBlock() instanceof BlockStoneSlabNew) {
-                return Optional.of((BlockState) blockState.func_177226_a(BlockStoneSlabNew.field_176558_b, seamless));
+                return Optional.of((BlockState) blockState.withProperty(BlockStoneSlabNew.SEAMLESS, seamless));
             }
         }
         return super.bridge$getStateWithData(blockState, manipulator);
@@ -99,25 +99,25 @@ public abstract class BlockStoneSlabMixin extends BlockMixin {
             if (blockState.getBlock() instanceof BlockStoneSlab) {
                 if (!type.equals(SlabTypes.RED_SAND)) {
                     final BlockStoneSlab.EnumType slabType = (BlockStoneSlab.EnumType) value;
-                    return Optional.of((BlockState) blockState.func_177226_a(BlockStoneSlab.field_176556_M, slabType));
+                    return Optional.of((BlockState) blockState.withProperty(BlockStoneSlab.VARIANT, slabType));
                 }
             } else if (blockState.getBlock() instanceof BlockStoneSlabNew) {
                 if (type.equals(SlabTypes.RED_SAND)) {
                     final BlockStoneSlabNew.EnumType slabType = (BlockStoneSlabNew.EnumType) value;
-                    return Optional.of((BlockState) blockState.func_177226_a(BlockStoneSlabNew.field_176559_M, slabType));
+                    return Optional.of((BlockState) blockState.withProperty(BlockStoneSlabNew.VARIANT, slabType));
                 }
             }
             return Optional.empty();
         } else if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.func_177226_a(SlabBlock.field_176554_a, (SlabBlock.EnumBlockHalf) value));
+            return Optional.of((BlockState) blockState.withProperty(SlabBlock.HALF, (SlabBlock.EnumBlockHalf) value));
         }
         if (key.equals(Keys.SEAMLESS)) {
             final boolean seamless = (Boolean) value;
             if (blockState.getBlock() instanceof BlockStoneSlab) {
-                return Optional.of((BlockState) blockState.func_177226_a(BlockStoneSlab.field_176555_b, seamless));
+                return Optional.of((BlockState) blockState.withProperty(BlockStoneSlab.SEAMLESS, seamless));
             }
             if (blockState.getBlock() instanceof BlockStoneSlabNew) {
-                return Optional.of((BlockState) blockState.func_177226_a(BlockStoneSlabNew.field_176558_b, seamless));
+                return Optional.of((BlockState) blockState.withProperty(BlockStoneSlabNew.SEAMLESS, seamless));
             }
         }
         return super.bridge$getStateWithValue(blockState, key, value);
@@ -127,13 +127,13 @@ public abstract class BlockStoneSlabMixin extends BlockMixin {
     private ImmutableSlabData impl$getSlabTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSlabData.class,
                 blockState.getBlock() instanceof BlockStoneSlab
-                        ? (SlabType) (Object) blockState.get(BlockStoneSlab.field_176556_M)
+                        ? (SlabType) (Object) blockState.get(BlockStoneSlab.VARIANT)
                         : blockState.getBlock() instanceof BlockStoneSlabNew
-                                ? (SlabType) (Object) blockState.get(BlockStoneSlabNew.field_176559_M)
+                                ? (SlabType) (Object) blockState.get(BlockStoneSlabNew.VARIANT)
                                 : SlabTypes.COBBLESTONE);
     }
 
     private ImmutablePortionData impl$getPortionTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class, blockState.get(SlabBlock.field_176554_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class, blockState.get(SlabBlock.HALF));
     }
 }

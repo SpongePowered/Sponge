@@ -92,7 +92,7 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setSettings(final net.minecraft.world.World worldIn, final long p_i45636_2_, final boolean p_i45636_4_, final String p_i45636_5_, final CallbackInfo ci) {
         if (this.settings == null) {
-            this.settings = new ChunkGeneratorSettings.Factory().func_177864_b();
+            this.settings = new ChunkGeneratorSettings.Factory().build();
         }
     }
 
@@ -103,50 +103,50 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
 
     @Override
     public void bridge$addPopulators(final WorldGenerator generator) {
-        if (this.settings.field_177839_r) {
+        if (this.settings.useCaves) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.caveGenerator);
         }
 
-        if (this.settings.field_177850_z) {
+        if (this.settings.useRavines) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.ravineGenerator);
         }
 
         // Structures are both generation populators and populators as they are
         // placed in a two phase system
 
-        if (this.settings.field_177829_w && this.mapFeaturesEnabled) {
+        if (this.settings.useMineShafts && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.mineshaftGenerator);
             generator.getPopulators().add((Populator) this.mineshaftGenerator);
         }
 
-        if (this.settings.field_177831_v && this.mapFeaturesEnabled) {
+        if (this.settings.useVillages && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.villageGenerator);
             generator.getPopulators().add((Populator) this.villageGenerator);
         }
 
-        if (this.settings.field_177833_u && this.mapFeaturesEnabled) {
+        if (this.settings.useStrongholds && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.strongholdGenerator);
             generator.getPopulators().add((Populator) this.strongholdGenerator);
         }
 
-        if (this.settings.field_177854_x && this.mapFeaturesEnabled) {
+        if (this.settings.useTemples && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.scatteredFeatureGenerator);
             generator.getPopulators().add((Populator) this.scatteredFeatureGenerator);
         }
 
-        if (this.settings.field_177852_y && this.mapFeaturesEnabled) {
+        if (this.settings.useMonuments && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.oceanMonumentGenerator);
             generator.getPopulators().add((Populator) this.oceanMonumentGenerator);
         }
 
-        if (this.settings.field_191077_z && this.mapFeaturesEnabled) {
+        if (this.settings.useMansions && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.woodlandMansionGenerator);
             generator.getPopulators().add((Populator) this.woodlandMansionGenerator);
         }
 
-        if (this.settings.field_177781_A) {
+        if (this.settings.useWaterLakes) {
             final Lake lake = Lake.builder()
-                    .chance(1d / this.settings.field_177782_B)
+                    .chance(1d / this.settings.waterLakeChance)
                     .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithRandomAddition(0, 256))
                     .build();
@@ -158,9 +158,9 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
             generator.getPopulators().add(filtered);
         }
 
-        if (this.settings.field_177783_C) {
+        if (this.settings.useLavaLakes) {
             final Lake lake = Lake.builder()
-                    .chance(1d / this.settings.field_177777_D)
+                    .chance(1d / this.settings.lavaLakeChance)
                     .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithVariance(0,
                             VariableAmount.baseWithRandomAddition(8, VariableAmount.baseWithOptionalAddition(55, 193, 0.1))))
@@ -170,10 +170,10 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
             generator.getPopulators().add(filtered);
         }
 
-        if (this.settings.field_177837_s) {
+        if (this.settings.useDungeons) {
             final Dungeon dungeon = Dungeon.builder()
                     // this is actually a count, terrible naming
-                    .attempts(this.settings.field_177835_t)
+                    .attempts(this.settings.dungeonChance)
                     .build();
             generator.getPopulators().add(dungeon);
         }
@@ -186,7 +186,7 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
     @Override
     public Biome[] bridge$getBiomesForGeneration(final int x, final int z) {
         if (this.impl$biomegen instanceof BiomeProvider) {
-            return ((BiomeProvider) this.impl$biomegen).func_76937_a(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
+            return ((BiomeProvider) this.impl$biomegen).getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
         }
         // If its not a WorldChunkManager then we have to perform a reverse of
         // the voronoi zoom biome generation layer to get a zoomed out version
@@ -239,7 +239,7 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
             return biomes;
         }
         // Re-use the same values passed in since the biomes parameter
-        return provider.func_76937_a(biomes, x, z, width, height);
+        return provider.getBiomesForGeneration(biomes, x, z, width, height);
     }
 
     /**

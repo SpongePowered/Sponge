@@ -94,12 +94,12 @@ public final class SpongeGenerationPopulator implements GenerationPopulator, Tim
 
         WorldGenConstants.disableLighting();
         if (minChunkX == maxChunkX && minChunkZ == maxChunkZ) {
-            this.cachedChunk = this.chunkGenerator.func_185932_a(minChunkX, minChunkZ);
+            this.cachedChunk = this.chunkGenerator.generateChunk(minChunkX, minChunkZ);
             this.placeChunkInBuffer(this.cachedChunk, buffer, minChunkX, minChunkZ);
         } else {
             for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
                 for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
-                    final Chunk generated = this.chunkGenerator.func_185932_a(chunkX, chunkZ);
+                    final Chunk generated = this.chunkGenerator.generateChunk(chunkX, chunkZ);
                     this.placeChunkInBuffer(generated, buffer, chunkX, chunkZ);
                 }
             }
@@ -129,7 +129,7 @@ public final class SpongeGenerationPopulator implements GenerationPopulator, Tim
                 continue;
             }
 
-            final int yOffset = miniChunk.func_76662_d();
+            final int yOffset = miniChunk.getYLocation();
             final int yInChunkStart = Math.max(0, yStart);
             final int yInChunkEnd = Math.min(15, yEnd);
             for (int xInChunk = xInChunkStart; xInChunk <= xInChunkEnd; xInChunk++) {

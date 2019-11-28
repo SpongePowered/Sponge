@@ -58,12 +58,12 @@ public abstract class WorldGenMelonMixin_API extends WorldGeneratorMixin impleme
         final int n = this.api$count.getFlooredAmount(random);
         final int x = random.nextInt(size.getX());
         final int z = random.nextInt(size.getZ());
-        final int y = apiImpl$nextInt(random, Math.min(world.func_175645_m(position.add(x, 0, z)).getY() * 2, 255));
+        final int y = apiImpl$nextInt(random, Math.min(world.getHeight(position.add(x, 0, z)).getY() * 2, 255));
         position = position.add(x, y, z);
         for (int i = 0; i < n; ++i) {
             final BlockPos blockpos1 = position.add(random.nextInt(8) - random.nextInt(8), random.nextInt(4) - random.nextInt(4), random.nextInt(8) - random.nextInt(8));
 
-            if (Blocks.MELON.func_176196_c(world, blockpos1) && world.getBlockState(blockpos1.down()).getBlock() == Blocks.GRASS) {
+            if (Blocks.MELON.canPlaceBlockAt(world, blockpos1) && world.getBlockState(blockpos1.down()).getBlock() == Blocks.GRASS) {
                 world.setBlockState(blockpos1, Blocks.MELON.getDefaultState(), 2);
             }
         }

@@ -65,7 +65,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
     @Override
     public String getIdentifier() {
-        return this.sender.func_70005_c_();
+        return this.sender.getName();
     }
 
     @Override
@@ -85,7 +85,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
     @Override
     public String getName() {
-        return this.sender.func_70005_c_();
+        return this.sender.getName();
     }
 
     @Override
@@ -111,7 +111,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
         if (sender instanceof WrapperICommandSender) {
             return ((WrapperICommandSender) sender).source;
         }
-        if (sender.func_174793_f() != null || !Vec3d.ZERO.equals(sender.getPositionVector())) {
+        if (sender.getCommandSenderEntity() != null || !Vec3d.ZERO.equals(sender.getPositionVector())) {
             return new Located(sender);
         }
         return new WrapperCommandSource(sender);

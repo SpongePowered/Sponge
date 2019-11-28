@@ -151,7 +151,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                     net.minecraft.entity.Entity foundEntity = null;
                     for (final ServerWorld worldServer : WorldManager.getWorlds())
                     {
-                        final net.minecraft.entity.Entity entityFromUuid = worldServer.func_175733_a(key);
+                        final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
                         if (entityFromUuid != null)
                         {
                             foundEntity = entityFromUuid;

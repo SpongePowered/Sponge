@@ -46,7 +46,7 @@ import java.util.Optional;
 public class FishDataProcessor extends AbstractItemSingleDataProcessor<Fish, Value<Fish>, FishData, ImmutableFishData> {
 
     public FishDataProcessor() {
-        super(stack -> stack.getItem().equals(Items.field_151115_aP), Keys.FISH_TYPE);
+        super(stack -> stack.getItem().equals(Items.FISH), Keys.FISH_TYPE);
     }
 
     @Override
@@ -56,13 +56,13 @@ public class FishDataProcessor extends AbstractItemSingleDataProcessor<Fish, Val
 
     @Override
     protected boolean set(ItemStack itemStack, Fish value) {
-        itemStack.func_77964_b(((ItemFishFood.FishType) (Object) value).func_150976_a());
+        itemStack.setItemDamage(((ItemFishFood.FishType) (Object) value).getMetadata());
         return true;
     }
 
     @Override
     protected Optional<Fish> getVal(ItemStack itemStack) {
-        return Optional.of((Fish) (Object) ItemFishFood.FishType.func_150978_a(itemStack));
+        return Optional.of((Fish) (Object) ItemFishFood.FishType.byItemStack(itemStack));
     }
 
     @Override

@@ -55,7 +55,7 @@ import java.util.Optional;
 public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<Text>, ListValue<Text>, SignData, ImmutableSignData> {
 
     public ItemSignDataProcessor() {
-        super(stack -> stack.getItem().equals(Items.field_151155_ap), Keys.SIGN_LINES);
+        super(stack -> stack.getItem().equals(Items.SIGN), Keys.SIGN_LINES);
     }
 
     @Override

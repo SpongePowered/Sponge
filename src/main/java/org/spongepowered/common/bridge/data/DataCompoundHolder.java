@@ -40,7 +40,7 @@ public interface DataCompoundHolder {
     default CompoundNBT data$getSpongeCompound() {
         final CompoundNBT data = this.data$getRootCompound();
         if (!data.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            data.func_74782_a(Constants.Sponge.SPONGE_DATA, new CompoundNBT());
+            data.setTag(Constants.Sponge.SPONGE_DATA, new CompoundNBT());
         }
         return data.getCompound(Constants.Sponge.SPONGE_DATA);
     }

@@ -202,14 +202,14 @@ public interface DefaultedExtent extends Extent {
             final net.minecraft.entity.Entity nms = (net.minecraft.entity.Entity) hit;
             final SpongeEntityArchetype archetype = (SpongeEntityArchetype) hit.createArchetype();
             final ListNBT tagList = archetype.getData().getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
-            if (tagList.func_82582_d()) {
-                tagList.func_74742_a(new DoubleNBT(nms.posX - ox));
-                tagList.func_74742_a(new DoubleNBT(nms.posY - oy));
-                tagList.func_74742_a(new DoubleNBT(nms.posZ - oz));
+            if (tagList.isEmpty()) {
+                tagList.appendTag(new DoubleNBT(nms.posX - ox));
+                tagList.appendTag(new DoubleNBT(nms.posY - oy));
+                tagList.appendTag(new DoubleNBT(nms.posZ - oz));
             } else {
-                tagList.func_150304_a(0, new DoubleNBT(nms.posX - ox));
-                tagList.func_150304_a(1, new DoubleNBT(nms.posY - oy));
-                tagList.func_150304_a(2, new DoubleNBT(nms.posZ - oz));
+                tagList.set(0, new DoubleNBT(nms.posX - ox));
+                tagList.set(1, new DoubleNBT(nms.posY - oy));
+                tagList.set(2, new DoubleNBT(nms.posZ - oz));
             }
             entities.add(archetype);
         }

@@ -142,7 +142,7 @@ public class SpongeHooks {
             return;
         }
 
-        final String spawnName = entity.func_70005_c_();
+        final String spawnName = entity.getName();
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().entitySpawnLogging()) {
@@ -227,7 +227,7 @@ public class SpongeHooks {
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().chunkGCQueueUnloadLogging()) {
-            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((WorldServerBridge) world).bridge$getDimensionId(), chunk.field_76635_g, chunk.field_76647_h);
+            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((WorldServerBridge) world).bridge$getDimensionId(), chunk.x, chunk.z);
             logStack(configAdapter);
         }
     }
@@ -240,7 +240,7 @@ public class SpongeHooks {
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) player.world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().logExploitSignCommandUpdates) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to exploit sign in world ''{1}'' located at ''{2}'' with command ''{3}''",
-                    player.func_70005_c_(),
+                    player.getName(),
                     te.getWorld().getWorldInfo().getWorldName(),
                     te.getPos().getX() + ", " + te.getPos().getY() + ", " + te.getPos().getZ(),
                     command);
@@ -256,7 +256,7 @@ public class SpongeHooks {
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) player.world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().logExploitItemStackNameOverflow) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to send a creative itemstack update with a display name length of ''{1}'' (Max allowed length is 32767). This has been blocked to avoid server overflow.",
-                    player.func_70005_c_(),
+                    player.getName(),
                     length);
             logStack(configAdapter);
         }
@@ -270,7 +270,7 @@ public class SpongeHooks {
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) player.world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().logExploitRespawnInvisibility) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to perform a respawn invisibility exploit to surrounding players.",
-                    player.func_70005_c_());
+                    player.getName());
             logStack(configAdapter);
         }
     }
@@ -300,7 +300,7 @@ public class SpongeHooks {
         if (size > maxBoundingBoxSize) {
             logWarning("Entity being removed for bounding box restrictions");
             logWarning("BB Size: {0} > {1} avg edge: {2}", size, maxBoundingBoxSize, aabb.getAverageEdgeLength());
-            logWarning("Motion: ({0}, {1}, {2})", entity.field_70159_w, entity.field_70181_x, entity.field_70179_y);
+            logWarning("Motion: ({0}, {1}, {2})", entity.motionX, entity.motionY, entity.motionZ);
             logWarning("Calculated bounding box: {0}", aabb);
             logWarning("Entity bounding box: {0}", entity.getCollisionBoundingBox());
             logWarning("Entity: {0}", entity);
@@ -329,14 +329,14 @@ public class SpongeHooks {
                     if (entity instanceof LivingEntity) {
                         final LivingEntity livingBase = (LivingEntity) entity;
                         logInfo("Entity Motion: ({0}, {1}, {2}) Move Strafing: {3} Move Forward: {4}",
-                                entity.field_70159_w, entity.field_70181_x,
-                                entity.field_70179_y,
+                                entity.motionX, entity.motionY,
+                                entity.motionZ,
                                 livingBase.moveStrafing, livingBase.moveForward);
                     }
 
                     if (configAdapter.getConfig().getLogging().logWithStackTraces()) {
                         logInfo("Move offset: ({0}, {1}, {2})", x, y, z);
-                        logInfo("Motion: ({0}, {1}, {2})", entity.field_70159_w, entity.field_70181_x, entity.field_70179_y);
+                        logInfo("Motion: ({0}, {1}, {2})", entity.motionX, entity.motionY, entity.motionZ);
                         logInfo("Entity: {0}", entity);
                         final CompoundNBT tag = new CompoundNBT();
                         entity.writeWithoutTypeId(tag);
@@ -345,9 +345,9 @@ public class SpongeHooks {
                     }
                 }
                 if (entity instanceof PlayerEntity) { // Skip killing players
-                    entity.field_70159_w = 0;
-                    entity.field_70181_x = 0;
-                    entity.field_70179_y = 0;
+                    entity.motionX = 0;
+                    entity.motionY = 0;
+                    entity.motionZ = 0;
                     return false;
                 }
                 // Remove the entity;
@@ -379,7 +379,7 @@ public class SpongeHooks {
             final SpongeHooks.CollisionWarning warning = new SpongeHooks.CollisionWarning(entity.world, entity);
             if (SpongeHooks.recentWarnings.containsKey(warning)) {
                 final long lastWarned = SpongeHooks.recentWarnings.get(warning);
-                if ((MinecraftServer.func_130071_aq() - lastWarned) < 30000) {
+                if ((MinecraftServer.getCurrentTimeMillis() - lastWarned) < 30000) {
                     return;
                 }
             }
@@ -485,7 +485,7 @@ public class SpongeHooks {
             // Reload before updating world config cache
             configAdapter.load();
             ((WorldServerBridge) world).bridge$updateConfigCache();
-            for (final Entity entity : world.field_72996_f) {
+            for (final Entity entity : world.loadedEntityList) {
                 if (entity instanceof ActivationCapability) {
                     ((ActivationCapability) entity).activation$requiresActivationCacheRefresh(true);
                 }

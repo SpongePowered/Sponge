@@ -67,7 +67,7 @@ public abstract class CommandTPMixin extends CommandBase {
      */
     @Override
     @Overwrite
-    public void func_184881_a(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException
+    public void execute(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException
     {
         if (args.length < 1)
         {
@@ -80,11 +80,11 @@ public abstract class CommandTPMixin extends CommandBase {
 
             if (args.length != 2 && args.length != 4 && args.length != 6)
             {
-                entity = func_71521_c(sender);
+                entity = getCommandSenderAsPlayer(sender);
             }
             else
             {
-                entity = func_184885_b(server, sender, args[0]);
+                entity = getEntity(server, sender, args[0]);
                 i = 1;
             }
 
@@ -98,11 +98,11 @@ public abstract class CommandTPMixin extends CommandBase {
                 {
                     // int j = 4096;
                     int lvt_6_2_ = i + 1;
-                    final CommandBase.CoordinateArg commandbase$coordinatearg = func_175770_a(entity.posX, args[i], true);
-                    final CommandBase.CoordinateArg commandbase$coordinatearg1 = func_175767_a(entity.posY, args[lvt_6_2_++], -4096, 4096, false);
-                    final CommandBase.CoordinateArg commandbase$coordinatearg2 = func_175770_a(entity.posZ, args[lvt_6_2_++], true);
-                    final CommandBase.CoordinateArg commandbase$coordinatearg3 = func_175770_a((double)entity.rotationYaw, args.length > lvt_6_2_ ? args[lvt_6_2_++] : "~", false);
-                    final CommandBase.CoordinateArg commandbase$coordinatearg4 = func_175770_a((double)entity.rotationPitch, args.length > lvt_6_2_ ? args[lvt_6_2_] : "~", false);
+                    final CommandBase.CoordinateArg commandbase$coordinatearg = parseCoordinate(entity.posX, args[i], true);
+                    final CommandBase.CoordinateArg commandbase$coordinatearg1 = parseCoordinate(entity.posY, args[lvt_6_2_++], -4096, 4096, false);
+                    final CommandBase.CoordinateArg commandbase$coordinatearg2 = parseCoordinate(entity.posZ, args[lvt_6_2_++], true);
+                    final CommandBase.CoordinateArg commandbase$coordinatearg3 = parseCoordinate((double)entity.rotationYaw, args.length > lvt_6_2_ ? args[lvt_6_2_++] : "~", false);
+                    final CommandBase.CoordinateArg commandbase$coordinatearg4 = parseCoordinate((double)entity.rotationPitch, args.length > lvt_6_2_ ? args[lvt_6_2_] : "~", false);
                     // Sponge start - check impl$shouldNotifyCommandListener before calling 'notifyCommandListener'
 
                     // Guard against any possible re-entrance
@@ -110,7 +110,7 @@ public abstract class CommandTPMixin extends CommandBase {
 
                     teleportEntityToCoordinates(entity, commandbase$coordinatearg, commandbase$coordinatearg1, commandbase$coordinatearg2, commandbase$coordinatearg3, commandbase$coordinatearg4);
                     if (impl$shouldNotifyCommandListener) {
-                        func_152373_a(sender, this, "commands.tp.success.coordinates", new Object[] {entity.func_70005_c_(), Double.valueOf(commandbase$coordinatearg.func_179628_a()), Double.valueOf(commandbase$coordinatearg1.func_179628_a()), Double.valueOf(commandbase$coordinatearg2.func_179628_a())});
+                        notifyCommandListener(sender, this, "commands.tp.success.coordinates", new Object[] {entity.getName(), Double.valueOf(commandbase$coordinatearg.getResult()), Double.valueOf(commandbase$coordinatearg1.getResult()), Double.valueOf(commandbase$coordinatearg2.getResult())});
                     }
                     impl$shouldNotifyCommandListener = shouldNotify;
                     // Sponge end
@@ -118,7 +118,7 @@ public abstract class CommandTPMixin extends CommandBase {
             }
             else
             {
-                final Entity entity1 = func_184885_b(server, sender, args[args.length - 1]);
+                final Entity entity1 = getEntity(server, sender, args[args.length - 1]);
 
                 if (entity1.world != entity.world)
                 {
@@ -160,7 +160,7 @@ public abstract class CommandTPMixin extends CommandBase {
                         // Sponge End
                     }
 
-                    func_152373_a(sender, this, "commands.tp.success", new Object[] {entity.func_70005_c_(), entity1.func_70005_c_()});
+                    notifyCommandListener(sender, this, "commands.tp.success", new Object[] {entity.getName(), entity1.getName()});
                 }
             }
         }
@@ -177,50 +177,50 @@ public abstract class CommandTPMixin extends CommandBase {
         {
             final Set<SPlayerPositionLookPacket.Flags> set = EnumSet.<SPlayerPositionLookPacket.Flags>noneOf(SPlayerPositionLookPacket.Flags.class);
 
-            if (p_189863_1_.func_179630_c())
+            if (p_189863_1_.isRelative())
             {
                 set.add(SPlayerPositionLookPacket.Flags.X);
             }
 
-            if (p_189863_2_.func_179630_c())
+            if (p_189863_2_.isRelative())
             {
                 set.add(SPlayerPositionLookPacket.Flags.Y);
             }
 
-            if (p_189863_3_.func_179630_c())
+            if (p_189863_3_.isRelative())
             {
                 set.add(SPlayerPositionLookPacket.Flags.Z);
             }
 
-            if (p_189863_5_.func_179630_c())
+            if (p_189863_5_.isRelative())
             {
                 set.add(SPlayerPositionLookPacket.Flags.X_ROT);
             }
 
-            if (p_189863_4_.func_179630_c())
+            if (p_189863_4_.isRelative())
             {
                 set.add(SPlayerPositionLookPacket.Flags.Y_ROT);
             }
 
-            float f = (float)p_189863_4_.func_179629_b();
+            float f = (float)p_189863_4_.getAmount();
 
-            if (!p_189863_4_.func_179630_c())
+            if (!p_189863_4_.isRelative())
             {
                 f = MathHelper.wrapDegrees(f);
             }
 
-            float f1 = (float)p_189863_5_.func_179629_b();
+            float f1 = (float)p_189863_5_.getAmount();
 
-            if (!p_189863_5_.func_179630_c())
+            if (!p_189863_5_.isRelative())
             {
                 f1 = MathHelper.wrapDegrees(f1);
             }
 
             // Sponge start
             final ServerPlayerEntity player = (ServerPlayerEntity) p_189863_0_;
-            final double x = p_189863_1_.func_179629_b();
-            final double y = p_189863_2_.func_179629_b();
-            final double z = p_189863_3_.func_179629_b();
+            final double x = p_189863_1_.getAmount();
+            final double y = p_189863_2_.getAmount();
+            final double z = p_189863_3_.getAmount();
             final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, x, y, z, f, f1);
             if (event.isCancelled()) {
                 return;
@@ -234,14 +234,14 @@ public abstract class CommandTPMixin extends CommandBase {
         }
         else
         {
-            final float f2 = (float)MathHelper.wrapDegrees(p_189863_4_.func_179628_a());
-            float f3 = (float)MathHelper.wrapDegrees(p_189863_5_.func_179628_a());
+            final float f2 = (float)MathHelper.wrapDegrees(p_189863_4_.getResult());
+            float f3 = (float)MathHelper.wrapDegrees(p_189863_5_.getResult());
             f3 = MathHelper.clamp(f3, -90.0F, 90.0F);
 
             // Sponge start
-            final double x = p_189863_1_.func_179628_a();
-            final double y = p_189863_2_.func_179628_a();
-            final double z = p_189863_3_.func_179628_a();
+            final double x = p_189863_1_.getResult();
+            final double y = p_189863_2_.getResult();
+            final double z = p_189863_3_.getResult();
             final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(p_189863_0_, x, y, z, f2, f3);
             if (event.isCancelled()) {
                 return;
@@ -255,7 +255,7 @@ public abstract class CommandTPMixin extends CommandBase {
 
         if (!(p_189863_0_ instanceof LivingEntity) || !((LivingEntity)p_189863_0_).isElytraFlying())
         {
-            p_189863_0_.field_70181_x = 0.0D;
+            p_189863_0_.motionY = 0.0D;
             p_189863_0_.onGround = true;
         }
 

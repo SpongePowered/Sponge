@@ -56,7 +56,7 @@ public class InstrumentPropertyStore extends AbstractBlockPropertyStore<Instrume
             return InstrumentTypes.FLUTE;
         } else if (blockType == Blocks.GOLD_BLOCK) {
             return InstrumentTypes.BELL;
-        } else if (blockType == Blocks.field_150325_L) {
+        } else if (blockType == Blocks.WOOL) {
             return InstrumentTypes.GUITAR;
         } else if (blockType == Blocks.PACKED_ICE) {
             return InstrumentTypes.CHIME;

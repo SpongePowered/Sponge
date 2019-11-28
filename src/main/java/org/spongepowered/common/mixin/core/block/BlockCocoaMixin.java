@@ -61,7 +61,7 @@ public abstract class BlockCocoaMixin extends BlockHorizontalMixin {
             if (growth > 2) {
                 growth = 2;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(CocoaBlock.AGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(CocoaBlock.AGE, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -73,7 +73,7 @@ public abstract class BlockCocoaMixin extends BlockHorizontalMixin {
             if (growth > 2) {
                 growth = 2;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(CocoaBlock.AGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(CocoaBlock.AGE, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

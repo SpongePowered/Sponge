@@ -89,7 +89,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
 
     private CompoundNBT loadNbt() {
         try {
-            return checkNotNull(JsonToNBT.getTagFromJson(this.value.func_150260_c()), "NBT");
+            return checkNotNull(JsonToNBT.getTagFromJson(this.value.getUnformattedText()), "NBT");
         } catch (NBTException e) {
             throw new RuntimeException(e);
         }

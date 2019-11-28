@@ -101,9 +101,9 @@ public final class DataUtil {
     private static final Supplier<InvalidDataException> INVALID_DATA_EXCEPTION_SUPPLIER = InvalidDataException::new;
 
     static {
-        spongeDataFixer.func_188256_a(FixTypes.LEVEL, new SpongeLevelFixer());
-        spongeDataFixer.func_188256_a(FixTypes.ENTITY, new EntityTrackedUser());
-        spongeDataFixer.func_188256_a(FixTypes.PLAYER, new PlayerRespawnData());
+        spongeDataFixer.registerFix(FixTypes.LEVEL, new SpongeLevelFixer());
+        spongeDataFixer.registerFix(FixTypes.ENTITY, new EntityTrackedUser());
+        spongeDataFixer.registerFix(FixTypes.PLAYER, new PlayerRespawnData());
     }
 
     public static DataView checkDataExists(final DataView dataView, final DataQuery query) throws InvalidDataException {
@@ -474,11 +474,11 @@ public final class DataUtil {
 
     public static DataTransactionResult apply(final CompoundNBT compound, final DataManipulator<?, ?> manipulator) {
         if (!compound.contains(Constants.Forge.FORGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            compound.func_74782_a(Constants.Forge.FORGE_DATA, new CompoundNBT());
+            compound.setTag(Constants.Forge.FORGE_DATA, new CompoundNBT());
         }
         final CompoundNBT forgeCompound = compound.getCompound(Constants.Forge.FORGE_DATA);
         if (!forgeCompound.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            forgeCompound.func_74782_a(Constants.Sponge.SPONGE_DATA, new CompoundNBT());
+            forgeCompound.setTag(Constants.Sponge.SPONGE_DATA, new CompoundNBT());
         }
         final CompoundNBT spongeTag = forgeCompound.getCompound(Constants.Sponge.SPONGE_DATA);
 
@@ -488,7 +488,7 @@ public final class DataUtil {
 
         if (spongeTag.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
             list = spongeTag.getList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
-            for (int i = 0; i < list.func_74745_c(); i++) {
+            for (int i = 0; i < list.tagCount(); i++) {
                 final CompoundNBT dataCompound = list.getCompound(i);
                 final String dataId = dataCompound.getString(Constants.Sponge.MANIPULATOR_ID);
                 if (dataId.equalsIgnoreCase(registration.getId())) {
@@ -497,7 +497,7 @@ public final class DataUtil {
                     final Optional<DataManipulator<?, ?>> existingManipulator = deserializeManipulator(dataId, currentView);
                     final DataContainer replacement = manipulator.toContainer();
                     final CompoundNBT replacementCompound = NbtTranslator.getInstance().translateData(replacement);
-                    dataCompound.func_74782_a(Constants.Sponge.CUSTOM_DATA, replacementCompound);
+                    dataCompound.setTag(Constants.Sponge.CUSTOM_DATA, replacementCompound);
                     return DataTransactionResult.successReplaceResult(manipulator.getValues(), existingManipulator.map(DataManipulator::getValues)
                         .orElseGet(ImmutableSet::of));
                 }
@@ -509,9 +509,9 @@ public final class DataUtil {
             newCompound.putString(Constants.Sponge.MANIPULATOR_ID, registration.getId());
             final DataContainer dataContainer = manipulator.toContainer();
             final CompoundNBT dataCompound = NbtTranslator.getInstance().translateData(dataContainer);
-            newCompound.func_74782_a(Constants.Sponge.CUSTOM_DATA, dataCompound);
-            list.func_74742_a(newCompound);
-            spongeTag.func_74782_a(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, list);
+            newCompound.setTag(Constants.Sponge.CUSTOM_DATA, dataCompound);
+            list.appendTag(newCompound);
+            spongeTag.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, list);
         }
 
         return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).success(manipulator.getValues()).build();
@@ -531,18 +531,18 @@ public final class DataUtil {
             return DataTransactionResult.successNoData();
         }
         final ListNBT dataList = spongeData.getList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
-        if (dataList.func_74745_c() == 0) {
+        if (dataList.tagCount() == 0) {
             return DataTransactionResult.successNoData();
         }
         final DataRegistration<?, ?> registration = SpongeManipulatorRegistry.getInstance().getRegistrationFor((Class) containerClass);
-        for (int i = 0; i < dataList.func_74745_c(); i++) {
+        for (int i = 0; i < dataList.tagCount(); i++) {
             final CompoundNBT dataCompound = dataList.getCompound(i);
             final String dataId = dataCompound.getString(Constants.Sponge.MANIPULATOR_ID);
             if (registration.getId().equalsIgnoreCase(dataId)) {
                 final CompoundNBT current = dataCompound.getCompound(Constants.Sponge.CUSTOM_DATA);
                 final DataContainer currentView = NbtTranslator.getInstance().translate(current);
                 final Optional<DataManipulator<?, ?>> existing = deserializeManipulator(dataId, currentView);
-                dataList.func_74744_a(i);
+                dataList.removeTag(i);
                 return existing.map(DataManipulator::getValues)
                     .map(DataTransactionResult::successRemove)
                     .orElseGet(DataTransactionResult::successNoData);
@@ -600,8 +600,8 @@ public final class DataUtil {
     }
 
     private static void translateTagListToView(final ImmutableList.Builder<? super DataView> builder, final ListNBT list) {
-        if (!list.func_82582_d()) {
-            for (int i = 0; i < list.func_74745_c(); i++) {
+        if (!list.isEmpty()) {
+            for (int i = 0; i < list.tagCount(); i++) {
                 final CompoundNBT internal = list.getCompound(i);
                 builder.add(NbtTranslator.getInstance().translateFrom(internal));
             }
@@ -616,17 +616,17 @@ public final class DataUtil {
                 final List<DataView> manipulatorViews = getSerializedManipulatorList(manipulators);
                 final ListNBT manipulatorTagList = new ListNBT();
                 for (final DataView dataView : manipulatorViews) {
-                    manipulatorTagList.func_74742_a(NbtTranslator.getInstance().translateData(dataView));
+                    manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
                 }
-                compound.func_74782_a(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
+                compound.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
             }
             final List<DataView> failedData = ((CustomDataHolderBridge) dataHolder).bridge$getFailedData();
             if (!failedData.isEmpty()) {
                 final ListNBT failedList = new ListNBT();
                 for (final DataView failedDatum : failedData) {
-                    failedList.func_74742_a(NbtTranslator.getInstance().translateData(failedDatum));
+                    failedList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
                 }
-                compound.func_74782_a(Constants.Sponge.FAILED_CUSTOM_DATA, failedList);
+                compound.setTag(Constants.Sponge.FAILED_CUSTOM_DATA, failedList);
             }
         }
     }

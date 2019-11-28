@@ -61,7 +61,7 @@ public class TimedEventListener<T extends Event> implements EventListener<T> {
 
     @Override
     public void handle(T event) throws Exception {
-        if (!Timings.isTimingsEnabled() || !SpongeImpl.getServer().func_152345_ab()) {
+        if (!Timings.isTimingsEnabled() || !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             this.listener.handle(event);
             return;
         }

@@ -75,7 +75,7 @@ public abstract class WorldTypeMixin_API implements GeneratorType {
         if (((WorldType) (Object) this) == WorldType.CUSTOMIZED) {
             // They easiest way to go from ChunkProviderSettings to DataContainer is via json and NBT
             try {
-                return JsonDataFormat.serialize(ChunkGeneratorSettings.Factory.field_177901_a, new ChunkGeneratorSettings.Factory());
+                return JsonDataFormat.serialize(ChunkGeneratorSettings.Factory.JSON_ADAPTER, new ChunkGeneratorSettings.Factory());
             } catch (JsonParseException | IOException e) {
                 throw new AssertionError("Failed to serialize default settings of CUSTOMIZED world type", e);
             }

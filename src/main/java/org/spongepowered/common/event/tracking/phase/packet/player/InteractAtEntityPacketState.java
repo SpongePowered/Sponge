@@ -132,7 +132,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
             context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
                 for (Map.Entry<UUID, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
                     final UUID entityUuid = entry.getKey();
-                    final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().func_175733_a(entityUuid);
+                    final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);
                     if (entityFromUuid != null) {
                         final List<Entity> entities = entry.getValue()
                             .stream()

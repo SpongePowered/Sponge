@@ -62,7 +62,7 @@ public class SpongeChunkDataStream implements ChunkDataStream {
         public DataInputStream getStreamAt(final int index) {
             final int x = index & 31;
             final int z = index >>> 5;
-            return this.file.func_76704_a(x, z);
+            return this.file.getChunkDataInputStream(x, z);
         }
 
     }

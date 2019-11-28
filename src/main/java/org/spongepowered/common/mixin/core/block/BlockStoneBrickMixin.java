@@ -58,7 +58,7 @@ public abstract class BlockStoneBrickMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableBrickData) {
             final BlockStoneBrick.EnumType stoneBrickType = (BlockStoneBrick.EnumType) (Object) ((ImmutableBrickData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockStoneBrick.field_176249_a, stoneBrickType));
+            return Optional.of((BlockState) blockState.withProperty(BlockStoneBrick.VARIANT, stoneBrickType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -67,7 +67,7 @@ public abstract class BlockStoneBrickMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.BRICK_TYPE)) {
             final BlockStoneBrick.EnumType stoneBrickType = (BlockStoneBrick.EnumType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockStoneBrick.field_176249_a, stoneBrickType));
+            return Optional.of((BlockState) blockState.withProperty(BlockStoneBrick.VARIANT, stoneBrickType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -75,6 +75,6 @@ public abstract class BlockStoneBrickMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableBrickData impl$getStoneBrickTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeBrickData.class,
-                (BrickType) (Object) blockState.get(BlockStoneBrick.field_176249_a));
+                (BrickType) (Object) blockState.get(BlockStoneBrick.VARIANT));
     }
 }

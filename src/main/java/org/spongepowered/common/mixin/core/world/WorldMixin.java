@@ -388,7 +388,7 @@ public abstract class WorldMixin implements WorldBridge {
                 final TileEntity tileEntity = this.getTileEntity(pos);
                 if(tileEntity instanceof JukeboxBlock.TileEntityJukebox) {
                     final JukeboxBlock.TileEntityJukebox jukebox = (JukeboxBlock.TileEntityJukebox) tileEntity;
-                    final ItemStack record = jukebox.func_145856_a();
+                    final ItemStack record = jukebox.getRecord();
                     frame.pushCause(jukebox);
                     frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(record));
                     if(!record.isEmpty()) {
@@ -555,7 +555,7 @@ public abstract class WorldMixin implements WorldBridge {
     protected void impl$getRawLightWithoutMarkingChunkActive(final BlockPos pos, final LightType enumSkyBlock, final CallbackInfoReturnable<Integer> cir) {
         final Chunk chunk;
         chunk = this.getChunk(pos);
-        if (chunk == null || chunk.field_189550_d) {
+        if (chunk == null || chunk.unloadQueued) {
             cir.setReturnValue(0);
         }
     }
@@ -576,7 +576,7 @@ public abstract class WorldMixin implements WorldBridge {
             return Blocks.AIR.getDefaultState();
         }
         final Chunk chunk = this.getChunk(pos);
-        return chunk.func_177435_g(pos);
+        return chunk.getBlockState(pos);
     }
 
     @Redirect(method = "getTileEntity",
@@ -591,7 +591,7 @@ public abstract class WorldMixin implements WorldBridge {
     private void impl$checkForAsync(final BlockPos pos, final CallbackInfoReturnable<TileEntity> cir) {
         // Sponge - Don't create or obtain pending tileentity async, simply check if TE exists in chunk
         // Mods such as pixelmon call this method async, so this is a temporary workaround until fixed
-        if (!this.bridge$isFake() && !SpongeImpl.getServer().func_152345_ab()) {
+        if (!this.bridge$isFake() && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             cir.setReturnValue(this.getChunk(pos).getTileEntity(pos, Chunk.CreateEntityType.CHECK));
             return;
         }
@@ -707,7 +707,7 @@ public abstract class WorldMixin implements WorldBridge {
             return type.defaultLightValue;
         } else {
             final Chunk chunk = this.getChunk(pos);
-            return chunk.func_177413_a(type, pos);
+            return chunk.getLightFor(type, pos);
         }
     }
 
@@ -727,7 +727,7 @@ public abstract class WorldMixin implements WorldBridge {
             // Sponge End
             if (this.isBlockLoaded(pos)) {
                 final Chunk chunk = this.getChunk(pos);
-                chunk.func_177431_a(type, pos, lightValue);
+                chunk.setLightFor(type, pos, lightValue);
                 this.notifyLightSet(pos);
             }
         }
@@ -782,7 +782,7 @@ public abstract class WorldMixin implements WorldBridge {
                                 }
 
                                 final BlockState iblockstate = this.getBlockState(blockpos$pooledmutableblockpos);
-                                iblockstate.func_185908_a((net.minecraft.world.World) (Object) this, blockpos$pooledmutableblockpos, bbox, list, (net.minecraft.entity.Entity) null, false);
+                                iblockstate.addCollisionBoxToList((net.minecraft.world.World) (Object) this, blockpos$pooledmutableblockpos, bbox, list, (net.minecraft.entity.Entity) null, false);
 
                                 if (!list.isEmpty()) {
                                     return true;
@@ -795,7 +795,7 @@ public abstract class WorldMixin implements WorldBridge {
 
             return false;
         } finally {
-            blockpos$pooledmutableblockpos.func_185344_t();
+            blockpos$pooledmutableblockpos.release();
         }
     }
 

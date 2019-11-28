@@ -198,7 +198,7 @@ public class DamageEventHandler {
             }
 
             final int itemDamage = (int) (damage / 25D < 1 ? 1 : damage / 25D);
-            stack.func_77972_a(itemDamage, entity);
+            stack.damageItem(itemDamage, entity);
         }
     }
 
@@ -249,7 +249,7 @@ public class DamageEventHandler {
                     continue;
                 }
 
-                for (int i = 0; i < enchantmentList.func_74745_c(); ++i) {
+                for (int i = 0; i < enchantmentList.tagCount(); ++i) {
                     final short enchantmentId = enchantmentList.getCompound(i).getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
                     final short level = enchantmentList.getCompound(i).getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
 
@@ -349,7 +349,7 @@ public class DamageEventHandler {
                     if (chunk == null) {
                         continue;
                     }
-                    if (predicate.test(chunk.func_177435_g(blockPos))) {
+                    if (predicate.test(chunk.getBlockState(blockPos))) {
                         return new Location<>((World) entity.world, k1, l1, i2);
                     }
                 }
@@ -398,11 +398,11 @@ public class DamageEventHandler {
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
         if (!heldItem.isEmpty()) {
             final ListNBT nbttaglist = heldItem.getEnchantmentTagList();
-            if (nbttaglist.func_82582_d()) {
+            if (nbttaglist.isEmpty()) {
                 return ImmutableList.of();
             }
 
-            for (int i = 0; i < nbttaglist.func_74745_c(); ++i) {
+            for (int i = 0; i < nbttaglist.tagCount(); ++i) {
                 final int j = nbttaglist.getCompound(i).getShort("id");
                 final int enchantmentLevel = nbttaglist.getCompound(i).getShort("lvl");
 

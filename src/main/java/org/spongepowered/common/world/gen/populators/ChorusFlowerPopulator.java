@@ -82,7 +82,7 @@ public class ChorusFlowerPopulator implements ChorusFlower {
                 for (int n = 0; n < count; ++n) {
                     int x = rand.nextInt(size.getX());
                     int y = rand.nextInt(size.getZ());
-                    int z = worldObj.func_175645_m(chunkPos.add(x, 0, y)).getY();
+                    int z = worldObj.getHeight(chunkPos.add(x, 0, y)).getY();
 
                     if (z > 0) {
                         if (worldObj.isAirBlock(chunkPos.add(x, z, y))

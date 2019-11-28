@@ -54,10 +54,10 @@ public class DurabilityDataProcessor extends AbstractItemDataProcessor<Durabilit
 
     @Override
     public boolean set(ItemStack itemStack, Map<Key<?>, Object> keyValues) {
-        itemStack.func_77964_b(itemStack.getMaxDamage() - (int) keyValues.get(Keys.ITEM_DURABILITY));
+        itemStack.setItemDamage(itemStack.getMaxDamage() - (int) keyValues.get(Keys.ITEM_DURABILITY));
         final boolean unbreakable = (boolean) keyValues.get(Keys.UNBREAKABLE);
         if (unbreakable) {
-            itemStack.func_77964_b(0);
+            itemStack.setItemDamage(0);
         }
         if (!itemStack.hasTag()) {
             itemStack.setTag(new CompoundNBT());

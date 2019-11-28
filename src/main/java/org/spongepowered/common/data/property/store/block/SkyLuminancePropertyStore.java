@@ -42,7 +42,7 @@ public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore<SkyLu
     public Optional<SkyLuminanceProperty> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location && ((Location<?>) propertyHolder).getExtent() instanceof Chunk) {
             final Chunk chunk = (Chunk) ((Location<?>) propertyHolder).getExtent();
-            final float light = chunk.func_177413_a(LightType.SKY, VecHelper.toBlockPos((Location<?>) propertyHolder));
+            final float light = chunk.getLightFor(LightType.SKY, VecHelper.toBlockPos((Location<?>) propertyHolder));
             return Optional.of(new SkyLuminanceProperty(light));
         }
         return super.getFor(propertyHolder);

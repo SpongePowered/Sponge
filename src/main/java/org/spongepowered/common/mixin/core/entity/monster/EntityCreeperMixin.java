@@ -172,7 +172,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
                                                                               + "(ILnet/minecraft/entity/EntityLivingBase;)V"))
     private void onDamageFlintAndSteel(final ItemStack fas, final int amount, final LivingEntity player) {
         if (!this.interactPrimeCancelled) {
-            fas.func_77972_a(amount, player);
+            fas.damageItem(amount, player);
             // TODO put this in the cause somehow?
 //            this.primeCause = Cause.of(NamedCause.of(NamedCause.IGNITER, player));
 //            this.detonationCause = this.primeCause;

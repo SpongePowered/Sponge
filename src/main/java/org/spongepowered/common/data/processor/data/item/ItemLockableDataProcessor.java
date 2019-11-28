@@ -60,7 +60,7 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
             if (!(block instanceof ITileEntityProvider)) {
                 return false;
             }
-            final TileEntity tile = ((ITileEntityProvider) block).func_149915_a(null, item.func_77647_b(stack.getDamage()));
+            final TileEntity tile = ((ITileEntityProvider) block).createNewTileEntity(null, item.getMetadata(stack.getDamage()));
             return tile instanceof LockableTileEntity;
         } , Keys.LOCK_TOKEN);
     }
@@ -94,10 +94,10 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
         }
         final CompoundNBT tileCompound = container.getTag().getCompound(Constants.Item.BLOCK_ENTITY_TAG);
         final LockCode code = LockCode.read(tileCompound);
-        if (code.func_180160_a()) {
+        if (code.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(code.func_180159_b());
+        return Optional.of(code.getLock());
     }
 
     @Override

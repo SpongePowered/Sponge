@@ -225,7 +225,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             final BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, toDimensionId);
             if (bedPos != null) { // Player has a bed
                 final boolean forceBedSpawn = SpongeImplHooks.isSpawnForced(playerIn, toDimensionId);
-                final BlockPos bedSpawnLoc = PlayerEntity.func_180467_a(worldServer, bedPos, forceBedSpawn);
+                final BlockPos bedSpawnLoc = PlayerEntity.getBedSpawnLocation(worldServer, bedPos, forceBedSpawn);
                 if (bedSpawnLoc != null) { // The bed exists and is not obstructed
                     tempIsBedSpawn = true;
                     targetSpawnVec = new Vector3d(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D);
@@ -255,18 +255,18 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         // Keep players out of blocks
         final Vector3d tempPos = player.getLocation().getPosition();
         playerIn.setPosition(location.getX(), location.getY(), location.getZ());
-        while (!((ServerWorld) location.getExtent()).func_184144_a(playerIn, playerIn.getBoundingBox()).isEmpty() && location.getPosition().getY() < 256.0D) {
+        while (!((ServerWorld) location.getExtent()).getCollisionBoxes(playerIn, playerIn.getBoundingBox()).isEmpty() && location.getPosition().getY() < 256.0D) {
             playerIn.setPosition(playerIn.posX, playerIn.posY + 1.0D, playerIn.posZ);
             location = location.add(0, 1, 0);
         }
         playerIn.setPosition(tempPos.getX(), tempPos.getY(), tempPos.getZ());
 
         // ### PHASE 2 ### Remove player from current dimension
-        playerIn.getServerWorld().func_73039_n().func_72787_a(playerIn);
-        playerIn.getServerWorld().func_73039_n().func_72790_b(playerIn);
-        playerIn.getServerWorld().func_184164_w().func_72695_c(playerIn);
+        playerIn.getServerWorld().getEntityTracker().removePlayerFromTrackers(playerIn);
+        playerIn.getServerWorld().getEntityTracker().untrack(playerIn);
+        playerIn.getServerWorld().getPlayerChunkMap().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
-        this.server.getWorld(playerIn.dimension).func_72973_f(playerIn);
+        this.server.getWorld(playerIn.dimension).removeEntityDangerously(playerIn);
         final BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, targetDimension);
 
         // ### PHASE 3 ### Reset player (if applicable)
@@ -285,7 +285,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         // set player dimension for RespawnPlayerEvent
         newPlayer.dimension = targetDimension;
         newPlayer.setEntityId(playerIn.getEntityId());
-        newPlayer.func_174817_o(playerIn);
+        newPlayer.setCommandStats(playerIn);
         newPlayer.setPrimaryHand(playerIn.getPrimaryHand());
 
         // Sponge - Vanilla does this before recreating the player entity. However, we need to determine the bed location
@@ -332,7 +332,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         newPlayer.setWorld(worldServer);
         newPlayer.interactionManager.setWorld(worldServer);
 
-        worldServer.getChunkProvider().func_186028_c((int) location.getX() >> 4, (int) location.getZ() >> 4);
+        worldServer.getChunkProvider().loadChunk((int) location.getX() >> 4, (int) location.getZ() >> 4);
 
         // ### PHASE 5 ### Respawn player in new world
 
@@ -362,7 +362,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 newPlayer.experienceLevel));
         this.updateTimeAndWeatherForPlayer(newPlayer, worldServer);
         this.updatePermissionLevel(newPlayer);
-        worldServer.func_184164_w().func_72683_a(newPlayer);
+        worldServer.getPlayerChunkMap().addPlayer(newPlayer);
         final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) newPlayer;
         ((org.spongepowered.api.world.World) worldServer).spawnEntity(spongeEntity);
         this.playerEntityList.add(newPlayer);
@@ -375,7 +375,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         // Update reducedDebugInfo game rule
         newPlayer.connection.sendPacket(new SEntityStatusPacket(newPlayer,
-                worldServer.getGameRules().func_82766_b(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
+                worldServer.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
 
         for (final EffectInstance potioneffect : newPlayer.getActivePotionEffects()) {
             newPlayer.connection.sendPacket(new SPlayEntityEffectPacket(newPlayer.getEntityId(), potioneffect));
@@ -411,7 +411,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Inject(method = "setPlayerManager", at = @At("HEAD"), cancellable = true)
     private void onSetPlayerManager(final ServerWorld[] worlds, final CallbackInfo callbackInfo) {
         if (this.playerDataManager == null) {
-            this.playerDataManager = worlds[0].func_72860_G().func_75756_e();
+            this.playerDataManager = worlds[0].getSaveHandler().getPlayerNBTManager();
             // This is already added in our world constructor
             //worlds[0].getWorldBorder().addListener(new PlayerBorderListener(0));
         }
@@ -444,7 +444,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private void onPlayerRemoveFromWorldFromDisconnect(final ServerWorld world, final Entity player, final ServerPlayerEntity playerMP) {
         try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT.createPhaseContext().source(playerMP)) {
             context.buildAndSwitch();
-            world.func_72900_e(player);
+            world.removeEntity(player);
         }
     }
 

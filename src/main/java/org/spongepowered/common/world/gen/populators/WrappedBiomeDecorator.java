@@ -63,10 +63,10 @@ public class WrappedBiomeDecorator implements Populator {
         Vector3i size = extent.getBlockSize();
         World worldIn = (World) world;
         if (this.biome != null) {
-            this.biome.func_180624_a(worldIn, random, VecHelper.toBlockPos(min.sub(8, 0, 8)));
+            this.biome.decorate(worldIn, random, VecHelper.toBlockPos(min.sub(8, 0, 8)));
         } else {
             Biome biome = (Biome) extent.getBiome(size.getX() / 2 + min.getX(), 0, size.getZ() / 2 + min.getZ());
-            this.wrapped.func_180292_a(worldIn, random, biome, VecHelper.toBlockPos(min.sub(8, 0, 8)));
+            this.wrapped.decorate(worldIn, random, biome, VecHelper.toBlockPos(min.sub(8, 0, 8)));
         }
     }
 

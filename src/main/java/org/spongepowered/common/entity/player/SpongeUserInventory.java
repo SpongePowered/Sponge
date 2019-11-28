@@ -141,7 +141,7 @@ public class SpongeUserInventory implements IInventory {
                 CompoundNBT nbttagcompound = new CompoundNBT();
                 nbttagcompound.putByte("Slot", (byte) i);
                 this.mainInventory.get(i).write(nbttagcompound);
-                nbtTagListIn.func_74742_a(nbttagcompound);
+                nbtTagListIn.appendTag(nbttagcompound);
             }
         }
 
@@ -150,7 +150,7 @@ public class SpongeUserInventory implements IInventory {
                 CompoundNBT nbttagcompound1 = new CompoundNBT();
                 nbttagcompound1.putByte("Slot", (byte) (j + 100));
                 this.armorInventory.get(j).write(nbttagcompound1);
-                nbtTagListIn.func_74742_a(nbttagcompound1);
+                nbtTagListIn.appendTag(nbttagcompound1);
             }
         }
 
@@ -159,7 +159,7 @@ public class SpongeUserInventory implements IInventory {
                 CompoundNBT nbttagcompound2 = new CompoundNBT();
                 nbttagcompound2.putByte("Slot", (byte) (k + 150));
                 this.offHandInventory.get(k).write(nbttagcompound2);
-                nbtTagListIn.func_74742_a(nbttagcompound2);
+                nbtTagListIn.appendTag(nbttagcompound2);
             }
         }
 
@@ -176,7 +176,7 @@ public class SpongeUserInventory implements IInventory {
         this.armorInventory.clear();
         this.offHandInventory.clear();
 
-        for (int i = 0; i < nbtTagListIn.func_74745_c(); ++i) {
+        for (int i = 0; i < nbtTagListIn.tagCount(); ++i) {
             CompoundNBT nbttagcompound = nbtTagListIn.getCompound(i);
             int j = nbttagcompound.getByte("Slot") & 255;
             ItemStack itemstack = new ItemStack(nbttagcompound);
@@ -247,7 +247,7 @@ public class SpongeUserInventory implements IInventory {
      * Get the name of this object. For players this returns their username
      */
     @Override
-    public String func_70005_c_() {
+    public String getName() {
         return "container.inventory";
     }
 
@@ -264,7 +264,7 @@ public class SpongeUserInventory implements IInventory {
      */
     @Override
     public ITextComponent getDisplayName() {
-        return this.hasCustomName() ? new StringTextComponent(this.func_70005_c_()) : new TranslationTextComponent(this.func_70005_c_());
+        return this.hasCustomName() ? new StringTextComponent(this.getName()) : new TranslationTextComponent(this.getName());
     }
 
     /**
@@ -311,16 +311,16 @@ public class SpongeUserInventory implements IInventory {
     }
 
     @Override
-    public int func_174887_a_(int id) {
+    public int getField(int id) {
         return 0;
     }
 
     @Override
-    public void func_174885_b(int id, int value) {
+    public void setField(int id, int value) {
     }
 
     @Override
-    public int func_174890_g() {
+    public int getFieldCount() {
         return 0;
     }
 

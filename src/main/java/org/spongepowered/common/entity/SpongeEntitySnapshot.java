@@ -118,7 +118,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         this.scale = builder.scale;
         this.entityReference = builder.entityReference;
         if (this.compound != null) {
-            this.compound.func_74782_a("Pos", Constants.NBT.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
+            this.compound.setTag("Pos", Constants.NBT.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
             // TODO should ensure other elements are within the compound as well
         }
     }

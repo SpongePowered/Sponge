@@ -37,7 +37,7 @@ public abstract class BlockColoredMixin extends BlockMixin implements DyeableBlo
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setColorPropertyOnConstruction(final Material material, final CallbackInfo ci) {
-        this.bridge$setColorPropertyEnum(BlockColored.field_176581_a);
+        this.bridge$setColorPropertyEnum(BlockColored.COLOR);
     }
 
 }

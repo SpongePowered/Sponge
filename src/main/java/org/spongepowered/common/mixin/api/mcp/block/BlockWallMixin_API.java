@@ -34,6 +34,6 @@ public abstract class BlockWallMixin_API extends BlockMixin_API {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + "." + WallBlock.EnumType.NORMAL.func_176659_c() + ".name");
+        return new SpongeTranslation(this.getTranslationKey() + "." + WallBlock.EnumType.NORMAL.getTranslationKey() + ".name");
     }
 }

@@ -86,11 +86,11 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
             if (value instanceof DataView) {
                 CompoundNBT inner = new CompoundNBT();
                 containerToCompound(container.getView(entry.getKey()).get(), inner);
-                compound.func_74782_a(key, inner);
+                compound.setTag(key, inner);
             } else if (value instanceof Boolean) {
-                compound.func_74782_a(key + BOOLEAN_IDENTIFIER, new ByteNBT(((Boolean) value) ? (byte) 1 : 0));
+                compound.setTag(key + BOOLEAN_IDENTIFIER, new ByteNBT(((Boolean) value) ? (byte) 1 : 0));
             } else {
-                compound.func_74782_a(key, getBaseFromObject(value));
+                compound.setTag(key, getBaseFromObject(value));
             }
         }
     }
@@ -148,7 +148,7 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
             for (Object object : (List) value) {
                 // Oh hey, we already have a translation already
                 // since DataView only supports some primitive types anyways...
-                list.func_74742_a(getBaseFromObject(object));
+                list.appendTag(getBaseFromObject(object));
             }
             return list;
         } else if (value instanceof Map) {
@@ -158,12 +158,12 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
                     if (entry.getValue() instanceof Boolean) {
                         compound.putBoolean(((DataQuery) entry.getKey()).asString('.') + BOOLEAN_IDENTIFIER, (Boolean) entry.getValue());
                     } else {
-                        compound.func_74782_a(((DataQuery) entry.getKey()).asString('.'), getBaseFromObject(entry.getValue()));
+                        compound.setTag(((DataQuery) entry.getKey()).asString('.'), getBaseFromObject(entry.getValue()));
                     }
                 } else if (entry.getKey() instanceof String) {
-                    compound.func_74782_a((String) entry.getKey(), getBaseFromObject(entry.getValue()));
+                    compound.setTag((String) entry.getKey(), getBaseFromObject(entry.getValue()));
                 } else {
-                    compound.func_74782_a(entry.getKey().toString(), getBaseFromObject(entry.getValue()));
+                    compound.setTag(entry.getKey().toString(), getBaseFromObject(entry.getValue()));
                 }
             }
             return compound;
@@ -221,10 +221,10 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
             case Constants.NBT.TAG_LIST:
                 ListNBT list = (ListNBT) base;
                 byte listType = (byte) list.getTagType();
-                int count = list.func_74745_c();
+                int count = list.tagCount();
                 List objectList = Lists.newArrayListWithCapacity(count);
                 for (int i = 0; i < count; i++) {
-                    objectList.add(fromTagBase(list.func_179238_g(i), listType));
+                    objectList.add(fromTagBase(list.get(i), listType));
                 }
                 view.set(of(key), objectList);
                 break;
@@ -274,10 +274,10 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
             case Constants.NBT.TAG_LIST:
                 ListNBT list = (ListNBT) base;
                 byte listType = (byte) list.getTagType();
-                int count = list.func_74745_c();
+                int count = list.tagCount();
                 List objectList = Lists.newArrayListWithCapacity(count);
-                for (int i = 0; i < list.func_74745_c(); i++) {
-                    objectList.add(fromTagBase(list.func_179238_g(i), listType));
+                for (int i = 0; i < list.tagCount(); i++) {
+                    objectList.add(fromTagBase(list.get(i), listType));
                 }
                 return objectList;
             case Constants.NBT.TAG_COMPOUND:

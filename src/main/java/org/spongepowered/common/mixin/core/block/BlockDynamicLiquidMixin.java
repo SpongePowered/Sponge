@@ -134,7 +134,7 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
         }
         // Do not call events when just flowing into air or same liquid
         if (state.getMaterial() != Material.AIR && state.getMaterial() != this.shadow$getDefaultState().getMaterial()) {
-            final net.minecraft.block.BlockState newState = this.shadow$getDefaultState().func_177226_a(BlockLiquid.LEVEL, level);
+            final net.minecraft.block.BlockState newState = this.shadow$getDefaultState().withProperty(BlockLiquid.LEVEL, level);
             final ChangeBlockEvent.Break event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidBreak(worldIn, pos, newState);
 
             final Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);

@@ -76,7 +76,7 @@ public abstract class WorldGenCanopyTreeMixin extends AbstractTreeFeature implem
                 for (k = x - b0; k <= x + b0 && flag; ++k) {
                     for (l = z - b0; l <= z + b0 && flag; ++l) {
                         if (j >= 0 && j < 256) {
-                            if (!this.func_150523_a(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
+                            if (!this.canGrowInto(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
                                 flag = false;
                             }
                         } else {
@@ -101,8 +101,8 @@ public abstract class WorldGenCanopyTreeMixin extends AbstractTreeFeature implem
     @Override
     public void placeObject(World world, Random random, int x, int y, int z) {
         BlockPos pos = new BlockPos(x, y, z);
-        func_175904_e();
-        if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
+        setDecorationDefaults();
+        if (generate((net.minecraft.world.World) world, random, pos)) {
             generateSaplings((net.minecraft.world.World) world, random, pos);
         }
     }

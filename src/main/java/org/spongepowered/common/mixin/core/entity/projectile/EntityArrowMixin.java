@@ -93,14 +93,14 @@ public abstract class EntityArrowMixin extends EntityMixin {
                 this.ticksInAir = 0;
                 this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
                 // if block was hit, change state to reflect it hit block to avoid onHit logic repeating indefinitely
-                if (hitResult.field_72308_g == null) {
-                    final BlockPos blockpos = hitResult.func_178782_a();
+                if (hitResult.entityHit == null) {
+                    final BlockPos blockpos = hitResult.getBlockPos();
                     this.xTile = blockpos.getX();
                     this.yTile = blockpos.getY();
                     this.zTile = blockpos.getZ();
                     final BlockState iblockstate = this.world.getBlockState(blockpos);
                     this.inTile = iblockstate.getBlock();
-                    this.inData = this.inTile.func_176201_c(iblockstate);
+                    this.inData = this.inTile.getMetaFromState(iblockstate);
                     this.inGround = true;
                     this.arrowShake = 7;
                     this.setIsCritical(false);

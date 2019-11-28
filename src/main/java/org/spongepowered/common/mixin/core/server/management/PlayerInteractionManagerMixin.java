@@ -187,7 +187,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
                         return;
                     }
 
-                    if (!itemstack.func_179544_c(block)) {
+                    if (!itemstack.canDestroy(block)) {
                         return;
                     }
                 }
@@ -198,7 +198,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
             float f = 1.0F;
 
             if (iblockstate.getMaterial() != Material.AIR) {
-                block.func_180649_a(this.world, pos, this.player);
+                block.onBlockClicked(this.world, pos, this.player);
                 f = iblockstate.getPlayerRelativeBlockHardness(this.player, this.player.world, pos);
             }
 
@@ -235,17 +235,17 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
                 ILockableContainer ilockablecontainer = (ILockableContainer) tileentity;
 
                 if (ilockablecontainer instanceof ChestTileEntity && block instanceof ChestBlock) {
-                    ilockablecontainer = ((ChestBlock) block).func_180676_d(worldIn, pos);
+                    ilockablecontainer = ((ChestBlock) block).getLockableContainer(worldIn, pos);
                 }
 
                 if (ilockablecontainer != null) {
                     // TODO - fire event
-                    player.func_71007_a(ilockablecontainer);
+                    player.displayGUIChest(ilockablecontainer);
                     return ActionResultType.SUCCESS;
                 }
             } else if (tileentity instanceof IInventory) {
                 // TODO - fire event
-                player.func_71007_a((IInventory) tileentity);
+                player.displayGUIChest((IInventory) tileentity);
                 return ActionResultType.SUCCESS;
             }
 
@@ -279,7 +279,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
                 // CommandBlock GUI opens solely on the client, we need to force it close on cancellation
                 this.player.connection.sendPacket(new SCloseWindowPacket(0));
 
-            } else if (state.func_177228_b().containsKey(DoorBlock.HALF)) {
+            } else if (state.getProperties().containsKey(DoorBlock.HALF)) {
                 // Stopping a door from opening while interacting the top part will allow the door to open, we need to update the
                 // client to resolve this
                 if (state.get(DoorBlock.HALF) == DoorBlock.EnumDoorHalf.LOWER) {
@@ -291,7 +291,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
             } else if (!oldStack.isEmpty()) {
                 // Stopping the placement of a door or double plant causes artifacts (ghosts) on the top-side of the block. We need to remove it
                 final Item item = oldStack.getItem();
-                if (item instanceof ItemDoor || (item instanceof BlockItem && ((BlockItem) item).getBlock().equals(Blocks.field_150398_cm))) {
+                if (item instanceof ItemDoor || (item instanceof BlockItem && ((BlockItem) item).getBlock().equals(Blocks.DOUBLE_PLANT))) {
                     this.player.connection.sendPacket(new SChangeBlockPacket(worldIn, pos.up(2)));
                 }
             }
@@ -326,7 +326,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
 
                 // Don't close client gui based on the result of Block#onBlockActivated
                 // See https://github.com/SpongePowered/SpongeForge/commit/a684cccd0355d1387a30a7fee08d23fa308273c9
-                if (iblockstate.getBlock().func_180639_a(worldIn, pos, iblockstate, player, hand, facing, hitX, hitY, hitZ)) {
+                if (iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, facing, hitX, hitY, hitZ)) {
                     result = ActionResultType.SUCCESS;
                 }
 
@@ -366,7 +366,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
             return ActionResultType.PASS;
         } else if (player.getCooldownTracker().hasCooldown(stack.getItem())) {
             return ActionResultType.PASS;
-        } else if (stack.getItem() instanceof BlockItem && !player.func_189808_dh()) {
+        } else if (stack.getItem() instanceof BlockItem && !player.canUseCommandBlock()) {
             final Block block = ((BlockItem)stack.getItem()).getBlock();
 
             if (block instanceof CommandBlockBlock || block instanceof StructureBlock) {
@@ -387,11 +387,11 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
         // Sponge Start - complete the method with the micro change of resetting item damage and quantity from the copied stack.
 
         if ((result != ActionResultType.SUCCESS && event.getUseItemResult() != Tristate.FALSE || result == ActionResultType.SUCCESS && event.getUseItemResult() == Tristate.TRUE)) {
-            final int meta = stack.func_77960_j();
+            final int meta = stack.getMetadata();
             final int size = stack.getCount();
-            result = stack.func_179546_a(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
+            result = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
             if (this.isCreative()) {
-                stack.func_77964_b(meta);
+                stack.setItemDamage(meta);
                 stack.setCount(size);
             }
         }
@@ -456,11 +456,11 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
 
 
         final int i = stack.getCount();
-        final int j = stack.func_77960_j();
+        final int j = stack.getMetadata();
         final ActionResult<ItemStack> actionresult = stack.useItemRightClick(worldIn, player, hand);
         final ItemStack itemstack = actionresult.getResult();
 
-        if (itemstack == stack && itemstack.getCount() == i && itemstack.getUseDuration() <= 0 && itemstack.func_77960_j() == j) {
+        if (itemstack == stack && itemstack.getCount() == i && itemstack.getUseDuration() <= 0 && itemstack.getMetadata() == j) {
 
             // Sponge - start
 
@@ -509,7 +509,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
                 itemstack.setCount(i);
 
                 if (itemstack.isDamageable()) {
-                    itemstack.func_77964_b(j);
+                    itemstack.setItemDamage(j);
                 }
             }
 

@@ -72,21 +72,21 @@ public abstract class BlockDoorMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableHingeData) {
             final DoorBlock.EnumHingePosition hinge = (DoorBlock.EnumHingePosition) (Object) ((ImmutableHingeData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(DoorBlock.HINGE, hinge));
+            return Optional.of((BlockState) blockState.withProperty(DoorBlock.HINGE, hinge));
         }
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
-            return Optional.of((BlockState) blockState.func_177226_a(DoorBlock.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.withProperty(DoorBlock.OPEN, isOpen));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.func_177226_a(DoorBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.withProperty(DoorBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.func_177226_a(DoorBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(DoorBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         if (manipulator instanceof ImmutablePortionData) {
-            return Optional.of((BlockState) blockState.func_177226_a(DoorBlock.HALF,
+            return Optional.of((BlockState) blockState.withProperty(DoorBlock.HALF,
                     impl$convertPortionType(((ImmutablePortionData) manipulator).type().get())));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
@@ -96,21 +96,21 @@ public abstract class BlockDoorMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.HINGE_POSITION)) {
             final DoorBlock.EnumHingePosition hinge = (DoorBlock.EnumHingePosition) value;
-            return Optional.of((BlockState) blockState.func_177226_a(DoorBlock.HINGE, hinge));
+            return Optional.of((BlockState) blockState.withProperty(DoorBlock.HINGE, hinge));
         }
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;
-            return Optional.of((BlockState) blockState.func_177226_a(DoorBlock.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.withProperty(DoorBlock.OPEN, isOpen));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.func_177226_a(DoorBlock.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.withProperty(DoorBlock.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.func_177226_a(DoorBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(DoorBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.func_177226_a(DoorBlock.HALF, impl$convertPortionType((PortionType) value)));
+            return Optional.of((BlockState) blockState.withProperty(DoorBlock.HALF, impl$convertPortionType((PortionType) value)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

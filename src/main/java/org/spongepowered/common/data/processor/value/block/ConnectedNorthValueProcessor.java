@@ -54,8 +54,8 @@ public class ConnectedNorthValueProcessor extends
 
     @Override
     protected Optional<Boolean> getVal(ChestTileEntity container) {
-        container.func_145979_i();
-        return Optional.of(container.field_145992_i != null);
+        container.checkForAdjacentChests();
+        return Optional.of(container.adjacentChestZNeg != null);
     }
 
     @Override

@@ -50,7 +50,7 @@ public class ExtentBufferUtil {
                 if(type instanceof VirtualBiomeType) {
                     type = ((VirtualBiomeType) type).getPersistedType();
                 }
-                copy[i++] = (byte) Biome.func_185362_a((Biome) type);
+                copy[i++] = (byte) Biome.getIdForBiome((Biome) type);
             }
         }
         return copy;

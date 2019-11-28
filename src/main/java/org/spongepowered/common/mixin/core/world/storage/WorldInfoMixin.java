@@ -169,8 +169,8 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
 
     // used in all init methods
     private void impl$commonConstructionSetUpSpongeCompounds() {
-        this.impl$spongeNbt.func_74782_a(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, this.impl$playerUniqueIdNbt);
-        this.impl$spongeRootLevelNbt.func_74782_a(Constants.Sponge.SPONGE_DATA, this.impl$spongeNbt);
+        this.impl$spongeNbt.setTag(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, this.impl$playerUniqueIdNbt);
+        this.impl$spongeRootLevelNbt.setTag(Constants.Sponge.SPONGE_DATA, this.impl$spongeNbt);
     }
 
     @Inject(method = "updateTagCompound", at = @At("HEAD"))
@@ -259,7 +259,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         WorldManager.getWorlds()
                 .stream()
                 .filter(world -> world.getWorldInfo() == (WorldInfo) (Object) this)
-                .flatMap(world -> world.field_73010_i.stream())
+                .flatMap(world -> world.playerEntities.stream())
                 .filter(player -> player instanceof ServerPlayerEntity)
                 .map(player -> (ServerPlayerEntity) player)
                 .forEach(player -> player.connection.sendPacket(new SServerDifficultyPacket(this.difficulty, ((WorldInfo) (Object) this).isDifficultyLocked
@@ -386,14 +386,14 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         }
         if (nbt.contains(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
             final ListNBT playerIdList = nbt.getList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
-            for (int i = 0; i < playerIdList.func_74745_c(); i++) {
+            for (int i = 0; i < playerIdList.tagCount(); i++) {
                 final CompoundNBT playerId = playerIdList.getCompound(i);
                 final UUID playerUuid = playerId.getUniqueId(Constants.UUID);
                 final Integer playerIndex = this.impl$playerUniqueIdMap.inverse().get(playerUuid);
                 if (playerIndex == null) {
                     this.impl$playerUniqueIdMap.put(this.impl$trackedUniqueIdCount++, playerUuid);
                 } else {
-                    playerIdList.func_74744_a(i);
+                    playerIdList.removeTag(i);
                 }
             }
 
@@ -425,7 +425,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
             while (iterator.hasNext()) {
                 final CompoundNBT compound = new CompoundNBT();
                 compound.putUniqueId(Constants.UUID, iterator.next());
-                playerIdList.func_74742_a(compound);
+                playerIdList.appendTag(compound);
                 iterator.remove();
             }
         }

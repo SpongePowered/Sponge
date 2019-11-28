@@ -43,7 +43,7 @@ public abstract class PotionMixin {
         final ResourceLocation resource = (ResourceLocation) location;
         final Effect mcPotion = (Effect) potion;
         PotionEffectTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionEffectType) mcPotion);
-        registry.func_177775_a(id, location, potion);
+        registry.register(id, location, potion);
     }
 
 }

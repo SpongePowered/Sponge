@@ -77,7 +77,7 @@ public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeCo
 
     public static Optional<DyeColor> fromId(int id) {
         for (net.minecraft.item.DyeColor color : net.minecraft.item.DyeColor.values()) {
-            if (color.func_176767_b() == id) {
+            if (color.getDyeDamage() == id) {
                 return Optional.of((DyeColor) (Object) color);
             }
         }

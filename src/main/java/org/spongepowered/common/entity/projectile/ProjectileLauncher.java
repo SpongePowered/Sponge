@@ -138,11 +138,11 @@ public class ProjectileLauncher {
         entity.posZ -= MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI) * 0.16F;
         entity.setPosition(entity.posX, entity.posY, entity.posZ);
         float f = 0.4F;
-        entity.field_70159_w = -MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI)
+        entity.motionX = -MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI)
                 * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f;
-        entity.field_70179_y = MathHelper.cos(entity.rotationYaw / 180.0F * (float) Math.PI)
+        entity.motionZ = MathHelper.cos(entity.rotationYaw / 180.0F * (float) Math.PI)
                 * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f;
-        entity.field_70181_x = -MathHelper.sin((entity.rotationPitch) / 180.0F * (float) Math.PI) * f;
+        entity.motionY = -MathHelper.sin((entity.rotationPitch) / 180.0F * (float) Math.PI) * f;
     }
 
     public static <T extends Projectile> void registerProjectileLogic(Class<T> projectileClass, ProjectileLogic<T> logic) {
@@ -246,7 +246,7 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), fireball);
             }
         });
-        registerProjectileLogic(Firework.class, new SimpleItemLaunchLogic<Firework>(Firework.class, Items.field_151152_bP) {
+        registerProjectileLogic(Firework.class, new SimpleItemLaunchLogic<Firework>(Firework.class, Items.FIREWORKS) {
 
             @Override
             protected Optional<Firework> createProjectile(LivingEntity source, Location<?> loc) {

@@ -34,12 +34,12 @@ import java.util.UUID;
 public class SpongeLevelFixer implements IFixableData {
 
     @Override
-    public int func_188216_a() {
+    public int getFixVersion() {
         return Constants.Legacy.World.WORLD_UUID_1_9_VERSION;
     }
 
     @Override
-    public CompoundNBT func_188217_a(CompoundNBT compound) {
+    public CompoundNBT fixTagCompound(CompoundNBT compound) {
         { // Fixes the world unique id
             final long least = compound.getLong(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
             final long most = compound.getLong(Constants.Legacy.World.WORLD_UUID_MOST_1_8);
@@ -52,7 +52,7 @@ public class SpongeLevelFixer implements IFixableData {
         // Fixes the Player Id Table
         if (compound.contains(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
             final ListNBT playerIdList = compound.getList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
-            for (int i = 0; i < playerIdList.func_74745_c(); i++) {
+            for (int i = 0; i < playerIdList.tagCount(); i++) {
                 final CompoundNBT playerIdCompound = playerIdList.getCompound(i);
                 final long least = playerIdCompound.getLong(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
                 final long most = playerIdCompound.getLong(Constants.Legacy.World.WORLD_UUID_MOST_1_8);

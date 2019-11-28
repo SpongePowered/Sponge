@@ -1017,7 +1017,7 @@ public class SpongeCommonEventFactory {
             final Cause cause = isMainThread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source == null ? entity : source);
             final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause,
                 originalChannel, Optional.of(channel), formatter,
-                (Living) entity, entity.world.getGameRules().func_82766_b("keepInventory"), messageCancelled);
+                (Living) entity, entity.world.getGameRules().getBoolean("keepInventory"), messageCancelled);
             SpongeImpl.postEvent(event, true); // Client code should be able to cancel the death event if server cancels it.
             final Text message = event.getMessage();
             // Check the event isn't cancelled either. If it is, then don't spawn the message.
@@ -1065,7 +1065,7 @@ public class SpongeCommonEventFactory {
 
     public static boolean handleCollideImpactEvent(final net.minecraft.entity.Entity projectile, @Nullable final ProjectileSource projectileSource,
             final RayTraceResult movingObjectPosition) {
-        final RayTraceResult.Type movingObjectType = movingObjectPosition.field_72313_a;
+        final RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(projectile);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
@@ -1078,15 +1078,15 @@ public class SpongeCommonEventFactory {
             boolean cancelled = false;
 
             if (movingObjectType == RayTraceResult.Type.BLOCK) {
-                final BlockPos blockPos = movingObjectPosition.func_178782_a();
+                final BlockPos blockPos = movingObjectPosition.getBlockPos();
                 if (blockPos.getY() <= 0) {
                     return false;
                 }
 
-                final BlockSnapshot targetBlock = ((World) projectile.world).createSnapshot(VecHelper.toVector3i(movingObjectPosition.func_178782_a()));
+                final BlockSnapshot targetBlock = ((World) projectile.world).createSnapshot(VecHelper.toVector3i(movingObjectPosition.getBlockPos()));
                 Direction side = Direction.NONE;
-                if (movingObjectPosition.field_178784_b != null) {
-                    side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.field_178784_b).get();
+                if (movingObjectPosition.sideHit != null) {
+                    side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();
                 }
 
                 final CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.getCurrentCause(),
@@ -1099,9 +1099,9 @@ public class SpongeCommonEventFactory {
                     final ChunkBridge spongeChunk = (ChunkBridge) projectile.world.getChunkAt(targetPos);
                     spongeChunk.bridge$addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, owner.get(), PlayerTracker.Type.NOTIFIER);
                 }
-            } else if (movingObjectPosition.field_72308_g != null) { // entity
+            } else if (movingObjectPosition.entityHit != null) { // entity
                 final ArrayList<Entity> entityList = new ArrayList<>();
-                entityList.add((Entity) movingObjectPosition.field_72308_g);
+                entityList.add((Entity) movingObjectPosition.entityHit);
                 final CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(frame.getCurrentCause(), entityList, impactPoint);
                         cancelled = SpongeImpl.postEvent(event);
             }
@@ -1182,7 +1182,7 @@ public class SpongeCommonEventFactory {
                     final Slot slot = container.getSlot(0);
                     final IInventory slotInventory = slot.inventory;
                     if (slotInventory instanceof IInteractionObject) {
-                        guiId = ((IInteractionObject) slotInventory).func_174875_k();
+                        guiId = ((IInteractionObject) slotInventory).getGuiID();
                     } else {
                         // expected fallback for unknown types
                         guiId = "minecraft:container";
@@ -1241,7 +1241,7 @@ public class SpongeCommonEventFactory {
                 ((EntityPlayerMPBridge) player).bridge$setContainerDisplay(displayName);
             }
             if (inventory instanceof IInteractionObject) {
-                final String guiId = ((IInteractionObject) inventory).func_174875_k();
+                final String guiId = ((IInteractionObject) inventory).getGuiID();
 
                 switch (guiId) {
                     case "EntityHorse":
@@ -1253,19 +1253,19 @@ public class SpongeCommonEventFactory {
                         }
                         break;
                     case "minecraft:chest":
-                        player.func_71007_a((IInventory) inventory);
+                        player.displayGUIChest((IInventory) inventory);
                         break;
                     case "minecraft:crafting_table":
                     case "minecraft:anvil":
                     case "minecraft:enchanting_table":
-                        player.func_180468_a((IInteractionObject) inventory);
+                        player.displayGui((IInteractionObject) inventory);
                         break;
                     default:
-                        player.func_71007_a((IInventory) inventory);
+                        player.displayGUIChest((IInventory) inventory);
                         break;
                 }
             } else if (inventory instanceof IInventory) {
-                player.func_71007_a(((IInventory) inventory));
+                player.displayGUIChest(((IInventory) inventory));
             } else {
                 return null;
             }

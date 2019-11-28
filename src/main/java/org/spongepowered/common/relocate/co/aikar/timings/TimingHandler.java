@@ -91,7 +91,7 @@ class TimingHandler implements Timing {
             return;
         }
 
-        if (Sponge.isServerAvailable() && SpongeImpl.getServer().func_152345_ab()) {
+        if (Sponge.isServerAvailable() && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             startTiming();
         }
     }

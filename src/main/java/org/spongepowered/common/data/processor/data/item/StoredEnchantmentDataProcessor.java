@@ -67,11 +67,11 @@ public class StoredEnchantmentDataProcessor extends
         ListNBT list = new ListNBT();
         for (Enchantment enchantment : value) {
             CompoundNBT tag = new CompoundNBT();
-            tag.putShort(Constants.Item.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.func_185258_b((net.minecraft.enchantment.Enchantment) enchantment.getType()));
+            tag.putShort(Constants.Item.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) enchantment.getType()));
             tag.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
-            list.func_74742_a(tag);
+            list.appendTag(tag);
         }
-        entity.getTag().func_74782_a(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, list);
+        entity.getTag().setTag(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, list);
         return true;
     }
 
@@ -82,7 +82,7 @@ public class StoredEnchantmentDataProcessor extends
         }
         List<Enchantment> list = Lists.newArrayList();
         ListNBT tags = entity.getTag().getList(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < tags.func_74745_c(); i++) {
+        for (int i = 0; i < tags.tagCount(); i++) {
             CompoundNBT tag = tags.getCompound(i);
             list.add(new SpongeEnchantment(
                     (EnchantmentType) net.minecraft.enchantment.Enchantment.getEnchantmentByID(tag.getShort(Constants.Item.ITEM_ENCHANTMENT_ID)),

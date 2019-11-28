@@ -55,7 +55,7 @@ public abstract class ScoreTextMixin extends TextMixin {
         } else {
             textComponentScore = new ScoreTextComponent(name, this.score.getObjectives().iterator().next().getName());
             if (Sponge.isServerAvailable()) {
-                textComponentScore.func_186876_a((ICommandSender) Sponge.getServer());
+                textComponentScore.resolve((ICommandSender) Sponge.getServer());
             }
         }
         this.override.ifPresent(textComponentScore::setValue);

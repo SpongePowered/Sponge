@@ -61,7 +61,7 @@ public abstract class WorldGenFireMixin_API extends Feature implements NetherFir
             final int x = min.getX() + random.nextInt(size.getX());
             final int z = min.getZ() + random.nextInt(size.getZ());
             final int y = min.getY() + 4 + random.nextInt(120);
-            func_180709_b(world, random, new BlockPos(x, y, z));
+            generate(world, random, new BlockPos(x, y, z));
         }
     }
 

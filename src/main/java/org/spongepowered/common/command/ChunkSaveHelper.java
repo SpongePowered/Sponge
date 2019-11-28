@@ -63,12 +63,12 @@ class ChunkSaveHelper {
                 for (final World spongeWorld : SpongeImpl.getGame().getServer().getWorlds()) {
                     final ServerWorld world = (ServerWorld) spongeWorld;
                     writer.beginObject();
-                    writer.name("name").value(((SaveHandlerAccessor) ((ServerWorld) spongeWorld).func_72860_G()).accessor$getSaveDirectoryName());
+                    writer.name("name").value(((SaveHandlerAccessor) ((ServerWorld) spongeWorld).getSaveHandler()).accessor$getSaveDirectoryName());
                     writer.name("dimensionId").value(((WorldServerBridge) spongeWorld).bridge$getDimensionId());
-                    writer.name("players").value(world.field_73010_i.size());
-                    writer.name("loadedChunks").value(world.getChunkProvider().func_189548_a().size());
+                    writer.name("players").value(world.playerEntities.size());
+                    writer.name("loadedChunks").value(world.getChunkProvider().getLoadedChunks().size());
                     writer.name("activeChunks").value(world.getChunkProvider().getLoadedChunkCount());
-                    writer.name("entities").value(world.field_72996_f.size());
+                    writer.name("entities").value(world.loadedEntityList.size());
                     writer.name("tiles").value(world.loadedTileEntityList.size());
 
                     final Object2IntMap<ChunkPos> chunkEntityCounts = new Object2IntOpenHashMap<>();
@@ -77,8 +77,8 @@ class ChunkSaveHelper {
                     classEntityCounts.defaultReturnValue(0);
                     final Object2IntMap<Entity> entityCollisionCounts = new Object2IntOpenHashMap<>();
                     final Set<BlockPos> collidingCoords = new HashSet<>();
-                    for (int i = 0; i < world.field_72996_f.size(); i++) {
-                        final Entity entity = world.field_72996_f.get(i);
+                    for (int i = 0; i < world.loadedEntityList.size(); i++) {
+                        final Entity entity = world.loadedEntityList.get(i);
                         final ChunkPos chunkCoords = new ChunkPos((int) entity.posX >> 4, (int) entity.posZ >> 4);
                         chunkEntityCounts.put(chunkCoords, chunkEntityCounts.getInt(chunkCoords) + 1);
                         classEntityCounts.put(entity.getClass(), classEntityCounts.getInt(entity.getClass()) + 1);
@@ -112,7 +112,7 @@ class ChunkSaveHelper {
                             writer.name("z").value(tile.getPos().getZ());
                             writer.name("isInvalid").value(tile.isRemoved());
                             // writer.name("canUpdate").value(tile.canUpdate());
-                            writer.name("block").value("" + tile.func_145838_q());
+                            writer.name("block").value("" + tile.getBlockType());
                             writer.endObject();
                         }
                         final ChunkPos chunkCoords = new ChunkPos(tile.getPos().getX() >> 4, tile.getPos().getZ() >> 4);

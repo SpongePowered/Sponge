@@ -129,11 +129,11 @@ public class TileEntityActivation {
     * @param world The world to perform activation checks in
     */
     public static void activateTileEntities(final ServerWorld world) {
-        final PlayerChunkMap playerChunkMap = world.func_184164_w();
+        final PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
         for (final PlayerChunkMapEntry playerChunkMapEntry : ((PlayerChunkMapAccessor) playerChunkMap).accessor$getEntries()) {
             for (final PlayerEntity player : ((PlayerchunkMapEntryAccessor) playerChunkMapEntry).accessor$getPlayers()) {
                 final Chunk chunk = ((PlayerchunkMapEntryAccessor) playerChunkMapEntry).accessor$getChunk();
-                if (chunk == null || chunk.field_189550_d || ((ChunkBridge) chunk).bridge$isPersistedChunk()) {
+                if (chunk == null || chunk.unloadQueued || ((ChunkBridge) chunk).bridge$isPersistedChunk()) {
                     continue;
                 }
 

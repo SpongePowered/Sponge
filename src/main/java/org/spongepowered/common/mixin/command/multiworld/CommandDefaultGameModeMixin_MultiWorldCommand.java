@@ -55,7 +55,7 @@ public abstract class CommandDefaultGameModeMixin_MultiWorldCommand {
         world.getWorldInfo().setGameType(type);
 
         if (server.getForceGamemode()) {
-            for (final PlayerEntity player : world.field_73010_i) {
+            for (final PlayerEntity player : world.playerEntities) {
                 if (!((EntityPlayerMPBridge) player).bridge$hasForcedGamemodeOverridePermission()) {
                     player.setGameType(type);
                 }

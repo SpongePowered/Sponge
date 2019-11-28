@@ -463,7 +463,7 @@ public abstract class BlockTransaction {
             // ChunkMixin#bridge$setBlockState will call onBlockAdded for blocks
             // with a TileEntity or when capturing is not being done.
             if (this.queueOnAdd) {
-                this.newState.getBlock().func_176213_c(worldServer, targetPosition, this.newState);
+                this.newState.getBlock().onBlockAdded(worldServer, targetPosition, this.newState);
                 phaseState.performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
             }
             if (this.queueTileSet != null) {

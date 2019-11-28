@@ -176,10 +176,10 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
                 }
 
                 if (!mixinMapInfo.mapOptimizationBridge$isValid()) {
-                    this.mapDecorations.remove(player.func_70005_c_());
+                    this.mapDecorations.remove(player.getName());
                 } else {
                     if (this.trackingPosition && mapOptimizationImpl$dimensionField.get(this).equals(player.dimension)) {
-                        this.updateDecorations(MapDecoration.Type.PLAYER, player.world, player.func_70005_c_(), player.posX, player.posZ,
+                        this.updateDecorations(MapDecoration.Type.PLAYER, player.world, player.getName(), player.posX, player.posZ,
                                 (double) player.rotationYaw);
                     }
                     // We invalidate the player's map info every tick.
@@ -278,7 +278,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
         {
             final ListNBT nbttaglist = mapStack.getTag().getList("Decorations", 10);
 
-            for (int j = 0; j < nbttaglist.func_74745_c(); ++j)
+            for (int j = 0; j < nbttaglist.tagCount(); ++j)
             {
                 final CompoundNBT nbttagcompound = nbttaglist.getCompound(j);
 

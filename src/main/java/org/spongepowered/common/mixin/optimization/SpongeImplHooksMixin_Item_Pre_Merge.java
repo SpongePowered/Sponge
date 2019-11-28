@@ -84,7 +84,7 @@ public class SpongeImplHooksMixin_Item_Pre_Merge {
                 continue;
             } else if (existing.isEmpty()) {
                 continue;
-            } else if (existing.getItem().func_77614_k() && existing.func_77960_j() != itemStack.func_77960_j()) {
+            } else if (existing.getItem().getHasSubtypes() && existing.getMetadata() != itemStack.getMetadata()) {
                 continue;
             }
             // now to actually merge the itemstacks

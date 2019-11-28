@@ -843,7 +843,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             context.getCapturedBlockSupplier().cancelTransaction(original);
             ((SpongeBlockSnapshot) original).getWorldServer().ifPresent(worldServer -> {
                 final Chunk chunk = worldServer.getChunkAt(((SpongeBlockSnapshot) original).getBlockPos());
-                final PlayerChunkMapEntry entry = worldServer.func_184164_w().func_187301_b(chunk.field_76635_g, chunk.field_76647_h);
+                final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
                 if (entry != null) {
                     ((PlayerChunkMapEntryBridge) entry).bridge$markBiomesForUpdate();
                 }

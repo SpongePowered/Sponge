@@ -76,7 +76,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
         int cz = buffer.getBlockMin().getZ();
         Vector3i size = buffer.getBlockSize();
 
-        this.stoneNoise = this.noise1.func_151599_a(this.stoneNoise, cx, cz, size.getX(), size.getZ(), 0.0625D, 0.0625D, 1.0D);
+        this.stoneNoise = this.noise1.getRegion(this.stoneNoise, cx, cz, size.getX(), size.getZ(), 0.0625D, 0.0625D, 1.0D);
 
         Random rand = new Random(cx / 16 * 341873128712L + cz / 16 * 132897987541L);
 
@@ -118,8 +118,8 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
         k = p_180622_5_;
         l = p_180622_4_;
         int seaLevel = world.getSeaLevel();
-        net.minecraft.block.BlockState iblockstate = Blocks.field_150406_ce.getDefaultState();
-        net.minecraft.block.BlockState iblockstate3 = Blocks.field_150406_ce.getDefaultState();
+        net.minecraft.block.BlockState iblockstate = Blocks.STAINED_HARDENED_CLAY.getDefaultState();
+        net.minecraft.block.BlockState iblockstate3 = Blocks.STAINED_HARDENED_CLAY.getDefaultState();
         int i1 = (int) (p_180622_6_ / 3.0D + 3.0D + p_180622_2_.nextDouble() * 0.25D);
         boolean flag1 = Math.cos(p_180622_6_ / 3.0D * Math.PI) > 0.0D;
         int j1 = -1;
@@ -147,8 +147,8 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
                             iblockstate = null;
                             iblockstate3 = Blocks.STONE.getDefaultState();
                         } else if (k1 >= seaLevel - 4 && k1 <= seaLevel + 1) {
-                            iblockstate = Blocks.field_150406_ce.getDefaultState();
-                            iblockstate3 = Blocks.field_150406_ce.getDefaultState();
+                            iblockstate = Blocks.STAINED_HARDENED_CLAY.getDefaultState();
+                            iblockstate3 = Blocks.STAINED_HARDENED_CLAY.getDefaultState();
                         }
 
                         if (k1 < seaLevel && (iblockstate == null || iblockstate.getMaterial() == Material.AIR)) {
@@ -162,7 +162,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
                                 if (flag1) {
                                     p_180622_3_.setBlock(l, k1, k,
                                             (BlockState) Blocks.DIRT.getDefaultState()
-                                                    .func_177226_a(BlockDirt.field_176386_a, BlockDirt.DirtType.COARSE_DIRT));
+                                                    .withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT));
                                 } else {
                                     p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.GRASS.getDefaultState());
                                 }
@@ -175,28 +175,28 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
                                     }
                                 } else {
                                     iblockstate2 =
-                                            Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE);
+                                            Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockColored.COLOR, DyeColor.ORANGE);
                                 }
 
                                 p_180622_3_.setBlock(l, k1, k, (BlockState) iblockstate2);
                             } else {
                                 p_180622_3_.setBlock(l, k1, k,
-                                        (BlockState) Blocks.SAND.getDefaultState().func_177226_a(SandBlock.field_176504_a, SandBlock.EnumType.RED_SAND));
+                                        (BlockState) Blocks.SAND.getDefaultState().withProperty(SandBlock.VARIANT, SandBlock.EnumType.RED_SAND));
                                 flag2 = true;
                             }
                         } else {
                             p_180622_3_.setBlock(l, k1, k, (BlockState) iblockstate3);
 
-                            if (iblockstate3.getBlock() == Blocks.field_150406_ce) {
+                            if (iblockstate3.getBlock() == Blocks.STAINED_HARDENED_CLAY) {
                                 p_180622_3_.setBlock(l, k1, k,
-                                        (BlockState) iblockstate3.getBlock().getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE));
+                                        (BlockState) iblockstate3.getBlock().getDefaultState().withProperty(BlockColored.COLOR, DyeColor.ORANGE));
                             }
                         }
                     } else if (j1 > 0) {
                         --j1;
 
                         if (flag2) {
-                            net.minecraft.block.BlockState clay = Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE);
+                            net.minecraft.block.BlockState clay = Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockColored.COLOR, DyeColor.ORANGE);
                             p_180622_3_ .setBlock(l, k1, k, (BlockState) clay);
                         } else {
                             iblockstate2 = this.func_180629_a(p_180622_4_, k1, p_180622_5_);
@@ -227,7 +227,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
             if (j < 64) {
                 this.possibleBlocks[j] =
-                        (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE);
+                        (BlockState) Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockColored.COLOR, DyeColor.ORANGE);
             }
         }
 
@@ -243,7 +243,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
             for (j1 = 0; i1 + j1 < 64 && j1 < l; ++j1) {
                 this.possibleBlocks[i1 + j1] =
-                        (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.YELLOW);
+                        (BlockState) Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockColored.COLOR, DyeColor.YELLOW);
             }
         }
 
@@ -256,7 +256,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
             for (k1 = 0; j1 + k1 < 64 && k1 < i1; ++k1) {
                 this.possibleBlocks[j1 + k1] =
-                        (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.BROWN);
+                        (BlockState) Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockColored.COLOR, DyeColor.BROWN);
             }
         }
 
@@ -268,7 +268,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
             for (int l1 = 0; k1 + l1 < 64 && l1 < j1; ++l1) {
                 this.possibleBlocks[k1 + l1] =
-                        (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.RED);
+                        (BlockState) Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockColored.COLOR, DyeColor.RED);
             }
         }
 
@@ -281,16 +281,16 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
             for (int i2 = 0; j1 + i2 < 64 && i2 < b0; ++i2) {
                 this.possibleBlocks[j1 + i2] =
-                        (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.WHITE);
+                        (BlockState) Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockColored.COLOR, DyeColor.WHITE);
 
                 if (j1 + i2 > 1 && random.nextBoolean()) {
                     this.possibleBlocks[j1 + i2 - 1] =
-                            (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.SILVER);
+                            (BlockState) Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockColored.COLOR, DyeColor.SILVER);
                 }
 
                 if (j1 + i2 < 63 && random.nextBoolean()) {
                     this.possibleBlocks[j1 + i2 + 1] =
-                            (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.SILVER);
+                            (BlockState) Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockColored.COLOR, DyeColor.SILVER);
                 }
             }
         }

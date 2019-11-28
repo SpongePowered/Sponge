@@ -56,7 +56,7 @@ public abstract class TileEntityCommandBlockMixin_API extends TileEntityMixin_AP
 
     @Override
     public String getName() {
-        return getCommandBlockLogic().func_70005_c_();
+        return getCommandBlockLogic().getName();
     }
 
     @Override
@@ -65,7 +65,7 @@ public abstract class TileEntityCommandBlockMixin_API extends TileEntityMixin_AP
         DataContainer container = super.toContainer();
         container.set(Constants.TileEntity.CommandBlock.STORED_COMMAND, this.getCommandBlockLogic().getCommand());
         container.set(Constants.TileEntity.CommandBlock.SUCCESS_COUNT, this.getCommandBlockLogic().getSuccessCount());
-        container.set(Constants.TileEntity.CUSTOM_NAME, this.getCommandBlockLogic().func_70005_c_());
+        container.set(Constants.TileEntity.CUSTOM_NAME, this.getCommandBlockLogic().getName());
         container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.getCommandBlockLogic().shouldTrackOutput());
         if (this.getCommandBlockLogic().shouldTrackOutput()) {
             container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, SpongeTexts.toLegacy(this.getCommandBlockLogic().getLastOutput()));

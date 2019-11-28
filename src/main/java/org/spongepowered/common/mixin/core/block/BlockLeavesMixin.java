@@ -117,22 +117,22 @@ public abstract class BlockLeavesMixin extends BlockMixin {
                     context.buildAndSwitch();
                 }
                 this.dropBlockAsItem(worldIn, pos, state, 0);
-                worldIn.func_175698_g(pos);
+                worldIn.setBlockToAir(pos);
             }
             return;
         }
         // Sponge End
         this.dropBlockAsItem(worldIn, pos, state , 0);
-        worldIn.func_175698_g(pos);
+        worldIn.setBlockToAir(pos);
 
     }
 
     private ImmutableTreeData impl$getTreeData(final net.minecraft.block.BlockState blockState) {
         final BlockPlanks.EnumType type;
         if (blockState.getBlock() instanceof BlockOldLeaf) {
-            type = blockState.get(BlockOldLeaf.field_176239_P);
+            type = blockState.get(BlockOldLeaf.VARIANT);
         } else if (blockState.getBlock() instanceof BlockNewLeaf) {
-            type = blockState.get(BlockNewLeaf.field_176240_P);
+            type = blockState.get(BlockNewLeaf.VARIANT);
         } else {
             type = BlockPlanks.EnumType.OAK;
         }
@@ -143,7 +143,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
     }
 
     private ImmutableDecayableData impl$getIsDecayableFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.get(LeavesBlock.field_176237_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.get(LeavesBlock.DECAYABLE));
     }
 
     @Override
@@ -161,18 +161,18 @@ public abstract class BlockLeavesMixin extends BlockMixin {
                         treeType.equals(TreeTypes.BIRCH) ||
                         treeType.equals(TreeTypes.SPRUCE) ||
                         treeType.equals(TreeTypes.JUNGLE)) {
-                    return Optional.of((BlockState) blockState.func_177226_a(BlockOldLeaf.field_176239_P, type));
+                    return Optional.of((BlockState) blockState.withProperty(BlockOldLeaf.VARIANT, type));
                 }
             } else if (blockState.getBlock() instanceof BlockNewLeaf) {
                 if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
-                    return Optional.of((BlockState) blockState.func_177226_a(BlockNewLeaf.field_176240_P, type));
+                    return Optional.of((BlockState) blockState.withProperty(BlockNewLeaf.VARIANT, type));
                 }
             }
             return Optional.empty();
         }
         if (manipulator instanceof ImmutableDecayableData) {
             final boolean decayable = ((ImmutableDecayableData) manipulator).decayable().get();
-            return Optional.of((BlockState) blockState.func_177226_a(LeavesBlock.field_176237_a, decayable));
+            return Optional.of((BlockState) blockState.withProperty(LeavesBlock.DECAYABLE, decayable));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -187,18 +187,18 @@ public abstract class BlockLeavesMixin extends BlockMixin {
                         treeType.equals(TreeTypes.BIRCH) ||
                         treeType.equals(TreeTypes.SPRUCE) ||
                         treeType.equals(TreeTypes.JUNGLE)) {
-                    return Optional.of((BlockState) blockState.func_177226_a(BlockOldLeaf.field_176239_P, type));
+                    return Optional.of((BlockState) blockState.withProperty(BlockOldLeaf.VARIANT, type));
                 }
             } else if (blockState.getBlock() instanceof BlockNewLeaf) {
                 if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
-                    return Optional.of((BlockState) blockState.func_177226_a(BlockNewLeaf.field_176240_P, type));
+                    return Optional.of((BlockState) blockState.withProperty(BlockNewLeaf.VARIANT, type));
                 }
             }
             return Optional.empty();
         }
         if (key.equals(Keys.DECAYABLE)) {
             final boolean decayable = (Boolean) value;
-            return Optional.of((BlockState) blockState.func_177226_a(LeavesBlock.field_176237_a, decayable));
+            return Optional.of((BlockState) blockState.withProperty(LeavesBlock.DECAYABLE, decayable));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

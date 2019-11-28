@@ -64,7 +64,7 @@ public abstract class BlockCropsMixin extends BlockMixin {
             if (growth > getMaxAge()) {
                 growth = getMaxAge();
             }
-            return Optional.of((BlockState) blockState.func_177226_a(getAgeProperty(), growth));
+            return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -76,7 +76,7 @@ public abstract class BlockCropsMixin extends BlockMixin {
             if (growth > getMaxAge()) {
                 growth = getMaxAge();
             }
-            return Optional.of((BlockState) blockState.func_177226_a(getAgeProperty(), growth));
+            return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

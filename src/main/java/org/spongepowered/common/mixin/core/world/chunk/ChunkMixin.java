@@ -426,7 +426,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                         transaction.queueBreak = true;
                         transaction.enqueueChanges(mixinWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
                     }
-                    currentBlock.func_180663_b(this.world, pos, currentState);
+                    currentBlock.breakBlock(this.world, pos, currentState);
                 }
                 if (existing != null && SpongeImplHooks.shouldRefresh(existing, this.world, pos, currentState, newState)) {
                     // And likewise, we want to queue the tile entity being removed, while
@@ -447,7 +447,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                 transaction = null;
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
                 if (currentBlock != newBlock && (state == null || !state.isRestoring())) { // cache the block break in the event we're capturing tiles
-                    currentBlock.func_180663_b(this.world, pos, currentState);
+                    currentBlock.breakBlock(this.world, pos, currentState);
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
                 // still work by themselves in vanilla. In all intents and purposes, the remove tile entity could
@@ -532,7 +532,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                 if (transaction != null) {
                     transaction.queueOnAdd = true;
                 } else if (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
-                    newBlock.func_176213_c(this.world, pos, newState);
+                    newBlock.onBlockAdded(this.world, pos, newState);
                 }
             }
             // Sponge end
@@ -814,7 +814,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             // If everything passes we have an intersection!
             intersections.add(hit);
             // If the entity has part, recurse on these
-            final net.minecraft.entity.Entity[] parts = entity.func_70021_al();
+            final net.minecraft.entity.Entity[] parts = entity.getParts();
             if (parts != null && parts.length > 0) {
                 impl$getIntersectingEntities(Arrays.asList(parts), start, direction, distance, filter, intersections);
             }
@@ -834,7 +834,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         for (int x = 0; x < 16; ++x) {
             for (int z = 0; z < 16; ++z) {
                 for (int y = 0; y < 256; ++y) {
-                    final BlockState block = primer.func_177856_a(x, y, z);
+                    final BlockState block = primer.getBlockState(x, y, z);
                     if (block.getMaterial() != Material.AIR) {
                         final int section = y >> 4;
                         if (this.storageArrays[section] == net.minecraft.world.chunk.Chunk.EMPTY_SECTION) {

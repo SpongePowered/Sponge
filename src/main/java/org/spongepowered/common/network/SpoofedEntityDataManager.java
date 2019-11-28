@@ -63,8 +63,8 @@ public class SpoofedEntityDataManager extends EntityDataManager {
     }
 
     @Override
-    public <T> void func_187217_b(DataParameter<T> key) {
-        this.cached.func_187217_b(key);
+    public <T> void setDirty(DataParameter<T> key) {
+        this.cached.setDirty(key);
     }
 
     @Override

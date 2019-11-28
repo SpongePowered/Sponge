@@ -63,11 +63,11 @@ public abstract class BlockWoodSlabMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableTreeData) {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) (Object) ((ImmutableTreeData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockPlanks.field_176383_a, treeType));
+            return Optional.of((BlockState) blockState.withProperty(BlockPlanks.VARIANT, treeType));
         }
         if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(SlabBlock.field_176554_a, (SlabBlock.EnumBlockHalf) (Object) portionType));
+            return Optional.of((BlockState) blockState.withProperty(SlabBlock.HALF, (SlabBlock.EnumBlockHalf) (Object) portionType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -76,20 +76,20 @@ public abstract class BlockWoodSlabMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.TREE_TYPE)) {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockPlanks.field_176383_a, treeType));
+            return Optional.of((BlockState) blockState.withProperty(BlockPlanks.VARIANT, treeType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.func_177226_a(SlabBlock.field_176554_a, (SlabBlock.EnumBlockHalf) value));
+            return Optional.of((BlockState) blockState.withProperty(SlabBlock.HALF, (SlabBlock.EnumBlockHalf) value));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableTreeData impl$getTreeTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.get(BlockPlanks.field_176383_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.get(BlockPlanks.VARIANT));
     }
 
     private ImmutablePortionData impl$getPortionTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class, blockState.get(SlabBlock.field_176554_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class, blockState.get(SlabBlock.HALF));
     }
 }

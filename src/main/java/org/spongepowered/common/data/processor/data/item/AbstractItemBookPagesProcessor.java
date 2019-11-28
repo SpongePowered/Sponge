@@ -79,7 +79,7 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
             }
             final CompoundNBT tag = stack.getTag();
             if (tag != null) {
-                tag.func_74782_a(Constants.Item.Book.ITEM_BOOK_PAGES, new ListNBT());
+                tag.setTag(Constants.Item.Book.ITEM_BOOK_PAGES, new ListNBT());
             }
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
@@ -91,7 +91,7 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
     protected boolean set(final ItemStack itemStack, final List<T> value) {
         final ListNBT list = new ListNBT();
         for (final T page : value) {
-            list.func_74742_a(this.translateTo(page));
+            list.appendTag(this.translateTo(page));
         }
         itemStack.setTagInfo(Constants.Item.Book.ITEM_BOOK_PAGES, list);
         final CompoundNBT compound = itemStack.getTag();
@@ -113,8 +113,8 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
         }
         final ListNBT list = tagCompound.getList(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
         final List<T> stringList = new ArrayList<>();
-        if (!list.func_82582_d()) {
-            for (int i = 0; i < list.func_74745_c(); i++) {
+        if (!list.isEmpty()) {
+            for (int i = 0; i < list.tagCount(); i++) {
                 stringList.add(this.translateFrom(list.getString(i)));
             }
         }

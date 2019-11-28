@@ -45,12 +45,12 @@ public class SandstoneDataProcessor extends AbstractCatalogDataProcessor<Sandsto
 
     @Override
     protected int setToMeta(SandstoneType value) {
-        return ((BlockSandStone.EnumType) (Object) value).func_176675_a();
+        return ((BlockSandStone.EnumType) (Object) value).getMetadata();
     }
 
     @Override
     protected SandstoneType getFromMeta(int meta) {
-        return (SandstoneType) (Object) BlockSandStone.EnumType.func_176673_a(meta);
+        return (SandstoneType) (Object) BlockSandStone.EnumType.byMetadata(meta);
     }
 
     @Override

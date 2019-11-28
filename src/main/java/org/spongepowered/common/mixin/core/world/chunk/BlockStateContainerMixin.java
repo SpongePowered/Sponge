@@ -86,7 +86,7 @@ public abstract class BlockStateContainerMixin implements BlockStateContainerBri
             int z = i >> 4 & 15;
             int idAdd = add == null ? 0 : add.get(x, y, z);
             int blockId = idAdd << 8 | (id[i] & 255);
-            Block block = Block.field_149771_c.func_148754_a(blockId);
+            Block block = Block.REGISTRY.getObjectById(blockId);
             if (block != null) {
                 newState = block.getDefaultState();
             } else {

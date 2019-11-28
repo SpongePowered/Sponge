@@ -56,7 +56,7 @@ public class SpongeDimension implements Dimension {
 
     @Override
     public int getMinimumSpawnHeight() {
-        return this.worldProvider.func_76557_i();
+        return this.worldProvider.getAverageGroundLevel();
     }
 
     @Override

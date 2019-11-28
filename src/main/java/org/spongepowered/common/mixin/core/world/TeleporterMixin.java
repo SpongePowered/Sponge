@@ -82,7 +82,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
         } else {
             this.createEndPortal(targetLocation); // Sponge - move end portal create logic to its own method
             entityIn.setLocationAndAngles(targetLocation.getX(), targetLocation.getY() - 1, targetLocation.getZ(), entityIn.rotationYaw, 0.0F);
-            entityIn.field_70159_w = entityIn.field_70181_x = entityIn.field_70179_y = 0.0D;
+            entityIn.motionX = entityIn.motionY = entityIn.motionZ = 0.0D;
         }
     }
 
@@ -190,10 +190,10 @@ public abstract class TeleporterMixin implements TeleporterBridge {
             f3 = 1.0F;
         }
 
-        double d3 = entityIn.field_70159_w;
-        double d4 = entityIn.field_70179_y;
-        entityIn.field_70159_w = d3 * f + d4 * f3;
-        entityIn.field_70179_y = d3 * f2 + d4 * f1;
+        double d3 = entityIn.motionX;
+        double d4 = entityIn.motionZ;
+        entityIn.motionX = d3 * f + d4 * f3;
+        entityIn.motionZ = d3 * f2 + d4 * f1;
         entityIn.rotationYaw = rotationYaw - entityIn.getTeleportDirection().getOpposite().getHorizontalIndex() * 90
                 + blockpattern$patternhelper.getForwards().getHorizontalIndex() * 90;
         entityIn.setLocationAndAngles(xTarget, yTarget, zTarget, entityIn.rotationYaw, entityIn.rotationPitch);

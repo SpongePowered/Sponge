@@ -70,13 +70,13 @@ public class FireworkUtils {
 
     @Nullable
     public static FireworkEffect getChargeEffect(final ItemStack item) {
-        Preconditions.checkArgument(item.getItem() == Items.field_151154_bQ, "Item is not a firework!"); // FIREWORK_CHARGE
+        Preconditions.checkArgument(item.getItem() == Items.FIREWORK_CHARGE, "Item is not a firework!"); // FIREWORK_CHARGE
         final CompoundNBT tag = item.getTag();
         if (tag == null) {
             return null;
         }
         final CompoundNBT firework = tag.getCompound(Constants.Entity.Firework.EXPLOSION);
-        if(firework.func_82582_d()) {
+        if(firework.isEmpty()) {
             return null;
         }
 
@@ -155,23 +155,23 @@ public class FireworkUtils {
         }
         if(item.isEmpty()) return false;
 
-        if(item.getItem() == Items.field_151154_bQ) {
+        if(item.getItem() == Items.FIREWORK_CHARGE) {
             final CompoundNBT tag = item.getTag();
             if (tag == null) {
                 return true;
             }
             if(!effects.isEmpty()) {
-                tag.func_74782_a(Constants.Entity.Firework.EXPLOSION, toNbt(effects.get(0)));
+                tag.setTag(Constants.Entity.Firework.EXPLOSION, toNbt(effects.get(0)));
             } else {
                 tag.remove(Constants.Entity.Firework.EXPLOSION);
             }
             return true;
-        } else if(item.getItem() == Items.field_151152_bP) {
+        } else if(item.getItem() == Items.FIREWORKS) {
             final ListNBT nbtEffects = new ListNBT();
-            effects.stream().map(FireworkUtils::toNbt).forEach(nbtEffects::func_74742_a);
+            effects.stream().map(FireworkUtils::toNbt).forEach(nbtEffects::appendTag);
 
             final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
-            fireworks.func_74782_a(Constants.Item.Fireworks.EXPLOSIONS, nbtEffects);
+            fireworks.setTag(Constants.Item.Fireworks.EXPLOSIONS, nbtEffects);
             return true;
         }
         return false;
@@ -188,13 +188,13 @@ public class FireworkUtils {
         if(item.isEmpty()) return Optional.empty();
 
         final List<FireworkEffect> effects;
-        if(item.getItem() == Items.field_151152_bP) {
+        if(item.getItem() == Items.FIREWORKS) {
             final CompoundNBT fireworks = item.getChildTag(Constants.Item.Fireworks.FIREWORKS);
             if(fireworks == null || !fireworks.contains(Constants.Item.Fireworks.EXPLOSIONS)) return Optional.empty();
 
             final ListNBT effectsNbt = fireworks.getList(Constants.Item.Fireworks.EXPLOSIONS, Constants.NBT.TAG_COMPOUND);
             effects = Lists.newArrayList();
-            for(int i = 0; i < effectsNbt.func_74745_c(); i++) {
+            for(int i = 0; i < effectsNbt.tagCount(); i++) {
                 final CompoundNBT effectNbt = effectsNbt.getCompound(i);
                 effects.add(fromNbt(effectNbt));
             }
@@ -217,14 +217,14 @@ public class FireworkUtils {
         }
         if(item.isEmpty()) return false;
 
-        if(item.getItem() == Items.field_151154_bQ) {
+        if(item.getItem() == Items.FIREWORK_CHARGE) {
             final CompoundNBT tag = item.getTag();
             if (tag == null) {
                 return true;
             }
             tag.remove(Constants.Entity.Firework.EXPLOSION);
             return true;
-        } else if(item.getItem() == Items.field_151152_bP) {
+        } else if(item.getItem() == Items.FIREWORKS) {
             final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
             fireworks.remove(Constants.Item.Fireworks.EXPLOSIONS);
             return true;

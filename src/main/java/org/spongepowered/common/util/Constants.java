@@ -965,7 +965,7 @@ public final class Constants {
                 if (forgeCompound.contains(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
                     cleanseInnerCompound(forgeCompound);
                 }
-                if (forgeCompound.func_82582_d()) {
+                if (forgeCompound.isEmpty()) {
                     rootCompound.remove(Forge.FORGE_DATA);
                 }
             } else if (rootCompound.contains(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
@@ -976,7 +976,7 @@ public final class Constants {
 
         private static void cleanseInnerCompound(final CompoundNBT compound) {
             final CompoundNBT inner = compound.getCompound(Sponge.SPONGE_DATA);
-            if (inner.func_82582_d()) {
+            if (inner.isEmpty()) {
                 compound.remove(Sponge.SPONGE_DATA);
             }
         }
@@ -987,7 +987,7 @@ public final class Constants {
             }
             final List<Enchantment> enchantments = Lists.newArrayList();
             final ListNBT list = itemStack.getEnchantmentTagList();
-            for (int i = 0; i < list.func_74745_c(); i++) {
+            for (int i = 0; i < list.tagCount(); i++) {
                 final CompoundNBT compound = list.getCompound(i);
                 final short enchantmentId = compound.getShort(Item.ITEM_ENCHANTMENT_ID);
                 final short level = compound.getShort(Item.ITEM_ENCHANTMENT_LEVEL);
@@ -1005,7 +1005,7 @@ public final class Constants {
             final ListNBT nbttaglist = new ListNBT();
 
             for (final double d1 : numbers) {
-                nbttaglist.func_74742_a(new DoubleNBT(d1));
+                nbttaglist.appendTag(new DoubleNBT(d1));
             }
 
             return nbttaglist;
@@ -1015,7 +1015,7 @@ public final class Constants {
             final ListNBT nbttaglist = new ListNBT();
 
             for (final float f : numbers) {
-                nbttaglist.func_74742_a(new FloatNBT(f));
+                nbttaglist.appendTag(new FloatNBT(f));
             }
 
             return nbttaglist;

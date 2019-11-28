@@ -214,11 +214,11 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         quantity(1);
         if (blockSnapshot instanceof SpongeBlockSnapshot) {
             final Block block = (Block) blockType;
-            this.damageValue = block.func_180651_a((net.minecraft.block.BlockState) blockSnapshot.getState());
+            this.damageValue = block.damageDropped((net.minecraft.block.BlockState) blockSnapshot.getState());
             final Optional<CompoundNBT> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
             if (compound.isPresent()) {
                 this.compound = new CompoundNBT();
-                this.compound.func_74782_a(Constants.Item.BLOCK_ENTITY_TAG, compound.get());
+                this.compound.setTag(Constants.Item.BLOCK_ENTITY_TAG, compound.get());
             }
             // todo probably needs more testing, but this'll do donkey...
         } else { // TODO handle through the API specifically handling the rest of the data stuff
@@ -241,7 +241,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             return this;
         }
         itemType(item.get());
-        this.damageValue = minecraftState.getBlock().func_180651_a(minecraftState);
+        this.damageValue = minecraftState.getBlock().damageDropped(minecraftState);
         return this;
     }
 
@@ -350,7 +350,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         } else {
             nbttaglist = compound.getList(Constants.Item.ITEM_ENCHANTMENT_LIST, Constants.NBT.TAG_COMPOUND);
         }
-        for (int i = 0; i < nbttaglist.func_74745_c(); ++i)
+        for (int i = 0; i < nbttaglist.tagCount(); ++i)
         {
             CompoundNBT nbttagcompound = nbttaglist.getCompound(i);
             short id = nbttagcompound.getShort(Constants.Item.ITEM_ENCHANTMENT_ID);

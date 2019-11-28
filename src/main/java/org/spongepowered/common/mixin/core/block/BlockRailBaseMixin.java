@@ -75,12 +75,12 @@ public abstract class BlockRailBaseMixin extends BlockMixin {
                 return state;
             }
             // For mods that extend BlockRailBase
-            for (final Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.func_177228_b().entrySet
+            for (final Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.getProperties().entrySet
                     ()) {
                 if (entry.getValue() instanceof AbstractRailBlock.EnumRailDirection) {
                     if (entry.getKey().getAllowedValues().contains(railDirection)) {
                         final PropertyEnum<AbstractRailBlock.EnumRailDirection> property = (PropertyEnum<AbstractRailBlock.EnumRailDirection>) entry.getKey();
-                        final net.minecraft.block.BlockState newState = blockState.func_177226_a(property, railDirection);
+                        final net.minecraft.block.BlockState newState = blockState.withProperty(property, railDirection);
                         return Optional.of((BlockState) newState);
                     }
                 }
@@ -104,19 +104,19 @@ public abstract class BlockRailBaseMixin extends BlockMixin {
 
     private Optional<BlockState> impl$getStateForDirection(final net.minecraft.block.BlockState blockState, final AbstractRailBlock.EnumRailDirection railDirection) {
         if (blockState.getBlock() instanceof RailBlock) {
-            return Optional.of((BlockState) blockState.func_177226_a(RailBlock.SHAPE, railDirection));
+            return Optional.of((BlockState) blockState.withProperty(RailBlock.SHAPE, railDirection));
         }
         if (blockState.getBlock() instanceof PoweredRailBlock) {
             if (!PoweredRailBlock.SHAPE.getAllowedValues().contains(railDirection)) {
                 return Optional.empty();
             }
-            return Optional.of((BlockState) blockState.func_177226_a(PoweredRailBlock.SHAPE, railDirection));
+            return Optional.of((BlockState) blockState.withProperty(PoweredRailBlock.SHAPE, railDirection));
         }
         if (blockState.getBlock() instanceof DetectorRailBlock) {
             if (!DetectorRailBlock.SHAPE.getAllowedValues().contains(railDirection)) {
                 return Optional.empty();
             }
-            return Optional.of((BlockState) blockState.func_177226_a(DetectorRailBlock.SHAPE, railDirection));
+            return Optional.of((BlockState) blockState.withProperty(DetectorRailBlock.SHAPE, railDirection));
         }
         return Optional.empty();
     }
@@ -132,7 +132,7 @@ public abstract class BlockRailBaseMixin extends BlockMixin {
         if (blockState.getBlock() instanceof DetectorRailBlock) {
             return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.get(DetectorRailBlock.SHAPE));
         } // For mods extending BlockRailBase
-        for (final Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.func_177228_b().entrySet()) {
+        for (final Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.getProperties().entrySet()) {
             if (entry.getValue() instanceof AbstractRailBlock.EnumRailDirection) {
                 return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, entry.getValue());
             }

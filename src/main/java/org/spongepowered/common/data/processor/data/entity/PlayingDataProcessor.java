@@ -48,13 +48,13 @@ public class PlayingDataProcessor
 
     @Override
     protected boolean set(VillagerEntity entity, Boolean value) {
-        entity.func_70939_f(value);
+        entity.setPlaying(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(VillagerEntity entity) {
-        return Optional.of(entity.func_70945_p());
+        return Optional.of(entity.isPlaying());
     }
 
     @Override

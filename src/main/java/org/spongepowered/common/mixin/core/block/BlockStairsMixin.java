@@ -68,15 +68,15 @@ public abstract class BlockStairsMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableStairShapeData) {
             final StairsBlock.EnumShape stairShapeType = (StairsBlock.EnumShape) (Object) ((ImmutableStairShapeData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.SHAPE, stairShapeType));
+            return Optional.of((BlockState) blockState.withProperty(StairsBlock.SHAPE, stairShapeType));
         }
         if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
+            return Optional.of((BlockState) blockState.withProperty(StairsBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(StairsBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -85,14 +85,14 @@ public abstract class BlockStairsMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.STAIR_SHAPE)) {
             final StairsBlock.EnumShape stairShapeType = (StairsBlock.EnumShape) value;
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.SHAPE, stairShapeType));
+            return Optional.of((BlockState) blockState.withProperty(StairsBlock.SHAPE, stairShapeType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) value)));
+            return Optional.of((BlockState) blockState.withProperty(StairsBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) value)));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(StairsBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

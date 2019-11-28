@@ -156,7 +156,7 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
 
         // Execute updates
         for (final BlockPos posi : blocksNeedingUpdate) {
-            worldIn.func_175685_c(posi, (RedstoneWireBlock) (Object) this, false);
+            worldIn.notifyNeighborsOfStateChange(posi, (RedstoneWireBlock) (Object) this, false);
         }
     }
 
@@ -280,11 +280,11 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
         }
         for (final Direction facingVertical : facingsVertical) {
             final BlockPos offsetPos = pos.offset(facingVertical);
-            final boolean solidBlock = worldIn.getBlockState(offsetPos).func_185898_k();
+            final boolean solidBlock = worldIn.getBlockState(offsetPos).isBlockNormalCube();
             for (final Direction facingHorizontal : facingsHorizontal) {
                 // wire can travel upwards if the block on top doesn't cut the wire (is non-solid)
                 // it can travel down if the block below is solid and the block "diagonal" doesn't cut off the wire (is non-solid) 
-                if ((facingVertical == Direction.UP && !solidBlock) || (facingVertical == Direction.DOWN && solidBlock && !worldIn.getBlockState(offsetPos.offset(facingHorizontal)).func_185898_k())) {
+                if ((facingVertical == Direction.UP && !solidBlock) || (facingVertical == Direction.DOWN && solidBlock && !worldIn.getBlockState(offsetPos.offset(facingHorizontal)).isBlockNormalCube())) {
                     this.addWireToList(worldIn, offsetPos.offset(facingHorizontal), ownPower);
                 }
             }
@@ -308,10 +308,10 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
             wirePower = this.getMaxCurrentStrength(worldIn, offsetPos, wirePower);
             
             // Block below the wire need to be solid (Upwards diode of slabs/stairs/glowstone) and no block should cut the wire
-            if(worldIn.getBlockState(offsetPos).func_185915_l() && !worldIn.getBlockState(pos.up()).func_185915_l()) {
+            if(worldIn.getBlockState(offsetPos).isNormalCube() && !worldIn.getBlockState(pos.up()).isNormalCube()) {
                 wirePower = this.getMaxCurrentStrength(worldIn, offsetPos.up(), wirePower);
                 // Only get from power below if no block is cutting the wire
-            } else if (!worldIn.getBlockState(offsetPos).func_185915_l()) {
+            } else if (!worldIn.getBlockState(offsetPos).isNormalCube()) {
                 wirePower = this.getMaxCurrentStrength(worldIn, offsetPos.down(), wirePower);
             }
         }
@@ -345,7 +345,7 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
         for (final Direction facing : facings) {
             final BlockPos offsetPos = pos.offset(facing);
             if (connectedSides.contains(facing.getOpposite()) || facing == Direction.DOWN) {
-                if (worldIn.getBlockState(offsetPos).func_185915_l()) {
+                if (worldIn.getBlockState(offsetPos).isNormalCube()) {
                     for (final Direction facing1 : facings) {
                         if (this.canBlockBePoweredFromSide(worldIn.getBlockState(offsetPos.offset(facing1)), facing1, false))
                             set.add(offsetPos.offset(facing1));
@@ -387,7 +387,7 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
                    && side.getAxis().isHorizontal();
         }
         if (state.getBlock() instanceof RedstoneTorchBlock) {
-            return !isWire && state.get(RedstoneTorchBlock.field_176596_a) == side;
+            return !isWire && state.get(RedstoneTorchBlock.FACING) == side;
         }
         return true;
     }
@@ -445,7 +445,7 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
      * @param power Power it should get set to
      */
     private void setWireState(final World worldIn, final BlockPos pos, BlockState state, final int power) {
-        state = state.func_177226_a(RedstoneWireBlock.POWER, power);
+        state = state.withProperty(RedstoneWireBlock.POWER, power);
         worldIn.setBlockState(pos, state, 2);
         this.panda$updatedRedstoneWire.add(pos);
     }
@@ -460,11 +460,11 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
      */
     @Override
     @Overwrite
-    public void func_176213_c(final World worldIn, final BlockPos pos, final BlockState state) {
+    public void onBlockAdded(final World worldIn, final BlockPos pos, final BlockState state) {
         if (!worldIn.isRemote) {
             this.updateSurroundingRedstone(worldIn, pos);
             for (final Vec3i vec : surroundingBlocksOffset) {
-                worldIn.func_175685_c(pos.add(vec), this, false);
+                worldIn.notifyNeighborsOfStateChange(pos.add(vec), this, false);
             }
         }
     }
@@ -478,12 +478,12 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
      */
     @Override
     @Overwrite
-    public void func_180663_b(final World worldIn, final BlockPos pos, final BlockState state) {
-        super.func_180663_b(worldIn, pos, state);
+    public void breakBlock(final World worldIn, final BlockPos pos, final BlockState state) {
+        super.breakBlock(worldIn, pos, state);
         if (!worldIn.isRemote) {
             this.updateSurroundingRedstone(worldIn, pos);
             for (final Vec3i vec : surroundingBlocksOffset) {
-                worldIn.func_175685_c(pos.add(vec), this, false);
+                worldIn.notifyNeighborsOfStateChange(pos.add(vec), this, false);
             }
         }
     }
@@ -519,7 +519,7 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
         if (block == Blocks.REDSTONE_WIRE) {
             return true;
         }
-        if (Blocks.field_150413_aR.func_185547_C(blockState)) {
+        if (Blocks.UNPOWERED_REPEATER.isSameDiode(blockState)) {
             final Direction enumfacing = blockState.get(RepeaterBlock.HORIZONTAL_FACING);
             return enumfacing == side || enumfacing.getOpposite() == side;
         }

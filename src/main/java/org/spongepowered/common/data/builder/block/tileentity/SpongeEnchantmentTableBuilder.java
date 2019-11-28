@@ -42,7 +42,7 @@ public class SpongeEnchantmentTableBuilder extends AbstractTileBuilder<Enchantme
     protected Optional<EnchantmentTable> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(enchantmentTable -> {
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((EnchantingTableTileEntity) enchantmentTable).func_145920_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
+                ((EnchantingTableTileEntity) enchantmentTable).setCustomName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
             ((EnchantingTableTileEntity) enchantmentTable).validate();
             return enchantmentTable;

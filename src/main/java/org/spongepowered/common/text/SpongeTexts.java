@@ -125,7 +125,7 @@ public final class SpongeTexts {
     public static ListNBT asJsonNBT(List<Text> list) {
         final ListNBT legacy = new ListNBT();
         for (Text line : list) {
-            legacy.func_74742_a(new StringNBT(TextSerializers.JSON.serialize(line)));
+            legacy.appendTag(new StringNBT(TextSerializers.JSON.serialize(line)));
         }
         return legacy;
     }
@@ -140,7 +140,7 @@ public final class SpongeTexts {
 
     public static List<Text> fromNbtJson(ListNBT legacy) throws TextParseException {
         List<Text> list = Lists.newArrayList();
-        for (int i = 0; i < legacy.func_74745_c(); i++) {
+        for (int i = 0; i < legacy.tagCount(); i++) {
             list.add(TextSerializers.JSON.deserialize(legacy.getString(i)));
         }
         return list;
@@ -148,7 +148,7 @@ public final class SpongeTexts {
 
     public static List<Text> fromNbtLegacy(ListNBT legacy) {
         List<Text> list = Lists.newArrayList();
-        for (int i = 0; i < legacy.func_74745_c(); i++) {
+        for (int i = 0; i < legacy.tagCount(); i++) {
             list.add(SpongeTexts.fromLegacy(legacy.getString(i)));
         }
         return list;
@@ -157,7 +157,7 @@ public final class SpongeTexts {
     public static ListNBT asLegacy(List<Text> list) {
         final ListNBT legacy = new ListNBT();
         for (Text line : list) {
-            legacy.func_74742_a(new StringNBT(toLegacy(line)));
+            legacy.appendTag(new StringNBT(toLegacy(line)));
         }
         return legacy;
     }

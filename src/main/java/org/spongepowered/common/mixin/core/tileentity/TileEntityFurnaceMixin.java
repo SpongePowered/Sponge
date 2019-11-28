@@ -83,10 +83,10 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
 
     private SlotProvider impl$generateSlotProvider() {
         return new SlotCollection.Builder().add(InputSlotAdapter.class, InputSlotLensImpl::new)
-                .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> FurnaceTileEntity.func_145954_b((ItemStack) s) || isBucket(
+                .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> FurnaceTileEntity.isItemFuel((ItemStack) s) || isBucket(
                         (ItemStack) s), t -> {
                     final ItemStack nmsStack = (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1);
-                    return FurnaceTileEntity.func_145954_b(nmsStack) || isBucket(nmsStack);
+                    return FurnaceTileEntity.isItemFuel(nmsStack) || isBucket(nmsStack);
                 }))
                 // TODO represent the filtering in the API somehow
                 .add(OutputSlotAdapter.class, (i) -> new OutputSlotLensImpl(i, (s) -> true, (t) -> true))
@@ -99,7 +99,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
 
     @Override
     public void bridge$setCustomDisplayName(final String customName) {
-        ((FurnaceTileEntity) (Object) this).func_145951_a(customName);
+        ((FurnaceTileEntity) (Object) this).setCustomInventoryName(customName);
     }
 
     // Shrink Fuel
@@ -232,7 +232,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
      */
     @Surrogate
     private void impl$afterSmeltItem(final CallbackInfo ci, final ItemStack outputStack) {
-        impl$callSmeltFinish(FurnaceRecipes.func_77602_a().func_151395_a(this.furnaceItemStacks.get(0)));
+        impl$callSmeltFinish(FurnaceRecipes.instance().getSmeltingResult(this.furnaceItemStacks.get(0)));
     }
 
     private void impl$callSmeltFinish(final ItemStack result) {

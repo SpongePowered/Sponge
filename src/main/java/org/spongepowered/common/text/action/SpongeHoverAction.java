@@ -66,7 +66,7 @@ public class SpongeHoverAction {
                 nbt.putString("id", entity.getUniqueId().toString());
 
                 if (entity.getType().isPresent()) {
-                    nbt.putString("type", EntityList.func_191306_a(((SpongeEntityType) entity.getType().get()).entityClass).toString());
+                    nbt.putString("type", EntityList.getKey(((SpongeEntityType) entity.getType().get()).entityClass).toString());
                 }
 
                 nbt.putString("name", entity.getName());

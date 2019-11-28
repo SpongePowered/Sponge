@@ -309,8 +309,8 @@ public final class PacketPhase {
         this.packetTranslationMap.put(CPlayerTryUseItemOnBlockPacket.class, packet -> {
             // Note that CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
             final CPlayerTryUseItemOnBlockPacket blockPlace = (CPlayerTryUseItemOnBlockPacket) packet;
-            final BlockPos blockPos = blockPlace.func_187023_a();
-            final Direction front = blockPlace.func_187024_b();
+            final BlockPos blockPos = blockPlace.getPos();
+            final Direction front = blockPlace.getDirection();
             final MinecraftServer server = SpongeImpl.getServer();
             if (blockPos.getY() < server.getBuildLimit() - 1 || front != Direction.UP && blockPos.getY() < server.getBuildLimit()) {
                 return PacketPhase.General.PLACE_BLOCK;

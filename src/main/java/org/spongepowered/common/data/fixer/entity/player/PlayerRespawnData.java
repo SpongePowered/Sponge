@@ -38,12 +38,12 @@ import java.util.UUID;
 public class PlayerRespawnData implements IFixableData {
 
     @Override
-    public int func_188216_a() {
+    public int getFixVersion() {
         return Constants.Sponge.PlayerData.RESPAWN_DATA_1_9_VERSION;
     }
 
     @Override
-    public CompoundNBT func_188217_a(CompoundNBT compound) {
+    public CompoundNBT fixTagCompound(CompoundNBT compound) {
         final Map<UUID, RespawnLocation> spawnLocations = Maps.newHashMap();
 
         if (compound.contains(Constants.Sponge.User.USER_SPAWN_X, Constants.NBT.TAG_ANY_NUMERIC)
@@ -59,7 +59,7 @@ public class PlayerRespawnData implements IFixableData {
         ListNBT spawnlist = compound.getList(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
         // This is legacy forge versions, not sure how forge is going to be saving it from now on, but
         // we can at least start moving all of this to our own compound and overwrite as necessary
-        for (int i = 0; i < spawnlist.func_74745_c(); i++) {
+        for (int i = 0; i < spawnlist.tagCount(); i++) {
             CompoundNBT spawndata = spawnlist.getCompound(i);
 //            UUID uuid = WorldPropertyRegistryModule.dimIdToUuid(spawndata.getInteger(NbtDataUtil.USER_SPAWN_DIM));
 //            if (uuid != null) {

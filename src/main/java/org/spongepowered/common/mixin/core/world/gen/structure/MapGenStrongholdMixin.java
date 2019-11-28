@@ -39,8 +39,8 @@ public abstract class MapGenStrongholdMixin extends MapGenStructureMixin {
     @Inject(method = "getNearestStructurePos", at = @At("HEAD"))
     private void onGetNearestStructurePos(final World worldIn, final BlockPos pos, final boolean findUnexplored,
         final CallbackInfoReturnable<BlockPos> ci) {
-        if (this.field_75039_c == null) {
-            this.field_75039_c = worldIn;
+        if (this.world == null) {
+            this.world = worldIn;
         }
     }
 }

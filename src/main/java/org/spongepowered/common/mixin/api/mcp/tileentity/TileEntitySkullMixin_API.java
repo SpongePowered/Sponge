@@ -46,13 +46,13 @@ public abstract class TileEntitySkullMixin_API extends TileEntityMixin_API imple
 
     @Override
     public SkullData getSkullData() {
-        return new SpongeSkullData(SkullUtils.getSkullType(((SkullTileEntity) (Object) this).func_145904_a()));
+        return new SpongeSkullData(SkullUtils.getSkullType(((SkullTileEntity) (Object) this).getSkullType()));
     }
 
     @Override
     public Value<SkullType> skullType() {
         return new SpongeValue<>(Keys.SKULL_TYPE, Constants.TileEntity.Skull.DEFAULT_TYPE,
-            SkullUtils.getSkullType(((SkullTileEntity) (Object) this).func_145904_a()));
+            SkullUtils.getSkullType(((SkullTileEntity) (Object) this).getSkullType()));
     }
 
     @Override

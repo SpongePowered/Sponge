@@ -70,7 +70,7 @@ public abstract class WorldGenMinableMixin_API extends Feature implements Ore {
         for (int i = 0; i < n; i++) {
             final BlockPos pos = position.add(random.nextInt(size.getX()), this.api$height.getFlooredAmount(random), random.nextInt(size.getX()));
             this.numberOfBlocks = this.api$size.getFlooredAmount(random);
-            func_180709_b(world, random, pos);
+            generate(world, random, pos);
         }
     }
 

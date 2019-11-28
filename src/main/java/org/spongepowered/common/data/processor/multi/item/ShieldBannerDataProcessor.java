@@ -74,12 +74,12 @@ public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerD
             for (final PatternLayer layer : patternLayers) {
                 final CompoundNBT compound = new CompoundNBT();
                 compound.putString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).getHashname());
-                compound.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).func_176767_b());
-                patterns.func_74742_a(compound);
+                compound.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).getDyeDamage());
+                patterns.appendTag(compound);
             }
-            blockEntity.func_74782_a(Constants.TileEntity.Banner.BANNER_PATTERNS, patterns);
+            blockEntity.setTag(Constants.TileEntity.Banner.BANNER_PATTERNS, patterns);
         }
-        blockEntity.putInt(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.item.DyeColor) (Object) baseColor).func_176767_b());
+        blockEntity.putInt(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.item.DyeColor) (Object) baseColor).getDyeDamage());
         return true;
     }
 

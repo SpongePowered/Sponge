@@ -56,7 +56,7 @@ public class EntityVillager_EmeraldForItemsMixin_API implements TradeOfferGenera
         int buyingCount = 1;
 
         if (this.price != null) {
-            buyingCount = this.price.func_179412_a(random);
+            buyingCount = this.price.getPrice(random);
         }
 
         final ItemStack buyingItem = new ItemStack(this.buyingItem, buyingCount, 0);

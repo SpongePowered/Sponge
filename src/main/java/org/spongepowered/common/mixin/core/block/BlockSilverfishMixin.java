@@ -57,7 +57,7 @@ public abstract class BlockSilverfishMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDisguisedBlockData) {
             final SilverfishBlock.EnumType disguisedBlockType = (SilverfishBlock.EnumType) ((ImmutableDisguisedBlockData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(SilverfishBlock.field_176378_a, disguisedBlockType));
+            return Optional.of((BlockState) blockState.withProperty(SilverfishBlock.VARIANT, disguisedBlockType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -66,12 +66,12 @@ public abstract class BlockSilverfishMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DISGUISED_BLOCK_TYPE)) {
             final SilverfishBlock.EnumType disguisedBlockType = (SilverfishBlock.EnumType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(SilverfishBlock.field_176378_a, disguisedBlockType));
+            return Optional.of((BlockState) blockState.withProperty(SilverfishBlock.VARIANT, disguisedBlockType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableDisguisedBlockData impl$getSilverfishTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisguisedBlockData.class, (DisguisedBlockType) blockState.get(SilverfishBlock.field_176378_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisguisedBlockData.class, (DisguisedBlockType) blockState.get(SilverfishBlock.VARIANT));
     }
 }

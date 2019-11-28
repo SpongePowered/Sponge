@@ -128,20 +128,20 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
 
         while (iterator.hasNext()) {
             final GoalSelector.EntityAITaskEntry entityaitaskentry = (GoalSelector.EntityAITaskEntry)iterator.next();
-            final net.minecraft.entity.ai.goal.Goal otherAiBase = entityaitaskentry.field_75733_a;
+            final net.minecraft.entity.ai.goal.Goal otherAiBase = entityaitaskentry.action;
 
             // Sponge start
             if (otherAiBase.equals(aiBase)) {
                 AITaskEvent.Remove event = null;
                 if (ShouldFire.A_I_TASK_EVENT_REMOVE && this.owner != null && !((EntityBridge) this.owner).bridge$isConstructing()) {
                     event = SpongeEventFactory.createAITaskEventRemove(Sponge.getCauseStackManager().getCurrentCause(),
-                            (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.field_75731_b);
+                            (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
                     SpongeImpl.postEvent(event);
                 }
                 if (event == null || !event.isCancelled()) {
 
-                    if (entityaitaskentry.field_188524_c) {
-                        entityaitaskentry.field_188524_c = false;
+                    if (entityaitaskentry.using) {
+                        entityaitaskentry.using = false;
                         otherAiBase.resetTask();
                         this.executingTaskEntries.remove(entityaitaskentry);
                     }
@@ -165,7 +165,7 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     private boolean areTasksCompatible(final GoalSelector.EntityAITaskEntry taskEntry1, final GoalSelector.EntityAITaskEntry taskEntry2) {
-        return (((AITask) taskEntry2.field_75733_a).canRunConcurrentWith((AITask) taskEntry1.field_75733_a));
+        return (((AITask) taskEntry2.action).canRunConcurrentWith((AITask) taskEntry1.action));
     }
 
     @Override

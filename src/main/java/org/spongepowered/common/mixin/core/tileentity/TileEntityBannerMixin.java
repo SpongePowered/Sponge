@@ -78,7 +78,7 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
     private void impl$markDirtyAndUpdate() {
         this.bridge$markDirty();
         if (this.world != null && !this.world.isRemote) {
-            ((ServerWorld) this.world).func_184164_w().func_180244_a(this.getPos());
+            ((ServerWorld) this.world).getPlayerChunkMap().markBlockForUpdate(this.getPos());
         }
     }
 
@@ -86,13 +86,13 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
         this.impl$patternLayers.clear();
         if (this.patterns != null) {
             final SpongeGameRegistry registry = SpongeImpl.getRegistry();
-            for (int i = 0; i < this.patterns.func_74745_c(); i++) {
+            for (int i = 0; i < this.patterns.tagCount(); i++) {
                 final CompoundNBT tagCompound = this.patterns.getCompound(i);
                 final String patternId = tagCompound.getString(Constants.TileEntity.Banner.BANNER_PATTERN_ID);
                 final int patternColor = tagCompound.getInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR);
                 this.impl$patternLayers.add(new SpongePatternLayer(
                     registry.getType(BannerPatternShape.class, patternId).get(),
-                    registry.getType(DyeColor.class, net.minecraft.item.DyeColor.func_176766_a(patternColor).getName()).get()));
+                    registry.getType(DyeColor.class, net.minecraft.item.DyeColor.byDyeDamage(patternColor).getName()).get()));
             }
         }
         this.impl$markDirtyAndUpdate();
@@ -111,8 +111,8 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
         for (final PatternLayer layer : this.impl$patternLayers) {
             final CompoundNBT compound = new CompoundNBT();
             compound.putString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, layer.getShape().getName());
-            compound.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).func_176767_b());
-            this.patterns.func_74742_a(compound);
+            compound.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).getDyeDamage());
+            this.patterns.appendTag(compound);
         }
         impl$markDirtyAndUpdate();
     }

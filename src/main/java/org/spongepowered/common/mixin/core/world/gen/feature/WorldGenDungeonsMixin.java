@@ -60,7 +60,7 @@ public abstract class WorldGenDungeonsMixin extends WorldGeneratorMixin {
         }
 
         // Just use the given mobName
-        logic.func_190894_a(mobName);
+        logic.setEntityId(mobName);
     }
 
     @Override

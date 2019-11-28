@@ -50,14 +50,14 @@ public abstract class TileEntityJukeboxMixin_API extends TileEntityMixin_API imp
     @Override
     public void playRecord() {
         if (!getRecord().isEmpty()) {
-            this.world.func_180498_a(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, Item.getIdFromItem(getRecord().getItem()));
+            this.world.playEvent(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, Item.getIdFromItem(getRecord().getItem()));
         }
     }
 
     @Override
     public void stopRecord() {
-        this.world.func_175718_b(Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, 0);
-        this.world.func_184149_a(this.pos, null);
+        this.world.playEvent(Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, 0);
+        this.world.playRecord(this.pos, null);
     }
 
     @SuppressWarnings("deprecation")
@@ -67,7 +67,7 @@ public abstract class TileEntityJukeboxMixin_API extends TileEntityMixin_API imp
         if (block.getBlock() == Blocks.JUKEBOX) {
             // TODO - Mixin 0.8 accessors
             ((BlockJukeboxBridge) block.getBlock()).accessor$dropRecordItem(this.world, this.pos, block);
-            this.world.setBlockState(this.pos, block.func_177226_a(JukeboxBlock.HAS_RECORD, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
+            this.world.setBlockState(this.pos, block.withProperty(JukeboxBlock.HAS_RECORD, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }
 
@@ -81,7 +81,7 @@ public abstract class TileEntityJukeboxMixin_API extends TileEntityMixin_API imp
         if (block.getBlock() == Blocks.JUKEBOX) {
             // Don't use BlockJukebox#insertRecord - it looses item data
             this.setRecord(itemStack);
-            this.world.setBlockState(this.pos, block.func_177226_a(JukeboxBlock.HAS_RECORD, true), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
+            this.world.setBlockState(this.pos, block.withProperty(JukeboxBlock.HAS_RECORD, true), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }
 

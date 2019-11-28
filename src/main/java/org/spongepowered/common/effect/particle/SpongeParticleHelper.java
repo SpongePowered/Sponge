@@ -96,19 +96,19 @@ public final class SpongeParticleHelper {
     private static int getBlockState(final SpongeParticleEffect effect, final Optional<BlockState> defaultBlockState) {
         final Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
         if (blockState.isPresent()) {
-            return Block.func_176210_f((net.minecraft.block.BlockState) blockState.get());
+            return Block.getStateId((net.minecraft.block.BlockState) blockState.get());
         }
         final Optional<ItemStackSnapshot> optSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
         if (optSnapshot.isPresent()) {
             final ItemStackSnapshot snapshot = optSnapshot.get();
             final Optional<BlockType> blockType = snapshot.getType().getBlock();
             if (blockType.isPresent()) {
-                return Block.func_176210_f(((Block) blockType.get()).func_176203_a(
+                return Block.getStateId(((Block) blockType.get()).getStateFromMeta(
                         ((SpongeItemStackSnapshot) snapshot).getDamageValue()));
             }
             return 0;
         }
-        return Block.func_176210_f((net.minecraft.block.BlockState) defaultBlockState.get());
+        return Block.getStateId((net.minecraft.block.BlockState) defaultBlockState.get());
     }
 
     private static int getDirectionData(Direction direction) {
@@ -149,7 +149,7 @@ public final class SpongeParticleHelper {
                 if (effects.isEmpty()) {
                     return EmptyCachedPacket.INSTANCE;
                 }
-                final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.field_151152_bP);
+                final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.FIREWORKS);
                 FireworkUtils.setFireworkEffects(itemStack, effects);
                 final SEntityMetadataPacket packetEntityMetadata = new SEntityMetadataPacket();
                 ((SPacketEntityMetadataAccessor) packetEntityMetadata).accessor$setEntityId(CachedFireworkPacket.FIREWORK_ROCKET_ID);
@@ -163,10 +163,10 @@ public final class SpongeParticleHelper {
                 return new CachedEffectPacket(2005, quantity, false);
             } else if (type == ParticleTypes.SPLASH_POTION) {
                 final Effect potion = (Effect) effect.getOptionOrDefault(ParticleOptions.POTION_EFFECT_TYPE).get();
-                for (final Potion potionType : Potion.field_185176_a) {
+                for (final Potion potionType : Potion.REGISTRY) {
                     for (final net.minecraft.potion.EffectInstance potionEffect : potionType.getEffects()) {
                         if (potionEffect.getPotion() == potion) {
-                            return new CachedEffectPacket(2002, Potion.field_185176_a.getId(potionType), false);
+                            return new CachedEffectPacket(2002, Potion.REGISTRY.getId(potionType), false);
                         }
                     }
                 }
@@ -225,7 +225,7 @@ public final class SpongeParticleHelper {
                     final Optional<ItemType> optItemType = blockState.getType().getItem();
                     if (optItemType.isPresent()) {
                         extra = new int[] { Item.getIdFromItem((Item) optItemType.get()),
-                                ((Block) blockState.getType()).func_176201_c((net.minecraft.block.BlockState) blockState) };
+                                ((Block) blockState.getType()).getMetaFromState((net.minecraft.block.BlockState) blockState) };
                     } else {
                         return EmptyCachedPacket.INSTANCE;
                     }

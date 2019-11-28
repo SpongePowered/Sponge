@@ -57,7 +57,7 @@ public abstract class BlockStandingSignMixin extends BlockSignMixin {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
             final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.func_177226_a(StandingSignBlock.ROTATION, intDirection));
+            return Optional.of((BlockState) blockState.withProperty(StandingSignBlock.ROTATION, intDirection));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -67,7 +67,7 @@ public abstract class BlockStandingSignMixin extends BlockSignMixin {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
             final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.func_177226_a(StandingSignBlock.ROTATION, intDirection));
+            return Optional.of((BlockState) blockState.withProperty(StandingSignBlock.ROTATION, intDirection));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

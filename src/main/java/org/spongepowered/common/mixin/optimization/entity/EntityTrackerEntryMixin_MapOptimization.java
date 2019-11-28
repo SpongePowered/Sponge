@@ -60,7 +60,7 @@ public abstract class EntityTrackerEntryMixin_MapOptimization {
             ordinal = 0))
     private Item mapOptimization$onGetItem(final ItemStack itemStack) {
         if (itemStack.getItem() instanceof FilledMapItem) {
-            ((OptimizedMapDataBridge) ((FilledMapItem) itemStack.getItem()).func_77873_a(itemStack, this.trackedEntity.world)).mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) this.trackedEntity);
+            ((OptimizedMapDataBridge) ((FilledMapItem) itemStack.getItem()).getMapData(itemStack, this.trackedEntity.world)).mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) this.trackedEntity);
         }
         return null;
     }

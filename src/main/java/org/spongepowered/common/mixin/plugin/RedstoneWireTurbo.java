@@ -343,10 +343,10 @@ public class RedstoneWireTurbo {
         // others are processed internally by the breadth first search
         // algorithm.  To preserve this game behavior, this check must
         // be replicated here.
-        if (!this.wire.func_176196_c(worldIn, pos)) {
+        if (!this.wire.canPlaceBlockAt(worldIn, pos)) {
             // Pop off the redstone dust
-            this.wire.func_176226_b(worldIn, pos, oldState, 0);
-            worldIn.func_175698_g(pos);
+            this.wire.dropBlockAsItem(worldIn, pos, oldState, 0);
+            worldIn.setBlockToAir(pos);
             
             // Mark this position as not being redstone wire
             upd1.type = UpdateNode.Type.OTHER;
@@ -887,7 +887,7 @@ public class RedstoneWireTurbo {
             // position directly above the node being calculated is always
             // at index 1.
             UpdateNode center_up = upd.neighbor_nodes[1];
-            boolean center_up_is_cube = center_up.currentState.func_185915_l();
+            boolean center_up_is_cube = center_up.currentState.isNormalCube();
 
             for (int m=0; m<4; m++) {
                 // Get the neighbor array index of each of the four cardinal
@@ -901,7 +901,7 @@ public class RedstoneWireTurbo {
 
                 // Also check the positions above and below the cardinal
                 // neighbors
-                boolean neighbor_is_cube = neighbor.currentState.func_185915_l();
+                boolean neighbor_is_cube = neighbor.currentState.isNormalCube();
                 if (!neighbor_is_cube) {
                     UpdateNode neighbor_down = upd.neighbor_nodes[rs_neighbors_dn[m]];
                     l = getMaxCurrentStrength(neighbor_down, l);
@@ -927,7 +927,7 @@ public class RedstoneWireTurbo {
             // and set it in the world.  
             // Possible optimization:  Don't commit state changes to the world until they
             // need to be known by some nearby non-redstone-wire block.
-            state = state.func_177226_a(RedstoneWireBlock.POWER, Integer.valueOf(j));
+            state = state.withProperty(RedstoneWireBlock.POWER, Integer.valueOf(j));
             worldIn.setBlockState(upd.self, state, 2);
         }
 

@@ -58,8 +58,8 @@ public abstract class WorldGenReedMixin_API extends Feature implements Reed {
                 min.getZ());
         final int x = random.nextInt(size.getX());
         final int z = random.nextInt(size.getZ());
-        position = world.func_175672_r(position.add(x, 0, z));
-        func_180709_b(world, random, position);
+        position = world.getTopSolidOrLiquidBlock(position.add(x, 0, z));
+        generate(world, random, position);
     }
 
     @Override

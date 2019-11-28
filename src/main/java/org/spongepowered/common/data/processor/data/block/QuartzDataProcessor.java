@@ -44,12 +44,12 @@ public class QuartzDataProcessor extends AbstractCatalogDataProcessor<QuartzType
 
     @Override
     protected int setToMeta(QuartzType value) {
-        return ((BlockQuartz.EnumType) (Object) value).func_176796_a();
+        return ((BlockQuartz.EnumType) (Object) value).getMetadata();
     }
 
     @Override
     protected QuartzType getFromMeta(int meta) {
-        return (QuartzType) (Object) BlockQuartz.EnumType.func_176794_a(meta);
+        return (QuartzType) (Object) BlockQuartz.EnumType.byMetadata(meta);
     }
 
     @Override

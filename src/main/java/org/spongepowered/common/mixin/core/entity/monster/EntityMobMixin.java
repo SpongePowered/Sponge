@@ -162,9 +162,9 @@ public abstract class EntityMobMixin extends EntityLivingMixin {
             boolean passes; // Sponge
             if (this.world.isThundering()) {
                 int j = this.world.getSkylightSubtracted();;
-                this.world.func_175692_b(10);
+                this.world.setSkylightSubtracted(10);
                 passes = !((WorldServerBridge) this.world).bridge$isLightLevel(chunk, blockpos, this.rand.nextInt(9));
-                this.world.func_175692_b(j);
+                this.world.setSkylightSubtracted(j);
             } else { 
                 passes = !((WorldServerBridge) this.world).bridge$isLightLevel(chunk, blockpos, this.rand.nextInt(9));
             }

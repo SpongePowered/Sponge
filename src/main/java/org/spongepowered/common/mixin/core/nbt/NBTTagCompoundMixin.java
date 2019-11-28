@@ -98,7 +98,7 @@ public abstract class NBTTagCompoundMixin extends NBTBase {
                                          + "possible bugs in any mods present. Please report this to SpongePowered and/or the relative mod\n"
                                          + "authors for the offending compound data!", exception);
         } else {
-            compound.func_74782_a(string, base);
+            compound.setTag(string, base);
         }
     }
 

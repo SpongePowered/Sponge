@@ -172,7 +172,7 @@ public final class NetworkUtil {
 
         if (actualDimensionId != playerIn.dimension) {
             SpongeImpl.getLogger().warn("Player [{}] has attempted to login to unloaded world [{}]. This is not safe so we have moved them to "
-                                        + "the default world's spawn point.", playerIn.func_70005_c_(), playerIn.dimension);
+                                        + "the default world's spawn point.", playerIn.getName(), playerIn.dimension);
             if (!firstJoined.isPresent()) {
                 spawnPos = SpongeImplHooks.getRandomizedSpawnPoint(worldServer);
             } else {
@@ -183,7 +183,7 @@ public final class NetworkUtil {
         }
 
         // Sponge start - fire login event
-        @Nullable final String kickReason = playerList.func_148542_a(netManager.getRemoteAddress(), gameprofile);
+        @Nullable final String kickReason = playerList.allowUserToConnect(netManager.getRemoteAddress(), gameprofile);
         final Text disconnectMessage;
         if (kickReason != null) {
             disconnectMessage = SpongeTexts.fromLegacy(kickReason);
@@ -217,7 +217,7 @@ public final class NetworkUtil {
                 }
 
                 try {
-                    ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("Disconnecting " + (gameprofile != null ? gameprofile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.func_150260_c())));
+                    ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("Disconnecting " + (gameprofile != null ? gameprofile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
                     netManager.sendPacket(new SDisconnectPacket(reason));
                     netManager.closeChannel(reason);
                 } catch (Exception exception) {
@@ -241,7 +241,7 @@ public final class NetworkUtil {
         playerIn.interactionManager.setWorld((ServerWorld) playerIn.world);
         playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
         // make sure the chunk is loaded for login
-        worldServer.getChunkProvider().func_186028_c(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
+        worldServer.getChunkProvider().loadChunk(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
         // Sponge end
 
         String s1 = "local";
@@ -270,7 +270,7 @@ public final class NetworkUtil {
 
         handler.sendPacket(new SJoinGamePacket(playerIn.getEntityId(), playerIn.interactionManager.getGameType(), worldinfo
                 .isHardcore(), dimensionId, worldServer.getDifficulty(), playerList.getMaxPlayers(), worldinfo
-                .getGenerator(), worldServer.getGameRules().func_82766_b("reducedDebugInfo")));
+                .getGenerator(), worldServer.getGameRules().getBoolean("reducedDebugInfo")));
         handler.sendPacket(new SCustomPayloadPlayPacket("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(playerList
                 .getServer().getServerModName())));
         handler.sendPacket(new SServerDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
@@ -283,10 +283,10 @@ public final class NetworkUtil {
         ((PlayerListAccessor) playerList).accessor$getPlayerListServer().refreshStatusNextTick();
 
         handler.setPlayerLocation(x, y, z, yaw, pitch);
-        playerList.func_72377_c(playerIn);
+        playerList.playerLoggedIn(playerIn);
 
         // Sponge start - add world name to message
-        ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.func_70005_c_(), s1, playerIn.getEntityId(),
+        ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.getName(), s1, playerIn.getEntityId(),
             worldServer.getWorldInfo().getWorldName(), ((DimensionType) (Object) worldServer.dimension.getType()).getId(),
             ((WorldServerBridge) worldServer).bridge$getDimensionId(), playerIn.posX, playerIn.posY, playerIn.posZ);
         // Sponge end
@@ -315,7 +315,7 @@ public final class NetworkUtil {
         if (nbttagcompound != null) {
             if (nbttagcompound.contains("RootVehicle", 10)) {
                 final CompoundNBT nbttagcompound1 = nbttagcompound.getCompound("RootVehicle");
-                final Entity entity2 = AnvilChunkLoader.func_186051_a(nbttagcompound1.getCompound("Entity"), worldServer, true);
+                final Entity entity2 = AnvilChunkLoader.readWorldEntity(nbttagcompound1.getCompound("Entity"), worldServer, true);
 
                 if (entity2 != null) {
                     final UUID uuid = nbttagcompound1.getUniqueId("Attach");
@@ -333,15 +333,15 @@ public final class NetworkUtil {
 
                     if (!playerIn.isPassenger()) {
                         ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().warn("Couldn\'t reattach entity to player");
-                        worldServer.func_72973_f(entity2);
+                        worldServer.removeEntityDangerously(entity2);
 
                         for (final Entity entity3 : entity2.getRecursivePassengers()) {
-                            worldServer.func_72973_f(entity3);
+                            worldServer.removeEntityDangerously(entity3);
                         }
                     }
                 }
             } else if (nbttagcompound.contains("Riding", 10)) {
-                final Entity entity1 = AnvilChunkLoader.func_186051_a(nbttagcompound.getCompound("Riding"), worldServer, true);
+                final Entity entity1 = AnvilChunkLoader.readWorldEntity(nbttagcompound.getCompound("Riding"), worldServer, true);
 
                 if (entity1 != null) {
                     playerIn.startRiding(entity1, true);
@@ -353,7 +353,7 @@ public final class NetworkUtil {
 
         final TranslationTextComponent chatcomponenttranslation;
 
-        if (!playerIn.func_70005_c_().equalsIgnoreCase(s))
+        if (!playerIn.getName().equalsIgnoreCase(s))
         {
             chatcomponenttranslation = new TranslationTextComponent("multiplayer.player.joined.renamed", playerIn.getDisplayName(), s);
         }

@@ -78,7 +78,7 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
 
         while (iterator.hasNext()) {
             final GoalSelector.EntityAITaskEntry entityaitaskentry = iterator.next();
-            final net.minecraft.entity.ai.goal.Goal otherAiBase = entityaitaskentry.field_75733_a;
+            final net.minecraft.entity.ai.goal.Goal otherAiBase = entityaitaskentry.action;
             final AITask<?> otherTask = (AITask<?>) otherAiBase;
 
             if (otherTask.getType().equals(type)) {
@@ -99,7 +99,7 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
         final ImmutableList.Builder<AITask<?>> tasks = ImmutableList.builder();
 
         for (final GoalSelector.EntityAITaskEntry entry : this.taskEntries) {
-            final AITask<?> task = (AITask<?>) entry.field_75733_a;
+            final AITask<?> task = (AITask<?>) entry.action;
 
             if (task.getType().equals(type)) {
                 tasks.add(task);
@@ -115,7 +115,7 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
         for (final Object o : this.taskEntries) {
             final GoalSelector.EntityAITaskEntry entry = (GoalSelector.EntityAITaskEntry) o;
 
-            tasks.add((AITask<?>) entry.field_75733_a);
+            tasks.add((AITask<?>) entry.action);
         }
         return tasks.build();
     }

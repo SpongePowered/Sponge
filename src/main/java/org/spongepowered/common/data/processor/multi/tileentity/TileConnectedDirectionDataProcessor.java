@@ -68,9 +68,9 @@ public class TileConnectedDirectionDataProcessor
 
     @Override
     protected boolean doesDataExist(ChestTileEntity chest) {
-        chest.func_145979_i();
-        return chest.field_145991_k != null || chest.field_145990_j != null
-                || chest.field_145992_i != null || chest.field_145988_l != null;
+        chest.checkForAdjacentChests();
+        return chest.adjacentChestXNeg != null || chest.adjacentChestXPos != null
+                || chest.adjacentChestZNeg != null || chest.adjacentChestZPos != null;
     }
 
     @Override
@@ -84,20 +84,20 @@ public class TileConnectedDirectionDataProcessor
         Set<Direction> directions = Sets.newHashSet();
         values.put(Keys.CONNECTED_DIRECTIONS, directions);
 
-        chest.func_145979_i();
-        if (chest.field_145992_i != null) {
+        chest.checkForAdjacentChests();
+        if (chest.adjacentChestZNeg != null) {
             values.put(Keys.CONNECTED_NORTH, true);
             directions.add(Direction.NORTH);
         }
-        if (chest.field_145990_j != null) {
+        if (chest.adjacentChestXPos != null) {
             values.put(Keys.CONNECTED_EAST, true);
             directions.add(Direction.EAST);
         }
-        if (chest.field_145988_l != null) {
+        if (chest.adjacentChestZPos != null) {
             values.put(Keys.CONNECTED_SOUTH, true);
             directions.add(Direction.SOUTH);
         }
-        if (chest.field_145991_k != null) {
+        if (chest.adjacentChestXNeg != null) {
             values.put(Keys.CONNECTED_WEST, true);
             directions.add(Direction.WEST);
         }

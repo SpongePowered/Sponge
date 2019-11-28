@@ -108,7 +108,7 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     public EntityHuman(final World worldIn) {
         super(worldIn);
         this.fakeProfile = new GameProfile(this.entityUniqueID, "");
-        this.func_70105_a(0.6F, 1.8F);
+        this.setSize(0.6F, 1.8F);
         this.setCanPickUpLoot(true);
     }
 
@@ -154,15 +154,15 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     @Override
-    public void func_96094_a(String name) {
+    public void setCustomNameTag(String name) {
         if (name.length() > 16) {
             // Vanilla restriction
             name = name.substring(0, 16);
         }
-        if (this.func_95999_t().equals(name)) {
+        if (this.getCustomNameTag().equals(name)) {
             return;
         }
-        super.func_96094_a(name);
+        super.setCustomNameTag(name);
         this.renameProfile(name);
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
@@ -179,8 +179,8 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     @Override
-    public void func_70014_b(final CompoundNBT tagCompound) {
-        super.func_70014_b(tagCompound);
+    public void writeEntityToNBT(final CompoundNBT tagCompound) {
+        super.writeEntityToNBT(tagCompound);
         final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
         if (this.skinUuid != null) {
             spongeData.putString("skinUuid", this.skinUuid.toString());
@@ -228,14 +228,14 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     public void onDeath(@Nullable final DamageSource cause) {
         super.onDeath(cause);
-        this.func_70105_a(0.2F, 0.2F);
+        this.setSize(0.2F, 0.2F);
         this.setPosition(this.posX, this.posY, this.posZ);
-        this.field_70181_x = 0.1D;
+        this.motionY = 0.1D;
         if (cause != null) {
-            this.field_70159_w = -MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
-            this.field_70179_y = -MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
+            this.motionX = -MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
+            this.motionZ = -MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
         } else {
-            this.field_70159_w = this.field_70179_y = 0.0D;
+            this.motionX = this.motionZ = 0.0D;
         }
     }
 
@@ -307,8 +307,8 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
             if (i > 0) {
                 entityIn.addVelocity(-MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F, 0.1D,
                         MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F);
-                this.field_70159_w *= 0.6D;
-                this.field_70179_y *= 0.6D;
+                this.motionX *= 0.6D;
+                this.motionZ *= 0.6D;
             }
 
             final int j = EnchantmentHelper.getFireAspectModifier(this);
@@ -508,7 +508,7 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
         // TODO Figure out how to API this out
         final ArrowEntity entitytippedarrow = new ArrowEntity(this.world, this);
         final double d0 = target.posX - this.posX;
-        final double d1 = target.getBoundingBox().minY + target.field_70131_O / 3.0F - entitytippedarrow.posY;
+        final double d1 = target.getBoundingBox().minY + target.height / 3.0F - entitytippedarrow.posY;
         final double d2 = target.posZ - this.posZ;
         final double d3 = MathHelper.sqrt(d0 * d0 + d2 * d2);
         entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.world.getDifficulty().getId() * 4);
@@ -536,7 +536,7 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     @Override
-    public void func_184724_a(final boolean var1) {
+    public void setSwingingArms(final boolean var1) {
         // TODO 1.12-pre2 Can we support this
     }
 }

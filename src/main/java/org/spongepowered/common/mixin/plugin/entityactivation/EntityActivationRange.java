@@ -225,7 +225,7 @@ public class EntityActivationRange {
             return;
         }
 
-        for (final PlayerEntity player : world.field_73010_i) {
+        for (final PlayerEntity player : world.playerEntities) {
 
             int maxRange = 0;
             for (final Integer range : maxActivationRanges.values()) {
@@ -363,7 +363,7 @@ public class EntityActivationRange {
             if (entity instanceof MobEntity && (((EntityLivingBaseAccessor) entity).accessor$getRevengeTarget() != null || ((MobEntity) entity).getAttackTarget() != null)) {
                 return true;
             }
-            if (entity instanceof VillagerEntity && ((VillagerEntity) entity).func_70941_o()) {
+            if (entity instanceof VillagerEntity && ((VillagerEntity) entity).isMating()) {
                 return true;
             }
             if (entity instanceof AnimalEntity) {

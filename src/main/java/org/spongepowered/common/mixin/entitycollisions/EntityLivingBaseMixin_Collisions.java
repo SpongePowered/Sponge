@@ -69,7 +69,7 @@ public abstract class EntityLivingBaseMixin_Collisions extends EntityMixin_Colli
     private int collisions$collideWithNearbyUseOurCache(final List<Entity> list) {
         for (final Entity entity: list) {
             // ignore players and entities with parts (ex. EnderDragon)
-            if (this.world.isRemote || entity == null || entity instanceof PlayerEntity || entity.func_70021_al() != null) {
+            if (this.world.isRemote || entity == null || entity instanceof PlayerEntity || entity.getParts() != null) {
                 continue;
             }
 

@@ -53,13 +53,13 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
 
     @Override
     protected boolean set(LivingEntity dataHolder, List<PotionEffect> value) {
-        dataHolder.func_70674_bp();
+        dataHolder.clearActivePotions();
         for (PotionEffect effect : value) {
             net.minecraft.potion.EffectInstance mcEffect =
                 new net.minecraft.potion.EffectInstance(((net.minecraft.potion.EffectInstance) effect).getPotion(), effect.getDuration(),
                     effect.getAmplifier(), effect.isAmbient(),
                     effect.getShowParticles());
-            dataHolder.func_70690_d(mcEffect);
+            dataHolder.addPotionEffect(mcEffect);
         }
         return true;
     }
@@ -101,7 +101,7 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
         }
         Optional<List<PotionEffect>> effects = getVal((LivingEntity) container);
         if (effects.isPresent()) {
-            ((LivingEntity) container).func_70674_bp();
+            ((LivingEntity) container).clearActivePotions();
             return DataTransactionResult.successRemove(constructImmutableValue(effects.get()));
         }
         return DataTransactionResult.successNoData();

@@ -74,7 +74,7 @@ public abstract class DyeableBlockMixin extends BlockMixin implements DyeableBlo
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDyeableData) {
             final DyeColor color = ((ImmutableDyeableData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(this.bridge$ColorProperty, (net.minecraft.item.DyeColor) (Object) color));
+            return Optional.of((BlockState) blockState.withProperty(this.bridge$ColorProperty, (net.minecraft.item.DyeColor) (Object) color));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -84,7 +84,7 @@ public abstract class DyeableBlockMixin extends BlockMixin implements DyeableBlo
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DYE_COLOR)) {
             final DyeColor color = (DyeColor) value;
-            return Optional.of((BlockState) blockState.func_177226_a(this.bridge$ColorProperty, (net.minecraft.item.DyeColor) (Object) color));
+            return Optional.of((BlockState) blockState.withProperty(this.bridge$ColorProperty, (net.minecraft.item.DyeColor) (Object) color));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

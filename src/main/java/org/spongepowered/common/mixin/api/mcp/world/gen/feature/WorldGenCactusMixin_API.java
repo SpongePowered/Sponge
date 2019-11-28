@@ -62,7 +62,7 @@ public abstract class WorldGenCactusMixin_API extends Feature implements Cactus 
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
-            func_180709_b(world, random, world.func_175672_r(chunkPos.add(x, 0, z)));
+            generate(world, random, world.getTopSolidOrLiquidBlock(chunkPos.add(x, 0, z)));
         }
     }
 

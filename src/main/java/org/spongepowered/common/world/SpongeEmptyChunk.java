@@ -51,36 +51,36 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public boolean func_76600_a(int x, int z) {
-        return x == this.field_76635_g && z == this.field_76647_h;
+    public boolean isAtLocation(int x, int z) {
+        return x == this.x && z == this.z;
     }
 
     @Override
-    public int func_76611_b(int x, int z) {
+    public int getHeightValue(int x, int z) {
         return 0;
     }
 
     @Override
-    public void func_76603_b() {
+    public void generateSkylightMap() {
     }
 
     @Override
-    public BlockState func_177435_g(BlockPos pos) {
+    public BlockState getBlockState(BlockPos pos) {
         return Blocks.AIR.getDefaultState();
     }
 
     @Override
-    public int func_177437_b(BlockPos pos) {
+    public int getBlockLightOpacity(BlockPos pos) {
         return 255;
     }
 
     @Override
-    public int func_177413_a(LightType p_177413_1_, BlockPos pos) {
+    public int getLightFor(LightType p_177413_1_, BlockPos pos) {
         return p_177413_1_.defaultLightValue;
     }
 
     @Override
-    public void func_177431_a(LightType p_177431_1_, BlockPos pos, int value) {
+    public void setLightFor(LightType p_177431_1_, BlockPos pos, int value) {
     }
 
     @Override
@@ -101,7 +101,7 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public boolean func_177444_d(BlockPos pos) {
+    public boolean canSeeSky(BlockPos pos) {
         return false;
     }
 
@@ -124,11 +124,11 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public void func_76631_c() {
+    public void onLoad() {
     }
 
     @Override
-    public void func_76623_d() {
+    public void onUnload() {
     }
 
     @Override
@@ -146,14 +146,14 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public boolean func_76601_a(boolean p_76601_1_) {
+    public boolean needsSaving(boolean p_76601_1_) {
         return false;
     }
 
     @Override
-    public Random func_76617_a(long seed) {
-        return new Random(this.getWorld().getSeed() + (long) (this.field_76635_g * this.field_76635_g * 4987142) + (long) (this.field_76635_g * 5947611)
-                + (long) (this.field_76647_h * this.field_76647_h) * 4392871L + (long) (this.field_76647_h * 389711) ^ seed);
+    public Random getRandomWithSeed(long seed) {
+        return new Random(this.getWorld().getSeed() + (long) (this.x * this.x * 4987142) + (long) (this.x * 5947611)
+                + (long) (this.z * this.z) * 4392871L + (long) (this.z * 389711) ^ seed);
     }
 
     @Override
@@ -170,8 +170,8 @@ public class SpongeEmptyChunk extends Chunk {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("empty", true)
-                .add("x", this.field_76635_g)
-                .add("z", this.field_76647_h)
+                .add("x", this.x)
+                .add("z", this.z)
                 .toString();
     }
 }

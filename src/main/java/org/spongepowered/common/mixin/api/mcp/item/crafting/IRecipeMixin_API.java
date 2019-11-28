@@ -81,7 +81,7 @@ public interface IRecipeMixin_API extends CraftingRecipe {
 
     @Override
     default String getId() {
-        return CraftingManager.field_193380_a.getKey(((IRecipe) this)).toString();
+        return CraftingManager.REGISTRY.getKey(((IRecipe) this)).toString();
     }
 
     @Override

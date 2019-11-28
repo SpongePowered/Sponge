@@ -92,8 +92,8 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         if (chunk.bridge$getTrackedShortPlayerPositions().size() > 0 || chunk.bridge$getTrackedIntPlayerPositions().size() > 0) {
             final CompoundNBT trackedNbt = new CompoundNBT();
             final ListNBT positions = new ListNBT();
-            trackedNbt.func_74782_a(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, positions);
-            compound.func_74782_a(Constants.Sponge.SPONGE_DATA, trackedNbt);
+            trackedNbt.setTag(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, positions);
+            compound.setTag(Constants.Sponge.SPONGE_DATA, trackedNbt);
 
             for (final Map.Entry<Short, PlayerTracker> mapEntry : chunk.bridge$getTrackedShortPlayerPositions().entrySet()) {
                 final Short pos = mapEntry.getKey();
@@ -103,7 +103,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                 valueNbt.putInt("owner", ownerUniqueIdIndex);
                 valueNbt.putInt("notifier", notifierUniqueIdIndex);
                 valueNbt.putShort("pos", pos);
-                positions.func_74742_a(valueNbt);
+                positions.appendTag(valueNbt);
             }
 
             for (final Map.Entry<Integer, PlayerTracker> mapEntry : chunk.bridge$getTrackedIntPlayerPositions().entrySet()) {
@@ -114,7 +114,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                 valueNbt.putInt("owner", ownerUniqueIdIndex);
                 valueNbt.putInt("notifier", notifierUniqueIdIndex);
                 valueNbt.putInt("ipos", pos);
-                positions.func_74742_a(valueNbt);
+                positions.appendTag(valueNbt);
             }
         }
     }
@@ -127,7 +127,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
             final Map<Short, PlayerTracker> trackedShortPlayerPositions = new HashMap<>();
             final ListNBT positions = compound.getCompound(Constants.Sponge.SPONGE_DATA).getList(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, 10);
             final ChunkBridge chunk = (ChunkBridge) chunkIn;
-            for (int i = 0; i < positions.func_74745_c(); i++) {
+            for (int i = 0; i < positions.tagCount(); i++) {
                 final CompoundNBT valueNbt = positions.getCompound(i);
                 final boolean isShortPos = valueNbt.contains("pos");
                 final PlayerTracker tracker = new PlayerTracker();
@@ -169,7 +169,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
     private static Entity impl$createEntityFromCompound(final CompoundNBT compound, final World world) {
         if ("Minecart".equals(compound.getString(Constants.Entity.ENTITY_TYPE_ID))) {
             compound.putString(Constants.Entity.ENTITY_TYPE_ID,
-                    AbstractMinecartEntity.Type.values()[compound.getInt(Constants.Entity.Minecart.MINECART_TYPE)].func_184954_b());
+                    AbstractMinecartEntity.Type.values()[compound.getInt(Constants.Entity.Minecart.MINECART_TYPE)].getName());
             compound.remove(Constants.Entity.Minecart.MINECART_TYPE);
         }
         final Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(compound.getString(Constants.Entity.ENTITY_TYPE_ID)));
@@ -192,7 +192,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
             if (event.isCancelled()) {
                 return null;
             }
-            return EntityList.func_75615_a(compound, world);
+            return EntityList.createEntityFromNBT(compound, world);
         }
     }
 
@@ -213,7 +213,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         }
         // Sponge end
 
-        return RegionFileCache.func_76549_c(this.chunkSaveLocation, x, z) != null;
+        return RegionFileCache.getChunkInputStream(this.chunkSaveLocation, x, z) != null;
     }
 
     /**
@@ -230,7 +230,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         }
         this.impl$queue.add(new QueuedChunk(pos, compound));
 
-        ThreadedFileIOBase.func_178779_a().func_75735_a((AnvilChunkLoader) (Object) this);
+        ThreadedFileIOBase.getThreadedIOInstance().queueIO((AnvilChunkLoader) (Object) this);
     }
 
     /**

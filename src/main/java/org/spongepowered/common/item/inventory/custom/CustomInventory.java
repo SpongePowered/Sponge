@@ -142,7 +142,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public Container func_174876_a(final PlayerInventory playerInventory, final PlayerEntity playerIn) {
+    public Container createContainer(final PlayerInventory playerInventory, final PlayerEntity playerIn) {
 
         // To be viewable the Inventory has to implement IInteractionObject and thus provide a Container
         // displayChest falls back to Chest for IInventory instance
@@ -166,7 +166,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public String func_174875_k() {
+    public String getGuiID() {
         final String key = AbstractInventoryProperty.getDefaultKey(GuiIdProperty.class).toString();
         final InventoryProperty<?, ?> property = this.properties.get(key);
         if (property instanceof GuiIdProperty) {
@@ -190,8 +190,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public String func_70005_c_() {
-        return this.inv.func_70005_c_();
+    public String getName() {
+        return this.inv.getName();
     }
 
     @Override
@@ -271,18 +271,18 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public int func_174887_a_(final int id) {
-        return this.inv.func_174887_a_(id);
+    public int getField(final int id) {
+        return this.inv.getField(id);
     }
 
     @Override
-    public void func_174885_b(final int id, final int value) {
-        this.inv.func_174885_b(id, value);
+    public void setField(final int id, final int value) {
+        this.inv.setField(id, value);
     }
 
     @Override
-    public int func_174890_g() {
-        return this.inv.func_174890_g();
+    public int getFieldCount() {
+        return this.inv.getFieldCount();
     }
 
     @Override

@@ -43,8 +43,8 @@ public abstract class GameRulesMixin implements GameRulesBridge {
     @Override
     public boolean bridge$removeGameRule(final String gameRule) {
         // Cannot remove default gamerule
-        if (Constants.Sponge.DEFAULT_GAME_RULES.func_82765_e(gameRule)) {
-            this.setOrCreateGameRule(gameRule, Constants.Sponge.DEFAULT_GAME_RULES.func_82767_a(gameRule));
+        if (Constants.Sponge.DEFAULT_GAME_RULES.hasRule(gameRule)) {
+            this.setOrCreateGameRule(gameRule, Constants.Sponge.DEFAULT_GAME_RULES.getString(gameRule));
             return true;
         }
 

@@ -44,12 +44,12 @@ public class BrickDataProcessor extends AbstractCatalogDataProcessor<BrickType, 
 
     @Override
     protected int setToMeta(BrickType value) {
-        return ((BlockStoneBrick.EnumType) (Object) value).func_176612_a();
+        return ((BlockStoneBrick.EnumType) (Object) value).getMetadata();
     }
 
     @Override
     protected BrickType getFromMeta(int meta) {
-        return (BrickType) (Object) BlockStoneBrick.EnumType.func_176613_a(meta);
+        return (BrickType) (Object) BlockStoneBrick.EnumType.byMetadata(meta);
     }
 
     @Override

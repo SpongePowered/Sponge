@@ -85,7 +85,7 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
     @Override
     protected boolean set(ItemStack itemStack, List<Text> value) {
         final ListNBT list =  SpongeTexts.asLegacy(value);
-        itemStack.getOrCreateChildTag(Constants.Item.ITEM_DISPLAY).func_74782_a(Constants.Item.ITEM_LORE, list); // setSubCompound
+        itemStack.getOrCreateChildTag(Constants.Item.ITEM_DISPLAY).setTag(Constants.Item.ITEM_LORE, list); // setSubCompound
         return true;
     }
 

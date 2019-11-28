@@ -55,13 +55,13 @@ public class MaxCookTimeValueProcessor extends AbstractSpongeValueProcessor<Furn
     protected boolean set(FurnaceTileEntity container, Integer value) {
         if(container.getStackInSlot(0).isEmpty()) return false; //Item cannot be null, the time depends on it
 
-        container.func_174885_b(3, value);
+        container.setField(3, value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(FurnaceTileEntity container) {
-        return Optional.of(container.getStackInSlot(0).isEmpty() ? 0 : container.func_174887_a_(3)); //Item cannot be null, the time depends on it
+        return Optional.of(container.getStackInSlot(0).isEmpty() ? 0 : container.getField(3)); //Item cannot be null, the time depends on it
     }
 
     @Override

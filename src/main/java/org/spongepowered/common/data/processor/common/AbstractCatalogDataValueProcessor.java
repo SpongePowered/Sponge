@@ -52,7 +52,7 @@ public abstract class AbstractCatalogDataValueProcessor<T extends CatalogType, V
 
     @Override
     protected boolean set(ItemStack container, T value) {
-        container.func_77964_b(this.setToMeta(value));
+        container.setItemDamage(this.setToMeta(value));
         return true;
     }
 

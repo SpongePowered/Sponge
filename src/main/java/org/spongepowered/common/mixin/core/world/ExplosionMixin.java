@@ -223,7 +223,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             final Entity entity = list.get(k2);
 
             if (!entity.isImmuneToExplosions()) {
-                final double d12 = entity.func_70011_f(this.x, this.y, this.z) / (double) f3;
+                final double d12 = entity.getDistance(this.x, this.y, this.z) / (double) f3;
 
                 if (d12 <= 1.0D) {
                     double d5 = entity.posX - this.x;
@@ -235,7 +235,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                         d5 = d5 / d13;
                         d7 = d7 / d13;
                         d9 = d9 / d13;
-                        final double d14 = (double) this.world.func_72842_a(vec3d, entity.getBoundingBox());
+                        final double d14 = (double) this.world.getBlockDensity(vec3d, entity.getBoundingBox());
                         final double d10 = (1.0D - d12) * d14;
                         entity.attackEntityFrom(
                                 DamageSource.causeExplosionDamage((net.minecraft.world.Explosion) (Object) this), (float) ((int) ((d10 * d10 + d10) / 2.0D * 7.0D * (double) f3 + 1.0D)));
@@ -245,9 +245,9 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             d11 = ProtectionEnchantment.getBlastDamageReduction((LivingEntity) entity, d10);
                         }
 
-                        entity.field_70159_w += d5 * d11;
-                        entity.field_70181_x += d7 * d11;
-                        entity.field_70179_y += d9 * d11;
+                        entity.motionX += d5 * d11;
+                        entity.motionY += d7 * d11;
+                        entity.motionZ += d9 * d11;
 
                         if (entity instanceof PlayerEntity) {
                             final PlayerEntity entityplayer = (PlayerEntity) entity;
@@ -280,19 +280,19 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             // to avoid spamming/lagging the client out when some ~idiot~ decides to explode
             // hundreds of explosions at once
             if (this.world instanceof ServerWorld) {
-                ((ServerWorld) this.world).func_175739_a(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
+                ((ServerWorld) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
             } else {
                 // Sponge End
-                this.world.func_175688_a(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
+                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
             } // Sponge - brackets.
         } else {
             // Sponge Start - Use WorldServer methods since we prune the explosion packets
             // to avoid spamming/lagging the client out when some ~idiot~ decides to explode
             // hundreds of explosions at once
             if (this.world instanceof ServerWorld) {
-                ((ServerWorld) this.world).func_175739_a(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
+                ((ServerWorld) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
             } else { // Sponge end
-                this.world.func_175688_a(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
+                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
             } // Sponge - brackets.
         }
         // Sponge Start - set up some variables for more fasts
@@ -321,8 +321,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                     d3 = d3 * d7;
                     d4 = d4 * d7;
                     d5 = d5 * d7;
-                    this.world.func_175688_a(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D, (d2 + this.z) / 2.0D, d3, d4, d5, new int[0]);
-                    this.world.func_175688_a(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5, new int[0]);
+                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D, (d2 + this.z) / 2.0D, d3, d4, d5, new int[0]);
+                    this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5, new int[0]);
                 }
 
                 if (iblockstate.getMaterial() != Material.AIR) {
@@ -334,7 +334,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                                 pos.setPos(blockpos);
                             }
                             // Sponge End
-                            block.func_180653_a(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.size, 0);
+                            block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.size, 0);
                         } // Sponge - brackets
                     }
 
@@ -357,7 +357,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
         if (this.causesFire) {
             for (final BlockPos blockpos1 : this.affectedBlockPositions) {
-                if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).func_185913_b() && this.random.nextInt(3) == 0) {
+                if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock() && this.random.nextInt(3) == 0) {
                     // Sponge Start - Track the block position being destroyed
                     try (final CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
                         if (pos != null) {

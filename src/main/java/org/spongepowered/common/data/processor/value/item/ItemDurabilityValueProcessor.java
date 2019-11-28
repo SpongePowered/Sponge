@@ -53,7 +53,7 @@ public class ItemDurabilityValueProcessor extends AbstractSpongeValueProcessor<I
 
     @Override
     public boolean set(ItemStack container, Integer value) {
-        container.func_77964_b(container.getMaxDamage() - value);
+        container.setItemDamage(container.getMaxDamage() - value);
         return true;
     }
 

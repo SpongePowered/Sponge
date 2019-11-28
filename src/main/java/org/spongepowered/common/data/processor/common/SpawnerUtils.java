@@ -77,7 +77,7 @@ public class SpawnerUtils {
     public static void setNextEntity(final AbstractSpawner logic, final WeightedSerializableObject<EntityArchetype> value) {
         final CompoundNBT compound = NbtTranslator.getInstance().translateData(value.get().getEntityData());
         if (!compound.contains(Constants.Entity.ENTITY_TYPE_ID)) {
-            final ResourceLocation key = EntityList.func_191306_a((Class<? extends Entity>) value.get().getType().getEntityClass());
+            final ResourceLocation key = EntityList.getKey((Class<? extends Entity>) value.get().getType().getEntityClass());
             compound.putString(Constants.Entity.ENTITY_TYPE_ID, key != null ? key.toString() : "");
         }
 
@@ -114,7 +114,7 @@ public class SpawnerUtils {
 
             final CompoundNBT compound = NbtTranslator.getInstance().translateData(object.get().getEntityData());
             if (!compound.contains(Constants.Entity.ENTITY_TYPE_ID)) {
-                final ResourceLocation key = EntityList.func_191306_a((Class<? extends Entity>) object.get().getType().getEntityClass());
+                final ResourceLocation key = EntityList.getKey((Class<? extends Entity>) object.get().getType().getEntityClass());
                 compound.putString(Constants.Entity.ENTITY_TYPE_ID, key != null ? key.toString() : "");
             }
 

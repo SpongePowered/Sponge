@@ -60,7 +60,7 @@ public class FlowerPotDataProcessor extends
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        flowerPot.func_190614_a(ItemStack.EMPTY);
+        flowerPot.setItemStack(ItemStack.EMPTY);
         flowerPot.markDirty();
         return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
     }
@@ -68,13 +68,13 @@ public class FlowerPotDataProcessor extends
     @Override
     protected boolean set(TileEntityFlowerPot flowerPot, ItemStackSnapshot stackSnapshot) {
         if (stackSnapshot == ItemStackSnapshot.NONE) {
-            flowerPot.func_190614_a(ItemStack.EMPTY);
+            flowerPot.setItemStack(ItemStack.EMPTY);
         } else {
             ItemStack stack = (ItemStack) stackSnapshot.createStack();
             if (!((BlockFlowerPotAccessor) Blocks.FLOWER_POT).accessor$canItemBePotted(stack)) {
                 return false;
             }
-            flowerPot.func_190614_a(stack);
+            flowerPot.setItemStack(stack);
         }
         flowerPot.markDirty();
         flowerPot.getWorld().notifyBlockUpdate(flowerPot.getPos(), flowerPot.getWorld().getBlockState(flowerPot.getPos()), flowerPot.getWorld()
@@ -84,10 +84,10 @@ public class FlowerPotDataProcessor extends
 
     @Override
     protected Optional<ItemStackSnapshot> getVal(TileEntityFlowerPot flowerPot) {
-        if (flowerPot.func_145965_a() == null) {
+        if (flowerPot.getFlowerPotItem() == null) {
             return Optional.empty();
         }
-        ItemStack stack = new ItemStack(flowerPot.func_145965_a(), 1, flowerPot.func_145966_b());
+        ItemStack stack = new ItemStack(flowerPot.getFlowerPotItem(), 1, flowerPot.getFlowerPotData());
         return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot());
     }
 

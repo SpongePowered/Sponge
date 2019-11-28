@@ -68,6 +68,6 @@ public abstract class TileEntityBrewingStandMixin extends TileEntityLockableMixi
 
     @Override
     public void bridge$setCustomDisplayName(final String customName) {
-        ((BrewingStandTileEntity) (Object) this).func_145937_a(customName);
+        ((BrewingStandTileEntity) (Object) this).setName(customName);
     }
 }

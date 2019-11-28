@@ -405,8 +405,8 @@ public class SpongeCommandFactory {
                     }
                     return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(((WorldServerBridge) worldserver).bridge$getDimensionId()), NEWLINE_TEXT,
                         key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), NEWLINE_TEXT,
-                        key("Active chunks: "), value(worldserver.getChunkProvider().func_189548_a().size()), NEWLINE_TEXT,
-                        key("Entities: "), value(worldserver.field_72996_f.size()), NEWLINE_TEXT,
+                        key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), NEWLINE_TEXT,
+                        key("Entities: "), value(worldserver.loadedEntityList.size()), NEWLINE_TEXT,
                         key("Tile Entities: "), value(worldserver.loadedTileEntityList.size()), NEWLINE_TEXT,
                         key("Removed Entities:"), value(((WorldAccessor) worldserver).accessor$getUnloadedEntityList().size()), NEWLINE_TEXT,
                         key("Removed Tile Entities: "), value(((WorldAccessor) worldserver).accessor$getTileEntitiesToBeRemoved()), NEWLINE_TEXT
@@ -534,19 +534,19 @@ public class SpongeCommandFactory {
                 }
                 final ServerPlayerEntity entityPlayerMP = (ServerPlayerEntity) (Player) src;
                 final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F);
-                if (rayTraceResult.field_72313_a != RayTraceResult.Type.BLOCK) {
+                if (rayTraceResult.typeOfHit != RayTraceResult.Type.BLOCK) {
                     src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,
                         "Failed to find a block! Please execute the command when looking at a block!"));
                     return CommandResult.empty();
                 }
                 final ServerWorld worldServer = (ServerWorld) entityPlayerMP.world;
-                final Chunk chunk = worldServer.getChunkAt(rayTraceResult.func_178782_a());
+                final Chunk chunk = worldServer.getChunkAt(rayTraceResult.getBlockPos());
                 final ChunkBridge mixinChunk = (ChunkBridge) chunk;
-                final net.minecraft.block.BlockState blockState = worldServer.getBlockState(rayTraceResult.func_178782_a());
+                final net.minecraft.block.BlockState blockState = worldServer.getBlockState(rayTraceResult.getBlockPos());
                 final BlockState spongeState = (BlockState) blockState;
                 src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Type: ", TextColors.BLUE, TextStyles.RESET, spongeState.getId()));
-                src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Owner: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.bridge$getBlockOwner(rayTraceResult.func_178782_a())));
-                src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Notifier: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.bridge$getBlockNotifier(rayTraceResult.func_178782_a())));
+                src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Owner: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.bridge$getBlockOwner(rayTraceResult.getBlockPos())));
+                src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Notifier: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.bridge$getBlockNotifier(rayTraceResult.getBlockPos())));
                 return CommandResult.success();
             })
             .build();
@@ -562,12 +562,12 @@ public class SpongeCommandFactory {
                 }
                 final ServerPlayerEntity entityPlayerMP = (ServerPlayerEntity) (Player) src;
                 final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F, true);
-                if (rayTraceResult.field_72313_a != RayTraceResult.Type.ENTITY) {
+                if (rayTraceResult.typeOfHit != RayTraceResult.Type.ENTITY) {
                     src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,
                         "Failed to find an entity! Please execute the command when looking at an entity!"));
                     return CommandResult.empty();
                 }
-                final Entity entityHit = rayTraceResult.field_72308_g;
+                final Entity entityHit = rayTraceResult.entityHit;
                 final EntityBridge mixinEntity = (EntityBridge) entityHit;
                 final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entityHit;
                 final Text.Builder builder = Text.builder();

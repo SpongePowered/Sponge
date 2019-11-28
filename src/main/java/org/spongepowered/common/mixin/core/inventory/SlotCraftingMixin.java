@@ -93,7 +93,7 @@ public abstract class SlotCraftingMixin extends Slot {
 
     @Inject(method = "onTake", at = @At("HEAD"))
     private void beforeTake(final PlayerEntity thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
-        this.impl$lastRecipe = ((CraftingRecipe) CraftingManager.func_192413_b(this.craftMatrix, thePlayer.world));
+        this.impl$lastRecipe = ((CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world));
         if (((ContainerBridge) thePlayer.openContainer).bridge$isShiftCrafting()) {
             ((ContainerBridge) thePlayer.openContainer).bridge$detectAndSendChanges(true);
             ((ContainerBridge) thePlayer.openContainer).bridge$setShiftCrafting(false);
@@ -118,7 +118,7 @@ public abstract class SlotCraftingMixin extends Slot {
         if (this.impl$lastRecipe == null) {
             return NonNullList.withSize(craftMatrix.getSizeInventory(), ItemStack.EMPTY);
         }
-        return CraftingManager.func_180303_b(craftMatrix, worldIn);
+        return CraftingManager.getRemainingItems(craftMatrix, worldIn);
     }
 
     /**
@@ -186,7 +186,7 @@ public abstract class SlotCraftingMixin extends Slot {
             last = previewTransactions.get(0);
         }
 
-        final CraftingRecipe newRecipe = (CraftingRecipe) CraftingManager.func_192413_b(this.craftMatrix, thePlayer.world);
+        final CraftingRecipe newRecipe = (CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world);
 
         SpongeCommonEventFactory.callCraftEventPre(thePlayer, craftingInventory, last, newRecipe, container, previewTransactions);
         previewTransactions.clear();

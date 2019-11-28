@@ -47,7 +47,7 @@ public final class ColorUtil {
             if (tagCompound == null || !tagCompound.contains(Constants.Item.Armor.ARMOR_COLOR_DISPLAY_TAG)) {
                 return Optional.empty();
             }
-            final int color = ((ArmorItem) item).func_82814_b(stack);
+            final int color = ((ArmorItem) item).getColor(stack);
             return color == -1 ? Optional.empty() : Optional.of(Color.ofRgb(color));
         }
         final CompoundNBT compound = stack.getTag();
@@ -115,7 +115,7 @@ public final class ColorUtil {
     public static boolean hasColor(final ItemStack stack) {
         final Item item = stack.getItem();
         return item instanceof ArmorItem &&
-                ((ArmorItem) item).func_82812_d() == ArmorItem.ArmorMaterial.LEATHER;
+                ((ArmorItem) item).getArmorMaterial() == ArmorItem.ArmorMaterial.LEATHER;
     }
 
     private ColorUtil() {

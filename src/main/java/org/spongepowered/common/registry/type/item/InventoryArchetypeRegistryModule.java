@@ -219,8 +219,8 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .container((i, p) -> {
                 WorkbenchContainer container = new WorkbenchContainer(p.inventory, p.getEntityWorld(), p.getPosition());
                 // Pre-Fills the container input with the items from the inventory
-                for (int index = 0; index < container.field_75162_e.getSizeInventory(); index++) {
-                    container.field_75162_e.setInventorySlotContents(index, i.getStackInSlot(index));
+                for (int index = 0; index < container.craftMatrix.getSizeInventory(); index++) {
+                    container.craftMatrix.setInventorySlotContents(index, i.getStackInSlot(index));
                 }
                 return container;
             })

@@ -66,7 +66,7 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     @Override
     public BiomeType getBiome(int x, int y, int z) {
         checkRange(x, y, z);
-        BiomeType biomeType = (BiomeType) Biome.func_185357_a(this.biomes[getIndex(x, z)] & 255);
+        BiomeType biomeType = (BiomeType) Biome.getBiomeForId(this.biomes[getIndex(x, z)] & 255);
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
 

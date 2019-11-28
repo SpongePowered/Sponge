@@ -55,12 +55,12 @@ public abstract class EntityAIBaseMixin_API<O extends Agent> implements AITask<O
 
     @Override
     public boolean canRunConcurrentWith(AITask<O> other) {
-        return (this.mutexBits & ((net.minecraft.entity.ai.goal.Goal) other).func_75247_h()) == 0;
+        return (this.mutexBits & ((net.minecraft.entity.ai.goal.Goal) other).getMutexBits()) == 0;
     }
 
     @Override
     public boolean canBeInterrupted() {
-        return ((net.minecraft.entity.ai.goal.Goal) (Object) this).func_75252_g();
+        return ((net.minecraft.entity.ai.goal.Goal) (Object) this).isInterruptible();
     }
 
 

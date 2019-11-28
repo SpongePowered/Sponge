@@ -66,13 +66,13 @@ public class SkullRotationDataProcessor
         if (value.ordinal() > 15) {
             return false;
         }
-        skull.func_145903_a(value.ordinal());
+        skull.setSkullRotation(value.ordinal());
         return true;
     }
 
     @Override
     protected Optional<Direction> getVal(final SkullTileEntity skull) {
-        if (skull.getWorld().getBlockState(skull.getPos()).get(SkullBlock.field_176418_a) != net.minecraft.util.Direction.UP) {
+        if (skull.getWorld().getBlockState(skull.getPos()).get(SkullBlock.FACING) != net.minecraft.util.Direction.UP) {
             return Optional.empty();
         }
         final int rot = ((TileEntitySkullAccessor) skull).accessor$getSkullRotation() % 16;

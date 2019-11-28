@@ -65,9 +65,9 @@ public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcess
         for (PotionEffect effect : value) {
             final CompoundNBT potionCompound = new CompoundNBT();
             ((net.minecraft.potion.EffectInstance) effect).write(potionCompound);
-            potionList.func_74742_a(potionCompound);
+            potionList.appendTag(potionCompound);
         }
-        mainCompound.func_74782_a(Constants.Item.CUSTOM_POTION_EFFECTS, potionList);
+        mainCompound.setTag(Constants.Item.CUSTOM_POTION_EFFECTS, potionList);
         return true;
     }
 
@@ -113,7 +113,7 @@ public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcess
         }
 
         final CompoundNBT tagCompound = itemStack.getTag();
-        tagCompound.func_74782_a(Constants.Item.CUSTOM_POTION_EFFECTS, new ListNBT());
+        tagCompound.setTag(Constants.Item.CUSTOM_POTION_EFFECTS, new ListNBT());
         if (currentEffects.isPresent()) {
             return DataTransactionResult.successRemove(constructImmutableValue(currentEffects.get()));
         }

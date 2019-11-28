@@ -45,13 +45,13 @@ public abstract class EntityShulkerMixin extends EntityLivingMixin implements En
     @SuppressWarnings("ConstantConditions")
     @Override
     public DyeColor bridge$getColor() {
-        return (DyeColor) (Object) net.minecraft.item.DyeColor.func_176764_b(this.dataManager.get(COLOR) & 15);
+        return (DyeColor) (Object) net.minecraft.item.DyeColor.byMetadata(this.dataManager.get(COLOR) & 15);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public void bridge$setColor(final DyeColor color) {
-        this.dataManager.set(COLOR, (byte) (this.dataManager.get(COLOR) & 240 | ((net.minecraft.item.DyeColor) (Object) color).func_176765_a() & 15));
+        this.dataManager.set(COLOR, (byte) (this.dataManager.get(COLOR) & 240 | ((net.minecraft.item.DyeColor) (Object) color).getMetadata() & 15));
     }
 
     @Override

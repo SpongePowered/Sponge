@@ -87,7 +87,7 @@ public abstract class WorldGenFlowersMixin_API extends Feature implements Flower
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
-            y = apiImpl$nextInt(random, world.func_175645_m(chunkPos.add(x, 0, z)).getY() + 32);
+            y = apiImpl$nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() + 32);
             blockpos = chunkPos.add(x, y, z);
             if(this.api$override != null) {
                 final Location<Extent> pos = new Location<>(extent, VecHelper.toVector3i(blockpos));
@@ -100,11 +100,11 @@ public abstract class WorldGenFlowersMixin_API extends Feature implements Flower
                 type = result.get(0);
             }
             final FlowerBlock.EnumFlowerType enumflowertype = (FlowerBlock.EnumFlowerType) (Object) type;
-            final FlowerBlock blockflower = enumflowertype.func_176964_a().func_180346_a();
+            final FlowerBlock blockflower = enumflowertype.getBlockType().getBlock();
 
             if (enumflowertype != null && blockflower.getDefaultState().getMaterial() != Material.AIR) {
                 setGeneratedBlock(blockflower, enumflowertype);
-                func_180709_b(world, random, blockpos);
+                generate(world, random, blockpos);
             }
         }
     }

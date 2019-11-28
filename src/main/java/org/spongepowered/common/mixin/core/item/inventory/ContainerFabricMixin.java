@@ -126,7 +126,7 @@ public abstract class ContainerFabricMixin implements Fabric, InventoryBridge {
         {
             Slot slot = this.getSlot(0);
             return slot.inventory != null && slot.inventory.getDisplayName() != null ?
-                    new FixedTranslation(slot.inventory.getDisplayName().func_150260_c()) :
+                    new FixedTranslation(slot.inventory.getDisplayName().getUnformattedText()) :
                     new FixedTranslation("UNKNOWN: " + this.getClass().getName());
         }
         catch (AbstractMethodError e)

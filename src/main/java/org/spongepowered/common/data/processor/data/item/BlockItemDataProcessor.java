@@ -62,7 +62,7 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
             // Invalid state for this stack.
             return false;
         }
-        stack.func_77964_b(baseBlock.func_180651_a(blockState));
+        stack.setItemDamage(baseBlock.damageDropped(blockState));
         return true;
     }
 
@@ -70,8 +70,8 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
     @Override
     protected Optional<BlockState> getVal(ItemStack stack) {
         final Block block = ((BlockItem) stack.getItem()).getBlock();
-        final int blockMeta = stack.getItem().func_77647_b(stack.getDamage());
-        return Optional.of((BlockState) block.func_176203_a(blockMeta));
+        final int blockMeta = stack.getItem().getMetadata(stack.getDamage());
+        return Optional.of((BlockState) block.getStateFromMeta(blockMeta));
     }
 
     @Override

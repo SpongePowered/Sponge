@@ -69,15 +69,15 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
+            return Optional.of((BlockState) blockState.withProperty(TrapDoorBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
         }
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
-            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.withProperty(TrapDoorBlock.OPEN, isOpen));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.field_176284_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(TrapDoorBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -85,15 +85,15 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) value)));
+            return Optional.of((BlockState) blockState.withProperty(TrapDoorBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) value)));
         }
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;
-            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.withProperty(TrapDoorBlock.OPEN, isOpen));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.field_176284_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(TrapDoorBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -109,7 +109,7 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.get(TrapDoorBlock.field_176284_a)));
+                Constants.DirectionFunctions.getFor(blockState.get(TrapDoorBlock.FACING)));
     }
 
     @SuppressWarnings("ConstantConditions")

@@ -53,7 +53,7 @@ public class ItemSkullRepresentedPlayerDataProcessor
     }
 
     private static boolean isSupportedItem(ItemStack stack) {
-        return SkullUtils.isValidItemStack(stack) && SkullUtils.getSkullType(stack.func_77960_j()).equals(SkullTypes.PLAYER);
+        return SkullUtils.isValidItemStack(stack) && SkullUtils.getSkullType(stack.getMetadata()).equals(SkullTypes.PLAYER);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ItemSkullRepresentedPlayerDataProcessor
 
     @Override
     protected Optional<GameProfile> getVal(ItemStack itemStack) {
-        if (SkullUtils.isValidItemStack(itemStack) && SkullUtils.getSkullType(itemStack.func_77960_j()).equals(SkullTypes.PLAYER)) {
+        if (SkullUtils.isValidItemStack(itemStack) && SkullUtils.getSkullType(itemStack.getMetadata()).equals(SkullTypes.PLAYER)) {
             final CompoundNBT nbt = itemStack.getChildTag(Constants.Item.Skull.ITEM_SKULL_OWNER);
             final com.mojang.authlib.GameProfile mcProfile = nbt == null ? null : NBTUtil.readGameProfile(nbt);
             return Optional.ofNullable((GameProfile) mcProfile);

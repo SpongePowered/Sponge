@@ -44,12 +44,12 @@ public class DirtDataProcessor extends AbstractCatalogDataProcessor<DirtType, Va
 
     @Override
     protected int setToMeta(DirtType value) {
-        return ((BlockDirt.DirtType) (Object) value).func_176925_a();
+        return ((BlockDirt.DirtType) (Object) value).getMetadata();
     }
 
     @Override
     protected DirtType getFromMeta(int meta) {
-        return (DirtType) (Object) BlockDirt.DirtType.func_176924_a(meta);
+        return (DirtType) (Object) BlockDirt.DirtType.byMetadata(meta);
     }
 
     @Override

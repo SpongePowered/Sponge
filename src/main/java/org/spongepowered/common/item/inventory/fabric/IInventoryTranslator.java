@@ -66,7 +66,7 @@ class IInventoryTranslator implements InventoryTranslator<IInventory> {
 
     @Override
     public Translation getDisplayName(IInventory inventory) {
-        return new FixedTranslation(inventory.getDisplayName().func_150260_c());
+        return new FixedTranslation(inventory.getDisplayName().getUnformattedText());
     }
 
     @Override

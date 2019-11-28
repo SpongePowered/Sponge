@@ -54,12 +54,12 @@ public class ShrubDataProcessor extends AbstractCatalogDataProcessor<ShrubType, 
 
     @Override
     protected ShrubType getFromMeta(int meta) {
-        return (ShrubType) (Object) TallGrassBlock.EnumType.func_177045_a(meta);
+        return (ShrubType) (Object) TallGrassBlock.EnumType.byMetadata(meta);
     }
 
     @Override
     protected int setToMeta(ShrubType type) {
-        return ((TallGrassBlock.EnumType) (Object) type).func_177044_a();
+        return ((TallGrassBlock.EnumType) (Object) type).getMeta();
     }
 
     @Override

@@ -59,7 +59,7 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     private void impl$updateBiomes(final CallbackInfo ci) {
         if (this.impl$updateBiomes) {
-            final Chunk chunk = this.playerChunkMap.func_72688_a().func_72964_e(this.pos.x, this.pos.z);
+            final Chunk chunk = this.playerChunkMap.getWorldServer().getChunk(this.pos.x, this.pos.z);
             this.sendPacket(new SChunkDataPacket(chunk, 65534));
             this.sendPacket(new SChunkDataPacket(chunk, 1));
             this.changes = 0;
@@ -72,7 +72,7 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     @Override
     public void bridge$markBiomesForUpdate() {
         this.impl$updateBiomes = true;
-        this.playerChunkMap.func_187304_a((PlayerChunkMapEntry) (Object) this);
+        this.playerChunkMap.entryChanged((PlayerChunkMapEntry) (Object) this);
     }
 
     @Override

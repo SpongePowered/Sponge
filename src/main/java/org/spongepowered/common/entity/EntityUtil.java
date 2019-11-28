@@ -250,11 +250,11 @@ public final class EntityUtil {
             toWorld = (ServerWorld) toTransform.getExtent();
         }
 
-        fromWorld.profiler.func_76318_c("reloading");
+        fromWorld.profiler.endStartSection("reloading");
         final Entity toReturn;
 
         if (recreate) {
-            toReturn = EntityList.func_191304_a(entity.getClass(), toWorld);
+            toReturn = EntityList.newEntity(entity.getClass(), toWorld);
             sEntity = (org.spongepowered.api.entity.Entity) toReturn;
             if (toReturn == null) {
                 return entity;
@@ -266,14 +266,14 @@ public final class EntityUtil {
         }
 
         if (!event.getKeepsVelocity()) {
-            toReturn.field_70159_w = 0;
-            toReturn.field_70181_x = 0;
-            toReturn.field_70179_y = 0;
+            toReturn.motionX = 0;
+            toReturn.motionY = 0;
+            toReturn.motionZ = 0;
         }
 
         if (loadChunks) {
             final Vector3i toChunkPosition = toTransform.getLocation().getChunkPosition();
-            toWorld.getChunkProvider().func_186028_c(toChunkPosition.getX(), toChunkPosition.getZ());
+            toWorld.getChunkProvider().loadChunk(toChunkPosition.getX(), toChunkPosition.getZ());
         }
 
         fromWorld.profiler.startSection("moving");
@@ -286,10 +286,10 @@ public final class EntityUtil {
                 toReturn.forceSpawn = true;
                 toWorld.addEntity0(toReturn);
                 toReturn.forceSpawn = flag;
-                toWorld.func_72866_a(toReturn, false);
+                toWorld.updateEntityWithOptionalForce(toReturn, false);
             } else {
                 toWorld.addEntity0(toReturn);
-                toWorld.func_72866_a(toReturn, false);
+                toWorld.updateEntityWithOptionalForce(toReturn, false);
             }
         }
 
@@ -458,7 +458,7 @@ public final class EntityUtil {
 
         playerList.updatePermissionLevel(player);
 
-        fromWorld.func_72973_f(player);
+        fromWorld.removeEntityDangerously(player);
         player.removed = false;
 
         final Vector3d position = toTransform.getPosition();
@@ -466,22 +466,22 @@ public final class EntityUtil {
 
         try (final PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld).buildAndSwitch()) {
             toWorld.addEntity0(player);
-            toWorld.func_72866_a(player, false);
+            toWorld.updateEntityWithOptionalForce(player, false);
         }
 
         // preparePlayer
-        fromWorld.func_184164_w().func_72695_c(player);
-        toWorld.func_184164_w().func_72683_a(player);
+        fromWorld.getPlayerChunkMap().removePlayer(player);
+        toWorld.getPlayerChunkMap().addPlayer(player);
 
         final Vector3i toChunkPosition = toTransform.getLocation().getChunkPosition();
-        toWorld.getChunkProvider().func_186025_d(toChunkPosition.getX(), toChunkPosition.getZ());
+        toWorld.getChunkProvider().provideChunk(toChunkPosition.getX(), toChunkPosition.getZ());
 
         if (event instanceof MoveEntityEvent.Teleport.Portal) {
             CriteriaTriggers.CHANGED_DIMENSION.trigger(player, fromWorld.dimension.getType(), toWorld.dimension.getType());
 
             if (fromWorld.dimension.getType() == DimensionType.NETHER && toWorld.dimension.getType() == DimensionType.OVERWORLD
-                && player.func_193106_Q() != null) {
-                CriteriaTriggers.NETHER_TRAVEL.trigger(player, player.func_193106_Q());
+                && player.getEnteredNetherPosition() != null) {
+                CriteriaTriggers.NETHER_TRAVEL.trigger(player, player.getEnteredNetherPosition());
             }
         }
         //
@@ -506,13 +506,13 @@ public final class EntityUtil {
         }
 
         player.connection.sendPacket(new SServerDifficultyPacket(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
-        player.connection.sendPacket(new SEntityStatusPacket(player, toWorld.getGameRules().func_82766_b(DefaultGameRules.REDUCED_DEBUG_INFO) ?
+        player.connection.sendPacket(new SEntityStatusPacket(player, toWorld.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ?
             (byte) 22 : 23));
 
         if (!event.getKeepsVelocity()) {
-            player.field_70159_w = 0;
-            player.field_70181_x = 0;
-            player.field_70179_y = 0;
+            player.motionX = 0;
+            player.motionY = 0;
+            player.motionZ = 0;
         }
 
         SpongeImplHooks.handlePostChangeDimensionEvent(player, fromWorld, toWorld);
@@ -544,7 +544,7 @@ public final class EntityUtil {
 
         // Check if we're to use a different teleporter for this world
         if (teleporter.getClass().getName().equals("net.minecraft.world.Teleporter")) {
-            worldName = portalAgents.get("minecraft:default_" + toWorld.dimension.getType().func_186065_b().toLowerCase(Locale.ENGLISH));
+            worldName = portalAgents.get("minecraft:default_" + toWorld.dimension.getType().getName().toLowerCase(Locale.ENGLISH));
         } else {
             worldName = portalAgents.get("minecraft:" + teleporter.getClass().getSimpleName());
         }
@@ -779,7 +779,7 @@ public final class EntityUtil {
         final List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.grow(1.0F, 1.0F, 1.0F), EntityUtil.TRACEABLE);
         for (final Entity entity : entities) {
             final AxisAlignedBB entityBB = entity.getBoundingBox().grow(entity.getCollisionBorderSize());
-            final RayTraceResult entityRay1 = entityBB.func_72327_a(traceStart, traceEnd);
+            final RayTraceResult entityRay1 = entityBB.calculateIntercept(traceStart, traceEnd);
 
             if (entityBB.contains(traceStart)) {
                 if (trace.distance >= 0.0D) {
@@ -822,7 +822,7 @@ public final class EntityUtil {
         final Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
         final Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
         final Vec3d traceEnd = traceStart.add(lookDir);
-        return source.world.func_147447_a(traceStart, traceEnd, false, false, true);
+        return source.world.rayTraceBlocks(traceStart, traceEnd, false, false, true);
     }
 
     private static Vec3d getPositionEyes(final Entity entity, final float partialTicks)

@@ -69,6 +69,6 @@ public abstract class BlockMyceliumMixin extends BlockMixin {
     }
 
     private ImmutableSnowedData impl$getIsSnowedFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.get(MyceliumBlock.field_176384_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.get(MyceliumBlock.SNOWY));
     }
 }

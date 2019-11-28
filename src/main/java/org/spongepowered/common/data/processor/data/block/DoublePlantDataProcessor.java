@@ -55,12 +55,12 @@ public class DoublePlantDataProcessor extends
 
     @Override
     protected int setToMeta(DoublePlantType value) {
-        return ((DoublePlantBlock.EnumPlantType) (Object) value).func_176936_a();
+        return ((DoublePlantBlock.EnumPlantType) (Object) value).getMeta();
     }
 
     @Override
     protected DoublePlantType getFromMeta(int meta) {
-        return (DoublePlantType) (Object) DoublePlantBlock.EnumPlantType.func_176938_a(meta);
+        return (DoublePlantType) (Object) DoublePlantBlock.EnumPlantType.byMetadata(meta);
     }
 
     @Override

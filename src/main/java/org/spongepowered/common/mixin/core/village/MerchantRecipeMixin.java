@@ -54,11 +54,11 @@ public abstract class MerchantRecipeMixin {
             return false;
         }
         MerchantRecipe other = (MerchantRecipe) o;
-        return ItemStackComparators.ALL.compare((ItemStack) this.getItemToBuy(), (ItemStack) other.func_77394_a()) == 0
-                && ItemStackComparators.ALL.compare((ItemStack) this.getSecondItemToBuy(), (ItemStack) other.func_77396_b()) == 0
-                && ItemStackComparators.ALL.compare((ItemStack) this.getItemToSell(), (ItemStack) other.func_77397_d()) == 0
-                && this.getToolUses() == other.func_180321_e()
-                && this.getMaxTradeUses() == other.func_180320_f()
-                && this.getRewardsExp() == other.func_180322_j();
+        return ItemStackComparators.ALL.compare((ItemStack) this.getItemToBuy(), (ItemStack) other.getItemToBuy()) == 0
+                && ItemStackComparators.ALL.compare((ItemStack) this.getSecondItemToBuy(), (ItemStack) other.getSecondItemToBuy()) == 0
+                && ItemStackComparators.ALL.compare((ItemStack) this.getItemToSell(), (ItemStack) other.getItemToSell()) == 0
+                && this.getToolUses() == other.getToolUses()
+                && this.getMaxTradeUses() == other.getMaxTradeUses()
+                && this.getRewardsExp() == other.getRewardsExp();
     }
 }

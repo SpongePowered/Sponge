@@ -91,7 +91,7 @@ public final class InventoryUtil {
 
             TileEntity tileentity1 = chest.getWorld().getTileEntity(blockpos);
 
-            if (tileentity1 instanceof ChestTileEntity && tileentity1.func_145838_q() == chest.func_145838_q()) {
+            if (tileentity1 instanceof ChestTileEntity && tileentity1.getBlockType() == chest.getBlockType()) {
 
                 DoubleSidedInventory inventory;
 

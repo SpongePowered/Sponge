@@ -54,14 +54,14 @@ public abstract class WorldGenMegaJungleMixin_API extends HugeTreesFeature imple
 
     @Override
     public boolean canPlaceAt(final World world, final int x, final int y, final int z) {
-        return this.func_175929_a((net.minecraft.world.World) world, null, new BlockPos(x, y, z), this.baseHeight);
+        return this.ensureGrowable((net.minecraft.world.World) world, null, new BlockPos(x, y, z), this.baseHeight);
     }
 
     @Override
     public void placeObject(final World world, final Random random, final int x, final int y, final int z) {
         final BlockPos pos = new BlockPos(x, y, z);
-        func_175904_e();
-        if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
+        setDecorationDefaults();
+        if (generate((net.minecraft.world.World) world, random, pos)) {
             generateSaplings((net.minecraft.world.World) world, random, pos);
         }
     }

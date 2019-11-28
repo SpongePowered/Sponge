@@ -106,7 +106,7 @@ public class SpongeProxySource implements ProxySource, CommandSourceBridge {
 
     @Override
     public String getName() {
-        return bridge$asICommandSender().func_70005_c_();
+        return bridge$asICommandSender().getName();
     }
 
     @Override

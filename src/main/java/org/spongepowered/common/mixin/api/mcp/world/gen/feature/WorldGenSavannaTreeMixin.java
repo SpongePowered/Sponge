@@ -93,7 +93,7 @@ public abstract class WorldGenSavannaTreeMixin extends AbstractTreeFeature imple
             }
             final BlockPos down = new BlockPos(x, y - 1, z);
             final Block block = worldIn.getBlockState(down).getBlock();
-            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, Direction.UP, Blocks.field_150345_g) && y < 256 - i - 1) {
+            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, Direction.UP, Blocks.SAPLING) && y < 256 - i - 1) {
                 return true;
             }
         }
@@ -103,8 +103,8 @@ public abstract class WorldGenSavannaTreeMixin extends AbstractTreeFeature imple
     @Override
     public void placeObject(final World world, final Random random, final int x, final int y, final int z) {
         final BlockPos pos = new BlockPos(x, y, z);
-        func_175904_e();
-        if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
+        setDecorationDefaults();
+        if (generate((net.minecraft.world.World) world, random, pos)) {
             generateSaplings((net.minecraft.world.World) world, random, pos);
         }
     }
@@ -113,7 +113,7 @@ public abstract class WorldGenSavannaTreeMixin extends AbstractTreeFeature imple
         return ((WorldGeneratorBridge) this).bridge$isAir(state, world, pos)
                || ((WorldGeneratorBridge) this).bridge$isLeaves(state, world, pos)
                || ((WorldGeneratorBridge) this).birdge$isWood(state, world, pos)
-               || func_150523_a(state.getBlock());
+               || canGrowInto(state.getBlock());
     }
 
 }

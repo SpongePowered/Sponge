@@ -58,7 +58,7 @@ public abstract class BlockRedstoneRepeaterMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDelayableData) {
             final int delay = ((ImmutableDelayableData) manipulator).delay().get();
-            return Optional.of((BlockState) blockState.func_177226_a(RepeaterBlock.DELAY, delay));
+            return Optional.of((BlockState) blockState.withProperty(RepeaterBlock.DELAY, delay));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -67,7 +67,7 @@ public abstract class BlockRedstoneRepeaterMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DELAY)) {
             final int delay = (Integer) value;
-            return Optional.of((BlockState) blockState.func_177226_a(RepeaterBlock.DELAY, delay));
+            return Optional.of((BlockState) blockState.withProperty(RepeaterBlock.DELAY, delay));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

@@ -113,7 +113,7 @@ public final class SpongeStatusResponse {
     }
 
     public static String getUnformattedMotd(ServerStatusResponse response) {
-        return getFirstLine(LegacyTexts.stripAll(response.getServerDescription().func_150260_c(), COLOR_CHAR));
+        return getFirstLine(LegacyTexts.stripAll(response.getServerDescription().getUnformattedText(), COLOR_CHAR));
     }
 
     private static String getFirstLine(String s) {

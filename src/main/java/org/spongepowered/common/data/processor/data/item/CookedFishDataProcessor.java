@@ -48,7 +48,7 @@ import java.util.Optional;
 public class CookedFishDataProcessor extends AbstractItemSingleDataProcessor<CookedFish, Value<CookedFish>, CookedFishData, ImmutableCookedFishData> {
 
     public CookedFishDataProcessor() {
-        super(stack -> stack.getItem().equals(Items.field_179566_aV), Keys.COOKED_FISH);
+        super(stack -> stack.getItem().equals(Items.COOKED_FISH), Keys.COOKED_FISH);
     }
 
     @Override
@@ -58,13 +58,13 @@ public class CookedFishDataProcessor extends AbstractItemSingleDataProcessor<Coo
 
     @Override
     protected boolean set(ItemStack itemStack, CookedFish value) {
-        itemStack.func_77964_b(((SpongeCookedFish) value).fish.func_150976_a());
+        itemStack.setItemDamage(((SpongeCookedFish) value).fish.getMetadata());
         return true;
     }
 
     @Override
     protected Optional<CookedFish> getVal(ItemStack itemStack) {
-        final ItemFishFood.FishType fishType = ItemFishFood.FishType.func_150974_a(itemStack.func_77960_j());
+        final ItemFishFood.FishType fishType = ItemFishFood.FishType.byMetadata(itemStack.getMetadata());
         return SpongeImpl.getRegistry().getType(CookedFish.class, fishType.name());
     }
 

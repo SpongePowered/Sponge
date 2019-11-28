@@ -54,9 +54,9 @@ public abstract class WorldGenPumpkinMixin extends WorldGeneratorMixin {
                     p_180709_3_.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
 
             if (worldIn.isAirBlock(blockpos1) && worldIn.getBlockState(blockpos1.down()).getBlock() == Blocks.GRASS
-                    && Blocks.PUMPKIN.func_176196_c(worldIn, blockpos1)) {
+                    && Blocks.PUMPKIN.canPlaceBlockAt(worldIn, blockpos1)) {
                 worldIn.setBlockState(blockpos1,
-                        Blocks.PUMPKIN.getDefaultState().func_177226_a(HorizontalBlock.HORIZONTAL_FACING, Direction.Plane.HORIZONTAL.random(rand)), 2);
+                        Blocks.PUMPKIN.getDefaultState().withProperty(HorizontalBlock.HORIZONTAL_FACING, Direction.Plane.HORIZONTAL.random(rand)), 2);
             }
         }
 

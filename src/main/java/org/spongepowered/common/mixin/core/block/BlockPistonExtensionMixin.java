@@ -64,11 +64,11 @@ public abstract class BlockPistonExtensionMixin extends BlockMixin {
         if (manipulator instanceof ImmutablePistonData) {
             final PistonHeadBlock.EnumPistonType pistonType =
                     (PistonHeadBlock.EnumPistonType) (Object) ((ImmutablePistonData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(PistonHeadBlock.TYPE, pistonType));
+            return Optional.of((BlockState) blockState.withProperty(PistonHeadBlock.TYPE, pistonType));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            return Optional.of((BlockState) blockState.func_177226_a(DirectionalBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(DirectionalBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -77,11 +77,11 @@ public abstract class BlockPistonExtensionMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.PISTON_TYPE)) {
             final PistonHeadBlock.EnumPistonType pistonType = (PistonHeadBlock.EnumPistonType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(PistonHeadBlock.TYPE, pistonType));
+            return Optional.of((BlockState) blockState.withProperty(PistonHeadBlock.TYPE, pistonType));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            return Optional.of((BlockState) blockState.func_177226_a(DirectionalBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(DirectionalBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

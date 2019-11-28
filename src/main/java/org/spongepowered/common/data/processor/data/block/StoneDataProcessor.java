@@ -44,12 +44,12 @@ public class StoneDataProcessor extends AbstractCatalogDataProcessor<StoneType, 
 
     @Override
     protected int setToMeta(StoneType value) {
-        return ((BlockStone.EnumType) (Object) value).func_176642_a();
+        return ((BlockStone.EnumType) (Object) value).getMetadata();
     }
 
     @Override
     protected StoneType getFromMeta(int meta) {
-        return (StoneType) (Object) BlockStone.EnumType.func_176643_a(meta);
+        return (StoneType) (Object) BlockStone.EnumType.byMetadata(meta);
     }
 
     @Override

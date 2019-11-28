@@ -114,10 +114,10 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
         while (taskItr.hasNext()) {
             final GoalSelector.EntityAITaskEntry task = taskItr.next();
             final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(),
-                    task.field_75731_b, task.field_75731_b, (Goal<? extends Agent>) tasks, (Agent) this, (AITask<?>) task.field_75733_a);
+                    task.priority, task.priority, (Goal<? extends Agent>) tasks, (Agent) this, (AITask<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
-                ((EntityAIBasesBridge) task.field_75733_a).bridge$setGoal(null);
+                ((EntityAIBasesBridge) task.action).bridge$setGoal(null);
                 taskItr.remove();
             }
         }
@@ -193,7 +193,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
         double bestDistance = -1.0D;
         PlayerEntity result = null;
 
-        for (final Object entity1 : world.field_73010_i) {
+        for (final Object entity1 : world.playerEntities) {
             final PlayerEntity player = (PlayerEntity) entity1;
             if (player == null || player.removed || !((EntityPlayerBridge) player).bridge$affectsSpawning()) {
                 continue;

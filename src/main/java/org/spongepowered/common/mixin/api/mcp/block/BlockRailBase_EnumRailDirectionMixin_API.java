@@ -57,6 +57,6 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
         } else {
             meta++;
         }
-        return (RailDirection) (Object) AbstractRailBlock.EnumRailDirection.func_177016_a(meta);
+        return (RailDirection) (Object) AbstractRailBlock.EnumRailDirection.byMetadata(meta);
     }
 }

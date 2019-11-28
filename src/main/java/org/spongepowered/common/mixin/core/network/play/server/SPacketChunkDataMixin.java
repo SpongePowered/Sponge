@@ -71,7 +71,7 @@ public abstract class SPacketChunkDataMixin {
     private int spongeImpl$surroundExtractingChunkDataWithExceptionPrinter(final SChunkDataPacket this$0, final PacketBuffer buf, final Chunk chunkIn,
         final boolean writeSkylight, final int changedSectionFilter) {
         try {
-            return this$0.func_189555_a(buf, chunkIn, writeSkylight, changedSectionFilter);
+            return this$0.extractChunkData(buf, chunkIn, writeSkylight, changedSectionFilter);
         } catch (Exception e) {
             spongeImpl$printVerbosity(chunkIn, writeSkylight, changedSectionFilter, e);
             throw new RuntimeException(String.format("Exception creating chunk packet for chunk at '%s %s'!", this.chunkX, this.chunkZ), e);
@@ -113,19 +113,19 @@ public abstract class SPacketChunkDataMixin {
                 printer.add("  - %s : %s", "ContainerBits", mixinData.bridge$getBits())
                     .add("  - %s : %s", "Palette Size", mixinData.bridge$getPalette().getSerializedSize())
                     .add("  - %s : %s", "BackingArray", mixinData.bridge$getStorage().getBackingLongArray())
-                    .add("  - %s : %s", "BlockLight", extendedblockstorage.func_76661_k().getData());
+                    .add("  - %s : %s", "BlockLight", extendedblockstorage.getBlockLight().getData());
 
 
                 if (writeSkylight)
                 {
-                    printer.add("  - %s : %s", "SkyLight", extendedblockstorage.func_76671_l().getData());
+                    printer.add("  - %s : %s", "SkyLight", extendedblockstorage.getSkyLight().getData());
                 }
             }
         }
 
         if (this.fullChunk)
         {
-            printer.add(" - %s : %s", "BiomeArray", chunkIn.func_76605_m());
+            printer.add(" - %s : %s", "BiomeArray", chunkIn.getBiomeArray());
         }
 
         printer

@@ -55,7 +55,7 @@ public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataC
             }
             Constants.NBT.filterSpongeCustomData(compound);
             content.remove(Constants.Sponge.UNSAFE_NBT);
-            if (!compound.func_82582_d()) {
+            if (!compound.isEmpty()) {
                 content.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translate(compound));
             }
         }

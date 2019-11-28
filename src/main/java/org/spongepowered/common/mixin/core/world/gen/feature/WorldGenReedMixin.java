@@ -65,8 +65,8 @@ public abstract class WorldGenReedMixin extends WorldGeneratorMixin {
                     final int height = ((Reed) this).getReedHeight().getFlooredAmount(rand);
                     // Sponge end
                     for (int y = 0; y < height; ++y) {
-                        if (Blocks.field_150436_aH.func_176354_d(worldIn, blockpos1)) {
-                            worldIn.setBlockState(blockpos1.up(y), Blocks.field_150436_aH.getDefaultState(), 2);
+                        if (Blocks.REEDS.canBlockStay(worldIn, blockpos1)) {
+                            worldIn.setBlockState(blockpos1.up(y), Blocks.REEDS.getDefaultState(), 2);
                         }
                     }
                 }

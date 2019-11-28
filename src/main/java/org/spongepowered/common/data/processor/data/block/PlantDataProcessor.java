@@ -58,7 +58,7 @@ public class PlantDataProcessor extends AbstractCatalogDataProcessor<PlantType, 
 
     @Override
     protected int setToMeta(PlantType value) {
-        return ((FlowerBlock.EnumFlowerType) (Object) value).func_176968_b();
+        return ((FlowerBlock.EnumFlowerType) (Object) value).getMeta();
     }
 
     @Override
@@ -69,9 +69,9 @@ public class PlantDataProcessor extends AbstractCatalogDataProcessor<PlantType, 
     @Override
     protected Optional<PlantType> getVal(ItemStack itemStack) {
         if (itemStack.getItem() == ItemTypes.RED_FLOWER) {
-            return Optional.of((PlantType) (Object) FlowerBlock.EnumFlowerType.func_176967_a(EnumFlowerColor.RED, itemStack.getDamage()));
+            return Optional.of((PlantType) (Object) FlowerBlock.EnumFlowerType.getType(EnumFlowerColor.RED, itemStack.getDamage()));
         }
-        return Optional.of((PlantType) (Object) FlowerBlock.EnumFlowerType.func_176967_a(EnumFlowerColor.YELLOW, itemStack.getDamage()));
+        return Optional.of((PlantType) (Object) FlowerBlock.EnumFlowerType.getType(EnumFlowerColor.YELLOW, itemStack.getDamage()));
     }
 
     @Override

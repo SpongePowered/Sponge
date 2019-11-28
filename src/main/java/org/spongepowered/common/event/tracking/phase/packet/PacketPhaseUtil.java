@@ -138,7 +138,7 @@ public final class PacketPhaseUtil {
             slotId = (player.inventory.mainInventory.size() + PlayerInventory.getHotbarSize());
         } else {
             player.inventory.mainInventory.set(player.inventory.currentItem, itemStack);
-            final Slot slot = player.openContainer.func_75147_a(player.inventory, player.inventory.currentItem);
+            final Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
             slotId = slot.slotNumber;
         }
 
@@ -234,7 +234,7 @@ public final class PacketPhaseUtil {
     public static DataParameter<?> findModifiedEntityInteractDataParameter(final ItemStack stack, final Entity entity) {
         final Item item = stack.getItem();
 
-        if (item == Items.field_151100_aR) {
+        if (item == Items.DYE) {
             // ItemDye.itemInteractionForEntity
             if (entity instanceof SheepEntity) {
                 return EntitySheepAccessor.accessor$getDyeColorParameter();

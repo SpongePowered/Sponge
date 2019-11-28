@@ -69,7 +69,7 @@ public abstract class CommandSummonMixin extends CommandBase {
         final MinecraftServer server, final ICommandSender sender, final String[] args) {
         if ("Minecart".equals(nbt.getString(Constants.Entity.ENTITY_TYPE_ID))) {
             nbt.putString(Constants.Entity.ENTITY_TYPE_ID,
-                    AbstractMinecartEntity.Type.values()[nbt.getInt(Constants.Entity.Minecart.MINECART_TYPE)].func_184954_b());
+                    AbstractMinecartEntity.Type.values()[nbt.getInt(Constants.Entity.Minecart.MINECART_TYPE)].getName());
             nbt.remove(Constants.Entity.Minecart.MINECART_TYPE);
         }
         final Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(nbt.getString(Constants.Entity.ENTITY_TYPE_ID)));
@@ -86,7 +86,7 @@ public abstract class CommandSummonMixin extends CommandBase {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
             SpongeImpl.postEvent(event);
-            return event.isCancelled() ? null : AnvilChunkLoader.func_186054_a(nbt, world, x, y, z, b);
+            return event.isCancelled() ? null : AnvilChunkLoader.readWorldEntityPos(nbt, world, x, y, z, b);
         }
     }
 

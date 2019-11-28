@@ -74,7 +74,7 @@ public abstract class WorldGenDesertWellsMixin_API extends Feature implements De
         if (random.nextDouble() < this.api$spawnProbability) {
             final int x = random.nextInt(size.getX());
             final int z = random.nextInt(size.getZ());
-            final BlockPos pos = world.func_175672_r(chunkPos.add(x, 0, z)).up();
+            final BlockPos pos = world.getTopSolidOrLiquidBlock(chunkPos.add(x, 0, z)).up();
             if (this.api$obj.canPlaceAt((org.spongepowered.api.world.World) world, pos.getX(), pos.getY(), pos.getZ())) {
                 this.api$obj.placeObject((org.spongepowered.api.world.World) world, random, pos.getX(), pos.getY(), pos.getZ());
             }
@@ -126,6 +126,6 @@ public abstract class WorldGenDesertWellsMixin_API extends Feature implements De
 
     @Override
     public void placeObject(final org.spongepowered.api.world.World world, final Random random, final int x, final int y, final int z) {
-        func_180709_b((World) world, random, new BlockPos(x, y, z));
+        generate((World) world, random, new BlockPos(x, y, z));
     }
 }

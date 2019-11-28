@@ -40,7 +40,7 @@ public abstract class WorldServerMixin_RealTime extends WorldMixin_RealTime impl
         if (((WorldBridge) this).bridge$isFake()) {
             return;
         }
-        if (this.worldInfo.getGameRulesInstance().func_82766_b("doDaylightCycle")) {
+        if (this.worldInfo.getGameRulesInstance().getBoolean("doDaylightCycle")) {
             // Subtract the one the original tick method is going to add
             long diff = this.realTimeBridge$getRealTimeTicks() - 1;
             // Don't set if we're not changing it as other mods might be listening for changes

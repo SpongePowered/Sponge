@@ -63,7 +63,7 @@ public abstract class BlockWallMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableWallData) {
             final WallBlock.EnumType wallType = (WallBlock.EnumType) (Object) ((ImmutableWallData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(WallBlock.field_176255_P, wallType));
+            return Optional.of((BlockState) blockState.withProperty(WallBlock.VARIANT, wallType));
         }
         if (manipulator instanceof ImmutableConnectedDirectionData) {
             return Optional.of((BlockState) blockState);
@@ -75,7 +75,7 @@ public abstract class BlockWallMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.WALL_TYPE)) {
             final WallBlock.EnumType wallType = (WallBlock.EnumType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(WallBlock.field_176255_P, wallType));
+            return Optional.of((BlockState) blockState.withProperty(WallBlock.VARIANT, wallType));
         }
         if (key.equals(Keys.CONNECTED_DIRECTIONS) || key.equals(Keys.CONNECTED_EAST) || key.equals(Keys.CONNECTED_NORTH)
                 || key.equals(Keys.CONNECTED_SOUTH) || key.equals(Keys.CONNECTED_WEST)) {
@@ -86,15 +86,15 @@ public abstract class BlockWallMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableWallData impl$getWallTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) (Object) blockState.get(WallBlock.field_176255_P));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) (Object) blockState.get(WallBlock.VARIANT));
     }
 
     private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final net.minecraft.block.BlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.get(WallBlock.field_176254_b);
-        final Boolean east = blockState.get(WallBlock.field_176257_M);
-        final Boolean west = blockState.get(WallBlock.field_176259_O);
-        final Boolean south = blockState.get(WallBlock.field_176258_N);
+        final Boolean north = blockState.get(WallBlock.NORTH);
+        final Boolean east = blockState.get(WallBlock.EAST);
+        final Boolean west = blockState.get(WallBlock.WEST);
+        final Boolean south = blockState.get(WallBlock.SOUTH);
         final Boolean up = blockState.get(WallBlock.UP);
         if (north) {
             directions.add(Direction.NORTH);

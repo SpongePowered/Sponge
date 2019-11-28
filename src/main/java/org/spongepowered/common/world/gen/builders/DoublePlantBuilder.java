@@ -103,7 +103,7 @@ public class DoublePlantBuilder implements DoublePlant.Builder {
         }
         DoublePlantFeature wgen = new DoublePlantFeature();
         // Set a default just in case the weighted table is ever empty
-        wgen.func_180710_a(EnumPlantType.GRASS);
+        wgen.setPlantType(EnumPlantType.GRASS);
         DoublePlant populator = (DoublePlant) wgen;
         populator.getPossibleTypes().addAll(this.types);
         populator.setPlantsPerChunk(this.count);

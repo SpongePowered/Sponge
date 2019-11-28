@@ -337,7 +337,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
             this.dropItem(new ItemStack(Items.APPLE, 1), true, false);
         }
 
-        if (!this.world.getGameRules().func_82766_b("keepInventory") && !this.isSpectator()) {
+        if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
             this.destroyVanishingCursedItems();
             this.inventory.dropAllItems();
         }
@@ -430,7 +430,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         final ItemStack stack, final Block block, final BlockPos pos, final Direction facing, final ItemStack sameStack) {
         // Lazy evaluation, if the stack isn't placeable anyways, might as well not
         // call the logic.
-        if (!stack.func_179547_d(block)) {
+        if (!stack.canPlaceOn(block)) {
             return false;
         }
         // If we're going to throw an event, then do it.
@@ -521,26 +521,26 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                 entityitem.setPickupDelay(40);
 
                 if (traceItem) {
-                    entityitem.func_145799_b(player.func_70005_c_());
+                    entityitem.setThrower(player.getName());
                 }
 
                 final Random random = player.getRNG();
                 if (dropAround) {
                     final float f = random.nextFloat() * 0.5F;
                     final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
-                    entityitem.field_70159_w = -MathHelper.sin(f1) * f;
-                    entityitem.field_70179_y = MathHelper.cos(f1) * f;
-                    entityitem.field_70181_x = 0.20000000298023224D;
+                    entityitem.motionX = -MathHelper.sin(f1) * f;
+                    entityitem.motionZ = MathHelper.cos(f1) * f;
+                    entityitem.motionY = 0.20000000298023224D;
                 } else {
                     float f2 = 0.3F;
-                    entityitem.field_70159_w = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
-                    entityitem.field_70179_y = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
-                    entityitem.field_70181_x = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
+                    entityitem.motionX = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+                    entityitem.motionZ = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+                    entityitem.motionY = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
                     final float f3 = random.nextFloat() * ((float) Math.PI * 2F);
                     f2 = 0.02F * random.nextFloat();
-                    entityitem.field_70159_w += Math.cos(f3) * f2;
-                    entityitem.field_70181_x += (random.nextFloat() - random.nextFloat()) * 0.1F;
-                    entityitem.field_70179_y += Math.sin(f3) * f2;
+                    entityitem.motionX += Math.cos(f3) * f2;
+                    entityitem.motionY += (random.nextFloat() - random.nextFloat()) * 0.1F;
+                    entityitem.motionZ += Math.sin(f3) * f2;
                 }
                 // FIFTH - Capture the entity maybe?
                 if (currentState.spawnItemOrCapture(phaseContext, (PlayerEntity) (EntityPlayerBridge) this, entityitem)) {
@@ -552,7 +552,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
                 if (traceItem) {
                     if (!stack.isEmpty()) {
-                        player.addStat(Stats.func_188058_e(stack.getItem()), droppedItem.getCount());
+                        player.addStat(Stats.getDroppedObjectStats(stack.getItem()), droppedItem.getCount());
                     }
 
                     player.addStat(Stats.DROP);
@@ -567,34 +567,34 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         entityitem.setPickupDelay(40);
 
         if (traceItem) {
-            entityitem.func_145799_b(this.shadow$getName());
+            entityitem.setThrower(this.shadow$getName());
         }
 
         if (dropAround) {
             final float f = this.rand.nextFloat() * 0.5F;
             final float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
-            entityitem.field_70159_w = (double) (-MathHelper.sin(f1) * f);
-            entityitem.field_70179_y = (double) (MathHelper.cos(f1) * f);
-            entityitem.field_70181_x = 0.20000000298023224D;
+            entityitem.motionX = (double) (-MathHelper.sin(f1) * f);
+            entityitem.motionZ = (double) (MathHelper.cos(f1) * f);
+            entityitem.motionY = 0.20000000298023224D;
         } else {
             float f2 = 0.3F;
-            entityitem.field_70159_w =
+            entityitem.motionX =
                 (double) (-MathHelper.sin(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
-            entityitem.field_70179_y =
+            entityitem.motionZ =
                 (double) (MathHelper.cos(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
-            entityitem.field_70181_x = (double) (-MathHelper.sin(this.rotationPitch * 0.017453292F) * f2 + 0.1F);
+            entityitem.motionY = (double) (-MathHelper.sin(this.rotationPitch * 0.017453292F) * f2 + 0.1F);
             final float f3 = this.rand.nextFloat() * ((float) Math.PI * 2F);
             f2 = 0.02F * this.rand.nextFloat();
-            entityitem.field_70159_w += Math.cos((double) f3) * (double) f2;
-            entityitem.field_70181_x += (double) ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
-            entityitem.field_70179_y += Math.sin((double) f3) * (double) f2;
+            entityitem.motionX += Math.cos((double) f3) * (double) f2;
+            entityitem.motionY += (double) ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
+            entityitem.motionZ += Math.sin((double) f3) * (double) f2;
         }
 
         final ItemStack itemstack = this.dropItemAndGetStack(entityitem);
 
         if (traceItem) {
             if (itemstack != null && !itemstack.isEmpty()) { // Sponge - add null check
-                this.addStat(Stats.func_188058_e(itemstack.getItem()), droppedItem.getCount());
+                this.addStat(Stats.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
             }
 
             this.addStat(Stats.DROP);
@@ -798,9 +798,9 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                         }
                     }
 
-                    final double targetMotionX = targetEntity.field_70159_w;
-                    final double targetMotionY = targetEntity.field_70181_x;
-                    final double targetMotionZ = targetEntity.field_70179_y;
+                    final double targetMotionX = targetEntity.motionX;
+                    final double targetMotionY = targetEntity.motionY;
+                    final double targetMotionZ = targetEntity.motionZ;
                     final boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage((PlayerEntity) (Object) this), damage);
 
                     if (attackSucceeded) {
@@ -817,7 +817,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                         }
 
                         if (isSweapingAttack) {
-                            for (final LivingEntity entitylivingbase : this.world.func_72872_a(LivingEntity.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
+                            for (final LivingEntity entitylivingbase : this.world.getEntitiesWithinAABB(LivingEntity.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
                                 if (entitylivingbase != (PlayerEntity) (Object) this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSq(entitylivingbase) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
                                     // entitylivingbase.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
@@ -863,9 +863,9 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                         if (targetEntity instanceof ServerPlayerEntity && targetEntity.velocityChanged) {
                             ((ServerPlayerEntity) targetEntity).connection.sendPacket(new SEntityVelocityPacket(targetEntity));
                             targetEntity.velocityChanged = false;
-                            targetEntity.field_70159_w = targetMotionX;
-                            targetEntity.field_70181_x = targetMotionY;
-                            targetEntity.field_70179_y = targetMotionZ;
+                            targetEntity.motionX = targetMotionX;
+                            targetEntity.motionY = targetMotionY;
+                            targetEntity.motionZ = targetMotionZ;
                         }
 
                         if (isCriticalAttack) {
@@ -896,7 +896,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                         Entity entity = targetEntity;
 
                         if (targetEntity instanceof MultiPartEntityPart) {
-                            final IEntityMultiPart ientitymultipart = ((MultiPartEntityPart) targetEntity).field_70259_a;
+                            final IEntityMultiPart ientitymultipart = ((MultiPartEntityPart) targetEntity).parent;
 
                             if (ientitymultipart instanceof LivingEntity) {
                                 entity = (LivingEntity) ientitymultipart;
@@ -920,7 +920,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
                             if (this.world instanceof ServerWorld && f5 > 2.0F) {
                                 final int k = (int) ((double) f5 * 0.5D);
-                                ((ServerWorld) this.world).func_175739_a(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.posX, targetEntity.posY + (double) (targetEntity.field_70131_O * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D, new int[0]);
+                                ((ServerWorld) this.world).spawnParticle(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.posX, targetEntity.posY + (double) (targetEntity.height * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D, new int[0]);
                             }
                         }
 

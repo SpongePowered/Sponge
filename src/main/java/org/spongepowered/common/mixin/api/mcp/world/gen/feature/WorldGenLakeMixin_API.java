@@ -71,7 +71,7 @@ public abstract class WorldGenLakeMixin_API extends Feature implements Lake {
             final int x = random.nextInt(size.getX());
             final int y = this.api$height.getFlooredAmount(random);
             final int z = random.nextInt(size.getZ());
-            func_180709_b(world, random, new BlockPos(x + min.getX(), y + min.getY(), z + min.getZ()));
+            generate(world, random, new BlockPos(x + min.getX(), y + min.getY(), z + min.getZ()));
         }
     }
 

@@ -86,8 +86,8 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
     public static GlobalPalette<BiomeType> getBiomePalette() {
         if (biomePalette == null) {
             biomePalette = new GlobalPalette<>(PaletteTypes.GLOBAL_BIOMES,
-                (type) -> Biome.func_185362_a((Biome) (type instanceof VirtualBiomeType ? ((VirtualBiomeType) type).getPersistedType() : type)),
-                (id) -> (BiomeType) Biome.func_185357_a(id),
+                (type) -> Biome.getIdForBiome((Biome) (type instanceof VirtualBiomeType ? ((VirtualBiomeType) type).getPersistedType() : type)),
+                (id) -> (BiomeType) Biome.getBiomeForId(id),
                 BiomeType.class
                 );
 

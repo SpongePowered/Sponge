@@ -300,7 +300,7 @@ public class TeleporterMixin_API implements PortalAgent {
             }
         }
 
-        BlockState iblockstate = Blocks.NETHER_PORTAL.getDefaultState().func_177226_a(NetherPortalBlock.AXIS, targetDirection != 0 ? Direction.Axis.X : Direction.Axis.Z);
+        BlockState iblockstate = Blocks.NETHER_PORTAL.getDefaultState().withProperty(NetherPortalBlock.AXIS, targetDirection != 0 ? Direction.Axis.X : Direction.Axis.Z);
 
         for (int i8 = 0; i8 < 4; ++i8) {
             for (int l8 = 0; l8 < 4; ++l8) {

@@ -55,7 +55,7 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
         if (!value.getUniqueId().isPresent()) {
             return false;
         }
-        final Entity newTarget = ((ServerWorld) ((ShulkerBulletEntity) dataHolder).world).func_175733_a(value.getUniqueId().get());
+        final Entity newTarget = ((ServerWorld) ((ShulkerBulletEntity) dataHolder).world).getEntityFromUuid(value.getUniqueId().get());
         if (newTarget == null) {
             return false;
         }

@@ -84,12 +84,12 @@ public final class CustomBiomeProvider extends BiomeProvider {
      *        in BiomeCacheBlock
      */
     @Override
-    public Biome[] func_76931_a(Biome[] listToReuse, int x, int z, int width, int length, boolean cacheFlag) {
-        return this.func_76933_b(listToReuse, x, z, width, length);
+    public Biome[] getBiomes(Biome[] listToReuse, int x, int z, int width, int length, boolean cacheFlag) {
+        return this.getBiomes(listToReuse, x, z, width, length);
     }
 
     @Override
-    public Biome[] func_76937_a(Biome[] biomeArrayZoomedOut, int xStart, int zStart, int xSize, int zSize) {
+    public Biome[] getBiomesForGeneration(Biome[] biomeArrayZoomedOut, int xStart, int zStart, int xSize, int zSize) {
         // "Biomes for generation" are a 4x zoomed out (on both the x and z
         // axis) version of the normal biomes
         // The easiest way to obtain these biomes is to obtain the normal
@@ -129,8 +129,8 @@ public final class CustomBiomeProvider extends BiomeProvider {
     }
 
     @Override
-    public boolean func_76940_a(int xCenter, int zCenter, int range, @SuppressWarnings("rawtypes") List searchingForBiomes) {
-        IntCache.func_76446_a();
+    public boolean areBiomesViable(int xCenter, int zCenter, int range, @SuppressWarnings("rawtypes") List searchingForBiomes) {
+        IntCache.resetIntCache();
         int xStartSegment = xCenter - range;
         int zStartSegment = zCenter - range;
         int xMaxSegment = xCenter + range;
@@ -155,7 +155,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
 
     @Override
     public BlockPos findBiomePosition(int xCenter, int zCenter, int range, List<Biome> biomes, Random random) {
-        IntCache.func_76446_a();
+        IntCache.resetIntCache();
         int xStartSegment = xCenter - range;
         int zStartSegment = zCenter - range;
         int xMaxSegment = xCenter + range;
@@ -183,7 +183,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
     }
 
     @Override
-    public Biome[] func_76933_b(Biome[] biomeArray, int startX, int startZ, int sizeX, int sizeZ) {
+    public Biome[] getBiomes(Biome[] biomeArray, int startX, int startZ, int sizeX, int sizeZ) {
         if (biomeArray == null || biomeArray.length < sizeX * sizeZ) {
             biomeArray = new Biome[sizeX * sizeZ];
         } else {

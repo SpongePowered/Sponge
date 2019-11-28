@@ -65,10 +65,10 @@ public abstract class BlockFenceGateMixin extends BlockHorizontalMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
-            return Optional.of((BlockState) blockState.func_177226_a(FenceGateBlock.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.withProperty(FenceGateBlock.OPEN, isOpen));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.func_177226_a(FenceGateBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.withProperty(FenceGateBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableInWallData) {
             return Optional.of((BlockState) blockState);
@@ -80,10 +80,10 @@ public abstract class BlockFenceGateMixin extends BlockHorizontalMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;
-            return Optional.of((BlockState) blockState.func_177226_a(FenceGateBlock.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.withProperty(FenceGateBlock.OPEN, isOpen));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.func_177226_a(FenceGateBlock.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.withProperty(FenceGateBlock.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.IN_WALL)) {
             return Optional.of((BlockState) blockState);

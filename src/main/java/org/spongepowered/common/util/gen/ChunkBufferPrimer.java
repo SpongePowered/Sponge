@@ -46,19 +46,19 @@ public class ChunkBufferPrimer extends ChunkPrimer {
     }
 
     @Override
-    public net.minecraft.block.BlockState func_177856_a(int x, int y, int z) {
+    public net.minecraft.block.BlockState getBlockState(int x, int y, int z) {
         return (net.minecraft.block.BlockState) this.buffer.getBlock(this.min.getX() + x, this.min.getY() + y, this.min.getZ() + z);
     }
 
     @Override
-    public void func_177855_a(int x, int y, int z, net.minecraft.block.BlockState state) {
+    public void setBlockState(int x, int y, int z, net.minecraft.block.BlockState state) {
         this.buffer.setBlock(this.min.getX() + x, this.min.getY() + y, this.min.getZ() + z, (BlockState) state);
     }
 
     @Override
-    public int func_186138_a(int x, int z) {
+    public int findGroundBlockIdx(int x, int z) {
         for (int y = 255; y >= 0; --y) {
-            net.minecraft.block.BlockState iblockstate = func_177856_a(x, y, z);
+            net.minecraft.block.BlockState iblockstate = getBlockState(x, y, z);
 
             if (iblockstate != null && iblockstate != defaultState) {
                 return y;

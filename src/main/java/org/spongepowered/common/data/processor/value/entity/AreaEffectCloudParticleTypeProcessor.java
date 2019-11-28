@@ -57,7 +57,7 @@ public class AreaEffectCloudParticleTypeProcessor extends AbstractSpongeValuePro
         if (internalType == null) {
             return false;
         }
-        container.func_184491_a(internalType);
+        container.setParticle(internalType);
         return true;
     }
 

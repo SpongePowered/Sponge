@@ -50,7 +50,7 @@ public abstract class AbstractCatalogDataProcessor<T, V extends BaseValue<T>, M 
 
     @Override
     protected boolean set(ItemStack itemStack, T value) {
-        itemStack.func_77964_b(this.setToMeta(value));
+        itemStack.setItemDamage(this.setToMeta(value));
         return true;
     }
 

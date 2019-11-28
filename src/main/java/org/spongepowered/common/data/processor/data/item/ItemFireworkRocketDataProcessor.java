@@ -48,7 +48,7 @@ public class ItemFireworkRocketDataProcessor
         extends AbstractItemSingleDataProcessor<Integer, MutableBoundedValue<Integer>, FireworkRocketData, ImmutableFireworkRocketData> {
 
     public ItemFireworkRocketDataProcessor() {
-        super(stack -> stack.getItem().equals(Items.field_151152_bP), Keys.FIREWORK_FLIGHT_MODIFIER);
+        super(stack -> stack.getItem().equals(Items.FIREWORKS), Keys.FIREWORK_FLIGHT_MODIFIER);
     }
 
     @Override

@@ -53,14 +53,14 @@ import java.util.Optional;
 public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<EntityType, Value<EntityType>, SpawnableData, ImmutableSpawnableData> {
 
     public SpawnableDataProcessor() {
-        super(input -> input.getItem().equals(Items.field_151063_bx), Keys.SPAWNABLE_ENTITY_TYPE);
+        super(input -> input.getItem().equals(Items.SPAWN_EGG), Keys.SPAWNABLE_ENTITY_TYPE);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean set(final ItemStack itemStack, final EntityType value) {
-        final ResourceLocation name = EntityList.func_191306_a((Class<? extends Entity>) value.getEntityClass());
-        if (EntityList.field_75627_a.containsKey(name)) {
+        final ResourceLocation name = EntityList.getKey((Class<? extends Entity>) value.getEntityClass());
+        if (EntityList.ENTITY_EGGS.containsKey(name)) {
             itemStack.getOrCreateChildTag(Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG)
                 .putString(Constants.Entity.ENTITY_TYPE_ID, name.toString());
             return true;
@@ -70,7 +70,7 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
 
     @Override
     public Optional<EntityType> getVal(final ItemStack itemStack) {
-        final ResourceLocation name = ItemMonsterPlacer.func_190908_h(itemStack);
+        final ResourceLocation name = ItemMonsterPlacer.getNamedIdFrom(itemStack);
         if (name != null) {
             final Class<? extends Entity> entity = SpongeImplHooks.getEntityClass(name);
             return Optional.ofNullable(EntityTypeRegistryModule.getInstance().getForClass(entity));

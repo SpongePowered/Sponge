@@ -49,7 +49,7 @@ public class ProjectileSourceSerializer {
             return new StringNBT(((Entity) projectileSource).getUniqueId().toString());
         }
         if (projectileSource instanceof BlockProjectileSource) {
-            return new LongNBT(VecHelper.toBlockPos(((BlockProjectileSource) projectileSource).getLocation()).func_177986_g());
+            return new LongNBT(VecHelper.toBlockPos(((BlockProjectileSource) projectileSource).getLocation()).toLong());
         }
         return null;
     }
@@ -63,7 +63,7 @@ public class ProjectileSourceSerializer {
             }
         }
         if (tag instanceof LongNBT) {
-            BlockPos pos = BlockPos.func_177969_a(((LongNBT) tag).getLong());
+            BlockPos pos = BlockPos.fromLong(((LongNBT) tag).getLong());
             if (worldObj.isBlockLoaded(pos)) {
                 TileEntity tileEntity = worldObj.getTileEntity(pos);
                 if (tileEntity instanceof ProjectileSource) {
@@ -80,7 +80,7 @@ public class ProjectileSourceSerializer {
         }
         NBTBase projectileNbt = toNbt(projectileSource);
         if (projectileNbt != null) {
-            compound.func_74782_a("projectileSource", projectileNbt);
+            compound.setTag("projectileSource", projectileNbt);
         }
     }
 

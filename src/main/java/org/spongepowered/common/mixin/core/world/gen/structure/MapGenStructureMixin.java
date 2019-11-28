@@ -76,10 +76,10 @@ public abstract class MapGenStructureMixin extends MapGenBase {
         impl$isGeneratingStructures = true;
         for (final StructureStart structurestart : this.structureMap.values())
         {
-            if (structurestart.isValid() && structurestart.func_175788_a(chunkCoord) && structurestart.getBoundingBox().intersectsWith(i, j, i + 15, j + 15))
+            if (structurestart.isValid() && structurestart.isValidForPostProcess(chunkCoord) && structurestart.getBoundingBox().intersectsWith(i, j, i + 15, j + 15))
             {
                 structurestart.generateStructure(worldIn, randomIn, new MutableBoundingBox(i, j, i + 15, j + 15));
-                structurestart.func_175787_b(chunkCoord);
+                structurestart.notifyPostProcessAt(chunkCoord);
                 flag = true;
                 this.setStructureStart(structurestart.getChunkPosX(), structurestart.getChunkPosZ(), structurestart);
             }

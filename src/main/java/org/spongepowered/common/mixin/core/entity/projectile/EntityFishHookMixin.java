@@ -100,8 +100,8 @@ public abstract class EntityFishHookMixin extends EntityMixin {
                 // Moved from below
                 LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerWorld) this.world);
                 lootcontext$builder.withLuck(this.luck + this.angler.getLuck());
-                transactions = this.world.func_184146_ak().getLootTableFromLocation(LootTables.GAMEPLAY_FISHING)
-                        .func_186462_a(this.rand, lootcontext$builder.func_186471_a())
+                transactions = this.world.getLootTableManager().getLootTableFromLocation(LootTables.GAMEPLAY_FISHING)
+                        .generateLootForPools(this.rand, lootcontext$builder.build())
                         .stream()
                         .map(s -> {
                             ItemStackSnapshot snapshot = ((org.spongepowered.api.item.inventory.ItemStack) s).createSnapshot();
@@ -143,15 +143,15 @@ public abstract class EntityFishHookMixin extends EntityMixin {
                     double d2 = this.angler.posZ - this.posZ;
                     double d3 = MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                     //double d4 = 0.1D;
-                    entityitem.field_70159_w = d0 * 0.1D;
-                    entityitem.field_70181_x = d1 * 0.1D + MathHelper.sqrt(d3) * 0.08D;
-                    entityitem.field_70179_y = d2 * 0.1D;
+                    entityitem.motionX = d0 * 0.1D;
+                    entityitem.motionY = d1 * 0.1D + MathHelper.sqrt(d3) * 0.08D;
+                    entityitem.motionZ = d2 * 0.1D;
                     this.world.addEntity0(entityitem);
                     this.angler.world.addEntity0(new ExperienceOrbEntity(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D,
                             this.rand.nextInt(6) + 1));
                     Item item = itemstack.getItem();
 
-                    if (item == Items.field_151115_aP || item == Items.field_179566_aV) {
+                    if (item == Items.FISH || item == Items.COOKED_FISH) {
                         this.angler.addStat(Stats.FISH_CAUGHT, 1);
                     }
                 }

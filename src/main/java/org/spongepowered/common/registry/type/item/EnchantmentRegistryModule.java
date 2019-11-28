@@ -75,15 +75,15 @@ public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogR
 
     @Override
     public void registerDefaults() {
-        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.field_185264_b.keySet()) {
-            this.enchantmentMappings.put(key.toString(), (EnchantmentType) net.minecraft.enchantment.Enchantment.field_185264_b.getOrDefault(key));
+        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.REGISTRY.keySet()) {
+            this.enchantmentMappings.put(key.toString(), (EnchantmentType) net.minecraft.enchantment.Enchantment.REGISTRY.getOrDefault(key));
         }
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
-        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.field_185264_b.keySet()) {
-            net.minecraft.enchantment.Enchantment enchantment = net.minecraft.enchantment.Enchantment.field_185264_b.getOrDefault(key);
+        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.REGISTRY.keySet()) {
+            net.minecraft.enchantment.Enchantment enchantment = net.minecraft.enchantment.Enchantment.REGISTRY.getOrDefault(key);
             if (enchantment == null) {
                 continue;
             }

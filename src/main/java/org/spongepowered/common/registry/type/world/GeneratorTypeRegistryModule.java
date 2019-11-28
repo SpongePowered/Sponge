@@ -93,7 +93,7 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
     public void registerAdditional() {
         for (final WorldType worldType : WorldTypeAccessor.accessor$getWorldTypes()) {
             if (worldType != null && !this.catalogTypeMap.values().contains(worldType)) {
-                this.catalogTypeMap.put(worldType.func_77127_a().toLowerCase(Locale.ENGLISH), (GeneratorType) worldType);
+                this.catalogTypeMap.put(worldType.getName().toLowerCase(Locale.ENGLISH), (GeneratorType) worldType);
             }
         }
         // Re-map fields in case mods have changed vanilla world types

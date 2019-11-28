@@ -83,7 +83,7 @@ public abstract class EntityTrackerEntryMixin {
     @Redirect(method = "updatePlayerList", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityTrackerEntry;sendPacketToTrackedPlayers(Lnet/minecraft/network/Packet;)V", ordinal = 0))
     public void onSendPassengerPacket(EntityTrackerEntry entityTrackerEntry, IPacket<?> packet) {
         // We need to notify a player of their passengers (since that can't normally happen in Vanilla)
-        entityTrackerEntry.func_151261_b(packet);
+        entityTrackerEntry.sendToTrackingAndSelf(packet);
     }
 
     // The spawn packet for a human is a player

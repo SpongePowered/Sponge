@@ -118,7 +118,7 @@ public abstract class WorldEntitySpawnerMixin {
             // mob spawn range set by server.
             final int MOB_SPAWN_COUNT_DIV = (2 * mobSpawnRange + 1) * (2 * mobSpawnRange + 1);
 
-            for (final PlayerEntity entityplayer : world.field_73010_i) {
+            for (final PlayerEntity entityplayer : world.playerEntities) {
                 // We treat players who do not affect spawning as "spectators"
                 if (!((EntityPlayerBridge) entityplayer).bridge$affectsSpawning() || entityplayer.isSpectator()) {
                     continue;
@@ -134,7 +134,7 @@ public abstract class WorldEntitySpawnerMixin {
                             chunk =
                             ((ChunkProviderBridge) world.getChunkProvider())
                                 .bridge$getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
-                        if (chunk == null || (chunk.field_189550_d && !((ChunkBridge) chunk).bridge$isPersistedChunk())) {
+                        if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).bridge$isPersistedChunk())) {
                             // Don't attempt to spawn in an unloaded chunk
                             continue;
                         }
@@ -143,9 +143,9 @@ public abstract class WorldEntitySpawnerMixin {
                         ++chunkSpawnCandidates;
                         final ChunkPos chunkPos = chunk.getPos();
                         if (!flag && world.getWorldBorder().contains(chunkPos)) {
-                            final PlayerChunkMapEntry playerchunkmapentry = world.func_184164_w().func_187301_b(chunkPos.x, chunkPos.z);
+                            final PlayerChunkMapEntry playerchunkmapentry = world.getPlayerChunkMap().getEntry(chunkPos.x, chunkPos.z);
 
-                            if (playerchunkmapentry != null && playerchunkmapentry.func_187274_e() && !spongeChunk.bridge$isSpawning()) {
+                            if (playerchunkmapentry != null && playerchunkmapentry.isSentToPlayers() && !spongeChunk.bridge$isSpawning()) {
                                 this.impl$eligibleSpawnChunks.add(chunk);
                                 spongeChunk.bridge$setIsSpawning(true);
                             }
@@ -205,7 +205,7 @@ public abstract class WorldEntitySpawnerMixin {
                         final int i2 = blockpos.getZ();
                         final BlockState iblockstate = world.getBlockState(blockpos);
 
-                        if (!iblockstate.func_185915_l()) {
+                        if (!iblockstate.isNormalCube()) {
                             int spawnCount = 0;
                             for (int spawnLimit = 0; spawnLimit < 3; ++spawnLimit) {
                                 int l2 = k1;
@@ -224,17 +224,17 @@ public abstract class WorldEntitySpawnerMixin {
                                     final double spawnY = i3;
                                     final double spawnZ = j3 + 0.5F;
 
-                                    if (!world.func_175636_b(spawnX, spawnY, spawnZ, 24.0D)
-                                        && world.getSpawnPoint().func_177954_c(spawnX, spawnY, spawnZ) >= 576.0D) {
+                                    if (!world.isAnyPlayerWithinRangeAt(spawnX, spawnY, spawnZ, 24.0D)
+                                        && world.getSpawnPoint().distanceSq(spawnX, spawnY, spawnZ) >= 576.0D) {
                                         if (spawnListEntry == null) {
-                                            spawnListEntry = world.func_175734_a(enumCreatureType, mutableBlockPos);
+                                            spawnListEntry = world.getSpawnListEntryForTypeAt(enumCreatureType, mutableBlockPos);
 
                                             if (spawnListEntry == null) {
                                                 break;
                                             }
                                         }
 
-                                        final EntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(spawnListEntry.field_76300_b);
+                                        final EntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(spawnListEntry.entityClass);
                                         if (entityType != null) {
                                             final Vector3d vector3d = new Vector3d(spawnX, spawnY, spawnZ);
                                             final Transform<org.spongepowered.api.world.World>
@@ -250,27 +250,27 @@ public abstract class WorldEntitySpawnerMixin {
                                             }
                                         }
 
-                                        if (world.func_175732_a(enumCreatureType, spawnListEntry, mutableBlockPos)
-                                            && WorldEntitySpawner.func_180267_a(
-                                            EntitySpawnPlacementRegistry.func_180109_a(spawnListEntry.field_76300_b), world,
+                                        if (world.canCreatureTypeSpawnHere(enumCreatureType, spawnListEntry, mutableBlockPos)
+                                            && WorldEntitySpawner.canCreatureTypeSpawnAtLocation(
+                                            EntitySpawnPlacementRegistry.getPlacementForEntity(spawnListEntry.entityClass), world,
                                             mutableBlockPos)) {
                                             final MobEntity entityliving;
 
                                             try {
                                                 entityliving =
-                                                    spawnListEntry.field_76300_b.getConstructor(new Class<?>[]{World.class}).newInstance(world);
+                                                    spawnListEntry.entityClass.getConstructor(new Class<?>[]{World.class}).newInstance(world);
                                             } catch (final Exception exception) {
                                                 exception.printStackTrace();
                                                 continue labelOuterLoop;
                                             }
 
                                             entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, world.rand.nextFloat() * 360.0F, 0.0F);
-                                            final boolean entityNotColliding = entityliving.func_70058_J();
+                                            final boolean entityNotColliding = entityliving.isNotColliding();
 
                                             final SpawnerSpawnType type = SpongeImplHooks.canEntitySpawnHere(entityliving, entityNotColliding);
                                             if (type != SpawnerSpawnType.NONE) {
                                                 if (type == SpawnerSpawnType.NORMAL) {
-                                                    ientitylivingdata = entityliving.func_180482_a(world.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
+                                                    ientitylivingdata = entityliving.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
                                                 }
 
                                                 if (entityNotColliding) {
@@ -304,9 +304,9 @@ public abstract class WorldEntitySpawnerMixin {
 
     private static BlockPos getRandomChunkPosition(final World worldIn, final Chunk chunk)
     {
-        final int i = chunk.field_76635_g * 16 + worldIn.rand.nextInt(16);
-        final int j = chunk.field_76647_h * 16 + worldIn.rand.nextInt(16);
-        final int k = MathHelper.roundUp(chunk.func_177433_f(new BlockPos(i, 0, j)) + 1, 16);
+        final int i = chunk.x * 16 + worldIn.rand.nextInt(16);
+        final int j = chunk.z * 16 + worldIn.rand.nextInt(16);
+        final int k = MathHelper.roundUp(chunk.getHeight(new BlockPos(i, 0, j)) + 1, 16);
         final int l = worldIn.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
         return new BlockPos(i, l, j);
     }
@@ -322,7 +322,7 @@ public abstract class WorldEntitySpawnerMixin {
     {
         // Sponge start
         final Chunk chunk = ((ChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x, z);
-        if (chunk == null || (chunk.field_189550_d && !((ChunkBridge) chunk).bridge$isPersistedChunk())) {
+        if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).bridge$isPersistedChunk())) {
             // Don't attempt to spawn in an unloaded chunk
             return null;
         }
@@ -330,7 +330,7 @@ public abstract class WorldEntitySpawnerMixin {
 
         final int i = x * 16 + worldIn.rand.nextInt(16);
         final int j = z * 16 + worldIn.rand.nextInt(16);
-        final int k = MathHelper.roundUp(chunk.func_177433_f(new BlockPos(i, 0, j)) + 1, 16);
+        final int k = MathHelper.roundUp(chunk.getHeight(new BlockPos(i, 0, j)) + 1, 16);
         final int l = worldIn.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
         return new BlockPos(i, l, j);
     }
@@ -361,7 +361,7 @@ public abstract class WorldEntitySpawnerMixin {
         "Lnet/minecraft/world/WorldEntitySpawner;canCreatureTypeSpawnAtLocation(Lnet/minecraft/entity/EntityLiving$SpawnPlacementType;"
         + "Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Z"))
     private static boolean onCanGenerate(final MobEntity.SpawnPlacementType type, final World worldIn, final BlockPos pos) {
-        return WorldEntitySpawner.func_180267_a(type, worldIn, pos) && check(pos, worldIn);
+        return WorldEntitySpawner.canCreatureTypeSpawnAtLocation(type, worldIn, pos) && check(pos, worldIn);
     }
 
     /**
@@ -377,7 +377,7 @@ public abstract class WorldEntitySpawnerMixin {
             + "Lnet/minecraft/util/WeightedRandom$Item;"))
     private static WeightedRandom.Item onGetRandom(final Random random, final List<Biome.SpawnListEntry> collection) {
         final Biome.SpawnListEntry entry = WeightedRandom.getRandomItem(random, collection);
-        setEntityType(entry.field_76300_b);
+        setEntityType(entry.entityClass);
         return entry;
     }
 

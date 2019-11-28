@@ -474,8 +474,8 @@ public final class WorldManager {
         // If the World represented in the properties is still loaded, save the properties and have the World reload its info
         if (optWorldServer.isPresent()) {
             final ServerWorld worldServer = optWorldServer.get();
-            worldServer.func_72860_G().saveWorldInfo((WorldInfo) properties);
-            worldServer.func_72860_G().loadWorldInfo();
+            worldServer.getSaveHandler().saveWorldInfo((WorldInfo) properties);
+            worldServer.getSaveHandler().loadWorldInfo();
         } else {
             new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer()).saveWorldInfo((WorldInfo) properties);
         }
@@ -512,7 +512,7 @@ public final class WorldManager {
 
         // Vanilla sometimes doesn't remove player entities from world first
         if (!isShuttingDown) {
-            if (!worldServer.field_73010_i.isEmpty()) {
+            if (!worldServer.playerEntities.isEmpty()) {
                 return false;
             }
 
@@ -570,10 +570,10 @@ public final class WorldManager {
         if (((WorldProperties) worldServer.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             return;
         } else {
-            worldServer.func_73044_a(true, null);
+            worldServer.saveAllChunks(true, null);
         }
         if (flush) {
-            worldServer.func_73041_k();
+            worldServer.flush();
         }
     }
 
@@ -735,7 +735,7 @@ public final class WorldManager {
             // Step 3 - Get our world information from disk
             final SaveHandler saveHandler;
             if (dimensionId == 0) {
-                saveHandler = server.getActiveAnvilConverter().func_75804_a(server.getFolderName(), true);
+                saveHandler = server.getActiveAnvilConverter().getSaveLoader(server.getFolderName(), true);
             } else {
                 saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
             }
@@ -822,7 +822,7 @@ public final class WorldManager {
     private static WorldInfo createWorldInfoFromSettings(final Path currentSaveRoot, final org.spongepowered.api.world.DimensionType dimensionType, final int
       dimensionId, final String worldFolderName, final WorldSettings worldSettings, final String generatorOptions) {
 
-        worldSettings.func_82750_a(generatorOptions);
+        worldSettings.setGeneratorOptions(generatorOptions);
 
         ((WorldSettingsBridge) (Object) worldSettings).bridge$setDimensionType(dimensionType);
         ((WorldSettingsBridge)(Object) worldSettings).bridge$setGenerateSpawnOnLoad(((DimensionTypeBridge) dimensionType).bridge$shouldGenerateSpawnOnLoad());
@@ -851,9 +851,9 @@ public final class WorldManager {
 
         ((MinecraftServerBridge) server).bridge$putWorldTickTimes(dimensionId, new long[100]);
 
-        worldServer.func_175643_b();
+        worldServer.init();
 
-        worldServer.func_72954_a(new ServerWorldEventHandler(server, worldServer));
+        worldServer.addEventListener(new ServerWorldEventHandler(server, worldServer));
 
         // This code changes from Mojang's to account for per-world API-set GameModes.
         if (!server.isSinglePlayer() && worldServer.getWorldInfo().getGameType() == GameType.NOT_SET) {
@@ -867,7 +867,7 @@ public final class WorldManager {
 
             // WorldSettings is only non-null here if this is a newly generated WorldInfo and therefore we need to initialize to calculate spawn.
             if (worldSettings != null) {
-                worldServer.func_72963_a(worldSettings);
+                worldServer.initialize(worldSettings);
             }
 
             if (((DimensionTypeBridge) ((org.spongepowered.api.world.World) worldServer).getDimension().getType()).bridge$shouldLoadSpawn()) {
@@ -999,7 +999,7 @@ public final class WorldManager {
                     continue;
                 }
 
-                spongeDataCompound = DataUtil.spongeDataFixer.func_188257_a(FixTypes.LEVEL, spongeDataCompound);
+                spongeDataCompound = DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeDataCompound);
 
                 final int dimensionId = spongeDataCompound.getInt(Constants.Sponge.World.DIMENSION_ID);
                 // We do not handle Vanilla dimensions, skip them
@@ -1288,9 +1288,9 @@ public final class WorldManager {
         final Optional<ServerWorld> optWorldServer = getWorldByDimensionId(0);
 
         if (optWorldServer.isPresent()) {
-            return Optional.of(optWorldServer.get().func_72860_G().getWorldDirectory().toPath());
+            return Optional.of(optWorldServer.get().getSaveHandler().getWorldDirectory().toPath());
         } else if (SpongeImpl.getGame().getState().ordinal() >= GameState.SERVER_ABOUT_TO_START.ordinal()) {
-            final SaveHandler saveHandler = (SaveHandler) SpongeImpl.getServer().getActiveAnvilConverter().func_75804_a(SpongeImpl.getServer().getFolderName(), false);
+            final SaveHandler saveHandler = (SaveHandler) SpongeImpl.getServer().getActiveAnvilConverter().getSaveLoader(SpongeImpl.getServer().getFolderName(), false);
             return Optional.of(saveHandler.getWorldDirectory().toPath());
         }
 

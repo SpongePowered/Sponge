@@ -56,7 +56,7 @@ public class JukeboxDataProcessor extends
     protected boolean set(JukeboxBlock.TileEntityJukebox jukebox, ItemStackSnapshot stackSnapshot) {
         BlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
         if (stackSnapshot == ItemStackSnapshot.NONE) {
-            if (jukebox.func_145856_a() == null) {
+            if (jukebox.getRecord() == null) {
                 return true;
             }
             return remove(jukebox);
@@ -71,10 +71,10 @@ public class JukeboxDataProcessor extends
 
     @Override
     protected Optional<ItemStackSnapshot> getVal(JukeboxBlock.TileEntityJukebox jukebox) {
-        if (jukebox.func_145856_a() == null) {
+        if (jukebox.getRecord() == null) {
             return Optional.empty();
         }
-        return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) jukebox.func_145856_a()).createSnapshot());
+        return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) jukebox.getRecord()).createSnapshot());
     }
 
     private boolean remove(JukeboxBlock.TileEntityJukebox jukebox) {

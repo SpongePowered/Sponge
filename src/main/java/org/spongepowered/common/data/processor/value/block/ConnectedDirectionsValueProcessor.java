@@ -57,19 +57,19 @@ public class ConnectedDirectionsValueProcessor extends
 
     @Override
     protected Optional<Set<Direction>> getVal(ChestTileEntity chest) {
-        chest.func_145979_i();
+        chest.checkForAdjacentChests();
 
         Set<Direction> directions = Sets.newHashSet();
-        if (chest.field_145992_i != null) {
+        if (chest.adjacentChestZNeg != null) {
             directions.add(Direction.NORTH);
         }
-        if (chest.field_145990_j != null) {
+        if (chest.adjacentChestXPos != null) {
             directions.add(Direction.EAST);
         }
-        if (chest.field_145988_l != null) {
+        if (chest.adjacentChestZPos != null) {
             directions.add(Direction.SOUTH);
         }
-        if (chest.field_145991_k != null) {
+        if (chest.adjacentChestXNeg != null) {
             directions.add(Direction.WEST);
         }
 

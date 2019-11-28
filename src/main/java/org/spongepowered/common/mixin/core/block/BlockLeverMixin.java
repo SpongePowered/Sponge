@@ -63,17 +63,17 @@ public abstract class BlockLeverMixin extends BlockMixin {
     @Override
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.withProperty(LeverBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            final Axis axis = this.impl$getAxisFromOrientation(blockState.get(LeverBlock.field_176360_a));
-            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
+            final Axis axis = this.impl$getAxisFromOrientation(blockState.get(LeverBlock.FACING));
+            return Optional.of((BlockState) blockState.withProperty(LeverBlock.FACING, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         if (manipulator instanceof ImmutableAxisData) {
             final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
-            final Direction dir = Constants.DirectionFunctions.getFor(blockState.get(LeverBlock.field_176360_a));
-            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
+            final Direction dir = Constants.DirectionFunctions.getFor(blockState.get(LeverBlock.FACING));
+            return Optional.of((BlockState) blockState.withProperty(LeverBlock.FACING, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -81,17 +81,17 @@ public abstract class BlockLeverMixin extends BlockMixin {
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.withProperty(LeverBlock.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            final Axis axis = this.impl$getAxisFromOrientation(blockState.get(LeverBlock.field_176360_a));
-            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
+            final Axis axis = this.impl$getAxisFromOrientation(blockState.get(LeverBlock.FACING));
+            return Optional.of((BlockState) blockState.withProperty(LeverBlock.FACING, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         if (key.equals(Keys.AXIS)) {
             final Axis axis = (Axis) value;
-            final Direction dir = Constants.DirectionFunctions.getFor(blockState.get(LeverBlock.field_176360_a));
-            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
+            final Direction dir = Constants.DirectionFunctions.getFor(blockState.get(LeverBlock.FACING));
+            return Optional.of((BlockState) blockState.withProperty(LeverBlock.FACING, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -101,12 +101,12 @@ public abstract class BlockLeverMixin extends BlockMixin {
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
-        final LeverBlock.EnumOrientation intDir = blockState.get(LeverBlock.field_176360_a);
+        final LeverBlock.EnumOrientation intDir = blockState.get(LeverBlock.FACING);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, Constants.DirectionFunctions.getFor(intDir));
     }
 
     private ImmutableAxisData impl$getAxisData(final net.minecraft.block.BlockState blockState) {
-        final LeverBlock.EnumOrientation orientation = blockState.get(LeverBlock.field_176360_a);
+        final LeverBlock.EnumOrientation orientation = blockState.get(LeverBlock.FACING);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class, this.impl$getAxisFromOrientation(orientation));
     }
 

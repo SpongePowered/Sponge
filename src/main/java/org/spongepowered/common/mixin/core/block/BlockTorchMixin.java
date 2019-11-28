@@ -63,7 +63,7 @@ public abstract class BlockTorchMixin extends BlockMixin {
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.func_177226_a(TorchBlock.field_176596_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(TorchBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -75,18 +75,18 @@ public abstract class BlockTorchMixin extends BlockMixin {
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown((Direction) value);
-            return Optional.of((BlockState) blockState.func_177226_a(TorchBlock.field_176596_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(TorchBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableAttachedData impl$getIsAttachedFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class,
-                blockState.get(TorchBlock.field_176596_a) != net.minecraft.util.Direction.UP);
+                blockState.get(TorchBlock.FACING) != net.minecraft.util.Direction.UP);
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.get(TorchBlock.field_176596_a)));
+                Constants.DirectionFunctions.getFor(blockState.get(TorchBlock.FACING)));
     }
 }

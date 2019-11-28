@@ -67,13 +67,13 @@ public abstract class BlockTripWireMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDisarmedData) {
             final boolean disarmed = ((ImmutableDisarmedData) manipulator).disarmed().get();
-            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.DISARMED, disarmed));
+            return Optional.of((BlockState) blockState.withProperty(TripWireBlock.DISARMED, disarmed));
         }
         if (manipulator instanceof ImmutableAttachedData) {
             return Optional.of((BlockState) blockState);
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.withProperty(TripWireBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableConnectedDirectionData) {
             return Optional.of((BlockState) blockState);
@@ -85,7 +85,7 @@ public abstract class BlockTripWireMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DISARMED)) {
             final boolean disarmed = (Boolean) value;
-            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.DISARMED, disarmed));
+            return Optional.of((BlockState) blockState.withProperty(TripWireBlock.DISARMED, disarmed));
         }
         if (key.equals(Keys.SUSPENDED)) {
             return Optional.of((BlockState) blockState);
@@ -94,7 +94,7 @@ public abstract class BlockTripWireMixin extends BlockMixin {
             return Optional.of((BlockState) blockState);
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.withProperty(TripWireBlock.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.CONNECTED_DIRECTIONS) || key.equals(Keys.CONNECTED_EAST) || key.equals(Keys.CONNECTED_NORTH)
                 || key.equals(Keys.CONNECTED_SOUTH) || key.equals(Keys.CONNECTED_WEST)) {

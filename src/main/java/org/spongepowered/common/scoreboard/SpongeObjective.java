@@ -83,7 +83,7 @@ public class SpongeObjective implements Objective {
     private void updateDisplayName() {
         for (final ScoreObjective objective: this.objectives.values()) {
             ((ScoreObjectiveAccessor) objective).accessor$setDisplayName(SpongeTexts.toLegacy(this.displayName));
-            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().func_96532_b(objective);
+            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().onObjectiveDisplayNameChanged(objective);
         }
     }
 
@@ -108,7 +108,7 @@ public class SpongeObjective implements Objective {
     private void updateDisplayMode() {
         for (final ScoreObjective objective: this.objectives.values()) {
             ((ScoreObjectiveAccessor) objective).accessor$setRenderType((ScoreCriteria.RenderType) (Object) this.displayMode);
-            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().func_96532_b(objective);
+            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().onObjectiveDisplayNameChanged(objective);
         }
     }
 

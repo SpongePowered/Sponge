@@ -34,6 +34,6 @@ public abstract class BlockPrismarineMixin_API extends BlockMixin_API {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + "." + BlockPrismarine.EnumType.ROUGH.func_176809_c() + ".name");
+        return new SpongeTranslation(this.getTranslationKey() + "." + BlockPrismarine.EnumType.ROUGH.getTranslationKey() + ".name");
     }
 }

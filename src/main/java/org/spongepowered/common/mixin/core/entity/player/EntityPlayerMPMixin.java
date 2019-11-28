@@ -242,7 +242,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             }
             // Sponge end
 
-            final boolean flag = this.world.getGameRules().func_82766_b(Constants.GameRule.SHOW_DEATH_MESSAGES);
+            final boolean flag = this.world.getGameRules().getBoolean(Constants.GameRule.SHOW_DEATH_MESSAGES);
             this.connection.sendPacket(new SCombatPacket(this.getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, flag));
 
             if (flag) {
@@ -269,7 +269,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
                 this.inventory.dropAllItems();
             }
 
-            for (final ScoreObjective scoreobjective : this.getWorldScoreboard().func_96520_a(ScoreCriteria.DEATH_COUNT)) {
+            for (final ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(ScoreCriteria.DEATH_COUNT)) {
                 final Score score = this.getWorldScoreboard().getOrCreateScore(this.shadow$getName(), scoreobjective);
                 score.incrementScore();
             }
@@ -277,10 +277,10 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             final LivingEntity entitylivingbase = this.getAttackingEntity();
 
             if (entitylivingbase != null) {
-                final EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.field_75627_a.get(EntityList.func_191301_a(entitylivingbase));
+                final EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
 
                 if (entitylist$entityegginfo != null) {
-                    this.addStat(entitylist$entityegginfo.field_151513_e);
+                    this.addStat(entitylist$entityegginfo.entityKilledByStat);
                 }
 
                 entitylivingbase.awardKillScore((ServerPlayerEntity) (Object) this, this.scoreValue, cause);
@@ -314,7 +314,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         }
         final DataCompoundHolder oldEntity = (DataCompoundHolder) oldPlayer;
         if (oldEntity.data$hasSpongeCompound()) {
-            ((DataCompoundHolder) this).data$getRootCompound().func_74782_a(Constants.Sponge.SPONGE_DATA, oldEntity.data$getSpongeCompound());
+            ((DataCompoundHolder) this).data$getRootCompound().setTag(Constants.Sponge.SPONGE_DATA, oldEntity.data$getSpongeCompound());
             this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeCompound());
         }
     }
@@ -346,8 +346,8 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             // Sponge end
 
             if (this.isPlayerSleeping()) {
-                this.getServerWorld().func_73039_n()
-                        .func_151248_b((Entity) (Object) this, new SAnimateHandPacket((Entity) (Object) this, 2)); // Sponge - cast to Entity
+                this.getServerWorld().getEntityTracker()
+                        .sendToTrackingAndSelf((Entity) (Object) this, new SAnimateHandPacket((Entity) (Object) this, 2)); // Sponge - cast to Entity
             }
 
             super.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
@@ -473,7 +473,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
         this.isChangingQuantityOnly = true;
         this.setHeldItem(hand, this.impl$packetItem);
-        final Slot slot = this.openContainer.func_75147_a(this.inventory, this.inventory.currentItem);
+        final Slot slot = this.openContainer.getSlotFromInventory(this.inventory, this.inventory.currentItem);
         this.openContainer.detectAndSendChanges();
         this.isChangingQuantityOnly = false;
         // force client itemstack update if place event was cancelled
@@ -515,7 +515,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Override
     public MessageChannel bridge$getDeathMessageChannel() {
         final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
-        if (player.world.getGameRules().func_82766_b(Constants.GameRule.SHOW_DEATH_MESSAGES)) {
+        if (player.world.getGameRules().getBoolean(Constants.GameRule.SHOW_DEATH_MESSAGES)) {
             @Nullable final Team team = player.getTeam();
 
             if (team != null && team.getDeathMessageVisibility() != Team.Visible.ALWAYS) {
@@ -643,7 +643,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     public void bridge$sendBlockChange(final BlockPos pos, final BlockState state) {
         final SChangeBlockPacket packet = new SChangeBlockPacket();
         packet.pos = pos;
-        packet.field_148883_d = state;
+        packet.blockState = state;
         this.connection.sendPacket(packet);
     }
 
@@ -841,15 +841,15 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             final IAttributeInstance maxAttribute = this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
             double modifiedScale = this.impl$healthScale;
             // Apply additive modifiers
-            for (final AttributeModifier attributemodifier : maxAttribute.func_111130_a(0)) {
+            for (final AttributeModifier attributemodifier : maxAttribute.getModifiersByOperation(0)) {
                 modifiedScale += attributemodifier.getAmount();
             }
 
-            for (final AttributeModifier attributemodifier1 : maxAttribute.func_111130_a(1)) {
+            for (final AttributeModifier attributemodifier1 : maxAttribute.getModifiersByOperation(1)) {
                 modifiedScale += modifiedScale * attributemodifier1.getAmount();
             }
 
-            for (final AttributeModifier attributemodifier2 : maxAttribute.func_111130_a(2)) {
+            for (final AttributeModifier attributemodifier2 : maxAttribute.getModifiersByOperation(2)) {
                 modifiedScale *= 1.0D + attributemodifier2.getAmount();
             }
 

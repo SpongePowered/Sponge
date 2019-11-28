@@ -120,7 +120,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
                 }
             }
             Constants.NBT.filterSpongeCustomData(compound);
-            if (!compound.func_82582_d()) {
+            if (!compound.isEmpty()) {
                 this.compound = compound;
             } else {
                 this.compound = null;

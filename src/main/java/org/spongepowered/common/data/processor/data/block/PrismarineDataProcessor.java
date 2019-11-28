@@ -45,12 +45,12 @@ public class PrismarineDataProcessor extends
 
     @Override
     protected int setToMeta(PrismarineType value) {
-        return ((BlockPrismarine.EnumType) (Object) value).func_176807_a();
+        return ((BlockPrismarine.EnumType) (Object) value).getMetadata();
     }
 
     @Override
     protected PrismarineType getFromMeta(int meta) {
-        return (PrismarineType) (Object) BlockPrismarine.EnumType.func_176810_a(meta);
+        return (PrismarineType) (Object) BlockPrismarine.EnumType.byMetadata(meta);
     }
 
     @Override

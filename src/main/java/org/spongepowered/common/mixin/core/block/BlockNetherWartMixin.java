@@ -59,7 +59,7 @@ public abstract class BlockNetherWartMixin extends BlockMixin {
             if (growth > 3) {
                 growth = 3;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(NetherWartBlock.AGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(NetherWartBlock.AGE, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -71,7 +71,7 @@ public abstract class BlockNetherWartMixin extends BlockMixin {
             if (growth > 3) {
                 growth = 3;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(NetherWartBlock.AGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(NetherWartBlock.AGE, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
