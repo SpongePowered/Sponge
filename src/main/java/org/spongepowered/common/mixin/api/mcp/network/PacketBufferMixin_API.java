@@ -30,7 +30,7 @@ import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.network.ChannelBuf;
@@ -57,7 +57,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     @Shadow public abstract PacketBuffer writeByteArray(byte[] array);
     @Shadow public abstract PacketBuffer writeVarInt(int input);
     @Shadow public abstract PacketBuffer writeString(String string);
-    @Shadow public abstract PacketBuffer writeCompoundTag(@Nullable NBTTagCompound nbt);
+    @Shadow public abstract PacketBuffer writeCompoundTag(@Nullable CompoundNBT nbt);
     @Shadow public abstract PacketBuffer writeUniqueId(UUID uniqueId);
     
     // mojang methods, non-fluent
@@ -65,7 +65,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     @Shadow public abstract byte[] readByteArray(int limit);
     @Shadow public abstract int readVarInt();
     @Shadow public abstract String readString(int maxLength);
-    @Shadow public abstract NBTTagCompound readCompoundTag() throws IOException;
+    @Shadow public abstract CompoundNBT readCompoundTag() throws IOException;
     @Shadow public abstract UUID readUniqueId();
 
     public int cbuf$getCapacity() {
@@ -491,7 +491,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     public ChannelBuf cbuf$writeDataView(DataView data) {
-        final NBTTagCompound compound = NbtTranslator.getInstance().translateData(checkNotNull(data, "data"));
+        final CompoundNBT compound = NbtTranslator.getInstance().translateData(checkNotNull(data, "data"));
         this.writeCompoundTag(compound);
         return (ChannelBuf) this;
     }

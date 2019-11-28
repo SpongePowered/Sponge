@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.state.pattern.BlockStateMatcher;
+import net.minecraft.block.pattern.BlockStateMatcher;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.DesertWellsFeature;

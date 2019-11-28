@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockJukebox;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.JukeboxBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,13 +33,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.bridge.block.BlockJukeboxBridge;
 
-@Mixin(BlockJukebox.class)
+@Mixin(JukeboxBlock.class)
 public abstract class BlockJukeboxMixin implements BlockJukeboxBridge {
 
-    @Shadow protected abstract void dropRecord(World worldIn, BlockPos pos, IBlockState state);
+    @Shadow protected abstract void dropRecord(World worldIn, BlockPos pos, BlockState state);
 
     @Override
-    public void accessor$dropRecordItem(final World worldIn, final BlockPos pos, final IBlockState state) {
+    public void accessor$dropRecordItem(final World worldIn, final BlockPos pos, final BlockState state) {
         dropRecord(worldIn, pos, state);
     }
 }

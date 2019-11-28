@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -67,7 +67,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
 
     @Shadow public abstract BlockPos getPos();
     @Shadow public abstract Block getBlockType();
-    @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
+    @Shadow public abstract CompoundNBT writeToNBT(CompoundNBT compound);
     @Shadow public abstract void shadow$markDirty();
 
     private final TileEntityType api$TileEntityType = SpongeImplHooks.getTileEntityType(((net.minecraft.tileentity.TileEntity) (Object) this).getClass());
@@ -92,7 +92,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
             .set(Queries.POSITION_Y, this.getPos().func_177956_o())
             .set(Queries.POSITION_Z, this.getPos().func_177952_p())
             .set(Constants.TileEntity.TILE_TYPE, this.api$TileEntityType.getId());
-        final NBTTagCompound compound = new NBTTagCompound();
+        final CompoundNBT compound = new CompoundNBT();
         this.writeToNBT(compound);
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));

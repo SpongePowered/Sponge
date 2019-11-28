@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
+import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -43,7 +43,7 @@ public class SpongeFurnaceBuilder extends SpongeLockableBuilder<Furnace> {
     @Override
     protected Optional<Furnace> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(furnace -> {
-            final TileEntityFurnace tileEntityFurnace = (TileEntityFurnace) furnace;
+            final FurnaceTileEntity tileEntityFurnace = (FurnaceTileEntity) furnace;
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
                 tileEntityFurnace.func_145951_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }

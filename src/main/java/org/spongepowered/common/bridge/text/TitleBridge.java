@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.bridge.text;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 
 public interface TitleBridge {
 
-    void bridge$send(EntityPlayerMP player);
+    void bridge$send(ServerPlayerEntity player);
 }

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 import com.google.common.collect.Lists;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityLockable;
+import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.world.LockCode;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
@@ -52,7 +52,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(TileEntityLockable.class)
+@Mixin(LockableTileEntity.class)
 public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier> extends TileEntityMixin_API
     implements TileEntityCarrier, TileEntityInventory<T> {
 
@@ -87,7 +87,7 @@ public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier
         lockData.ifPresent(manipulators::add);
         final Optional<InventoryItemData> inventoryData = get(InventoryItemData.class);
         inventoryData.ifPresent(manipulators::add);
-        if (((TileEntityLockable) (Object) this).func_145818_k_()) {
+        if (((LockableTileEntity) (Object) this).func_145818_k_()) {
             manipulators.add(get(DisplayNameData.class).get());
         }
     }

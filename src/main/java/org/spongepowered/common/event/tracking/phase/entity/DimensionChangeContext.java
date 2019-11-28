@@ -24,24 +24,24 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
 public class DimensionChangeContext extends EntityContext<DimensionChangeContext> {
 
-    private WorldServer targetWorld;
+    private ServerWorld targetWorld;
 
     DimensionChangeContext(
         IPhaseState<? extends DimensionChangeContext> state) {
         super(state);
     }
 
-    public WorldServer getTargetWorld() {
+    public ServerWorld getTargetWorld() {
         return this.targetWorld;
     }
 
-    public DimensionChangeContext setTargetWorld(WorldServer targetWorld) {
+    public DimensionChangeContext setTargetWorld(ServerWorld targetWorld) {
         this.targetWorld = targetWorld;
         return this;
     }

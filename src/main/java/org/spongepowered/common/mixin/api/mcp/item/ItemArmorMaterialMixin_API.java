@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item;
 
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor;
 import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Final;
@@ -40,7 +40,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(ItemArmor.ArmorMaterial.class)
+@Mixin(ArmorItem.ArmorMaterial.class)
 @Implements(@Interface(iface = ArmorType.class, prefix = "apiArmor$"))
 public abstract class ItemArmorMaterialMixin_API implements ArmorType {
 

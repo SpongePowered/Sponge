@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.tracking.world;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 public abstract class WorldMixin_TrackerAPI implements World {
 
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
-    @Shadow public abstract IChunkProvider getChunkProvider();
+    @Shadow public abstract AbstractChunkProvider getChunkProvider();
 
     @Override
     public Optional<UUID> getCreator(final int x, final int y, final int z) {

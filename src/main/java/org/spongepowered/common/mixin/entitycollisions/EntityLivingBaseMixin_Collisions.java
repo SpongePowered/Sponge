@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.entitycollisions;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,7 +38,7 @@ import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.Collisi
 
 import java.util.List;
 
-@Mixin(EntityLivingBase.class)
+@Mixin(LivingEntity.class)
 public abstract class EntityLivingBaseMixin_Collisions extends EntityMixin_Collisions {
 
     @Shadow protected abstract void collideWithEntity(Entity entityIn);
@@ -69,7 +69,7 @@ public abstract class EntityLivingBaseMixin_Collisions extends EntityMixin_Colli
     private int collisions$collideWithNearbyUseOurCache(final List<Entity> list) {
         for (final Entity entity: list) {
             // ignore players and entities with parts (ex. EnderDragon)
-            if (this.world.field_72995_K || entity == null || entity instanceof EntityPlayer || entity.func_70021_al() != null) {
+            if (this.world.field_72995_K || entity == null || entity instanceof PlayerEntity || entity.func_70021_al() != null) {
                 continue;
             }
 

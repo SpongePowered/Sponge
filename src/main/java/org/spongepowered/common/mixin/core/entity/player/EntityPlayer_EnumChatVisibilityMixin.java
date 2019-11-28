@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.entity.player.EnumChatVisibilityBridge;
 
 import java.util.HashSet;
 import java.util.Set;
+import net.minecraft.entity.player.PlayerEntity;
 
-@Mixin(EntityPlayer.EnumChatVisibility.class)
+@Mixin(PlayerEntity.EnumChatVisibility.class)
 public abstract class EntityPlayer_EnumChatVisibilityMixin implements EnumChatVisibilityBridge {
 
     private Set<ChatType> impl$visibleChatTypes = new HashSet<>();

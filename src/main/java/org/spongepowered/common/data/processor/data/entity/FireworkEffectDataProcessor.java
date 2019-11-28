@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.entity.item.EntityFireworkRocket;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -46,12 +45,13 @@ import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.entity.item.FireworkRocketEntity;
 
 public class FireworkEffectDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityFireworkRocket, List<FireworkEffect>, ListValue<FireworkEffect>, FireworkEffectData, ImmutableFireworkEffectData> {
+        AbstractEntitySingleDataProcessor<FireworkRocketEntity, List<FireworkEffect>, ListValue<FireworkEffect>, FireworkEffectData, ImmutableFireworkEffectData> {
 
     public FireworkEffectDataProcessor() {
-        super(EntityFireworkRocket.class, Keys.FIREWORK_EFFECTS);
+        super(FireworkRocketEntity.class, Keys.FIREWORK_EFFECTS);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class FireworkEffectDataProcessor extends
     }
 
     @Override
-    protected Optional<List<FireworkEffect>> getVal(EntityFireworkRocket firework) {
+    protected Optional<List<FireworkEffect>> getVal(FireworkRocketEntity firework) {
         return FireworkUtils.getFireworkEffects(firework);
     }
 
@@ -79,7 +79,7 @@ public class FireworkEffectDataProcessor extends
     }
 
     @Override
-    protected boolean set(EntityFireworkRocket firework, List<FireworkEffect> effects) {
+    protected boolean set(FireworkRocketEntity firework, List<FireworkEffect> effects) {
         return FireworkUtils.setFireworkEffects(firework, effects);
     }
 

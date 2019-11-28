@@ -26,7 +26,6 @@ package org.spongepowered.common.service.permission;
 
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.management.UserListOpsEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
@@ -41,6 +40,7 @@ import org.spongepowered.common.service.permission.base.SpongeSubject;
 
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.server.management.OpEntry;
 
 /**
  * An implementation of vanilla minecraft's 4 op groups.
@@ -71,7 +71,7 @@ public class UserSubject extends SpongeSubject {
                 }
                 if (opLevel > 0) {
                     // TODO: Should bypassesPlayerLimit be true or false?
-                    SpongePermissionService.getOps().func_152687_a(new UserListOpsEntry(player, opLevel, false));
+                    SpongePermissionService.getOps().func_152687_a(new OpEntry(player, opLevel, false));
                 } else {
                     SpongePermissionService.getOps().func_152684_c(player);
                 }
@@ -102,7 +102,7 @@ public class UserSubject extends SpongeSubject {
         Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
 
         // Query op level from server ops list based on player's game profile
-        UserListOpsEntry entry = SpongePermissionService.getOps().func_152683_b(this.player);
+        OpEntry entry = SpongePermissionService.getOps().func_152683_b(this.player);
         if (entry == null) {
             // Take care of singleplayer commands -- unless an op level is specified, this player follows global rules
             return SpongeImpl.getServer().func_184103_al().func_152596_g(this.player) ? SpongeImpl.getServer().func_110455_j() : 0;

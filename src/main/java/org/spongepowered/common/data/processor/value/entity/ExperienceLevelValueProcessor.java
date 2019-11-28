@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,18 +35,19 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 
 import java.util.Optional;
+import net.minecraft.entity.player.PlayerEntity;
 
-public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Integer, MutableBoundedValue<Integer>> {
+public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Integer, MutableBoundedValue<Integer>> {
 
     public ExperienceLevelValueProcessor() {
-        super(EntityPlayer.class, Keys.EXPERIENCE_LEVEL);
+        super(PlayerEntity.class, Keys.EXPERIENCE_LEVEL);
     }
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
         final ImmutableBoundedValue<Integer> newValue = constructImmutableValue(value);
         if (supports(container)) {
-            final EntityPlayer player = (EntityPlayer) container;
+            final PlayerEntity player = (PlayerEntity) container;
             final Integer oldValue = player.field_71068_ca;
             player.field_71067_cb = ExperienceHolderUtils.xpAtLevel(value);
             player.field_71106_cc = 0;
@@ -76,12 +76,12 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected boolean set(EntityPlayer container, Integer value) {
+    protected boolean set(PlayerEntity container, Integer value) {
         return false;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityPlayer container) {
+    protected Optional<Integer> getVal(PlayerEntity container) {
         return Optional.of(container.field_71068_ca);
     }
 

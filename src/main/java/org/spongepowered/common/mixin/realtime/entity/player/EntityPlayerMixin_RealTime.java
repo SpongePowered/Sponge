@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.realtime.entity.player;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.entity.EntityLivingBaseMixin_RealTime;
 
-@Mixin(EntityPlayer.class)
+@Mixin(PlayerEntity.class)
 public abstract class EntityPlayerMixin_RealTime extends EntityLivingBaseMixin_RealTime {
 
     @Shadow public int xpCooldown;
@@ -44,8 +44,8 @@ public abstract class EntityPlayerMixin_RealTime extends EntityLivingBaseMixin_R
 
     @Redirect(method = "onUpdate",
         at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayer;xpCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
-    private void realTimeImpl$adjustForRealTimeXpCooldown(final EntityPlayer self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
+    private void realTimeImpl$adjustForRealTimeXpCooldown(final PlayerEntity self, final int modifier) {
+        if (SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
             this.xpCooldown = modifier;
         }
         final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();
@@ -71,8 +71,8 @@ public abstract class EntityPlayerMixin_RealTime extends EntityLivingBaseMixin_R
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeSleepTimer(final EntityPlayer self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
+    private void realTimeImpl$adjustForRealTimeSleepTimer(final PlayerEntity self, final int modifier) {
+        if (SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
             this.sleepTimer = modifier;
         }
         final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();
@@ -98,8 +98,8 @@ public abstract class EntityPlayerMixin_RealTime extends EntityLivingBaseMixin_R
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeWakeTimer(final EntityPlayer self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
+    private void realTimeImpl$adjustForRealTimeWakeTimer(final PlayerEntity self, final int modifier) {
+        if (SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
             this.sleepTimer = modifier;
         }
         final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();

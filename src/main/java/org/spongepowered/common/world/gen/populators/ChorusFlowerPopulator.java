@@ -27,12 +27,12 @@ package org.spongepowered.common.world.gen.populators;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.BlockChorusFlower;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.ChorusFlowerBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.NoiseGeneratorSimplex;
+import net.minecraft.world.gen.SimplexNoiseGenerator;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
@@ -42,7 +42,7 @@ import java.util.Random;
 
 public class ChorusFlowerPopulator implements ChorusFlower {
 
-    private NoiseGeneratorSimplex noise;
+    private SimplexNoiseGenerator noise;
     private long lastSeed = -1;
     private int exclusion = 1024;
 
@@ -68,7 +68,7 @@ public class ChorusFlowerPopulator implements ChorusFlower {
         Vector3i size = extent.getBlockSize();
         if (this.noise == null || world.getProperties().getSeed() != this.lastSeed) {
             this.lastSeed = world.getProperties().getSeed();
-            this.noise = new NoiseGeneratorSimplex(new Random(this.lastSeed));
+            this.noise = new SimplexNoiseGenerator(new Random(this.lastSeed));
         }
 
         World worldObj = (World) world;
@@ -87,7 +87,7 @@ public class ChorusFlowerPopulator implements ChorusFlower {
                     if (z > 0) {
                         if (worldObj.func_175623_d(chunkPos.func_177982_a(x, z, y))
                                 && worldObj.func_180495_p(chunkPos.func_177982_a(x, z - 1, y)).func_177230_c() == Blocks.field_150377_bs) {
-                            BlockChorusFlower.func_185603_a(worldObj, chunkPos.func_177982_a(x, z, y), rand, 8);
+                            ChorusFlowerBlock.func_185603_a(worldObj, chunkPos.func_177982_a(x, z, y), rand, 8);
                         }
                     }
                 }

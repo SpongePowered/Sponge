@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockSlab;
+import net.minecraft.block.SlabBlock;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 @RegisterCatalog(PortionTypes.class)
-public final class PortionTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockSlab.EnumBlockHalf, PortionType> {
+public final class PortionTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<SlabBlock.EnumBlockHalf, PortionType> {
 
     @Override
-    protected BlockSlab.EnumBlockHalf[] getValues() {
-        return BlockSlab.EnumBlockHalf.values();
+    protected SlabBlock.EnumBlockHalf[] getValues() {
+        return SlabBlock.EnumBlockHalf.values();
     }
 }

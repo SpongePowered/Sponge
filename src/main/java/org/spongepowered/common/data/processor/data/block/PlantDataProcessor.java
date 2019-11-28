@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.processor.data.block;
 
-import net.minecraft.block.BlockFlower;
-import net.minecraft.block.BlockFlower.EnumFlowerColor;
+import net.minecraft.block.FlowerBlock;
+import net.minecraft.block.FlowerBlock.EnumFlowerColor;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePlantData;
@@ -58,7 +58,7 @@ public class PlantDataProcessor extends AbstractCatalogDataProcessor<PlantType, 
 
     @Override
     protected int setToMeta(PlantType value) {
-        return ((BlockFlower.EnumFlowerType) (Object) value).func_176968_b();
+        return ((FlowerBlock.EnumFlowerType) (Object) value).func_176968_b();
     }
 
     @Override
@@ -69,9 +69,9 @@ public class PlantDataProcessor extends AbstractCatalogDataProcessor<PlantType, 
     @Override
     protected Optional<PlantType> getVal(ItemStack itemStack) {
         if (itemStack.func_77973_b() == ItemTypes.RED_FLOWER) {
-            return Optional.of((PlantType) (Object) BlockFlower.EnumFlowerType.func_176967_a(EnumFlowerColor.RED, itemStack.func_77952_i()));
+            return Optional.of((PlantType) (Object) FlowerBlock.EnumFlowerType.func_176967_a(EnumFlowerColor.RED, itemStack.func_77952_i()));
         }
-        return Optional.of((PlantType) (Object) BlockFlower.EnumFlowerType.func_176967_a(EnumFlowerColor.YELLOW, itemStack.func_77952_i()));
+        return Optional.of((PlantType) (Object) FlowerBlock.EnumFlowerType.func_176967_a(EnumFlowerColor.YELLOW, itemStack.func_77952_i()));
     }
 
     @Override

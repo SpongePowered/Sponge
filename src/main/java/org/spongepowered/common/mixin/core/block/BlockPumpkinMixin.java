@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockPumpkin;
+import net.minecraft.block.PumpkinBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(BlockPumpkin.class)
+@Mixin(PumpkinBlock.class)
 public abstract class BlockPumpkinMixin extends BlockHorizontalMixin {
 
     @Inject(method = "trySpawnGolem", at = @At("HEAD"), cancellable = true)

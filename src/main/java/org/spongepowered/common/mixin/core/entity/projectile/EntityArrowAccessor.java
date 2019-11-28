@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EntityArrow.class)
+@Mixin(AbstractArrowEntity.class)
 public interface EntityArrowAccessor {
 
     @Accessor("knockbackStrength") int accessor$getKnockbackStrength();

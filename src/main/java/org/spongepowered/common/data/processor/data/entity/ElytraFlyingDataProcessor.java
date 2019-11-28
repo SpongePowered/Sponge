@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElytraFlyingData;
@@ -40,21 +39,22 @@ import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.LivingEntity;
 
-public class ElytraFlyingDataProcessor extends AbstractEntitySingleDataProcessor<EntityLivingBase, Boolean, Value<Boolean>, ElytraFlyingData, ImmutableElytraFlyingData> {
+public class ElytraFlyingDataProcessor extends AbstractEntitySingleDataProcessor<LivingEntity, Boolean, Value<Boolean>, ElytraFlyingData, ImmutableElytraFlyingData> {
 
     public ElytraFlyingDataProcessor() {
-        super(EntityLivingBase.class, Keys.IS_ELYTRA_FLYING);
+        super(LivingEntity.class, Keys.IS_ELYTRA_FLYING);
     }
 
     @Override
-    protected boolean set(final EntityLivingBase dataHolder, final Boolean value) {
+    protected boolean set(final LivingEntity dataHolder, final Boolean value) {
         ((EntityAccessor) dataHolder).accessor$setEntityFlag(Constants.Entity.ELYTRA_FLYING_FLAG, value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(final EntityLivingBase dataHolder) {
+    protected Optional<Boolean> getVal(final LivingEntity dataHolder) {
         return Optional.of(dataHolder.func_184613_cA());
     }
 

@@ -28,9 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -52,14 +52,14 @@ import java.util.List;
 import java.util.Optional;
 
 public class TileEntitySignDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntitySign, List<Text>, ListValue<Text>, SignData, ImmutableSignData> {
+        extends AbstractTileEntitySingleDataProcessor<SignTileEntity, List<Text>, ListValue<Text>, SignData, ImmutableSignData> {
 
     public TileEntitySignDataProcessor() {
-        super(TileEntitySign.class, Keys.SIGN_LINES);
+        super(SignTileEntity.class, Keys.SIGN_LINES);
     }
 
     @Override
-    protected Optional<List<Text>> getVal(TileEntitySign sign) {
+    protected Optional<List<Text>> getVal(SignTileEntity sign) {
         final ITextComponent[] rawLines = sign.field_145915_a;
         final List<Text> signLines = Lists.newArrayListWithExpectedSize(4);
         for (int i = 0; i < rawLines.length; i++) {
@@ -70,7 +70,7 @@ public class TileEntitySignDataProcessor
     }
 
     @Override
-    protected boolean set(TileEntitySign sign, List<Text> lines) {
+    protected boolean set(SignTileEntity sign, List<Text> lines) {
         for (int i = 0; i < sign.field_145915_a.length; i++) {
             Text line = lines.size() > i ? lines.get(i) : Text.EMPTY;
             if (line == null) {
@@ -79,7 +79,7 @@ public class TileEntitySignDataProcessor
             sign.field_145915_a[i] = SpongeTexts.toComponent(line);
         }
         sign.func_70296_d();
-        ((WorldServer) sign.func_145831_w()).func_184164_w().func_180244_a(sign.func_174877_v());
+        ((ServerWorld) sign.func_145831_w()).func_184164_w().func_180244_a(sign.func_174877_v());
         return true;
     }
 

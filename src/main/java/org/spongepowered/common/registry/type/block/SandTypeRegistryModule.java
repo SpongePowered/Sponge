@@ -24,23 +24,23 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockSand;
+import net.minecraft.block.SandBlock;
 import org.spongepowered.api.data.type.SandType;
 import org.spongepowered.api.data.type.SandTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 @RegisterCatalog(SandTypes.class)
-public final class SandTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockSand.EnumType, SandType> {
+public final class SandTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<SandBlock.EnumType, SandType> {
 
     @Override
-    protected BlockSand.EnumType[] getValues() {
-        return BlockSand.EnumType.values();
+    protected SandBlock.EnumType[] getValues() {
+        return SandBlock.EnumType.values();
     }
 
     @Override
     protected void generateInitialMap() {
         super.generateInitialMap();
-        this.catalogTypeMap.put("normal", (SandType) (Object) BlockSand.EnumType.SAND);
+        this.catalogTypeMap.put("normal", (SandType) (Object) SandBlock.EnumType.SAND);
     }
 }

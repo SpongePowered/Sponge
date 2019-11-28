@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.entity.item.ExperienceOrbEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.ThrowableEntity;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.play.client.CPlayerDiggingPacket;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
@@ -83,7 +83,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final InteractionPacketContext context) {
+    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final InteractionPacketContext context) {
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.func_184614_ca());
         if (stack != null) {
             context.itemUsed(stack);
@@ -92,7 +92,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         if (itemInUse != null) {
             context.activeItem(itemInUse);
         }
-        final BlockPos target = ((CPacketPlayerDigging) packet).func_179715_a();
+        final BlockPos target = ((CPlayerDiggingPacket) packet).func_179715_a();
         if (!playerMP.field_70170_p.func_175667_e(target)) {
             context.targetBlock(BlockSnapshot.NONE);
         } else {
@@ -145,7 +145,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     @Override
     public void unwind(final InteractionPacketContext phaseContext) {
 
-        final EntityPlayerMP player = phaseContext.getPacketPlayer();
+        final ServerPlayerEntity player = phaseContext.getPacketPlayer();
         final ItemStack usedStack = phaseContext.getItemUsed();
         final HandType usedHand = phaseContext.getHandUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
@@ -176,7 +176,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             }
             phaseContext.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
                 if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
-                    for (final Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                    for (final Map.Entry<BlockPos, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
                         if (!entry.getValue().isEmpty()) {
                             final List<Entity> items = entry.getValue().stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                             final DropItemEvent.Destruct event =
@@ -188,7 +188,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                         }
                     }
                 } else {
-                    for (final Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                    for (final Map.Entry<BlockPos, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
                         if (!entry.getValue().isEmpty()) {
                             processEntities(player, (Collection<Entity>) (Collection<?>) entry.getValue());
                         }
@@ -200,7 +200,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             phaseContext.getCapturedItemsSupplier()
                 .acceptAndClearIfNotEmpty(items -> {
                     final ArrayList<Entity> entities = new ArrayList<>();
-                    for (final EntityItem item : items) {
+                    for (final ItemEntity item : items) {
                         entities.add((Entity) item);
                     }
                     final DropItemEvent.Dispense dispense =
@@ -231,11 +231,11 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             });
 
             phaseContext.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty((multimap -> {
-                for (final Map.Entry<UUID, Collection<EntityItem>> entry : multimap.asMap().entrySet()) {
+                for (final Map.Entry<UUID, Collection<ItemEntity>> entry : multimap.asMap().entrySet()) {
                     if (entry.getKey().equals(player.func_110124_au())) {
                         throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
                     } else {
-                        final net.minecraft.entity.Entity spawnedEntity = ((WorldServer) player.field_70170_p).func_175733_a(entry.getKey());
+                        final net.minecraft.entity.Entity spawnedEntity = ((ServerWorld) player.field_70170_p).func_175733_a(entry.getKey());
                         if (spawnedEntity != null) {
                             try (final CauseStackManager.StackFrame entityFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 entityFrame.pushCause(spawnedEntity);
@@ -254,7 +254,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         ((EntityLivingBaseAccessor) player).accessor$setActiveItemStack(endActiveItem);
     }
 
-    private void throwEntitySpawnEvents(final InteractionPacketContext phaseContext, final EntityPlayerMP player, final ItemStackSnapshot usedSnapshot,
+    private void throwEntitySpawnEvents(final InteractionPacketContext phaseContext, final ServerPlayerEntity player, final ItemStackSnapshot usedSnapshot,
         final BlockSnapshot firstBlockChange, final Collection<Entity> entities) {
         final List<Entity> projectiles = new ArrayList<>(entities.size());
         final List<Entity> spawnEggs = new ArrayList<>(entities.size());
@@ -262,13 +262,13 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         final List<Entity> normalPlacement = new ArrayList<>(entities.size());
         final List<Entity> items = new ArrayList<>(entities.size());
         for (final Entity entity : entities) {
-            if (entity instanceof Projectile || entity instanceof EntityThrowable) {
+            if (entity instanceof Projectile || entity instanceof ThrowableEntity) {
                 projectiles.add(entity);
             } else if (usedSnapshot.getType() == ItemTypes.SPAWN_EGG) {
                 spawnEggs.add(entity);
-            } else if (entity instanceof EntityItem) {
+            } else if (entity instanceof ItemEntity) {
                 items.add(entity);
-            } else if (entity instanceof EntityXPOrb) {
+            } else if (entity instanceof ExperienceOrbEntity) {
                 xpOrbs.add(entity);
             } else {
                 normalPlacement.add(entity);

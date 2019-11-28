@@ -25,18 +25,18 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.command.ICommandSender;
-import net.minecraft.tileentity.CommandBlockBaseLogic;
-import net.minecraft.tileentity.TileEntityCommandBlock;
+import net.minecraft.tileentity.CommandBlockLogic;
+import net.minecraft.tileentity.CommandBlockTileEntity;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 
 @NonnullByDefault
-@Mixin(TileEntityCommandBlock.class)
+@Mixin(CommandBlockTileEntity.class)
 public abstract class TileEntityCommandBlockMixin extends TileEntityMixin implements CommandSourceBridge {
 
-    @Shadow public abstract CommandBlockBaseLogic getCommandBlockLogic();
+    @Shadow public abstract CommandBlockLogic getCommandBlockLogic();
 
     @Override
     public ICommandSender bridge$asICommandSender() {

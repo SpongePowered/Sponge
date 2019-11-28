@@ -30,8 +30,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonParseException;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.EnumDifficulty;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
@@ -84,7 +83,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Shadow private long worldTime;
     @Shadow private long lastTimePlayed;
     @Shadow private long sizeOnDisk;
-    @Shadow private NBTTagCompound playerTag;
+    @Shadow private CompoundNBT playerTag;
     @Shadow private String levelName;
     @Shadow private int saveVersion;
     @Shadow private int cleanWeatherTime;
@@ -97,7 +96,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Shadow private boolean hardcore;
     @Shadow private boolean allowCommands;
     @Shadow private boolean initialized;
-    @Shadow private EnumDifficulty difficulty;
+    @Shadow private net.minecraft.world.Difficulty difficulty;
     @Shadow private boolean difficultyLocked;
     @Shadow private double borderCenterX;
     @Shadow private double borderCenterZ;
@@ -110,8 +109,8 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Shadow private int borderWarningTime;
     @Shadow private GameRules gameRules;
 
-    @Shadow public abstract void setDifficulty(EnumDifficulty newDifficulty);
-    @Shadow public abstract NBTTagCompound cloneNBTCompound(@Nullable NBTTagCompound nbt);
+    @Shadow public abstract void setDifficulty(net.minecraft.world.Difficulty newDifficulty);
+    @Shadow public abstract CompoundNBT cloneNBTCompound(@Nullable CompoundNBT nbt);
     @Shadow public abstract String shadow$getWorldName();
 
     private SerializationBehavior api$serializationBehavior = SerializationBehaviors.AUTOMATIC;
@@ -270,7 +269,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void setDifficulty(final Difficulty difficulty) {
-        this.setDifficulty((EnumDifficulty) (Object) difficulty);
+        this.setDifficulty((net.minecraft.world.Difficulty) (Object) difficulty);
     }
 
     @Override
@@ -519,7 +518,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     public Optional<DataView> getPropertySection(final DataQuery path) {
         if ( ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74764_b(path.toString())) {
             try {
-                final NBTTagCompound property = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74775_l(path.toString());
+                final CompoundNBT property = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74775_l(path.toString());
                 return Optional.of(NbtTranslator.getInstance().translateFrom(property));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -531,7 +530,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public void setPropertySection(final DataQuery path, final DataView data) {
-        final NBTTagCompound nbt = NbtTranslator.getInstance().translateData(data);
+        final CompoundNBT nbt = NbtTranslator.getInstance().translateData(data);
         ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74782_a(path.toString(), nbt);
     }
 
@@ -543,7 +542,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public DataContainer getAdditionalProperties() {
-        final NBTTagCompound additionalProperties = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74737_b();
+        final CompoundNBT additionalProperties = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74737_b();
         additionalProperties.func_82580_o(SpongeImpl.ECOSYSTEM_NAME);
         return NbtTranslator.getInstance().translateFrom(additionalProperties);
     }

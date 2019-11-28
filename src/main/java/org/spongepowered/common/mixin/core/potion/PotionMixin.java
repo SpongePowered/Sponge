@@ -24,24 +24,24 @@
  */
 package org.spongepowered.common.mixin.core.potion;
 
-import net.minecraft.potion.Potion;
+import net.minecraft.potion.Effect;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.RegistryNamespaced;
+import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
 
-@Mixin(Potion.class)
+@Mixin(Effect.class)
 public abstract class PotionMixin {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "registerPotions",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/RegistryNamespaced;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
-    private static void impl$registerForSponge(final RegistryNamespaced registry, final int id, final Object location, final Object potion) {
+    private static void impl$registerForSponge(final SimpleRegistry registry, final int id, final Object location, final Object potion) {
         final ResourceLocation resource = (ResourceLocation) location;
-        final Potion mcPotion = (Potion) potion;
+        final Effect mcPotion = (Effect) potion;
         PotionEffectTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionEffectType) mcPotion);
         registry.func_177775_a(id, location, potion);
     }

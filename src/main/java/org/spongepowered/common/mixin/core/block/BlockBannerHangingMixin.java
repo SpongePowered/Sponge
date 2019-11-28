@@ -25,10 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockBanner;
-import net.minecraft.block.BlockBanner.BlockBannerHanging;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -42,12 +38,14 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.block.BannerBlock;
+import net.minecraft.block.BannerBlock.BlockBannerHanging;
 
 @Mixin(BlockBannerHanging.class)
 public abstract class BlockBannerHangingMixin extends BlockBannerMixin {
 
-    private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
-        final EnumFacing facing = blockState.func_177229_b(BlockBanner.field_176449_a);
+    private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
+        final net.minecraft.util.Direction facing = blockState.func_177229_b(BannerBlock.field_176449_a);
         final Direction direction = Constants.DirectionFunctions.getFor(facing);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, direction);
     }
@@ -58,27 +56,27 @@ public abstract class BlockBannerHangingMixin extends BlockBannerMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
-            final EnumFacing facing = Constants.DirectionFunctions.getFor(direction);
-            return Optional.of((BlockState) blockState.func_177226_a(BlockBanner.field_176449_a, facing));
+            final net.minecraft.util.Direction facing = Constants.DirectionFunctions.getFor(direction);
+            return Optional.of((BlockState) blockState.func_177226_a(BannerBlock.field_176449_a, facing));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
-            final EnumFacing facing = Constants.DirectionFunctions.getFor(direction);
-            return Optional.of((BlockState) blockState.func_177226_a(BlockBanner.field_176449_a, facing));
+            final net.minecraft.util.Direction facing = Constants.DirectionFunctions.getFor(direction);
+            return Optional.of((BlockState) blockState.func_177226_a(BannerBlock.field_176449_a, facing));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
                 .add(impl$getDirectionalData(blockState))

@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.property.block.FlammableProperty;
 import org.spongepowered.api.util.Direction;
@@ -47,7 +46,7 @@ public class FlammablePropertyStore extends AbstractSpongePropertyStore<Flammabl
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final BlockPos pos = VecHelper.toBlockPos(location);
         final Block block = world.func_180495_p(pos).func_177230_c();
-        for (EnumFacing facing : EnumFacing.values()) {
+        for (net.minecraft.util.Direction facing : net.minecraft.util.Direction.values()) {
             if (SpongeImplHooks.isBlockFlammable(block, world, pos, facing)) {
                 return Optional.of(TRUE);
             }
@@ -58,7 +57,7 @@ public class FlammablePropertyStore extends AbstractSpongePropertyStore<Flammabl
     @Override
     public Optional<FlammableProperty> getFor(Location<World> location, Direction direction) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final EnumFacing facing = toEnumFacing(direction);
+        final net.minecraft.util.Direction facing = toEnumFacing(direction);
         final BlockPos pos = VecHelper.toBlockPos(location);
         final boolean flammable = SpongeImplHooks.isBlockFlammable(world.func_180495_p(pos).func_177230_c(), world, pos, facing);
         return Optional.of(flammable ? TRUE : FALSE);

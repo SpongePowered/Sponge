@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.EntityAreaEffectCloud;
+import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -39,10 +39,10 @@ import org.spongepowered.common.effect.particle.SpongeParticleType;
 
 import java.util.Optional;
 
-public class AreaEffectCloudParticleTypeProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, ParticleType, Value<ParticleType>> {
+public class AreaEffectCloudParticleTypeProcessor extends AbstractSpongeValueProcessor<AreaEffectCloudEntity, ParticleType, Value<ParticleType>> {
 
     public AreaEffectCloudParticleTypeProcessor() {
-        super(EntityAreaEffectCloud.class, Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE);
+        super(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class AreaEffectCloudParticleTypeProcessor extends AbstractSpongeValuePro
     }
 
     @Override
-    protected boolean set(EntityAreaEffectCloud container, ParticleType value) {
+    protected boolean set(AreaEffectCloudEntity container, ParticleType value) {
 
         final EnumParticleTypes internalType = ((SpongeParticleType) value).getInternalType();
         if (internalType == null) {
@@ -62,7 +62,7 @@ public class AreaEffectCloudParticleTypeProcessor extends AbstractSpongeValuePro
     }
 
     @Override
-    protected Optional<ParticleType> getVal(EntityAreaEffectCloud container) {
+    protected Optional<ParticleType> getVal(AreaEffectCloudEntity container) {
         return Optional.of(ParticleTypes.MOB_SPELL);
     }
 

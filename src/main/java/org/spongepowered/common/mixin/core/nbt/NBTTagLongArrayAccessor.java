@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.nbt;
 
-import net.minecraft.nbt.NBTTagLongArray;
+import net.minecraft.nbt.LongArrayNBT;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(NBTTagLongArray.class)
+@Mixin(LongArrayNBT.class)
 public interface NBTTagLongArrayAccessor {
 
     @Accessor("data") long[] accessor$getLongArray();

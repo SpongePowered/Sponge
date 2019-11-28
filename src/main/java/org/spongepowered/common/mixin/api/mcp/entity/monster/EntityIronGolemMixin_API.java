@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.EntityIronGolem;
+import net.minecraft.entity.passive.IronGolemEntity;
 import org.spongepowered.api.entity.living.golem.IronGolem;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityIronGolem.class)
+@Mixin(IronGolemEntity.class)
 public abstract class EntityIronGolemMixin_API extends EntityGolemMixin_API implements IronGolem {
 
 }

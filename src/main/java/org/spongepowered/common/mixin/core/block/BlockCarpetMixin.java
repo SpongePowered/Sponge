@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockCarpet;
+import net.minecraft.block.CarpetBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.block.DyeableBlockBridge;
 
-@Mixin(BlockCarpet.class)
+@Mixin(CarpetBlock.class)
 public abstract class BlockCarpetMixin extends BlockMixin implements DyeableBlockBridge {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setPropertyForDyeableBlock(final CallbackInfo ci) {
-        this.bridge$setColorPropertyEnum(BlockCarpet.field_176330_a);
+        this.bridge$setColorPropertyEnum(CarpetBlock.field_176330_a);
     }
 }

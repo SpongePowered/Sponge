@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockLever;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -45,13 +43,14 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.block.LeverBlock;
 
-@Mixin(BlockLever.class)
+@Mixin(LeverBlock.class)
 public abstract class BlockLeverMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getIsPoweredFor(blockState), impl$getDirectionalData(blockState), impl$getAxisData(blockState));
     }
 
@@ -62,56 +61,56 @@ public abstract class BlockLeverMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockLever.field_176359_b, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.field_176359_b, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            final Axis axis = this.impl$getAxisFromOrientation(blockState.func_177229_b(BlockLever.field_176360_a));
-            return Optional.of((BlockState) blockState.func_177226_a(BlockLever.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
+            final Axis axis = this.impl$getAxisFromOrientation(blockState.func_177229_b(LeverBlock.field_176360_a));
+            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         if (manipulator instanceof ImmutableAxisData) {
             final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
-            final Direction dir = Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockLever.field_176360_a));
-            return Optional.of((BlockState) blockState.func_177226_a(BlockLever.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
+            final Direction dir = Constants.DirectionFunctions.getFor(blockState.func_177229_b(LeverBlock.field_176360_a));
+            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockLever.field_176359_b, (Boolean) value));
+            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.field_176359_b, (Boolean) value));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            final Axis axis = this.impl$getAxisFromOrientation(blockState.func_177229_b(BlockLever.field_176360_a));
-            return Optional.of((BlockState) blockState.func_177226_a(BlockLever.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
+            final Axis axis = this.impl$getAxisFromOrientation(blockState.func_177229_b(LeverBlock.field_176360_a));
+            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         if (key.equals(Keys.AXIS)) {
             final Axis axis = (Axis) value;
-            final Direction dir = Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockLever.field_176360_a));
-            return Optional.of((BlockState) blockState.func_177226_a(BlockLever.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
+            final Direction dir = Constants.DirectionFunctions.getFor(blockState.func_177229_b(LeverBlock.field_176360_a));
+            return Optional.of((BlockState) blockState.func_177226_a(LeverBlock.field_176360_a, Constants.DirectionFunctions.getAsOrientation(dir, axis)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutablePoweredData impl$getIsPoweredFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(BlockLever.field_176359_b));
+    private ImmutablePoweredData impl$getIsPoweredFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(LeverBlock.field_176359_b));
     }
 
-    private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
-        final BlockLever.EnumOrientation intDir = blockState.func_177229_b(BlockLever.field_176360_a);
+    private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
+        final LeverBlock.EnumOrientation intDir = blockState.func_177229_b(LeverBlock.field_176360_a);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, Constants.DirectionFunctions.getFor(intDir));
     }
 
-    private ImmutableAxisData impl$getAxisData(final IBlockState blockState) {
-        final BlockLever.EnumOrientation orientation = blockState.func_177229_b(BlockLever.field_176360_a);
+    private ImmutableAxisData impl$getAxisData(final net.minecraft.block.BlockState blockState) {
+        final LeverBlock.EnumOrientation orientation = blockState.func_177229_b(LeverBlock.field_176360_a);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class, this.impl$getAxisFromOrientation(orientation));
     }
 
-    private Axis impl$getAxisFromOrientation(final BlockLever.EnumOrientation orientation) {
+    private Axis impl$getAxisFromOrientation(final LeverBlock.EnumOrientation orientation) {
         final Axis axis;
         switch (orientation) {
             case UP_X:

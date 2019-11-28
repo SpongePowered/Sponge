@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import net.minecraft.item.ItemRecord;
+import net.minecraft.item.MusicDiscItem;
 import net.minecraft.util.SoundEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Map;
 
-@Mixin(ItemRecord.class)
+@Mixin(MusicDiscItem.class)
 public interface ItemRecordAccessor {
 
-    @Accessor("RECORDS") Map<SoundEvent, ItemRecord> accessor$getRecords();
+    @Accessor("RECORDS") Map<SoundEvent, MusicDiscItem> accessor$getRecords();
 
     @Accessor("sound") SoundEvent accessor$getSoundEvent();
 

@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionEffectData;
@@ -43,20 +42,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.entity.LivingEntity;
 
-public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityLivingBase, List<PotionEffect>, ListValue<PotionEffect>,
+public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetProcessor<LivingEntity, List<PotionEffect>, ListValue<PotionEffect>,
         PotionEffectData, ImmutablePotionEffectData> {
 
     public EntityPotionDataProcessor() {
-        super(Keys.POTION_EFFECTS, EntityLivingBase.class);
+        super(Keys.POTION_EFFECTS, LivingEntity.class);
     }
 
     @Override
-    protected boolean set(EntityLivingBase dataHolder, List<PotionEffect> value) {
+    protected boolean set(LivingEntity dataHolder, List<PotionEffect> value) {
         dataHolder.func_70674_bp();
         for (PotionEffect effect : value) {
-            net.minecraft.potion.PotionEffect mcEffect =
-                new net.minecraft.potion.PotionEffect(((net.minecraft.potion.PotionEffect) effect).func_188419_a(), effect.getDuration(),
+            net.minecraft.potion.EffectInstance mcEffect =
+                new net.minecraft.potion.EffectInstance(((net.minecraft.potion.EffectInstance) effect).func_188419_a(), effect.getDuration(),
                     effect.getAmplifier(), effect.isAmbient(),
                     effect.getShowParticles());
             dataHolder.func_70690_d(mcEffect);
@@ -65,14 +65,14 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
     }
 
     @Override
-    protected Optional<List<PotionEffect>> getVal(EntityLivingBase dataHolder) {
-        Collection<net.minecraft.potion.PotionEffect> effects = dataHolder.func_70651_bq();
+    protected Optional<List<PotionEffect>> getVal(LivingEntity dataHolder) {
+        Collection<net.minecraft.potion.EffectInstance> effects = dataHolder.func_70651_bq();
         if (effects.isEmpty()) {
             return Optional.empty();
         }
         List<PotionEffect> apiEffects = new ArrayList<>();
-        for (net.minecraft.potion.PotionEffect potionEffect : effects) {
-            apiEffects.add((PotionEffect) new net.minecraft.potion.PotionEffect(potionEffect.func_188419_a(), potionEffect.func_76459_b(),
+        for (net.minecraft.potion.EffectInstance potionEffect : effects) {
+            apiEffects.add((PotionEffect) new net.minecraft.potion.EffectInstance(potionEffect.func_188419_a(), potionEffect.func_76459_b(),
                 potionEffect.func_76458_c(),
                 potionEffect.func_82720_e(), potionEffect.func_188418_e()));
         }
@@ -96,12 +96,12 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (!(container instanceof EntityLivingBase)) {
+        if (!(container instanceof LivingEntity)) {
             return DataTransactionResult.failNoData();
         }
-        Optional<List<PotionEffect>> effects = getVal((EntityLivingBase) container);
+        Optional<List<PotionEffect>> effects = getVal((LivingEntity) container);
         if (effects.isPresent()) {
-            ((EntityLivingBase) container).func_70674_bp();
+            ((LivingEntity) container).func_70674_bp();
             return DataTransactionResult.successRemove(constructImmutableValue(effects.get()));
         }
         return DataTransactionResult.successNoData();

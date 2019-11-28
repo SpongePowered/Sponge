@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.item.inventory;
 
-import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.container.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 

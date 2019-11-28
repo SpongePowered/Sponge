@@ -25,16 +25,16 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(WorldServer.class)
+@Mixin(ServerWorld.class)
 public interface WorldServerAccessor {
 
     @Accessor("blockEventQueue")
-    WorldServer.ServerBlockEventList[] getBlockEventQueueForSponge();
+    ServerWorld.ServerBlockEventList[] getBlockEventQueueForSponge();
 
     @Accessor("blockEventCacheIndex")
     int getBlockEventCacheIndexForSponge();

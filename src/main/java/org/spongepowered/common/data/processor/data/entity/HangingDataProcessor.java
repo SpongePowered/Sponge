@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.EntityHanging;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
@@ -41,11 +40,12 @@ import org.spongepowered.common.mixin.core.entity.EntityHangingAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.item.HangingEntity;
 
-public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityHanging, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
+public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcessor<HangingEntity, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
 
     public HangingDataProcessor() {
-        super(Keys.DIRECTION, EntityHanging.class);
+        super(Keys.DIRECTION, HangingEntity.class);
     }
 
     @Override
@@ -54,13 +54,13 @@ public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcesso
     }
 
     @Override
-    protected boolean set(EntityHanging dataHolder, Direction value) {
+    protected boolean set(HangingEntity dataHolder, Direction value) {
         ((EntityHangingAccessor) dataHolder).accessor$updateFacingWithBoundingBox(Constants.DirectionFunctions.getFor(value));
         return true;
     }
 
     @Override
-    protected Optional<Direction> getVal(EntityHanging dataHolder) {
+    protected Optional<Direction> getVal(HangingEntity dataHolder) {
         return Optional.of(dataHolder.field_174860_b == null ? Direction.NONE : Constants.DirectionFunctions.getFor(dataHolder.field_174860_b));
     }
 

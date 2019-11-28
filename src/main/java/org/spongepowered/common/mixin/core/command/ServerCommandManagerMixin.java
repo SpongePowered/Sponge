@@ -32,7 +32,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandResult;
@@ -78,7 +78,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/WorldServer;getGameRules()Lnet/minecraft/world/GameRules;"))
-    private GameRules impl$useSenderWorldGamerules(final WorldServer overworld, final ICommandSender sender, final ICommand command,
+    private GameRules impl$useSenderWorldGamerules(final ServerWorld overworld, final ICommandSender sender, final ICommand command,
         final int flags, final String translationKey, final Object... translationArgs) {
         // Check the game rules of the current world instead of overworld game rules
         return sender.func_130014_f_().func_82736_K();

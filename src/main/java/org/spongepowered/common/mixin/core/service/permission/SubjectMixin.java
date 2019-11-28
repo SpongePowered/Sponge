@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.service.permission;
 
-import net.minecraft.entity.item.EntityMinecartCommandBlock;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntityCommandBlock;
+import net.minecraft.tileentity.CommandBlockTileEntity;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
@@ -55,7 +55,7 @@ import javax.annotation.Nullable;
  * installed permissions service for a subject.
  */
 @NonnullByDefault
-@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class,
+@Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, MinecraftServer.class, RConConsoleSource.class,
         SpongeUser.class}, targets = "net/minecraft/tileentity/TileEntitySign$1")
 public abstract class SubjectMixin implements CommandSourceBridge, SubjectBridge {
 

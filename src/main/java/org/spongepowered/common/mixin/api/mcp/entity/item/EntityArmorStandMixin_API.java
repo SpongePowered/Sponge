@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
-import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.util.math.Rotations;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -51,7 +51,7 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.Collection;
 import java.util.Map;
 
-@Mixin(EntityArmorStand.class)
+@Mixin(ArmorStandEntity.class)
 @Implements(@Interface(iface = ArmorStand.class, prefix = "armor$"))
 public abstract class EntityArmorStandMixin_API extends EntityLivingBaseMixin_API implements ArmorStand {
 

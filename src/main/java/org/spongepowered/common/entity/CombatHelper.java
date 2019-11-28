@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.entity;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.CombatTracker;
 
 public final class CombatHelper {
 
     @SuppressWarnings("Unchecked")
     public static CombatTracker getNewTracker(Object mixin) {
-        if (mixin instanceof EntityLivingBase) {
-            return new CombatTracker((EntityLivingBase) mixin);
+        if (mixin instanceof LivingEntity) {
+            return new CombatTracker((LivingEntity) mixin);
         }
         return null;
     }

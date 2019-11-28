@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.block.tileentity.Skull;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -40,19 +39,20 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.tileentity.SkullTileEntity;
 
-@Mixin(TileEntitySkull.class)
+@Mixin(SkullTileEntity.class)
 public abstract class TileEntitySkullMixin_API extends TileEntityMixin_API implements Skull {
 
     @Override
     public SkullData getSkullData() {
-        return new SpongeSkullData(SkullUtils.getSkullType(((TileEntitySkull) (Object) this).func_145904_a()));
+        return new SpongeSkullData(SkullUtils.getSkullType(((SkullTileEntity) (Object) this).func_145904_a()));
     }
 
     @Override
     public Value<SkullType> skullType() {
         return new SpongeValue<>(Keys.SKULL_TYPE, Constants.TileEntity.Skull.DEFAULT_TYPE,
-            SkullUtils.getSkullType(((TileEntitySkull) (Object) this).func_145904_a()));
+            SkullUtils.getSkullType(((SkullTileEntity) (Object) this).func_145904_a()));
     }
 
     @Override

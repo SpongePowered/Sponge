@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.network.play.server;
 
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SPacketChunkData;
+import net.minecraft.network.play.server.SChunkDataPacket;
 import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.bridge.world.chunk.BlockStateContainerBridge;
 
-@Mixin(SPacketChunkData.class)
+@Mixin(SChunkDataPacket.class)
 public abstract class SPacketChunkDataMixin {
 
     @Shadow private int chunkX;
@@ -56,7 +56,7 @@ public abstract class SPacketChunkDataMixin {
         )
     )
     private int spongeImpl$getCalculatedSizeForArray(
-        final SPacketChunkData sPacketChunkData, final Chunk chunkIn, final boolean p_189556_2_, final int p_189556_3_) {
+        final SChunkDataPacket sPacketChunkData, final Chunk chunkIn, final boolean p_189556_2_, final int p_189556_3_) {
         this.impl$calculatedSize = this.calculateChunkSize(chunkIn, p_189556_2_, p_189556_3_);
         return this.impl$calculatedSize;
     }
@@ -68,7 +68,7 @@ public abstract class SPacketChunkDataMixin {
             target = "Lnet/minecraft/network/play/server/SPacketChunkData;extractChunkData(Lnet/minecraft/network/PacketBuffer;Lnet/minecraft/world/chunk/Chunk;ZI)I"
         )
     )
-    private int spongeImpl$surroundExtractingChunkDataWithExceptionPrinter(final SPacketChunkData this$0, final PacketBuffer buf, final Chunk chunkIn,
+    private int spongeImpl$surroundExtractingChunkDataWithExceptionPrinter(final SChunkDataPacket this$0, final PacketBuffer buf, final Chunk chunkIn,
         final boolean writeSkylight, final int changedSectionFilter) {
         try {
             return this$0.func_189555_a(buf, chunkIn, writeSkylight, changedSectionFilter);

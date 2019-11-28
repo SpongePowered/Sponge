@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.realtime.entity;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MobEntity;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
-@Mixin(EntityLiving.class)
+@Mixin(MobEntity.class)
 public abstract class EntityLivingMixin_RealTime extends EntityLivingBaseMixin_RealTime {
 
 
@@ -53,7 +53,7 @@ public abstract class EntityLivingMixin_RealTime extends EntityLivingBaseMixin_R
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeEntityDespawnAge(final EntityLiving self, final int modifier) {
+    private void realTimeImpl$adjustForRealTimeEntityDespawnAge(final MobEntity self, final int modifier) {
         if (((WorldBridge) this.world).bridge$isFake()) {
             this.idleTime = modifier;
             return;

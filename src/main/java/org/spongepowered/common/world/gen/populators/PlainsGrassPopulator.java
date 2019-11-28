@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.NoiseGeneratorPerlin;
+import net.minecraft.world.gen.PerlinNoiseGenerator;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.data.type.PlantTypes;
@@ -45,7 +45,7 @@ import java.util.Random;
 
 public class PlainsGrassPopulator implements Populator {
 
-    private NoiseGeneratorPerlin noise = new NoiseGeneratorPerlin(new Random(2345L), 1);
+    private PerlinNoiseGenerator noise = new PerlinNoiseGenerator(new Random(2345L), 1);
     private final boolean sunflowers;
     private Flower flowers;
     private Shrub grass;

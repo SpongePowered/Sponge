@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.entity.ai;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.EntityAIMate;
-import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.ai.goal.BreedGoal;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.Ageable;
@@ -48,12 +48,12 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityAIMate.class)
+@Mixin(BreedGoal.class)
 public abstract class EntityAIMateMixin {
 
-    @Shadow @Final private EntityAnimal animal;
-    @Shadow private EntityAnimal targetMate;
-    @Shadow @Nullable private EntityAnimal getNearbyMate() {
+    @Shadow @Final private AnimalEntity animal;
+    @Shadow private AnimalEntity targetMate;
+    @Shadow @Nullable private AnimalEntity getNearbyMate() {
         // Shadow implements
         return null;
     }
@@ -66,8 +66,8 @@ public abstract class EntityAIMateMixin {
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/entity/ai/EntityAIMate;getNearbyMate()Lnet/minecraft/entity/passive/EntityAnimal;"))
-    private EntityAnimal impl$callFindMateEvent(final EntityAIMate entityAIMate) {
-        EntityAnimal nearbyMate = this.getNearbyMate();
+    private AnimalEntity impl$callFindMateEvent(final BreedGoal entityAIMate) {
+        AnimalEntity nearbyMate = this.getNearbyMate();
         if (nearbyMate == null) {
             return null;
         }

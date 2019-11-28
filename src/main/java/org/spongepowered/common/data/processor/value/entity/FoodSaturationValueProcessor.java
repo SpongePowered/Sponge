@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,11 +35,12 @@ import org.spongepowered.common.mixin.core.util.FoodStatsAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.player.PlayerEntity;
 
-public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double, MutableBoundedValue<Double>> {
+public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Double, MutableBoundedValue<Double>> {
 
     public FoodSaturationValueProcessor() {
-        super(EntityPlayer.class, Keys.SATURATION);
+        super(PlayerEntity.class, Keys.SATURATION);
     }
 
     @Override
@@ -54,13 +54,13 @@ public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<E
     }
 
     @Override
-    protected boolean set(final EntityPlayer container, final Double value) {
+    protected boolean set(final PlayerEntity container, final Double value) {
         ((FoodStatsAccessor) container.func_71024_bL()).accessor$setFoodSaturationLevel(value.floatValue());
         return true;
     }
 
     @Override
-    protected Optional<Double> getVal(final EntityPlayer container) {
+    protected Optional<Double> getVal(final PlayerEntity container) {
         return Optional.of((double) container.func_71024_bL().func_75115_e());
     }
 

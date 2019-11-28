@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockHugeMushroom;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -39,13 +37,14 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeBigMushroomData;
 
 import java.util.Optional;
+import net.minecraft.block.HugeMushroomBlock;
 
-@Mixin(BlockHugeMushroom.class)
+@Mixin(HugeMushroomBlock.class)
 public abstract class BlockHugeMushroomMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getBigMushroomTypeFor(blockState));
     }
 
@@ -55,27 +54,27 @@ public abstract class BlockHugeMushroomMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableBigMushroomData) {
-            final BlockHugeMushroom.EnumType bigMushroomType =
-                    (BlockHugeMushroom.EnumType) (Object) ((ImmutableBigMushroomData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockHugeMushroom.field_176380_a, bigMushroomType));
+            final HugeMushroomBlock.EnumType bigMushroomType =
+                    (HugeMushroomBlock.EnumType) (Object) ((ImmutableBigMushroomData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.func_177226_a(HugeMushroomBlock.field_176380_a, bigMushroomType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.BIG_MUSHROOM_TYPE)) {
-            final BlockHugeMushroom.EnumType bigMushroomType = (BlockHugeMushroom.EnumType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockHugeMushroom.field_176380_a, bigMushroomType));
+            final HugeMushroomBlock.EnumType bigMushroomType = (HugeMushroomBlock.EnumType) value;
+            return Optional.of((BlockState) blockState.func_177226_a(HugeMushroomBlock.field_176380_a, bigMushroomType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @SuppressWarnings("ConstantConditions")
-    private ImmutableBigMushroomData impl$getBigMushroomTypeFor(final IBlockState blockState) {
+    private ImmutableBigMushroomData impl$getBigMushroomTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeBigMushroomData.class,
-                (BigMushroomType) (Object) blockState.func_177229_b(BlockHugeMushroom.field_176380_a));
+                (BigMushroomType) (Object) blockState.func_177229_b(HugeMushroomBlock.field_176380_a));
     }
 }

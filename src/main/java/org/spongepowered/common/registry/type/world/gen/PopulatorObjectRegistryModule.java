@@ -27,12 +27,12 @@ package org.spongepowered.common.registry.type.world.gen;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.LeavesBlock;
 import net.minecraft.world.gen.feature.BigTreeFeature;
 import net.minecraft.world.gen.feature.BirchTreeFeature;
 import net.minecraft.world.gen.feature.CanopyTreeFeature;
@@ -87,9 +87,9 @@ public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalo
         register(new PointyTaigaTreeFeature());
         register(new MegaPineTree(false, true));
         register(new MegaPineTree(false, false));
-        IBlockState jlog = Blocks.field_150364_r.func_176223_P().func_177226_a(BlockOldLog.field_176301_b, BlockPlanks.EnumType.JUNGLE);
-        IBlockState jleaf = Blocks.field_150362_t.func_176223_P().func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE).func_177226_a(BlockLeaves.field_176236_b, Boolean.valueOf(false));
-        IBlockState leaf = Blocks.field_150362_t.func_176223_P().func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE).func_177226_a(BlockLeaves.field_176236_b, Boolean.valueOf(false));
+        BlockState jlog = Blocks.field_150364_r.func_176223_P().func_177226_a(BlockOldLog.field_176301_b, BlockPlanks.EnumType.JUNGLE);
+        BlockState jleaf = Blocks.field_150362_t.func_176223_P().func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE).func_177226_a(LeavesBlock.field_176236_b, Boolean.valueOf(false));
+        BlockState leaf = Blocks.field_150362_t.func_176223_P().func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE).func_177226_a(LeavesBlock.field_176236_b, Boolean.valueOf(false));
         WorldGenTreesBridge trees = (WorldGenTreesBridge) new TreeFeature(false, 4, jlog, jleaf, true);
         trees.bridge$setId("minecraft:jungle");
         trees.bridge$setName("Jungle tree");

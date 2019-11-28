@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import net.minecraft.block.BlockJukebox;
-import net.minecraft.block.BlockJukebox.TileEntityJukebox;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemRecord;
 import org.spongepowered.api.block.tileentity.Jukebox;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -44,51 +40,55 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.util.Optional;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.JukeboxBlock;
+import net.minecraft.block.JukeboxBlock.TileEntityJukebox;
+import net.minecraft.item.MusicDiscItem;
 
 public class JukeboxDataProcessor extends
-        AbstractTileEntitySingleDataProcessor<BlockJukebox.TileEntityJukebox, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
+        AbstractTileEntitySingleDataProcessor<JukeboxBlock.TileEntityJukebox, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
 
     public JukeboxDataProcessor() {
-        super(BlockJukebox.TileEntityJukebox.class, Keys.REPRESENTED_ITEM);
+        super(JukeboxBlock.TileEntityJukebox.class, Keys.REPRESENTED_ITEM);
     }
 
     @Override
-    protected boolean set(BlockJukebox.TileEntityJukebox jukebox, ItemStackSnapshot stackSnapshot) {
-        IBlockState block = jukebox.func_145831_w().func_180495_p(jukebox.func_174877_v());
+    protected boolean set(JukeboxBlock.TileEntityJukebox jukebox, ItemStackSnapshot stackSnapshot) {
+        BlockState block = jukebox.func_145831_w().func_180495_p(jukebox.func_174877_v());
         if (stackSnapshot == ItemStackSnapshot.NONE) {
             if (jukebox.func_145856_a() == null) {
                 return true;
             }
             return remove(jukebox);
         }
-        if (!(stackSnapshot.getType() instanceof ItemRecord)) {
+        if (!(stackSnapshot.getType() instanceof MusicDiscItem)) {
             return false;
         }
         ((Jukebox) jukebox).insertRecord(stackSnapshot.createStack());
         block = jukebox.func_145831_w().func_180495_p(jukebox.func_174877_v());
-        return block.func_177230_c() instanceof BlockJukebox && block.func_177229_b(BlockJukebox.field_176432_a);
+        return block.func_177230_c() instanceof JukeboxBlock && block.func_177229_b(JukeboxBlock.field_176432_a);
     }
 
     @Override
-    protected Optional<ItemStackSnapshot> getVal(BlockJukebox.TileEntityJukebox jukebox) {
+    protected Optional<ItemStackSnapshot> getVal(JukeboxBlock.TileEntityJukebox jukebox) {
         if (jukebox.func_145856_a() == null) {
             return Optional.empty();
         }
         return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) jukebox.func_145856_a()).createSnapshot());
     }
 
-    private boolean remove(BlockJukebox.TileEntityJukebox jukebox) {
+    private boolean remove(JukeboxBlock.TileEntityJukebox jukebox) {
         ((Jukebox) jukebox).ejectRecord();
-        IBlockState block = jukebox.func_145831_w().func_180495_p(jukebox.func_174877_v());
-        return block.func_177230_c() instanceof BlockJukebox && !block.func_177229_b(BlockJukebox.field_176432_a);
+        BlockState block = jukebox.func_145831_w().func_180495_p(jukebox.func_174877_v());
+        return block.func_177230_c() instanceof JukeboxBlock && !block.func_177229_b(JukeboxBlock.field_176432_a);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (!(container instanceof BlockJukebox.TileEntityJukebox)) {
+        if (!(container instanceof JukeboxBlock.TileEntityJukebox)) {
             return DataTransactionResult.failNoData();
         }
-        BlockJukebox.TileEntityJukebox jukebox = (TileEntityJukebox) container;
+        JukeboxBlock.TileEntityJukebox jukebox = (TileEntityJukebox) container;
         Optional<ItemStackSnapshot> old = getVal(jukebox);
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();

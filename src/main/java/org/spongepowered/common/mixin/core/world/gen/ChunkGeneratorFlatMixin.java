@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.gen;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.world.gen.ChunkGeneratorFlat;
+import net.minecraft.block.Blocks;
+import net.minecraft.world.gen.FlatChunkGenerator;
 import net.minecraft.world.gen.FlatGeneratorInfo;
 import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.feature.Structure;
@@ -49,10 +48,10 @@ import org.spongepowered.common.world.gen.populators.FilteredPopulator;
 
 import java.util.Map;
 
-@Mixin(ChunkGeneratorFlat.class)
+@Mixin(FlatChunkGenerator.class)
 public class ChunkGeneratorFlatMixin implements  PopulatorProviderBridge {
 
-    @Shadow @Final private IBlockState[] cachedBlockIDs;
+    @Shadow @Final private net.minecraft.block.BlockState[] cachedBlockIDs;
     @Shadow @Final private Map<String, Structure> structureGenerators;
     @Shadow @Final private boolean hasDecoration;
     @Shadow @Final private boolean hasDungeons;

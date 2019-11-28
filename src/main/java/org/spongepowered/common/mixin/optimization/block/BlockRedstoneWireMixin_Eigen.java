@@ -26,10 +26,10 @@ package org.spongepowered.common.mixin.optimization.block;
 
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockRedstoneWire;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.RedstoneWireBlock;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
@@ -45,7 +45,7 @@ import org.spongepowered.common.mixin.plugin.RedstoneWireTurbo;
 import java.util.List;
 import java.util.Set;
 
-@Mixin(value = BlockRedstoneWire.class, priority = 1001)
+@Mixin(value = RedstoneWireBlock.class, priority = 1001)
 public abstract class BlockRedstoneWireMixin_Eigen extends Block {
 
     @Shadow @Final private Set<BlockPos> blocksNeedingUpdate;
@@ -70,10 +70,10 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
     // 45% improvement to be enabled by itself.
 
     // The bulk of the new functionality is found in RedstoneWireTurbo.java
-    private RedstoneWireTurbo turbo = new RedstoneWireTurbo((BlockRedstoneWire)(Object) this);
+    private RedstoneWireTurbo turbo = new RedstoneWireTurbo((RedstoneWireBlock)(Object) this);
 
     @Inject(method = "updateSurroundingRedstone", at = @At("HEAD"), cancellable = true)
-    private void onUpdateSurroundingRedstone(World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<IBlockState> cir) {
+    private void onUpdateSurroundingRedstone(World worldIn, BlockPos pos, BlockState state, CallbackInfoReturnable<BlockState> cir) {
         if (!worldIn.field_72995_K) {
             this.updateSurroundingRedstone(worldIn, pos, state, null);
             cir.setReturnValue(state);
@@ -87,7 +87,7 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
     @Override
     @SuppressWarnings("deprecation")
     @Overwrite
-    public void func_189540_a(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    public void func_189540_a(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
         if (!worldIn.field_72995_K)
         {
@@ -114,7 +114,7 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
      * this.neighborChanged and a few other methods in this class.
      * Note: Added 'source' argument so to help determine direction of information flow
      */
-    private IBlockState updateSurroundingRedstone(World worldIn, BlockPos pos, IBlockState state, BlockPos source)
+    private BlockState updateSurroundingRedstone(World worldIn, BlockPos pos, BlockState state, BlockPos source)
     {
         if (this.old_search) {
             state = this.calculateCurrentChanges(worldIn, pos, pos, state);
@@ -145,10 +145,10 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
      * Note:  Made this public so that RedstoneWireTurbo can access it.
      */
     @Overwrite
-    private IBlockState calculateCurrentChanges(World worldIn, BlockPos pos1, BlockPos pos2, IBlockState state)
+    private BlockState calculateCurrentChanges(World worldIn, BlockPos pos1, BlockPos pos2, BlockState state)
     {
-        IBlockState iblockstate = state;
-        int i = state.func_177229_b(BlockRedstoneWire.field_176351_O).intValue();
+        BlockState iblockstate = state;
+        int i = state.func_177229_b(RedstoneWireBlock.field_176351_O).intValue();
         int j = 0;
         j = this.getMaxCurrentStrength(worldIn, pos2, j);
         this.canProvidePower = false;
@@ -171,7 +171,7 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
         // following loop can affect the power level of the wire.  Therefore, the loop is 
         // skipped if k is already 15. 
         if (this.old_search || k < 15)
-        for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
+        for (Direction enumfacing : Direction.Plane.HORIZONTAL)
         {
             BlockPos blockpos = pos1.func_177972_a(enumfacing);
             boolean flag = blockpos.func_177958_n() != pos2.func_177958_n() || blockpos.func_177952_p() != pos2.func_177952_p();
@@ -226,7 +226,7 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
 
         if (i != j)
         {
-            state = state.func_177226_a(BlockRedstoneWire.field_176351_O, Integer.valueOf(j));
+            state = state.func_177226_a(RedstoneWireBlock.field_176351_O, Integer.valueOf(j));
             
             if (worldIn.func_180495_p(pos1) == iblockstate)
             {
@@ -238,7 +238,7 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
                 // so only add anything to blocksNeedingUpdate if we're using the vanilla update algorithm.
                 this.blocksNeedingUpdate.add(pos1);
 
-                for (EnumFacing enumfacing1 : EnumFacing.values())
+                for (Direction enumfacing1 : Direction.values())
                 {   
                     this.blocksNeedingUpdate.add(pos1.func_177972_a(enumfacing1));
                 }

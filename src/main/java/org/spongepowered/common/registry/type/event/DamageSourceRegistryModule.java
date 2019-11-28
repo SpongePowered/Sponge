@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.type.event;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSources;
 import org.spongepowered.api.registry.RegistryModule;
@@ -46,21 +46,21 @@ public final class DamageSourceRegistryModule implements RegistryModule {
             // These need to be instantiated after the DamageTypeRegistryModule has had a chance to register
             // the damage types, otherwise it will fail and have invalid types.
             {
-                DAMAGESOURCE_POISON = net.minecraft.util.DamageSource.func_188405_b((EntityLivingBase) null);
+                DAMAGESOURCE_POISON = net.minecraft.util.DamageSource.func_188405_b((LivingEntity) null);
                 ((DamageSourceAccessor) DAMAGESOURCE_POISON).accessor$setId("poison");
                 ((DamageSourceBridge) DAMAGESOURCE_POISON).bridge$resetDamageType();
                 ((DamageSourceAccessor) DAMAGESOURCE_POISON).accessor$setDamageBypassesArmor();
                 DAMAGESOURCE_POISON.func_82726_p();
             }
             {
-                DAMAGESOURCE_MELTING = net.minecraft.util.DamageSource.func_188405_b((EntityLivingBase) null);
+                DAMAGESOURCE_MELTING = net.minecraft.util.DamageSource.func_188405_b((LivingEntity) null);
                 ((DamageSourceAccessor) DAMAGESOURCE_MELTING).accessor$setId("melting");
                 ((DamageSourceBridge) DAMAGESOURCE_MELTING).bridge$resetDamageType();
                 ((DamageSourceAccessor) DAMAGESOURCE_MELTING).accessor$setDamageBypassesArmor();
                 ((DamageSourceAccessor) DAMAGESOURCE_MELTING).accessor$setFireDamage();
             }
             {
-                IGNORED_DAMAGE_SOURCE = net.minecraft.util.DamageSource.func_188405_b((EntityLivingBase) null);
+                IGNORED_DAMAGE_SOURCE = net.minecraft.util.DamageSource.func_188405_b((LivingEntity) null);
                 ((DamageSourceAccessor) IGNORED_DAMAGE_SOURCE).accessor$setId("spongespecific");
                 ((DamageSourceBridge) IGNORED_DAMAGE_SOURCE).bridge$resetDamageType();
                 ((DamageSourceAccessor) IGNORED_DAMAGE_SOURCE).accessor$setDamageAllowedInCreativeMode();

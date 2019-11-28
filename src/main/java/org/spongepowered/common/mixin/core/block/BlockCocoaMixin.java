@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockCocoa;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -38,12 +36,13 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
 
 import java.util.Optional;
+import net.minecraft.block.CocoaBlock;
 
-@Mixin(BlockCocoa.class)
+@Mixin(CocoaBlock.class)
 public abstract class BlockCocoaMixin extends BlockHorizontalMixin {
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
                 .add(impl$getGrowthData(blockState))
@@ -56,31 +55,31 @@ public abstract class BlockCocoaMixin extends BlockHorizontalMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
             if (growth > 2) {
                 growth = 2;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(BlockCocoa.field_176501_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(CocoaBlock.field_176501_a, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             int growth = (Integer) value;
             if (growth > 2) {
                 growth = 2;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(BlockCocoa.field_176501_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(CocoaBlock.field_176501_a, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableGrowthData impl$getGrowthData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(BlockCocoa.field_176501_a), 0, 2);
+    private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(CocoaBlock.field_176501_a), 0, 2);
     }
 
 }

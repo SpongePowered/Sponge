@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import net.minecraft.entity.item.EntityPainting;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.Arts;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -41,6 +40,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.item.PaintingEntity;
 
 public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
 
@@ -59,7 +59,7 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
 
     @Override
     public void registerDefaults() {
-        for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
+        for (PaintingEntity.EnumArt art : PaintingEntity.EnumArt.values()) {
             this.artMappings.put(((Art) (Object) art).getId().toLowerCase(Locale.ENGLISH), (Art) (Object) art);
         }
     }
@@ -75,7 +75,7 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
 
     @AdditionalRegistration
     public void registerAdditionals() {
-        for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
+        for (PaintingEntity.EnumArt art : PaintingEntity.EnumArt.values()) {
             if (!this.artMappings.containsValue(art)) {
                 this.artMappings.put(((Art) (Object) art).getId().toLowerCase(Locale.ENGLISH), (Art) (Object) art);
             }

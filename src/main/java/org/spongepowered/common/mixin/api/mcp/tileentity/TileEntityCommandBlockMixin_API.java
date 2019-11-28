@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.CommandBlockBaseLogic;
-import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.block.tileentity.CommandBlock;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -36,12 +34,14 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
+import net.minecraft.tileentity.CommandBlockLogic;
+import net.minecraft.tileentity.CommandBlockTileEntity;
 
 @NonnullByDefault
-@Mixin(TileEntityCommandBlock.class)
+@Mixin(CommandBlockTileEntity.class)
 public abstract class TileEntityCommandBlockMixin_API extends TileEntityMixin_API implements CommandBlock {
 
-    @Shadow public abstract CommandBlockBaseLogic getCommandBlockLogic();
+    @Shadow public abstract CommandBlockLogic getCommandBlockLogic();
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {

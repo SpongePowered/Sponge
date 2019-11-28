@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
@@ -69,7 +69,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
 
     @Shadow public abstract BlockPos getPos();
     @Shadow public abstract Block getBlockType();
-    @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
+    @Shadow public abstract CompoundNBT writeToNBT(CompoundNBT compound);
     @Shadow public abstract void shadow$markDirty();
 
     @Inject(method = "<init>*", at = @At("RETURN"))
@@ -105,7 +105,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      * @param ci (Unused) callback info
      */
     @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
-    private void impl$WriteSpongeDataToCompound(final NBTTagCompound compound, final CallbackInfoReturnable<NBTTagCompound> ci) {
+    private void impl$WriteSpongeDataToCompound(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
         if (!((CustomDataHolderBridge) this).bridge$getCustomManipulators().isEmpty()) {
             this.bridge$writeToSpongeCompound(this.data$getSpongeCompound());
         }
@@ -120,7 +120,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      * @param ci (Unused) callback info
      */
     @Inject(method = "readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
-    private void impl$ReadSpongeDataFromCompound(final NBTTagCompound compound, final CallbackInfo ci) {
+    private void impl$ReadSpongeDataFromCompound(final CompoundNBT compound, final CallbackInfo ci) {
         if (this.data$hasRootCompound()) {
             this.bridge$readFromSpongeCompound(this.data$getSpongeCompound());
         }
@@ -131,7 +131,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      *
      * @param compound The SpongeData compound to read from
      */
-    protected void bridge$readFromSpongeCompound(final NBTTagCompound compound) {
+    protected void bridge$readFromSpongeCompound(final CompoundNBT compound) {
         DataUtil.readCustomData(compound, (TileEntity) this);
     }
 
@@ -140,7 +140,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      *
      * @param compound The SpongeData compound to write to
      */
-    protected void bridge$writeToSpongeCompound(final NBTTagCompound compound) {
+    protected void bridge$writeToSpongeCompound(final CompoundNBT compound) {
         DataUtil.writeCustomData(compound, (TileEntity) this);
     }
 

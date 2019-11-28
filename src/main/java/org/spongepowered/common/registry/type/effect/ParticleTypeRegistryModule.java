@@ -30,7 +30,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.effect.particle.ParticleOption;

@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.SPacketUpdateBossInfo;
-import net.minecraft.world.BossInfoServer;
 import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
@@ -39,23 +36,26 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Collection;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.server.SUpdateBossInfoPacket;
+import net.minecraft.world.ServerBossInfo;
 
 @Implements(@Interface(iface = ServerBossBar.class, prefix = "sbar$"))
-@Mixin(BossInfoServer.class)
+@Mixin(ServerBossInfo.class)
 public abstract class BossInfoServerMixin_API extends BossInfoMixin_API implements ServerBossBar {
 
     @Shadow private boolean visible;
-    @Shadow public abstract void shadow$addPlayer(EntityPlayerMP player);
-    @Shadow public abstract void removePlayer(EntityPlayerMP player);
+    @Shadow public abstract void shadow$addPlayer(ServerPlayerEntity player);
+    @Shadow public abstract void removePlayer(ServerPlayerEntity player);
     @Shadow public abstract void shadow$setVisible(boolean visibleIn);
-    @Shadow public abstract Collection<EntityPlayerMP> shadow$getPlayers();
-    @Shadow private void sendUpdate(final SPacketUpdateBossInfo.Operation operation) { }
+    @Shadow public abstract Collection<ServerPlayerEntity> shadow$getPlayers();
+    @Shadow private void sendUpdate(final SUpdateBossInfoPacket.Operation operation) { }
 
     @Override
     public ServerBossBar setName(final Text name) {
         if (this.name != name) {
             super.setName(name);
-            this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_NAME);
+            this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_NAME);
         }
 
         return this;
@@ -65,7 +65,7 @@ public abstract class BossInfoServerMixin_API extends BossInfoMixin_API implemen
     public ServerBossBar setPercent(final float percent) {
         if (this.percent != percent) {
             super.setPercent(percent);
-            this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_PCT);
+            this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_PCT);
         }
 
         return this;
@@ -76,7 +76,7 @@ public abstract class BossInfoServerMixin_API extends BossInfoMixin_API implemen
     public ServerBossBar setColor(final BossBarColor color) {
         if ((Object) this.color != color) {
             super.setColor(color);
-            this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_STYLE);
+            this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
         }
 
         return (ServerBossBar) this;
@@ -87,7 +87,7 @@ public abstract class BossInfoServerMixin_API extends BossInfoMixin_API implemen
     public ServerBossBar setOverlay(final BossBarOverlay overlay) {
         if ((Object) this.overlay != overlay) {
             super.setOverlay(overlay);
-            this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_STYLE);
+            this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
         }
 
         return (ServerBossBar) this;
@@ -119,13 +119,13 @@ public abstract class BossInfoServerMixin_API extends BossInfoMixin_API implemen
 
     @Override
     public ServerBossBar addPlayer(final Player player) {
-        this.shadow$addPlayer((EntityPlayerMP) player);
+        this.shadow$addPlayer((ServerPlayerEntity) player);
         return this;
     }
 
     @Override
     public ServerBossBar removePlayer(final Player player) {
-        this.removePlayer((EntityPlayerMP) player);
+        this.removePlayer((ServerPlayerEntity) player);
         return this;
     }
 

@@ -25,7 +25,7 @@
 package org.spongepowered.common.world.gen.populators;
 
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.gen.NoiseGeneratorPerlin;
+import net.minecraft.world.gen.PerlinNoiseGenerator;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PlantTypes;
@@ -37,11 +37,11 @@ import java.util.function.Function;
 
 public class FlowerForestSupplier implements Function<Location<Extent>, PlantType> {
 
-    private static final NoiseGeneratorPerlin GRASS_COLOR_NOISE;
+    private static final PerlinNoiseGenerator GRASS_COLOR_NOISE;
     private static PlantType[] options;
 
     static {
-        GRASS_COLOR_NOISE = new NoiseGeneratorPerlin(new Random(2345L), 1);
+        GRASS_COLOR_NOISE = new PerlinNoiseGenerator(new Random(2345L), 1);
     }
 
     public FlowerForestSupplier() {

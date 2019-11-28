@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.entitycollisions;
 
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.Entity;
@@ -65,8 +65,8 @@ public class EntityMixin_Collisions implements CollisionsCapability {
             }
 
 
-            if ((net.minecraft.entity.Entity) (Object) this instanceof EntityItem) {
-                final EntityItem item = (EntityItem) (Object) this;
+            if ((net.minecraft.entity.Entity) (Object) this instanceof ItemEntity) {
+                final ItemEntity item = (ItemEntity) (Object) this;
                 final ItemStack itemstack = item.func_92059_d();
                 if (!itemstack.func_190926_b()) {
                     this.collision$entityName = itemstack.func_77977_a().replace("item.", "");
@@ -143,7 +143,7 @@ public class EntityMixin_Collisions implements CollisionsCapability {
             }
 
             Integer entityMaxCollision = null;
-            if ((net.minecraft.entity.Entity) (Object) this instanceof EntityItem) {
+            if ((net.minecraft.entity.Entity) (Object) this instanceof ItemEntity) {
                 // check if all items are overridden
                 entityMaxCollision = worldCollMod.getEntityList().get(this.collision$getModDataName());
             }

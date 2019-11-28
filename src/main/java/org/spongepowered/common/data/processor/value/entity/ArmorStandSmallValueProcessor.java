@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,11 +35,12 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 
 import java.util.Optional;
+import net.minecraft.entity.item.ArmorStandEntity;
 
-public class ArmorStandSmallValueProcessor extends AbstractSpongeValueProcessor<EntityArmorStand, Boolean, Value<Boolean>> {
+public class ArmorStandSmallValueProcessor extends AbstractSpongeValueProcessor<ArmorStandEntity, Boolean, Value<Boolean>> {
 
     public ArmorStandSmallValueProcessor() {
-        super(EntityArmorStand.class, Keys.ARMOR_STAND_IS_SMALL);
+        super(ArmorStandEntity.class, Keys.ARMOR_STAND_IS_SMALL);
     }
 
     @Override
@@ -49,13 +49,13 @@ public class ArmorStandSmallValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected boolean set(final EntityArmorStand container, final Boolean value) {
+    protected boolean set(final ArmorStandEntity container, final Boolean value) {
         ((EntityArmorStandAccessor) container).accessor$setSmall(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(final EntityArmorStand container) {
+    protected Optional<Boolean> getVal(final ArmorStandEntity container) {
         return Optional.of(container.func_175410_n());
     }
 

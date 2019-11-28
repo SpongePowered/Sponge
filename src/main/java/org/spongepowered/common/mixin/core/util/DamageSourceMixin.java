@@ -26,12 +26,12 @@ package org.spongepowered.common.mixin.core.util;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Explosion;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
@@ -81,10 +81,10 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
 
     @Inject(method = "getDeathMessage(Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/util/text/ITextComponent;", cancellable = true,
             at = @At(value = "RETURN"))
-    private void beforeGetDeathMessageReturn(final EntityLivingBase entityLivingBaseIn, final CallbackInfoReturnable<ITextComponent> cir) {
+    private void beforeGetDeathMessageReturn(final LivingEntity entityLivingBaseIn, final CallbackInfoReturnable<ITextComponent> cir) {
         // This prevents untranslated keys from appearing in death messages, switching out those that are untranslated with the generic message.
         if (cir.getReturnValue().func_150260_c().equals("death.attack." + this.damageType)) {
-            cir.setReturnValue(new TextComponentTranslation("death.attack.generic", entityLivingBaseIn.func_145748_c_()));
+            cir.setReturnValue(new TranslationTextComponent("death.attack.generic", entityLivingBaseIn.func_145748_c_()));
         }
     }
 
@@ -97,10 +97,10 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
                     // check creator
                     final OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) entity;
                     spongeEntity.tracked$getOwnerReference()
-                        .filter(user -> user instanceof EntityPlayer)
-                        .map(user -> (EntityPlayer) user)
+                        .filter(user -> user instanceof PlayerEntity)
+                        .map(user -> (PlayerEntity) user)
                         .ifPresent(player -> {
-                            final EntityDamageSourceIndirect damageSource = new EntityDamageSourceIndirect("explosion.player", entity, player);
+                            final IndirectEntityDamageSource damageSource = new IndirectEntityDamageSource("explosion.player", entity, player);
                             damageSource.func_76351_m().func_94540_d();
                             cir.setReturnValue(damageSource);
                         });

@@ -31,7 +31,6 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
@@ -70,6 +69,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundNBT;
 
 public class SpongeEntitySnapshot implements EntitySnapshot {
 
@@ -82,7 +82,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     private final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<ImmutableValue<?>> values;
-    @Nullable private final NBTTagCompound compound;
+    @Nullable private final CompoundNBT compound;
     @Nullable private final WeakReference<Entity> entityReference;
     // TODO write optimization to lazy load and evaluate all of the manipulators
     // for entities during events.
@@ -382,7 +382,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         final SpongeEntitySnapshotBuilder builder = createBuilder();
         builder.position = location.getPosition();
         builder.worldId = location.getExtent().getUniqueId();
-        NBTTagCompound newCompound = this.compound.func_74737_b();
+        CompoundNBT newCompound = this.compound.func_74737_b();
         newCompound.func_74768_a("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());
         builder.compound = newCompound;
         return builder.build();
@@ -395,7 +395,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 .scale(this.scale);
     }
 
-    public Optional<NBTTagCompound> getCompound() {
+    public Optional<CompoundNBT> getCompound() {
         if (this.compound == null) {
             return Optional.empty();
         }

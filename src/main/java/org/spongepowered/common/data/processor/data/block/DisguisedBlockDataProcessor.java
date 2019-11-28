@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.block;
 
-import net.minecraft.block.BlockSilverfish;
+import net.minecraft.block.SilverfishBlock;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDisguisedBlockData;
 import org.spongepowered.api.data.manipulator.mutable.block.DisguisedBlockData;
@@ -45,12 +45,12 @@ public class DisguisedBlockDataProcessor extends
 
     @Override
     protected int setToMeta(DisguisedBlockType value) {
-        return ((BlockSilverfish.EnumType) value).func_176881_a();
+        return ((SilverfishBlock.EnumType) value).func_176881_a();
     }
 
     @Override
     protected DisguisedBlockType getFromMeta(int meta) {
-        return (DisguisedBlockType) BlockSilverfish.EnumType.func_176879_a(meta);
+        return (DisguisedBlockType) SilverfishBlock.EnumType.func_176879_a(meta);
     }
 
     @Override

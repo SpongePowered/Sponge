@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.inventory.ContainerWorkbench;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -41,8 +40,9 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlo
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.inventory.container.WorkbenchContainer;
 
-@Mixin(ContainerWorkbench.class)
+@Mixin(WorkbenchContainer.class)
 public abstract class ContainerWorkbenchMixin extends ContainerMixin implements LensProviderBridge {
 
     @Override

@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.core.network.rcon;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.command.ICommandSender;
+import net.minecraft.network.rcon.ClientThread;
 import net.minecraft.network.rcon.RConConsoleSource;
-import net.minecraft.network.rcon.RConThreadClient;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -52,15 +52,15 @@ public abstract class RConConsoleSourceMixin implements ICommandSender, CommandS
 
     @Shadow @Final private StringBuffer buffer;
 
-    @Nullable private RConThreadClient impl$clientThread;
+    @Nullable private ClientThread impl$clientThread;
 
     @Override
-    public void bridge$setConnection(final RConThreadClient conn) {
+    public void bridge$setConnection(final ClientThread conn) {
         this.impl$clientThread = conn;
     }
 
     @Override
-    public RConThreadClient bridge$getClient() {
+    public ClientThread bridge$getClient() {
         return checkNotNull(this.impl$clientThread, "RCon Client is null");
     }
 

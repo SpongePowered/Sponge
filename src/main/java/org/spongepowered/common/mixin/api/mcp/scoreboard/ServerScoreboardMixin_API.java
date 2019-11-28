@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.scoreboard;
 
-import net.minecraft.network.play.server.SPacketDisplayObjective;
-import net.minecraft.network.play.server.SPacketScoreboardObjective;
+import net.minecraft.network.play.server.SDisplayObjectivePacket;
+import net.minecraft.network.play.server.SScoreboardObjectivePacket;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -105,7 +105,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
         }
         final int index = ((SpongeDisplaySlot) displaySlot).getIndex();
         ((ScoreboardBridge) this).accessor$getObjectiveDisplaySlots()[index] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
-        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SPacketDisplayObjective(index, ((ScoreboardBridge) this).accessor$getObjectiveDisplaySlots()[index]));
+        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SDisplayObjectivePacket(index, ((ScoreboardBridge) this).accessor$getObjectiveDisplaySlots()[index]));
     }
 
     public Optional<Objective> scoreboard$getObjective(final DisplaySlot slot) {
@@ -146,7 +146,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
             }
         }
 
-        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SPacketScoreboardObjective(scoreObjective, Constants.Scoreboards.OBJECTIVE_PACKET_REMOVE));
+        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SScoreboardObjectivePacket(scoreObjective, Constants.Scoreboards.OBJECTIVE_PACKET_REMOVE));
 
         final List list = ((ScoreboardBridge) this).accessor$getScoreObjectiveCriterias().get(scoreObjective.func_96680_c());
 

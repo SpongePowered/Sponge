@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallDistanceData;
@@ -39,22 +38,23 @@ import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataPr
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
+import net.minecraft.entity.LivingEntity;
 
 public class FallDistanceDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityLivingBase, Float, MutableBoundedValue<Float>, FallDistanceData, ImmutableFallDistanceData> {
+        extends AbstractEntitySingleDataProcessor<LivingEntity, Float, MutableBoundedValue<Float>, FallDistanceData, ImmutableFallDistanceData> {
 
     public FallDistanceDataProcessor() {
-        super(EntityLivingBase.class, Keys.FALL_DISTANCE);
+        super(LivingEntity.class, Keys.FALL_DISTANCE);
     }
 
     @Override
-    protected boolean set(EntityLivingBase entity, Float value) {
+    protected boolean set(LivingEntity entity, Float value) {
         entity.field_70143_R = checkNotNull(value);
         return true;
     }
 
     @Override
-    protected Optional<Float> getVal(EntityLivingBase entity) {
+    protected Optional<Float> getVal(LivingEntity entity) {
         return Optional.of(entity.field_70143_R);
     }
 

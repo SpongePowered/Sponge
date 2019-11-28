@@ -26,7 +26,6 @@ package org.spongepowered.common.service.permission;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.server.management.UserListOps;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -55,6 +54,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.management.OpList;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -97,7 +97,7 @@ public class SpongePermissionService implements PermissionService {
         this.defaultData = getDefaultCollection().get(SUBJECTS_DEFAULT);
     }
 
-    static UserListOps getOps() {
+    static OpList getOps() {
         return SpongeImpl.getServer().func_184103_al().func_152603_m();
     }
 

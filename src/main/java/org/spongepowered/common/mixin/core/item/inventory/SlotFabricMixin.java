@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;

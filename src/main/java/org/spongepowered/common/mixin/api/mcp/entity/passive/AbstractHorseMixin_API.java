@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.passive.AbstractHorse;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.inventory.ContainerHorseChest;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -32,7 +32,7 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(AbstractHorse.class)
+@Mixin(AbstractHorseEntity.class)
 public abstract class AbstractHorseMixin_API extends EntityAnimalMixin_API implements Horse {
 
     @Shadow protected ContainerHorseChest horseChest;

@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import net.minecraft.entity.passive.EntityLlama;
-import net.minecraft.entity.projectile.EntityLlamaSpit;
+import net.minecraft.entity.passive.horse.LlamaEntity;
+import net.minecraft.entity.projectile.LlamaSpitEntity;
 import org.spongepowered.api.entity.projectile.LlamaSpit;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-@Mixin(EntityLlamaSpit.class)
+@Mixin(LlamaSpitEntity.class)
 public abstract class EntityLlamaSpitMixin_API extends EntityMixin_API implements LlamaSpit {
 
-    @Shadow public EntityLlama owner;
+    @Shadow public LlamaEntity owner;
 
     @Override
     public ProjectileSource getShooter() {
@@ -44,9 +44,9 @@ public abstract class EntityLlamaSpitMixin_API extends EntityMixin_API implement
 
     @Override
     public void setShooter(ProjectileSource shooter) {
-        if (!(shooter instanceof EntityLlama)) {
+        if (!(shooter instanceof LlamaEntity)) {
             throw new IllegalArgumentException("Cound not set this LlamaSpit's shooter as anyone else!");
         }
-        this.owner = (EntityLlama) shooter;
+        this.owner = (LlamaEntity) shooter;
     }
 }

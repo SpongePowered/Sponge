@@ -27,17 +27,15 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
@@ -64,21 +62,21 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
-@Mixin(value = EntityLivingBase.class, priority = 999)
+@Mixin(value = LivingEntity.class, priority = 999)
 public abstract class EntityLivingBaseMixin_API extends EntityMixin_API implements Living {
 
-    @Shadow @Nullable private EntityLivingBase revengeTarget;
+    @Shadow @Nullable private LivingEntity revengeTarget;
     @Shadow protected float lastDamage;
 
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void setRotationYawHead(float rotation);
     @Shadow public abstract void setRenderYawOffset(float offset);
-    @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
+    @Shadow public abstract void setHeldItem(Hand hand, @Nullable ItemStack stack);
     @Shadow public abstract float getHealth();
     @Shadow public abstract float getMaxHealth();
     @Shadow public abstract float getRotationYawHead();
-    @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
-    @Shadow public abstract ItemStack getHeldItem(EnumHand hand);
+    @Shadow public abstract ItemStack getItemStackFromSlot(EquipmentSlotType slotIn);
+    @Shadow public abstract ItemStack getHeldItem(Hand hand);
     @Shadow public abstract ItemStack getHeldItemMainhand();
 
     @Override

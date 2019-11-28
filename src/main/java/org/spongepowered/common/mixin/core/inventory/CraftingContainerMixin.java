@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ClickType;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerPlayer;
-import net.minecraft.inventory.ContainerWorkbench;
-import net.minecraft.inventory.IContainerListener;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.ClickType;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.IContainerListener;
+import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.container.WorkbenchContainer;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(value = {
-        ContainerWorkbench.class,
-        ContainerPlayer.class
+        WorkbenchContainer.class,
+        PlayerContainer.class
 })
 public abstract class CraftingContainerMixin extends ContainerMixin {
 
@@ -53,7 +53,7 @@ public abstract class CraftingContainerMixin extends ContainerMixin {
      * @return The item stack result
      */
     @Override
-    public ItemStack slotClick(final int slotId, final int dragType, final ClickType clickTypeIn, final EntityPlayer player) {
+    public ItemStack slotClick(final int slotId, final int dragType, final ClickType clickTypeIn, final PlayerEntity player) {
         final ItemStack result = super.slotClick(slotId, dragType, clickTypeIn, player);
 
         if (slotId == 0) {

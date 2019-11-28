@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.item.EntityFallingBlock;
+import net.minecraft.entity.item.FallingBlockEntity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-@Mixin(EntityFallingBlock.class)
+@Mixin(FallingBlockEntity.class)
 public abstract class EntityFallingBlockMixin_API extends EntityMixin_API implements FallingBlock {
 
 }

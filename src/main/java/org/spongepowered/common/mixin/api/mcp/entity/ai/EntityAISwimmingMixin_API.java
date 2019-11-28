@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.SwimGoal;
 import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityAISwimming.class)
+@Mixin(SwimGoal.class)
 public abstract class EntityAISwimmingMixin_API implements SwimmingAITask {
 
-    @Shadow @Final private EntityLiving entity;
+    @Shadow @Final private MobEntity entity;
 
     float api$swimChance = 0.8f;
 

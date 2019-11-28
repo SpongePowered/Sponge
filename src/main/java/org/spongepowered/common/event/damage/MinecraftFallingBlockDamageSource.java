@@ -26,7 +26,7 @@ package org.spongepowered.common.event.damage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.item.EntityFallingBlock;
+import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.util.EntityDamageSource;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
@@ -36,19 +36,19 @@ public class MinecraftFallingBlockDamageSource extends EntityDamageSource {
 
     @SuppressWarnings("unused") private final ImmutableFallingBlockData fallingBlockData; // Used in the mixin
 
-    public MinecraftFallingBlockDamageSource(final String p_i1567_1_, final EntityFallingBlock damageSourceEntityIn) {
+    public MinecraftFallingBlockDamageSource(final String p_i1567_1_, final FallingBlockEntity damageSourceEntityIn) {
         super(p_i1567_1_, damageSourceEntityIn);
         this.fallingBlockData = ((DataHolder) damageSourceEntityIn).get(FallingBlockData.class).get().asImmutable();
     }
 
-    public MinecraftFallingBlockDamageSource(final String type, final EntityFallingBlock damageSourceEntityIn, final ImmutableFallingBlockData data) {
+    public MinecraftFallingBlockDamageSource(final String type, final FallingBlockEntity damageSourceEntityIn, final ImmutableFallingBlockData data) {
         super(type, damageSourceEntityIn);
         this.fallingBlockData = checkNotNull(data);
     }
 
     @Override
-    public EntityFallingBlock getTrueSource() {
-        return (EntityFallingBlock) super.func_76346_g();
+    public FallingBlockEntity getTrueSource() {
+        return (FallingBlockEntity) super.func_76346_g();
     }
 
 }

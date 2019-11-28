@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -55,7 +55,7 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
     @Override
     protected boolean set(ItemStack container, Boolean value) {
         if (!container.func_77942_o()) {
-            container.func_77982_d(new NBTTagCompound());
+            container.func_77982_d(new CompoundNBT());
         }
         if (container.func_77978_p().func_150297_b(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
             int flag = container.func_77978_p().func_74762_e(Constants.Item.ITEM_HIDE_FLAGS);

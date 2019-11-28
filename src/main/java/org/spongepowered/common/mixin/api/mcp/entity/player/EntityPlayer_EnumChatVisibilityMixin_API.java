@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.entity.player;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.translation.Translation;
@@ -38,8 +37,9 @@ import org.spongepowered.common.bridge.entity.player.EnumChatVisibilityBridge;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
+import net.minecraft.entity.player.PlayerEntity;
 
-@Mixin(EntityPlayer.EnumChatVisibility.class)
+@Mixin(PlayerEntity.EnumChatVisibility.class)
 public abstract class EntityPlayer_EnumChatVisibilityMixin_API implements ChatVisibility {
 
     @Shadow @Final private String resourceKey;
@@ -56,7 +56,7 @@ public abstract class EntityPlayer_EnumChatVisibilityMixin_API implements ChatVi
     @Override
     public String getId() {
         if (this.api$id == null) {
-            this.api$id = SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + ((EntityPlayer.EnumChatVisibility) (Object) this).name().toLowerCase(Locale.ENGLISH);
+            this.api$id = SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + ((PlayerEntity.EnumChatVisibility) (Object) this).name().toLowerCase(Locale.ENGLISH);
         }
         return this.api$id;
     }

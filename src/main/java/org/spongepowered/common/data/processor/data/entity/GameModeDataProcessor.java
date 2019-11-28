@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.GameType;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -43,10 +43,10 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 
 public class GameModeDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityPlayerMP, GameMode, Value<GameMode>, GameModeData, ImmutableGameModeData> {
+        AbstractEntitySingleDataProcessor<ServerPlayerEntity, GameMode, Value<GameMode>, GameModeData, ImmutableGameModeData> {
 
     public GameModeDataProcessor() {
-        super(EntityPlayerMP.class, Keys.GAME_MODE);
+        super(ServerPlayerEntity.class, Keys.GAME_MODE);
     }
 
     @Override
@@ -55,13 +55,13 @@ public class GameModeDataProcessor extends
     }
 
     @Override
-    protected boolean set(EntityPlayerMP entity, GameMode value) {
+    protected boolean set(ServerPlayerEntity entity, GameMode value) {
         entity.func_71033_a((GameType) (Object) value);
         return true;
     }
 
     @Override
-    protected Optional<GameMode> getVal(EntityPlayerMP entity) {
+    protected Optional<GameMode> getVal(ServerPlayerEntity entity) {
         return Optional.of((GameMode) (Object) entity.field_71134_c.func_73081_b());
     }
 

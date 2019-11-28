@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,12 +35,13 @@ import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
+import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 
 public class EntityLastCommandOutputValueProcessor extends
-        AbstractSpongeValueProcessor<EntityMinecartCommandBlock, Optional<Text>, OptionalValue<Text>> {
+        AbstractSpongeValueProcessor<MinecartCommandBlockEntity, Optional<Text>, OptionalValue<Text>> {
 
     public EntityLastCommandOutputValueProcessor() {
-        super(EntityMinecartCommandBlock.class, Keys.LAST_COMMAND_OUTPUT);
+        super(MinecartCommandBlockEntity.class, Keys.LAST_COMMAND_OUTPUT);
     }
 
     @Override
@@ -55,13 +55,13 @@ public class EntityLastCommandOutputValueProcessor extends
     }
 
     @Override
-    protected boolean set(EntityMinecartCommandBlock container, Optional<Text> value) {
+    protected boolean set(MinecartCommandBlockEntity container, Optional<Text> value) {
         container.func_145822_e().func_145750_b(SpongeTexts.toComponent(value.orElse(Text.of())));
         return true;
     }
 
     @Override
-    protected Optional<Optional<Text>> getVal(EntityMinecartCommandBlock container) {
+    protected Optional<Optional<Text>> getVal(MinecartCommandBlockEntity container) {
         Text text = SpongeTexts.toText(container.func_145822_e().func_145749_h());
         return Optional.of(Optional.of(text)); //#OptionalWrapping o.o
     }

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.bridge.optimization;
 
-import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.item.ItemFrameEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.common.config.category.OptimizationCategory;
@@ -37,9 +37,9 @@ public interface OptimizedMapDataBridge {
 
     void mapOptimizationBridge$tickMap();
 
-    void mapOptimizationBridge$updatePlayer(EntityPlayer player, ItemStack mapStack);
+    void mapOptimizationBridge$updatePlayer(PlayerEntity player, ItemStack mapStack);
 
-    void mapOptimizationBridge$updateItemFrameDecoration(EntityItemFrame frame);
+    void mapOptimizationBridge$updateItemFrameDecoration(ItemFrameEntity frame);
 
-    void mapOptimizationBridge$removeItemFrame(EntityItemFrame frame);
+    void mapOptimizationBridge$removeItemFrame(ItemFrameEntity frame);
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,11 +35,12 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.item.ItemEntity;
 
-public class DespawnDelayValueProcessor extends AbstractSpongeValueProcessor<EntityItem, Integer, MutableBoundedValue<Integer>> {
+public class DespawnDelayValueProcessor extends AbstractSpongeValueProcessor<ItemEntity, Integer, MutableBoundedValue<Integer>> {
 
     public DespawnDelayValueProcessor() {
-        super(EntityItem.class, Keys.DESPAWN_DELAY);
+        super(ItemEntity.class, Keys.DESPAWN_DELAY);
     }
 
     @Override
@@ -54,13 +54,13 @@ public class DespawnDelayValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected boolean set(EntityItem container, Integer value) {
+    protected boolean set(ItemEntity container, Integer value) {
         ((EntityItemBridge) container).bridge$setDespawnDelay(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityItem container) {
+    protected Optional<Integer> getVal(ItemEntity container) {
         return Optional.of(((EntityItemBridge) container).bridge$getDespawnDelay());
     }
 
@@ -70,7 +70,7 @@ public class DespawnDelayValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected boolean supports(EntityItem container) {
+    protected boolean supports(ItemEntity container) {
         return true;
     }
 

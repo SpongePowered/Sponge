@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.EquipmentProperty;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -36,8 +36,8 @@ public class EquipmentPropertyStore extends AbstractItemStackPropertyStore<Equip
 
     @Override
     protected Optional<EquipmentProperty> getFor(ItemStack itemStack) {
-        if (itemStack.func_77973_b() instanceof ItemArmor) {
-            final ItemArmor armor = (ItemArmor) itemStack.func_77973_b();
+        if (itemStack.func_77973_b() instanceof ArmorItem) {
+            final ArmorItem armor = (ArmorItem) itemStack.func_77973_b();
             switch (armor.field_77881_a) {
                 case FEET: {
                     return Optional.of(new EquipmentProperty(EquipmentTypes.HEADWEAR));

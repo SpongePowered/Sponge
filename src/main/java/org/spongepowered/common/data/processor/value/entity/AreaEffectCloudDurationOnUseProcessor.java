@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.EntityAreaEffectCloud;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -35,11 +34,12 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.EntityAreaEffectCloudAccessor;
 
 import java.util.Optional;
+import net.minecraft.entity.AreaEffectCloudEntity;
 
-public class AreaEffectCloudDurationOnUseProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Integer, MutableBoundedValue<Integer>> {
+public class AreaEffectCloudDurationOnUseProcessor extends AbstractSpongeValueProcessor<AreaEffectCloudEntity, Integer, MutableBoundedValue<Integer>> {
 
     public AreaEffectCloudDurationOnUseProcessor() {
-        super(EntityAreaEffectCloud.class, Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+        super(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
     }
 
     @Override
@@ -53,13 +53,13 @@ public class AreaEffectCloudDurationOnUseProcessor extends AbstractSpongeValuePr
     }
 
     @Override
-    protected boolean set(EntityAreaEffectCloud container, Integer value) {
+    protected boolean set(AreaEffectCloudEntity container, Integer value) {
         ((EntityAreaEffectCloudAccessor) container).setDurationOnUse(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityAreaEffectCloud container) {
+    protected Optional<Integer> getVal(AreaEffectCloudEntity container) {
         return Optional.of(((EntityAreaEffectCloudAccessor) container).getDurationOnUse());
     }
 

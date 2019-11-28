@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.entity.monster;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.world.Location;
@@ -49,7 +49,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityCreeper.class)
+@Mixin(CreeperEntity.class)
 public abstract class EntityCreeperMixin extends EntityMobMixin implements FusedExplosiveBridge, ExplosiveBridge {
 
     @Shadow private int timeSinceIgnited;
@@ -161,7 +161,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
     }
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityCreeper;ignite()V"))
-    private void onInteractIgnite(final EntityCreeper self) {
+    private void onInteractIgnite(final CreeperEntity self) {
         this.interactPrimeCancelled = !bridge$shouldPrime();
         if (!this.interactPrimeCancelled) {
             ignite();
@@ -170,7 +170,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;damageItem"
                                                                               + "(ILnet/minecraft/entity/EntityLivingBase;)V"))
-    private void onDamageFlintAndSteel(final ItemStack fas, final int amount, final EntityLivingBase player) {
+    private void onDamageFlintAndSteel(final ItemStack fas, final int amount, final LivingEntity player) {
         if (!this.interactPrimeCancelled) {
             fas.func_77972_a(amount, player);
             // TODO put this in the cause somehow?

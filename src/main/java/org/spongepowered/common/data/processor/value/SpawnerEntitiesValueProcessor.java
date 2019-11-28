@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value;
 
-import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -39,6 +38,7 @@ import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccesso
 import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
 
 import java.util.Optional;
+import net.minecraft.world.spawner.AbstractSpawner;
 
 public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<TileEntityMobSpawnerAccessor, WeightedTable<EntityArchetype>, WeightedCollectionValue<EntityArchetype>> {
 
@@ -55,7 +55,7 @@ public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<
     protected boolean set(final TileEntityMobSpawnerAccessor container, final WeightedTable<EntityArchetype> value) {
         final MobSpawnerBaseLogicAccessor logic = (MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic();
         SpawnerUtils.setEntities(logic, value);
-        SpawnerUtils.setNextEntity((MobSpawnerBaseLogic) logic, SpawnerUtils.getNextEntity(logic));
+        SpawnerUtils.setNextEntity((AbstractSpawner) logic, SpawnerUtils.getNextEntity(logic));
         return true;
     }
 

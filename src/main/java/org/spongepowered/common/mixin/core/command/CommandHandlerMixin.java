@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.command;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -71,7 +71,7 @@ public abstract class CommandHandlerMixin implements CommandHandlerBridge {
         locals = LocalCapture.CAPTURE_FAILHARD)
     private void impl$onCommandError(
         final ICommandSender sender, final String[] args, final ICommand command, final String input, final CallbackInfoReturnable<Boolean> cir,
-                    final TextComponentTranslation comp, final Throwable error) {
+                    final TranslationTextComponent comp, final Throwable error) {
         MinecraftCommandWrapper.setError(error);
         cir.setReturnValue(false);
     }
@@ -79,7 +79,7 @@ public abstract class CommandHandlerMixin implements CommandHandlerBridge {
     @Surrogate
     public void impl$onCommandError(
         final ICommandSender sender, final String[] args, final ICommand command, final String input, final CallbackInfoReturnable<Boolean> cir,
-                               final Throwable error, final TextComponentTranslation comp) {
+                               final Throwable error, final TranslationTextComponent comp) {
         MinecraftCommandWrapper.setError(error);
         cir.setReturnValue(false);
     }

@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.EntityShulkerBullet;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.entity.projectile.ShulkerBulletEntity;
+import net.minecraft.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -34,7 +34,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityShulkerBullet.class)
+@Mixin(ShulkerBulletEntity.class)
 public interface ShulkerBulletEntityAccessor {
 
     @Accessor("target") @Nullable Entity accessor$getTarget();
@@ -43,8 +43,8 @@ public interface ShulkerBulletEntityAccessor {
 
     @Accessor("targetUniqueId") void accessor$setTargetId(@Nullable UUID target);
 
-    @Accessor("direction") @Nullable EnumFacing accessor$getDirection();
+    @Accessor("direction") @Nullable Direction accessor$getDirection();
 
-    @Accessor("direction") void accessor$setDirection(@Nullable EnumFacing facing);
+    @Accessor("direction") void accessor$setDirection(@Nullable Direction facing);
 
 }

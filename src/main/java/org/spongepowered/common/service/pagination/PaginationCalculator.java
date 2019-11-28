@@ -27,8 +27,8 @@ package org.spongepowered.common.service.pagination;
 import com.flowpowered.math.GenericMath;
 import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -167,7 +167,7 @@ class PaginationCalculator {
 
         for(ITextComponent child : children) {
             PrimitiveIterator.OfInt i_it;
-            if(child instanceof TextComponentString || child instanceof TextComponentTranslation) {
+            if(child instanceof StringTextComponent || child instanceof TranslationTextComponent) {
                 i_it = child.func_150261_e().codePoints().iterator();
             } else {
                 continue;

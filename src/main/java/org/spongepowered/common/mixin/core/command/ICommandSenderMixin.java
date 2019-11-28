@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.CommandBlockBaseLogic;
+import net.minecraft.tileentity.CommandBlockLogic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.command.CommandPermissions;
 import org.spongepowered.common.bridge.command.CommandSenderBridge;
 
-@Mixin(value = {EntityPlayerMP.class, MinecraftServer.class, RConConsoleSource.class, CommandBlockBaseLogic.class},
+@Mixin(value = {ServerPlayerEntity.class, MinecraftServer.class, RConConsoleSource.class, CommandBlockLogic.class},
     targets = "net/minecraft/tileentity/TileEntitySign$1")
 public abstract class ICommandSenderMixin implements ICommandSender {
 

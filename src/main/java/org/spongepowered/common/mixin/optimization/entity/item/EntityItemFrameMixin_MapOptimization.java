@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.optimization.entity.item;
 
-import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.item.ItemMap;
+import net.minecraft.entity.item.ItemFrameEntity;
+import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
-@Mixin(EntityItemFrame.class)
+@Mixin(ItemFrameEntity.class)
 public abstract class EntityItemFrameMixin_MapOptimization extends EntityMixin {
 
     @Shadow public abstract ItemStack getDisplayedItem();
@@ -47,10 +47,10 @@ public abstract class EntityItemFrameMixin_MapOptimization extends EntityMixin {
             return;
         }
 
-        if (stack.func_77973_b() instanceof ItemMap) {
-            ((OptimizedMapDataBridge) ((ItemMap) stack.func_77973_b()).func_77873_a(stack, this.world)).mapOptimizationBridge$updateItemFrameDecoration((EntityItemFrame) (Object) this);
-        } else if (this.getDisplayedItem().func_77973_b() instanceof ItemMap && stack.func_190926_b()) {
-            ((OptimizedMapDataBridge) ((ItemMap) this.getDisplayedItem().func_77973_b()).func_77873_a(stack, this.world)).mapOptimizationBridge$removeItemFrame((EntityItemFrame) (Object) this);
+        if (stack.func_77973_b() instanceof FilledMapItem) {
+            ((OptimizedMapDataBridge) ((FilledMapItem) stack.func_77973_b()).func_77873_a(stack, this.world)).mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) (Object) this);
+        } else if (this.getDisplayedItem().func_77973_b() instanceof FilledMapItem && stack.func_190926_b()) {
+            ((OptimizedMapDataBridge) ((FilledMapItem) this.getDisplayedItem().func_77973_b()).func_77873_a(stack, this.world)).mapOptimizationBridge$removeItemFrame((ItemFrameEntity) (Object) this);
         }
     }
 

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockWall;
+import net.minecraft.block.WallBlock;
 import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BlockWall.EnumType.class)
+@Mixin(WallBlock.EnumType.class)
 @Implements(@Interface(iface = WallType.class, prefix = "wall$"))
 public abstract class BlockWall_EnumTypeMixin_API {
 

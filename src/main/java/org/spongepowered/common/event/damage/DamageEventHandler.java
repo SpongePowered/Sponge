@@ -29,21 +29,21 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.MobEffects;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -91,13 +91,13 @@ public class DamageEventHandler {
         return damage -> -(damage - ((damage * modifier) / 25.0F));
     }
 
-    public static Optional<DamageFunction> createHardHatModifier(final EntityLivingBase entityLivingBase,
+    public static Optional<DamageFunction> createHardHatModifier(final LivingEntity entityLivingBase,
             final DamageSource damageSource) {
-        if ((damageSource instanceof FallingBlockDamageSource) && !entityLivingBase.func_184582_a(EntityEquipmentSlot.HEAD).func_190926_b()) {
+        if ((damageSource instanceof FallingBlockDamageSource) && !entityLivingBase.func_184582_a(EquipmentSlotType.HEAD).func_190926_b()) {
             // TODO: direct cause creation: bad bad bad
             final DamageModifier modifier = DamageModifier.builder()
                 .cause(
-                    Cause.of(EventContext.empty(), ((ItemStack) entityLivingBase.func_184582_a(EntityEquipmentSlot.HEAD)).createSnapshot()))
+                    Cause.of(EventContext.empty(), ((ItemStack) entityLivingBase.func_184582_a(EquipmentSlotType.HEAD)).createSnapshot()))
                 .type(DamageModifierTypes.HARD_HAT)
                 .build();
             return Optional.of(new DamageFunction(modifier, HARD_HAT_FUNCTION));
@@ -107,7 +107,7 @@ public class DamageEventHandler {
 
     private static double damageToHandle;
 
-    public static Optional<List<DamageFunction>> createArmorModifiers(final EntityLivingBase entityLivingBase,
+    public static Optional<List<DamageFunction>> createArmorModifiers(final LivingEntity entityLivingBase,
             final DamageSource damageSource, double damage) {
         if (!damageSource.func_76363_c()) {
             damage *= 25;
@@ -121,8 +121,8 @@ public class DamageEventHandler {
                     continue;
                 }
                 final Item item = itemStack.func_77973_b();
-                if (item instanceof ItemArmor) {
-                    final ItemArmor armor = (ItemArmor) item;
+                if (item instanceof ArmorItem) {
+                    final ArmorItem armor = (ArmorItem) item;
                     final double reduction = armor.field_77879_b / 25D;
                     final DamageObject object = new DamageObject();
                     object.slot = index;
@@ -187,7 +187,7 @@ public class DamageEventHandler {
      * @param modifier
      * @param damage
      */
-    public static void acceptArmorModifier(final EntityLivingBase entity, final DamageSource damageSource, final DamageModifier modifier, double damage) {
+    public static void acceptArmorModifier(final LivingEntity entity, final DamageSource damageSource, final DamageModifier modifier, double damage) {
         final Optional<DamageObject> property = modifier.getCause().first(DamageObject.class);
         final Iterable<net.minecraft.item.ItemStack> inventory = entity.func_184193_aE();
         if (property.isPresent()) {
@@ -216,9 +216,9 @@ public class DamageEventHandler {
         }
     }
 
-    public static Optional<DamageFunction> createResistanceModifier(final EntityLivingBase entityLivingBase, final DamageSource damageSource) {
-        if (!damageSource.func_151517_h() && entityLivingBase.func_70644_a(MobEffects.field_76429_m) && damageSource != DamageSource.field_76380_i) {
-            final PotionEffect effect = ((PotionEffect) entityLivingBase.func_70660_b(MobEffects.field_76429_m));
+    public static Optional<DamageFunction> createResistanceModifier(final LivingEntity entityLivingBase, final DamageSource damageSource) {
+        if (!damageSource.func_151517_h() && entityLivingBase.func_70644_a(Effects.field_76429_m) && damageSource != DamageSource.field_76380_i) {
+            final PotionEffect effect = ((PotionEffect) entityLivingBase.func_70660_b(Effects.field_76429_m));
             // TODO: direct cause creation: bad bad bad
             return Optional.of(new DamageFunction(DamageModifier.builder()
                                                .cause(Cause.of(EventContext.empty(), effect))
@@ -230,7 +230,7 @@ public class DamageEventHandler {
 
     private static double enchantmentDamageTracked;
 
-    public static Optional<List<DamageFunction>> createEnchantmentModifiers(final EntityLivingBase entityLivingBase, final DamageSource damageSource) {
+    public static Optional<List<DamageFunction>> createEnchantmentModifiers(final LivingEntity entityLivingBase, final DamageSource damageSource) {
         if (!damageSource.func_151517_h()) {
             final Iterable<net.minecraft.item.ItemStack> inventory = entityLivingBase.func_184193_aE();
             if (EnchantmentHelper.func_77508_a(Lists.newArrayList(entityLivingBase.func_184193_aE()), damageSource) == 0) {
@@ -244,7 +244,7 @@ public class DamageEventHandler {
                     continue;
                 }
                 final Multimap<Enchantment, Short> enchantments = LinkedHashMultimap.create();
-                final NBTTagList enchantmentList = itemStack.func_77986_q();
+                final ListNBT enchantmentList = itemStack.func_77986_q();
                 if (enchantmentList == null) {
                     continue;
                 }
@@ -317,7 +317,7 @@ public class DamageEventHandler {
         return Optional.empty();
     }
 
-    public static Optional<DamageFunction> createAbsorptionModifier(final EntityLivingBase entityLivingBase,
+    public static Optional<DamageFunction> createAbsorptionModifier(final LivingEntity entityLivingBase,
                                                                                                              final DamageSource damageSource) {
         final float absorptionAmount = entityLivingBase.func_110139_bj();
         if (absorptionAmount > 0) {
@@ -333,7 +333,7 @@ public class DamageEventHandler {
         return Optional.empty();
     }
 
-    public static Location<World> findFirstMatchingBlock(final Entity entity, final AxisAlignedBB bb, final Predicate<IBlockState> predicate) {
+    public static Location<World> findFirstMatchingBlock(final Entity entity, final AxisAlignedBB bb, final Predicate<BlockState> predicate) {
         final int i = MathHelper.func_76128_c(bb.field_72340_a);
         final int j = MathHelper.func_76128_c(bb.field_72336_d + 1.0D);
         final int k = MathHelper.func_76128_c(bb.field_72338_b);
@@ -368,16 +368,16 @@ public class DamageEventHandler {
      * @param frame
      */
     public static void generateCauseFor(final DamageSource damageSource, final CauseStackManager.StackFrame frame) {
-        if (damageSource instanceof EntityDamageSourceIndirect) {
+        if (damageSource instanceof IndirectEntityDamageSource) {
             final net.minecraft.entity.Entity source = damageSource.func_76346_g();
-            if (!(source instanceof EntityPlayer) && source instanceof OwnershipTrackedBridge) {
+            if (!(source instanceof PlayerEntity) && source instanceof OwnershipTrackedBridge) {
                 final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) source;
                 ownerBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
                 ownerBridge.tracked$getOwnerReference().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
             }
         } else if (damageSource instanceof EntityDamageSource) {
             final net.minecraft.entity.Entity source = damageSource.func_76346_g();
-            if (!(source instanceof EntityPlayer) && source instanceof OwnershipTrackedBridge) {
+            if (!(source instanceof PlayerEntity) && source instanceof OwnershipTrackedBridge) {
                 final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) source;
                 ownerBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
                 ownerBridge.tracked$getOwnerReference().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
@@ -397,7 +397,7 @@ public class DamageEventHandler {
         final Multimap<Enchantment, Integer> enchantments = LinkedHashMultimap.create();
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
         if (!heldItem.func_190926_b()) {
-            final NBTTagList nbttaglist = heldItem.func_77986_q();
+            final ListNBT nbttaglist = heldItem.func_77986_q();
             if (nbttaglist.func_82582_d()) {
                 return ImmutableList.of();
             }
@@ -435,7 +435,7 @@ public class DamageEventHandler {
         return damageModifierFunctions;
     }
 
-    public static DamageFunction provideCriticalAttackTuple(final EntityPlayer player) {
+    public static DamageFunction provideCriticalAttackTuple(final PlayerEntity player) {
         // TODO: direct cause creation: bad bad bad
         final DamageModifier modifier = DamageModifier.builder()
                 .cause(Cause.of(EventContext.empty(), player))
@@ -445,7 +445,7 @@ public class DamageEventHandler {
         return new DamageFunction(modifier, function);
     }
 
-    public static DamageFunction provideCooldownAttackStrengthFunction(final EntityPlayer player,
+    public static DamageFunction provideCooldownAttackStrengthFunction(final PlayerEntity player,
             final float attackStrength) {
         // TODO: direct cause creation: bad bad bad
         final DamageModifier modifier = DamageModifier.builder()
@@ -458,7 +458,7 @@ public class DamageEventHandler {
         return new DamageFunction(modifier, function);
     }
 
-    public static Optional<DamageFunction> createShieldFunction(final EntityLivingBase entity, final DamageSource source, final float amount) {
+    public static Optional<DamageFunction> createShieldFunction(final LivingEntity entity, final DamageSource source, final float amount) {
         if (entity.func_184585_cz() && amount > 0.0 && ((EntityLivingBaseAccessor) entity).accessor$canBlockDamageSource(source)) {
             // TODO: direct cause creation: bad bad bad
             final DamageModifier modifier = DamageModifier.builder()

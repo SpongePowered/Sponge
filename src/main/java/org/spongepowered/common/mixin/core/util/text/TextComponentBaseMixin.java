@@ -35,7 +35,7 @@ import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -54,7 +54,7 @@ import org.spongepowered.common.text.format.SpongeTextColor;
 import java.util.Iterator;
 import java.util.List;
 
-@Mixin(TextComponentBase.class)
+@Mixin(TextComponent.class)
 public abstract class TextComponentBaseMixin implements ITextComponentBridge, ITextComponent {
 
     @Shadow private Style style;

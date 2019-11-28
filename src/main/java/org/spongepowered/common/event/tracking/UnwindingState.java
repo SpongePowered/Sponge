@@ -27,10 +27,10 @@ package org.spongepowered.common.event.tracking;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -114,7 +114,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
-    public BlockTransaction.ChangeBlock captureBlockChange(UnwindingPhaseContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
+    public BlockTransaction.ChangeBlock captureBlockChange(UnwindingPhaseContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, BlockState newState,
         BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
         if (!phaseContext.isPostingSpecialProcess()) { // If we're posting special, we need to
             return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, flags);
@@ -162,7 +162,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     @SuppressWarnings("unchecked")
     @Override
     public void associateNeighborStateNotifier(UnwindingPhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-        WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+        ServerWorld minecraftWorld, PlayerTracker.Type notifier) {
         final IPhaseState<?> unwindingState = context.getUnwindingState();
         final PhaseContext<?> unwindingContext = context.getUnwindingContext();
         ((IPhaseState) unwindingState).associateNeighborStateNotifier(unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
@@ -282,7 +282,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
     @Override
     public void performPostBlockNotificationsAndNeighborUpdates(UnwindingPhaseContext context,
-        IBlockState newState, SpongeBlockChangeFlag changeFlag, int depth) {
+        BlockState newState, SpongeBlockChangeFlag changeFlag, int depth) {
         if (context.isPostingSpecialProcess()) {
             return; // it will keep on going internally.
         }

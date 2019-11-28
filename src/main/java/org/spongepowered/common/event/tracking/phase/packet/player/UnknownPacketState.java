@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -46,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 
 public final class UnknownPacketState extends BasicPacketState {
 
@@ -66,7 +66,7 @@ public final class UnknownPacketState extends BasicPacketState {
 
     @Override
     public void unwind(BasicPacketContext context) {
-        final EntityPlayerMP player = context.getPacketPlayer();
+        final ServerPlayerEntity player = context.getPacketPlayer();
 
         try (CauseStackManager.StackFrame frame1 = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame1.pushCause(player);
@@ -96,7 +96,7 @@ public final class UnknownPacketState extends BasicPacketState {
             printer.trace(System.err);
         });
         context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
-            for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+            for (Map.Entry<UUID, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
                 final UUID entityUuid = entry.getKey();
                 final net.minecraft.entity.Entity entityFromUuid = player.func_71121_q().func_175733_a(entityUuid);
                 final Entity affectedEntity = (Entity) entityFromUuid;
@@ -123,7 +123,7 @@ public final class UnknownPacketState extends BasicPacketState {
             }
         });
         context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
-            final List<EntityItem> items =
+            final List<ItemEntity> items =
                 drops.stream().map(drop -> drop.create(player.func_71121_q())).collect(Collectors.toList());
             final List<Entity> entities = items
                 .stream()

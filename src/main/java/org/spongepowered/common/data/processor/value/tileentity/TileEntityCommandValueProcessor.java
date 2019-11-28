@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
-import net.minecraft.tileentity.CommandBlockBaseLogic;
-import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -35,11 +33,13 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.tileentity.CommandBlockLogic;
+import net.minecraft.tileentity.CommandBlockTileEntity;
 
-public class TileEntityCommandValueProcessor extends AbstractSpongeValueProcessor<TileEntityCommandBlock, String, Value<String>> {
+public class TileEntityCommandValueProcessor extends AbstractSpongeValueProcessor<CommandBlockTileEntity, String, Value<String>> {
 
     public TileEntityCommandValueProcessor() {
-        super(TileEntityCommandBlock.class, Keys.COMMAND);
+        super(CommandBlockTileEntity.class, Keys.COMMAND);
     }
 
     @Override
@@ -53,8 +53,8 @@ public class TileEntityCommandValueProcessor extends AbstractSpongeValueProcesso
     }
 
     @Override
-    protected boolean set(final TileEntityCommandBlock container, final String value) {
-        final CommandBlockBaseLogic logic = container.func_145993_a();
+    protected boolean set(final CommandBlockTileEntity container, final String value) {
+        final CommandBlockLogic logic = container.func_145993_a();
         final int successCount = logic.func_145760_g();
         logic.func_145752_a(value);
         logic.func_184167_a(successCount);
@@ -62,7 +62,7 @@ public class TileEntityCommandValueProcessor extends AbstractSpongeValueProcesso
     }
 
     @Override
-    protected Optional<String> getVal(final TileEntityCommandBlock container) {
+    protected Optional<String> getVal(final CommandBlockTileEntity container) {
         return Optional.ofNullable(container.func_145993_a().func_145753_i());
     }
 

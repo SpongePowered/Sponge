@@ -28,28 +28,28 @@ import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.local.LocalAddress;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SPacketCustomPayload;
-import net.minecraft.network.play.server.SPacketDisconnect;
-import net.minecraft.network.play.server.SPacketEntityEffect;
-import net.minecraft.network.play.server.SPacketHeldItemChange;
-import net.minecraft.network.play.server.SPacketJoinGame;
-import net.minecraft.network.play.server.SPacketPlayerAbilities;
-import net.minecraft.network.play.server.SPacketServerDifficulty;
-import net.minecraft.network.play.server.SPacketSpawnPosition;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
+import net.minecraft.network.play.server.SDisconnectPacket;
+import net.minecraft.network.play.server.SHeldItemChangePacket;
+import net.minecraft.network.play.server.SJoinGamePacket;
+import net.minecraft.network.play.server.SPlayEntityEffectPacket;
+import net.minecraft.network.play.server.SPlayerAbilitiesPacket;
+import net.minecraft.network.play.server.SServerDifficultyPacket;
+import net.minecraft.network.play.server.SSpawnPositionPacket;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.WorldServer;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -145,7 +145,7 @@ public final class NetworkUtil {
      * @param playerIn
      * @param handler
      */
-    public static void initializeConnectionToPlayer(final PlayerList playerList, final NetworkManager netManager, final EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
+    public static void initializeConnectionToPlayer(final PlayerList playerList, final NetworkManager netManager, final ServerPlayerEntity playerIn, @Nullable ServerPlayNetHandler handler) {
         final GameProfile gameprofile = playerIn.func_146103_bH();
         final PlayerProfileCache playerprofilecache = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().func_152358_ax();
         final GameProfile gameprofile1 = playerprofilecache.func_152652_a(gameprofile.getId());
@@ -161,8 +161,8 @@ public final class NetworkUtil {
         }
         // Sponge end
 
-        final NBTTagCompound nbttagcompound = playerList.func_72380_a(playerIn);
-        WorldServer worldServer = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().func_71218_a(playerIn.field_71093_bK);
+        final CompoundNBT nbttagcompound = playerList.func_72380_a(playerIn);
+        ServerWorld worldServer = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().func_71218_a(playerIn.field_71093_bK);
         final int actualDimensionId = ((WorldServerBridge) worldServer).bridge$getDimensionId();
         final BlockPos spawnPos;
         // Join data
@@ -213,12 +213,12 @@ public final class NetworkUtil {
                 if (message.isPresent()) {
                     reason = SpongeTexts.toComponent(message.get());
                 } else {
-                    reason = new TextComponentTranslation("disconnect.disconnected");
+                    reason = new TranslationTextComponent("disconnect.disconnected");
                 }
 
                 try {
                     ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("Disconnecting " + (gameprofile != null ? gameprofile.toString() + " (" + netManager.func_74430_c().toString() + ")" : String.valueOf(netManager.func_74430_c() + ": " + reason.func_150260_c())));
-                    netManager.func_179290_a(new SPacketDisconnect(reason));
+                    netManager.func_179290_a(new SDisconnectPacket(reason));
                     netManager.func_150718_a(reason);
                 } catch (Exception exception) {
                     ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().error("Error whilst disconnecting player", exception);
@@ -229,7 +229,7 @@ public final class NetworkUtil {
 
         // Sponge end
 
-        worldServer = (WorldServer) loginEvent.getToTransform().getExtent();
+        worldServer = (ServerWorld) loginEvent.getToTransform().getExtent();
         final double x = loginEvent.getToTransform().getPosition().getX();
         final double y = loginEvent.getToTransform().getPosition().getY();
         final double z = loginEvent.getToTransform().getPosition().getZ();
@@ -238,7 +238,7 @@ public final class NetworkUtil {
 
         playerIn.field_71093_bK = ((WorldServerBridge) worldServer).bridge$getDimensionId();
         playerIn.func_70029_a(worldServer);
-        playerIn.field_71134_c.func_73080_a((WorldServer) playerIn.field_70170_p);
+        playerIn.field_71134_c.func_73080_a((ServerWorld) playerIn.field_70170_p);
         playerIn.func_70080_a(x, y, z, yaw, pitch);
         // make sure the chunk is loaded for login
         worldServer.func_72863_F().func_186028_c(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
@@ -257,7 +257,7 @@ public final class NetworkUtil {
         // Sponge start
         if (handler == null) {
             // Create the handler here (so the player's gets set)
-            handler = new NetHandlerPlayServer(((PlayerListAccessor) playerList).accessor$getPlayerListServer(), netManager, playerIn);
+            handler = new ServerPlayNetHandler(((PlayerListAccessor) playerList).accessor$getPlayerListServer(), netManager, playerIn);
         }
         playerIn.field_71135_a = handler;
         SpongeImplHooks.fireServerConnectionEvent(netManager);
@@ -268,15 +268,15 @@ public final class NetworkUtil {
 
         WorldManager.sendDimensionRegistration(playerIn, worldServer.field_73011_w);
 
-        handler.func_147359_a(new SPacketJoinGame(playerIn.func_145782_y(), playerIn.field_71134_c.func_73081_b(), worldinfo
+        handler.func_147359_a(new SJoinGamePacket(playerIn.func_145782_y(), playerIn.field_71134_c.func_73081_b(), worldinfo
                 .func_76093_s(), dimensionId, worldServer.func_175659_aa(), playerList.func_72352_l(), worldinfo
                 .func_76067_t(), worldServer.func_82736_K().func_82766_b("reducedDebugInfo")));
-        handler.func_147359_a(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).func_180714_a(playerList
+        handler.func_147359_a(new SCustomPayloadPlayPacket("MC|Brand", (new PacketBuffer(Unpooled.buffer())).func_180714_a(playerList
                 .func_72365_p().getServerModName())));
-        handler.func_147359_a(new SPacketServerDifficulty(worldinfo.func_176130_y(), worldinfo.func_176123_z()));
-        handler.func_147359_a(new SPacketSpawnPosition(spawnBlockPos));
-        handler.func_147359_a(new SPacketPlayerAbilities(playerIn.field_71075_bZ));
-        handler.func_147359_a(new SPacketHeldItemChange(playerIn.field_71071_by.field_70461_c));
+        handler.func_147359_a(new SServerDifficultyPacket(worldinfo.func_176130_y(), worldinfo.func_176123_z()));
+        handler.func_147359_a(new SSpawnPositionPacket(spawnBlockPos));
+        handler.func_147359_a(new SPlayerAbilitiesPacket(playerIn.field_71075_bZ));
+        handler.func_147359_a(new SHeldItemChangePacket(playerIn.field_71071_by.field_70461_c));
         playerList.func_187243_f(playerIn);
         playerIn.func_147099_x().func_150877_d();
         playerIn.func_192037_E().func_192826_c(playerIn);
@@ -308,13 +308,13 @@ public final class NetworkUtil {
 
         ((EntityPlayerMPBridge) playerIn).bridge$initScoreboard();
 
-        for (final PotionEffect potioneffect : playerIn.func_70651_bq()) {
-            handler.func_147359_a(new SPacketEntityEffect(playerIn.func_145782_y(), potioneffect));
+        for (final EffectInstance potioneffect : playerIn.func_70651_bq()) {
+            handler.func_147359_a(new SPlayEntityEffectPacket(playerIn.func_145782_y(), potioneffect));
         }
 
         if (nbttagcompound != null) {
             if (nbttagcompound.func_150297_b("RootVehicle", 10)) {
-                final NBTTagCompound nbttagcompound1 = nbttagcompound.func_74775_l("RootVehicle");
+                final CompoundNBT nbttagcompound1 = nbttagcompound.func_74775_l("RootVehicle");
                 final Entity entity2 = AnvilChunkLoader.func_186051_a(nbttagcompound1.func_74775_l("Entity"), worldServer, true);
 
                 if (entity2 != null) {
@@ -351,15 +351,15 @@ public final class NetworkUtil {
 
         playerIn.func_71116_b();
 
-        final TextComponentTranslation chatcomponenttranslation;
+        final TranslationTextComponent chatcomponenttranslation;
 
         if (!playerIn.func_70005_c_().equalsIgnoreCase(s))
         {
-            chatcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined.renamed", playerIn.func_145748_c_(), s);
+            chatcomponenttranslation = new TranslationTextComponent("multiplayer.player.joined.renamed", playerIn.func_145748_c_(), s);
         }
         else
         {
-            chatcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined", playerIn.func_145748_c_());
+            chatcomponenttranslation = new TranslationTextComponent("multiplayer.player.joined", playerIn.func_145748_c_());
         }
 
         chatcomponenttranslation.func_150256_b().func_150238_a(TextFormatting.YELLOW);

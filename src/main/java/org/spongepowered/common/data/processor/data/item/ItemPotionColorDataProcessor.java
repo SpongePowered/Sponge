@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.PotionUtils;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -54,10 +54,10 @@ public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcesso
     @Override
     protected boolean set(ItemStack dataHolder, Color value) {
         if (!dataHolder.func_77942_o()) {
-            dataHolder.func_77982_d(new NBTTagCompound());
+            dataHolder.func_77982_d(new CompoundNBT());
         }
 
-        final NBTTagCompound mainCompound = dataHolder.func_77978_p();
+        final CompoundNBT mainCompound = dataHolder.func_77978_p();
         mainCompound.func_74768_a(Constants.Item.CUSTOM_POTION_COLOR, value.getRgb());
         return true;
     }
@@ -93,7 +93,7 @@ public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcesso
             return DataTransactionResult.successNoData();
         }
 
-        NBTTagCompound mainCompound = itemStack.func_77978_p();
+        CompoundNBT mainCompound = itemStack.func_77978_p();
         if (!mainCompound.func_150297_b(Constants.Item.CUSTOM_POTION_COLOR, Constants.NBT.TAG_INT)) {
             return DataTransactionResult.successNoData();
         }

@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockPrismarine;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -45,7 +44,7 @@ public abstract class BlockPrismarineMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getPrismarineTypeFor(blockState));
     }
 
@@ -56,7 +55,7 @@ public abstract class BlockPrismarineMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePrismarineData) {
             final BlockPrismarine.EnumType prismarineType = (BlockPrismarine.EnumType) (Object) ((ImmutablePrismarineData) manipulator).type().get();
             return Optional.of((BlockState) blockState.func_177226_a(BlockPrismarine.field_176332_a, prismarineType));
@@ -65,7 +64,7 @@ public abstract class BlockPrismarineMixin extends BlockMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.PRISMARINE_TYPE)) {
             final BlockPrismarine.EnumType prismarineType = (BlockPrismarine.EnumType) value;
             return Optional.of((BlockState) blockState.func_177226_a(BlockPrismarine.field_176332_a, prismarineType));
@@ -74,7 +73,7 @@ public abstract class BlockPrismarineMixin extends BlockMixin {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private ImmutablePrismarineData impl$getPrismarineTypeFor(final IBlockState blockState) {
+    private ImmutablePrismarineData impl$getPrismarineTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePrismarineData.class,
                 (PrismarineType) (Object) blockState.func_177229_b(BlockPrismarine.field_176332_a));
     }

@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.MobSpawnerBaseLogic;
-import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.tileentity.MobSpawnerTileEntity;
+import net.minecraft.world.spawner.AbstractSpawner;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @NonnullByDefault
-@Mixin(TileEntityMobSpawner.class)
+@Mixin(MobSpawnerTileEntity.class)
 public interface TileEntityMobSpawnerAccessor {
 
     @Accessor("spawnerLogic")
-    MobSpawnerBaseLogic accessor$getSpawnerLogic();
+    AbstractSpawner accessor$getSpawnerLogic();
 
 }

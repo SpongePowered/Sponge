@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.tileentity.TileEntitySkull;
+import net.minecraft.tileentity.SkullTileEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.bridge.tileentity.TileEntitySkullBridge;
 
-@Mixin(TileEntitySkull.class)
+@Mixin(SkullTileEntity.class)
 public abstract class TileEntitySkullMixin extends TileEntityMixin implements TileEntitySkullBridge {
 
     @Shadow private com.mojang.authlib.GameProfile playerProfile;

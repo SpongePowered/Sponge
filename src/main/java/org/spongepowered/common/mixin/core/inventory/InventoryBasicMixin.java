@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
+import net.minecraft.inventory.CraftResultInventory;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.inventory.InventoryCraftResult;
+import net.minecraft.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -37,7 +37,7 @@ import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 
-@Mixin(value = {InventoryBasic.class, InventoryCraftResult.class})
+@Mixin(value = {Inventory.class, CraftResultInventory.class})
 public abstract class InventoryBasicMixin implements IInventory, LensProviderBridge {
 
     @Override

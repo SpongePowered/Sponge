@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.block;
 
 import com.google.common.collect.Sets;
-import net.minecraft.tileentity.TileEntityChest;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -37,12 +36,13 @@ import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.tileentity.ChestTileEntity;
 
 public class ConnectedDirectionsValueProcessor extends
-        AbstractSpongeValueProcessor<TileEntityChest, Set<Direction>, SetValue<Direction>> {
+        AbstractSpongeValueProcessor<ChestTileEntity, Set<Direction>, SetValue<Direction>> {
 
     public ConnectedDirectionsValueProcessor() {
-        super(TileEntityChest.class, Keys.CONNECTED_DIRECTIONS);
+        super(ChestTileEntity.class, Keys.CONNECTED_DIRECTIONS);
     }
 
     @Override
@@ -51,12 +51,12 @@ public class ConnectedDirectionsValueProcessor extends
     }
 
     @Override
-    protected boolean set(TileEntityChest container, Set<Direction> value) {
+    protected boolean set(ChestTileEntity container, Set<Direction> value) {
         return false;
     }
 
     @Override
-    protected Optional<Set<Direction>> getVal(TileEntityChest chest) {
+    protected Optional<Set<Direction>> getVal(ChestTileEntity chest) {
         chest.func_145979_i();
 
         Set<Direction> directions = Sets.newHashSet();

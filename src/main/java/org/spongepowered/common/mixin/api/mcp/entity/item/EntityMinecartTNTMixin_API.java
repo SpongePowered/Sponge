@@ -26,13 +26,13 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.entity.item.EntityMinecartTNT;
+import net.minecraft.entity.item.minecart.TNTMinecartEntity;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 
-@Mixin(EntityMinecartTNT.class)
+@Mixin(TNTMinecartEntity.class)
 public abstract class EntityMinecartTNTMixin_API extends EntityMinecartMixin_API implements TNTMinecart {
 
     @Shadow private int minecartTNTFuse;

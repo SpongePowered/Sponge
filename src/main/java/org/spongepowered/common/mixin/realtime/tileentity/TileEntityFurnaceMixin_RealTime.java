@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.realtime.tileentity;
 
+import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.math.MathHelper;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
-@Mixin(value = TileEntityFurnace.class, priority = 1001)
+@Mixin(value = FurnaceTileEntity.class, priority = 1001)
 public abstract class TileEntityFurnaceMixin_RealTime extends TileEntity {
 
     @Shadow private int furnaceBurnTime;
@@ -63,7 +63,7 @@ public abstract class TileEntityFurnaceMixin_RealTime extends TileEntity {
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeBurnTime(final TileEntityFurnace self, final int modifier) {
+    private void realTimeImpl$adjustForRealTimeBurnTime(final FurnaceTileEntity self, final int modifier) {
         if (((WorldBridge) this.field_145850_b).bridge$isFake()) {
             this.furnaceBurnTime = modifier;
             return;
@@ -93,7 +93,7 @@ public abstract class TileEntityFurnaceMixin_RealTime extends TileEntity {
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeCookTime(final TileEntityFurnace self, final int modifier) {
+    private void realTimeImpl$adjustForRealTimeCookTime(final FurnaceTileEntity self, final int modifier) {
         if (((WorldBridge) this.field_145850_b).bridge$isFake()) {
             this.cookTime = modifier;
             return;
@@ -120,7 +120,7 @@ public abstract class TileEntityFurnaceMixin_RealTime extends TileEntity {
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeCookTimeCooldown(final TileEntityFurnace self, final int modifier) {
+    private void realTimeImpl$adjustForRealTimeCookTimeCooldown(final FurnaceTileEntity self, final int modifier) {
         if (((WorldBridge) this.field_145850_b).bridge$isFake()) {
             this.cookTime = modifier;
             return;

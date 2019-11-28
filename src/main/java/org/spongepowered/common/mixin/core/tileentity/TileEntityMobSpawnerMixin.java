@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.tileentity.MobSpawnerTileEntity;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
 @NonnullByDefault
-@Mixin(TileEntityMobSpawner.class)
+@Mixin(MobSpawnerTileEntity.class)
 public abstract class TileEntityMobSpawnerMixin extends TileEntityMixin {
 
     @Override

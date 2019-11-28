@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.BlockDoublePlant;
+import net.minecraft.block.DoublePlantBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.DoublePlantFeature;
@@ -51,7 +51,7 @@ import javax.annotation.Nullable;
 @Mixin(DoublePlantFeature.class)
 public abstract class WorldGenDoublePlantMixin_API extends Feature implements DoublePlant {
 
-    @Shadow private BlockDoublePlant.EnumPlantType plantType;
+    @Shadow private DoublePlantBlock.EnumPlantType plantType;
 
     private final WeightedTable<DoublePlantType> api$types = new WeightedTable<>();
     private VariableAmount api$count = VariableAmount.fixed(1);

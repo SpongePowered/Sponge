@@ -27,13 +27,13 @@ package org.spongepowered.common.mixin.core.tileentity;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.MobSpawnerBaseLogic;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedSpawnerEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import net.minecraft.world.spawner.AbstractSpawner;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
@@ -62,7 +62,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-@Mixin(MobSpawnerBaseLogic.class)
+@Mixin(AbstractSpawner.class)
 public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBridge {
 
     @Shadow private int spawnDelay;
@@ -100,7 +100,7 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
         )
     )
     private Entity impl$ThrowEventAndConstruct(
-        final NBTTagCompound compound, final World world, final double x, final double y, final double z, final boolean doesNotForceSpawn) {
+        final CompoundNBT compound, final World world, final double x, final double y, final double z, final boolean doesNotForceSpawn) {
         final String entityTypeString = compound.func_74779_i(Constants.Entity.ENTITY_TYPE_ID);
         final Class<? extends Entity> clazz = SpongeImplHooks.getEntityClass(new ResourceLocation(entityTypeString));
         if (clazz == null) {
@@ -150,7 +150,7 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
 
 
         if (compound.func_150297_b(Constants.Entity.PASSENGERS, Constants.NBT.TAG_LIST)) {
-            final NBTTagList passengerList = compound.func_150295_c(Constants.Entity.PASSENGERS, Constants.NBT.TAG_COMPOUND);
+            final ListNBT passengerList = compound.func_150295_c(Constants.Entity.PASSENGERS, Constants.NBT.TAG_COMPOUND);
 
             for (int i = 0; i < passengerList.func_74745_c(); i++) {
                 final Entity passenger = impl$ThrowEventAndConstruct(passengerList.func_150305_b(i), world, x, y, z, doesNotForceSpawn);

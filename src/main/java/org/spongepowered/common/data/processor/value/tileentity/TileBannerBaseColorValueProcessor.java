@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
-import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.DyeColor;
@@ -38,11 +37,12 @@ import org.spongepowered.common.bridge.tileentity.TileEntityBannerBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.tileentity.BannerTileEntity;
 
-public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProcessor<TileEntityBanner, DyeColor, Value<DyeColor>> {
+public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProcessor<BannerTileEntity, DyeColor, Value<DyeColor>> {
 
     public TileBannerBaseColorValueProcessor() {
-        super(TileEntityBanner.class, Keys.BANNER_BASE_COLOR);
+        super(BannerTileEntity.class, Keys.BANNER_BASE_COLOR);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProces
     }
 
     @Override
-    protected boolean set(TileEntityBanner container, DyeColor value) {
+    protected boolean set(BannerTileEntity container, DyeColor value) {
         if (!container.func_145831_w().field_72995_K) {
             ((TileEntityBannerBridge) container).bridge$setBaseColor(value);
             return true;
@@ -60,7 +60,7 @@ public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProces
     }
 
     @Override
-    protected Optional<DyeColor> getVal(TileEntityBanner container) {
+    protected Optional<DyeColor> getVal(BannerTileEntity container) {
         return Optional.of(((TileEntityBannerBridge) container).bridge$getBaseColor());
     }
 

@@ -30,18 +30,18 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityMultiPart;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -138,7 +138,7 @@ public class SpongeHooks {
             return;
         }
 
-        if (!(entity instanceof EntityLivingBase)) {
+        if (!(entity instanceof LivingEntity)) {
             return;
         }
 
@@ -220,7 +220,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logChunkGCQueueUnload(final WorldServer world, final Chunk chunk) {
+    public static void logChunkGCQueueUnload(final ServerWorld world, final Chunk chunk) {
         if (world.field_72995_K) {
             return;
         }
@@ -232,7 +232,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logExploitSignCommandUpdates(final EntityPlayer player, final TileEntity te, final String command) {
+    public static void logExploitSignCommandUpdates(final PlayerEntity player, final TileEntity te, final String command) {
         if (player.field_70170_p.field_72995_K) {
             return;
         }
@@ -248,7 +248,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logExploitItemNameOverflow(final EntityPlayer player, final int length) {
+    public static void logExploitItemNameOverflow(final PlayerEntity player, final int length) {
         if (player.field_70170_p.field_72995_K) {
             return;
         }
@@ -262,7 +262,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logExploitRespawnInvisibility(final EntityPlayer player) {
+    public static void logExploitRespawnInvisibility(final PlayerEntity player) {
         if (player.field_70170_p.field_72995_K) {
             return;
         }
@@ -281,7 +281,7 @@ public class SpongeHooks {
         }
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.field_70170_p.func_72912_H()).bridge$getConfigAdapter();
-        if (!(entity instanceof EntityLivingBase) || entity instanceof EntityPlayer || entity instanceof IEntityMultiPart) {
+        if (!(entity instanceof LivingEntity) || entity instanceof PlayerEntity || entity instanceof IEntityMultiPart) {
             return false; // only check living entities, so long as they are not a player or multipart entity
         }
 
@@ -304,7 +304,7 @@ public class SpongeHooks {
             logWarning("Calculated bounding box: {0}", aabb);
             logWarning("Entity bounding box: {0}", entity.func_70046_E());
             logWarning("Entity: {0}", entity);
-            final NBTTagCompound tag = new NBTTagCompound();
+            final CompoundNBT tag = new CompoundNBT();
             entity.func_189511_e(tag);
             logWarning("Entity NBT: {0}", tag);
             logStack(configAdapter);
@@ -326,8 +326,8 @@ public class SpongeHooks {
             if (distance > maxSpeed && !entity.func_184218_aH()) {
                 if (configAdapter.getConfig().getLogging().logEntitySpeedRemoval()) {
                     logInfo("Speed violation: {0} was over {1} - Removing Entity: {2}", distance, maxSpeed, entity);
-                    if (entity instanceof EntityLivingBase) {
-                        final EntityLivingBase livingBase = (EntityLivingBase) entity;
+                    if (entity instanceof LivingEntity) {
+                        final LivingEntity livingBase = (LivingEntity) entity;
                         logInfo("Entity Motion: ({0}, {1}, {2}) Move Strafing: {3} Move Forward: {4}",
                                 entity.field_70159_w, entity.field_70181_x,
                                 entity.field_70179_y,
@@ -338,13 +338,13 @@ public class SpongeHooks {
                         logInfo("Move offset: ({0}, {1}, {2})", x, y, z);
                         logInfo("Motion: ({0}, {1}, {2})", entity.field_70159_w, entity.field_70181_x, entity.field_70179_y);
                         logInfo("Entity: {0}", entity);
-                        final NBTTagCompound tag = new NBTTagCompound();
+                        final CompoundNBT tag = new CompoundNBT();
                         entity.func_189511_e(tag);
                         logInfo("Entity NBT: {0}", tag);
                         logStack(configAdapter);
                     }
                 }
-                if (entity instanceof EntityPlayer) { // Skip killing players
+                if (entity instanceof PlayerEntity) { // Skip killing players
                     entity.field_70159_w = 0;
                     entity.field_70181_x = 0;
                     entity.field_70179_y = 0;
@@ -480,7 +480,7 @@ public class SpongeHooks {
             ((SpongeEntityType) entityType).initializeTrackerState();
         }
 
-        for (final WorldServer world : WorldManager.getWorlds()) {
+        for (final ServerWorld world : WorldManager.getWorlds()) {
             final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.func_72912_H()).bridge$getConfigAdapter();
             // Reload before updating world config cache
             configAdapter.load();

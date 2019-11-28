@@ -28,9 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -60,7 +60,7 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
 
     @Override
     protected Optional<List<Text>> getVal(final ItemStack itemStack) {
-        final NBTTagCompound mainCompound = itemStack.func_77978_p();
+        final CompoundNBT mainCompound = itemStack.func_77978_p();
         if (mainCompound == null) {
             return Optional.empty();
         }
@@ -68,7 +68,7 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
                 || !mainCompound.func_74775_l(Constants.Item.BLOCK_ENTITY_TAG).func_74764_b(Constants.Item.BLOCK_ENTITY_ID)) {
             return Optional.empty();
         }
-        final NBTTagCompound tileCompound = mainCompound.func_74775_l(Constants.Item.BLOCK_ENTITY_TAG);
+        final CompoundNBT tileCompound = mainCompound.func_74775_l(Constants.Item.BLOCK_ENTITY_TAG);
         final String id = tileCompound.func_74779_i(Constants.Item.BLOCK_ENTITY_ID);
         if (!id.equalsIgnoreCase(Constants.TileEntity.SIGN)) {
             return Optional.empty();
@@ -112,7 +112,7 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
 
     @Override
     protected boolean set(final ItemStack itemStack, final List<Text> lines) {
-        final NBTTagCompound signCompound = itemStack.func_190925_c(Constants.Item.BLOCK_ENTITY_TAG);
+        final CompoundNBT signCompound = itemStack.func_190925_c(Constants.Item.BLOCK_ENTITY_TAG);
         signCompound.func_74778_a(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
         for (int i = 0; i < 4; i++) {
             final Text line = lines.size() > i ? lines.get(i) : Text.EMPTY;

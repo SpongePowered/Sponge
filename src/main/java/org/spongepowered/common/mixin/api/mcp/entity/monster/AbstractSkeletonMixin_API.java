@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.AbstractSkeleton;
+import net.minecraft.entity.monster.AbstractSkeletonEntity;
 import org.spongepowered.api.entity.living.monster.Skeleton;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(AbstractSkeleton.class)
+@Mixin(AbstractSkeletonEntity.class)
 public abstract class AbstractSkeletonMixin_API extends EntityMobMixin_API implements Skeleton {
 
 }

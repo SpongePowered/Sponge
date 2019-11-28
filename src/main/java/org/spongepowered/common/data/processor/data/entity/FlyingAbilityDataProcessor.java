@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingAbilityData;
@@ -38,12 +37,13 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.entity.player.PlayerEntity;
 
 public class FlyingAbilityDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityPlayer, Boolean, Value<Boolean>, FlyingAbilityData, ImmutableFlyingAbilityData> {
+        AbstractEntitySingleDataProcessor<PlayerEntity, Boolean, Value<Boolean>, FlyingAbilityData, ImmutableFlyingAbilityData> {
 
     public FlyingAbilityDataProcessor() {
-        super(EntityPlayer.class, Keys.CAN_FLY);
+        super(PlayerEntity.class, Keys.CAN_FLY);
     }
 
     @Override
@@ -57,14 +57,14 @@ public class FlyingAbilityDataProcessor extends
     }
 
     @Override
-    protected boolean set(EntityPlayer entity, Boolean value) {
+    protected boolean set(PlayerEntity entity, Boolean value) {
         entity.field_71075_bZ.field_75101_c = value;
         entity.func_71016_p();
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityPlayer entity) {
+    protected Optional<Boolean> getVal(PlayerEntity entity) {
         return Optional.of(entity.field_71075_bZ.field_75101_c);
     }
 

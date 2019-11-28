@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.item.inventory.util;
 
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.inventory.InventoryLargeChest;
+import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -56,17 +56,17 @@ public final class InventoryUtil {
     private InventoryUtil() {}
 
     @SuppressWarnings("rawtypes")
-    public static CraftingGridInventory toSpongeInventory(InventoryCrafting inv) {
+    public static CraftingGridInventory toSpongeInventory(CraftingInventory inv) {
         CraftingGridInventoryLensImpl lens = new CraftingGridInventoryLensImpl(0, inv.func_174922_i(), inv.func_174923_h(), inv.func_174922_i(), SlotLensImpl::new);
 
         return new CraftingGridInventoryAdapter((Fabric) inv, lens);
     }
 
-    public static InventoryCrafting toNativeInventory(CraftingGridInventory inv) {
+    public static CraftingInventory toNativeInventory(CraftingGridInventory inv) {
         Fabric fabric = ((CraftingGridInventoryAdapter) inv).bridge$getFabric();
         for (Object inventory : fabric.fabric$allInventories()) {
-            if (inventory instanceof InventoryCrafting) {
-                return ((InventoryCrafting) inventory);
+            if (inventory instanceof CraftingInventory) {
+                return ((CraftingInventory) inventory);
             }
         }
 
@@ -84,21 +84,21 @@ public final class InventoryUtil {
         throw new IllegalStateException(sb.toString());
     }
 
-    public static Optional<Inventory> getDoubleChestInventory(TileEntityChest chest) {
+    public static Optional<Inventory> getDoubleChestInventory(ChestTileEntity chest) {
         // BlockChest#getContainer(World, BlockPos, boolean) without isBlocked() check
-        for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+        for (Direction enumfacing : Direction.Plane.HORIZONTAL) {
             BlockPos blockpos = chest.func_174877_v().func_177972_a(enumfacing);
 
             TileEntity tileentity1 = chest.func_145831_w().func_175625_s(blockpos);
 
-            if (tileentity1 instanceof TileEntityChest && tileentity1.func_145838_q() == chest.func_145838_q()) {
+            if (tileentity1 instanceof ChestTileEntity && tileentity1.func_145838_q() == chest.func_145838_q()) {
 
-                InventoryLargeChest inventory;
+                DoubleSidedInventory inventory;
 
-                if (enumfacing != EnumFacing.WEST && enumfacing != EnumFacing.NORTH) {
-                    inventory = new InventoryLargeChest("container.chestDouble", chest, (TileEntityChest) tileentity1);
+                if (enumfacing != Direction.WEST && enumfacing != Direction.NORTH) {
+                    inventory = new DoubleSidedInventory("container.chestDouble", chest, (ChestTileEntity) tileentity1);
                 } else {
-                    inventory = new InventoryLargeChest("container.chestDouble", (TileEntityChest) tileentity1, chest);
+                    inventory = new DoubleSidedInventory("container.chestDouble", (ChestTileEntity) tileentity1, chest);
                 }
 
                 return Optional.of((Inventory) inventory);
@@ -114,8 +114,8 @@ public final class InventoryUtil {
 
     public static Inventory toInventory(Object inventory, @Nullable Object forgeItemHandler) {
         if (forgeItemHandler == null) {
-            if (inventory instanceof TileEntityChest) {
-                inventory = getDoubleChestInventory(((TileEntityChest) inventory)).orElse(((Inventory) inventory));
+            if (inventory instanceof ChestTileEntity) {
+                inventory = getDoubleChestInventory(((ChestTileEntity) inventory)).orElse(((Inventory) inventory));
             }
             if (inventory instanceof Inventory) {
                 return ((Inventory) inventory);

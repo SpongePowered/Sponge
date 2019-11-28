@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.monster.EntityShulker;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
@@ -40,12 +39,13 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.bridge.entity.monster.EntityShulkerBridge;
 
 import java.util.Optional;
+import net.minecraft.entity.monster.ShulkerEntity;
 
-public class ShulkerDyeColorDataProcessor extends AbstractEntitySingleDataProcessor<EntityShulker, DyeColor, Value<DyeColor>, DyeableData,
+public class ShulkerDyeColorDataProcessor extends AbstractEntitySingleDataProcessor<ShulkerEntity, DyeColor, Value<DyeColor>, DyeableData,
         ImmutableDyeableData> {
 
     public ShulkerDyeColorDataProcessor() {
-        super(EntityShulker.class, Keys.DYE_COLOR);
+        super(ShulkerEntity.class, Keys.DYE_COLOR);
     }
 
     @Override
@@ -54,13 +54,13 @@ public class ShulkerDyeColorDataProcessor extends AbstractEntitySingleDataProces
     }
 
     @Override
-    protected boolean set(EntityShulker container, DyeColor value) {
+    protected boolean set(ShulkerEntity container, DyeColor value) {
         ((EntityShulkerBridge) container).bridge$setColor(value);
         return true;
     }
 
     @Override
-    protected Optional<DyeColor> getVal(EntityShulker container) {
+    protected Optional<DyeColor> getVal(ShulkerEntity container) {
         return Optional.of(((EntityShulkerBridge) container).bridge$getColor());
     }
 
@@ -70,7 +70,7 @@ public class ShulkerDyeColorDataProcessor extends AbstractEntitySingleDataProces
     }
 
     @Override
-    public boolean supports(EntityShulker dataHolder) {
+    public boolean supports(ShulkerEntity dataHolder) {
         return dataHolder instanceof EntityShulkerBridge;
     }
 

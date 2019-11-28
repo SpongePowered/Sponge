@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
-import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.goal.LookRandomlyGoal;
 import org.spongepowered.api.entity.ai.task.builtin.LookIdleAITask;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityAILookIdle.class)
+@Mixin(LookRandomlyGoal.class)
 public abstract class EntityAILookIdleMixin_API implements LookIdleAITask {
 
 }

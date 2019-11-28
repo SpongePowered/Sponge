@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.bridge.network.rcon;
 
-import net.minecraft.network.rcon.RConThreadClient;
+import net.minecraft.network.rcon.ClientThread;
 
 public interface RConConsoleSourceBridge {
 
-    void bridge$setConnection(RConThreadClient connection);
+    void bridge$setConnection(ClientThread connection);
 
-    RConThreadClient bridge$getClient();
+    ClientThread bridge$getClient();
 }

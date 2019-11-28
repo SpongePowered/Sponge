@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockTallGrass;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
@@ -36,8 +35,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
+import net.minecraft.block.TallGrassBlock;
 
-@Mixin(BlockTallGrass.EnumType.class)
+@Mixin(TallGrassBlock.EnumType.class)
 @Implements(@Interface(iface = ShrubType.class, prefix = "shrub$"))
 public abstract class BlockTallGrass_EnumTypeMixin_API implements ShrubType {
 
@@ -55,7 +55,7 @@ public abstract class BlockTallGrass_EnumTypeMixin_API implements ShrubType {
     }
 
     private Translation impl$resolveTranslation() {
-        switch ((BlockTallGrass.EnumType) (Object) this) {
+        switch ((TallGrassBlock.EnumType) (Object) this) {
             case DEAD_BUSH:
                 return new SpongeTranslation("tile.tallgrass.shrub.name");
             case FERN:

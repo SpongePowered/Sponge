@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockPistonExtension;
+import net.minecraft.block.PistonHeadBlock;
 import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.type.PistonTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 @RegisterCatalog(PistonTypes.class)
-public final class PistonTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockPistonExtension.EnumPistonType, PistonType> {
+public final class PistonTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<PistonHeadBlock.EnumPistonType, PistonType> {
 
     @Override
-    protected BlockPistonExtension.EnumPistonType[] getValues() {
-        return BlockPistonExtension.EnumPistonType.values();
+    protected PistonHeadBlock.EnumPistonType[] getValues() {
+        return PistonHeadBlock.EnumPistonType.values();
     }
 
 }

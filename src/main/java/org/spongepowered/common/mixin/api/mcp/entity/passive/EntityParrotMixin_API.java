@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.passive.EntityParrot;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ParrotData;
@@ -40,8 +39,9 @@ import org.spongepowered.common.registry.type.entity.ParrotVariantRegistryModule
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
+import net.minecraft.entity.passive.ParrotEntity;
 
-@Mixin(EntityParrot.class)
+@Mixin(ParrotEntity.class)
 public abstract class EntityParrotMixin_API extends EntityTameableMixin_API implements Parrot {
 
     @Shadow public abstract int getVariant();

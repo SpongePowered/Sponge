@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.init.Blocks;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -38,11 +35,13 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 
-public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor<EntityMinecart, BlockState, Value<BlockState>> {
+public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor<AbstractMinecartEntity, BlockState, Value<BlockState>> {
 
     public RepresentedBlockValueProcessor() {
-        super(EntityMinecart.class, Keys.REPRESENTED_BLOCK);
+        super(AbstractMinecartEntity.class, Keys.REPRESENTED_BLOCK);
     }
 
     @Override
@@ -51,13 +50,13 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
     }
 
     @Override
-    protected boolean set(final EntityMinecart container, final BlockState value) {
-        container.func_174899_a((IBlockState) value);
+    protected boolean set(final AbstractMinecartEntity container, final BlockState value) {
+        container.func_174899_a((net.minecraft.block.BlockState) value);
         return true;
     }
 
     @Override
-    protected Optional<BlockState> getVal(final EntityMinecart container) {
+    protected Optional<BlockState> getVal(final AbstractMinecartEntity container) {
         if(!container.func_94100_s()) return Optional.empty();
         return Optional.of((BlockState) container.func_174897_t());
     }
@@ -69,8 +68,8 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
-        if(container instanceof EntityMinecart) {
-            final EntityMinecart cart = (EntityMinecart) container;
+        if(container instanceof AbstractMinecartEntity) {
+            final AbstractMinecartEntity cart = (AbstractMinecartEntity) container;
             final ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.func_174897_t());
             cart.func_94096_e(false);
             return DataTransactionResult.builder().replace(block).build();

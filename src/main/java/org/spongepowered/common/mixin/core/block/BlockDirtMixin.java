@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockDirt;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -47,7 +46,7 @@ public abstract class BlockDirtMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getDirtTypeFor(blockState), impl$getIsSnowedFor(blockState));
     }
 
@@ -57,7 +56,7 @@ public abstract class BlockDirtMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirtData) {
             final BlockDirt.DirtType dirtType = (BlockDirt.DirtType) (Object) ((ImmutableDirtData) manipulator).type().get();
             return Optional.of((BlockState) blockState.func_177226_a(BlockDirt.field_176386_a, dirtType));
@@ -69,7 +68,7 @@ public abstract class BlockDirtMixin extends BlockMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DIRT_TYPE)) {
             final BlockDirt.DirtType dirtType = (BlockDirt.DirtType) value;
             return Optional.of((BlockState) blockState.func_177226_a(BlockDirt.field_176386_a, dirtType));
@@ -80,11 +79,11 @@ public abstract class BlockDirtMixin extends BlockMixin {
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableDirtData impl$getDirtTypeFor(final IBlockState blockState) {
+    private ImmutableDirtData impl$getDirtTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirtData.class, (DirtType) (Object) blockState.func_177229_b(BlockDirt.field_176386_a));
     }
 
-    private ImmutableSnowedData impl$getIsSnowedFor(final IBlockState blockState) {
+    private ImmutableSnowedData impl$getIsSnowedFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.func_177229_b(BlockDirt.field_176385_b));
     }
 }

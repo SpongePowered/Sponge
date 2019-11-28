@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockFenceGate;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -42,12 +40,13 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
 
 import java.util.Optional;
+import net.minecraft.block.FenceGateBlock;
 
-@Mixin(BlockFenceGate.class)
+@Mixin(FenceGateBlock.class)
 public abstract class BlockFenceGateMixin extends BlockHorizontalMixin {
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
             .addAll(super.bridge$getManipulators(blockState))
             .add(impl$getIsOpenFor(blockState))
@@ -63,13 +62,13 @@ public abstract class BlockFenceGateMixin extends BlockHorizontalMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockFenceGate.field_176466_a, isOpen));
+            return Optional.of((BlockState) blockState.func_177226_a(FenceGateBlock.field_176466_a, isOpen));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockFenceGate.field_176465_b, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.func_177226_a(FenceGateBlock.field_176465_b, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableInWallData) {
             return Optional.of((BlockState) blockState);
@@ -78,13 +77,13 @@ public abstract class BlockFenceGateMixin extends BlockHorizontalMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockFenceGate.field_176466_a, isOpen));
+            return Optional.of((BlockState) blockState.func_177226_a(FenceGateBlock.field_176466_a, isOpen));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockFenceGate.field_176465_b, (Boolean) value));
+            return Optional.of((BlockState) blockState.func_177226_a(FenceGateBlock.field_176465_b, (Boolean) value));
         }
         if (key.equals(Keys.IN_WALL)) {
             return Optional.of((BlockState) blockState);
@@ -92,15 +91,15 @@ public abstract class BlockFenceGateMixin extends BlockHorizontalMixin {
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableOpenData impl$getIsOpenFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.func_177229_b(BlockFenceGate.field_176466_a));
+    private ImmutableOpenData impl$getIsOpenFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.func_177229_b(FenceGateBlock.field_176466_a));
     }
 
-    private ImmutablePoweredData impl$getIsPoweredFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(BlockFenceGate.field_176465_b));
+    private ImmutablePoweredData impl$getIsPoweredFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(FenceGateBlock.field_176465_b));
     }
 
-    private ImmutableInWallData impl$getInWallFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInWallData.class, blockState.func_177229_b(BlockFenceGate.field_176467_M));
+    private ImmutableInWallData impl$getInWallFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInWallData.class, blockState.func_177229_b(FenceGateBlock.field_176467_M));
     }
 }

@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkState;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
@@ -60,6 +59,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundNBT;
 
 public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnapshot> implements EntitySnapshot.Builder {
 
@@ -71,7 +71,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
 
     @Nullable UUID entityId;
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
-    @Nullable NBTTagCompound compound;
+    @Nullable CompoundNBT compound;
     @Nullable List<ImmutableValue<?>> values;
     @Nullable WeakReference<Entity> entityReference;
 
@@ -134,7 +134,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) entity).bridge$getCustomManipulators()) {
             addManipulator(manipulator.asImmutable());
         }
-        this.compound = new NBTTagCompound();
+        this.compound = new CompoundNBT();
         ((net.minecraft.entity.Entity) entity).func_189511_e(this.compound);
         return this;
     }
@@ -224,12 +224,12 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) minecraftEntity).bridge$getCustomManipulators()) {
             addManipulator(manipulator.asImmutable());
         }
-        this.compound = new NBTTagCompound();
+        this.compound = new CompoundNBT();
         minecraftEntity.func_189511_e(this.compound);
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder unsafeCompound(NBTTagCompound compound) {
+    public SpongeEntitySnapshotBuilder unsafeCompound(CompoundNBT compound) {
         this.compound = checkNotNull(compound).func_74737_b();
         return this;
     }

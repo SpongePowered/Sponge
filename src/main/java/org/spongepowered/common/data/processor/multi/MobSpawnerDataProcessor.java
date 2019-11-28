@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.multi;
 
 import com.google.common.collect.Maps;
-import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -42,6 +41,7 @@ import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccess
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.world.spawner.AbstractSpawner;
 
 public class MobSpawnerDataProcessor extends AbstractMultiDataSingleTargetProcessor<TileEntityMobSpawnerAccessor, MobSpawnerData, ImmutableMobSpawnerData> {
 
@@ -56,7 +56,7 @@ public class MobSpawnerDataProcessor extends AbstractMultiDataSingleTargetProces
 
     @Override
     protected boolean set(TileEntityMobSpawnerAccessor entity, Map<Key<?>, Object> values) {
-        MobSpawnerBaseLogic logic = entity.accessor$getSpawnerLogic();
+        AbstractSpawner logic = entity.accessor$getSpawnerLogic();
         SpawnerUtils.applyData(((MobSpawnerBaseLogicAccessor) logic), values);
         return true;
     }
@@ -74,7 +74,7 @@ public class MobSpawnerDataProcessor extends AbstractMultiDataSingleTargetProces
         values.put(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, (short) logic.accessor$getActivatingRangeFromPlayer());
         values.put(Keys.SPAWNER_SPAWN_RANGE, (short) logic.accessor$getSpawnRange());
         values.put(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, SpawnerUtils.getNextEntity(logic));
-        values.put(Keys.SPAWNER_ENTITIES, SpawnerUtils.getEntities((MobSpawnerBaseLogic) logic));
+        values.put(Keys.SPAWNER_ENTITIES, SpawnerUtils.getEntities((AbstractSpawner) logic));
 
         return values;
     }

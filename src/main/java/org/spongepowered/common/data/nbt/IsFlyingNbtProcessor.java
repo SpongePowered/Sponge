@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.nbt;
 
+import net.minecraft.nbt.ByteNBT;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagByte;
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -46,15 +46,15 @@ public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData,
     }
 
     @Override
-    public boolean isCompatible(NBTTagCompound nbtDataType) {
+    public boolean isCompatible(CompoundNBT nbtDataType) {
         return false;
     }
 
     @Override
-    public Optional<FlyingData> readFrom(NBTTagCompound compound) {
+    public Optional<FlyingData> readFrom(CompoundNBT compound) {
         final NBTBase tag = compound.func_74781_a(Constants.Entity.Player.IS_FLYING);
         if (tag != null) {
-            return Optional.of(new SpongeFlyingData(((NBTTagByte) tag).func_150290_f() != 0));
+            return Optional.of(new SpongeFlyingData(((ByteNBT) tag).func_150290_f() != 0));
         }
         return Optional.empty();
     }
@@ -65,7 +65,7 @@ public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData,
     }
 
     @Override
-    public Optional<NBTTagCompound> storeToCompound(NBTTagCompound compound, FlyingData manipulator) {
+    public Optional<CompoundNBT> storeToCompound(CompoundNBT compound, FlyingData manipulator) {
         compound.func_74757_a(Constants.Entity.Player.IS_FLYING, manipulator.flying().get());
         return Optional.of(compound);
     }
@@ -77,7 +77,7 @@ public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData,
     }
 
     @Override
-    public DataTransactionResult remove(NBTTagCompound data) {
+    public DataTransactionResult remove(CompoundNBT data) {
         return null;
     }
 

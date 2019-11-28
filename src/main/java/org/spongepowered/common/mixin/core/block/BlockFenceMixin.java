@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockFence;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -41,13 +39,14 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.block.FenceBlock;
 
-@Mixin(BlockFence.class)
+@Mixin(FenceBlock.class)
 public abstract class BlockFenceMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getConnectedDirectionData(blockState));
     }
 
@@ -57,7 +56,7 @@ public abstract class BlockFenceMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableConnectedDirectionData) {
             return Optional.of((BlockState) blockState);
         }
@@ -65,7 +64,7 @@ public abstract class BlockFenceMixin extends BlockMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.CONNECTED_DIRECTIONS) || key.equals(Keys.CONNECTED_EAST) || key.equals(Keys.CONNECTED_NORTH)
                 || key.equals(Keys.CONNECTED_SOUTH) || key.equals(Keys.CONNECTED_WEST)) {
             return Optional.of((BlockState) blockState);
@@ -73,12 +72,12 @@ public abstract class BlockFenceMixin extends BlockMixin {
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final IBlockState blockState) {
+    private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final net.minecraft.block.BlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.func_177229_b(BlockFence.field_176526_a);
-        final Boolean east = blockState.func_177229_b(BlockFence.field_176525_b);
-        final Boolean west = blockState.func_177229_b(BlockFence.field_176528_N);
-        final Boolean south = blockState.func_177229_b(BlockFence.field_176527_M);
+        final Boolean north = blockState.func_177229_b(FenceBlock.field_176526_a);
+        final Boolean east = blockState.func_177229_b(FenceBlock.field_176525_b);
+        final Boolean west = blockState.func_177229_b(FenceBlock.field_176528_N);
+        final Boolean south = blockState.func_177229_b(FenceBlock.field_176527_M);
         if (north) {
             directions.add(Direction.NORTH);
         }

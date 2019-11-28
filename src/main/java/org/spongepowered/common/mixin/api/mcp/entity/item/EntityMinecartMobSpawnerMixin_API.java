@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.item.EntityMinecartMobSpawner;
-import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.entity.vehicle.minecart.MobSpawnerMinecart;
@@ -37,11 +35,13 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 
 import java.util.Collection;
+import net.minecraft.entity.item.minecart.SpawnerMinecartEntity;
+import net.minecraft.world.spawner.AbstractSpawner;
 
-@Mixin(EntityMinecartMobSpawner.class)
+@Mixin(SpawnerMinecartEntity.class)
 public abstract class EntityMinecartMobSpawnerMixin_API extends EntityMinecartMixin_API implements MobSpawnerMinecart {
 
-    @Shadow @Final private MobSpawnerBaseLogic mobSpawnerLogic;
+    @Shadow @Final private AbstractSpawner mobSpawnerLogic;
 
     @Override
     public MobSpawnerData getSpawnerData() {

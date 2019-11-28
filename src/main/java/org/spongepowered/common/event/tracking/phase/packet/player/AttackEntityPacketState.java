@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.CPacketUseEntity;
-import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.HandTypes;
@@ -59,6 +54,11 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.play.client.CUseEntityPacket;
+import net.minecraft.world.server.ServerWorld;
 
 public final class AttackEntityPacketState extends BasicPacketState {
 
@@ -74,8 +74,8 @@ public final class AttackEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
-        final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
+    public boolean isPacketIgnored(IPacket<?> packetIn, ServerPlayerEntity packetPlayer) {
+        final CUseEntityPacket useEntityPacket = (CUseEntityPacket) packetIn;
         // There are cases where a player is interacting with an entity that
         // doesn't exist on the server.
         @Nullable
@@ -84,7 +84,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
         context.itemUsed(ItemStackUtil.cloneDefensive(playerMP.func_184614_ca()))
             .handUsed(HandTypes.MAIN_HAND);
     }
@@ -92,8 +92,8 @@ public final class AttackEntityPacketState extends BasicPacketState {
 
     @Override
     public void unwind(BasicPacketContext context) {
-        final EntityPlayerMP player = context.getPacketPlayer();
-        final CPacketUseEntity useEntityPacket = context.getPacket();
+        final ServerPlayerEntity player = context.getPacketPlayer();
+        final CUseEntityPacket useEntityPacket = context.getPacket();
         final net.minecraft.entity.Entity entity = useEntityPacket.func_149564_a(player.field_70170_p);
         if (entity == null) {
             // Something happened?
@@ -138,7 +138,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
                 if (!items.isEmpty()) {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         final List<Entity> itemEntities = items.stream()
-                            .map(data -> data.create(((WorldServer) player.field_70170_p)))
+                            .map(data -> data.create(((ServerWorld) player.field_70170_p)))
                             .map(entity1 -> (Entity) entity1)
                             .collect(Collectors.toList());
                         frame.pushCause(player);
@@ -159,7 +159,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                for (Map.Entry<UUID, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
                     final UUID key = entry.getKey();
                     final Optional<Entity> attackedEntities = spongeWorld.getEntity(key);
                     if (!attackedEntities.isPresent()) {

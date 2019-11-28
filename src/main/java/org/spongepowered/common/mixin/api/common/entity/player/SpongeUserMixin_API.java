@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.common.entity.player;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.inventory.InventoryEnderChest;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -47,6 +46,7 @@ import org.spongepowered.common.world.WorldManager;
 
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.inventory.EnderChestInventory;
 
 @Mixin(value = SpongeUser.class, remap = false)
 public abstract class SpongeUserMixin_API implements User {
@@ -59,7 +59,7 @@ public abstract class SpongeUserMixin_API implements User {
     @Shadow private int dimension;
     @Shadow private float rotationPitch;
     @Shadow private float rotationYaw;
-    @Shadow private InventoryEnderChest enderChest;
+    @Shadow private EnderChestInventory enderChest;
 
     @Shadow public abstract void markDirty();
     @Shadow protected abstract SpongeUser loadEnderInventory();

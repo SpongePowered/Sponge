@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockHugeMushroom;
+import net.minecraft.block.HugeMushroomBlock;
 import org.spongepowered.api.data.type.BigMushroomType;
 import org.spongepowered.api.data.type.BigMushroomTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 @RegisterCatalog(BigMushroomTypes.class)
-public final class BigMushroomRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockHugeMushroom.EnumType, BigMushroomType> {
+public final class BigMushroomRegistryModule extends MinecraftEnumBasedCatalogTypeModule<HugeMushroomBlock.EnumType, BigMushroomType> {
 
     @Override
-    protected BlockHugeMushroom.EnumType[] getValues() {
-        return BlockHugeMushroom.EnumType.values();
+    protected HugeMushroomBlock.EnumType[] getValues() {
+        return HugeMushroomBlock.EnumType.values();
     }
 
 }

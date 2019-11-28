@@ -93,7 +93,7 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
         // If the parent != null, that means that its not a root advancement
         if (mcAdv.func_192070_b() != null && mcAdv.func_192070_b() != DUMMY_ROOT_ADVANCEMENT &&
                 advList.bridge$getNonRootsSet().add(mcAdv)) { // Only update if the root wasn't already present for some reason
-            final AdvancementList.Listener listener = advList.bridge$getListener();
+            final AdvancementList.IListener listener = advList.bridge$getListener();
             if (listener != null) {
                 listener.func_191932_c(mcAdv);
             }

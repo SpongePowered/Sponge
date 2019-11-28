@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.passive.EntityTameable;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -40,16 +39,17 @@ import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.entity.passive.TameableEntity;
 
 public class TameableDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityTameable, Optional<UUID>, OptionalValue<UUID>, TameableData, ImmutableTameableData> {
+        extends AbstractEntitySingleDataProcessor<TameableEntity, Optional<UUID>, OptionalValue<UUID>, TameableData, ImmutableTameableData> {
 
     public TameableDataProcessor() {
-        super(EntityTameable.class, Keys.TAMED_OWNER);
+        super(TameableEntity.class, Keys.TAMED_OWNER);
     }
 
     @Override
-    protected Optional<Optional<UUID>> getVal(EntityTameable tameable) {
+    protected Optional<Optional<UUID>> getVal(TameableEntity tameable) {
         return Optional.of(Optional.ofNullable(tameable.func_184753_b()));
     }
 
@@ -67,7 +67,7 @@ public class TameableDataProcessor
     }
 
     @Override
-    protected boolean set(EntityTameable tameable, Optional<UUID> uuidOptional) {
+    protected boolean set(TameableEntity tameable, Optional<UUID> uuidOptional) {
         tameable.func_184754_b(uuidOptional.orElse(null));
         tameable.func_70903_f(uuidOptional.isPresent());
         return true;

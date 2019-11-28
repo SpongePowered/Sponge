@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.EntityAreaEffectCloud;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -35,11 +34,12 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.entity.AreaEffectCloudEntity;
 
-public class AreaEffectCloudColorProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Color, Value<Color>> {
+public class AreaEffectCloudColorProcessor extends AbstractSpongeValueProcessor<AreaEffectCloudEntity, Color, Value<Color>> {
 
     public AreaEffectCloudColorProcessor() {
-        super(EntityAreaEffectCloud.class, Keys.AREA_EFFECT_CLOUD_COLOR);
+        super(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_COLOR);
     }
 
     @Override
@@ -48,13 +48,13 @@ public class AreaEffectCloudColorProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected boolean set(EntityAreaEffectCloud container, Color value) {
+    protected boolean set(AreaEffectCloudEntity container, Color value) {
         container.func_184482_a(value.getRgb());
         return true;
     }
 
     @Override
-    protected Optional<Color> getVal(EntityAreaEffectCloud container) {
+    protected Optional<Color> getVal(AreaEffectCloudEntity container) {
         return Optional.of(Color.ofRgb(container.func_184492_k()));
     }
 

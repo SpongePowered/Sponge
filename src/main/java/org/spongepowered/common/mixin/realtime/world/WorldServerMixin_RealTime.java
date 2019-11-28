@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.realtime.world;
 
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 
-@Mixin(WorldServer.class)
+@Mixin(ServerWorld.class)
 public abstract class WorldServerMixin_RealTime extends WorldMixin_RealTime implements RealTimeTrackingBridge {
 
     @Inject(method = "tick", at = @At("HEAD"))

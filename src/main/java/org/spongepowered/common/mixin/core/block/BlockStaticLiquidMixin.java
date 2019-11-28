@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockStaticLiquid;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
@@ -58,7 +58,7 @@ public class BlockStaticLiquidMixin {
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"
         )
     )
-    private boolean impl$CheckEventsBeforeSpreadingFire(final World world, final BlockPos pos, final IBlockState blockState) {
+    private boolean impl$CheckEventsBeforeSpreadingFire(final World world, final BlockPos pos, final BlockState blockState) {
         if (!ShouldFire.CHANGE_BLOCK_EVENT_PRE) { // If we're not throwing events... well..
             if (!((WorldBridge) world).bridge$isFake()) {
                 return PhaseTracker.getInstance().setBlockState(((WorldServerBridge) world), pos, blockState, BlockChangeFlags.ALL);

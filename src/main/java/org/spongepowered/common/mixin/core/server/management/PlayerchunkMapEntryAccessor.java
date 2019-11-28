@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.management;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
 @Mixin(PlayerChunkMapEntry.class)
 public interface PlayerchunkMapEntryAccessor {
 
-    @Accessor("players") List<EntityPlayerMP> accessor$getPlayers();
+    @Accessor("players") List<ServerPlayerEntity> accessor$getPlayers();
 
     @Accessor("pos") ChunkPos accessor$getPos();
 

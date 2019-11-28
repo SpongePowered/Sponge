@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.passive.EntityBat;
+import net.minecraft.entity.passive.BatEntity;
 import org.spongepowered.api.entity.living.Bat;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityBat.class)
+@Mixin(BatEntity.class)
 public abstract class EntityBatMixin_API extends EntityAmbientCreatureMixin_API implements Bat {
 
 }

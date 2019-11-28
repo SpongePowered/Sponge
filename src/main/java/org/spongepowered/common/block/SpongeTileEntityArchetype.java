@@ -26,8 +26,7 @@ package org.spongepowered.common.block;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -77,15 +76,15 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     @Override
     public Optional<org.spongepowered.api.block.tileentity.TileEntity> apply(Location<World> location) {
         final BlockState currentState = location.getBlock();
-        final Block currentBlock = ((IBlockState) currentState).func_177230_c();
-        final Block newBlock = ((IBlockState) this.blockState).func_177230_c();
+        final Block currentBlock = ((net.minecraft.block.BlockState) currentState).func_177230_c();
+        final Block newBlock = ((net.minecraft.block.BlockState) this.blockState).func_177230_c();
         final net.minecraft.world.World minecraftWorld = (net.minecraft.world.World) location.getExtent();
 
         BlockPos blockpos = VecHelper.toBlockPos(location);
         if (currentBlock != newBlock) {
             ((World) minecraftWorld).setBlock(blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p(), this.blockState, BlockChangeFlags.ALL);
         }
-        final NBTTagCompound compound = this.data.func_74737_b();
+        final CompoundNBT compound = this.data.func_74737_b();
 
         TileEntity tileEntity = minecraftWorld.func_175625_s(blockpos);
         if (tileEntity == null) {

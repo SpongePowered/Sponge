@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.util;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.util.CooldownTrackerServer;
+import net.minecraft.util.ServerCooldownTracker;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
@@ -39,10 +39,10 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.OptionalInt;
 
-@Mixin(CooldownTrackerServer.class)
+@Mixin(ServerCooldownTracker.class)
 public abstract class CooldownTrackerServerMixin extends CooldownTrackerMixin {
 
-    @Shadow @Final private EntityPlayerMP player;
+    @Shadow @Final private ServerPlayerEntity player;
 
     @Shadow protected abstract void notifyOnSet(Item itemIn, int ticksIn);
 

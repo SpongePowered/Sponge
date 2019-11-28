@@ -25,17 +25,17 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.tileentity.TileEntityPiston;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.PistonTileEntity;
+import net.minecraft.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(TileEntityPiston.class)
+@Mixin(PistonTileEntity.class)
 public abstract class TileEntityPistonMixin extends TileEntityMixin {
 
-    @Shadow private IBlockState pistonState;
-    @Shadow private EnumFacing pistonFacing;
+    @Shadow private BlockState pistonState;
+    @Shadow private Direction pistonFacing;
 
     @Override
     public MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {

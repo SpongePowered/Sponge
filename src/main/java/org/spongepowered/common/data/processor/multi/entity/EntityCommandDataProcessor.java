@@ -25,8 +25,6 @@
 package org.spongepowered.common.data.processor.multi.entity;
 
 import com.google.common.collect.Maps;
-import net.minecraft.entity.item.EntityMinecartCommandBlock;
-import net.minecraft.tileentity.CommandBlockBaseLogic;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -42,11 +40,13 @@ import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
+import net.minecraft.tileentity.CommandBlockLogic;
 
-public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<EntityMinecartCommandBlock, CommandData, ImmutableCommandData> {
+public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<MinecartCommandBlockEntity, CommandData, ImmutableCommandData> {
 
     public EntityCommandDataProcessor() {
-        super(EntityMinecartCommandBlock.class);
+        super(MinecartCommandBlockEntity.class);
     }
 
     @Override
@@ -76,14 +76,14 @@ public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<Enti
     }
 
     @Override
-    protected boolean doesDataExist(final EntityMinecartCommandBlock entity) {
+    protected boolean doesDataExist(final MinecartCommandBlockEntity entity) {
         return true;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected boolean set(final EntityMinecartCommandBlock entity, final Map<Key<?>, Object> keyValues) {
-        final CommandBlockBaseLogic logic = entity.func_145822_e();
+    protected boolean set(final MinecartCommandBlockEntity entity, final Map<Key<?>, Object> keyValues) {
+        final CommandBlockLogic logic = entity.func_145822_e();
         logic.func_145750_b(SpongeTexts.toComponent(((Optional<Text>) keyValues.get(Keys.LAST_COMMAND_OUTPUT)).orElse(Text.of())));
         ((CommandBlockBaseLogicAccessor) logic).accessor$setCommandStored((String) keyValues.get(Keys.COMMAND));
         ((CommandBlockBaseLogicAccessor) logic).accessor$setSuccessCount((int) keyValues.get(Keys.SUCCESS_COUNT));
@@ -93,8 +93,8 @@ public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<Enti
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(final EntityMinecartCommandBlock entity) {
-        final CommandBlockBaseLogic logic = entity.func_145822_e();
+    protected Map<Key<?>, ?> getValues(final MinecartCommandBlockEntity entity) {
+        final CommandBlockLogic logic = entity.func_145822_e();
         final Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(4);
         final Optional<Text> lastCommandOutput = logic.func_145749_h() != null ? Optional.of(SpongeTexts.toText(logic.func_145749_h())) : Optional.empty();
         values.put(Keys.LAST_COMMAND_OUTPUT, lastCommandOutput);

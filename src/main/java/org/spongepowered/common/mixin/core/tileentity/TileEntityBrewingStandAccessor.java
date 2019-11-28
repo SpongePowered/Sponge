@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityBrewingStand;
+import net.minecraft.tileentity.BrewingStandTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(TileEntityBrewingStand.class)
+@Mixin(BrewingStandTileEntity.class)
 public interface TileEntityBrewingStandAccessor {
 
     @Invoker("canBrew") boolean accessor$canBrew();

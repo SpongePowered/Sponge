@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.passive.TameableEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityTameable.class)
+@Mixin(TameableEntity.class)
 public abstract class EntityTameableMixin_API extends EntityAnimalMixin_API {
 
     @Shadow public abstract boolean shadow$isTamed();

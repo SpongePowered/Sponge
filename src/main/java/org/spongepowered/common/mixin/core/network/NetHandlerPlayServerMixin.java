@@ -26,57 +26,57 @@ package org.spongepowered.common.mixin.core.network;
 
 import com.flowpowered.math.vector.Vector3d;
 import io.netty.util.collection.LongObjectHashMap;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.item.ExperienceOrbEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraft.network.play.client.CPacketAnimation;
-import net.minecraft.network.play.client.CPacketClickWindow;
-import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
-import net.minecraft.network.play.client.CPacketKeepAlive;
-import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.network.play.client.CPacketPlayerDigging;
-import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
-import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
-import net.minecraft.network.play.client.CPacketResourcePackStatus;
-import net.minecraft.network.play.client.CPacketSpectate;
-import net.minecraft.network.play.client.CPacketUpdateSign;
-import net.minecraft.network.play.client.CPacketUseEntity;
-import net.minecraft.network.play.client.CPacketVehicleMove;
-import net.minecraft.network.play.server.SPacketEntityAttach;
-import net.minecraft.network.play.server.SPacketKeepAlive;
-import net.minecraft.network.play.server.SPacketMoveVehicle;
-import net.minecraft.network.play.server.SPacketPlayerListItem;
-import net.minecraft.network.play.server.SPacketResourcePackSend;
-import net.minecraft.network.play.server.SPacketSetExperience;
-import net.minecraft.network.play.server.SPacketSetSlot;
+import net.minecraft.network.play.IServerPlayNetHandler;
+import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.network.play.client.CAnimateHandPacket;
+import net.minecraft.network.play.client.CClickWindowPacket;
+import net.minecraft.network.play.client.CCreativeInventoryActionPacket;
+import net.minecraft.network.play.client.CKeepAlivePacket;
+import net.minecraft.network.play.client.CMoveVehiclePacket;
+import net.minecraft.network.play.client.CPlayerDiggingPacket;
+import net.minecraft.network.play.client.CPlayerPacket;
+import net.minecraft.network.play.client.CPlayerTryUseItemOnBlockPacket;
+import net.minecraft.network.play.client.CPlayerTryUseItemPacket;
+import net.minecraft.network.play.client.CResourcePackStatusPacket;
+import net.minecraft.network.play.client.CSpectatePacket;
+import net.minecraft.network.play.client.CUpdateSignPacket;
+import net.minecraft.network.play.client.CUseEntityPacket;
+import net.minecraft.network.play.server.SKeepAlivePacket;
+import net.minecraft.network.play.server.SMountEntityPacket;
+import net.minecraft.network.play.server.SMoveVehiclePacket;
+import net.minecraft.network.play.server.SPlayerListItemPacket;
+import net.minecraft.network.play.server.SSendResourcePackPacket;
+import net.minecraft.network.play.server.SSetExperiencePacket;
+import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.WorldServer;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
@@ -142,19 +142,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
-@Mixin(NetHandlerPlayServer.class)
+@Mixin(ServerPlayNetHandler.class)
 public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerBridge {
 
     @Shadow @Final public NetworkManager netManager;
     @Shadow @Final private MinecraftServer server;
-    @Shadow public EntityPlayerMP player;
+    @Shadow public ServerPlayerEntity player;
     @Shadow private Entity lowestRiddenEnt;
     @Shadow private int itemDropThreshold;
     // Appears to be the last keep-alive packet ID. Currently the same as
     // field_194402_f, but _f is time (which the ID just so happens to match).
     @Shadow private long field_194404_h;
 
-    @Shadow public abstract void sendPacket(final Packet<?> packetIn);
+    @Shadow public abstract void sendPacket(final IPacket<?> packetIn);
     @Shadow public abstract void disconnect(ITextComponent reason);
     @Shadow private void captureCurrentPosition() {}
     @Shadow protected abstract long currentTimeMillis();
@@ -173,7 +173,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     }
 
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;onUpdateEntity()V"))
-    private void impl$onPlayerTick(final EntityPlayerMP player) {
+    private void impl$onPlayerTick(final ServerPlayerEntity player) {
         if (player.field_70170_p.field_72995_K) {
             player.func_71127_g();
             return;
@@ -193,11 +193,11 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
      */
     @Redirect(method = "sendPacket(Lnet/minecraft/network/Packet;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;sendPacket(Lnet/minecraft/network/Packet;)V"))
-    private void impl$onSendPacket(final NetworkManager manager, Packet<?> packet) {
+    private void impl$onSendPacket(final NetworkManager manager, IPacket<?> packet) {
         // Update the tab list data
-        if (packet instanceof SPacketPlayerListItem) {
-            ((SpongeTabList) ((Player) this.player).getTabList()).updateEntriesOnSend((SPacketPlayerListItem) packet);
-        } else if (packet instanceof SPacketResourcePackSend) {
+        if (packet instanceof SPlayerListItemPacket) {
+            ((SpongeTabList) ((Player) this.player).getTabList()).updateEntriesOnSend((SPlayerListItemPacket) packet);
+        } else if (packet instanceof SSendResourcePackPacket) {
             // Send a custom keep-alive packet that doesn't match vanilla.
             long now = this.currentTimeMillis() - 1;
             while (now == this.field_194404_h || this.impl$customKeepAliveCallbacks.containsKey(now)) {
@@ -209,8 +209,8 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                 this.impl$lastReceivedPack = resourcePack; // TODO do something with the old value
                 this.impl$numResourcePacksInTransit.decrementAndGet();
             });
-            this.netManager.func_179290_a(new SPacketKeepAlive(now));
-        } else if (packet instanceof SPacketSetExperience) {
+            this.netManager.func_179290_a(new SKeepAlivePacket(now));
+        } else if (packet instanceof SSetExperiencePacket) {
             // Ensures experience is in sync server-side.
             ((EntityPlayerBridge) this.player).bridge$recalculateTotalExperience();
         }
@@ -222,10 +222,10 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     }
 
     @Inject(method = "processKeepAlive", at = @At("HEAD"), cancellable = true)
-    private void impl$checkSpongeKeepAlive(final CPacketKeepAlive packetIn, final CallbackInfo ci) {
+    private void impl$checkSpongeKeepAlive(final CKeepAlivePacket packetIn, final CallbackInfo ci) {
         final Runnable callback = this.impl$customKeepAliveCallbacks.get(packetIn.func_149460_c());
         if (callback != null) {
-            PacketThreadUtil.func_180031_a(packetIn, (INetHandlerPlayServer) this, this.player.func_71121_q());
+            PacketThreadUtil.func_180031_a(packetIn, (IServerPlayNetHandler) this, this.player.func_71121_q());
             this.impl$customKeepAliveCallbacks.remove(packetIn.func_149460_c());
             callback.run();
             ci.cancel();
@@ -244,7 +244,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
      * @param tileentitysign Injected tileentitysign param
      */
     @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CPacketUpdateSign;getLines()[Ljava/lang/String;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    private void impl$callSignChangeEvent(final CPacketUpdateSign packetIn, final CallbackInfo ci, final WorldServer worldserver, final BlockPos blockpos, final IBlockState iblockstate, final TileEntity tileentity, final TileEntitySign tileentitysign) {
+    private void impl$callSignChangeEvent(final CUpdateSignPacket packetIn, final CallbackInfo ci, final ServerWorld worldserver, final BlockPos blockpos, final BlockState iblockstate, final TileEntity tileentity, final SignTileEntity tileentitysign) {
         ci.cancel();
         final Optional<SignData> existingSignData = ((Sign) tileentitysign).get(SignData.class);
         if (!existingSignData.isPresent()) {
@@ -254,7 +254,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         final SignData changedSignData = existingSignData.get().copy();
         final ListValue<Text> lines = changedSignData.lines();
         for (int i = 0; i < packetIn.func_187017_b().length; i++) {
-            lines.set(i, SpongeTexts.toText(new TextComponentString(packetIn.func_187017_b()[i])));
+            lines.set(i, SpongeTexts.toText(new StringTextComponent(packetIn.func_187017_b()[i])));
         }
         changedSignData.set(lines);
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
@@ -285,8 +285,8 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
      * @param packetIn The creative inventory packet
      */
     @Overwrite
-    public void processCreativeInventoryAction(final CPacketCreativeInventoryAction packetIn) {
-        PacketThreadUtil.func_180031_a(packetIn, (NetHandlerPlayServer) (Object) this, this.player.func_71121_q());
+    public void processCreativeInventoryAction(final CCreativeInventoryActionPacket packetIn) {
+        PacketThreadUtil.func_180031_a(packetIn, (ServerPlayNetHandler) (Object) this, this.player.func_71121_q());
 
         if (this.player.field_71134_c.func_73083_d()) {
             final PacketContext<?> context = (PacketContext<?>) PhaseTracker.getInstance().getCurrentContext();
@@ -295,14 +295,14 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             final ItemStack itemstack = packetIn.func_149625_d();
 
             if (!itemstack.func_190926_b() && itemstack.func_77942_o() && itemstack.func_77978_p().func_150297_b(Constants.Item.BLOCK_ENTITY_TAG, 10)) {
-                final NBTTagCompound nbttagcompound = itemstack.func_77978_p().func_74775_l(Constants.Item.BLOCK_ENTITY_TAG);
+                final CompoundNBT nbttagcompound = itemstack.func_77978_p().func_74775_l(Constants.Item.BLOCK_ENTITY_TAG);
 
                 if (nbttagcompound.func_74764_b("x") && nbttagcompound.func_74764_b("y") && nbttagcompound.func_74764_b("z")) {
                     final BlockPos blockpos = new BlockPos(nbttagcompound.func_74762_e("x"), nbttagcompound.func_74762_e("y"), nbttagcompound.func_74762_e("z"));
                     final TileEntity tileentity = this.player.field_70170_p.func_175625_s(blockpos);
 
                     if (tileentity != null) {
-                        final NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+                        final CompoundNBT nbttagcompound1 = new CompoundNBT();
                         tileentity.func_189515_b(nbttagcompound1);
                         nbttagcompound1.func_82580_o("x");
                         nbttagcompound1.func_82580_o("y");
@@ -323,9 +323,9 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                         // Reset slot on client
                         if (packetIn.func_149627_c() >= 0 && packetIn.func_149627_c() < this.player.field_71069_bz.field_75151_b.size()) {
                             this.player.field_71135_a.func_147359_a(
-                                    new SPacketSetSlot(this.player.field_71069_bz.field_75152_c, packetIn.func_149627_c(),
+                                    new SSetSlotPacket(this.player.field_71069_bz.field_75152_c, packetIn.func_149627_c(),
                                             this.player.field_71069_bz.func_75139_a(packetIn.func_149627_c()).func_75211_c()));
-                            this.player.field_71135_a.func_147359_a(new SPacketSetSlot(-1, -1, ItemStack.field_190927_a));
+                            this.player.field_71135_a.func_147359_a(new SSetSlotPacket(-1, -1, ItemStack.field_190927_a));
                         }
                         return;
                     }
@@ -341,7 +341,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                     this.player.field_71069_bz.func_75128_a(this.player, true);
                 } else if (clickedOutside && this.itemDropThreshold < 200) {
                     this.itemDropThreshold += 20;
-                    final EntityItem entityitem = this.player.func_71019_a(itemstack, true);
+                    final ItemEntity entityitem = this.player.func_71019_a(itemstack, true);
 
                     if (entityitem != null)
                     {
@@ -354,7 +354,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     }
 
     @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/IntHashMap;addKey(ILjava/lang/Object;)V"))
-    private void impl$updateOpenContainer(final CPacketClickWindow packet, final CallbackInfo ci) {
+    private void impl$updateOpenContainer(final CClickWindowPacket packet, final CallbackInfo ci) {
         // We want to treat an 'invalid' click just like a regular click - we still fire events, do restores, etc.
 
         // Vanilla doesn't call detectAndSendChanges for 'invalid' clicks, since it restores the entire inventory
@@ -384,7 +384,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
      * @param packetIn
      */
     @Redirect(method = "processPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;queuedEndExit:Z"))
-    private boolean throwMoveEvent(final EntityPlayerMP playerMP, final CPacketPlayer packetIn) {
+    private boolean throwMoveEvent(final ServerPlayerEntity playerMP, final CPlayerPacket packetIn) {
         if (!playerMP.field_71136_j) {
 
             // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
@@ -513,7 +513,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true
     )
-    private void impl$onSpectateTeleportCallMoveEvent(CPacketSpectate packetIn, CallbackInfo ci, Entity spectatingEntity) {
+    private void impl$onSpectateTeleportCallMoveEvent(CSpectatePacket packetIn, CallbackInfo ci, Entity spectatingEntity) {
         final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(
                 this.player,
                 spectatingEntity.field_70165_t,
@@ -536,7 +536,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     @Inject(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getServerWorld()Lnet/minecraft/world/WorldServer;", ordinal = 1), cancellable = true)
     private void impl$cancelIfSameWorld(CallbackInfo ci) {
         //noinspection ConstantConditions
-        if (this.player.func_71121_q() == (WorldServer) this.impl$spectatingTeleportLocation.getExtent()) {
+        if (this.player.func_71121_q() == (ServerWorld) this.impl$spectatingTeleportLocation.getExtent()) {
             final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
             this.impl$spectatingTeleportLocation = null;
             player.func_70634_a(position.getX(), position.getY(), position.getZ());
@@ -545,9 +545,9 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     }
 
     @Redirect(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setLocationAndAngles(DDDFF)V"))
-    private void impl$onSpectateLocationAndAnglesUpdate(EntityPlayerMP player, double x, double y, double z, float yaw, float pitch) {
+    private void impl$onSpectateLocationAndAnglesUpdate(ServerPlayerEntity player, double x, double y, double z, float yaw, float pitch) {
         //noinspection ConstantConditions
-        player.field_71093_bK = ((WorldServer) this.impl$spectatingTeleportLocation.getExtent()).field_73011_w.func_186058_p().func_186068_a();
+        player.field_71093_bK = ((ServerWorld) this.impl$spectatingTeleportLocation.getExtent()).field_73011_w.func_186058_p().func_186068_a();
         final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
         player.func_70012_b(
                 position.getX(), position.getY(), position.getZ(),
@@ -557,7 +557,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     }
 
     @Redirect(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setPositionAndUpdate(DDD)V"))
-    private void impl$onSpectatePositionUpdate(EntityPlayerMP player, double x, double y, double z) {
+    private void impl$onSpectatePositionUpdate(ServerPlayerEntity player, double x, double y, double z) {
         //noinspection ConstantConditions
         final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
         player.func_70634_a(position.getX(), position.getY(), position.getZ());
@@ -579,7 +579,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
      * @return The lowest riding entity
      */
     @Redirect(method = "processVehicleMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getLowestRidingEntity()Lnet/minecraft/entity/Entity;"))
-    private Entity processVehicleMoveEvent(final EntityPlayerMP playerMP, final CPacketVehicleMove packetIn) {
+    private Entity processVehicleMoveEvent(final ServerPlayerEntity playerMP, final CMoveVehiclePacket packetIn) {
         final Entity ridingEntity = this.player.func_184208_bv();
         if (ridingEntity == this.player || ridingEntity.func_184179_bs() != this.player || ridingEntity != this.lowestRiddenEnt) {
             return ridingEntity;
@@ -599,7 +599,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         if (event.isCancelled()) {
             // There is no need to change the current riding entity position as it hasn't changed yet.
             // Send packet to client in order to update rider position.
-            this.netManager.func_179290_a(new SPacketMoveVehicle(ridingEntity));
+            this.netManager.func_179290_a(new SMoveVehiclePacket(ridingEntity));
             return this.player;
         }
         return ridingEntity;
@@ -632,8 +632,8 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     }
 
     @Redirect(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
-    private EnumActionResult impl$checkState(final PlayerInteractionManager interactionManager, final EntityPlayer player, final net.minecraft.world.World worldIn, @Nullable final ItemStack stack, final EnumHand hand, final BlockPos pos, final EnumFacing facing, final float hitX, final float hitY, final float hitZ) {
-        final EnumActionResult actionResult = interactionManager.func_187251_a(this.player, worldIn, stack, hand, pos, facing, hitX, hitY, hitZ);
+    private ActionResultType impl$checkState(final PlayerInteractionManager interactionManager, final PlayerEntity player, final net.minecraft.world.World worldIn, @Nullable final ItemStack stack, final Hand hand, final BlockPos pos, final Direction facing, final float hitX, final float hitY, final float hitZ) {
+        final ActionResultType actionResult = interactionManager.func_187251_a(this.player, worldIn, stack, hand, pos, facing, hitX, hitY, hitZ);
         if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
             return actionResult;
         }
@@ -647,7 +647,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
             if (!ItemStack.func_77989_b(itemStack, player.func_184586_b(hand)) && ((PlayerInteractionManagerBridge) this.player.field_71134_c).bridge$isInteractBlockRightClickCancelled()) {
-                PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
+                PacketPhaseUtil.handlePlayerSlotRestore((ServerPlayerEntity) player, itemStack, hand);
             }
         }
         context.interactItemChanged(false);
@@ -658,8 +658,8 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     @Redirect(method = "processTryUseItem",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClick(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;)Lnet/minecraft/util/EnumActionResult;"))
-    private EnumActionResult impl$checkStateAfter(final PlayerInteractionManager interactionManager, final EntityPlayer player, final net.minecraft.world.World worldIn, @Nullable final ItemStack stack, final EnumHand hand) {
-        final EnumActionResult actionResult = interactionManager.func_187250_a(this.player, worldIn, stack, hand);
+    private ActionResultType impl$checkStateAfter(final PlayerInteractionManager interactionManager, final PlayerEntity player, final net.minecraft.world.World worldIn, @Nullable final ItemStack stack, final Hand hand) {
+        final ActionResultType actionResult = interactionManager.func_187250_a(this.player, worldIn, stack, hand);
         // If a plugin or mod has changed the item, avoid restoring
         if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
             return actionResult;
@@ -672,7 +672,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
             if (!ItemStack.func_77989_b(itemStack, player.func_184586_b(hand))  && ((PlayerInteractionManagerBridge) this.player.field_71134_c).bridge$isInteractBlockRightClickCancelled()) {
-                PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
+                PacketPhaseUtil.handlePlayerSlotRestore((ServerPlayerEntity) player, itemStack, hand);
             }
         }
         packetContext.interactItemChanged(false);
@@ -682,8 +682,8 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
     @Nullable
     @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
-    private EntityItem impl$performDropThroughPhase(final EntityPlayerMP player, final boolean dropAll) {
-        EntityItem item = null;
+    private ItemEntity impl$performDropThroughPhase(final ServerPlayerEntity player, final boolean dropAll) {
+        ItemEntity item = null;
         final ItemStack stack = this.player.field_71071_by.func_70448_g();
         if (!stack.func_190926_b()) {
             final int size = stack.func_190916_E();
@@ -693,7 +693,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                 final Slot slot = this.player.field_71070_bA.func_75147_a(this.player.field_71071_by, this.player.field_71071_by.field_70461_c);
                 final int windowId = this.player.field_71070_bA.field_75152_c;
                 stack.func_190920_e(size);
-                this.sendPacket(new SPacketSetSlot(windowId, slot.field_75222_d, stack));
+                this.sendPacket(new SSetSlotPacket(windowId, slot.field_75222_d, stack));
             }
         }
 
@@ -702,7 +702,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
     @Inject(method = "handleAnimation",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;markPlayerActive()V"), cancellable = true)
-    private void impl$throwAnimationEvent(final CPacketAnimation packetIn, final CallbackInfo ci) {
+    private void impl$throwAnimationEvent(final CAnimateHandPacket packetIn, final CallbackInfo ci) {
         if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
             return;
         }
@@ -722,7 +722,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     }
 
     @Inject(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"))
-    private void impl$updateLastPrimaryPacket(final CPacketPlayerDigging packetIn, final CallbackInfo ci) {
+    private void impl$updateLastPrimaryPacket(final CPlayerDiggingPacket packetIn, final CallbackInfo ci) {
         if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
             return;
         }
@@ -730,7 +730,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     }
 
     @Inject(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
-    private void onProcessPlayerDiggingDropItem(final CPacketPlayerDigging packetIn, final CallbackInfo ci) {
+    private void onProcessPlayerDiggingDropItem(final CPlayerDiggingPacket packetIn, final CallbackInfo ci) {
         final ItemStack stack = this.player.func_184614_ca();
         if (!stack.func_190926_b()) {
             ((EntityPlayerMPBridge) this.player).bridge$setPacketItem(stack.func_77946_l());
@@ -738,7 +738,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     }
 
     @Inject(method = "processTryUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"), cancellable = true)
-    private void onProcessTryUseItem(final CPacketPlayerTryUseItem packetIn, final CallbackInfo ci) {
+    private void onProcessTryUseItem(final CPlayerTryUseItemPacket packetIn, final CallbackInfo ci) {
         SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().func_71259_af();
         final long packetDiff = System.currentTimeMillis() - this.impl$lastTryBlockPacketTimeStamp;
         // If the time between packets is small enough, use the last result.
@@ -751,7 +751,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     }
 
     @Inject(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"))
-    private void onProcessTryUseItemOnBlockSetCountersForSponge(final CPacketPlayerTryUseItemOnBlock packetIn, final CallbackInfo ci) {
+    private void onProcessTryUseItemOnBlockSetCountersForSponge(final CPlayerTryUseItemOnBlockPacket packetIn, final CallbackInfo ci) {
         // InteractItemEvent on block must be handled in PlayerInteractionManager to support item/block results.
         // Only track the timestamps to support our block animation events
         this.impl$lastTryBlockPacketTimeStamp = System.currentTimeMillis();
@@ -769,23 +769,23 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
      * @param packetIn The entity use packet
      */
     @Overwrite
-    public void processUseEntity(final CPacketUseEntity packetIn) {
+    public void processUseEntity(final CUseEntityPacket packetIn) {
         // Sponge start
         // All packets received by server are handled first on the Netty Thread
         if (!SpongeImpl.getServer().func_152345_ab()) {
-            if (packetIn.func_149565_c() == CPacketUseEntity.Action.INTERACT) {
+            if (packetIn.func_149565_c() == CUseEntityPacket.Action.INTERACT) {
                 // This packet is only sent by client when CPacketUseEntity.Action.INTERACT_AT is
                 // not successful. We can safely ignore this packet as we handle the INTERACT logic
                 // when INTERACT_AT does not return a successful result.
                 return;
             } else { // queue packet for main thread
-                PacketThreadUtil.func_180031_a(packetIn, (NetHandlerPlayServer) (Object) this, this.player.func_71121_q());
+                PacketThreadUtil.func_180031_a(packetIn, (ServerPlayNetHandler) (Object) this, this.player.func_71121_q());
                 return;
             }
         }
         // Sponge end
 
-        final WorldServer worldserver = this.server.func_71218_a(this.player.field_71093_bK);
+        final ServerWorld worldserver = this.server.func_71218_a(this.player.field_71093_bK);
         final Entity entity = packetIn.func_149564_a(worldserver);
         this.player.func_143004_u();
 
@@ -807,11 +807,11 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                 } else */
                 // Sponge end
 
-                if (packetIn.func_149565_c() == CPacketUseEntity.Action.INTERACT_AT) {
+                if (packetIn.func_149565_c() == CUseEntityPacket.Action.INTERACT_AT) {
 
                     // Sponge start - Fire interact events
                     try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                        final EnumHand hand = packetIn.func_186994_b();
+                        final Hand hand = packetIn.func_186994_b();
                         final ItemStack itemstack = hand != null ? this.player.func_184586_b(hand) : ItemStack.field_190927_a;
 
                         SpongeCommonEventFactory.lastSecondaryPacketTick = this.server.func_71259_af();
@@ -823,12 +823,12 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                             // Restore held item in hand
                             final int index = ((InventoryPlayerBridge) this.player.field_71071_by).bridge$getHeldItemIndex(hand);
 
-                            if (hand == EnumHand.OFF_HAND) {
+                            if (hand == Hand.OFF_HAND) {
                                 // A window id of -2 can be used to set the off hand, even if a container is open.
-                                sendPacket(new SPacketSetSlot(-2, ((ContainerPlayerBridge) this.player.field_71069_bz).bridge$getOffHandSlot(), itemstack));
+                                sendPacket(new SSetSlotPacket(-2, ((ContainerPlayerBridge) this.player.field_71069_bz).bridge$getOffHandSlot(), itemstack));
                             } else {
                                 final Slot slot = this.player.field_71070_bA.func_75147_a(this.player.field_71071_by, index);
-                                sendPacket(new SPacketSetSlot(this.player.field_71070_bA.field_75152_c, slot.field_75222_d, itemstack));
+                                sendPacket(new SSetSlotPacket(this.player.field_71070_bA.field_75152_c, slot.field_75222_d, itemstack));
                             }
 
 
@@ -836,7 +836,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                             // which means that we need to force an update
                             if (itemstack.func_77973_b() == Items.field_151058_ca) {
                                 // Detach entity again
-                                sendPacket(new SPacketEntityAttach(entity, null));
+                                sendPacket(new SMountEntityPacket(entity, null));
                             } else {
                                 // Other cases may involve a specific DataParameter of the entity
                                 // We fix the client state by marking it as dirty so it will be updated on the client the next tick
@@ -850,14 +850,14 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                         }
 
                         // If INTERACT_AT is not successful, run the INTERACT logic
-                        if (entity.func_184199_a(this.player, packetIn.func_179712_b(), hand) != EnumActionResult.SUCCESS) {
+                        if (entity.func_184199_a(this.player, packetIn.func_179712_b(), hand) != ActionResultType.SUCCESS) {
                             this.player.func_190775_a(entity, hand);
                         }
                     }
                     // Sponge end
-                } else if (packetIn.func_149565_c() == CPacketUseEntity.Action.ATTACK) {
+                } else if (packetIn.func_149565_c() == CUseEntityPacket.Action.ATTACK) {
                     // Sponge start - Call interact event
-                    final EnumHand hand = EnumHand.MAIN_HAND; // Will be null in the packet during ATTACK
+                    final Hand hand = Hand.MAIN_HAND; // Will be null in the packet during ATTACK
                     final ItemStack itemstack = this.player.func_184586_b(hand);
                     SpongeCommonEventFactory.lastPrimaryPacketTick = this.server.func_71259_af();
 
@@ -874,8 +874,8 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                     }
                     // Sponge end
 
-                    if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.player) {
-                        this.disconnect(new TextComponentTranslation("multiplayer.disconnect.invalid_entity_attacked"));
+                    if (entity instanceof ItemEntity || entity instanceof ExperienceOrbEntity || entity instanceof AbstractArrowEntity || entity == this.player) {
+                        this.disconnect(new TranslationTextComponent("multiplayer.disconnect.invalid_entity_attacked"));
                         this.server.func_71236_h("Player " + this.player.func_70005_c_() + " tried to attack an invalid entity");
                         return;
                     }
@@ -899,10 +899,10 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     }
 
     @Inject(method = "handleResourcePackStatus(Lnet/minecraft/network/play/client/CPacketResourcePackStatus;)V", at = @At("HEAD"))
-    private void onProcessResourcePackStatus(final CPacketResourcePackStatus packet, final CallbackInfo ci) {
+    private void onProcessResourcePackStatus(final CResourcePackStatusPacket packet, final CallbackInfo ci) {
         // Propagate the packet to the main thread so the cause tracker picks
         // it up. See PacketThreadUtil_1Mixin.
-        PacketThreadUtil.func_180031_a(packet, (INetHandlerPlayServer) this, this.player.func_71121_q());
+        PacketThreadUtil.func_180031_a(packet, (IServerPlayNetHandler) this, this.player.func_71121_q());
     }
 
     @Override

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
-import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -38,11 +37,12 @@ import org.spongepowered.common.bridge.tileentity.TileEntityBannerBridge;
 
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.tileentity.BannerTileEntity;
 
-public class TileBannerPatternLayersValueProcessor extends AbstractSpongeValueProcessor<TileEntityBanner, List<PatternLayer>, PatternListValue> {
+public class TileBannerPatternLayersValueProcessor extends AbstractSpongeValueProcessor<BannerTileEntity, List<PatternLayer>, PatternListValue> {
 
     public TileBannerPatternLayersValueProcessor() {
-        super(TileEntityBanner.class, Keys.BANNER_PATTERNS);
+        super(BannerTileEntity.class, Keys.BANNER_PATTERNS);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class TileBannerPatternLayersValueProcessor extends AbstractSpongeValuePr
     }
 
     @Override
-    protected boolean set(TileEntityBanner container, List<PatternLayer> value) {
+    protected boolean set(BannerTileEntity container, List<PatternLayer> value) {
         if (!container.func_145831_w().field_72995_K) { // This avoids a client crash because clientside.
             ((TileEntityBannerBridge) container).bridge$setLayers(value);
             return true;
@@ -60,7 +60,7 @@ public class TileBannerPatternLayersValueProcessor extends AbstractSpongeValuePr
     }
 
     @Override
-    protected Optional<List<PatternLayer>> getVal(TileEntityBanner container) {
+    protected Optional<List<PatternLayer>> getVal(BannerTileEntity container) {
         return Optional.of(((TileEntityBannerBridge) container).bridge$getLayers());
     }
 

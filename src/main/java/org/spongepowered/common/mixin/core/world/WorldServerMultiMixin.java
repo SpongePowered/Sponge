@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServerMulti;
+import net.minecraft.world.server.ServerMultiWorld;
 import net.minecraft.world.storage.SessionLockException;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
-@Mixin(WorldServerMulti.class)
+@Mixin(ServerMultiWorld.class)
 public abstract class WorldServerMultiMixin extends WorldServerMixin {
 
     /**

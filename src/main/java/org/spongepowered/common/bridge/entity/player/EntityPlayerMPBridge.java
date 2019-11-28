@@ -25,11 +25,11 @@
 package org.spongepowered.common.bridge.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.User;
@@ -58,7 +58,7 @@ public interface EntityPlayerMPBridge {
 
     void bridge$setVelocityOverride(@Nullable Vector3d velocity);
 
-    void bridge$sendBlockChange(BlockPos pos, IBlockState state);
+    void bridge$sendBlockChange(BlockPos pos, BlockState state);
 
     MessageChannel bridge$getDeathMessageChannel();
 
@@ -68,7 +68,7 @@ public interface EntityPlayerMPBridge {
 
     void bridge$setScoreboardOnRespawn(Scoreboard scoreboard);
 
-    void bridge$restorePacketItem(EnumHand hand);
+    void bridge$restorePacketItem(Hand hand);
 
     void bridge$setPacketItem(ItemStack itemstack);
 
@@ -92,7 +92,7 @@ public interface EntityPlayerMPBridge {
 
     void bridge$setContainerDisplay(Text displayName);
 
-    void bridge$setDelegateAfterRespawn(EntityPlayerMP delegate);
+    void bridge$setDelegateAfterRespawn(ServerPlayerEntity delegate);
 
     Scoreboard bridge$getScoreboard();
 
@@ -105,7 +105,7 @@ public interface EntityPlayerMPBridge {
     boolean bridge$hasDelegate();
 
     @Nullable
-    EntityPlayerMP bridge$getDelegate();
+    ServerPlayerEntity bridge$getDelegate();
 
     @Nullable
     Vector3d bridge$getVelocityOverride();

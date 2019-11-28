@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.server.management;
 
-import net.minecraft.server.management.UserListBansEntry;
+import net.minecraft.server.management.ProfileBanEntry;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(UserListBansEntry.class)
+@Mixin(ProfileBanEntry.class)
 public abstract class UserListBansEntryMixin_API extends UserListEntryBanMixin_API<com.mojang.authlib.GameProfile> implements Ban.Profile {
 
     @Override

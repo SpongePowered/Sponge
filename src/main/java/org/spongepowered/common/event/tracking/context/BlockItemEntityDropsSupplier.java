@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.context;
 
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.util.math.BlockPos;
 
-public final class BlockItemEntityDropsSupplier extends CapturedMultiMapSupplier<BlockPos, EntityItem> {
+public final class BlockItemEntityDropsSupplier extends CapturedMultiMapSupplier<BlockPos, ItemEntity> {
 
     public BlockItemEntityDropsSupplier() {
     }

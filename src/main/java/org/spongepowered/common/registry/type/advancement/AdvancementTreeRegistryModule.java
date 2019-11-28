@@ -58,7 +58,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
         final Advancement advancement = (Advancement) advancementTree.getRootAdvancement();
         final AdvancementListBridge advancementList = (AdvancementListBridge) AdvancementManagerAccessor.accessor$getAdvancementList();
         advancementList.bridge$getRootsSet().add(advancement);
-        final AdvancementList.Listener listener = advancementList.bridge$getListener();
+        final AdvancementList.IListener listener = advancementList.bridge$getListener();
         if (listener != null) {
             listener.func_191931_a(advancement);
         }

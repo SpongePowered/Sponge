@@ -25,8 +25,6 @@
 package org.spongepowered.common.bridge.data;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
@@ -39,6 +37,8 @@ import org.spongepowered.common.util.Constants;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 
 public interface CustomDataHolderBridge {
 
@@ -64,13 +64,13 @@ public interface CustomDataHolderBridge {
 
     default void bridge$removeCustomFromNbt(DataManipulator<?, ?> manipulator) {
         if (this instanceof DataCompoundHolder) {
-            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
             if (spongeData.func_150297_b(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
-                final NBTTagList tagList = spongeData.func_150295_c(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
+                final ListNBT tagList = spongeData.func_150295_c(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
                 if (!tagList.func_82582_d()) {
                     String id = DataUtil.getRegistrationFor(manipulator).getId();
                     for (int i = 0; i < tagList.func_74745_c(); i++) {
-                        final NBTTagCompound tag = tagList.func_150305_b(i);
+                        final CompoundNBT tag = tagList.func_150305_b(i);
                         if (id.equals(tag.func_74779_i(Constants.Sponge.MANIPULATOR_ID))) {
                             tagList.func_74744_a(i);
                             break;

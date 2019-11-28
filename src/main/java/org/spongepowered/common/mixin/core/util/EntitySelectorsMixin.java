@@ -26,29 +26,29 @@ package org.spongepowered.common.mixin.core.util;
 
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EntitySelectors;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.EntityPredicates;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 
-@Mixin(EntitySelectors.class)
+@Mixin(EntityPredicates.class)
 public class EntitySelectorsMixin {
 
     @Shadow @Final @Mutable public static Predicate<Entity> NOT_SPECTATING = entity ->
         !(entity instanceof VanishableBridge)
         || !((VanishableBridge) entity).bridge$isVanished()
-        || !(entity instanceof EntityPlayer)
-        || !((EntityPlayer) entity).func_175149_v();
+        || !(entity instanceof PlayerEntity)
+        || !((PlayerEntity) entity).func_175149_v();
 
     @Shadow @Final @Mutable public static Predicate<Entity> CAN_AI_TARGET = entity ->
         !(entity instanceof VanishableBridge)
         || !(((VanishableBridge) entity).bridge$isVanished() && ((VanishableBridge) entity).bridge$isUntargetable())
-        || !(entity instanceof EntityPlayer)
-        || !((EntityPlayer) entity).func_175149_v()
-           && !((EntityPlayer)entity).func_184812_l_();
+        || !(entity instanceof PlayerEntity)
+        || !((PlayerEntity) entity).func_175149_v()
+           && !((PlayerEntity)entity).func_184812_l_();
 
 
 }

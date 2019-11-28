@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.projectile.EntitySmallFireball;
+import net.minecraft.entity.projectile.SmallFireballEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 
-@Mixin(EntitySmallFireball.class)
+@Mixin(SmallFireballEntity.class)
 public abstract class EntitySmallFireballMixin extends EntityFireballMixin {
 
     /**

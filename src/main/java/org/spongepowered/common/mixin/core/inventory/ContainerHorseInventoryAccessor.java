@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.entity.passive.AbstractHorse;
-import net.minecraft.inventory.ContainerHorseInventory;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
+import net.minecraft.inventory.container.HorseInventoryContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ContainerHorseInventory.class)
+@Mixin(HorseInventoryContainer.class)
 public interface ContainerHorseInventoryAccessor {
 
-    @Accessor("horse") AbstractHorse accessor$getHorseCarrier();
+    @Accessor("horse") AbstractHorseEntity accessor$getHorseCarrier();
 
 }

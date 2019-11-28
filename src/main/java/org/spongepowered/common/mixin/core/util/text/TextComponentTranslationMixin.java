@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.util.text;
 
 import com.google.common.collect.Iterators;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,7 +38,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.util.Iterator;
 import java.util.List;
 
-@Mixin(TextComponentTranslation.class)
+@Mixin(TranslationTextComponent.class)
 public abstract class TextComponentTranslationMixin extends TextComponentBaseMixin {
 
     @Shadow @Final private String key;

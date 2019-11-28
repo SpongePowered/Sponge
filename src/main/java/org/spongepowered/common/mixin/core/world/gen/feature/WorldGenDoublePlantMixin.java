@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
-import net.minecraft.block.BlockDoublePlant;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.DoublePlantBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.DoublePlantFeature;
@@ -53,7 +53,7 @@ import javax.annotation.Nullable;
 @Mixin(DoublePlantFeature.class)
 public abstract class WorldGenDoublePlantMixin extends WorldGeneratorMixin implements WorldGenDoublePlantBridge {
 
-    @Shadow private BlockDoublePlant.EnumPlantType plantType;
+    @Shadow private DoublePlantBlock.EnumPlantType plantType;
 
     @Nullable private Extent impl$currentExtent = null;
 
@@ -93,7 +93,7 @@ public abstract class WorldGenDoublePlantMixin extends WorldGeneratorMixin imple
                     && Blocks.field_150398_cm.func_176196_c(worldIn, next)) {
                 final DoublePlantType type = impl$getType(VecHelper.toVector3i(next), rand);
                 Blocks.field_150398_cm.func_176491_a(worldIn, next,
-                        (BlockDoublePlant.EnumPlantType) (Object) type, 2);
+                        (DoublePlantBlock.EnumPlantType) (Object) type, 2);
                 flag = true;
             }
         }

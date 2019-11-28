@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -52,11 +52,11 @@ public class RepresentedItemDataProcessor extends
 
     @Override
     protected boolean set(Entity container, ItemStackSnapshot value) {
-        if (container instanceof EntityItemFrame) {
-            ((EntityItemFrame) container).func_82334_a((ItemStack) value.createStack());
+        if (container instanceof ItemFrameEntity) {
+            ((ItemFrameEntity) container).func_82334_a((ItemStack) value.createStack());
             return true;
-        } else if (container instanceof EntityItem) {
-            ((EntityItem) container).func_92058_a((ItemStack) value.createStack());
+        } else if (container instanceof ItemEntity) {
+            ((ItemEntity) container).func_92058_a((ItemStack) value.createStack());
             return true;
         }
         return false;
@@ -64,13 +64,13 @@ public class RepresentedItemDataProcessor extends
 
     @Override
     protected Optional<ItemStackSnapshot> getVal(Entity container) {
-        if (container instanceof EntityItemFrame) {
-            final ItemStack itemStack = ((EntityItemFrame) container).func_82335_i();
+        if (container instanceof ItemFrameEntity) {
+            final ItemStack itemStack = ((ItemFrameEntity) container).func_82335_i();
             if (!itemStack.func_190926_b()) {
                 return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot());
             }
-        } else if (container instanceof EntityItem) {
-            return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) ((EntityItem) container).func_92059_d()).createSnapshot());
+        } else if (container instanceof ItemEntity) {
+            return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) ((ItemEntity) container).func_92059_d()).createSnapshot());
         }
         return Optional.empty();
     }
@@ -87,13 +87,13 @@ public class RepresentedItemDataProcessor extends
 
     @Override
     protected boolean supports(Entity holder) {
-        return holder instanceof EntityItem || holder instanceof EntityItemFrame;
+        return holder instanceof ItemEntity || holder instanceof ItemFrameEntity;
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (container instanceof EntityItemFrame) {
-            EntityItemFrame frame = (EntityItemFrame) container;
+        if (container instanceof ItemFrameEntity) {
+            ItemFrameEntity frame = (ItemFrameEntity) container;
             if (!frame.func_82335_i().func_190926_b()) {
                 final ImmutableValue<ItemStackSnapshot> old = constructImmutableValue(getVal(frame).get());
                 frame.func_82334_a(ItemStack.field_190927_a);

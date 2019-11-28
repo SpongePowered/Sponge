@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.multi.entity;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
-import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -50,12 +49,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import net.minecraft.entity.item.ArmorStandEntity;
 
 public class ArmorStandBodyPartRotationalDataProcessor
-        extends AbstractEntityDataProcessor<EntityArmorStand, BodyPartRotationalData, ImmutableBodyPartRotationalData> {
+        extends AbstractEntityDataProcessor<ArmorStandEntity, BodyPartRotationalData, ImmutableBodyPartRotationalData> {
 
     public ArmorStandBodyPartRotationalDataProcessor() {
-        super(EntityArmorStand.class);
+        super(ArmorStandEntity.class);
     }
 
     @Override
@@ -99,12 +99,12 @@ public class ArmorStandBodyPartRotationalDataProcessor
     }
 
     @Override
-    protected boolean doesDataExist(final EntityArmorStand dataHolder) {
+    protected boolean doesDataExist(final ArmorStandEntity dataHolder) {
         return true;
     }
 
     @Override
-    protected boolean set(final EntityArmorStand dataHolder, final Map<Key<?>, Object> keyValues) {
+    protected boolean set(final ArmorStandEntity dataHolder, final Map<Key<?>, Object> keyValues) {
         @SuppressWarnings("unchecked") final Map<BodyPart, Vector3d> bodyRotations = (Map<BodyPart, Vector3d>) keyValues.get(Keys.BODY_ROTATIONS);
         final Vector3d headRotation =
                 getValueFromTwoMapsOrUseFallback(keyValues, Keys.HEAD_ROTATION, bodyRotations, BodyParts.HEAD, Constants.Entity.ArmorStand.DEFAULT_HEAD_ROTATION);
@@ -129,7 +129,7 @@ public class ArmorStandBodyPartRotationalDataProcessor
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(final EntityArmorStand dataHolder) {
+    protected Map<Key<?>, ?> getValues(final ArmorStandEntity dataHolder) {
         final Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(6);
         values.put(Keys.HEAD_ROTATION, VecHelper.toVector3d(dataHolder.func_175418_s()));
         values.put(Keys.CHEST_ROTATION, VecHelper.toVector3d(dataHolder.func_175408_t()));

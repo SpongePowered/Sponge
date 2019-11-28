@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.entity.item;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityEnderCrystal;
+import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
@@ -46,7 +46,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityEnderCrystal.class)
+@Mixin(EnderCrystalEntity.class)
 public abstract class EntityEnderCrystalMixin extends EntityMixin implements ExplosiveBridge, EntityEnderCrystalBridge {
 
     private int explosionStrength = Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH;

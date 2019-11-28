@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
-import net.minecraft.entity.ai.EntityAIAttackMelee;
+import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityAIAttackMelee.class)
+@Mixin(MeleeAttackGoal.class)
 public abstract class EntityAIAttackMeleeMixin_API implements AttackLivingAITask {
 
     @Shadow double speedTowardsTarget;

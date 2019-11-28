@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.monster.EntityGuardian;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.monster.GuardianEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Guardian;
@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Optional;
 
-@Mixin(EntityGuardian.class)
+@Mixin(GuardianEntity.class)
 public abstract class EntityGuardianMixin_API extends EntityMobMixin_API implements Guardian {
 
     @Shadow @Final private static DataParameter<Integer> TARGET_ENTITY;
@@ -51,7 +51,7 @@ public abstract class EntityGuardianMixin_API extends EntityMobMixin_API impleme
         if (entity == null) {
             this.setTargetedEntity(0);
         } else {
-            this.setTargetedEntity(((EntityLivingBase) entity).func_145782_y());
+            this.setTargetedEntity(((LivingEntity) entity).func_145782_y());
         }
     }
 }

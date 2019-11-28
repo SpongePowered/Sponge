@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.util.text;
 
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(TextComponentString.class)
+@Mixin(StringTextComponent.class)
 public interface TextComponentStringAccessor {
 
     @Accessor("text") void accessor$setText(String text);

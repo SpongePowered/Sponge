@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockPistonExtension;
 import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -35,8 +34,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
+import net.minecraft.block.PistonHeadBlock;
 
-@Mixin(BlockPistonExtension.EnumPistonType.class)
+@Mixin(PistonHeadBlock.EnumPistonType.class)
 @Implements(@Interface(iface = PistonType.class, prefix = "piston$"))
 public abstract class BlockPistonExtension_EnumPistonTypeMixin_API implements PistonType {
 

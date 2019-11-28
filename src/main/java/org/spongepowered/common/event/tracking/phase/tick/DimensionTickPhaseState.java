@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -34,6 +33,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
+import net.minecraft.entity.item.ItemEntity;
 
 class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     DimensionTickPhaseState() {
@@ -62,7 +62,7 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
             phaseContext.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (final EntityItem entity : entities) {
+                        for (final ItemEntity entity : entities) {
                             capturedEntities.add((Entity) entity);
                         }
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, phaseContext);

@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.data.type;
 
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.SpongeCatalogType;
 
 public class SpongeEquipmentType extends SpongeCatalogType implements EquipmentType {
 
-    private EntityEquipmentSlot[] slots;
+    private EquipmentSlotType[] slots;
 
-    public SpongeEquipmentType(final String id, EntityEquipmentSlot... slots) {
+    public SpongeEquipmentType(final String id, EquipmentSlotType... slots) {
         super(id);
         this.slots = slots;
     }
 
-    public EntityEquipmentSlot[] getSlots() {
+    public EquipmentSlotType[] getSlots() {
         return this.slots;
     }
 

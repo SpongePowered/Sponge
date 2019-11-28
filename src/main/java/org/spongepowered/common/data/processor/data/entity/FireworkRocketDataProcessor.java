@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.item.EntityFireworkRocket;
+import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkRocketData;
@@ -48,10 +48,10 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 
 public class FireworkRocketDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityFireworkRocket, Integer, MutableBoundedValue<Integer>, FireworkRocketData, ImmutableFireworkRocketData> {
+        AbstractEntitySingleDataProcessor<FireworkRocketEntity, Integer, MutableBoundedValue<Integer>, FireworkRocketData, ImmutableFireworkRocketData> {
 
     public FireworkRocketDataProcessor() {
-        super(EntityFireworkRocket.class, Keys.FIREWORK_FLIGHT_MODIFIER);
+        super(FireworkRocketEntity.class, Keys.FIREWORK_FLIGHT_MODIFIER);
     }
 
     @Override
@@ -65,9 +65,9 @@ public class FireworkRocketDataProcessor extends
     }
 
     @Override
-    protected Optional<Integer> getVal(final EntityFireworkRocket firework) {
+    protected Optional<Integer> getVal(final FireworkRocketEntity firework) {
         final ItemStack item = FireworkUtils.getItem(firework);
-        final NBTTagCompound fireworks = item.func_190925_c("Fireworks");
+        final CompoundNBT fireworks = item.func_190925_c("Fireworks");
         if (fireworks.func_74764_b("Flight")) {
             return Optional.of((int) fireworks.func_74771_c("Flight"));
         }
@@ -76,9 +76,9 @@ public class FireworkRocketDataProcessor extends
     }
 
     @Override
-    protected boolean set(final EntityFireworkRocket firework, final Integer modifier) {
+    protected boolean set(final FireworkRocketEntity firework, final Integer modifier) {
         final ItemStack item = FireworkUtils.getItem(firework);
-        final NBTTagCompound fireworks = item.func_190925_c("Fireworks");
+        final CompoundNBT fireworks = item.func_190925_c("Fireworks");
         fireworks.func_74774_a("Flight", modifier.byteValue());
         ((EntityFireworkRocketAccessor) firework).spongeImpl$setLifeTime(10 * modifier.byteValue() + ((EntityAccessor) firework).accessor$getRandom().nextInt(6) + ((EntityAccessor) firework).accessor$getRandom().nextInt(7));
         return true;

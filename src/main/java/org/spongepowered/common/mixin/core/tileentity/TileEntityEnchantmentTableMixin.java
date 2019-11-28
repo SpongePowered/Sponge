@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityEnchantmentTable;
+import net.minecraft.tileentity.EnchantingTableTileEntity;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.data.CustomNameableBridge;
 
 @NonnullByDefault
-@Mixin(TileEntityEnchantmentTable.class)
+@Mixin(EnchantingTableTileEntity.class)
 public abstract class TileEntityEnchantmentTableMixin extends TileEntityMixin implements CustomNameableBridge {
 
     @Override
     public void bridge$setCustomDisplayName(String customName) {
-        ((TileEntityEnchantmentTable) (Object) this).func_145920_a(customName);
+        ((EnchantingTableTileEntity) (Object) this).func_145920_a(customName);
     }
 }

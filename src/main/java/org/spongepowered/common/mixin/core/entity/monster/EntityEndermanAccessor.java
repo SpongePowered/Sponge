@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.monster.EntityEnderman;
+import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EntityEnderman.class)
+@Mixin(EndermanEntity.class)
 public interface EntityEndermanAccessor {
 
     @Accessor("SCREAMING")

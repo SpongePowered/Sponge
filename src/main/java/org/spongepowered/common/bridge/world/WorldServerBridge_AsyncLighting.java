@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.world;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EnumLightType;
+import net.minecraft.world.LightType;
 import net.minecraft.world.chunk.Chunk;
 
 import java.util.List;
@@ -33,9 +33,9 @@ import java.util.concurrent.ExecutorService;
 
 public interface WorldServerBridge_AsyncLighting {
 
-    boolean asyncLightingBridge$updateLightAsync(EnumLightType lightType, BlockPos pos, Chunk chunk);
+    boolean asyncLightingBridge$updateLightAsync(LightType lightType, BlockPos pos, Chunk chunk);
 
-    boolean asyncLightingBridge$checkLightAsync(EnumLightType lightType, BlockPos pos, Chunk chunk, List<Chunk> neighbors);
+    boolean asyncLightingBridge$checkLightAsync(LightType lightType, BlockPos pos, Chunk chunk, List<Chunk> neighbors);
 
     ExecutorService asyncLightingBridge$getLightingExecutor();
 }

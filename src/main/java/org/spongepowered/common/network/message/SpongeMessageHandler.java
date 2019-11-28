@@ -25,7 +25,7 @@
 package org.spongepowered.common.network.message;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
@@ -67,7 +67,7 @@ public final class SpongeMessageHandler {
             return;
         }
 
-        EntityPlayerMP sender = (EntityPlayerMP) player;
+        ServerPlayerEntity sender = (ServerPlayerEntity) player;
 
         BlockPos pos = new BlockPos(message.x, message.y, message.z);
         if (!sender.field_70170_p.func_175667_e(pos)) {

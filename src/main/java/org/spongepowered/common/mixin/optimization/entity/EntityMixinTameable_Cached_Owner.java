@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.optimization.entity;
 
 import com.google.common.base.Optional;
-import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +37,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityTameable.class)
+@Mixin(TameableEntity.class)
 public abstract class EntityMixinTameable_Cached_Owner extends EntityAgeableMixin {
 
     @Shadow @Final protected static DataParameter<Optional<UUID>> OWNER_UNIQUE_ID;

@@ -26,7 +26,6 @@ package org.spongepowered.common.world.schematic;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
@@ -77,7 +76,7 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
     public static Palette<BlockState> getBlockPalette() {
         if (blockPalette == null) {
             blockPalette = new BlockPaletteWrapper(new GlobalPalette<>(PaletteTypes.GLOBAL_BLOCKS,
-                (type) -> Block.field_176229_d.func_148747_b((IBlockState) type),
+                (type) -> Block.field_176229_d.func_148747_b((net.minecraft.block.BlockState) type),
                 (id) -> (BlockState) Block.field_176229_d.func_148745_a(id),
                 BlockState.class), org.spongepowered.api.world.schematic.BlockPaletteTypes.GLOBAL);
         }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,11 +35,12 @@ import org.spongepowered.common.mixin.core.entity.player.PlayerCapabilitiesAcces
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.player.PlayerEntity;
 
-public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double, Value<Double>> {
+public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Double, Value<Double>> {
 
     public FlyingSpeedValueProcessor() {
-        super(EntityPlayer.class, Keys.FLYING_SPEED);
+        super(PlayerEntity.class, Keys.FLYING_SPEED);
     }
 
     @Override
@@ -54,14 +54,14 @@ public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<Enti
     }
 
     @Override
-    protected boolean set(EntityPlayer container, Double value) {
+    protected boolean set(PlayerEntity container, Double value) {
         ((PlayerCapabilitiesAccessor) container.field_71075_bZ).accessor$setFlySpeed(value.floatValue());
         container.func_71016_p();
         return true;
     }
 
     @Override
-    protected Optional<Double> getVal(EntityPlayer container) {
+    protected Optional<Double> getVal(PlayerEntity container) {
         return Optional.of(((double)container.field_71075_bZ.func_75093_a()));
     }
 

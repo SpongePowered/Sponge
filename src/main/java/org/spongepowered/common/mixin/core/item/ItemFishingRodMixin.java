@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityFishHook;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.item.FishingRodItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemFishingRod;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.FishHook;
@@ -45,34 +45,34 @@ import org.spongepowered.common.SpongeImpl;
 
 import javax.annotation.Nullable;
 
-@Mixin(ItemFishingRod.class)
+@Mixin(FishingRodItem.class)
 public abstract class ItemFishingRodMixin extends Item {
 
-    @Nullable private EntityFishHook fishHook;
+    @Nullable private FishingBobberEntity fishHook;
 
     @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
             target = "Lnet/minecraft/entity/projectile/EntityFishHook;handleHookRetraction()I"), cancellable = true)
-    private void cancelHookRetraction(World world, EntityPlayer player, EnumHand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
+    private void cancelHookRetraction(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
         if (player.field_71104_cf != null) {
             // Event was cancelled
-            cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, player.func_184586_b(hand)));
+            cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, player.func_184586_b(hand)));
         }
     }
 
     @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound"
             + "(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", ordinal = 1),
             cancellable = true)
-    private void onThrowEvent(World world, EntityPlayer player, EnumHand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
+    private void onThrowEvent(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
         if (world.field_72995_K) {
             // Only fire event on server-side to avoid crash on client
             return;
         }
 
-        EntityFishHook fishHook = new EntityFishHook(world, player);
+        FishingBobberEntity fishHook = new FishingBobberEntity(world, player);
         Sponge.getCauseStackManager().pushCause(player);
         if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getCauseStackManager().getCurrentCause(), (FishHook) fishHook))) {
             fishHook.func_70106_y(); // Bye
-            cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, player.func_184586_b(hand)));
+            cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, player.func_184586_b(hand)));
         } else {
             this.fishHook = fishHook;
         }
@@ -80,9 +80,9 @@ public abstract class ItemFishingRodMixin extends Item {
     }
 
     @Redirect(method = "onItemRightClick", at = @At(value = "NEW", target = "net/minecraft/entity/projectile/EntityFishHook"))
-    private EntityFishHook onNewEntityFishHook(World world, EntityPlayer player) {
+    private FishingBobberEntity onNewEntityFishHook(World world, PlayerEntity player) {
         // Use the fish hook we created for the event
-        EntityFishHook fishHook = this.fishHook;
+        FishingBobberEntity fishHook = this.fishHook;
         this.fishHook = null;
         return fishHook;
     }

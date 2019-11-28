@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.enchantment;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.RegistryNamespaced;
+import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
@@ -58,7 +58,7 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     @Shadow public abstract boolean isTreasureEnchantment();
     @Shadow public abstract boolean shadow$isCurse();
 
-    @Shadow @Final public static RegistryNamespaced<ResourceLocation, Enchantment> REGISTRY;
+    @Shadow @Final public static SimpleRegistry<ResourceLocation, Enchantment> REGISTRY;
 
     @Nullable private String api$id;
 

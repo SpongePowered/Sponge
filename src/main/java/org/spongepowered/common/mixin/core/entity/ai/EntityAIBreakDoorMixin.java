@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIBreakDoor;
-import net.minecraft.entity.ai.EntityAIDoorInteract;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.BreakDoorGoal;
+import net.minecraft.entity.ai.goal.InteractDoorGoal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 
-@Mixin(EntityAIBreakDoor.class)
-public abstract class EntityAIBreakDoorMixin extends EntityAIDoorInteract {
+@Mixin(BreakDoorGoal.class)
+public abstract class EntityAIBreakDoorMixin extends InteractDoorGoal {
 
-    public EntityAIBreakDoorMixin(final EntityLiving entityLiving) {
+    public EntityAIBreakDoorMixin(final MobEntity entityLiving) {
         super(entityLiving);
     }
 
@@ -53,7 +53,7 @@ public abstract class EntityAIBreakDoorMixin extends EntityAIDoorInteract {
             target = "Lnet/minecraft/entity/ai/EntityAIDoorInteract;shouldExecute()Z"
         )
     )
-    private boolean spongeShouldExecuteForGriefer(final EntityAIDoorInteract entityAIDoorInteract) {
+    private boolean spongeShouldExecuteForGriefer(final InteractDoorGoal entityAIDoorInteract) {
         return super.func_75250_a() && ((GrieferBridge) this.field_75356_a).bridge$CanGrief();
 
     }

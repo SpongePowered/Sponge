@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.builder.block.state;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -68,7 +67,7 @@ public class SpongeBlockStateMetaContentUpdater implements DataContentUpdater {
         // implementation of minecraft, mods may change this in the future, not really known how
         // they will handle it?
 
-        final IBlockState blockState = ((Block) type).func_176203_a(meta);
+        final net.minecraft.block.BlockState blockState = ((Block) type).func_176203_a(meta);
         // Now that we have the actual block state, delete the old data
         content.remove(Constants.Block.BLOCK_TYPE);
         content.remove(Constants.Block.BLOCK_STATE_UNSAFE_META);

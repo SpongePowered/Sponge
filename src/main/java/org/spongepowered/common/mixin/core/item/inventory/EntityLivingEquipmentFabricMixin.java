@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,20 +37,20 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import java.util.Collection;
 import java.util.Collections;
 
-@Mixin(EntityLivingBase.class)
+@Mixin(LivingEntity.class)
 public abstract class EntityLivingEquipmentFabricMixin implements Fabric, InventoryBridge {
 
-    @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
+    @Shadow public abstract ItemStack getItemStackFromSlot(EquipmentSlotType slotIn);
 
-    @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
+    @Shadow public abstract void setItemStackToSlot(EquipmentSlotType slotIn, ItemStack stack);
 
-    private static final EntityEquipmentSlot[] SLOTS;
+    private static final EquipmentSlotType[] SLOTS;
     private static final int MAX_STACK_SIZE = 64;
 
     static {
-        EntityEquipmentSlot[] values = EntityEquipmentSlot.values();
-        SLOTS = new EntityEquipmentSlot[values.length];
-        for (EntityEquipmentSlot slot : values) {
+        EquipmentSlotType[] values = EquipmentSlotType.values();
+        SLOTS = new EquipmentSlotType[values.length];
+        for (EquipmentSlotType slot : values) {
             SLOTS[slot.func_188452_c()] = slot;
         }
     }
@@ -92,7 +92,7 @@ public abstract class EntityLivingEquipmentFabricMixin implements Fabric, Invent
 
     @Override
     public void fabric$clear() {
-        for (EntityEquipmentSlot slot : SLOTS) {
+        for (EquipmentSlotType slot : SLOTS) {
             this.setItemStackToSlot(slot, ItemStack.field_190927_a);
         }
     }

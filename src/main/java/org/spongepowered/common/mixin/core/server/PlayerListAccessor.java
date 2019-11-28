@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.world.World;
@@ -40,6 +40,6 @@ public interface PlayerListAccessor {
 
     @Accessor("LOGGER") Logger accessor$getPlayerListLogger();
 
-    @Invoker("setPlayerGameTypeBasedOnOther") void accessor$setPlayerGameType(EntityPlayerMP target, EntityPlayerMP source, World worldIn);
+    @Invoker("setPlayerGameTypeBasedOnOther") void accessor$setPlayerGameType(ServerPlayerEntity target, ServerPlayerEntity source, World worldIn);
 
 }

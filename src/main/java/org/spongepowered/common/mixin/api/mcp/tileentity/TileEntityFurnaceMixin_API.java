@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.tileentity.FurnaceTileEntity;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -42,7 +42,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.List;
 
 @NonnullByDefault
-@Mixin(TileEntityFurnace.class)
+@Mixin(FurnaceTileEntity.class)
 public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin_API<Furnace> implements Furnace {
 
     @Shadow private String furnaceCustomName;

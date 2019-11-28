@@ -26,9 +26,9 @@ package org.spongepowered.common.text.action;
 
 import net.minecraft.entity.EntityList;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
@@ -62,7 +62,7 @@ public class SpongeHoverAction {
             case SHOW_ENTITY: {
                 HoverAction.ShowEntity.Ref entity = ((HoverAction.ShowEntity) action).getResult();
 
-                NBTTagCompound nbt = new NBTTagCompound();
+                CompoundNBT nbt = new CompoundNBT();
                 nbt.func_74778_a("id", entity.getUniqueId().toString());
 
                 if (entity.getType().isPresent()) {
@@ -70,14 +70,14 @@ public class SpongeHoverAction {
                 }
 
                 nbt.func_74778_a("name", entity.getName());
-                component = new TextComponentString(nbt.toString());
+                component = new StringTextComponent(nbt.toString());
                 break;
             }
             case SHOW_ITEM: {
                 ItemStack item = (ItemStack) ((ItemStackSnapshot) action.getResult()).createStack();
-                NBTTagCompound nbt = new NBTTagCompound();
+                CompoundNBT nbt = new CompoundNBT();
                 item.func_77955_b(nbt);
-                component = new TextComponentString(nbt.toString());
+                component = new StringTextComponent(nbt.toString());
                 break;
             }
             case SHOW_TEXT:

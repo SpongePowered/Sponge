@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockDoublePlant;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -35,8 +34,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
+import net.minecraft.block.DoublePlantBlock;
 
-@Mixin(BlockDoublePlant.EnumPlantType.class)
+@Mixin(DoublePlantBlock.EnumPlantType.class)
 @Implements(@Interface(iface = DoublePlantType.class, prefix = "plant$"))
 public abstract class BlockDoublePlant_EnumPlantTypeMixin_API implements DoublePlantType {
 

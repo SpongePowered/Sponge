@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.optimization.world.storage;
 
-import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Items;
+import net.minecraft.entity.item.ItemFrameEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.Packet;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
@@ -73,7 +73,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
         super(name);
     }
 
-    @Shadow @Final @Mutable private Map<EntityPlayer, MapData.MapInfo> playersHashMap;
+    @Shadow @Final @Mutable private Map<PlayerEntity, MapData.MapInfo> playersHashMap;
     @Shadow public Map<String, MapDecoration> mapDecorations;
     @Shadow public List<MapData.MapInfo> playersArrayList;
 
@@ -101,7 +101,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
 
     static {
         try {
-            mapOptimizationImpl$mapInfoConstructor = MapData.MapInfo.class.getDeclaredConstructor(MapData.class, EntityPlayer.class);
+            mapOptimizationImpl$mapInfoConstructor = MapData.MapInfo.class.getDeclaredConstructor(MapData.class, PlayerEntity.class);
             if (SpongeImplHooks.isDeobfuscatedEnvironment()) {
                 mapOptimizationImpl$dimensionField = MapData.class.getDeclaredField("dimension");
             } else {
@@ -128,7 +128,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
      * @author Aaron1011 - August 8th, 2018
      */
     @Overwrite
-    public void updateVisiblePlayers(final EntityPlayer player, final ItemStack mapStack) {
+    public void updateVisiblePlayers(final PlayerEntity player, final ItemStack mapStack) {
     }
 
     /**
@@ -164,10 +164,10 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
     public void mapOptimizationBridge$tickMap() {
         final List<OptimizedMapInfoBridge> mapInfosToUpdate = new ArrayList<>(this.playersHashMap.size());
         try {
-            final Iterator<Map.Entry<EntityPlayer, MapData.MapInfo>> it = this.playersHashMap.entrySet().iterator();
+            final Iterator<Map.Entry<PlayerEntity, MapData.MapInfo>> it = this.playersHashMap.entrySet().iterator();
             while (it.hasNext()) {
-                final Map.Entry<EntityPlayer, MapData.MapInfo> entry = it.next();
-                final EntityPlayer player = entry.getKey();
+                final Map.Entry<PlayerEntity, MapData.MapInfo> entry = it.next();
+                final PlayerEntity player = entry.getKey();
                 final MapData.MapInfo mapInfo = entry.getValue();
                 final OptimizedMapInfoBridge mixinMapInfo = (OptimizedMapInfoBridge) mapInfo;
                 if (player.field_70128_L) {
@@ -223,7 +223,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
                 for (final Player player: world.getPlayers()) {
                     // Copied from EntityTrackerEntry#updatePlayerList
 
-                    final EntityPlayerMP entityplayermp = (EntityPlayerMP) player;
+                    final ServerPlayerEntity entityplayermp = (ServerPlayerEntity) player;
                     OptimizedMapInfoBridge mapInfo = (OptimizedMapInfoBridge) this.playersHashMap.get(player);
                     if (mapInfo != null && mapInfo.mapOptimizationBridge$isValid()) {
                         continue; // We've already sent the player a map data packet for this map
@@ -236,7 +236,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
                     }
 
                     //mapdata.updateVisiblePlayers(entityplayermp, itemstack); - Sponge - this is handled above in bridge$tickMap
-                    final Packet<?> packet = Items.field_151098_aY.func_150911_c(this.mapOptimizationImpl$dummyItemStack, (World) world, entityplayermp);
+                    final IPacket<?> packet = Items.field_151098_aY.func_150911_c(this.mapOptimizationImpl$dummyItemStack, (World) world, entityplayermp);
 
                     if (packet != null)
                     {
@@ -257,7 +257,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
 
     // MapInfo is a non-static inner class, so we need to use reflection to call
     // the constructor
-    private MapData.MapInfo constructMapInfo(final EntityPlayer player) {
+    private MapData.MapInfo constructMapInfo(final PlayerEntity player) {
         try {
             return mapOptimizationImpl$mapInfoConstructor.newInstance(this, player);
         } catch (final Exception e) {
@@ -266,7 +266,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
     }
 
     @Override
-    public void mapOptimizationBridge$updatePlayer(final EntityPlayer player, final ItemStack mapStack) {
+    public void mapOptimizationBridge$updatePlayer(final PlayerEntity player, final ItemStack mapStack) {
         MapData.MapInfo info = this.playersHashMap.get(player);
         if (info == null) {
             info = this.constructMapInfo(player);
@@ -276,11 +276,11 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
 
         if (mapStack.func_77942_o() && mapStack.func_77978_p().func_150297_b("Decorations", 9))
         {
-            final NBTTagList nbttaglist = mapStack.func_77978_p().func_150295_c("Decorations", 10);
+            final ListNBT nbttaglist = mapStack.func_77978_p().func_150295_c("Decorations", 10);
 
             for (int j = 0; j < nbttaglist.func_74745_c(); ++j)
             {
-                final NBTTagCompound nbttagcompound = nbttaglist.func_150305_b(j);
+                final CompoundNBT nbttagcompound = nbttaglist.func_150305_b(j);
 
                 if (!this.mapDecorations.containsKey(nbttagcompound.func_74779_i("id")))
                 {
@@ -291,7 +291,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
     }
 
     @Override
-    public void mapOptimizationBridge$updateItemFrameDecoration(final EntityItemFrame frame) {
+    public void mapOptimizationBridge$updateItemFrameDecoration(final ItemFrameEntity frame) {
         this.mapOptimizationImpl$activeWorlds.add(((Entity) frame).getWorld().getUniqueId());
         if (this.trackingPosition) {
             final BlockPos blockpos = frame.func_174857_n();
@@ -303,7 +303,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
     }
 
     @Override
-    public void mapOptimizationBridge$removeItemFrame(final EntityItemFrame frame) {
+    public void mapOptimizationBridge$removeItemFrame(final ItemFrameEntity frame) {
         this.mapOptimizationImpl$activeWorlds.remove(((Entity) frame).getWorld().getUniqueId());
         this.mapDecorations.remove("frame-" + frame.func_145782_y());
     }

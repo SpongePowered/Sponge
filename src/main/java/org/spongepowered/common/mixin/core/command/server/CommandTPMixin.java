@@ -31,9 +31,9 @@ import net.minecraft.command.CommandTP;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.SPacketPlayerPosLook;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.server.SPlayerPositionLookPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.Sponge;
@@ -128,10 +128,10 @@ public abstract class CommandTPMixin extends CommandBase {
                 {
                     entity.func_184210_p();
 
-                    if (entity instanceof EntityPlayerMP)
+                    if (entity instanceof ServerPlayerEntity)
                     {
                         // Sponge start
-                        final EntityPlayerMP player = (EntityPlayerMP) entity;
+                        final ServerPlayerEntity player = (ServerPlayerEntity) entity;
                         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.COMMAND);
                             final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.field_70165_t, entity1.field_70163_u, entity1.field_70161_v, entity1.field_70177_z, entity1.field_70125_A);
@@ -173,33 +173,33 @@ public abstract class CommandTPMixin extends CommandBase {
     @Overwrite
     private static void teleportEntityToCoordinates(final Entity p_189863_0_, final CommandBase.CoordinateArg p_189863_1_, final CommandBase.CoordinateArg p_189863_2_, final CommandBase.CoordinateArg p_189863_3_, final CommandBase.CoordinateArg p_189863_4_, final CommandBase.CoordinateArg p_189863_5_)
     {
-        if (p_189863_0_ instanceof EntityPlayerMP)
+        if (p_189863_0_ instanceof ServerPlayerEntity)
         {
-            final Set<SPacketPlayerPosLook.EnumFlags> set = EnumSet.<SPacketPlayerPosLook.EnumFlags>noneOf(SPacketPlayerPosLook.EnumFlags.class);
+            final Set<SPlayerPositionLookPacket.Flags> set = EnumSet.<SPlayerPositionLookPacket.Flags>noneOf(SPlayerPositionLookPacket.Flags.class);
 
             if (p_189863_1_.func_179630_c())
             {
-                set.add(SPacketPlayerPosLook.EnumFlags.X);
+                set.add(SPlayerPositionLookPacket.Flags.X);
             }
 
             if (p_189863_2_.func_179630_c())
             {
-                set.add(SPacketPlayerPosLook.EnumFlags.Y);
+                set.add(SPlayerPositionLookPacket.Flags.Y);
             }
 
             if (p_189863_3_.func_179630_c())
             {
-                set.add(SPacketPlayerPosLook.EnumFlags.Z);
+                set.add(SPlayerPositionLookPacket.Flags.Z);
             }
 
             if (p_189863_5_.func_179630_c())
             {
-                set.add(SPacketPlayerPosLook.EnumFlags.X_ROT);
+                set.add(SPlayerPositionLookPacket.Flags.X_ROT);
             }
 
             if (p_189863_4_.func_179630_c())
             {
-                set.add(SPacketPlayerPosLook.EnumFlags.Y_ROT);
+                set.add(SPlayerPositionLookPacket.Flags.Y_ROT);
             }
 
             float f = (float)p_189863_4_.func_179629_b();
@@ -217,7 +217,7 @@ public abstract class CommandTPMixin extends CommandBase {
             }
 
             // Sponge start
-            final EntityPlayerMP player = (EntityPlayerMP) p_189863_0_;
+            final ServerPlayerEntity player = (ServerPlayerEntity) p_189863_0_;
             final double x = p_189863_1_.func_179629_b();
             final double y = p_189863_2_.func_179629_b();
             final double z = p_189863_3_.func_179629_b();
@@ -228,7 +228,7 @@ public abstract class CommandTPMixin extends CommandBase {
 
             p_189863_0_.func_184210_p();
             final Vector3d position = event.getToTransform().getPosition();
-            ((EntityPlayerMP)p_189863_0_).field_71135_a.func_175089_a(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch(), set);
+            ((ServerPlayerEntity)p_189863_0_).field_71135_a.func_175089_a(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch(), set);
             p_189863_0_.func_70034_d((float) event.getToTransform().getYaw());
             // Sponge end
         }
@@ -253,7 +253,7 @@ public abstract class CommandTPMixin extends CommandBase {
             // Sponge end
         }
 
-        if (!(p_189863_0_ instanceof EntityLivingBase) || !((EntityLivingBase)p_189863_0_).func_184613_cA())
+        if (!(p_189863_0_ instanceof LivingEntity) || !((LivingEntity)p_189863_0_).func_184613_cA())
         {
             p_189863_0_.field_70181_x = 0.0D;
             p_189863_0_.field_70122_E = true;

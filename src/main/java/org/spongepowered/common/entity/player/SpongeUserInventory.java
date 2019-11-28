@@ -24,18 +24,17 @@
  */
 package org.spongepowered.common.entity.player;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,7 +60,7 @@ public class SpongeUserInventory implements IInventory {
     }
 
     public ItemStack getCurrentItem() {
-        return InventoryPlayer.func_184435_e(this.currentItem) ? this.mainInventory.get(this.currentItem) : ItemStack.field_190927_a;
+        return PlayerInventory.func_184435_e(this.currentItem) ? this.mainInventory.get(this.currentItem) : ItemStack.field_190927_a;
     }
 
     /**
@@ -136,10 +135,10 @@ public class SpongeUserInventory implements IInventory {
      * Writes the inventory out as a list of compound tags. This is where the slot indices are used (+100 for armor, +80
      * for crafting).
      */
-    public NBTTagList writeToNBT(NBTTagList nbtTagListIn) {
+    public ListNBT writeToNBT(ListNBT nbtTagListIn) {
         for (int i = 0; i < this.mainInventory.size(); ++i) {
             if (!this.mainInventory.get(i).func_190926_b()) {
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
+                CompoundNBT nbttagcompound = new CompoundNBT();
                 nbttagcompound.func_74774_a("Slot", (byte) i);
                 this.mainInventory.get(i).func_77955_b(nbttagcompound);
                 nbtTagListIn.func_74742_a(nbttagcompound);
@@ -148,7 +147,7 @@ public class SpongeUserInventory implements IInventory {
 
         for (int j = 0; j < this.armorInventory.size(); ++j) {
             if (!this.armorInventory.get(j).func_190926_b()) {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+                CompoundNBT nbttagcompound1 = new CompoundNBT();
                 nbttagcompound1.func_74774_a("Slot", (byte) (j + 100));
                 this.armorInventory.get(j).func_77955_b(nbttagcompound1);
                 nbtTagListIn.func_74742_a(nbttagcompound1);
@@ -157,7 +156,7 @@ public class SpongeUserInventory implements IInventory {
 
         for (int k = 0; k < this.offHandInventory.size(); ++k) {
             if (!this.offHandInventory.get(k).func_190926_b()) {
-                NBTTagCompound nbttagcompound2 = new NBTTagCompound();
+                CompoundNBT nbttagcompound2 = new CompoundNBT();
                 nbttagcompound2.func_74774_a("Slot", (byte) (k + 150));
                 this.offHandInventory.get(k).func_77955_b(nbttagcompound2);
                 nbtTagListIn.func_74742_a(nbttagcompound2);
@@ -172,13 +171,13 @@ public class SpongeUserInventory implements IInventory {
     /**
      * Reads from the given tag list and fills the slots in the inventory with the correct items.
      */
-    public void readFromNBT(NBTTagList nbtTagListIn) {
+    public void readFromNBT(ListNBT nbtTagListIn) {
         this.mainInventory.clear();
         this.armorInventory.clear();
         this.offHandInventory.clear();
 
         for (int i = 0; i < nbtTagListIn.func_74745_c(); ++i) {
-            NBTTagCompound nbttagcompound = nbtTagListIn.func_150305_b(i);
+            CompoundNBT nbttagcompound = nbtTagListIn.func_150305_b(i);
             int j = nbttagcompound.func_74771_c("Slot") & 255;
             ItemStack itemstack = new ItemStack(nbttagcompound);
 
@@ -265,7 +264,7 @@ public class SpongeUserInventory implements IInventory {
      */
     @Override
     public ITextComponent func_145748_c_() {
-        return this.func_145818_k_() ? new TextComponentString(this.func_70005_c_()) : new TextComponentTranslation(this.func_70005_c_());
+        return this.func_145818_k_() ? new StringTextComponent(this.func_70005_c_()) : new TranslationTextComponent(this.func_70005_c_());
     }
 
     /**
@@ -290,16 +289,16 @@ public class SpongeUserInventory implements IInventory {
      * Don't rename this method to canInteractWith due to conflicts with Container
      */
     @Override
-    public boolean func_70300_a(EntityPlayer player) {
+    public boolean func_70300_a(PlayerEntity player) {
         return true;
     }
 
     @Override
-    public void func_174889_b(EntityPlayer player) {
+    public void func_174889_b(PlayerEntity player) {
     }
 
     @Override
-    public void func_174886_c(EntityPlayer player) {
+    public void func_174886_c(PlayerEntity player) {
     }
 
     /**

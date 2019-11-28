@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.item.EntityMinecartHopper;
+import net.minecraft.entity.item.minecart.HopperMinecartEntity;
 import org.spongepowered.api.entity.vehicle.minecart.HopperMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityMinecartHopper.class)
+@Mixin(HopperMinecartEntity.class)
 public abstract class EntityMinecartHopperMixin_API extends EntityMinecartContainerMixin_API<HopperMinecart> implements HopperMinecart {
 
 }

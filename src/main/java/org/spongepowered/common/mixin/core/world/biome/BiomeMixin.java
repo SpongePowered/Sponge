@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.biome;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeDecorator;
@@ -47,8 +47,8 @@ import javax.annotation.Nullable;
 @Mixin(Biome.class)
 public abstract class BiomeMixin implements BiomeBridge {
 
-    @Shadow public IBlockState topBlock;
-    @Shadow public IBlockState fillerBlock;
+    @Shadow public BlockState topBlock;
+    @Shadow public BlockState fillerBlock;
     @Shadow public BiomeDecorator decorator;
 
     @Nullable @MonotonicNonNull private String impl$id;

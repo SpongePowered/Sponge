@@ -26,9 +26,9 @@ package org.spongepowered.common.item.inventory.archetype;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 
@@ -101,7 +101,7 @@ public class CompositeInventoryArchetype implements InventoryArchetype {
      * Provides a {@link Container} for a {@link EntityPlayer} viewing an {@link IInventory}
      */
     public interface ContainerProvider {
-        Container provide(IInventory viewed, EntityPlayer viewing);
+        Container provide(IInventory viewed, PlayerEntity viewing);
     }
 
 }

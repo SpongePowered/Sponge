@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -48,7 +48,7 @@ public final class CreativeInventoryPacketState extends BasicPacketState {
 
     @Override
     public void unwind(BasicPacketContext context) {
-        final EntityPlayerMP player = context.getPacketPlayer();
+        final ServerPlayerEntity player = context.getPacketPlayer();
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

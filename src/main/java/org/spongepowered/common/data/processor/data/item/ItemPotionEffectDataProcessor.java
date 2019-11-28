@@ -25,11 +25,11 @@
 package org.spongepowered.common.data.processor.data.item;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.potion.PotionUtils;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -58,13 +58,13 @@ public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcess
     @Override
     protected boolean set(ItemStack dataHolder, List<PotionEffect> value) {
         if (!dataHolder.func_77942_o()) {
-            dataHolder.func_77982_d(new NBTTagCompound());
+            dataHolder.func_77982_d(new CompoundNBT());
         }
-        final NBTTagCompound mainCompound = dataHolder.func_77978_p();
-        final NBTTagList potionList = new NBTTagList();
+        final CompoundNBT mainCompound = dataHolder.func_77978_p();
+        final ListNBT potionList = new ListNBT();
         for (PotionEffect effect : value) {
-            final NBTTagCompound potionCompound = new NBTTagCompound();
-            ((net.minecraft.potion.PotionEffect) effect).func_82719_a(potionCompound);
+            final CompoundNBT potionCompound = new CompoundNBT();
+            ((net.minecraft.potion.EffectInstance) effect).func_82719_a(potionCompound);
             potionList.func_74742_a(potionCompound);
         }
         mainCompound.func_74782_a(Constants.Item.CUSTOM_POTION_EFFECTS, potionList);
@@ -74,7 +74,7 @@ public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcess
     @SuppressWarnings("unchecked")
     @Override
     protected Optional<List<PotionEffect>> getVal(ItemStack dataHolder) {
-        final List<net.minecraft.potion.PotionEffect> effects = PotionUtils.func_185189_a(dataHolder);
+        final List<net.minecraft.potion.EffectInstance> effects = PotionUtils.func_185189_a(dataHolder);
         if (effects.isEmpty()) {
             return Optional.empty();
         }
@@ -109,11 +109,11 @@ public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcess
 
         Optional<List<PotionEffect>> currentEffects = getVal(itemStack);
         if (!itemStack.func_77942_o()) {
-            itemStack.func_77982_d(new NBTTagCompound());
+            itemStack.func_77982_d(new CompoundNBT());
         }
 
-        final NBTTagCompound tagCompound = itemStack.func_77978_p();
-        tagCompound.func_74782_a(Constants.Item.CUSTOM_POTION_EFFECTS, new NBTTagList());
+        final CompoundNBT tagCompound = itemStack.func_77978_p();
+        tagCompound.func_74782_a(Constants.Item.CUSTOM_POTION_EFFECTS, new ListNBT());
         if (currentEffects.isPresent()) {
             return DataTransactionResult.successRemove(constructImmutableValue(currentEffects.get()));
         }

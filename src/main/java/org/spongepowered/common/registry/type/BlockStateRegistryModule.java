@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.state.pattern.BlockStateMatcher;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;

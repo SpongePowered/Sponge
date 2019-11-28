@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockSilverfish;
+import net.minecraft.block.SilverfishBlock;
 import org.spongepowered.api.data.type.DisguisedBlockType;
 import org.spongepowered.api.data.type.DisguisedBlockTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -32,7 +32,7 @@ import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalog
 
 @RegisterCatalog(DisguisedBlockTypes.class)
 public final class DisguisedBlockTypeRegistryModule
-    extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<BlockSilverfish.EnumType, DisguisedBlockType> {
+    extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<SilverfishBlock.EnumType, DisguisedBlockType> {
 
     public DisguisedBlockTypeRegistryModule() {
         super(new String[] {"minecraft"},
@@ -40,7 +40,7 @@ public final class DisguisedBlockTypeRegistryModule
     }
 
     @Override
-    protected BlockSilverfish.EnumType[] getValues() {
-        return BlockSilverfish.EnumType.values();
+    protected SilverfishBlock.EnumType[] getValues() {
+        return SilverfishBlock.EnumType.values();
     }
 }

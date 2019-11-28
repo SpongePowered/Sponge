@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.TileEntityEndGateway;
+import net.minecraft.tileentity.EndGatewayTileEntity;
 import org.spongepowered.api.block.tileentity.EndGateway;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(TileEntityEndGateway.class)
+@Mixin(EndGatewayTileEntity.class)
 public abstract class TileEntityEndGatewayMixin_API extends TileEntityMixin_API implements EndGateway {
 
 

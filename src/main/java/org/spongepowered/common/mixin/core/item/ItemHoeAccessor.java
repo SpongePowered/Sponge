@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
+import net.minecraft.item.HoeItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemHoe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ItemHoe.class)
+@Mixin(HoeItem.class)
 public interface ItemHoeAccessor {
 
     @Accessor("toolMaterial") Item.ToolMaterial accessor$getToolMaterial();

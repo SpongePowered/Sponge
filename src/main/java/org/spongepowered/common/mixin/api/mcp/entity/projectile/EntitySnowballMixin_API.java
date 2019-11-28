@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.entity.projectile.SnowballEntity;
 import org.spongepowered.api.entity.projectile.Snowball;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntitySnowball.class)
+@Mixin(SnowballEntity.class)
 public abstract class EntitySnowballMixin_API extends EntityThrowableMixin_API implements Snowball {
 
 }

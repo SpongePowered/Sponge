@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.block.BlockDoublePlant.EnumPlantType;
+import net.minecraft.block.DoublePlantBlock.EnumPlantType;
 import net.minecraft.world.gen.feature.DoublePlantFeature;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.util.weighted.VariableAmount;

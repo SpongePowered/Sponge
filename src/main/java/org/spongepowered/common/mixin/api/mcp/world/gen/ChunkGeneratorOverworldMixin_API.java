@@ -28,7 +28,7 @@ import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.ChunkGeneratorOverworld;
+import net.minecraft.world.gen.OverworldChunkGenerator;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
@@ -44,7 +44,7 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@Mixin(ChunkGeneratorOverworld.class)
+@Mixin(OverworldChunkGenerator.class)
 public abstract class ChunkGeneratorOverworldMixin_API
     implements GenerationPopulator {
 

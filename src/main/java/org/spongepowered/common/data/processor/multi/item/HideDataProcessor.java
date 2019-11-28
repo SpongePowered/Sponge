@@ -26,7 +26,7 @@ package org.spongepowered.common.data.processor.multi.item;
 
 import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -55,7 +55,7 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
     @Override
     protected boolean set(ItemStack dataHolder, Map<Key<?>, Object> keyValues) {
         if (!dataHolder.func_77942_o()) {
-            dataHolder.func_77982_d(new NBTTagCompound());
+            dataHolder.func_77982_d(new CompoundNBT());
         }
         int flag = 0;
         if ((boolean) keyValues.get(Keys.HIDE_ENCHANTMENTS)) {

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.item.EntityBoat;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
@@ -40,11 +39,12 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.entity.item.BoatEntity;
 
-public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcessor<EntityBoat, TreeType, Value<TreeType>, TreeData, ImmutableTreeData> {
+public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcessor<BoatEntity, TreeType, Value<TreeType>, TreeData, ImmutableTreeData> {
 
     public BoatTreeTypeValueProcessor() {
-        super(EntityBoat.class, Keys.TREE_TYPE);
+        super(BoatEntity.class, Keys.TREE_TYPE);
     }
 
     @Override
@@ -53,19 +53,19 @@ public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcesso
     }
 
     @Override
-    protected boolean set(EntityBoat dataHolder, TreeType value) {
+    protected boolean set(BoatEntity dataHolder, TreeType value) {
         if (value == TreeTypes.OAK) {
-            dataHolder.func_184458_a(EntityBoat.Type.OAK);
+            dataHolder.func_184458_a(BoatEntity.Type.OAK);
         } else if (value == TreeTypes.SPRUCE) {
-            dataHolder.func_184458_a(EntityBoat.Type.SPRUCE);
+            dataHolder.func_184458_a(BoatEntity.Type.SPRUCE);
         } else if (value == TreeTypes.JUNGLE) {
-            dataHolder.func_184458_a(EntityBoat.Type.JUNGLE);
+            dataHolder.func_184458_a(BoatEntity.Type.JUNGLE);
         } else if (value == TreeTypes.DARK_OAK) {
-            dataHolder.func_184458_a(EntityBoat.Type.DARK_OAK);
+            dataHolder.func_184458_a(BoatEntity.Type.DARK_OAK);
         } else if (value == TreeTypes.BIRCH) {
-            dataHolder.func_184458_a(EntityBoat.Type.BIRCH);
+            dataHolder.func_184458_a(BoatEntity.Type.BIRCH);
         } else if (value == TreeTypes.ACACIA) {
-            dataHolder.func_184458_a(EntityBoat.Type.ACACIA);
+            dataHolder.func_184458_a(BoatEntity.Type.ACACIA);
         } else {
             return false;
         }
@@ -74,7 +74,7 @@ public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcesso
     }
 
     @Override
-    protected Optional<TreeType> getVal(EntityBoat dataHolder) {
+    protected Optional<TreeType> getVal(BoatEntity dataHolder) {
         switch (dataHolder.func_184453_r()) {
             case OAK:
                 return Optional.of(TreeTypes.OAK);

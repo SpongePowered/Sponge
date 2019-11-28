@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityMinecartContainer;
+import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.storage.loot.ILootContainer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +40,7 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLe
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityMinecartContainer.class)
+@Mixin(ContainerMinecartEntity.class)
 public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin implements ILockableContainer, ILootContainer, InventoryAdapter, InventoryAdapterBridge {
 
     @Shadow private boolean dropContentsWhenDead;
@@ -54,7 +54,7 @@ public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin i
     public Entity changeDimension(int dimensionIn) {
         final Entity entity = super.changeDimension(dimensionIn);
 
-        if (entity instanceof EntityMinecartContainer) {
+        if (entity instanceof ContainerMinecartEntity) {
             // We actually teleported so...
             this.dropContentsWhenDead = false;
         }

@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.api.mcp.entity.boss;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import net.minecraft.entity.MultiPartEntityPart;
-import net.minecraft.entity.boss.EntityDragon;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.boss.dragon.phase.PhaseManager;
-import net.minecraft.entity.item.EntityEnderCrystal;
+import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.world.end.DragonFightManager;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.entity.EnderCrystal;
@@ -45,11 +45,11 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingMixin_API;
 import java.util.Optional;
 import java.util.Set;
 
-@Mixin(EntityDragon.class)
+@Mixin(EnderDragonEntity.class)
 public abstract class EntityDragonMixin_API extends EntityLivingMixin_API implements EnderDragon {
 
     @Shadow public MultiPartEntityPart[] dragonPartArray;
-    @Shadow public EntityEnderCrystal healingEnderCrystal;
+    @Shadow public EnderCrystalEntity healingEnderCrystal;
     @Final @Shadow private DragonFightManager fightManager;
     @Shadow @Final private PhaseManager phaseManager;
 

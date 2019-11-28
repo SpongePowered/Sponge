@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.tileentity.TileEntityHopper;
 import org.spongepowered.api.block.tileentity.carrier.Hopper;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -33,6 +32,7 @@ import org.spongepowered.common.mixin.core.tileentity.TileEntityHopperAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.tileentity.HopperTileEntity;
 
 public class SpongeHopperBuilder extends SpongeLockableBuilder<Hopper> {
 
@@ -44,14 +44,14 @@ public class SpongeHopperBuilder extends SpongeLockableBuilder<Hopper> {
     protected Optional<Hopper> buildContent(final DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(hopper -> {
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((TileEntityHopper) hopper).func_190575_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
+                ((HopperTileEntity) hopper).func_190575_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
             if (!container.contains(Keys.COOLDOWN.getQuery())) {
-                ((TileEntityHopper) hopper).func_145843_s();
+                ((HopperTileEntity) hopper).func_145843_s();
                 return Optional.empty();
             }
             ((TileEntityHopperAccessor) hopper).accessor$setTransferCooldown(container.getInt(Keys.COOLDOWN.getQuery()).get());
-            ((TileEntityHopper) hopper).func_145829_t();
+            ((HopperTileEntity) hopper).func_145829_t();
             return Optional.of(hopper);
         });
     }

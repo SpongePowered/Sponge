@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.network.rcon;
 
+import net.minecraft.network.rcon.ClientThread;
 import net.minecraft.network.rcon.IServer;
 import net.minecraft.network.rcon.RConConsoleSource;
-import net.minecraft.network.rcon.RConThreadBase;
-import net.minecraft.network.rcon.RConThreadClient;
+import net.minecraft.network.rcon.RConThread;
 import net.minecraft.network.rcon.RConUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,8 +53,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ExecutionException;
 
-@Mixin(RConThreadClient.class)
-public abstract class RConThreadClientMixin extends RConThreadBase implements RConThreadClientBridge {
+@Mixin(ClientThread.class)
+public abstract class RConThreadClientMixin extends RConThread implements RConThreadClientBridge {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -101,7 +101,7 @@ public abstract class RConThreadClientMixin extends RConThreadBase implements RC
         /// Sponge: START
         // Initialize the source
         this.impl$source = new RConConsoleSource(SpongeImpl.getServer());
-        ((RConConsoleSourceBridge) this.impl$source).bridge$setConnection((RConThreadClient) (Object) this);
+        ((RConConsoleSourceBridge) this.impl$source).bridge$setConnection((ClientThread) (Object) this);
 
         // Call the connection event
         final RconConnectionEvent.Connect connectEvent;

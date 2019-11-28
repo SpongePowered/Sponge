@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -44,6 +42,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 
 public final class DoubleClickInventoryState extends BasicInventoryPacketState {
 
@@ -57,14 +57,14 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
     }
 
     @Override
-    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+    public ClickInventoryEvent createInventoryEvent(ServerPlayerEntity playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
         return SpongeEventFactory.createClickInventoryEventDouble(Sponge.getCauseStackManager().getCurrentCause(), transaction,
                 Optional.ofNullable(slot), openContainer, slotTransactions);
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
+    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
         ((ContainerBridge) playerMP.field_71070_bA).bridge$setFirePreview(false);
     }

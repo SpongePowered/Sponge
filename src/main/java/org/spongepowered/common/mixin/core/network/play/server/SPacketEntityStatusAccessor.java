@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.network.play.server;
 
-import net.minecraft.network.play.server.SPacketEntityStatus;
+import net.minecraft.network.play.server.SEntityStatusPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(SPacketEntityStatus.class)
+@Mixin(SEntityStatusPacket.class)
 public interface SPacketEntityStatusAccessor {
 
     @Accessor("entityId") int accessor$getEntityId();

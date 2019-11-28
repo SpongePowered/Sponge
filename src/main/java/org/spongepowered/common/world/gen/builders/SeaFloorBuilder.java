@@ -26,7 +26,6 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.init.Blocks;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.SeaFloor;
@@ -35,6 +34,7 @@ import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.SeaFloorPopulator;
 
 import java.util.function.Predicate;
+import net.minecraft.block.Blocks;
 
 public class SeaFloorBuilder implements SeaFloor.Builder {
 

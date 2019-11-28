@@ -25,11 +25,11 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -68,12 +68,12 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
     }
 
 
-    protected static void processSpawnedEntities(final EntityPlayerMP player, final SpawnEntityEvent event) {
+    protected static void processSpawnedEntities(final ServerPlayerEntity player, final SpawnEntityEvent event) {
         final List<Entity> entities = event.getEntities();
         processEntities(player, entities);
     }
 
-    protected static void processEntities(final EntityPlayerMP player, final Collection<Entity> entities) {
+    protected static void processEntities(final ServerPlayerEntity player, final Collection<Entity> entities) {
         for (final Entity entity : entities) {
             EntityUtil.processEntitySpawn(entity, () -> Optional.of((Player) player));
         }
@@ -103,18 +103,18 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     @Override
     public void associateNeighborStateNotifier(
-        final P unwindingContext, final BlockPos sourcePos, final Block block, final BlockPos notifyPos, final WorldServer minecraftWorld,
+        final P unwindingContext, final BlockPos sourcePos, final Block block, final BlockPos notifyPos, final ServerWorld minecraftWorld,
         final PlayerTracker.Type notifier) {
         final Player player = unwindingContext.getSpongePlayer();
         final Chunk chunk = minecraftWorld.func_175726_f(notifyPos);
         ((ChunkBridge) chunk).bridge$setBlockNotifier(notifyPos, player.getUniqueId());
     }
 
-    public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final P context) {
+    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final P context) {
 
     }
 
-    public boolean isPacketIgnored(final Packet<?> packetIn, final EntityPlayerMP packetPlayer) {
+    public boolean isPacketIgnored(final IPacket<?> packetIn, final ServerPlayerEntity packetPlayer) {
         return false;
     }
 

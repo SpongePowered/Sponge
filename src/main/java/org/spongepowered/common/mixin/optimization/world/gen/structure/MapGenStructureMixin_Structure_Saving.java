@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.optimization.world.gen.structure;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.MapGenBase;
@@ -125,7 +125,7 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
             }
             else
             {
-                final NBTTagCompound nbttagcompound = this.structureData.func_143041_a();
+                final CompoundNBT nbttagcompound = this.structureData.func_143041_a();
 
                 for (final String s : nbttagcompound.func_150296_c())
                 {
@@ -133,7 +133,7 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
 
                     if (nbtbase.func_74732_a() == 10)
                     {
-                        final NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbtbase;
+                        final CompoundNBT nbttagcompound1 = (CompoundNBT)nbtbase;
 
                         if (nbttagcompound1.func_74764_b("ChunkX") && nbttagcompound1.func_74764_b("ChunkZ"))
                         {

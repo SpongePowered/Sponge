@@ -26,7 +26,6 @@ package org.spongepowered.common.registry.type.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import net.minecraft.entity.projectile.EntityArrow;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.data.type.PickupRules;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -37,6 +36,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -57,7 +57,7 @@ public final class PickupRuleRegistryModule implements CatalogRegistryModule<Pic
 
     @Override
     public void registerDefaults() {
-        for (EntityArrow.PickupStatus status : EntityArrow.PickupStatus.values()) {
+        for (AbstractArrowEntity.PickupStatus status : AbstractArrowEntity.PickupStatus.values()) {
             PickupRule rule = (PickupRule) (Object) status;
             this.ruleMapping.put(rule.getId().toLowerCase(Locale.ENGLISH), rule);
         }
@@ -65,7 +65,7 @@ public final class PickupRuleRegistryModule implements CatalogRegistryModule<Pic
 
     @AdditionalRegistration
     public void customRegistration() {
-        for (EntityArrow.PickupStatus status : EntityArrow.PickupStatus.values()) {
+        for (AbstractArrowEntity.PickupStatus status : AbstractArrowEntity.PickupStatus.values()) {
             PickupRule rule = (PickupRule) (Object) status;
             if (!this.ruleMapping.containsValue(rule)) {
                 this.ruleMapping.put(rule.getId().toLowerCase(Locale.ENGLISH), rule);

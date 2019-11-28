@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.HardnessProperty;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -34,6 +33,7 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.block.BlockState;
 
 public class HardnessPropertyStore extends AbstractBlockPropertyStore<HardnessProperty> {
 
@@ -42,7 +42,7 @@ public class HardnessPropertyStore extends AbstractBlockPropertyStore<HardnessPr
     }
 
     @Override
-    protected Optional<HardnessProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
+    protected Optional<HardnessProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
         final float hardness;
         if (location != null) {
             hardness = block.func_185887_b((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
@@ -55,7 +55,7 @@ public class HardnessPropertyStore extends AbstractBlockPropertyStore<HardnessPr
 
     @Override
     public Optional<HardnessProperty> getFor(Location<World> location) {
-        final IBlockState blockState = (IBlockState) location.getBlock();
+        final BlockState blockState = (BlockState) location.getBlock();
         final float hardness = blockState.func_185887_b((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
         if (hardness > 0) {
             return Optional.of(new HardnessProperty(hardness));

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -41,18 +40,19 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.entity.item.ArmorStandEntity;
 
 public class PlacingDisabledValueProcessor
-		extends AbstractSpongeValueProcessor<EntityArmorStand, Set<EquipmentType>, SetValue<EquipmentType>> {
+		extends AbstractSpongeValueProcessor<ArmorStandEntity, Set<EquipmentType>, SetValue<EquipmentType>> {
 
 	public PlacingDisabledValueProcessor() {
-		super(EntityArmorStand.class, Keys.ARMOR_STAND_TAKING_DISABLED);
+		super(ArmorStandEntity.class, Keys.ARMOR_STAND_TAKING_DISABLED);
 	}
 
 	@Override
 	public DataTransactionResult offerToStore(final ValueContainer<?> container, final Set<EquipmentType> value) {
 		try {
-			set((EntityArmorStand) container, value);
+			set((ArmorStandEntity) container, value);
 			return DataTransactionResult.successNoData();
 		} catch (Exception e) {
 			return DataTransactionResult.failNoData();
@@ -70,7 +70,7 @@ public class PlacingDisabledValueProcessor
 	}
 
 	@Override
-	protected boolean set(final EntityArmorStand container, final Set<EquipmentType> value) {
+	protected boolean set(final ArmorStandEntity container, final Set<EquipmentType> value) {
 		int chunk = 0;
 
 		int disabledSlots = ((EntityArmorStandAccessor) container).accessor$getDisabledSlots();
@@ -95,7 +95,7 @@ public class PlacingDisabledValueProcessor
 	}
 
 	@Override
-	protected Optional<Set<EquipmentType>> getVal(final EntityArmorStand container) {
+	protected Optional<Set<EquipmentType>> getVal(final ArmorStandEntity container) {
 		// include all chunk
 		final int disabled = ((EntityArmorStandAccessor) container).accessor$getDisabledSlots();
 		final int resultantChunk = ((disabled >> 16) & 0b1111_1111) | (disabled & 0b1111_1111);

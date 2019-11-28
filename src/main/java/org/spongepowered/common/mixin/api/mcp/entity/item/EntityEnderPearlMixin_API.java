@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.item.EntityEnderPearl;
+import net.minecraft.entity.item.EnderPearlEntity;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.projectile.EntityThrowableMixin_API;
 
-@Mixin(EntityEnderPearl.class)
+@Mixin(EnderPearlEntity.class)
 public abstract class EntityEnderPearlMixin_API extends EntityThrowableMixin_API implements EnderPearl {
 
 }

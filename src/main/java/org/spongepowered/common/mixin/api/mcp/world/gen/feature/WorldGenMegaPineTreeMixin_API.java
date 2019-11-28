@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.HugeTreesFeature;
 import net.minecraft.world.gen.feature.MegaPineTree;
@@ -46,8 +46,8 @@ public abstract class WorldGenMegaPineTreeMixin_API extends HugeTreesFeature imp
     @Nullable private String api$id;
     @Nullable private String api$name;
 
-    public WorldGenMegaPineTreeMixin_API(final boolean notify, final int baseHeightIn, final int extraRandomHeightIn, final IBlockState woodMetadataIn,
-        final IBlockState leavesMetadataIn) {
+    public WorldGenMegaPineTreeMixin_API(final boolean notify, final int baseHeightIn, final int extraRandomHeightIn, final BlockState woodMetadataIn,
+        final BlockState leavesMetadataIn) {
         super(notify, baseHeightIn, extraRandomHeightIn, woodMetadataIn, leavesMetadataIn);
     }
 

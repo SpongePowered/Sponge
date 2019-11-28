@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockDoublePlant;
+import net.minecraft.block.DoublePlantBlock;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -32,15 +32,15 @@ import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalog
 
 @RegisterCatalog(DoublePlantTypes.class)
 public final class DoublePlantTypeRegistryModule extends
-        MinecraftEnumBasedAlternateCatalogTypeRegistryModule<BlockDoublePlant.EnumPlantType, DoublePlantType> {
+        MinecraftEnumBasedAlternateCatalogTypeRegistryModule<DoublePlantBlock.EnumPlantType, DoublePlantType> {
 
     public DoublePlantTypeRegistryModule() {
         super(new String[] {"double_"});
     }
 
     @Override
-    protected BlockDoublePlant.EnumPlantType[] getValues() {
-        return BlockDoublePlant.EnumPlantType.values();
+    protected DoublePlantBlock.EnumPlantType[] getValues() {
+        return DoublePlantBlock.EnumPlantType.values();
     }
 
 }

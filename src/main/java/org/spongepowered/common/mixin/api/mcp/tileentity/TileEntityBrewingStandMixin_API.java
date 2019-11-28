@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.TileEntityBrewingStand;
+import net.minecraft.tileentity.BrewingStandTileEntity;
 import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(TileEntityBrewingStand.class)
+@Mixin(BrewingStandTileEntity.class)
 public abstract class TileEntityBrewingStandMixin_API extends TileEntityLockableMixin_API<BrewingStand> implements BrewingStand {
 
     @Override

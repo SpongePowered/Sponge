@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.tileentity.TileEntityEnchantmentTable;
 import org.spongepowered.api.block.tileentity.EnchantmentTable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.tileentity.EnchantingTableTileEntity;
 
 public class SpongeEnchantmentTableBuilder extends AbstractTileBuilder<EnchantmentTable> {
 
@@ -42,9 +42,9 @@ public class SpongeEnchantmentTableBuilder extends AbstractTileBuilder<Enchantme
     protected Optional<EnchantmentTable> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(enchantmentTable -> {
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((TileEntityEnchantmentTable) enchantmentTable).func_145920_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
+                ((EnchantingTableTileEntity) enchantmentTable).func_145920_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
-            ((TileEntityEnchantmentTable) enchantmentTable).func_145829_t();
+            ((EnchantingTableTileEntity) enchantmentTable).func_145829_t();
             return enchantmentTable;
         });
 

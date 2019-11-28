@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.projectile.EntityArrow;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableKnockbackData;
@@ -39,12 +38,13 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.mixin.core.entity.projectile.EntityArrowAccessor;
 
 import java.util.Optional;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 
 public class KnockbackDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityArrow, Integer, MutableBoundedValue<Integer>, KnockbackData, ImmutableKnockbackData> {
+        extends AbstractEntitySingleDataProcessor<AbstractArrowEntity, Integer, MutableBoundedValue<Integer>, KnockbackData, ImmutableKnockbackData> {
 
     public KnockbackDataProcessor() {
-        super(EntityArrow.class, Keys.KNOCKBACK_STRENGTH);
+        super(AbstractArrowEntity.class, Keys.KNOCKBACK_STRENGTH);
     }
 
     @Override
@@ -63,13 +63,13 @@ public class KnockbackDataProcessor
     }
 
     @Override
-    protected boolean set(final EntityArrow entity, final Integer value) {
+    protected boolean set(final AbstractArrowEntity entity, final Integer value) {
         entity.func_70240_a(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(final EntityArrow entity) {
+    protected Optional<Integer> getVal(final AbstractArrowEntity entity) {
         return Optional.of(((EntityArrowAccessor) entity).accessor$getKnockbackStrength());
     }
 

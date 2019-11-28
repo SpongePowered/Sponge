@@ -25,12 +25,11 @@
 package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemHoe;
-import net.minecraft.item.ItemSword;
+import net.minecraft.item.SwordItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ItemSword.class)
+@Mixin(SwordItem.class)
 public interface ItemSwordAccessor {
 
     @Accessor("material") Item.ToolMaterial accessor$getToolMaterial();

@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.entity.EntityHanging;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityFallingBlock;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ExperienceOrbEntity;
+import net.minecraft.entity.item.FallingBlockEntity;
+import net.minecraft.entity.item.HangingEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.item.ItemFrameEntity;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.CombatEntry;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -74,7 +74,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         super.getFrameModifier().andThen((frame, context) -> {
             final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
-            if (tickingEntity instanceof EntityFallingBlock) {
+            if (tickingEntity instanceof FallingBlockEntity) {
                 context.getOwner().ifPresent(frame::pushCause);
             }
             frame.pushCause(tickingEntity);
@@ -117,7 +117,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     final List<Entity> breeding = new ArrayList<>(entities.size());
                     final List<Entity> projectile = new ArrayList<>(entities.size());
                     for (final Entity entity : entities) {
-                        if (entity instanceof EntityXPOrb) {
+                        if (entity instanceof ExperienceOrbEntity) {
                             experience.add(entity);
                         } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
                             breeding.add(entity);
@@ -136,8 +136,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     }
                     if (!breeding.isEmpty()) {
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
-                        if (tickingEntity instanceof EntityAnimal) {
-                            final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).func_191993_do();
+                        if (tickingEntity instanceof AnimalEntity) {
+                            final PlayerEntity playerInLove = ((AnimalEntity) tickingEntity).func_191993_do();
                             if (playerInLove != null) {
                                 frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
                             }
@@ -160,7 +160,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         phaseContext.getCapturedItemsSupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
                     final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                    for (final EntityItem entity : entities) {
+                    for (final ItemEntity entity : entities) {
                         capturedEntities.add((Entity) entity);
                     }
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -174,7 +174,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 final List<SpongeBlockSnapshot> capturedBlocks = phaseContext.getCapturedOriginalBlocksChanged();
                 for (final SpongeBlockSnapshot snapshot : capturedBlocks) {
                     final BlockPos blockPos = snapshot.getBlockPos();
-                    final Collection<EntityItem> entityItems = map.get(blockPos);
+                    final Collection<ItemEntity> entityItems = map.get(blockPos);
                     if (!entityItems.isEmpty()) {
                         frame.pushCause(snapshot);
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -189,7 +189,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         phaseContext.getCapturedItemStackSupplier()
                 .acceptAndClearIfNotEmpty(drops -> {
                     final List<Entity> items = drops.stream()
-                            .map(drop -> drop.create((WorldServer) tickingEntity.getWorld()))
+                            .map(drop -> drop.create((ServerWorld) tickingEntity.getWorld()))
                             .map(entity -> (Entity) entity)
                             .collect(Collectors.toList());
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -201,7 +201,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         phaseContext.getPerBlockEntitySpawnSuppplier()
             .acceptAndClearIfNotEmpty(blockDrops -> blockDrops.asMap().forEach((pos, drops) -> {
                 final List<Entity> items = drops.stream()
-                    .filter(entity -> entity instanceof EntityItem)
+                    .filter(entity -> entity instanceof ItemEntity)
                     .map(entity2 -> (Entity) entity2)
                     .collect(Collectors.toList());
                 final BlockSnapshot snapshot = tickingEntity.getWorld().createSnapshot(VecHelper.toVector3i(pos));
@@ -211,7 +211,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     SpongeCommonEventFactory.callDropItemCustom(items, phaseContext);
                 }
                 final List<Entity> nonItems = drops.stream()
-                    .filter(entity -> !(entity instanceof EntityItem))
+                    .filter(entity -> !(entity instanceof ItemEntity))
                     .map(entity1 -> (Entity) entity1)
                     .collect(Collectors.toList());
                 if (!nonItems.isEmpty()) {
@@ -224,8 +224,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     private void appendContextOfPossibleEntityDeath(final Entity tickingEntity, final CauseStackManager.StackFrame frame) {
         if (EntityUtil.isEntityDead((net.minecraft.entity.Entity) tickingEntity)) {
-            if (tickingEntity instanceof EntityLivingBase) {
-                final CombatEntry entry = ((CombatTrackerAccessor) ((EntityLivingBase) tickingEntity).func_110142_aN()).accessor$getBestCombatEntry();
+            if (tickingEntity instanceof LivingEntity) {
+                final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) tickingEntity).func_110142_aN()).accessor$getBestCombatEntry();
                 if (entry != null) {
                     if (((CombatEntryAccessor) entry).accessor$getDamageSrc() != null) {
                         frame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE,
@@ -247,8 +247,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-            final List<EntityHanging> hangingEntities = ((WorldServer) tickingEntity.getWorld())
-                .func_175647_a(EntityHanging.class, new AxisAlignedBB(blockPos, blockPos).func_72314_b(1.1D, 1.1D, 1.1D),
+            final List<HangingEntity> hangingEntities = ((ServerWorld) tickingEntity.getWorld())
+                .func_175647_a(HangingEntity.class, new AxisAlignedBB(blockPos, blockPos).func_72314_b(1.1D, 1.1D, 1.1D),
                     entityIn -> {
                         if (entityIn == null) {
                             return false;
@@ -261,22 +261,22 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                         }
 
                         // Check around source block
-                        final EnumFacing entityFacing = entityIn.func_174811_aO();
+                        final Direction entityFacing = entityIn.func_174811_aO();
 
-                        if (entityFacing == EnumFacing.NORTH) {
+                        if (entityFacing == Direction.NORTH) {
                             return entityPos.equals(blockPos.func_177971_a(Constants.Entity.HANGING_OFFSET_NORTH));
-                        } else if (entityFacing == EnumFacing.SOUTH) {
+                        } else if (entityFacing == Direction.SOUTH) {
                             return entityIn.func_180425_c().equals(blockPos.func_177971_a(Constants.Entity.HANGING_OFFSET_SOUTH));
-                        } else if (entityFacing == EnumFacing.WEST) {
+                        } else if (entityFacing == Direction.WEST) {
                             return entityIn.func_180425_c().equals(blockPos.func_177971_a(Constants.Entity.HANGING_OFFSET_WEST));
-                        } else if (entityFacing == EnumFacing.EAST) {
+                        } else if (entityFacing == Direction.EAST) {
                             return entityIn.func_180425_c().equals(blockPos.func_177971_a(Constants.Entity.HANGING_OFFSET_EAST));
                         }
                         return false;
                     });
-            for (final EntityHanging entityHanging : hangingEntities) {
-                if (entityHanging instanceof EntityItemFrame) {
-                    final EntityItemFrame itemFrame = (EntityItemFrame) entityHanging;
+            for (final HangingEntity entityHanging : hangingEntities) {
+                if (entityHanging instanceof ItemFrameEntity) {
+                    final ItemFrameEntity itemFrame = (ItemFrameEntity) entityHanging;
                     if (!itemFrame.field_70128_L) {
                         itemFrame.func_146065_b((net.minecraft.entity.Entity) tickingEntity, true);
                     }
@@ -320,7 +320,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             context.addNotifierAndOwnerToCauseStack(frame);
             frame.pushCause(tickingEntity);
-            if (entity instanceof EntityXPOrb) {
+            if (entity instanceof ExperienceOrbEntity) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                 appendContextOfPossibleEntityDeath(tickingEntity, frame);
                 final List<Entity> experience = new ArrayList<>(1);
@@ -329,8 +329,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 return SpongeCommonEventFactory.callSpawnEntity(experience, context);
             } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
-                if (tickingEntity instanceof EntityAnimal) {
-                    final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).func_191993_do();
+                if (tickingEntity instanceof AnimalEntity) {
+                    final PlayerEntity playerInLove = ((AnimalEntity) tickingEntity).func_191993_do();
                     if (playerInLove != null) {
                         frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
                     }

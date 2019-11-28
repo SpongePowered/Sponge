@@ -25,9 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockBanner;
-import net.minecraft.block.BlockBanner.BlockBannerStanding;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -40,12 +37,14 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 
 import java.util.Optional;
+import net.minecraft.block.BannerBlock;
+import net.minecraft.block.BannerBlock.BlockBannerStanding;
 
 @Mixin(BlockBannerStanding.class)
 public abstract class BlockBannerStandingMixin extends BlockBannerMixin {
 
-    private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
-        final int intDir = blockState.func_177229_b(BlockBanner.field_176448_b);
+    private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
+        final int intDir = blockState.func_177229_b(BannerBlock.field_176448_b);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, Direction.values()[(intDir + 8) % 16]);
     }
 
@@ -55,27 +54,27 @@ public abstract class BlockBannerStandingMixin extends BlockBannerMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
             final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockBanner.field_176448_b, intDirection));
+            return Optional.of((BlockState) blockState.func_177226_a(BannerBlock.field_176448_b, intDirection));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
             final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockBanner.field_176448_b, intDirection));
+            return Optional.of((BlockState) blockState.func_177226_a(BannerBlock.field_176448_b, intDirection));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
                 .add(impl$getDirectionalData(blockState))

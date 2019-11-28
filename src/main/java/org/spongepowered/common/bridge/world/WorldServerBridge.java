@@ -26,12 +26,11 @@ package org.spongepowered.common.bridge.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
@@ -100,7 +99,7 @@ public interface WorldServerBridge {
      * @param updateFlag The update flag
      * @return The snapshot, never NONE
      */
-    SpongeBlockSnapshot bridge$createSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag);
+    SpongeBlockSnapshot bridge$createSnapshot(BlockState state, BlockState extended, BlockPos pos, BlockChangeFlag updateFlag);
 
     /**
      * Similar to {@link #bridge$createSnapshot(IBlockState, IBlockState, BlockPos, BlockChangeFlag)},
@@ -113,7 +112,7 @@ public interface WorldServerBridge {
      * @param tileEntity The tile entity to serialize, if available
      * @return The snapshot, never NONE
      */
-    SpongeBlockSnapshot bridge$createSnapshotWithEntity(IBlockState state, BlockPos pos, BlockChangeFlag updateFlag, @Nullable TileEntity tileEntity);
+    SpongeBlockSnapshot bridge$createSnapshotWithEntity(BlockState state, BlockPos pos, BlockChangeFlag updateFlag, @Nullable TileEntity tileEntity);
 
     SpongeWorldGenerator bridge$createWorldGenerator(DataContainer settings);
 

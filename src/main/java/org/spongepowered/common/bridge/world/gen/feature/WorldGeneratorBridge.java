@@ -25,18 +25,18 @@
 package org.spongepowered.common.bridge.world.gen.feature;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public interface WorldGeneratorBridge {
 
-    boolean bridge$isAir(IBlockState state, World worldIn, BlockPos pos);
+    boolean bridge$isAir(BlockState state, World worldIn, BlockPos pos);
 
-    boolean bridge$isLeaves(IBlockState state, World worldIn, BlockPos pos);
+    boolean bridge$isLeaves(BlockState state, World worldIn, BlockPos pos);
 
-    boolean birdge$isWood(IBlockState state, World worldIn, BlockPos pos);
+    boolean birdge$isWood(BlockState state, World worldIn, BlockPos pos);
 
-    boolean bridge$canSustainPlant(Block block, World worldIn, BlockPos pos, EnumFacing direction, Block plant);
+    boolean bridge$canSustainPlant(Block block, World worldIn, BlockPos pos, Direction direction, Block plant);
 }

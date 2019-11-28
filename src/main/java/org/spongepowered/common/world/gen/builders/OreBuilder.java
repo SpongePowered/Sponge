@@ -26,9 +26,6 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.world.gen.feature.MinableFeature;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Ore;
@@ -36,6 +33,8 @@ import org.spongepowered.api.world.gen.populator.Ore.Builder;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
 import java.util.function.Predicate;
+import net.minecraft.block.Blocks;
+import net.minecraft.world.gen.feature.OreFeature;
 
 public class OreBuilder implements Ore.Builder {
 
@@ -100,7 +99,7 @@ public class OreBuilder implements Ore.Builder {
 
     @Override
     public Ore build() throws IllegalStateException {
-        Ore pop = (Ore) new MinableFeature((IBlockState) this.block, 10);
+        Ore pop = (Ore) new OreFeature((net.minecraft.block.BlockState) this.block, 10);
         pop.setDepositSize(this.size);
         pop.setDepositsPerChunk(this.count);
         pop.setHeight(this.height);

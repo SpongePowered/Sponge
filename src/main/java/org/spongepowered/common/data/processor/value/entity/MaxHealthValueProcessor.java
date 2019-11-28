@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -36,10 +36,10 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<EntityLivingBase, Double, MutableBoundedValue<Double>> {
+public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<LivingEntity, Double, MutableBoundedValue<Double>> {
 
     public MaxHealthValueProcessor() {
-        super(EntityLivingBase.class, Keys.MAX_HEALTH);
+        super(LivingEntity.class, Keys.MAX_HEALTH);
     }
 
     @Override
@@ -53,13 +53,13 @@ public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<Entity
     }
 
     @Override
-    protected boolean set(final EntityLivingBase container, final Double value) {
+    protected boolean set(final LivingEntity container, final Double value) {
         container.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(value);
         return true;
     }
 
     @Override
-    protected Optional<Double> getVal(final EntityLivingBase container) {
+    protected Optional<Double> getVal(final LivingEntity container) {
         return Optional.of((double) container.func_110138_aP());
     }
 

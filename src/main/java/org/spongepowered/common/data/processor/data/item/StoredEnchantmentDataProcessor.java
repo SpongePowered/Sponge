@@ -25,10 +25,10 @@
 package org.spongepowered.common.data.processor.data.item;
 
 import com.google.common.collect.Lists;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableStoredEnchantmentData;
@@ -62,11 +62,11 @@ public class StoredEnchantmentDataProcessor extends
     @Override
     protected boolean set(ItemStack entity, List<Enchantment> value) {
         if (!entity.func_77942_o()) {
-            entity.func_77982_d(new NBTTagCompound());
+            entity.func_77982_d(new CompoundNBT());
         }
-        NBTTagList list = new NBTTagList();
+        ListNBT list = new ListNBT();
         for (Enchantment enchantment : value) {
-            NBTTagCompound tag = new NBTTagCompound();
+            CompoundNBT tag = new CompoundNBT();
             tag.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.func_185258_b((net.minecraft.enchantment.Enchantment) enchantment.getType()));
             tag.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
             list.func_74742_a(tag);
@@ -81,9 +81,9 @@ public class StoredEnchantmentDataProcessor extends
             return Optional.empty();
         }
         List<Enchantment> list = Lists.newArrayList();
-        NBTTagList tags = entity.func_77978_p().func_150295_c(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
+        ListNBT tags = entity.func_77978_p().func_150295_c(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < tags.func_74745_c(); i++) {
-            NBTTagCompound tag = tags.func_150305_b(i);
+            CompoundNBT tag = tags.func_150305_b(i);
             list.add(new SpongeEnchantment(
                     (EnchantmentType) net.minecraft.enchantment.Enchantment.func_185262_c(tag.func_74765_d(Constants.Item.ITEM_ENCHANTMENT_ID)),
                     tag.func_74765_d(Constants.Item.ITEM_ENCHANTMENT_LEVEL)));

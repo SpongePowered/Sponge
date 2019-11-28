@@ -25,8 +25,8 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.LookAtGoal;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
 import org.spongepowered.api.entity.living.Agent;
@@ -78,6 +78,6 @@ public final class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Bui
     @SuppressWarnings({"unchecked", "rawtypes"})
     public WatchClosestAITask build(Agent owner) {
         Preconditions.checkNotNull(this.watchedClass);
-        return (WatchClosestAITask) new EntityAIWatchClosest((EntityLiving) owner, (Class) this.watchedClass, this.maxDistance, this.chance);
+        return (WatchClosestAITask) new LookAtGoal((MobEntity) owner, (Class) this.watchedClass, this.maxDistance, this.chance);
     }
 }

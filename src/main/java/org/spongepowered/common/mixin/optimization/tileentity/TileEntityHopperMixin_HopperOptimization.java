@@ -26,13 +26,13 @@ package org.spongepowered.common.mixin.optimization.tileentity;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityHopper;
+import net.minecraft.tileentity.HopperTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.optimization.HopperOptimizationBridge;
 
-@Mixin(value = TileEntityHopper.class, priority = 1300)
+@Mixin(value = HopperTileEntity.class, priority = 1300)
 public class TileEntityHopperMixin_HopperOptimization extends TileEntityMixin_HopperOptimization {
 
     @Redirect(method = "insertStack",

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,11 +35,12 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.item.ItemEntity;
 
-public class PickupDelayValueProcessor extends AbstractSpongeValueProcessor<EntityItem, Integer, MutableBoundedValue<Integer>> {
+public class PickupDelayValueProcessor extends AbstractSpongeValueProcessor<ItemEntity, Integer, MutableBoundedValue<Integer>> {
 
     public PickupDelayValueProcessor() {
-        super(EntityItem.class, Keys.PICKUP_DELAY);
+        super(ItemEntity.class, Keys.PICKUP_DELAY);
     }
 
     @Override
@@ -54,13 +54,13 @@ public class PickupDelayValueProcessor extends AbstractSpongeValueProcessor<Enti
     }
 
     @Override
-    protected boolean set(final EntityItem container, final Integer value) {
+    protected boolean set(final ItemEntity container, final Integer value) {
         container.func_174867_a(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(final EntityItem container) {
+    protected Optional<Integer> getVal(final ItemEntity container) {
         return Optional.of(((EntityItemBridge) container).bridge$getPickupDelay());
     }
 
@@ -70,7 +70,7 @@ public class PickupDelayValueProcessor extends AbstractSpongeValueProcessor<Enti
     }
 
     @Override
-    protected boolean supports(final EntityItem container) {
+    protected boolean supports(final ItemEntity container) {
         return true;
     }
 

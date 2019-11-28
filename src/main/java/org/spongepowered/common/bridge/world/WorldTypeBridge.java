@@ -26,8 +26,7 @@ package org.spongepowered.common.bridge.world;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.provider.BiomeProvider;
-import net.minecraft.world.gen.IChunkGenerator;
-
+import net.minecraft.world.gen.ChunkGenerator;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -36,9 +35,9 @@ public interface WorldTypeBridge {
 
     Optional<Function<World, BiomeProvider>> bridge$getBiomeProvider();
 
-    Optional<BiFunction<World, String, IChunkGenerator>> bridge$getChunkGenerator();
+    Optional<BiFunction<World, String, ChunkGenerator>> bridge$getChunkGenerator();
 
-    void bridge$setChunkGenerator(BiFunction<World, String, IChunkGenerator> function);
+    void bridge$setChunkGenerator(BiFunction<World, String, ChunkGenerator> function);
 
     void bridge$setBiomeProvider(Function<World, BiomeProvider> function);
 }

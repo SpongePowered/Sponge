@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockRedstoneRepeater;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -38,12 +36,13 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDelayableData;
 
 import java.util.Optional;
+import net.minecraft.block.RepeaterBlock;
 
-@Mixin(BlockRedstoneRepeater.class)
+@Mixin(RepeaterBlock.class)
 public abstract class BlockRedstoneRepeaterMixin extends BlockMixin {
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
                 .add(impl$getDelayableData(blockState))
@@ -56,25 +55,25 @@ public abstract class BlockRedstoneRepeaterMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDelayableData) {
             final int delay = ((ImmutableDelayableData) manipulator).delay().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockRedstoneRepeater.field_176410_b, delay));
+            return Optional.of((BlockState) blockState.func_177226_a(RepeaterBlock.field_176410_b, delay));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DELAY)) {
             final int delay = (Integer) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockRedstoneRepeater.field_176410_b, delay));
+            return Optional.of((BlockState) blockState.func_177226_a(RepeaterBlock.field_176410_b, delay));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableDelayableData impl$getDelayableData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDelayableData.class, blockState.func_177229_b(BlockRedstoneRepeater.field_176410_b));
+    private ImmutableDelayableData impl$getDelayableData(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDelayableData.class, blockState.func_177229_b(RepeaterBlock.field_176410_b));
     }
 
 }

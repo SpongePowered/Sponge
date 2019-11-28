@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockPortal;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -40,13 +38,14 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.block.NetherPortalBlock;
 
-@Mixin(BlockPortal.class)
+@Mixin(NetherPortalBlock.class)
 public abstract class BlockPortalMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getAxisData(blockState));
     }
 
@@ -56,31 +55,31 @@ public abstract class BlockPortalMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableAxisData) {
             final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
             if (axis == Axis.Y) {
                 return Optional.of((BlockState) blockState);
             }
-            return Optional.of((BlockState) blockState.func_177226_a(BlockPortal.field_176550_a, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.func_177226_a(NetherPortalBlock.field_176550_a, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.AXIS)) {
             final Axis axis = (Axis) value;
             if (axis == Axis.Y) {
                 return Optional.of((BlockState) blockState);
             }
-            return Optional.of((BlockState) blockState.func_177226_a(BlockPortal.field_176550_a, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.func_177226_a(NetherPortalBlock.field_176550_a, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableAxisData impl$getAxisData(final IBlockState blockState) {
+    private ImmutableAxisData impl$getAxisData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
-                Constants.DirectionFunctions.convertAxisToSponge(blockState.func_177229_b(BlockPortal.field_176550_a)));
+                Constants.DirectionFunctions.convertAxisToSponge(blockState.func_177229_b(NetherPortalBlock.field_176550_a)));
     }
 }

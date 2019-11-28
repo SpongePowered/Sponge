@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.passive.EntityMule;
+import net.minecraft.entity.passive.horse.MuleEntity;
 import org.spongepowered.api.entity.living.animal.Mule;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityMule.class)
+@Mixin(MuleEntity.class)
 @Implements(@Interface(iface = Mule.class, prefix = "mule$", unique = true))
 public abstract class EntityMuleMixin_API extends AbstractHorseMixin_API implements Mule {
 

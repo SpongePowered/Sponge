@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -46,21 +44,23 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.SkullTileEntity;
 
 public class TileEntitySkullDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntitySkull, SkullType, Value<SkullType>, SkullData, ImmutableSkullData> {
+        extends AbstractTileEntitySingleDataProcessor<SkullTileEntity, SkullType, Value<SkullType>, SkullData, ImmutableSkullData> {
 
     public TileEntitySkullDataProcessor() {
-        super(TileEntitySkull.class, Keys.SKULL_TYPE);
+        super(SkullTileEntity.class, Keys.SKULL_TYPE);
     }
 
     @Override
-    protected boolean supports(final TileEntitySkull skull) {
+    protected boolean supports(final SkullTileEntity skull) {
         return SkullUtils.supportsObject(skull);
     }
 
     @Override
-    protected Optional<SkullType> getVal(final TileEntitySkull skull) {
+    protected Optional<SkullType> getVal(final SkullTileEntity skull) {
         return Optional.of(SkullUtils.getSkullType(skull.func_145904_a()));
     }
 
@@ -71,10 +71,10 @@ public class TileEntitySkullDataProcessor
     }
 
     @Override
-    protected boolean set(final TileEntitySkull skull, final SkullType type) {
+    protected boolean set(final SkullTileEntity skull, final SkullType type) {
         skull.func_152107_a(((SpongeSkullType) type).getByteId());
         skull.func_70296_d();
-        final IBlockState blockState = skull.func_145831_w().func_180495_p(skull.func_174877_v());
+        final BlockState blockState = skull.func_145831_w().func_180495_p(skull.func_174877_v());
         skull.func_145831_w().func_184138_a(skull.func_174877_v(), blockState, blockState, 3);
         return true;
     }

@@ -36,22 +36,21 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.FixTypes;
-import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.SessionLockException;
 import net.minecraft.world.storage.WorldInfo;
@@ -124,15 +123,15 @@ public final class WorldManager {
     private static final Int2ObjectMap<DimensionType> dimensionTypeByTypeId = new Int2ObjectOpenHashMap<>(3);
     private static final Int2ObjectMap<DimensionType> dimensionTypeByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Int2ObjectMap<Path> dimensionPathByDimensionId = new Int2ObjectOpenHashMap<>(3);
-    private static final Int2ObjectOpenHashMap<WorldServer> worldByDimensionId = new Int2ObjectOpenHashMap<>(3);
+    private static final Int2ObjectOpenHashMap<ServerWorld> worldByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>(3);
     private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid =  new HashMap<>(3);
     private static final Map<Integer, String> worldFolderByDimensionId = new HashMap<>();
     private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);
     private static final IntSet usedDimensionIds = new IntOpenHashSet();
-    private static final Map<WorldServer, WorldServer> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
-    private static final Queue<WorldServer> unloadQueue = new ArrayDeque<>();
-    private static final Comparator<WorldServer>
+    private static final Map<ServerWorld, ServerWorld> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
+    private static final Queue<ServerWorld> unloadQueue = new ArrayDeque<>();
+    private static final Comparator<ServerWorld>
             WORLD_SERVER_COMPARATOR =
             (world1, world2) -> {
                 final int world1DimId = ((WorldServerBridge) world1).bridge$getDimensionId();
@@ -319,15 +318,15 @@ public final class WorldManager {
         return newMap;
     }
 
-    public static ObjectIterator<Int2ObjectMap.Entry<WorldServer>> worldsIterator() {
+    public static ObjectIterator<Int2ObjectMap.Entry<ServerWorld>> worldsIterator() {
         return worldByDimensionId.int2ObjectEntrySet().fastIterator();
     }
 
-    public static Collection<WorldServer> getWorlds() {
+    public static Collection<ServerWorld> getWorlds() {
         return worldByDimensionId.values();
     }
 
-    public static Optional<WorldServer> getWorldByDimensionId(final int dimensionId) {
+    public static Optional<ServerWorld> getWorldByDimensionId(final int dimensionId) {
         return Optional.ofNullable(worldByDimensionId.get(dimensionId));
     }
 
@@ -339,8 +338,8 @@ public final class WorldManager {
         return worldByDimensionId.keySet().toIntArray();
     }
 
-    public static Optional<WorldServer> getWorld(final String worldName) {
-        for (final WorldServer worldServer : getWorlds()) {
+    public static Optional<ServerWorld> getWorld(final String worldName) {
+        for (final ServerWorld worldServer : getWorlds()) {
             final org.spongepowered.api.world.World apiWorld = (org.spongepowered.api.world.World) worldServer;
             if (apiWorld.getName().equals(worldName)) {
                 return Optional.of(worldServer);
@@ -420,7 +419,7 @@ public final class WorldManager {
     public static WorldProperties createWorldProperties(final String folderName, final WorldArchetype archetype, @Nullable final Integer dimensionId) {
         checkNotNull(folderName);
         checkNotNull(archetype);
-        final Optional<WorldServer> optWorldServer = getWorld(folderName);
+        final Optional<ServerWorld> optWorldServer = getWorld(folderName);
         if (optWorldServer.isPresent()) {
             return ((org.spongepowered.api.world.World) optWorldServer.get()).getProperties();
         }
@@ -431,7 +430,7 @@ public final class WorldManager {
             return optWorldProperties.get();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
+        final SaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
         WorldInfo worldInfo = saveHandler.func_75757_d();
 
         if (worldInfo == null) {
@@ -471,10 +470,10 @@ public final class WorldManager {
 
     public static boolean saveWorldProperties(final WorldProperties properties) {
         checkNotNull(properties);
-        final Optional<WorldServer> optWorldServer = getWorldByDimensionId(((WorldInfoBridge) properties).bridge$getDimensionId());
+        final Optional<ServerWorld> optWorldServer = getWorldByDimensionId(((WorldInfoBridge) properties).bridge$getDimensionId());
         // If the World represented in the properties is still loaded, save the properties and have the World reload its info
         if (optWorldServer.isPresent()) {
-            final WorldServer worldServer = optWorldServer.get();
+            final ServerWorld worldServer = optWorldServer.get();
             worldServer.func_72860_G().func_75761_a((WorldInfo) properties);
             worldServer.func_72860_G().func_75757_d();
         } else {
@@ -486,7 +485,7 @@ public final class WorldManager {
     }
 
     public static void unloadQueuedWorlds() {
-        WorldServer server;
+        ServerWorld server;
 
         while ((server = unloadQueue.poll()) != null) {
             unloadWorld(server, true, false);
@@ -495,13 +494,13 @@ public final class WorldManager {
         unloadQueue.clear();
     }
 
-    public static void queueWorldToUnload(final WorldServer worldServer) {
+    public static void queueWorldToUnload(final ServerWorld worldServer) {
         checkNotNull(worldServer);
 
         unloadQueue.add(worldServer);
     }
 
-    public static boolean unloadWorld(final WorldServer worldServer, final boolean checkConfig, final boolean isShuttingDown) {
+    public static boolean unloadWorld(final ServerWorld worldServer, final boolean checkConfig, final boolean isShuttingDown) {
         checkNotNull(worldServer);
 
         final MinecraftServer server = SpongeImpl.getServer();
@@ -567,7 +566,7 @@ public final class WorldManager {
         return true;
     }
 
-    public static void saveWorld(final WorldServer worldServer, final boolean flush) throws SessionLockException {
+    public static void saveWorld(final ServerWorld worldServer, final boolean flush) throws SessionLockException {
         if (((WorldProperties) worldServer.func_72912_H()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             return;
         } else {
@@ -578,12 +577,12 @@ public final class WorldManager {
         }
     }
 
-    public static Optional<WorldServer> loadWorld(final UUID uuid) {
+    public static Optional<ServerWorld> loadWorld(final UUID uuid) {
         checkNotNull(uuid);
         // If someone tries to load loaded world, return it
         final Optional<org.spongepowered.api.world.World> optWorld = Sponge.getServer().getWorld(uuid);
         if (optWorld.isPresent()) {
-            return Optional.of((WorldServer) optWorld.get());
+            return Optional.of((ServerWorld) optWorld.get());
         }
         // Check if we even know of this UUID's folder
         final String worldFolder = worldUuidByFolderName.inverse().get(uuid);
@@ -594,22 +593,22 @@ public final class WorldManager {
         return loadWorld(worldFolder, null);
     }
 
-    public static Optional<WorldServer> loadWorld(final String worldName) {
+    public static Optional<ServerWorld> loadWorld(final String worldName) {
         checkNotNull(worldName);
         return loadWorld(worldName, null);
     }
 
-    public static Optional<WorldServer> loadWorld(final WorldProperties properties) {
+    public static Optional<ServerWorld> loadWorld(final WorldProperties properties) {
         checkNotNull(properties);
         return loadWorld(properties.getWorldName(), properties);
     }
 
-    private static Optional<WorldServer> loadWorld(final String worldName, @Nullable WorldProperties properties) {
+    private static Optional<ServerWorld> loadWorld(final String worldName, @Nullable WorldProperties properties) {
         checkNotNull(worldName);
         final Path currentSavesDir = WorldManager.getCurrentSavesDirectory().orElseThrow(() -> new IllegalStateException("Attempt "
                 + "made to load world too early!"));
         final MinecraftServer server = SpongeImpl.getServer();
-        final Optional<WorldServer> optExistingWorldServer = getWorld(worldName);
+        final Optional<ServerWorld> optExistingWorldServer = getWorld(worldName);
         if (optExistingWorldServer.isPresent()) {
             return optExistingWorldServer;
         }
@@ -625,7 +624,7 @@ public final class WorldManager {
             return Optional.empty();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
+        final SaveHandler saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
 
         // We weren't given a properties, see if one is cached
         if (properties == null) {
@@ -661,7 +660,7 @@ public final class WorldManager {
         registerDimensionPath(dimensionId, worldFolder);
         SpongeImpl.getLogger().info("Loading world [{}] ({}/{})", properties.getWorldName(), properties.getDimensionType().getId(), dimensionId);
 
-        final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, new WorldSettings((WorldInfo)
+        final ServerWorld worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, new WorldSettings((WorldInfo)
                         properties));
 
         // Set the worlds on the Minecraft server
@@ -734,7 +733,7 @@ public final class WorldManager {
             }
 
             // Step 3 - Get our world information from disk
-            final ISaveHandler saveHandler;
+            final SaveHandler saveHandler;
             if (dimensionId == 0) {
                 saveHandler = server.func_71254_M().func_75804_a(server.func_71270_I(), true);
             } else {
@@ -810,7 +809,7 @@ public final class WorldManager {
             }
 
             // Step 7 - Finally, we can create the world and tell it to load
-            final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings);
+            final ServerWorld worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings);
             ;
             SpongeImpl.getLogger().info("Loading world [{}] ({}/{})", ((org.spongepowered.api.world.World) worldServer).getName(),
                 apiDimensionType.getId(), dimensionId);
@@ -839,11 +838,11 @@ public final class WorldManager {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private static WorldServer createWorldFromProperties(
-        final int dimensionId, final ISaveHandler saveHandler, final WorldInfo worldInfo, @Nullable final WorldSettings
+    private static ServerWorld createWorldFromProperties(
+        final int dimensionId, final SaveHandler saveHandler, final WorldInfo worldInfo, @Nullable final WorldSettings
         worldSettings) {
         final MinecraftServer server = SpongeImpl.getServer();
-        final WorldServer worldServer = new WorldServer(server, saveHandler, worldInfo, dimensionId, server.field_71304_b);
+        final ServerWorld worldServer = new ServerWorld(server, saveHandler, worldInfo, dimensionId, server.field_71304_b);
 
         worldByDimensionId.put(dimensionId, worldServer);
         weakWorldByWorld.put(worldServer, worldServer);
@@ -891,7 +890,7 @@ public final class WorldManager {
      * @param dimensionId The world instance dimension id
      * @param worldServer The world server
      */
-    public static void forceAddWorld(final int dimensionId, final WorldServer worldServer) {
+    public static void forceAddWorld(final int dimensionId, final ServerWorld worldServer) {
         worldByDimensionId.put(dimensionId, worldServer);
         weakWorldByWorld.put(worldServer, worldServer);
 
@@ -899,10 +898,10 @@ public final class WorldManager {
     }
 
     public static void reorderWorldsVanillaFirst() {
-        final List<WorldServer> sorted = new LinkedList<>();
+        final List<ServerWorld> sorted = new LinkedList<>();
 
         final List<Integer> vanillaWorldIds = new ArrayList<>();
-        WorldServer worldServer = worldByDimensionId.get(0);
+        ServerWorld worldServer = worldByDimensionId.get(0);
 
         if (worldServer != null) {
             vanillaWorldIds.add(0);
@@ -923,8 +922,8 @@ public final class WorldManager {
             sorted.add(worldServer);
         }
 
-        final List<WorldServer> worlds = new ArrayList<>(worldByDimensionId.values());
-        final Iterator<WorldServer> iterator = worlds.iterator();
+        final List<ServerWorld> worlds = new ArrayList<>(worldByDimensionId.values());
+        final Iterator<ServerWorld> iterator = worlds.iterator();
         while(iterator.hasNext()) {
             final WorldServerBridge mixinWorld = (WorldServerBridge) iterator.next();
             final int dimensionId = mixinWorld.bridge$getDimensionId();
@@ -935,7 +934,7 @@ public final class WorldManager {
 
         worlds.sort(WORLD_SERVER_COMPARATOR);
         sorted.addAll(worlds);
-        SpongeImpl.getServer().field_71305_c = sorted.toArray(new WorldServer[0]);
+        SpongeImpl.getServer().field_71305_c = sorted.toArray(new ServerWorld[0]);
     }
 
     /**
@@ -977,7 +976,7 @@ public final class WorldManager {
                 final Path spongeLevelPath = worldPath.resolve("level_sponge.dat");
                 final String worldFolderName = worldPath.getFileName().toString();
 
-                final NBTTagCompound compound;
+                final CompoundNBT compound;
                 try {
                     compound = CompressedStreamTools.func_74796_a(Files.newInputStream(spongeLevelPath));
                 } catch (IOException e) {
@@ -985,7 +984,7 @@ public final class WorldManager {
                     continue;
                 }
 
-                NBTTagCompound spongeDataCompound = compound.func_74775_l(Constants.Sponge.SPONGE_DATA);
+                CompoundNBT spongeDataCompound = compound.func_74775_l(Constants.Sponge.SPONGE_DATA);
 
                 if (!compound.func_74764_b(Constants.Sponge.SPONGE_DATA)) {
                     SpongeImpl.getLogger()
@@ -1076,7 +1075,7 @@ public final class WorldManager {
         checkArgument(!worldPropertiesByFolderName.containsKey(copyName), "Destination world name already is registered!");
         final WorldInfo info = (WorldInfo) worldProperties;
 
-        final WorldServer worldServer = worldByDimensionId.get(((WorldInfoBridge) info).bridge$getDimensionId().intValue());
+        final ServerWorld worldServer = worldByDimensionId.get(((WorldInfoBridge) info).bridge$getDimensionId().intValue());
         if (worldServer != null) {
             try {
                 saveWorld(worldServer, true);
@@ -1143,22 +1142,22 @@ public final class WorldManager {
      * If the world has a difficulty set via external means (command, plugin, mod) then we honor that difficulty always.
      */
     public static void updateServerDifficulty() {
-        final EnumDifficulty serverDifficulty = SpongeImpl.getServer().func_147135_j();
+        final Difficulty serverDifficulty = SpongeImpl.getServer().func_147135_j();
 
-        for (final WorldServer worldServer : getWorlds()) {
+        for (final ServerWorld worldServer : getWorlds()) {
             final boolean alreadySet = ((WorldInfoBridge) worldServer.func_72912_H()).bridge$hasCustomDifficulty();
             adjustWorldForDifficulty(worldServer, alreadySet ? worldServer.func_72912_H().func_176130_y() : serverDifficulty, false);
         }
     }
 
-    public static void adjustWorldForDifficulty(final WorldServer worldServer, EnumDifficulty difficulty, final boolean isCustom) {
+    public static void adjustWorldForDifficulty(final ServerWorld worldServer, Difficulty difficulty, final boolean isCustom) {
         final MinecraftServer server = SpongeImpl.getServer();
 
         if (worldServer.func_72912_H().func_76093_s()) {
-            difficulty = EnumDifficulty.HARD;
+            difficulty = Difficulty.HARD;
             worldServer.func_72891_a(true, true);
         } else if (SpongeImpl.getServer().func_71264_H()) {
-            worldServer.func_72891_a(worldServer.func_175659_aa() != EnumDifficulty.PEACEFUL, true);
+            worldServer.func_72891_a(worldServer.func_175659_aa() != Difficulty.PEACEFUL, true);
         } else {
             worldServer.func_72891_a(server.func_71193_K(), server.func_71268_U());
         }
@@ -1252,11 +1251,11 @@ public final class WorldManager {
 
     }
 
-    public static void sendDimensionRegistration(final EntityPlayerMP playerMP, final Dimension provider) {
+    public static void sendDimensionRegistration(final ServerPlayerEntity playerMP, final Dimension provider) {
         // Do nothing in Common
     }
 
-    public static void loadDimensionDataMap(@Nullable final NBTTagCompound compound) {
+    public static void loadDimensionDataMap(@Nullable final CompoundNBT compound) {
         usedDimensionIds.clear();
         lastUsedDimensionId = 0;
 
@@ -1279,14 +1278,14 @@ public final class WorldManager {
         }
     }
 
-    public static NBTTagCompound saveDimensionDataMap() {
-        final NBTTagCompound dimMap = new NBTTagCompound();
+    public static CompoundNBT saveDimensionDataMap() {
+        final CompoundNBT dimMap = new CompoundNBT();
         dimMap.func_74783_a(Constants.Forge.USED_DIMENSION_IDS, usedDimensionIds.toIntArray());
         return dimMap;
     }
 
     public static Optional<Path> getCurrentSavesDirectory() {
-        final Optional<WorldServer> optWorldServer = getWorldByDimensionId(0);
+        final Optional<ServerWorld> optWorldServer = getWorldByDimensionId(0);
 
         if (optWorldServer.isPresent()) {
             return Optional.of(optWorldServer.get().func_72860_G().func_75765_b().toPath());
@@ -1298,11 +1297,11 @@ public final class WorldManager {
         return Optional.empty();
     }
 
-    public static Map<WorldServer, WorldServer> getWeakWorldMap() {
+    public static Map<ServerWorld, ServerWorld> getWeakWorldMap() {
         return weakWorldByWorld;
     }
 
-    public static int getClientDimensionId(final EntityPlayerMP player, final World world) {
+    public static int getClientDimensionId(final ServerPlayerEntity player, final World world) {
         final DimensionType type = world.field_73011_w.func_186058_p();
         if (type == DimensionType.OVERWORLD) {
             return 0;
@@ -1315,7 +1314,7 @@ public final class WorldManager {
         }
     }
 
-    public static boolean isKnownWorld(final WorldServer world) {
+    public static boolean isKnownWorld(final ServerWorld world) {
         return weakWorldByWorld.containsKey(world);
     }
 }

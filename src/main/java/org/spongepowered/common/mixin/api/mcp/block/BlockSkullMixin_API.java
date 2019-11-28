@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockSkull;
+import net.minecraft.block.SkullBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(BlockSkull.class)
+@Mixin(SkullBlock.class)
 public abstract class BlockSkullMixin_API extends BlockMixin_API {
 
     @Override

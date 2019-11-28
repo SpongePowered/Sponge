@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockLog;
+import net.minecraft.block.LogBlock;
 import org.spongepowered.api.data.type.LogAxis;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BlockLog.EnumAxis.class)
+@Mixin(LogBlock.EnumAxis.class)
 @Implements(@Interface(iface = LogAxis.class, prefix = "log$"))
 public abstract class BlockLog_EnumAxisMixin_API implements LogAxis {
 
@@ -50,6 +50,6 @@ public abstract class BlockLog_EnumAxisMixin_API implements LogAxis {
     @SuppressWarnings("ConstantConditions")
     @Override
     public LogAxis cycleNext() {
-        return (LogAxis) (Object) BlockLog.EnumAxis.values()[(((BlockLog.EnumAxis) (Object) this).ordinal() + 1) % BlockLog.EnumAxis.values().length];
+        return (LogAxis) (Object) LogBlock.EnumAxis.values()[(((LogBlock.EnumAxis) (Object) this).ordinal() + 1) % LogBlock.EnumAxis.values().length];
     }
 }

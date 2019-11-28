@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.CPacketPlaceRecipe;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.play.client.CPlaceRecipePacket;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -57,18 +57,18 @@ import java.util.Optional;
 public final class PlaceRecipePacketState extends BasicInventoryPacketState {
 
     @Override
-    public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final InventoryPacketContext context) {
+    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final InventoryPacketContext context) {
         ((TrackedInventoryBridge) playerMP.field_71070_bA).bridge$setCaptureInventory(true);
         ((ContainerBridge) playerMP.field_71070_bA).bridge$setFirePreview(false);
     }
 
     @Override
     public void unwind(final InventoryPacketContext context) {
-        final CPacketPlaceRecipe packet = context.getPacket();
+        final CPlaceRecipePacket packet = context.getPacket();
         final boolean shift = packet.func_194319_c();
         final IRecipe recipe = packet.func_194317_b();
 
-        final EntityPlayerMP player = context.getPacketPlayer();
+        final ServerPlayerEntity player = context.getPacketPlayer();
         ((ContainerBridge)player.field_71070_bA).bridge$detectAndSendChanges(true);
         ((TrackedInventoryBridge) player.field_71070_bA).bridge$setCaptureInventory(false);
         ((ContainerBridge) player.field_71070_bA).bridge$setFirePreview(true);

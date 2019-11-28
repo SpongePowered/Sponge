@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.util.DamageSource;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
@@ -46,7 +46,7 @@ import org.spongepowered.common.mixin.core.entity.EntityLivingBaseMixin;
 
 import java.util.ArrayList;
 
-@Mixin(EntityArmorStand.class)
+@Mixin(ArmorStandEntity.class)
 public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
 
     @Shadow protected abstract void damageArmorStand(float damage);
@@ -87,7 +87,7 @@ public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
     }
 
     @Redirect(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;damageArmorStand(F)V"))
-    private void fireDamageEventDamage(final EntityArmorStand self, final float effectiveAmount, final DamageSource source, final float originalAmount) {
+    private void fireDamageEventDamage(final ArmorStandEntity self, final float effectiveAmount, final DamageSource source, final float originalAmount) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), new ArrayList<>(),

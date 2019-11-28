@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.tileentity.TileEntityBrewingStand;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
 import org.spongepowered.api.data.DataQuery;
@@ -34,6 +33,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.tileentity.BrewingStandTileEntity;
 
 public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStand> {
 
@@ -51,14 +51,14 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
             }
             // Have to consider custom names as an option
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((TileEntityBrewingStand) brewingStand).func_145937_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
+                ((BrewingStandTileEntity) brewingStand).func_145937_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
 
             final BrewingStandData brewingData = Sponge.getDataManager().getManipulatorBuilder(BrewingStandData.class).get().create();
             brewingData.remainingBrewTime().set(container.getInt(BREW_TIME_QUERY).get());
             brewingStand.offer(brewingData);
 
-            ((TileEntityBrewingStand) brewingStand).func_145829_t();
+            ((BrewingStandTileEntity) brewingStand).func_145829_t();
             return brewingStand;
         });
     }

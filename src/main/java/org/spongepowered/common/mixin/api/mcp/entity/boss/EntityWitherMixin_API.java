@@ -27,9 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.entity.boss;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.boss.EntityWither;
-import net.minecraft.world.BossInfoServer;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Wither;
@@ -41,11 +38,14 @@ import org.spongepowered.common.mixin.api.mcp.entity.monster.EntityMobMixin_API;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.boss.WitherEntity;
+import net.minecraft.world.ServerBossInfo;
 
-@Mixin(value = EntityWither.class)
+@Mixin(value = WitherEntity.class)
 public abstract class EntityWitherMixin_API extends EntityMobMixin_API implements Wither {
 
-    @Shadow @Final private BossInfoServer bossInfo;
+    @Shadow @Final private ServerBossInfo bossInfo;
     @Shadow public abstract int getWatchedTargetId(int p_82203_1_);
     @Shadow public abstract void updateWatchedTargetId(int targetOffset, int newId);
     @Shadow public abstract void setInvulTime(int ticks);
@@ -68,7 +68,7 @@ public abstract class EntityWitherMixin_API extends EntityMobMixin_API implement
     public void setTargets(List<Living> targets) {
         checkNotNull(targets, "Targets are null!");
         for (int i = 0; i < 2; i++) {
-            updateWatchedTargetId(i, targets.size() > i ? ((EntityLivingBase) targets.get(i)).func_145782_y() : 0);
+            updateWatchedTargetId(i, targets.size() > i ? ((LivingEntity) targets.get(i)).func_145782_y() : 0);
         }
     }
 

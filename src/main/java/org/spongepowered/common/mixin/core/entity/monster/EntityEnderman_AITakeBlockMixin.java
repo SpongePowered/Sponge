@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.monster.EntityEnderman;
-import net.minecraft.init.Blocks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,11 +32,15 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 import javax.annotation.Nullable;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.monster.EndermanEntity;
 
-@Mixin(EntityEnderman.AITakeBlock.class)
-public abstract class EntityEnderman_AITakeBlockMixin extends EntityAIBase {
+@Mixin(EndermanEntity.TakeBlockGoal.class)
+public abstract class EntityEnderman_AITakeBlockMixin extends Goal {
 
-    @Shadow @Final private EntityEnderman enderman; //enderman
+    @Shadow @Final private EndermanEntity enderman; //enderman
 
     /**
      * @author gabizou - April 13th, 2018
@@ -59,8 +59,8 @@ public abstract class EntityEnderman_AITakeBlockMixin extends EntityAIBase {
         )
     )
     @Nullable
-    private IBlockState onCanGrief(final EntityEnderman entityEnderman) {
-        final IBlockState heldBlockState = entityEnderman.func_175489_ck();
+    private BlockState onCanGrief(final EndermanEntity entityEnderman) {
+        final BlockState heldBlockState = entityEnderman.func_175489_ck();
         return ((GrieferBridge) this.enderman).bridge$CanGrief() ? heldBlockState : Blocks.field_150350_a.func_176223_P();
     }
 }

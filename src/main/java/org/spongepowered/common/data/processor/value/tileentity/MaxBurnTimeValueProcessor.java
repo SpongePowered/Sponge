@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
-import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -36,11 +35,12 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
+import net.minecraft.tileentity.FurnaceTileEntity;
 
-public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<TileEntityFurnace, Integer, MutableBoundedValue<Integer>> {
+public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<FurnaceTileEntity, Integer, MutableBoundedValue<Integer>> {
 
     public MaxBurnTimeValueProcessor() {
-        super(TileEntityFurnace.class, Keys.MAX_BURN_TIME);
+        super(FurnaceTileEntity.class, Keys.MAX_BURN_TIME);
     }
 
     @Override
@@ -53,19 +53,19 @@ public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
     }
 
     @Override
-    protected boolean set(TileEntityFurnace container, Integer value) {
+    protected boolean set(FurnaceTileEntity container, Integer value) {
         if (!container.func_145950_i() && value > 0 || container.func_145950_i() && value == 0) {
             final World world = (World) container.func_145831_w();
             world.setBlockType(container.func_174877_v().func_177958_n(), container.func_174877_v().func_177956_o(),
                     container.func_174877_v().func_177952_p(), value > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
-            container = (TileEntityFurnace) container.func_145831_w().func_175625_s(container.func_174877_v());
+            container = (FurnaceTileEntity) container.func_145831_w().func_175625_s(container.func_174877_v());
         }
         container.func_174885_b(1, value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(TileEntityFurnace container) {
+    protected Optional<Integer> getVal(FurnaceTileEntity container) {
         return Optional.of(container.func_174887_a_(1));
     }
 

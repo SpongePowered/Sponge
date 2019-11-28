@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.RegistryNamespaced;
+import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface TileEntityAccessor {
 
     @Accessor("REGISTRY")
-    static RegistryNamespaced<ResourceLocation, Class <? extends TileEntity >> accessor$getRegistry() {
+    static SimpleRegistry<ResourceLocation, Class <? extends TileEntity >> accessor$getRegistry() {
         throw new IllegalStateException("Untransformed Accessor");
     }
 

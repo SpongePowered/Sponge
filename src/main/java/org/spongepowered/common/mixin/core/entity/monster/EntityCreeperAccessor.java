@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EntityCreeper.class)
+@Mixin(CreeperEntity.class)
 public interface EntityCreeperAccessor {
 
     @Accessor("POWERED")

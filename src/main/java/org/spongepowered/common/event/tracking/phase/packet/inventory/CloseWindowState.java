@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.network.Packet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -45,17 +41,21 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.network.IPacket;
 
 public final class CloseWindowState extends BasicPacketState {
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
         context.openContainer(playerMP.field_71070_bA);
     }
 
     @Override
     public void unwind(BasicPacketContext context) {
-        final EntityPlayerMP player = context.getSource(EntityPlayerMP.class).get();
+        final ServerPlayerEntity player = context.getSource(ServerPlayerEntity.class).get();
         final Container container = context.getOpenContainer();
         ItemStackSnapshot lastCursor = context.getCursor();
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.field_71071_by.func_70445_o());
@@ -89,7 +89,7 @@ public final class CloseWindowState extends BasicPacketState {
             });
             // Pre-merged items
             context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(stacks -> {
-                final List<EntityItem> items = stacks.stream()
+                final List<ItemEntity> items = stacks.stream()
                     .map(drop -> drop.create(player.func_71121_q()))
                     .collect(Collectors.toList());
                 final List<Entity> entities = items

@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
@@ -53,6 +51,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundNBT;
 
 public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEntityArchetype> implements TileEntityArchetype.Builder {
 
@@ -83,7 +82,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
 
     @Override
     public TileEntityArchetype.Builder state(BlockState state) {
-        final IBlockState blockState = (IBlockState) state;
+        final net.minecraft.block.BlockState blockState = (net.minecraft.block.BlockState) state;
         if (!SpongeImplHooks.hasBlockTileEntity(blockState.func_177230_c(), blockState)) {
             new IllegalArgumentException("BlockState: "+ state + " does not provide TileEntities!").printStackTrace();
         }
@@ -111,7 +110,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     @Override
     public TileEntityArchetype.Builder tile(TileEntity tileEntity) {
         checkArgument(tileEntity instanceof net.minecraft.tileentity.TileEntity, "TileEntity is not compatible with this implementation!");
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
+        CompoundNBT nbttagcompound = new CompoundNBT();
         ((net.minecraft.tileentity.TileEntity) tileEntity).func_189515_b(nbttagcompound);
         nbttagcompound.func_82580_o("x");
         nbttagcompound.func_82580_o("y");

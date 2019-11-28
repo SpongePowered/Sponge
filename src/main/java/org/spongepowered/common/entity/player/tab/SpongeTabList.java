@@ -31,12 +31,12 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.SPacketPlayerListHeaderFooter;
-import net.minecraft.network.play.server.SPacketPlayerListItem;
-import net.minecraft.network.play.server.SPacketPlayerListItem.AddPlayerData;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.server.SPlayerListHeaderFooterPacket;
+import net.minecraft.network.play.server.SPlayerListItemPacket;
+import net.minecraft.network.play.server.SPlayerListItemPacket.AddPlayerData;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.GameType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -57,13 +57,13 @@ import javax.annotation.Nullable;
 
 public final class SpongeTabList implements TabList {
 
-    private static final ITextComponent EMPTY_COMPONENT = new TextComponentString("");
-    private final EntityPlayerMP player;
+    private static final ITextComponent EMPTY_COMPONENT = new StringTextComponent("");
+    private final ServerPlayerEntity player;
     @Nullable private Text header;
     @Nullable private Text footer;
     private final Map<UUID, TabListEntry> entries = Maps.newHashMap();
 
-    public SpongeTabList(final EntityPlayerMP player) {
+    public SpongeTabList(final ServerPlayerEntity player) {
         this.player = player;
     }
 
@@ -113,7 +113,7 @@ public final class SpongeTabList implements TabList {
 
     @SuppressWarnings("ConstantConditions")
     private void refreshClientHeaderFooter() {
-        final SPacketPlayerListHeaderFooter packet = new SPacketPlayerListHeaderFooter();
+        final SPlayerListHeaderFooterPacket packet = new SPlayerListHeaderFooterPacket();
         // MC-98180 - Sending null as header or footer will cause an exception on the client
         ((SPacketPlayerListHeaderFooterAccessor) packet).accessor$setHeader(this.header == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.header));
         ((SPacketPlayerListHeaderFooterAccessor) packet).accessor$setFooter(this.footer == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.footer));
@@ -141,7 +141,7 @@ public final class SpongeTabList implements TabList {
         return this;
     }
 
-    private void addEntry(final SPacketPlayerListItem.AddPlayerData entry) {
+    private void addEntry(final SPlayerListItemPacket.AddPlayerData entry) {
         if (!this.entries.containsKey(entry.func_179962_a().getId())) {
             this.addEntry(new SpongeTabListEntry(
                     this,
@@ -163,10 +163,10 @@ public final class SpongeTabList implements TabList {
         if (!this.entries.containsKey(uniqueId)) {
             this.entries.put(uniqueId, entry);
 
-            this.sendUpdate(entry, SPacketPlayerListItem.Action.ADD_PLAYER);
-            entry.getDisplayName().ifPresent(text -> this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_DISPLAY_NAME));
-            this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_LATENCY);
-            this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_GAME_MODE);
+            this.sendUpdate(entry, SPlayerListItemPacket.Action.ADD_PLAYER);
+            entry.getDisplayName().ifPresent(text -> this.sendUpdate(entry, SPlayerListItemPacket.Action.UPDATE_DISPLAY_NAME));
+            this.sendUpdate(entry, SPlayerListItemPacket.Action.UPDATE_LATENCY);
+            this.sendUpdate(entry, SPlayerListItemPacket.Action.UPDATE_GAME_MODE);
         }
     }
 
@@ -176,7 +176,7 @@ public final class SpongeTabList implements TabList {
 
         if (this.entries.containsKey(uniqueId)) {
             final TabListEntry entry = this.entries.remove(uniqueId);
-            this.sendUpdate(entry, SPacketPlayerListItem.Action.REMOVE_PLAYER);
+            this.sendUpdate(entry, SPlayerListItemPacket.Action.REMOVE_PLAYER);
             return Optional.of(entry);
         }
         return Optional.empty();
@@ -189,10 +189,10 @@ public final class SpongeTabList implements TabList {
      * @param action The update action to perform
      */
     @SuppressWarnings("ConstantConditions")
-    void sendUpdate(final TabListEntry entry, final SPacketPlayerListItem.Action action) {
-        final SPacketPlayerListItem packet = new SPacketPlayerListItem();
+    void sendUpdate(final TabListEntry entry, final SPlayerListItemPacket.Action action) {
+        final SPlayerListItemPacket packet = new SPlayerListItemPacket();
         ((SPacketPlayerListItemAccessor) packet).accessor$setAction(action);
-        final SPacketPlayerListItem.AddPlayerData data = packet.new AddPlayerData((GameProfile) entry.getProfile(),
+        final SPlayerListItemPacket.AddPlayerData data = packet.new AddPlayerData((GameProfile) entry.getProfile(),
             entry.getLatency(), (GameType) (Object) entry.getGameMode(),
             entry.getDisplayName().isPresent() ? SpongeTexts.toComponent(entry.getDisplayName().get()) : null);
         ((SPacketPlayerListItemAccessor) packet).accessor$getPlayerDatas().add(data);
@@ -208,13 +208,13 @@ public final class SpongeTabList implements TabList {
      * @param packet The packet to process
      */
     @SuppressWarnings("ConstantConditions")
-    public void updateEntriesOnSend(final SPacketPlayerListItem packet) {
-        for (final SPacketPlayerListItem.AddPlayerData data : ((SPacketPlayerListItemAccessor) packet).accessor$getPlayerDatas()) {
-            final SPacketPlayerListItem.Action action = ((SPacketPlayerListItemAccessor) packet).accessor$getAction();
-            if (action == SPacketPlayerListItem.Action.ADD_PLAYER) {
+    public void updateEntriesOnSend(final SPlayerListItemPacket packet) {
+        for (final SPlayerListItemPacket.AddPlayerData data : ((SPacketPlayerListItemAccessor) packet).accessor$getPlayerDatas()) {
+            final SPlayerListItemPacket.Action action = ((SPacketPlayerListItemAccessor) packet).accessor$getAction();
+            if (action == SPlayerListItemPacket.Action.ADD_PLAYER) {
                 // If an entry with the same id exists nothing will be done
                 this.addEntry(data);
-            } else if (action == SPacketPlayerListItem.Action.REMOVE_PLAYER) {
+            } else if (action == SPlayerListItemPacket.Action.REMOVE_PLAYER) {
                 this.removeEntry(data.func_179962_a().getId());
             } else {
                 this.getEntry(data.func_179962_a().getId()).ifPresent(entry -> {

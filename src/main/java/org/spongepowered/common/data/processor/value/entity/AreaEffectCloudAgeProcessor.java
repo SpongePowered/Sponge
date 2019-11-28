@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.EntityAreaEffectCloud;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -34,11 +33,12 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
+import net.minecraft.entity.AreaEffectCloudEntity;
 
-public class AreaEffectCloudAgeProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Integer, MutableBoundedValue<Integer>> {
+public class AreaEffectCloudAgeProcessor extends AbstractSpongeValueProcessor<AreaEffectCloudEntity, Integer, MutableBoundedValue<Integer>> {
 
     public AreaEffectCloudAgeProcessor() {
-        super(EntityAreaEffectCloud.class, Keys.AREA_EFFECT_CLOUD_AGE);
+        super(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_AGE);
     }
 
     @Override
@@ -52,13 +52,13 @@ public class AreaEffectCloudAgeProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    protected boolean set(EntityAreaEffectCloud container, Integer value) {
+    protected boolean set(AreaEffectCloudEntity container, Integer value) {
         container.field_70173_aa = value;
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityAreaEffectCloud container) {
+    protected Optional<Integer> getVal(AreaEffectCloudEntity container) {
         return Optional.of(container.field_70173_aa);
     }
 

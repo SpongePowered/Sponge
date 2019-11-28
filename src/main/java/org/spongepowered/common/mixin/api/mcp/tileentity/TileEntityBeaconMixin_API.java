@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -34,9 +33,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
+import net.minecraft.tileentity.BeaconTileEntity;
 
 @NonnullByDefault
-@Mixin(TileEntityBeacon.class)
+@Mixin(BeaconTileEntity.class)
 public abstract class TileEntityBeaconMixin_API extends TileEntityLockableMixin_API<Beacon> implements Beacon {
 
     @Shadow private int levels;

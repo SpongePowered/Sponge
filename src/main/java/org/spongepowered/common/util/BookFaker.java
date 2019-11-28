@@ -25,13 +25,13 @@
 package org.spongepowered.common.util;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SPacketCustomPayload;
-import net.minecraft.network.play.server.SPacketSetSlot;
-import net.minecraft.util.EnumHand;
+import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
+import net.minecraft.network.play.server.SSetSlotPacket;
+import net.minecraft.util.Hand;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
@@ -44,8 +44,8 @@ public class BookFaker {
     public static final int WINDOW_PLAYER_INVENTORY = 0;
 
     public static void fakeBookView(BookView bookView, Player player) {
-        EntityPlayerMP mcPlayer = (EntityPlayerMP) player;
-        NetHandlerPlayServer receiver = mcPlayer.field_71135_a;
+        ServerPlayerEntity mcPlayer = (ServerPlayerEntity) player;
+        ServerPlayNetHandler receiver = mcPlayer.field_71135_a;
 
         // First we need to send a fake a Book ItemStack with the BookView's
         // contents to the player's hand
@@ -54,18 +54,18 @@ public class BookFaker {
         item.offer(Keys.BOOK_AUTHOR, bookView.getAuthor());
         item.offer(Keys.BOOK_PAGES, bookView.getPages());
 
-        InventoryPlayer inventory = mcPlayer.field_71071_by;
+        PlayerInventory inventory = mcPlayer.field_71071_by;
         int bookSlot = inventory.field_70462_a.size() + inventory.field_70461_c;
-        receiver.func_147359_a(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
+        receiver.func_147359_a(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
 
         // Next we tell the client to open the Book GUI
         PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
-        packetbuffer.func_179249_a(EnumHand.MAIN_HAND);
-        receiver.func_147359_a(new SPacketCustomPayload("MC|BOpen", packetbuffer));
+        packetbuffer.func_179249_a(Hand.MAIN_HAND);
+        receiver.func_147359_a(new SCustomPayloadPlayPacket("MC|BOpen", packetbuffer));
 
         // Now we can remove the fake Book since it's contents will have already
         // been transferred to the GUI
-        receiver.func_147359_a(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.func_70448_g()));
+        receiver.func_147359_a(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.func_70448_g()));
     }
 
 }

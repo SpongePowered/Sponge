@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.entity.item.EntityMinecartChest;
+import net.minecraft.entity.item.minecart.ChestMinecartEntity;
 import org.spongepowered.api.entity.vehicle.minecart.ChestMinecart;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -33,7 +33,7 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
-@Mixin(EntityMinecartChest.class)
+@Mixin(ChestMinecartEntity.class)
 @Implements(@Interface(iface = ChestMinecart.class, prefix = "minecart$"))
 public abstract class EntityMinecartChestMixin extends EntityMinecartContainerMixin {
 

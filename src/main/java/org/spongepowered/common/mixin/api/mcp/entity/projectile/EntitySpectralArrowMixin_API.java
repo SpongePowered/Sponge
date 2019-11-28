@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import net.minecraft.entity.projectile.EntitySpectralArrow;
+import net.minecraft.entity.projectile.SpectralArrowEntity;
 import org.spongepowered.api.entity.projectile.arrow.SpectralArrow;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntitySpectralArrow.class)
+@Mixin(SpectralArrowEntity.class)
 public abstract class EntitySpectralArrowMixin_API extends EntityArrowMixin_API implements SpectralArrow {
 
 }

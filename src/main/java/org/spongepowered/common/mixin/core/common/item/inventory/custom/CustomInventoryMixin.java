@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.common.item.inventory.custom;
 
-import net.minecraft.inventory.InventoryBasic;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
@@ -44,7 +43,7 @@ import java.util.Map;
 public abstract class CustomInventoryMixin implements InventoryAdapter, InventoryAdapterBridge {
 
     @Shadow(remap = false) protected InventoryArchetype archetype;
-    @Shadow(remap = false) private InventoryBasic inv;
+    @Shadow(remap = false) private net.minecraft.inventory.Inventory inv;
     @Shadow(remap = false) private Map<String, InventoryProperty<?, ?>> properties;
 
     @Shadow public abstract int getSizeInventory();

@@ -31,14 +31,13 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
-import net.minecraft.block.BlockLever;
-import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraft.inventory.ClickType;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagFloat;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.LeverBlock;
+import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.inventory.container.ClickType;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
+import net.minecraft.nbt.FloatNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
 import org.spongepowered.api.block.BlockState;
@@ -380,8 +379,8 @@ public final class Constants {
          * using
          *  IBlockState#neighborChanged(net.minecraft.world.World, BlockPos, Block, BlockPos)
          */
-        public static final EnumFacing[] NOTIFY_DIRECTIONS = {EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH};
-        public static final EnumSet<EnumFacing> NOTIFY_DIRECTION_SET = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
+        public static final net.minecraft.util.Direction[] NOTIFY_DIRECTIONS = {net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN, net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH};
+        public static final EnumSet<net.minecraft.util.Direction> NOTIFY_DIRECTION_SET = EnumSet.of(net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN, net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH);
         public static final UUID INVALID_WORLD_UUID = java.util.UUID.fromString("00000000-0000-0000-0000-000000000000");
         public static final int DEFAULT_CHUNK_UNLOAD_DELAY = 15000;
         public static final int MAX_CHUNK_UNLOADS = 100;
@@ -738,7 +737,7 @@ public final class Constants {
         public static final class ArmorStand {
             static {
                 try {
-                    Class.forName(String.valueOf(EntityArmorStand.class));
+                    Class.forName(String.valueOf(ArmorStandEntity.class));
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -960,9 +959,9 @@ public final class Constants {
         public static final byte TAG_LONG_ARRAY  = 12;
         public static final byte TAG_ANY_NUMERIC = 99;
 
-        public static NBTTagCompound filterSpongeCustomData(final NBTTagCompound rootCompound) {
+        public static CompoundNBT filterSpongeCustomData(final CompoundNBT rootCompound) {
             if (rootCompound.func_150297_b(Forge.FORGE_DATA, TAG_COMPOUND)) {
-                final NBTTagCompound forgeCompound = rootCompound.func_74775_l(Forge.FORGE_DATA);
+                final CompoundNBT forgeCompound = rootCompound.func_74775_l(Forge.FORGE_DATA);
                 if (forgeCompound.func_150297_b(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
                     cleanseInnerCompound(forgeCompound);
                 }
@@ -975,8 +974,8 @@ public final class Constants {
             return rootCompound;
         }
 
-        private static void cleanseInnerCompound(final NBTTagCompound compound) {
-            final NBTTagCompound inner = compound.func_74775_l(Sponge.SPONGE_DATA);
+        private static void cleanseInnerCompound(final CompoundNBT compound) {
+            final CompoundNBT inner = compound.func_74775_l(Sponge.SPONGE_DATA);
             if (inner.func_82582_d()) {
                 compound.func_82580_o(Sponge.SPONGE_DATA);
             }
@@ -987,9 +986,9 @@ public final class Constants {
                 return Collections.emptyList();
             }
             final List<Enchantment> enchantments = Lists.newArrayList();
-            final NBTTagList list = itemStack.func_77986_q();
+            final ListNBT list = itemStack.func_77986_q();
             for (int i = 0; i < list.func_74745_c(); i++) {
-                final NBTTagCompound compound = list.func_150305_b(i);
+                final CompoundNBT compound = list.func_150305_b(i);
                 final short enchantmentId = compound.func_74765_d(Item.ITEM_ENCHANTMENT_ID);
                 final short level = compound.func_74765_d(Item.ITEM_ENCHANTMENT_LEVEL);
 
@@ -1002,21 +1001,21 @@ public final class Constants {
             return enchantments;
         }
 
-        public static NBTTagList newDoubleNBTList(final double... numbers) {
-            final NBTTagList nbttaglist = new NBTTagList();
+        public static ListNBT newDoubleNBTList(final double... numbers) {
+            final ListNBT nbttaglist = new ListNBT();
 
             for (final double d1 : numbers) {
-                nbttaglist.func_74742_a(new NBTTagDouble(d1));
+                nbttaglist.func_74742_a(new DoubleNBT(d1));
             }
 
             return nbttaglist;
         }
 
-        public static NBTTagList newFloatNBTList(final float... numbers) {
-            final NBTTagList nbttaglist = new NBTTagList();
+        public static ListNBT newFloatNBTList(final float... numbers) {
+            final ListNBT nbttaglist = new ListNBT();
 
             for (final float f : numbers) {
-                nbttaglist.func_74742_a(new NBTTagFloat(f));
+                nbttaglist.func_74742_a(new FloatNBT(f));
             }
 
             return nbttaglist;
@@ -1200,26 +1199,26 @@ public final class Constants {
 
     public static final class DirectionFunctions {
 
-        public static EnumFacing getFor(final Direction direction) {
+        public static net.minecraft.util.Direction getFor(final Direction direction) {
             switch (checkNotNull(direction)) {
                 case UP:
-                    return EnumFacing.UP;
+                    return net.minecraft.util.Direction.UP;
                 case DOWN:
-                    return EnumFacing.DOWN;
+                    return net.minecraft.util.Direction.DOWN;
                 case WEST:
-                    return EnumFacing.WEST;
+                    return net.minecraft.util.Direction.WEST;
                 case SOUTH:
-                    return EnumFacing.SOUTH;
+                    return net.minecraft.util.Direction.SOUTH;
                 case EAST:
-                    return EnumFacing.EAST;
+                    return net.minecraft.util.Direction.EAST;
                 case NORTH:
-                    return EnumFacing.NORTH;
+                    return net.minecraft.util.Direction.NORTH;
                 default:
                     throw new IllegalArgumentException("No matching direction found for direction: " + direction);
             }
         }
 
-        public static Direction getFor(final EnumFacing facing) {
+        public static Direction getFor(final net.minecraft.util.Direction facing) {
             switch (checkNotNull(facing)) {
                 case UP:
                     return Direction.UP;
@@ -1238,7 +1237,7 @@ public final class Constants {
             }
         }
 
-        public static Direction getFor(final BlockLever.EnumOrientation orientation) {
+        public static Direction getFor(final LeverBlock.EnumOrientation orientation) {
             switch (orientation) {
                 case DOWN_X:
                     return Direction.DOWN;
@@ -1261,22 +1260,22 @@ public final class Constants {
             }
         }
 
-        public static BlockLever.EnumOrientation getAsOrientation(final Direction direction, final Axis axis) {
+        public static LeverBlock.EnumOrientation getAsOrientation(final Direction direction, final Axis axis) {
             switch (direction) {
                 case DOWN:
-                    return axis == Axis.Z ? BlockLever.EnumOrientation.DOWN_Z : BlockLever.EnumOrientation.DOWN_X;
+                    return axis == Axis.Z ? LeverBlock.EnumOrientation.DOWN_Z : LeverBlock.EnumOrientation.DOWN_X;
                 case EAST:
-                    return BlockLever.EnumOrientation.EAST;
+                    return LeverBlock.EnumOrientation.EAST;
                 case WEST:
-                    return BlockLever.EnumOrientation.WEST;
+                    return LeverBlock.EnumOrientation.WEST;
                 case SOUTH:
-                    return BlockLever.EnumOrientation.SOUTH;
+                    return LeverBlock.EnumOrientation.SOUTH;
                 case NORTH:
-                    return BlockLever.EnumOrientation.NORTH;
+                    return LeverBlock.EnumOrientation.NORTH;
                 case UP:
-                    return axis == Axis.Z ? BlockLever.EnumOrientation.UP_Z : BlockLever.EnumOrientation.UP_X;
+                    return axis == Axis.Z ? LeverBlock.EnumOrientation.UP_Z : LeverBlock.EnumOrientation.UP_X;
                 default:
-                    return BlockLever.EnumOrientation.NORTH;
+                    return LeverBlock.EnumOrientation.NORTH;
             }
         }
 
@@ -1332,21 +1331,21 @@ public final class Constants {
             return dir;
         }
 
-        public static EnumFacing.Axis convertAxisToMinecraft(final Axis axis) {
+        public static net.minecraft.util.Direction.Axis convertAxisToMinecraft(final Axis axis) {
             switch (axis) {
                 case X:
-                    return EnumFacing.Axis.X;
+                    return net.minecraft.util.Direction.Axis.X;
                 case Y:
-                    return EnumFacing.Axis.Y;
+                    return net.minecraft.util.Direction.Axis.Y;
                 case Z:
-                    return EnumFacing.Axis.Z;
+                    return net.minecraft.util.Direction.Axis.Z;
                 default:
-                    return EnumFacing.Axis.X;
+                    return net.minecraft.util.Direction.Axis.X;
 
             }
         }
 
-        public static Axis convertAxisToSponge(final EnumFacing.Axis axis) {
+        public static Axis convertAxisToSponge(final net.minecraft.util.Direction.Axis axis) {
             switch (axis) {
                 case X:
                     return Axis.X;

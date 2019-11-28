@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockBed;
+import net.minecraft.block.BedBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(BlockBed.class)
+@Mixin(BedBlock.class)
 public abstract class BlockBedMixin_API extends BlockMixin_API {
 
     @Override

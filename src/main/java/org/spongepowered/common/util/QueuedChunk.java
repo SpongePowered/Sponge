@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.ChunkPos;
 
 public class QueuedChunk {
     public ChunkPos coords;
-    public NBTTagCompound compound;
+    public CompoundNBT compound;
 
-    public QueuedChunk(ChunkPos coords, NBTTagCompound compound) {
+    public QueuedChunk(ChunkPos coords, CompoundNBT compound) {
         this.coords = coords;
         this.compound = compound;
     }

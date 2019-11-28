@@ -25,16 +25,15 @@
 package org.spongepowered.common.mixin.core.world.gen;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.init.Biomes;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkGeneratorOverworld;
+import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.MapGenBase;
+import net.minecraft.world.gen.OverworldChunkGenerator;
 import net.minecraft.world.gen.feature.MineshaftStructure;
 import net.minecraft.world.gen.feature.OceanMonumentStructure;
 import net.minecraft.world.gen.feature.ScatteredStructure;
@@ -71,7 +70,7 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@Mixin(ChunkGeneratorOverworld.class)
+@Mixin(OverworldChunkGenerator.class)
 public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderBridge, ChunkGeneratorOverworldBridge {
 
     @Shadow @Final private boolean mapFeaturesEnabled;
@@ -88,7 +87,7 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
     @Shadow private Biome[] biomesForGeneration;
 
     @Nullable private BiomeGenerator impl$biomegen;
-    private boolean impl$isVanilla = WorldGenConstants.isValid((IChunkGenerator) this, GenerationPopulator.class);
+    private boolean impl$isVanilla = WorldGenConstants.isValid((ChunkGenerator) this, GenerationPopulator.class);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setSettings(final net.minecraft.world.World worldIn, final long p_i45636_2_, final boolean p_i45636_4_, final String p_i45636_5_, final CallbackInfo ci) {

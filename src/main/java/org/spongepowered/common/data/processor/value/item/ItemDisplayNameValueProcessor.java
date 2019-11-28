@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.StringNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -58,7 +58,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     protected boolean set(final ItemStack container, final Text value) {
         final String legacy = SpongeTexts.toLegacy(value);
         if (container.func_77973_b() == Items.field_151164_bB) {
-            container.func_77983_a(Constants.Item.Book.ITEM_BOOK_TITLE, new NBTTagString(legacy));
+            container.func_77983_a(Constants.Item.Book.ITEM_BOOK_TITLE, new StringNBT(legacy));
         } else {
             container.func_151001_c(legacy);
         }
@@ -68,14 +68,14 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     @Override
     protected Optional<Text> getVal(final ItemStack container) {
         if (container.func_77973_b() == Items.field_151164_bB) {
-            final NBTTagCompound mainCompound = container.func_77978_p();
+            final CompoundNBT mainCompound = container.func_77978_p();
             if (mainCompound == null) {
                 return Optional.empty(); // Basically, this book wasn't initialized properly.
             }
             final String titleString = mainCompound.func_74779_i(Constants.Item.Book.ITEM_BOOK_TITLE);
             return Optional.of(SpongeTexts.fromLegacy(titleString));
         }
-        final NBTTagCompound mainCompound = container.func_179543_a(Constants.Item.ITEM_DISPLAY);
+        final CompoundNBT mainCompound = container.func_179543_a(Constants.Item.ITEM_DISPLAY);
         if (mainCompound != null && mainCompound.func_150297_b(Constants.Item.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
             final String displayString = mainCompound.func_74779_i(Constants.Item.ITEM_DISPLAY_NAME);
             return Optional.of(SpongeTexts.fromLegacy(displayString));

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.EntityShulker;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DyeableData;
@@ -44,8 +43,9 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.Optional;
+import net.minecraft.entity.monster.ShulkerEntity;
 
-@Mixin(EntityShulker.class)
+@Mixin(ShulkerEntity.class)
 public abstract class EntityShulkerMixin_API extends EntityGolemMixin_API implements Shulker {
 
 

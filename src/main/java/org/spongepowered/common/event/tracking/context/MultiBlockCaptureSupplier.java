@@ -34,10 +34,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -79,7 +79,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     @Nullable private LinkedListMultimap<BlockPos, SpongeBlockSnapshot> multimap;
     @Nullable private ListMultimap<BlockPos, BlockEventData> scheduledEvents;
     @Nullable private List<SpongeBlockSnapshot> snapshots;
-    @Nullable private LinkedHashMap<WorldServer, SpongeProxyBlockAccess.Proxy> processingWorlds;
+    @Nullable private LinkedHashMap<ServerWorld, SpongeProxyBlockAccess.Proxy> processingWorlds;
     @Nullable private Set<BlockPos> usedBlocks;
     private int transactionIndex = -1; // These are used to keep track of which snapshot is being referred to as "most recent change"
     private int snapshotIndex = -1;    // so that we can appropriately cancel or discard or apply specific event transactions
@@ -112,7 +112,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      * @param newState The most current new IBlockState to calculate the BlockChange flag
      * @return True if the block position has previously not been modified or captured yet
      */
-    public boolean put(final BlockSnapshot snapshot, final IBlockState newState) {
+    public boolean put(final BlockSnapshot snapshot, final BlockState newState) {
         // Start by figuring out the backing snapshot. In all likelyhood, we could just cast, but we want to be safe
         final SpongeBlockSnapshot backingSnapshot = getBackingSnapshot(snapshot);
         // Get the key of the block position, we know this is a pure block pos and not a mutable one too.
@@ -192,12 +192,12 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      * @param blockPos The block position to get the backing list from the multimap
      */
     @SuppressWarnings("unchecked")
-    private void associateBlockChangeForPosition(final IBlockState newState, final BlockPos blockPos) {
+    private void associateBlockChangeForPosition(final BlockState newState, final BlockPos blockPos) {
         final List<SpongeBlockSnapshot> list = this.multimap.get(blockPos);
         if (list != null && !list.isEmpty()) {
             final SpongeBlockSnapshot originalSnapshot = list.get(0);
             final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
-            final IBlockState currentState = (IBlockState) originalSnapshot.getState();
+            final BlockState currentState = (BlockState) originalSnapshot.getState();
             originalSnapshot.blockChange = ((IPhaseState) peek.state).associateBlockChangeWithSnapshot(peek, newState, newState.func_177230_c(), currentState, originalSnapshot, currentState.func_177230_c());
         }
     }
@@ -401,9 +401,9 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     public void captureNeighborNotification(
-            final WorldServerBridge mixinWorldServer, final IBlockState notifyState, final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos) {
+            final WorldServerBridge mixinWorldServer, final BlockState notifyState, final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos) {
         final int transactionIndex = ++this.transactionIndex;
-        final IBlockState actualSourceState = ((WorldServer) mixinWorldServer).func_180495_p(sourcePos);
+        final BlockState actualSourceState = ((ServerWorld) mixinWorldServer).func_180495_p(sourcePos);
         final BlockTransaction.NeighborNotification notification = new BlockTransaction.NeighborNotification(transactionIndex, this.snapshotIndex, mixinWorldServer,
             notifyState, notifyPos, sourceBlock, sourcePos, actualSourceState);
         notification.enqueueChanges(mixinWorldServer.bridge$getProxyAccess(), this);
@@ -422,7 +422,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      * @param flags The change flags
      * @return The constructed transaction
      */
-    public BlockTransaction.ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final IBlockState newState,
+    public BlockTransaction.ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
         final BlockChangeFlag flags) {
         this.put(originalBlockSnapshot, newState); // Always update the snapshot index before the block change is tracked
         final int transactionIndex = ++this.transactionIndex;
@@ -434,8 +434,8 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
     public void logTileChange(
             final WorldServerBridge mixinWorldServer, final BlockPos pos, @Nullable final TileEntity oldTile, @Nullable final TileEntity newTile) {
-        final WorldServer world = (WorldServer) mixinWorldServer;
-        final IBlockState current = world.func_180495_p(pos);
+        final ServerWorld world = (ServerWorld) mixinWorldServer;
+        final BlockState current = world.func_180495_p(pos);
 
         if (this.tail instanceof BlockTransaction.ChangeBlock) {
             final BlockTransaction.ChangeBlock changeBlock = (BlockTransaction.ChangeBlock) this.tail;
@@ -573,18 +573,18 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     public Optional<Transaction<BlockSnapshot>> createTransaction(final SpongeBlockSnapshot snapshot) {
-        final Optional<WorldServer> maybeWorld = snapshot.getWorldServer();
+        final Optional<ServerWorld> maybeWorld = snapshot.getWorldServer();
         if (!maybeWorld.isPresent()) {
             return Optional.empty();
         }
-        final WorldServer worldServer = maybeWorld.get();
+        final ServerWorld worldServer = maybeWorld.get();
         final BlockPos blockPos = snapshot.getBlockPos();
-        final IBlockState newState = worldServer.func_180495_p(blockPos);
+        final BlockState newState = worldServer.func_180495_p(blockPos);
         // Because enhanced tracking requires handling very specific proxying of block states
         // so, the requests for the actual states sometimes may cause issues with mods and their
         // extended state handling logic if what the world sees is different from what our tracker
         // saw, so, we have to just provide the new state (extended states are calculated anyways).
-        final IBlockState newActualState = this.head != null ? newState : newState.func_185899_b(worldServer, blockPos);
+        final BlockState newActualState = this.head != null ? newState : newState.func_185899_b(worldServer, blockPos);
         final BlockSnapshot newSnapshot =
             ((WorldServerBridge) worldServer).bridge$createSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
         // Up until this point, we can create a default Transaction
@@ -649,7 +649,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     final SpongeBlockSnapshot original = (SpongeBlockSnapshot) transaction.getOriginal();
                     original.getWorldServer().ifPresent(worldServer -> {
                         final WorldServerAccessor accessor = (WorldServerAccessor) worldServer;
-                        final WorldServer.ServerBlockEventList queue = accessor.getBlockEventQueueForSponge()[accessor.getBlockEventCacheIndexForSponge()];
+                        final ServerWorld.ServerBlockEventList queue = accessor.getBlockEventQueueForSponge()[accessor.getBlockEventCacheIndexForSponge()];
                         for (final BlockEventData blockEventData : scheduledEvents.get(original.getBlockPos())) {
                             boolean equals = false;
                             for (final BlockEventData eventData : queue) {
@@ -753,7 +753,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             if (this.processingWorlds == null) {
                 return noCancelledTransactions;
             }
-            for (final Map.Entry<WorldServer, SpongeProxyBlockAccess.Proxy> entry : this.processingWorlds.entrySet()) {
+            for (final Map.Entry<ServerWorld, SpongeProxyBlockAccess.Proxy> entry : this.processingWorlds.entrySet()) {
                 try {
                     entry.getValue().close();
                 } catch (final Exception e) {
@@ -778,10 +778,10 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         if (this.processingWorlds == null) {
             this.processingWorlds = new LinkedHashMap<>();
         }
-        SpongeProxyBlockAccess.Proxy existing = this.processingWorlds.get((WorldServer) mixinWorldServer);
+        SpongeProxyBlockAccess.Proxy existing = this.processingWorlds.get((ServerWorld) mixinWorldServer);
         if (existing == null) {
             existing = mixinWorldServer.bridge$getProxyAccess().pushProxy();
-            this.processingWorlds.put((WorldServer) mixinWorldServer, existing);
+            this.processingWorlds.put((ServerWorld) mixinWorldServer, existing);
         }
     }
 
@@ -814,7 +814,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         if (this.processingWorlds == null || this.processingWorlds.isEmpty()) {
             return;
         }
-        for (final Map.Entry<WorldServer, SpongeProxyBlockAccess.Proxy> entry : this.processingWorlds.entrySet()) {
+        for (final Map.Entry<ServerWorld, SpongeProxyBlockAccess.Proxy> entry : this.processingWorlds.entrySet()) {
             try {
                 entry.getValue().close();
             } catch (final Exception e) {

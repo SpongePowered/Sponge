@@ -32,41 +32,38 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.block.BlockPistonBase;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.PistonBlock;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
-import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.passive.EntitySkeletonHorse;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.play.server.SPacketEntityVelocity;
+import net.minecraft.entity.effect.LightningBoltEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.passive.horse.SkeletonHorseEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.play.server.SEntityVelocityPacket;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.EnumLightType;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
+import net.minecraft.world.LightType;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.provider.BiomeProvider;
@@ -74,11 +71,12 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.gen.ChunkGeneratorEnd;
-import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraft.world.gen.IChunkGenerator;
-import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.EndChunkGenerator;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.MapStorage;
+import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.SessionLockException;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.world.storage.WorldSavedData;
@@ -199,7 +197,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-@Mixin(WorldServer.class)
+@Mixin(ServerWorld.class)
 public abstract class WorldServerMixin extends WorldMixin implements WorldServerBridge {
 
     private final Map<net.minecraft.entity.Entity, Vector3d> impl$rotationUpdates = new HashMap<>();
@@ -227,7 +225,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @Shadow private boolean fireBlockEvent(final BlockEventData event) { return false; }// shadowed
     @Shadow protected abstract void createBonusChest();
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
-    @Shadow public abstract ChunkProviderServer getChunkProvider();
+    @Shadow public abstract ServerChunkProvider getChunkProvider();
     @Shadow protected abstract void playerCheckLight();
     @Shadow protected abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
     @Shadow private boolean canAddEntity(final net.minecraft.entity.Entity entityIn) {
@@ -245,7 +243,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$initializeSpongeFields(final MinecraftServer server, final ISaveHandler saveHandlerIn, @Nullable WorldInfo info,
+    private void impl$initializeSpongeFields(final MinecraftServer server, final SaveHandler saveHandlerIn, @Nullable WorldInfo info,
         final int dimensionId, final Profiler profilerIn, final CallbackInfo callbackInfo) {
         if (info == null) {
             SpongeImpl.getLogger().warn("World constructed without a WorldInfo! This will likely cause problems. Subsituting dummy info.",
@@ -257,7 +255,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
         // This change is not needed as all worlds use separate save handlers.
         this.worldInfo = info;
-        this.impl$timings = new WorldTimingsHandler((WorldServer) (Object) this);
+        this.impl$timings = new WorldTimingsHandler((ServerWorld) (Object) this);
         this.impl$dimensionId = dimensionId;
         this.prevWeather = ((org.spongepowered.api.world.World) this).getWeather();
         this.impl$weatherStartTime = this.worldInfo.func_82573_f();
@@ -265,7 +263,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         final PortalAgentType portalAgentType = ((WorldProperties) this.worldInfo).getPortalAgentType();
         if (!portalAgentType.equals(PortalAgentTypes.DEFAULT)) {
             try {
-                this.worldTeleporter = (Teleporter) portalAgentType.getPortalAgentClass().getConstructor(new Class<?>[] {WorldServer.class})
+                this.worldTeleporter = (Teleporter) portalAgentType.getPortalAgentClass().getConstructor(new Class<?>[] {ServerWorld.class})
                         .newInstance(new Object[] {this});
             } catch (Exception e) {
                 SpongeImpl.getLogger().log(Level.ERROR, "Could not create PortalAgent of type " + portalAgentType.getId()
@@ -285,8 +283,8 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/MapStorage"))
-    private MapStorage impl$createMapStorageIfOverworldOrGetOverworldMapStorage(final ISaveHandler saveHandler) {
-        final WorldServer overWorld = WorldManager.getWorldByDimensionId(0).orElse(null);
+    private MapStorage impl$createMapStorageIfOverworldOrGetOverworldMapStorage(final SaveHandler saveHandler) {
+        final ServerWorld overWorld = WorldManager.getWorldByDimensionId(0).orElse(null);
         // if overworld has loaded, use its mapstorage
         if (this.impl$dimensionId != 0 && overWorld != null) {
             return overWorld.func_175693_T();
@@ -348,7 +346,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         }
 
         if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END))
-            || (((ChunkProviderServerBridge) (((WorldServer) (Object) this)).func_72863_F()).accessor$getChunkGenerator() instanceof ChunkGeneratorEnd)) {
+            || (((ChunkProviderServerBridge) (((ServerWorld) (Object) this)).func_72863_F()).accessor$getChunkGenerator() instanceof EndChunkGenerator)) {
             this.worldInfo.func_176143_a(new BlockPos(100, 50, 0));
             ci.cancel();
         }
@@ -403,10 +401,10 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         // If the base generator is an IChunkProvider which implements
         // PopulatorProviderBridge we request that it add its populators not covered
         // by the base generation populator
-        if (newGenerator.getBaseGenerationPopulator() instanceof IChunkGenerator) {
+        if (newGenerator.getBaseGenerationPopulator() instanceof ChunkGenerator) {
             // We check here to ensure that the PopulatorProviderBridge is one of our mixed in ones and not
             // from a mod chunk provider extending a provider that we mixed into
-            if (WorldGenConstants.isValid((IChunkGenerator) newGenerator.getBaseGenerationPopulator(), PopulatorProviderBridge.class)) {
+            if (WorldGenConstants.isValid((ChunkGenerator) newGenerator.getBaseGenerationPopulator(), PopulatorProviderBridge.class)) {
                 ((PopulatorProviderBridge) newGenerator.getBaseGenerationPopulator()).bridge$addPopulators(newGenerator);
             }
         } else if (newGenerator.getBaseGenerationPopulator() instanceof PopulatorProviderBridge) {
@@ -462,12 +460,12 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @SuppressWarnings("deprecation")
     @Override
     public SpongeWorldGenerator bridge$createWorldGenerator(final String settings) {
-        final WorldServer worldServer = (WorldServer) (Object) this;
+        final ServerWorld worldServer = (ServerWorld) (Object) this;
         final WorldType worldType = worldServer.func_175624_G();
-        final IChunkGenerator chunkGenerator = ((WorldTypeBridge) worldType).bridge$getChunkGenerator()
+        final ChunkGenerator chunkGenerator = ((WorldTypeBridge) worldType).bridge$getChunkGenerator()
             .map(func -> func.apply(worldServer, settings))
             .orElseGet(() -> {
-                final IChunkGenerator current = ((ChunkProviderServerBridge) this.getChunkProvider()).accessor$getChunkGenerator();
+                final ChunkGenerator current = ((ChunkProviderServerBridge) this.getChunkProvider()).accessor$getChunkGenerator();
                 if (current == null) {
                     final Dimension worldProvider = worldServer.field_73011_w;
                     ((WorldProviderBridge) worldProvider).accessor$setGeneratorSettings(settings);
@@ -505,12 +503,12 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Override
-    protected void impl$getRawLightWithoutMarkingChunkActive(final BlockPos pos, final EnumLightType enumSkyBlock, final CallbackInfoReturnable<Integer> cir) {
+    protected void impl$getRawLightWithoutMarkingChunkActive(final BlockPos pos, final LightType enumSkyBlock, final CallbackInfoReturnable<Integer> cir) {
         if (this.bridge$isFake()) {
             super.impl$getRawLightWithoutMarkingChunkActive(pos, enumSkyBlock, cir);
             return;
         }
-        final Chunk chunk = ((ChunkProviderBridge) ((WorldServer) (Object) this).func_72863_F())
+        final Chunk chunk = ((ChunkProviderBridge) ((ServerWorld) (Object) this).func_72863_F())
             .bridge$getLoadedChunkWithoutMarkingActive(pos.func_177958_n() >> 4, pos.func_177952_p() >> 4);
         if (chunk == null || chunk.field_189550_d) {
             cir.setReturnValue(0);
@@ -549,7 +547,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
         // Sponge: Use SpongeImplHooks for Forge
         for (final Iterator<net.minecraft.world.chunk.Chunk> iterator =
-             SpongeImplHooks.getChunkIterator((WorldServer) (Object) this); iterator.hasNext(); ) // this.profiler.endSection()) // Sponge - don't use the profiler
+             SpongeImplHooks.getChunkIterator((ServerWorld) (Object) this); iterator.hasNext(); ) // this.profiler.endSection()) // Sponge - don't use the profiler
         {
             this.profiler.func_76320_a("getChunk");
             final net.minecraft.world.chunk.Chunk chunk = iterator.next();
@@ -607,7 +605,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                                 SpongeImpl.postEvent(constructEntityEvent);
                                 if (!constructEntityEvent.isCancelled()) {
                                     // Sponge End
-                                    final EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
+                                    final SkeletonHorseEntity entityhorse = new SkeletonHorseEntity((ServerWorld) (Object) this);
                                     entityhorse.func_190691_p(true);
                                     entityhorse.func_70873_a(0);
                                     entityhorse.func_70107_b(blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p());
@@ -625,7 +623,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                                     final LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());
                                     if (!SpongeImpl.postEvent(lightningPre)) {
                                         // Sponge End
-                                        this.addWeatherEffect(new EntityLightningBolt(world, (double) blockpos.func_177958_n(), (double) blockpos.func_177956_o(),
+                                        this.addWeatherEffect(new LightningBoltEntity(world, (double) blockpos.func_177958_n(), (double) blockpos.func_177956_o(),
                                                 (double) blockpos.func_177952_p(), true));
                                     }
                                 } // Sponge - Brackets.
@@ -644,7 +642,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                                     final LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());
                                     if (!SpongeImpl.postEvent(lightningPre)) {
                                         // Sponge End
-                                        this.addWeatherEffect(new EntityLightningBolt(world, (double) blockpos.func_177958_n(), (double) blockpos.func_177956_o(),
+                                        this.addWeatherEffect(new LightningBoltEntity(world, (double) blockpos.func_177958_n(), (double) blockpos.func_177956_o(),
                                                 (double) blockpos.func_177952_p(), true));
                                     }
                                 } // Sponge - Brackets.
@@ -676,7 +674,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                     }
 
                     if (flag && this.getBiome(blockpos2).func_76738_d()) {
-                        this.getBlockState(blockpos2).func_177230_c().func_176224_k((WorldServer) (Object) this, blockpos2);
+                        this.getBlockState(blockpos2).func_177230_c().func_176224_k((ServerWorld) (Object) this, blockpos2);
                     }
                 }
             } // Sponge end phase - brackets
@@ -698,7 +696,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                             final int k1 = j1 & 15;
                             final int l1 = j1 >> 8 & 15;
                             final int i2 = j1 >> 16 & 15;
-                            final IBlockState iblockstate = extendedblockstorage.func_177485_a(k1, i2, l1);
+                            final net.minecraft.block.BlockState iblockstate = extendedblockstorage.func_177485_a(k1, i2, l1);
                             final Block block = iblockstate.func_177230_c();
                             this.profiler.func_76320_a("randomTick");
 
@@ -736,12 +734,12 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setDifficulty(Lnet/minecraft/world/EnumDifficulty;)V"))
-    private void syncDifficultyDueToHardcore(final WorldInfo worldInfo, final EnumDifficulty newDifficulty) {
-        WorldManager.adjustWorldForDifficulty((WorldServer) (Object) this, newDifficulty, false);
+    private void syncDifficultyDueToHardcore(final WorldInfo worldInfo, final Difficulty newDifficulty) {
+        WorldManager.adjustWorldForDifficulty((ServerWorld) (Object) this, newDifficulty, false);
     }
 
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target= "Lnet/minecraft/world/WorldServer;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean onBlockTickIsAreaLoaded(final WorldServer worldIn, final BlockPos fromPos, final BlockPos toPos) {
+    private boolean onBlockTickIsAreaLoaded(final ServerWorld worldIn, final BlockPos fromPos, final BlockPos toPos) {
         int posX = fromPos.func_177958_n() + 8;
         int posZ = fromPos.func_177952_p() + 8;
         // Forge passes the same block position for forced chunks
@@ -774,7 +772,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"
         )
     )
-    private void spongeBlockUpdateTick(final Block block, final World worldIn, final BlockPos pos, final IBlockState state, final Random rand) {
+    private void spongeBlockUpdateTick(final Block block, final World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, final Random rand) {
         if (this.scheduledUpdatesAreImmediate) {
             /*
             The reason why we are first checking and then resetting the immediate updates flag is
@@ -808,7 +806,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         }
 
         sbu.func_82753_a(priority);
-        ((NextTickListEntryBridge) sbu).bridge$setWorld((WorldServer) (Object) this);
+        ((NextTickListEntryBridge) sbu).bridge$setWorld((ServerWorld) (Object) this);
         this.impl$tmpScheduledObj = sbu;
     }
 
@@ -844,7 +842,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"
         )
     )
-    private void onUpdateTick(final Block block, final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, final Random rand) {
+    private void onUpdateTick(final Block block, final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, final Random rand) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState phaseState = context.state;
         if (phaseState.alreadyCapturingBlockTicks(context) || phaseState.ignoresBlockUpdateTick(context)) {
@@ -861,7 +859,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             target = "Lnet/minecraft/crash/CrashReportCategory;addBlockInfo(Lnet/minecraft/crash/CrashReportCategory;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)V"
         )
     )
-    private void onBlockInfo(final CrashReportCategory category, final BlockPos pos, final IBlockState state) {
+    private void onBlockInfo(final CrashReportCategory category, final BlockPos pos, final net.minecraft.block.BlockState state) {
         try {
             CrashReportCategory.func_175750_a(category, pos, state);
         } catch (NoClassDefFoundError e) {
@@ -879,7 +877,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             remap = false
         )
     )
-    private boolean onAddBlockEvent(final WorldServer.ServerBlockEventList list, final Object obj, final BlockPos pos, final Block blockIn, final int eventId, final int eventParam) {
+    private boolean onAddBlockEvent(final ServerWorld.ServerBlockEventList list, final Object obj, final BlockPos pos, final Block blockIn, final int eventId, final int eventParam) {
         final BlockEventData blockEventData = (BlockEventData) obj;
         final BlockEventDataBridge blockEvent = (BlockEventDataBridge) blockEventData;
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
@@ -924,7 +922,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             // We fire a Pre event to make sure our captures do not get stuck in a loop.
             // This is very common with pistons as they add block events while blocks are being notified.
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-                if (blockIn instanceof BlockPistonBase) {
+                if (blockIn instanceof PistonBlock) {
                     // We only fire pre events for pistons
                     if (SpongeCommonEventFactory.handlePistonEvent(this, list, obj, pos, blockIn, eventId, eventParam)) {
                         return false;
@@ -950,7 +948,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
-    private boolean onFireBlockEvent(final net.minecraft.world.WorldServer worldIn, final BlockEventData event) {
+    private boolean onFireBlockEvent(final net.minecraft.world.server.ServerWorld worldIn, final BlockEventData event) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> phaseState = phaseTracker.getCurrentState();
         if (phaseState.ignoresBlockEvent()) {
@@ -973,7 +971,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         // from the world before we are able to capture it.
         TileEntity tileEntity =  this.proxyBlockAccess.func_175625_s(pos);
         if (tileEntity == null && !this.proxyBlockAccess.isTileEntityRemoved(pos)) {
-            tileEntity = SpongeImplHooks.onChunkGetTileDuringRemoval((WorldServer) (Object) this, pos);
+            tileEntity = SpongeImplHooks.onChunkGetTileDuringRemoval((ServerWorld) (Object) this, pos);
         }
 
 
@@ -1074,11 +1072,11 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         TileEntity currentTile = this.getProcessingTileFromProxy(pos);
 
         if (currentTile == null && !this.proxyBlockAccess.isTileEntityRemoved(pos)) { // Make sure we're not getting a tile while it's being removed.
-            currentTile = this.getChunk(pos).func_177424_a(pos, Chunk.EnumCreateEntityType.CHECK);
+            currentTile = this.getChunk(pos).func_177424_a(pos, Chunk.CreateEntityType.CHECK);
         }
         newTile.func_174878_a(pos);
-        if (newTile.func_145831_w() != (WorldServer) (Object) this) {
-            newTile.func_145834_a((WorldServer) (Object) this);
+        if (newTile.func_145831_w() != (ServerWorld) (Object) this) {
+            newTile.func_145834_a((ServerWorld) (Object) this);
         }
         currentContext.getCapturedBlockSupplier().logTileChange(this, pos, currentTile, newTile);
         // We want to mark the tile as "invalid" only so that it does not get added to the world/chunk
@@ -1093,7 +1091,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Override
-    TileEntity impl$getTileOrNullIfMarkedForRemoval(final Chunk chunk, final BlockPos pos, final Chunk.EnumCreateEntityType creationMode) {
+    TileEntity impl$getTileOrNullIfMarkedForRemoval(final Chunk chunk, final BlockPos pos, final Chunk.CreateEntityType creationMode) {
         // Sponge - Make sure the tile entity is not actually marked for being "empty"
         if (this.bridge$isFake()) {
             return super.impl$getTileOrNullIfMarkedForRemoval(chunk, pos, creationMode);
@@ -1129,7 +1127,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             return;
         }
 
-        final ChunkProviderServer chunkProviderServer = this.getChunkProvider();
+        final ServerChunkProvider chunkProviderServer = this.getChunkProvider();
         for (final net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.func_189548_a()) {
             final ChunkBridge spongeChunk = (ChunkBridge) chunk;
             if (chunk.field_189550_d || spongeChunk.bridge$isPersistedChunk() || !this.provider.func_186056_c(chunk.field_76635_g, chunk.field_76647_h)) {
@@ -1143,7 +1141,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
             // If we reach this point the chunk leaked so queue for unload
             chunkProviderServer.func_189549_a(chunk);
-            SpongeHooks.logChunkGCQueueUnload((WorldServer) (Object) this, chunk);
+            SpongeHooks.logChunkGCQueueUnload((ServerWorld) (Object) this, chunk);
         }
     }
 
@@ -1151,7 +1149,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @Inject(method = "saveLevel", at = @At("HEAD"))
     private void onSaveLevel(final CallbackInfo ci) {
         // Always call the provider's onWorldSave method as we do not use WorldServerMulti
-        for (final WorldServer worldServer : this.server.field_71305_c) {
+        for (final ServerWorld worldServer : this.server.field_71305_c) {
             worldServer.field_73011_w.func_186057_q();
         }
     }
@@ -1168,7 +1166,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @Overwrite
     public void saveAllChunks(final boolean all, @Nullable final IProgressUpdate progressCallback) throws SessionLockException
     {
-        final ChunkProviderServer chunkproviderserver = this.getChunkProvider();
+        final ServerChunkProvider chunkproviderserver = this.getChunkProvider();
 
         if (chunkproviderserver.func_73157_c())
         {
@@ -1212,7 +1210,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
     @Redirect(method = "updateAllPlayersSleepingFlag()V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
-    private boolean isSpectatorOrIgnored(final EntityPlayer entityPlayer) {
+    private boolean isSpectatorOrIgnored(final PlayerEntity entityPlayer) {
         // spectators are excluded from the sleep tally in vanilla
         // this redirect expands that check to include sleep-ignored players as well
         final boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
@@ -1221,7 +1219,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
     @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerFullyAsleep()Z"))
-    private boolean isPlayerFullyAsleep(final EntityPlayer entityPlayer) {
+    private boolean isPlayerFullyAsleep(final PlayerEntity entityPlayer) {
         // if isPlayerFullyAsleep() returns false areAllPlayerAsleep() breaks its loop and returns false
         // this redirect forces it to return true if the player is sleep-ignored even if they're not sleeping
         final boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
@@ -1230,7 +1228,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
     @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
-    private boolean isSpectatorAndNotIgnored(final EntityPlayer entityPlayer) {
+    private boolean isSpectatorAndNotIgnored(final PlayerEntity entityPlayer) {
         // if a player is marked as a spectator areAllPlayersAsleep() breaks its loop and returns false
         // this redirect forces it to return false if a player is sleep-ignored even if they're a spectator
         final boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
@@ -1364,7 +1362,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
              */
             // Use the knockback map and set velocities, since the explosion packet isn't sent, we need to replicate
             // the players being moved.
-            for (final EntityPlayer playerEntity : this.playerEntities) {
+            for (final PlayerEntity playerEntity : this.playerEntities) {
                 final Vec3d knockback = mcExplosion.func_77277_b().get(playerEntity);
                 if (knockback != null) {
                     // In Vanilla, doExplosionB always updates the 'motion[xyz]' fields for every entity in range.
@@ -1374,7 +1372,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                     // To replicate this behavior, we manually send a velocity packet. It's critical that we don't simply
                     // add to the 'motion[xyz]' fields, as that will end up using the value set by 'doExplosionB', which must be
                     // ignored.
-                    ((EntityPlayerMP) playerEntity).field_71135_a.func_147359_a(new SPacketEntityVelocity(playerEntity.func_145782_y(), knockback.field_72450_a, knockback.field_72448_b, knockback.field_72449_c));
+                    ((ServerPlayerEntity) playerEntity).field_71135_a.func_147359_a(new SEntityVelocityPacket(playerEntity.func_145782_y(), knockback.field_72450_a, knockback.field_72448_b, knockback.field_72449_c));
                 }
             }
             // Sponge End
@@ -1403,7 +1401,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if (PhaseTracker.isEntitySpawnInvalid((Entity) entity)) {
             return true;
         }
-        return canAddEntity(entity) && PhaseTracker.getInstance().spawnEntity((WorldServer) (Object) this, entity);
+        return canAddEntity(entity) && PhaseTracker.getInstance().spawnEntity((ServerWorld) (Object) this, entity);
     }
 
 
@@ -1415,7 +1413,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
      * Purpose: Rewritten to support capturing blocks
      */
     @Override
-    public boolean setBlockState(final BlockPos pos, final IBlockState newState, final int flags) {
+    public boolean setBlockState(final BlockPos pos, final net.minecraft.block.BlockState newState, final int flags) {
         if (!this.isValid(pos)) {
             return false;
         } else if (this.worldInfo.func_76067_t() == WorldType.field_180272_g) { // isRemote is always false since this is WorldServer
@@ -1440,7 +1438,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
      */
     @Override
     public boolean destroyBlock(final BlockPos pos, final boolean dropBlock) {
-        final IBlockState iblockstate = this.getBlockState(pos);
+        final net.minecraft.block.BlockState iblockstate = this.getBlockState(pos);
         final Block block = iblockstate.func_177230_c();
 
         if (iblockstate.func_185904_a() == Material.field_151579_a) {
@@ -1469,7 +1467,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                 previousPos = null;
             }
             // Sponge End
-            block.func_176226_b((WorldServer) (Object) this, pos, iblockstate, 0);
+            block.func_176226_b((ServerWorld) (Object) this, pos, iblockstate, 0);
             // Sponge Start
             if (isCapturingBlockDrops) {
                 // we need to reset the capture pos because we've been capturing item and entity drops this way.
@@ -1504,7 +1502,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if (chunk == null) {
             return;
         }
-        final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, pos, blockIn, otherPos, chunk);
+        final Block used = PhaseTracker.validateBlockForNeighborNotification((ServerWorld) (Object) this, pos, blockIn, otherPos, chunk);
 
         PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(pos), pos, used, otherPos);
     }
@@ -1515,27 +1513,27 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
      * Technically an overwrite to properly track on *server* worlds.
      */
     @Override
-    public void notifyNeighborsOfStateExcept(final BlockPos pos, final Block blockType, final EnumFacing skipSide) {
+    public void notifyNeighborsOfStateExcept(final BlockPos pos, final Block blockType, final net.minecraft.util.Direction skipSide) {
         if (isChunkAvailable(pos)) {
             return;
         }
 
         // Check for listeners.
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
-            final EnumSet<EnumFacing> directions = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
+            final EnumSet<net.minecraft.util.Direction> directions = EnumSet.of(net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN, net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH);
             directions.remove(skipSide);
             throwNotifyNeighborAndCall(pos, blockType, directions);
             return;
         }
 
         // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
-        for (final EnumFacing direction : Constants.World.NOTIFY_DIRECTIONS) { // ORDER MATTERS, we have to keep order in which directions are notified.
+        for (final net.minecraft.util.Direction direction : Constants.World.NOTIFY_DIRECTIONS) { // ORDER MATTERS, we have to keep order in which directions are notified.
             if (direction == skipSide) {
                 continue;
             }
             final BlockPos offset = pos.func_177972_a(direction);
             final Chunk chunk = this.getChunk(pos);
-            final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, pos, blockType, offset, chunk);
+            final Block used = PhaseTracker.validateBlockForNeighborNotification((ServerWorld) (Object) this, pos, blockType, offset, chunk);
             PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(offset), offset, used, pos);
         }
 
@@ -1556,10 +1554,10 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             throwNotifyNeighborAndCall(sourcePos, sourceBlock, Constants.World.NOTIFY_DIRECTION_SET);
         } else {
             // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
-            for (final EnumFacing direction : Constants.World.NOTIFY_DIRECTIONS) {
+            for (final net.minecraft.util.Direction direction : Constants.World.NOTIFY_DIRECTIONS) {
                 final BlockPos notifyPos = sourcePos.func_177972_a(direction);
                 final Chunk chunk = this.getChunk(sourcePos);
-                final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, sourcePos, sourceBlock, notifyPos, chunk);
+                final Block used = PhaseTracker.validateBlockForNeighborNotification((ServerWorld) (Object) this, sourcePos, sourceBlock, notifyPos, chunk);
                 PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, used, sourcePos);
             }
         }
@@ -1570,10 +1568,10 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         }
     }
 
-    private void throwNotifyNeighborAndCall(final BlockPos sourcePos, final Block sourceBlock, final EnumSet<EnumFacing> notifyDirectionSet) {
+    private void throwNotifyNeighborAndCall(final BlockPos sourcePos, final Block sourceBlock, final EnumSet<net.minecraft.util.Direction> notifyDirectionSet) {
         final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent((org.spongepowered.api.world.World) this, sourcePos, notifyDirectionSet);
         if (event == null || !event.isCancelled()) {
-            for (final EnumFacing facing : Constants.World.NOTIFY_DIRECTIONS) {
+            for (final net.minecraft.util.Direction facing : Constants.World.NOTIFY_DIRECTIONS) {
                 if (event != null) {
                     final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
                     if (!event.getNeighbors().keySet().contains(direction)) {
@@ -1583,7 +1581,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
                 final BlockPos notifyPos = sourcePos.func_177972_a(facing);
                 final Chunk chunk = this.getChunk(sourcePos);
-                final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, sourcePos, sourceBlock, notifyPos, chunk);
+                final Block used = PhaseTracker.validateBlockForNeighborNotification((ServerWorld) (Object) this, sourcePos, sourceBlock, notifyPos, chunk);
                 PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, used, sourcePos);
             }
         }
@@ -1684,7 +1682,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     public <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(final Class<? extends T> clazz, final AxisAlignedBB aabb,
         @Nullable final Predicate<? super T> filter) {
         // Sponge start - get the max entity radius variable from forge
-        final double maxEntityRadius = SpongeImplHooks.getWorldMaxEntityRadius((WorldServer) (Object) this);
+        final double maxEntityRadius = SpongeImplHooks.getWorldMaxEntityRadius((ServerWorld) (Object) this);
         // j2 == minChunkX
         // k2 == maxChunkX
         // l2 == minChunkZ
@@ -1715,7 +1713,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             // We need to check for entity spawns and entity drops. If either are used, we need to offer them up in the lsit, provided
             // they pass the predicate check
             if (((IPhaseState) state).doesCaptureEntityDrops(context)) {
-                for (final EntityItem entity : context.getCapturedItems()) {
+                for (final ItemEntity entity : context.getCapturedItems()) {
                     // We can ignore the type check because we're already checking the instance class of the entity.
                     if (clazz.isInstance(entity) && entity.func_174813_aQ().func_72326_a(aabb) && (filter == null || filter.apply((T) entity))) {
                         list.add((T) entity);
@@ -1779,13 +1777,13 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if (!this.bridge$isFake() && SpongeImplHooks.isMainThread()) {
             SpongeHooks.logEntitySpawn(entity);
         }
-        if (entity instanceof EntityPlayer) {
-            final EntityPlayer entityplayer = (EntityPlayer) entity;
+        if (entity instanceof PlayerEntity) {
+            final PlayerEntity entityplayer = (PlayerEntity) entity;
             this.playerEntities.add(entityplayer);
             this.updateAllPlayersSleepingFlag();
         }
 
-        if (entity instanceof EntityLightningBolt) {
+        if (entity instanceof LightningBoltEntity) {
             this.addWeatherEffect(entity);
             return true;
         }
@@ -1808,19 +1806,19 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if (chunk == null) {
             return (SpongeBlockSnapshot) BlockSnapshot.NONE;
         }
-        final IBlockState blockState = chunk.func_177435_g(pos);
+        final net.minecraft.block.BlockState blockState = chunk.func_177435_g(pos);
         builder.worldId(((org.spongepowered.api.world.World) this).getUniqueId());
         builder.position(new Vector3i(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p()));
         builder.blockState(blockState);
         try {
-            builder.extendedState(blockState.func_185899_b((WorldServer) (Object) this, pos));
+            builder.extendedState(blockState.func_185899_b((ServerWorld) (Object) this, pos));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        final TileEntity existing = chunk.func_177424_a(pos, Chunk.EnumCreateEntityType.CHECK);
+        final TileEntity existing = chunk.func_177424_a(pos, Chunk.CreateEntityType.CHECK);
         if (existing != null) {
             try {
-                final NBTTagCompound tileData = new NBTTagCompound();
+                final CompoundNBT tileData = new CompoundNBT();
                 existing.func_189515_b(tileData);
                 builder.unsafeNbt(tileData);
             } catch (Exception e) {
@@ -1833,7 +1831,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Override
-    public SpongeBlockSnapshot bridge$createSnapshot(final IBlockState state, final IBlockState extended, final BlockPos pos, final BlockChangeFlag updateFlag) {
+    public SpongeBlockSnapshot bridge$createSnapshot(final net.minecraft.block.BlockState state, final net.minecraft.block.BlockState extended, final BlockPos pos, final BlockChangeFlag updateFlag) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.reset();
         builder.blockState(state)
@@ -1851,14 +1849,14 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         creator.ifPresent(builder::creator);
         notifier.ifPresent(builder::notifier);
         final boolean hasTileEntity = SpongeImplHooks.hasBlockTileEntity(state.func_177230_c(), state);
-        final TileEntity tileEntity = chunk.func_177424_a(pos, Chunk.EnumCreateEntityType.CHECK);
+        final TileEntity tileEntity = chunk.func_177424_a(pos, Chunk.CreateEntityType.CHECK);
         if (hasTileEntity || tileEntity != null) {
             // We MUST only check to see if a TE exists to avoid creating a new one.
             if (tileEntity != null) {
                 for (final DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators()) {
                     builder.add(manipulator);
                 }
-                final NBTTagCompound nbt = new NBTTagCompound();
+                final CompoundNBT nbt = new CompoundNBT();
                 // Some mods like OpenComputers assert if attempting to save robot while moving
                 try {
                     tileEntity.func_189515_b(nbt);
@@ -1874,7 +1872,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Override
-    public SpongeBlockSnapshot bridge$createSnapshotWithEntity(final IBlockState state, final BlockPos pos, final BlockChangeFlag updateFlag,
+    public SpongeBlockSnapshot bridge$createSnapshotWithEntity(final net.minecraft.block.BlockState state, final BlockPos pos, final BlockChangeFlag updateFlag,
         @Nullable final TileEntity tileEntity) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.reset();
@@ -1883,7 +1881,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             .worldId(((org.spongepowered.api.world.World) this).getUniqueId())
             .position(VecHelper.toVector3i(pos));
         if (tileEntity != null) { // Store the information of the tile entity onto the snapshot
-            final NBTTagCompound nbt = new NBTTagCompound();
+            final CompoundNBT nbt = new CompoundNBT();
             // Some mods like OpenComputers assert if attempting to save robot while moving
             try {
                 tileEntity.func_189515_b(nbt);
@@ -1918,13 +1916,13 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @Overwrite
     public Explosion newExplosion(@Nullable final net.minecraft.entity.Entity entityIn, final double x, final double y, final double z, final float strength, final boolean isFlaming,
             final boolean isSmoking) {
-        Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
+        Explosion explosion = new Explosion((ServerWorld) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
 
         // Sponge Start - all the remaining behavior is in bridge$triggerInternalExplosion().
         explosion = bridge$triggerInternalExplosion((org.spongepowered.api.world.explosion.Explosion) explosion, e -> GeneralPhase.State.EXPLOSION
                 .createPhaseContext()
                 .explosion(e)
-                .potentialExplosionSource((WorldServer) (Object) this, entityIn));
+                .potentialExplosionSource((ServerWorld) (Object) this, entityIn));
         // Sponge End
         return explosion;
     }
@@ -1945,7 +1943,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
      * @return The block state at the desired position
      */
     @Override
-    public IBlockState getBlockState(final BlockPos pos) {
+    public net.minecraft.block.BlockState getBlockState(final BlockPos pos) {
         // Sponge - Replace with inlined method
         // if (this.isOutsideBuildHeight(pos)) // Vanilla
         if (((BlockPosBridge) pos).bridge$isInvalidYPosition()) {
@@ -1963,7 +1961,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         }
         try {
             // Proxies have block changes for bulk special captures
-            final IBlockState blockState = this.proxyBlockAccess.func_180495_p(pos);
+            final net.minecraft.block.BlockState blockState = this.proxyBlockAccess.func_180495_p(pos);
             if (blockState != null) {
                 return blockState;
             }
@@ -1994,7 +1992,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
      */
     @Override
     public boolean spongeIsAreaLoadedForCheckingLight(
-        final World thisWorld, final BlockPos pos, final int radius, final boolean allowEmtpy, final EnumLightType lightType,
+        final World thisWorld, final BlockPos pos, final int radius, final boolean allowEmtpy, final LightType lightType,
             final BlockPos samePosition) {
         final Chunk chunk = ((ChunkProviderBridge) this.getChunkProvider())
             .bridge$getLoadedChunkWithoutMarkingActive(pos.func_177958_n() >> 4, pos.func_177952_p() >> 4);
@@ -2095,7 +2093,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
      * @return The light for the defined sky type and block position
      */
     @Override
-    public int getLightFor(final EnumLightType type, BlockPos pos) {
+    public int getLightFor(final LightType type, BlockPos pos) {
         if (pos.func_177956_o() < 0) {
             pos = new BlockPos(pos.func_177958_n(), 0, pos.func_177952_p());
         }
@@ -2401,7 +2399,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @Redirect(method = "tickUpdates",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/WorldServer;scheduleUpdate(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;I)V"))
-    private void redirectDontRescheduleBlockUpdates(final WorldServer worldServer, final BlockPos pos, final Block blockIn, final int delay) {
+    private void redirectDontRescheduleBlockUpdates(final ServerWorld worldServer, final BlockPos pos, final Block blockIn, final int delay) {
     }
 
     // TIMINGS

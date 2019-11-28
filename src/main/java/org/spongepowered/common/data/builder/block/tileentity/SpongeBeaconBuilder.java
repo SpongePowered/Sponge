@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.potion.Potion;
-import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -36,6 +34,8 @@ import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBeacon
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.potion.Effect;
+import net.minecraft.tileentity.BeaconTileEntity;
 
 public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
 
@@ -49,15 +49,15 @@ public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
         return super.buildContent(container).flatMap(beacon -> {
             final BeaconData beaconData = new SpongeBeaconData();
             container.getInt(Constants.TileEntity.Beacon.PRIMARY)
-                .map(Potion::func_188412_a)
+                .map(Effect::func_188412_a)
                 .map(potion -> (PotionEffectType) potion)
                 .ifPresent(potion -> beaconData.set(Keys.BEACON_PRIMARY_EFFECT, Optional.of(potion)));
             container.getInt(Constants.TileEntity.Beacon.SECONDARY)
-                .map(Potion::func_188412_a)
+                .map(Effect::func_188412_a)
                 .map(potion -> (PotionEffectType) potion)
                 .ifPresent(potion -> beaconData.set(Keys.BEACON_SECONDARY_EFFECT, Optional.of(potion)));
             beacon.offer(beaconData);
-            ((TileEntityBeacon) beacon).func_145829_t();
+            ((BeaconTileEntity) beacon).func_145829_t();
             return Optional.of(beacon);
         });
     }

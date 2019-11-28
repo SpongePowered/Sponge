@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.item.EntityFallingBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -35,11 +34,12 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.item.FallingBlockEntity;
 
-public class CanDropAsItemValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlock, Boolean, Value<Boolean>> {
+public class CanDropAsItemValueProcessor extends AbstractSpongeValueProcessor<FallingBlockEntity, Boolean, Value<Boolean>> {
 
     public CanDropAsItemValueProcessor() {
-        super(EntityFallingBlock.class, Keys.CAN_DROP_AS_ITEM);
+        super(FallingBlockEntity.class, Keys.CAN_DROP_AS_ITEM);
     }
 
     @Override
@@ -48,13 +48,13 @@ public class CanDropAsItemValueProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    protected boolean set(EntityFallingBlock container, Boolean value) {
+    protected boolean set(FallingBlockEntity container, Boolean value) {
         container.field_145813_c = value;
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityFallingBlock container) {
+    protected Optional<Boolean> getVal(FallingBlockEntity container) {
         return Optional.of(container.field_145813_c);
     }
 

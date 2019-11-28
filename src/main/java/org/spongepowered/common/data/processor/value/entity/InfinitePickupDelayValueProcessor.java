@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,11 +35,12 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.item.ItemEntity;
 
-public class InfinitePickupDelayValueProcessor extends AbstractSpongeValueProcessor<EntityItem, Boolean, Value<Boolean>> {
+public class InfinitePickupDelayValueProcessor extends AbstractSpongeValueProcessor<ItemEntity, Boolean, Value<Boolean>> {
 
     public InfinitePickupDelayValueProcessor() {
-        super(EntityItem.class, Keys.INFINITE_PICKUP_DELAY);
+        super(ItemEntity.class, Keys.INFINITE_PICKUP_DELAY);
     }
 
     @Override
@@ -49,13 +49,13 @@ public class InfinitePickupDelayValueProcessor extends AbstractSpongeValueProces
     }
 
     @Override
-    protected boolean set(EntityItem container, Boolean value) {
+    protected boolean set(ItemEntity container, Boolean value) {
         ((EntityItemBridge) container).bridge$setPickupDelay(value ? Constants.Entity.Item.MAGIC_NO_PICKUP : Constants.Entity.Item.DEFAULT_PICKUP_DELAY, value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityItem container) {
+    protected Optional<Boolean> getVal(ItemEntity container) {
         return Optional.of(((EntityItemBridge) container).bridge$infinitePickupDelay());
     }
 
@@ -65,7 +65,7 @@ public class InfinitePickupDelayValueProcessor extends AbstractSpongeValueProces
     }
 
     @Override
-    protected boolean supports(EntityItem container) {
+    protected boolean supports(ItemEntity container) {
         return true;
     }
 

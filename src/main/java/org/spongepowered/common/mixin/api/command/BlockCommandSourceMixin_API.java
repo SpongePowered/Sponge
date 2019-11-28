@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.command;
 
-import net.minecraft.entity.item.EntityMinecartCommandBlock;
-import net.minecraft.tileentity.TileEntityCommandBlock;
+import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
+import net.minecraft.tileentity.CommandBlockTileEntity;
 import org.spongepowered.api.command.source.CommandBlockSource;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
 @NonnullByDefault
-@Mixin(value = {TileEntityCommandBlock.class, EntityMinecartCommandBlock.class}, targets = "net/minecraft/tileentity/TileEntitySign$1")
+@Mixin(value = {CommandBlockTileEntity.class, MinecartCommandBlockEntity.class}, targets = "net/minecraft/tileentity/TileEntitySign$1")
 public abstract class BlockCommandSourceMixin_API implements CommandBlockSource {
 
     @Override

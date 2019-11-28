@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockDaylightDetector;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -38,13 +36,14 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeRedstonePoweredData;
 
 import java.util.Optional;
+import net.minecraft.block.DaylightDetectorBlock;
 
-@Mixin(BlockDaylightDetector.class)
+@Mixin(DaylightDetectorBlock.class)
 public abstract class BlockDaylightDetectorMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getPowerFor(blockState));
     }
 
@@ -54,7 +53,7 @@ public abstract class BlockDaylightDetectorMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableRedstonePoweredData) {
             return Optional.of((BlockState) blockState);
         }
@@ -62,14 +61,14 @@ public abstract class BlockDaylightDetectorMixin extends BlockMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.POWER)) {
             return Optional.of((BlockState) blockState);
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableRedstonePoweredData impl$getPowerFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.func_177229_b(BlockDaylightDetector.field_176436_a));
+    private ImmutableRedstonePoweredData impl$getPowerFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.func_177229_b(DaylightDetectorBlock.field_176436_a));
     }
 }

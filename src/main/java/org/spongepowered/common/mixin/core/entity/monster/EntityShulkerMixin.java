@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.monster.EntityShulker;
-import net.minecraft.item.EnumDyeColor;
+import net.minecraft.entity.monster.ShulkerEntity;
 import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
@@ -37,23 +35,23 @@ import org.spongepowered.common.bridge.entity.monster.EntityShulkerBridge;
 import org.spongepowered.common.mixin.core.entity.EntityLivingMixin;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(EntityShulker.class)
+@Mixin(ShulkerEntity.class)
 public abstract class EntityShulkerMixin extends EntityLivingMixin implements EntityShulkerBridge {
 
     @Shadow @Final protected static DataParameter<Byte> COLOR;
 
-    @Shadow @Final protected static DataParameter<EnumFacing> ATTACHED_FACE;
+    @Shadow @Final protected static DataParameter<net.minecraft.util.Direction> ATTACHED_FACE;
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public DyeColor bridge$getColor() {
-        return (DyeColor) (Object) EnumDyeColor.func_176764_b(this.dataManager.func_187225_a(COLOR) & 15);
+        return (DyeColor) (Object) net.minecraft.item.DyeColor.func_176764_b(this.dataManager.func_187225_a(COLOR) & 15);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public void bridge$setColor(final DyeColor color) {
-        this.dataManager.func_187227_b(COLOR, (byte) (this.dataManager.func_187225_a(COLOR) & 240 | ((EnumDyeColor) (Object) color).func_176765_a() & 15));
+        this.dataManager.func_187227_b(COLOR, (byte) (this.dataManager.func_187225_a(COLOR) & 240 | ((net.minecraft.item.DyeColor) (Object) color).func_176765_a() & 15));
     }
 
     @Override

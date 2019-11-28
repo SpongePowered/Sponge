@@ -25,22 +25,22 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntitySpawnPlacementRegistry;
-import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.entity.IEntityLivingData;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.ILivingEntityData;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldEntitySpawner;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.spawner.WorldEntitySpawner;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
@@ -92,7 +92,7 @@ public abstract class WorldEntitySpawnerMixin {
      * @return The amount of entities spawned
      */
     @Overwrite
-    public int findChunksForSpawning(final WorldServer world, final boolean spawnHostileMobs, final boolean spawnPeacefulMobs, final boolean spawnOnSetTickRate) {
+    public int findChunksForSpawning(final ServerWorld world, final boolean spawnHostileMobs, final boolean spawnPeacefulMobs, final boolean spawnOnSetTickRate) {
         if (!spawnHostileMobs && !spawnPeacefulMobs) {
             return 0;
         }
@@ -118,7 +118,7 @@ public abstract class WorldEntitySpawnerMixin {
             // mob spawn range set by server.
             final int MOB_SPAWN_COUNT_DIV = (2 * mobSpawnRange + 1) * (2 * mobSpawnRange + 1);
 
-            for (final EntityPlayer entityplayer : world.field_73010_i) {
+            for (final PlayerEntity entityplayer : world.field_73010_i) {
                 // We treat players who do not affect spawning as "spectators"
                 if (!((EntityPlayerBridge) entityplayer).bridge$affectsSpawning() || entityplayer.func_175149_v()) {
                     continue;
@@ -165,19 +165,19 @@ public abstract class WorldEntitySpawnerMixin {
             final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.func_72912_H()).bridge$getConfigAdapter();
 
             labelOuterLoop:
-            for (final EnumCreatureType enumCreatureType : EnumCreatureType.values()) {
+            for (final EntityClassification enumCreatureType : EntityClassification.values()) {
                 int limit = 0;
                 int tickRate = 0;
-                if (enumCreatureType == EnumCreatureType.MONSTER) {
+                if (enumCreatureType == EntityClassification.MONSTER) {
                     limit = configAdapter.getConfig().getSpawner().getMonsterSpawnLimit();
                     tickRate = configAdapter.getConfig().getSpawner().getMonsterTickRate();
-                } else if (enumCreatureType == EnumCreatureType.CREATURE) {
+                } else if (enumCreatureType == EntityClassification.CREATURE) {
                     limit = configAdapter.getConfig().getSpawner().getAnimalSpawnLimit();
                     tickRate = configAdapter.getConfig().getSpawner().getAnimalTickRate();
-                } else if (enumCreatureType == EnumCreatureType.WATER_CREATURE) {
+                } else if (enumCreatureType == EntityClassification.WATER_CREATURE) {
                     limit = configAdapter.getConfig().getSpawner().getAquaticSpawnLimit();
                     tickRate = configAdapter.getConfig().getSpawner().getAquaticTickRate();
-                } else if (enumCreatureType == EnumCreatureType.AMBIENT) {
+                } else if (enumCreatureType == EntityClassification.AMBIENT) {
                     limit = configAdapter.getConfig().getSpawner().getAmbientSpawnLimit();
                     tickRate = configAdapter.getConfig().getSpawner().getAmbientTickRate();
                 }
@@ -203,7 +203,7 @@ public abstract class WorldEntitySpawnerMixin {
                         final int k1 = blockpos.func_177958_n();
                         final int l1 = blockpos.func_177956_o();
                         final int i2 = blockpos.func_177952_p();
-                        final IBlockState iblockstate = world.func_180495_p(blockpos);
+                        final BlockState iblockstate = world.func_180495_p(blockpos);
 
                         if (!iblockstate.func_185915_l()) {
                             int spawnCount = 0;
@@ -212,7 +212,7 @@ public abstract class WorldEntitySpawnerMixin {
                                 int i3 = l1;
                                 int j3 = i2;
                                 Biome.SpawnListEntry spawnListEntry = null;
-                                IEntityLivingData ientitylivingdata = null;
+                                ILivingEntityData ientitylivingdata = null;
                                 final int l3 = MathHelper.func_76143_f(Math.random() * 4.0D);
 
                                 for (int i4 = 0; i4 < l3; ++i4) {
@@ -254,7 +254,7 @@ public abstract class WorldEntitySpawnerMixin {
                                             && WorldEntitySpawner.func_180267_a(
                                             EntitySpawnPlacementRegistry.func_180109_a(spawnListEntry.field_76300_b), world,
                                             mutableBlockPos)) {
-                                            final EntityLiving entityliving;
+                                            final MobEntity entityliving;
 
                                             try {
                                                 entityliving =
@@ -360,7 +360,7 @@ public abstract class WorldEntitySpawnerMixin {
     @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target =
         "Lnet/minecraft/world/WorldEntitySpawner;canCreatureTypeSpawnAtLocation(Lnet/minecraft/entity/EntityLiving$SpawnPlacementType;"
         + "Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Z"))
-    private static boolean onCanGenerate(final EntityLiving.SpawnPlacementType type, final World worldIn, final BlockPos pos) {
+    private static boolean onCanGenerate(final MobEntity.SpawnPlacementType type, final World worldIn, final BlockPos pos) {
         return WorldEntitySpawner.func_180267_a(type, worldIn, pos) && check(pos, worldIn);
     }
 

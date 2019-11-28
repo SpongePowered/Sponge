@@ -25,12 +25,11 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockDispenser;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.dispenser.BlockSourceImpl;
-import net.minecraft.dispenser.IBehaviorDispenseItem;
+import net.minecraft.block.DispenserBlock;
+import net.minecraft.dispenser.IDispenseItemBehavior;
+import net.minecraft.dispenser.ProxyBlockSource;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityDispenser;
+import net.minecraft.tileentity.DispenserTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
@@ -72,7 +71,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(BlockDispenser.class)
+@Mixin(DispenserBlock.class)
 public abstract class BlockDispenserMixin extends BlockMixin {
 
     private ItemStack originalItem = ItemStack.field_190927_a;
@@ -82,7 +81,7 @@ public abstract class BlockDispenserMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getDirectionalData(blockState));
     }
 
@@ -92,30 +91,30 @@ public abstract class BlockDispenserMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirectionalData) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockDispenser.field_176441_a, Constants.DirectionFunctions
+            return Optional.of((BlockState) blockState.func_177226_a(DispenserBlock.field_176441_a, Constants.DirectionFunctions
                 .getFor(((ImmutableDirectionalData) manipulator).direction().get())));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DIRECTION)) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockDispenser.field_176441_a, Constants.DirectionFunctions.getFor((Direction) value)));
+            return Optional.of((BlockState) blockState.func_177226_a(DispenserBlock.field_176441_a, Constants.DirectionFunctions.getFor((Direction) value)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
+    private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockDispenser.field_176441_a)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(DispenserBlock.field_176441_a)));
     }
 
     @Inject(method = "dispense", at = @At(value = "HEAD"))
     private void impl$CreateContextOnDispensing(final World worldIn, final BlockPos pos, final CallbackInfo ci) {
-        final IBlockState state = worldIn.func_180495_p(pos);
+        final net.minecraft.block.BlockState state = worldIn.func_180495_p(pos);
         final SpongeBlockSnapshot spongeBlockSnapshot = ((WorldServerBridge) worldIn).bridge$createSnapshot(state, state, pos, BlockChangeFlags.ALL);
         final ChunkBridge mixinChunk = (ChunkBridge) worldIn.func_175726_f(pos);
         this.impl$context = BlockPhase.State.DISPENSE.createPhaseContext()
@@ -143,12 +142,12 @@ public abstract class BlockDispenserMixin extends BlockMixin {
         locals = LocalCapture.CAPTURE_FAILSOFT
     )
     private void impl$InjectToStoreOriginalItem(
-        final World worldIn, final BlockPos pos, final CallbackInfo ci, final BlockSourceImpl source, final TileEntityDispenser dispenser, final int slotIndex, final ItemStack dispensedItem, final IBehaviorDispenseItem behavior) {
+        final World worldIn, final BlockPos pos, final CallbackInfo ci, final ProxyBlockSource source, final DispenserTileEntity dispenser, final int slotIndex, final ItemStack dispensedItem, final IDispenseItemBehavior behavior) {
         this.originalItem = ItemStackUtil.cloneDefensiveNative(dispensedItem);
     }
 
     @Redirect(method = "dispense", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityDispenser;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
-    private void impl$SetInventoryContentsThrowingEvent(final TileEntityDispenser dispenser, final int index, @Nullable final ItemStack stack) {
+    private void impl$SetInventoryContentsThrowingEvent(final DispenserTileEntity dispenser, final int index, @Nullable final ItemStack stack) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         // If we captured nothing, simply set the slot contents and return
         if (context.getCapturedItemsOrEmptyList().isEmpty()) {

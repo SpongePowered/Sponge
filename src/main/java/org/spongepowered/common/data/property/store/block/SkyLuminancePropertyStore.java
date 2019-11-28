@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.world.EnumLightType;
+import net.minecraft.world.LightType;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.SkyLuminanceProperty;
@@ -42,7 +42,7 @@ public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore<SkyLu
     public Optional<SkyLuminanceProperty> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location && ((Location<?>) propertyHolder).getExtent() instanceof Chunk) {
             final Chunk chunk = (Chunk) ((Location<?>) propertyHolder).getExtent();
-            final float light = chunk.func_177413_a(EnumLightType.SKY, VecHelper.toBlockPos((Location<?>) propertyHolder));
+            final float light = chunk.func_177413_a(LightType.SKY, VecHelper.toBlockPos((Location<?>) propertyHolder));
             return Optional.of(new SkyLuminanceProperty(light));
         }
         return super.getFor(propertyHolder);
@@ -51,7 +51,7 @@ public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore<SkyLu
     @Override
     public Optional<SkyLuminanceProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final float light = world.func_175642_b(EnumLightType.SKY, VecHelper.toBlockPos(location));
+        final float light = world.func_175642_b(LightType.SKY, VecHelper.toBlockPos(location));
         return Optional.of(new SkyLuminanceProperty(light));
     }
 

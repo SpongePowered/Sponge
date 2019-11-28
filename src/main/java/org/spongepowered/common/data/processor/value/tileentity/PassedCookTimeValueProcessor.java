@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
-import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -34,11 +33,12 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
+import net.minecraft.tileentity.FurnaceTileEntity;
 
-public class PassedCookTimeValueProcessor extends AbstractSpongeValueProcessor<TileEntityFurnace, Integer, MutableBoundedValue<Integer>> {
+public class PassedCookTimeValueProcessor extends AbstractSpongeValueProcessor<FurnaceTileEntity, Integer, MutableBoundedValue<Integer>> {
 
     public PassedCookTimeValueProcessor() {
-        super(TileEntityFurnace.class, Keys.PASSED_COOK_TIME);
+        super(FurnaceTileEntity.class, Keys.PASSED_COOK_TIME);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class PassedCookTimeValueProcessor extends AbstractSpongeValueProcessor<T
     }
 
     @Override
-    protected boolean set(TileEntityFurnace container, Integer value) {
+    protected boolean set(FurnaceTileEntity container, Integer value) {
         if(container.func_70301_a(0).func_190926_b() || value > container.func_174887_a_(3)){ //The passedCookTime of nothing cannot be set | Cannot be higher than the maximum
             return false;
         }
@@ -62,7 +62,7 @@ public class PassedCookTimeValueProcessor extends AbstractSpongeValueProcessor<T
     }
 
     @Override
-    protected Optional<Integer> getVal(TileEntityFurnace container) {
+    protected Optional<Integer> getVal(FurnaceTileEntity container) {
         return Optional.of(container.func_70301_a(0).func_190926_b() ? container.func_174887_a_(2) : 0); //The passedCookTime of nothing cannot be set
     }
 

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.tileentity.TileEntityShulkerBox;
 import org.spongepowered.api.block.tileentity.carrier.ShulkerBox;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -40,12 +38,13 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
+import net.minecraft.tileentity.ShulkerBoxTileEntity;
 
 @NonnullByDefault
-@Mixin(TileEntityShulkerBox.class)
+@Mixin(ShulkerBoxTileEntity.class)
 public abstract class TileEntityShulkerBoxMixin_API extends TileEntityLockableLootMixin_API<ShulkerBox> implements ShulkerBox {
 
-    @Shadow private EnumDyeColor color;
+    @Shadow private net.minecraft.item.DyeColor color;
 
 
     @SuppressWarnings("ConstantConditions")

@@ -31,7 +31,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.entity.passive.EntityVillager;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
@@ -45,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 
 /*
  * Basically, until Forge figures out their VillagerRegistry stuff, we can only hope to
@@ -143,9 +143,9 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
         for (Career career: CareerRegistryModule.getInstance().getAll()) {
             SpongeCareer spongeCareer = (SpongeCareer) career;
 
-            EntityVillager.ITradeList[][] careerLevels = EntityVillagerAccessor.accessor$getDefaultTradeListMapping()[((SpongeProfession) spongeCareer.getProfession()).type][spongeCareer.type];
+            VillagerEntity.ITradeList[][] careerLevels = EntityVillagerAccessor.accessor$getDefaultTradeListMapping()[((SpongeProfession) spongeCareer.getProfession()).type][spongeCareer.type];
             for (int level = 0; level < careerLevels.length; level++) {
-                EntityVillager.ITradeList[] offers = careerLevels[level];
+                VillagerEntity.ITradeList[] offers = careerLevels[level];
                 ImmutableList.Builder<TradeOfferListMutator> builder = ImmutableList.builder();
 
                 for (int i = 0; i < offers.length; i++) {
@@ -157,7 +157,7 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
         }
     }
 
-    private static TradeOfferListMutator generatorFor(EntityVillager.ITradeList iTradeList) {
+    private static TradeOfferListMutator generatorFor(VillagerEntity.ITradeList iTradeList) {
         return (TradeOfferListMutator) iTradeList;
     }
 

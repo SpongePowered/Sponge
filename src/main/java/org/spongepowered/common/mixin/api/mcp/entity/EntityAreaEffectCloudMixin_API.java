@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
-import net.minecraft.entity.EntityAreaEffectCloud;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.potion.PotionType;
+import net.minecraft.entity.AreaEffectCloudEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.AreaEffectCloudData;
@@ -50,11 +50,11 @@ import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings("unchecked")
-@Mixin(EntityAreaEffectCloud.class)
+@Mixin(AreaEffectCloudEntity.class)
 public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API implements AreaEffectCloud {
 
-    @Shadow private PotionType potion;
-    @Shadow @Final private List<net.minecraft.potion.PotionEffect> effects;
+    @Shadow private Potion potion;
+    @Shadow @Final private List<net.minecraft.potion.EffectInstance> effects;
     @Shadow private int duration;
     @Shadow private int waitTime;
     @Shadow private int reapplicationDelay;
@@ -62,7 +62,7 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
     @Shadow private int durationOnUse;
     @Shadow private float radiusOnUse;
     @Shadow private float radiusPerTick;
-    @Shadow private EntityLivingBase owner;
+    @Shadow private LivingEntity owner;
     @Shadow private UUID ownerUniqueId;
 
     @Shadow public abstract float getRadius();

@@ -25,8 +25,8 @@
 package org.spongepowered.common.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.spawner.WorldEntitySpawner;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;

@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTracker;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,7 +42,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(EntityTracker.class)
 public abstract class EntityTrackerMixin {
 
-    @Shadow @Final private WorldServer world;
+    @Shadow @Final private ServerWorld world;
 
     @Shadow
     public abstract void track(Entity entityIn, int trackingRange, int updateFrequency);

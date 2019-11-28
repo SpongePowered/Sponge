@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.tileentity.TileEntityEndGateway;
+import net.minecraft.tileentity.EndGatewayTileEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -47,19 +47,19 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public final class EndGatewayDataProcessor extends AbstractTileEntityDataProcessor<TileEntityEndGateway, EndGatewayData, ImmutableEndGatewayData> {
+public final class EndGatewayDataProcessor extends AbstractTileEntityDataProcessor<EndGatewayTileEntity, EndGatewayData, ImmutableEndGatewayData> {
 
     public EndGatewayDataProcessor() {
-        super(TileEntityEndGateway.class);
+        super(EndGatewayTileEntity.class);
     }
 
     @Override
-    protected boolean doesDataExist(final TileEntityEndGateway container) {
+    protected boolean doesDataExist(final EndGatewayTileEntity container) {
         return true;
     }
 
     @Override
-    protected boolean set(final TileEntityEndGateway container, final Map<Key<?>, Object> map) {
+    protected boolean set(final EndGatewayTileEntity container, final Map<Key<?>, Object> map) {
         @Nullable final Vector3i exitPortal = (Vector3i) map.get(Keys.EXIT_POSITION);
         if (exitPortal != null) {
             ((TileEntityEndGatewayAccessor) container).accessor$SetExit(new BlockPos(exitPortal.getX(), exitPortal.getY(), exitPortal.getZ()));
@@ -81,7 +81,7 @@ public final class EndGatewayDataProcessor extends AbstractTileEntityDataProcess
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(final TileEntityEndGateway container) {
+    protected Map<Key<?>, ?> getValues(final EndGatewayTileEntity container) {
         final ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
         builder.put(Keys.EXIT_POSITION, VecHelper.toVector3i(((TileEntityEndGatewayAccessor) container).accessor$getExitPortal()));
         builder.put(Keys.EXACT_TELEPORT, ((TileEntityEndGatewayAccessor) container).accessor$getExactTeleport());

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
-import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.CreatureEntity;
 import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityCreature.class)
+@Mixin(CreatureEntity.class)
 public abstract class EntityCreatureMixin_API extends EntityLivingMixin_API implements Creature {
 
 }

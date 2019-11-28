@@ -25,14 +25,14 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import javax.annotation.Nullable;
+import net.minecraft.tileentity.SkullTileEntity;
 
-@Mixin(TileEntitySkull.class)
+@Mixin(SkullTileEntity.class)
 public interface TileEntitySkullAccessor {
 
     @Nullable

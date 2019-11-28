@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import org.spongepowered.api.data.property.block.ReplaceableProperty;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -46,7 +46,7 @@ public class ReplaceablePropertyStore extends AbstractBlockPropertyStore<Replace
     }
 
     @Override
-    protected Optional<ReplaceableProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
+    protected Optional<ReplaceableProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
         return Optional.of(block.func_185904_a().func_76222_j() ? TRUE : FALSE);
     }
 

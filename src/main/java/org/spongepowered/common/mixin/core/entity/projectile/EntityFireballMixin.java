@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.projectile.EntityFireball;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.projectile.DamagingProjectileEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,26 +37,26 @@ import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
-@Mixin(EntityFireball.class)
+@Mixin(DamagingProjectileEntity.class)
 public abstract class EntityFireballMixin extends EntityMixin {
 
-    @Shadow public EntityLivingBase shootingEntity;
+    @Shadow public LivingEntity shootingEntity;
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, ((Fireball) this));
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, ((Fireball) this).getShooter(), this.shootingEntity);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
-    private void onProjectileImpact(EntityFireball projectile, RayTraceResult movingObjectPosition) {
+    private void onProjectileImpact(DamagingProjectileEntity projectile, RayTraceResult movingObjectPosition) {
         if (this.world.field_72995_K || movingObjectPosition.field_72313_a == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;

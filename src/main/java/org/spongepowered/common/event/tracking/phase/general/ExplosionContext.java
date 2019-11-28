@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.general;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -50,7 +50,7 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         return this;
     }
 
-    public ExplosionContext potentialExplosionSource(final WorldServer worldServer, @Nullable final Entity entityIn) {
+    public ExplosionContext potentialExplosionSource(final ServerWorld worldServer, @Nullable final Entity entityIn) {
         if (entityIn != null) {
             this.source(entityIn);
         } else {

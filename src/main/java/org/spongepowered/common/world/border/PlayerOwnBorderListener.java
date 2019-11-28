@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.world.border;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.SPacketWorldBorder;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.play.server.SWorldBorderPacket;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.entity.living.player.Player;
@@ -34,35 +34,35 @@ import org.spongepowered.common.mixin.core.world.border.WorldBorderAccessor;
 
 public class PlayerOwnBorderListener implements IBorderListener {
 
-    private EntityPlayerMP player;
+    private ServerPlayerEntity player;
 
-    public PlayerOwnBorderListener(EntityPlayerMP player) {
+    public PlayerOwnBorderListener(ServerPlayerEntity player) {
         this.player = player;
     }
 
     @Override
     public void func_177694_a(WorldBorder border, double newSize) {
-        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_SIZE));
+        sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_SIZE));
     }
 
     @Override
     public void func_177692_a(WorldBorder border, double oldSize, double newSize, long time) {
-        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.LERP_SIZE));
+        sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.LERP_SIZE));
     }
 
     @Override
     public void func_177693_a(WorldBorder border, double x, double z) {
-        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_CENTER));
+        sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_CENTER));
     }
 
     @Override
     public void func_177691_a(WorldBorder border, int newTime) {
-        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_WARNING_TIME));
+        sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_TIME));
     }
 
     @Override
     public void func_177690_b(WorldBorder border, int newDistance) {
-        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_WARNING_BLOCKS));
+        sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_BLOCKS));
     }
 
     @Override
@@ -80,7 +80,7 @@ public class PlayerOwnBorderListener implements IBorderListener {
         ((Player) this.player).getWorldBorder().ifPresent(border -> ((WorldBorderAccessor) border).accessor$getListeners().remove(this));
     }
 
-    private void sendBorderPacket(Packet<?> packet) {
+    private void sendBorderPacket(IPacket<?> packet) {
         this.player.field_71135_a.func_147359_a(packet);
     }
 }

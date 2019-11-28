@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockWall;
+import net.minecraft.block.WallBlock;
 import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.data.type.WallTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 @RegisterCatalog(WallTypes.class)
-public final class WallTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockWall.EnumType, WallType> {
+public final class WallTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<WallBlock.EnumType, WallType> {
 
     @Override
-    protected BlockWall.EnumType[] getValues() {
-        return BlockWall.EnumType.values();
+    protected WallBlock.EnumType[] getValues() {
+        return WallBlock.EnumType.values();
     }
 }

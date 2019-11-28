@@ -26,14 +26,13 @@ package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemSword;
-import net.minecraft.item.ItemTool;
+import net.minecraft.item.ToolItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Set;
 
-@Mixin(ItemTool.class)
+@Mixin(ToolItem.class)
 public interface ItemToolAccessor {
 
     @Accessor("effectiveBlocks") Set<Block> accessor$getEffectiveBlocks();

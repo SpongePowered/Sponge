@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.chunk;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BitArray;
 import net.minecraft.world.chunk.BlockStateContainer;
@@ -48,7 +48,7 @@ public abstract class BlockStateContainerMixin implements BlockStateContainerBri
     @Shadow protected IBlockStatePalette palette;
     @Shadow protected BitArray storage;
 
-    @Shadow protected abstract void set(int index, IBlockState state);
+    @Shadow protected abstract void set(int index, BlockState state);
 
     @Override
     public int bridge$getBits() {
@@ -75,8 +75,8 @@ public abstract class BlockStateContainerMixin implements BlockStateContainerBri
             method = "setDataFromNBT",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/BlockStateContainer;set(ILnet/minecraft/block/state/IBlockState;)V")
     )
-    private void setFixedBlockState(BlockStateContainer this_, int i, IBlockState state, byte[] id, NibbleArray meta, @Nullable NibbleArray add) {
-        IBlockState newState;
+    private void setFixedBlockState(BlockStateContainer this_, int i, BlockState state, byte[] id, NibbleArray meta, @Nullable NibbleArray add) {
+        BlockState newState;
 
         if (state != null) {
             newState = state;

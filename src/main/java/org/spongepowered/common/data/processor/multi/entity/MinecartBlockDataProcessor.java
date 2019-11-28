@@ -25,8 +25,6 @@
 package org.spongepowered.common.data.processor.multi.entity;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityMinecart;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -42,31 +40,32 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 
-public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<EntityMinecart, MinecartBlockData, ImmutableMinecartBlockData> {
+public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<AbstractMinecartEntity, MinecartBlockData, ImmutableMinecartBlockData> {
 
     public MinecartBlockDataProcessor() {
-        super(EntityMinecart.class);
+        super(AbstractMinecartEntity.class);
     }
 
     @Override
-    protected boolean doesDataExist(EntityMinecart entity) {
+    protected boolean doesDataExist(AbstractMinecartEntity entity) {
         return entity.func_94100_s();
     }
 
     @Override
-    protected boolean set(EntityMinecart entity, Map<Key<?>, Object> keyValues) {
+    protected boolean set(AbstractMinecartEntity entity, Map<Key<?>, Object> keyValues) {
         BlockState type = (BlockState) keyValues.get(Keys.REPRESENTED_BLOCK);
         int offset = (Integer) keyValues.get(Keys.OFFSET);
 
         entity.func_94086_l(offset);
-        entity.func_174899_a((IBlockState) type);
+        entity.func_174899_a((net.minecraft.block.BlockState) type);
 
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityMinecart entity) {
+    protected Map<Key<?>, ?> getValues(AbstractMinecartEntity entity) {
         BlockState state = (BlockState) entity.func_174897_t();
         int offset = entity.func_94099_q();
         return ImmutableMap.of(Keys.REPRESENTED_BLOCK, state, Keys.OFFSET, offset);
@@ -95,8 +94,8 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Enti
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        if(dataHolder instanceof EntityMinecart) {
-            EntityMinecart cart = (EntityMinecart) dataHolder;
+        if(dataHolder instanceof AbstractMinecartEntity) {
+            AbstractMinecartEntity cart = (AbstractMinecartEntity) dataHolder;
             DataTransactionResult.Builder builder = DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS);
             if(cart.func_94100_s()) {
                 ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.func_174897_t());

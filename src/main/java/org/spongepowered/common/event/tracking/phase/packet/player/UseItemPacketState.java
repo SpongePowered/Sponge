@@ -25,12 +25,12 @@
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
-import net.minecraft.util.EnumHand;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.play.client.CPlayerTryUseItemPacket;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -82,8 +82,8 @@ public final class UseItemPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
-        final CPacketPlayerTryUseItem placeBlock = (CPacketPlayerTryUseItem) packet;
+    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
+        final CPlayerTryUseItemPacket placeBlock = (CPlayerTryUseItemPacket) packet;
         final net.minecraft.item.ItemStack usedItem = playerMP.func_184586_b(placeBlock.func_187028_a());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
         context.itemUsed(itemstack);
@@ -96,7 +96,7 @@ public final class UseItemPacketState extends BasicPacketState {
         BasicPacketContext context) {
         Player player = context.getSpongePlayer();
         BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getLocation().get());
-        ChunkBridge spongeChunk = (ChunkBridge) ((WorldServer) player.getWorld()).func_175726_f(pos);
+        ChunkBridge spongeChunk = (ChunkBridge) ((ServerWorld) player.getWorld()).func_175726_f(pos);
         if (blockChange == BlockChange.PLACE) {
             spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.OWNER);
         }
@@ -107,7 +107,7 @@ public final class UseItemPacketState extends BasicPacketState {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void unwind(BasicPacketContext context) {
-        final EntityPlayerMP player = context.getPacketPlayer();
+        final ServerPlayerEntity player = context.getPacketPlayer();
         final ItemStack itemStack = context.getItemUsed();
         final SpongeItemStackSnapshot snapshot = context.getItemUsedSnapshot();
         final HandType hand = context.getHandUsed();
@@ -124,7 +124,7 @@ public final class UseItemPacketState extends BasicPacketState {
                 boolean success = TrackingUtil.processBlockCaptures(context);
                 if (!success && snapshot.isNone()) {
                     Sponge.getCauseStackManager().pushCause(player);
-                    PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, (EnumHand) (Object) hand);
+                    PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, (Hand) (Object) hand);
                 }
             }
         }

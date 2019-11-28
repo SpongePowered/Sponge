@@ -27,10 +27,10 @@ package org.spongepowered.common.entity;
 import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
@@ -78,7 +78,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public final String modId;
     public final Class<? extends Entity> entityClass;
     private final boolean isVanilla;
-    private EnumCreatureType creatureType;
+    private EntityClassification creatureType;
     private boolean activationRangeInitialized = false;
     @Nullable private Timing timing = null;
     // Used by tracker config
@@ -119,11 +119,11 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     }
 
     @Nullable
-    public EnumCreatureType getEnumCreatureType() {
+    public EntityClassification getEnumCreatureType() {
         return this.creatureType;
     }
 
-    public void setEnumCreatureType(EnumCreatureType type) {
+    public void setEnumCreatureType(EntityClassification type) {
         this.creatureType = type;
     }
 
@@ -168,7 +168,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
             String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "damageEntity" : "func_70665_d";
             Class<?>[] argTypes = {DamageSource.class, float.class };
             Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            if (!(clazz.equals(EntityLivingBase.class) || clazz.equals(EntityPlayer.class) || clazz.equals(EntityPlayerMP.class))) {
+            if (!(clazz.equals(LivingEntity.class) || clazz.equals(PlayerEntity.class) || clazz.equals(ServerPlayerEntity.class))) {
                 this.isModdedDamageEntityMethod = true;
             }
         } catch (Throwable ex) {

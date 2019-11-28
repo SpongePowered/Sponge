@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.util;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.IndirectEntityDamageSource;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,7 +39,7 @@ import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 
 import javax.annotation.Nullable;
 
-@Mixin(value = EntityDamageSourceIndirect.class, priority = 992)
+@Mixin(value = IndirectEntityDamageSource.class, priority = 992)
 public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSourceMixin {
 
     @Shadow @Final @Mutable @Nullable private Entity indirectEntity;

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.passive.EntityVillager;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
@@ -41,12 +40,13 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.bridge.entity.EntityVillagerBridge;
 
 import java.util.Optional;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 
 public class CareerDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityVillager, Career, Value<Career>, CareerData, ImmutableCareerData> {
+        extends AbstractEntitySingleDataProcessor<VillagerEntity, Career, Value<Career>, CareerData, ImmutableCareerData> {
 
     public CareerDataProcessor() {
-        super(EntityVillager.class, Keys.CAREER);
+        super(VillagerEntity.class, Keys.CAREER);
     }
 
     @Override
@@ -55,13 +55,13 @@ public class CareerDataProcessor
     }
 
     @Override
-    protected boolean set(EntityVillager entity, Career value) {
+    protected boolean set(VillagerEntity entity, Career value) {
         ((EntityVillagerBridge) entity).bridge$setCareer(value);
         return true;
     }
 
     @Override
-    protected Optional<Career> getVal(EntityVillager entity) {
+    protected Optional<Career> getVal(VillagerEntity entity) {
         return Optional.of(((EntityVillagerBridge) entity).bridge$getCareer());
     }
 

@@ -25,8 +25,7 @@
 package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -47,7 +46,7 @@ import java.util.Optional;
 public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<BlockState, Value<BlockState>, BlockItemData, ImmutableBlockItemData> {
 
     public BlockItemDataProcessor() {
-        super(stack -> stack.func_77973_b() instanceof ItemBlock, Keys.ITEM_BLOCKSTATE);
+        super(stack -> stack.func_77973_b() instanceof BlockItem, Keys.ITEM_BLOCKSTATE);
     }
 
     @Override
@@ -57,7 +56,7 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
 
     @Override
     protected boolean set(ItemStack stack, BlockState value) {
-        final IBlockState blockState = (IBlockState) value;
+        final net.minecraft.block.BlockState blockState = (net.minecraft.block.BlockState) value;
         final Block baseBlock = blockState.func_177230_c();
         if (Block.func_149634_a(stack.func_77973_b()) != baseBlock) {
             // Invalid state for this stack.
@@ -70,7 +69,7 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
     @SuppressWarnings("deprecation")
     @Override
     protected Optional<BlockState> getVal(ItemStack stack) {
-        final Block block = ((ItemBlock) stack.func_77973_b()).func_179223_d();
+        final Block block = ((BlockItem) stack.func_77973_b()).func_179223_d();
         final int blockMeta = stack.func_77973_b().func_77647_b(stack.func_77952_i());
         return Optional.of((BlockState) block.func_176203_a(blockMeta));
     }

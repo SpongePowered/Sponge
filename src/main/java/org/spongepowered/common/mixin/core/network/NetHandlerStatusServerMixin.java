@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
-import net.minecraft.network.NetHandlerStatusServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.ServerStatusResponse;
-import net.minecraft.network.status.client.CPacketServerQuery;
-import net.minecraft.network.status.server.SPacketServerInfo;
+import net.minecraft.network.status.ServerStatusNetHandler;
+import net.minecraft.network.status.client.CServerQueryPacket;
+import net.minecraft.network.status.server.SServerInfoPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.asm.mixin.Final;
@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.network.status.SpongeStatusClient;
 import org.spongepowered.common.network.status.SpongeStatusResponse;
 
-@Mixin(NetHandlerStatusServer.class)
+@Mixin(ServerStatusNetHandler.class)
 public abstract class NetHandlerStatusServerMixin {
 
     @Shadow @Final private static ITextComponent EXIT_MESSAGE;
@@ -52,7 +52,7 @@ public abstract class NetHandlerStatusServerMixin {
      * @reason Post the server status ping event for plugins.
      */
     @Overwrite
-    public void processServerQuery(final CPacketServerQuery packetIn) {
+    public void processServerQuery(final CServerQueryPacket packetIn) {
         if (this.handled) {
             this.networkManager.func_150718_a(EXIT_MESSAGE);
         } else {
@@ -60,7 +60,7 @@ public abstract class NetHandlerStatusServerMixin {
 
             final ServerStatusResponse response = SpongeStatusResponse.post(this.server, new SpongeStatusClient(this.networkManager));
             if (response != null) {
-                this.networkManager.func_179290_a(new SPacketServerInfo(response));
+                this.networkManager.func_179290_a(new SServerInfoPacket(response));
             } else {
                 this.networkManager.func_150718_a(null);
             }

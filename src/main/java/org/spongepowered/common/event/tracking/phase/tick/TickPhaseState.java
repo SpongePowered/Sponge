@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -68,7 +68,7 @@ abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState
 
     @Override
     public void associateNeighborStateNotifier(final C context, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-                                               final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
+                                               final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
 
     }
 

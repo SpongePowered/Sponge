@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.EntityHanging;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.entity.item.HangingEntity;
+import net.minecraft.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(EntityHanging.class)
+@Mixin(HangingEntity.class)
 public interface EntityHangingAccessor {
 
-    @Invoker("updateFacingWithBoundingBox") void accessor$updateFacingWithBoundingBox(EnumFacing facingDirectionIn);
+    @Invoker("updateFacingWithBoundingBox") void accessor$updateFacingWithBoundingBox(Direction facingDirectionIn);
 
 }

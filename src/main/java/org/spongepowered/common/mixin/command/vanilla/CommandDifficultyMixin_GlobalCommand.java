@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.command.vanilla;
 import net.minecraft.command.CommandDifficulty;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -47,9 +47,9 @@ public abstract class CommandDifficultyMixin_GlobalCommand {
     @Redirect(method = "execute",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/MinecraftServer;setDifficultyForAllWorlds(Lnet/minecraft/world/EnumDifficulty;)V"))
-    private void globalCommand$adjustWorldsThroughManager(final MinecraftServer server, final EnumDifficulty difficulty, final MinecraftServer server2,
+    private void globalCommand$adjustWorldsThroughManager(final MinecraftServer server, final Difficulty difficulty, final MinecraftServer server2,
         final ICommandSender sender, final String[] args) {
-        for (final WorldServer world : SpongeImpl.getServer().field_71305_c) {
+        for (final ServerWorld world : SpongeImpl.getServer().field_71305_c) {
             WorldManager.adjustWorldForDifficulty(world, difficulty, true);
         }
     }

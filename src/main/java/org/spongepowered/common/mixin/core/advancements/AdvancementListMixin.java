@@ -62,7 +62,7 @@ public class AdvancementListMixin implements AdvancementListBridge {
     @Shadow @Final @Mutable private Map<ResourceLocation, Advancement> advancements = new AdvancementMap();
     @Shadow @Final @Mutable private Set<Advancement> roots = new RootAdvancementSet();
     @Shadow @Final private Set<Advancement> nonRoots;
-    @Shadow @Nullable private AdvancementList.Listener listener;
+    @Shadow @Nullable private AdvancementList.IListener listener;
 
     @Inject(method = "loadAdvancements", at = @At(value = "INVOKE", shift = At.Shift.BEFORE,
             target = "Ljava/util/Map;size()I", remap = false))
@@ -120,7 +120,7 @@ public class AdvancementListMixin implements AdvancementListBridge {
     }
 
     @Override
-    public AdvancementList.Listener bridge$getListener() {
+    public AdvancementList.IListener bridge$getListener() {
         return this.listener;
     }
 }

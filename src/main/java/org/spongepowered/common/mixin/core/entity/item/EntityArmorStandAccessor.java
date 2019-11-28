@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.math.Rotations;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(EntityArmorStand.class)
+@Mixin(ArmorStandEntity.class)
 public interface EntityArmorStandAccessor {
 
     @Accessor("DEFAULT_HEAD_ROTATION")

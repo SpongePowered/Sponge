@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.item.Item;
-import net.minecraft.network.play.server.SPacketEffect;
+import net.minecraft.network.play.server.SPlaySoundEventPacket;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.record.RecordType;
@@ -64,10 +64,10 @@ public class SpongeRecordType extends SpongeCatalogType.Translatable implements 
         return this.soundType;
     }
 
-    public static SPacketEffect createPacket(Vector3i position, @Nullable RecordType recordType) {
+    public static SPlaySoundEventPacket createPacket(Vector3i position, @Nullable RecordType recordType) {
         checkNotNull(position, "position");
         final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
-        return new SPacketEffect(EFFECT_ID, pos, recordType == null ? 0 :
+        return new SPlaySoundEventPacket(EFFECT_ID, pos, recordType == null ? 0 :
                 ((SpongeRecordType) recordType).getInternalId(), false);
     }
 }

@@ -25,14 +25,14 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIAvoidEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
 import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.api.util.Functional;
 
 import java.util.function.Predicate;
+import net.minecraft.entity.CreatureEntity;
+import net.minecraft.entity.ai.goal.AvoidEntityGoal;
 
 public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Builder {
 
@@ -89,7 +89,7 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
     public AvoidEntityAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetSelector);
-        return (AvoidEntityAITask) new EntityAIAvoidEntity((EntityCreature) owner, Entity.class,
+        return (AvoidEntityAITask) new AvoidEntityGoal((CreatureEntity) owner, Entity.class,
                 Functional.java8ToGuava((Predicate) this.targetSelector),
                 this.searchDistance, this.closeRangeSpeed, this.farRangeSpeed);
     }

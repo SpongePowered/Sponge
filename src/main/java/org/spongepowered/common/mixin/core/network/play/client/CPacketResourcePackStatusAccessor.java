@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.network.play.client;
 
-import net.minecraft.network.play.client.CPacketResourcePackStatus;
+import net.minecraft.network.play.client.CResourcePackStatusPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(CPacketResourcePackStatus.class)
+@Mixin(CResourcePackStatusPacket.class)
 public interface CPacketResourcePackStatusAccessor {
 
-    @Accessor("action") CPacketResourcePackStatus.Action accessor$getAction();
+    @Accessor("action") CResourcePackStatusPacket.Action accessor$getAction();
 
 
 }

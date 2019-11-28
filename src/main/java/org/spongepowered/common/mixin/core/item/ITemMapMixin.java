@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import net.minecraft.item.ItemMap;
-import net.minecraft.item.ItemMapBase;
+import net.minecraft.item.AbstractMapItem;
+import net.minecraft.item.FilledMapItem;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldSavedData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,8 +35,8 @@ import org.spongepowered.common.world.WorldManager;
 
 import javax.annotation.Nullable;
 
-@Mixin(ItemMap.class)
-public class ITemMapMixin extends ItemMapBase {
+@Mixin(FilledMapItem.class)
+public class ITemMapMixin extends AbstractMapItem {
 
 
     @Redirect(method = "setupNewMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))

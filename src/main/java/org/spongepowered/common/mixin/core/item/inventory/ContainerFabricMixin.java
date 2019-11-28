@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.item.inventory;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;

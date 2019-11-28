@@ -25,8 +25,8 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.CreatureEntity;
+import net.minecraft.entity.ai.goal.RandomWalkingGoal;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
 import org.spongepowered.api.entity.living.Creature;
 
@@ -67,6 +67,6 @@ public final class SpongeWanderAIBuilder implements WanderAITask.Builder {
     @Override
     public WanderAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
-        return (WanderAITask) new EntityAIWander((EntityCreature) owner, this.speed, this.executionChance);
+        return (WanderAITask) new RandomWalkingGoal((CreatureEntity) owner, this.speed, this.executionChance);
     }
 }

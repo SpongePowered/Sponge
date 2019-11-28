@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.inventory.ContainerBrewingStand;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.BrewingStandContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ContainerBrewingStand.class)
+@Mixin(BrewingStandContainer.class)
 public interface ContainerBrewingStandAccessor {
 
     @Accessor("tileBrewingStand") IInventory accessor$getBrewingStandInventory();

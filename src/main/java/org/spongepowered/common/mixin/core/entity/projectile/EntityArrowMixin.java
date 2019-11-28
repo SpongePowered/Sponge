@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.entity.projectile.arrow.Arrow;
@@ -45,7 +45,7 @@ import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityArrow.class)
+@Mixin(AbstractArrowEntity.class)
 public abstract class EntityArrowMixin extends EntityMixin {
 
     @Shadow public Entity shootingEntity;
@@ -66,13 +66,13 @@ public abstract class EntityArrowMixin extends EntityMixin {
     @Nullable public ProjectileSource projectileSource;
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, (Arrow) this);
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, ((Arrow) this).getShooter(), this.shootingEntity);
     }
@@ -83,13 +83,13 @@ public abstract class EntityArrowMixin extends EntityMixin {
     @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
     private void onProjectileHit(final RayTraceResult hitResult, final CallbackInfo ci) {
         if (!this.world.field_72995_K) {
-            if (SpongeCommonEventFactory.handleCollideImpactEvent((EntityArrow) (Object) this, ((Arrow) this).getShooter(), hitResult)) {
+            if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrowEntity) (Object) this, ((Arrow) this).getShooter(), hitResult)) {
                 // deflect and drop to ground
                 this.motionX *= -0.10000000149011612D;
                 this.motionY *= -0.10000000149011612D;
                 this.motionZ *= -0.10000000149011612D;
                 this.rotationYaw += 180.0F;
-                ((EntityArrow) (Object) this).field_70126_B += 180.0F;
+                ((AbstractArrowEntity) (Object) this).field_70126_B += 180.0F;
                 this.ticksInAir = 0;
                 this.playSound(SoundEvents.field_187731_t, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
                 // if block was hit, change state to reflect it hit block to avoid onHit logic repeating indefinitely
@@ -98,7 +98,7 @@ public abstract class EntityArrowMixin extends EntityMixin {
                     this.xTile = blockpos.func_177958_n();
                     this.yTile = blockpos.func_177956_o();
                     this.zTile = blockpos.func_177952_p();
-                    final IBlockState iblockstate = this.world.func_180495_p(blockpos);
+                    final BlockState iblockstate = this.world.func_180495_p(blockpos);
                     this.inTile = iblockstate.func_177230_c();
                     this.inData = this.inTile.func_176201_c(iblockstate);
                     this.inGround = true;

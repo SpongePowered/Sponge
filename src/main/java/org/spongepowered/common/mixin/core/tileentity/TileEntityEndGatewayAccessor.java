@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityEndGateway;
+import net.minecraft.tileentity.EndGatewayTileEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(TileEntityEndGateway.class)
+@Mixin(EndGatewayTileEntity.class)
 public interface TileEntityEndGatewayAccessor {
 
     @Accessor("exitPortal")

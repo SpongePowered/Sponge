@@ -25,8 +25,6 @@
 package org.spongepowered.common.data.processor.multi.tileentity;
 
 import com.google.common.collect.Maps;
-import net.minecraft.tileentity.CommandBlockBaseLogic;
-import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -42,11 +40,13 @@ import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.tileentity.CommandBlockLogic;
+import net.minecraft.tileentity.CommandBlockTileEntity;
 
-public class TileEntityCommandDataProcessor extends AbstractTileEntityDataProcessor<TileEntityCommandBlock, CommandData, ImmutableCommandData> {
+public class TileEntityCommandDataProcessor extends AbstractTileEntityDataProcessor<CommandBlockTileEntity, CommandData, ImmutableCommandData> {
 
     public TileEntityCommandDataProcessor() {
-        super(TileEntityCommandBlock.class);
+        super(CommandBlockTileEntity.class);
     }
 
     @Override
@@ -76,14 +76,14 @@ public class TileEntityCommandDataProcessor extends AbstractTileEntityDataProces
     }
 
     @Override
-    protected boolean doesDataExist(final TileEntityCommandBlock entity) {
+    protected boolean doesDataExist(final CommandBlockTileEntity entity) {
         return true;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected boolean set(final TileEntityCommandBlock entity, final Map<Key<?>, Object> keyValues) {
-        final CommandBlockBaseLogic logic = entity.func_145993_a();
+    protected boolean set(final CommandBlockTileEntity entity, final Map<Key<?>, Object> keyValues) {
+        final CommandBlockLogic logic = entity.func_145993_a();
         logic.func_145750_b(SpongeTexts.toComponent(((Optional<Text>) keyValues.get(Keys.LAST_COMMAND_OUTPUT)).orElse(Text.of())));
         ((CommandBlockBaseLogicAccessor) logic).accessor$setCommandStored((String) keyValues.get(Keys.COMMAND));
         ((CommandBlockBaseLogicAccessor) logic).accessor$setSuccessCount((int) keyValues.get(Keys.SUCCESS_COUNT));
@@ -93,8 +93,8 @@ public class TileEntityCommandDataProcessor extends AbstractTileEntityDataProces
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(final TileEntityCommandBlock entity) {
-        final CommandBlockBaseLogic logic = entity.func_145993_a();
+    protected Map<Key<?>, ?> getValues(final CommandBlockTileEntity entity) {
+        final CommandBlockLogic logic = entity.func_145993_a();
         final Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(4);
         final Optional<Text> lastCommandOutput = logic.func_145749_h() != null ? Optional.of(SpongeTexts.toText(logic.func_145749_h())) : Optional.empty();
         values.put(Keys.LAST_COMMAND_OUTPUT, lastCommandOutput);

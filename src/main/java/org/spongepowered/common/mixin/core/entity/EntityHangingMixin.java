@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.EntityHanging;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.HangingEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -50,10 +50,10 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityHanging.class)
+@Mixin(HangingEntity.class)
 public abstract class EntityHangingMixin extends EntityMixin {
 
-    @Shadow @Nullable public EnumFacing facingDirection;
+    @Shadow @Nullable public Direction facingDirection;
     @Shadow public abstract boolean onValidSurface();
 
     private boolean ignorePhysics = false;
@@ -62,18 +62,18 @@ public abstract class EntityHangingMixin extends EntityMixin {
      * Called to update the entity's position/logic.
      */
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityHanging;onValidSurface()Z"))
-    private boolean checkIfOnValidSurfaceAndIgnoresPhysics(EntityHanging entityHanging) {
+    private boolean checkIfOnValidSurfaceAndIgnoresPhysics(HangingEntity entityHanging) {
         return this.onValidSurface() && !this.ignorePhysics;
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         compound.func_74757_a("ignorePhysics", this.ignorePhysics);
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.func_74764_b("ignorePhysics")) {
             this.ignorePhysics = compound.func_74767_n("ignorePhysics");
@@ -99,19 +99,19 @@ public abstract class EntityHangingMixin extends EntityMixin {
      */
     @Override
     @Overwrite
-    public EntityItem entityDropItem(ItemStack stack, float offsetY) {
+    public ItemEntity entityDropItem(ItemStack stack, float offsetY) {
         // Sponge Start - Check for client worlds,, don't care about them really. If it's server world, then we care.
         final double xOffset = ((float) this.facingDirection.func_82601_c() * 0.15F);
         final double zOffset = ((float) this.facingDirection.func_82599_e() * 0.15F);
         if (((WorldBridge) this.world).bridge$isFake()) {
             // Sponge End
-            EntityItem entityitem = new EntityItem(this.world, this.posX + xOffset, this.posY + (double) offsetY, this.posZ + zOffset, stack);
+            ItemEntity entityitem = new ItemEntity(this.world, this.posX + xOffset, this.posY + (double) offsetY, this.posZ + zOffset, stack);
             entityitem.func_174869_p();
             this.world.func_72838_d(entityitem);
             return entityitem;
         }
         // Sponge - redirect server sided logic to sponge to handle cause stacks and phase states
-        return EntityUtil.entityOnDropItem((EntityHanging) (Object) this, stack, offsetY, this.posX + xOffset, this.posZ + zOffset);
+        return EntityUtil.entityOnDropItem((HangingEntity) (Object) this, stack, offsetY, this.posX + xOffset, this.posZ + zOffset);
     }
 
 }

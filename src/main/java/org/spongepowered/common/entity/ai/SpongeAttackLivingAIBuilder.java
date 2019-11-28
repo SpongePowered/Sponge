@@ -25,8 +25,8 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIAttackMelee;
+import net.minecraft.entity.CreatureEntity;
+import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
 import org.spongepowered.api.entity.living.Creature;
 
@@ -67,6 +67,6 @@ public final class SpongeAttackLivingAIBuilder implements AttackLivingAITask.Bui
     @Override
     public AttackLivingAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
-        return (AttackLivingAITask) new EntityAIAttackMelee((EntityCreature) owner, this.speed, this.longMemory);
+        return (AttackLivingAITask) new MeleeAttackGoal((CreatureEntity) owner, this.speed, this.longMemory);
     }
 }

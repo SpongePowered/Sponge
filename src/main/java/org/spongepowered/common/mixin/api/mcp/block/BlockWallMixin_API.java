@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockWall;
+import net.minecraft.block.WallBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(BlockWall.class)
+@Mixin(WallBlock.class)
 public abstract class BlockWallMixin_API extends BlockMixin_API {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + "." + BlockWall.EnumType.NORMAL.func_176659_c() + ".name");
+        return new SpongeTranslation(this.getTranslationKey() + "." + WallBlock.EnumType.NORMAL.func_176659_c() + ".name");
     }
 }

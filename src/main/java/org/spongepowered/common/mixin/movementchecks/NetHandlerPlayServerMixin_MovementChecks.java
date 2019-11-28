@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.movementchecks;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.ServerPlayNetHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,14 +35,14 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.SpongeImpl;
 
-@Mixin(NetHandlerPlayServer.class)
+@Mixin(ServerPlayNetHandler.class)
 public class NetHandlerPlayServerMixin_MovementChecks {
 
-    @Shadow public EntityPlayerMP player;
+    @Shadow public ServerPlayerEntity player;
 
     @Redirect(method = "processPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 0))
-    private boolean movementCheck$onPlayerMovedTooQuicklyCheck(final EntityPlayerMP player) {
+    private boolean movementCheck$onPlayerMovedTooQuicklyCheck(final ServerPlayerEntity player) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().playerMovedTooQuickly()) {
             return player.func_184850_K();
         }
@@ -51,7 +51,7 @@ public class NetHandlerPlayServerMixin_MovementChecks {
 
     @Redirect(method = "processPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 1))
-    private boolean movementCheck$onMovedWronglyCheck(final EntityPlayerMP player) {
+    private boolean movementCheck$onMovedWronglyCheck(final ServerPlayerEntity player) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().movedWrongly()) {
             return player.func_184850_K();
         }

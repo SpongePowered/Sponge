@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.world.gen.feature.MinableFeature;
+import net.minecraft.block.BlockState;
+import net.minecraft.world.gen.feature.OreFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Ore;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,12 +35,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(MinableFeature.class)
+@Mixin(OreFeature.class)
 public abstract class WorldGenMinableMixin extends WorldGeneratorMixin {
 
     @SuppressWarnings("Guava") // IntelliJ wants to migrate to Java 8's functionals, but this is an injection.
     @Inject(method = "<init>(Lnet/minecraft/block/state/IBlockState;ILcom/google/common/base/Predicate;)V", at = @At("RETURN") )
-    private void onConstructed(final IBlockState ore, final int count, final Predicate<IBlockState> condition, final CallbackInfo ci) {
+    private void onConstructed(final BlockState ore, final int count, final Predicate<BlockState> condition, final CallbackInfo ci) {
         ((Ore) this).setDepositSize(VariableAmount.fixed(count));
     }
 

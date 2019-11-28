@@ -29,11 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.WorldServer;
-
+import net.minecraft.world.server.ServerWorld;
 import java.util.Random;
 
 public class ItemDropData {
@@ -76,8 +75,8 @@ public class ItemDropData {
         return this.motion;
     }
 
-    public EntityItem create(WorldServer worldServer) {
-        final EntityItem entityItem = new EntityItem(worldServer, this.position.getX(), this.position.getY(), this.position.getZ(), this.stack);
+    public ItemEntity create(ServerWorld worldServer) {
+        final ItemEntity entityItem = new ItemEntity(worldServer, this.position.getX(), this.position.getY(), this.position.getZ(), this.stack);
         if (this.motion != Vector3d.ZERO) {
             entityItem.field_70159_w = this.motion.getX();
             entityItem.field_70181_x = this.motion.getY();
@@ -166,7 +165,7 @@ public class ItemDropData {
 
     public static final class Player extends ItemDropData {
 
-        public static org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder player(EntityPlayer player) {
+        public static org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder player(PlayerEntity player) {
             return new org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder(player);
         }
 
@@ -201,8 +200,8 @@ public class ItemDropData {
 
 
         @Override
-        public EntityItem create(WorldServer worldServer) {
-            final EntityItem entityItem = super.create(worldServer);
+        public ItemEntity create(ServerWorld worldServer) {
+            final ItemEntity entityItem = super.create(worldServer);
             entityItem.func_174867_a(40);
             if (this.trace) {
                 entityItem.func_145799_b(this.playerName);
@@ -255,7 +254,7 @@ public class ItemDropData {
             boolean dropAround;
             Random random;
 
-            Builder(EntityPlayer player) {
+            Builder(PlayerEntity player) {
                 this.playerName = player.func_70005_c_();
                 this.random = ((org.spongepowered.api.entity.Entity) player).getRandom();
             }

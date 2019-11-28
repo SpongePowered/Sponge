@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.core.entity.passive;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
@@ -64,16 +64,16 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
-@Mixin(EntityVillager.class)
+@Mixin(VillagerEntity.class)
 public abstract class EntityVillagerMixin extends EntityAgeableMixin implements EntityVillagerBridge, InventoryAdapter, InventoryAdapterBridge {
 
     @Shadow private int careerId; // careerId
     @Shadow private int careerLevel; // careerLevel
     @Shadow @Nullable private MerchantRecipeList buyingList; // buyingList
-    @Shadow @Final private InventoryBasic villagerInventory; // villagerInventory
+    @Shadow @Final private Inventory villagerInventory; // villagerInventory
 
     @Shadow public abstract void setProfession(int professionId); // setProfession
-    @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
+    @Shadow public abstract MerchantRecipeList getRecipes(PlayerEntity player);
 
     @Nullable private Profession impl$profession;
 

@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.multi.entity;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -42,11 +41,12 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.LivingEntity;
 
-public class BreathingDataProcessor extends AbstractEntityDataProcessor<EntityLivingBase, BreathingData, ImmutableBreathingData> {
+public class BreathingDataProcessor extends AbstractEntityDataProcessor<LivingEntity, BreathingData, ImmutableBreathingData> {
 
     public BreathingDataProcessor() {
-        super(EntityLivingBase.class);
+        super(LivingEntity.class);
     }
 
     @Override
@@ -55,19 +55,19 @@ public class BreathingDataProcessor extends AbstractEntityDataProcessor<EntityLi
     }
 
     @Override
-    protected boolean doesDataExist(EntityLivingBase entity) {
+    protected boolean doesDataExist(LivingEntity entity) {
         return entity.func_70090_H();
     }
 
     @Override
-    protected boolean set(EntityLivingBase entity, Map<Key<?>, Object> keyValues) {
+    protected boolean set(LivingEntity entity, Map<Key<?>, Object> keyValues) {
         final int air = (Integer) keyValues.get(Keys.REMAINING_AIR);
         entity.func_70050_g(air);
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityLivingBase entity) {
+    protected Map<Key<?>, ?> getValues(LivingEntity entity) {
         return ImmutableMap.<Key<?>, Object>of(Keys.MAX_AIR, ((LivingEntityBaseBridge) entity).bridge$getMaxAir(), Keys.REMAINING_AIR, entity.func_70086_ai());
     }
 

@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.data.item;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
@@ -57,7 +57,7 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
         super(predicate, key);
     }
 
-    abstract NBTTagString translateTo(T type);
+    abstract StringNBT translateTo(T type);
     abstract T translateFrom(String page);
 
     @SuppressWarnings("unchecked")
@@ -77,9 +77,9 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            final NBTTagCompound tag = stack.func_77978_p();
+            final CompoundNBT tag = stack.func_77978_p();
             if (tag != null) {
-                tag.func_74782_a(Constants.Item.Book.ITEM_BOOK_PAGES, new NBTTagList());
+                tag.func_74782_a(Constants.Item.Book.ITEM_BOOK_PAGES, new ListNBT());
             }
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
@@ -89,12 +89,12 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
 
     @Override
     protected boolean set(final ItemStack itemStack, final List<T> value) {
-        final NBTTagList list = new NBTTagList();
+        final ListNBT list = new ListNBT();
         for (final T page : value) {
             list.func_74742_a(this.translateTo(page));
         }
         itemStack.func_77983_a(Constants.Item.Book.ITEM_BOOK_PAGES, list);
-        final NBTTagCompound compound = itemStack.func_77978_p();
+        final CompoundNBT compound = itemStack.func_77978_p();
         if (!compound.func_74764_b(Constants.Item.Book.ITEM_BOOK_TITLE)) {
             compound.func_74778_a(Constants.Item.Book.ITEM_BOOK_TITLE, Constants.Item.Book.INVALID_TITLE);
         }
@@ -107,11 +107,11 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
 
     @Override
     protected Optional<List<T>> getVal(final ItemStack itemStack) {
-        final NBTTagCompound tagCompound = itemStack.func_77978_p();
+        final CompoundNBT tagCompound = itemStack.func_77978_p();
         if (tagCompound == null || !tagCompound.func_74764_b(Constants.Item.Book.ITEM_BOOK_PAGES)) {
             return Optional.empty();
         }
-        final NBTTagList list = tagCompound.func_150295_c(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
+        final ListNBT list = tagCompound.func_150295_c(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
         final List<T> stringList = new ArrayList<>();
         if (!list.func_82582_d()) {
             for (int i = 0; i < list.func_74745_c(); i++) {

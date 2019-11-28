@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.stats;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatisticsManager;
 import net.minecraft.util.TupleIntJsonSerializable;
@@ -49,7 +49,7 @@ import java.util.Map;
 public abstract class StatisticsManagerMixin implements StatisticsManagerBridge {
 
     @Shadow public abstract int readStat(Stat stat);
-    @Shadow public abstract void increaseStat(EntityPlayer player, Stat stat, int amount);
+    @Shadow public abstract void increaseStat(PlayerEntity player, Stat stat, int amount);
 
     @Shadow @Final protected Map<Stat, TupleIntJsonSerializable> statsData;
 
@@ -57,7 +57,7 @@ public abstract class StatisticsManagerMixin implements StatisticsManagerBridge 
 
     @Inject(method = "increaseStat(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/stats/StatBase;I)V",
             at = @At("HEAD"), cancellable = true)
-    private void impl$throwEvent(final EntityPlayer player, final Stat stat, final int amount, final CallbackInfo ci) {
+    private void impl$throwEvent(final PlayerEntity player, final Stat stat, final int amount, final CallbackInfo ci) {
         if (this.statCaptured) {
             return;
         }

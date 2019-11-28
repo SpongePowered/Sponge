@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.entity.item;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.TNTEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.event.CauseStackManager;
@@ -51,17 +51,17 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityTNTPrimed.class)
+@Mixin(TNTEntity.class)
 public abstract class EntityTNTPrimedMixin extends EntityMixin implements EntityTNTPrimedBridge, FusedExplosiveBridge, ExplosiveBridge {
 
     @Shadow private int fuse;
 
-    @Nullable private EntityLivingBase impl$detonator;
+    @Nullable private LivingEntity impl$detonator;
     private int bridge$explosionRadius = Constants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS;
     private int bridge$fuseDuration = Constants.Entity.PrimedTNT.DEFAULT_FUSE_DURATION;
 
     @Override
-    public void bridge$setDetonator(final EntityLivingBase detonator) {
+    public void bridge$setDetonator(final LivingEntity detonator) {
         this.impl$detonator = detonator;
     }
 

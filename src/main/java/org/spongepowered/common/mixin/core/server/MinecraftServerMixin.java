@@ -30,20 +30,20 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.crash.CrashReport;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
@@ -117,12 +117,12 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     @Shadow @Final public Profiler profiler;
     @Shadow private boolean serverStopped;
     @Shadow private int tickCounter;
-    @Shadow public WorldServer[] worlds;
+    @Shadow public ServerWorld[] worlds;
 
     @Shadow public abstract void sendMessage(ITextComponent message);
     @Shadow public abstract boolean isServerRunning();
     @Shadow public abstract PlayerList getPlayerList();
-    @Shadow public abstract EnumDifficulty getDifficulty();
+    @Shadow public abstract Difficulty getDifficulty();
     @Shadow public abstract GameType getGameType();
     @Shadow protected abstract void setUserMessage(String message);
     @Shadow protected abstract void outputPercentRemaining(String message, int percent);
@@ -196,14 +196,14 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
      */
     @Overwrite
     public void initialWorldChunkLoad() {
-        for (final WorldServer worldServer: this.worlds) {
+        for (final ServerWorld worldServer: this.worlds) {
             this.bridge$prepareSpawnArea(worldServer);
         }
         this.clearCurrentTask();
     }
 
     @Override
-    public void bridge$prepareSpawnArea(final WorldServer worldServer) {
+    public void bridge$prepareSpawnArea(final ServerWorld worldServer) {
         final WorldProperties worldProperties = (WorldProperties) worldServer.func_72912_H();
         if (!((WorldInfoBridge) worldProperties).bridge$isValid() || !worldProperties.doesGenerateSpawnOnLoad()) {
             return;
@@ -324,7 +324,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
         final int lastPrimaryTick = SpongeCommonEventFactory.lastPrimaryPacketTick;
         final int lastSecondaryTick = SpongeCommonEventFactory.lastSecondaryPacketTick;
         if (SpongeCommonEventFactory.lastAnimationPlayer != null) {
-            final EntityPlayerMP player = SpongeCommonEventFactory.lastAnimationPlayer.get();
+            final ServerPlayerEntity player = SpongeCommonEventFactory.lastAnimationPlayer.get();
             if (player != null && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
                 final BlockSnapshot blockSnapshot = BlockSnapshot.NONE;
 
@@ -334,13 +334,13 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
                     return;
                 }
 
-                if (!player.func_184614_ca().func_190926_b() && SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.func_184614_ca(), EnumHand.MAIN_HAND, null, blockSnapshot).isCancelled()) {
+                if (!player.func_184614_ca().func_190926_b() && SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.func_184614_ca(), Hand.MAIN_HAND, null, blockSnapshot).isCancelled()) {
                     SpongeCommonEventFactory.lastAnimationPacketTick = 0;
                     SpongeCommonEventFactory.lastAnimationPlayer = null;
                     return;
                 }
 
-                SpongeCommonEventFactory.callInteractBlockEventPrimary(player, player.func_184614_ca(), EnumHand.MAIN_HAND, null);
+                SpongeCommonEventFactory.callInteractBlockEventPrimary(player, player.func_184614_ca(), Hand.MAIN_HAND, null);
             }
             SpongeCommonEventFactory.lastAnimationPlayer = null;
         }
@@ -358,7 +358,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
             value = "FIELD",
             target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;",
             opcode = Opcodes.GETFIELD))
-    private Dimension impl$getWorldProviderAndMaybeSetDimensionId(final WorldServer world) {
+    private Dimension impl$getWorldProviderAndMaybeSetDimensionId(final ServerWorld world) {
         //noinspection ConstantConditions
         if (((WorldBridge) world).bridge$isFake() || world.func_72912_H() == null) {
             // Return overworld provider
@@ -405,7 +405,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
         if (!this.impl$enableSaving) {
             return;
         }
-        for (final WorldServer world : this.worlds) {
+        for (final ServerWorld world : this.worlds) {
             final boolean save = world.func_72863_F().func_73157_c() && ((WorldProperties) world.func_72912_H()).getSerializationBehavior() != SerializationBehaviors.NONE;
             boolean log = !dontLog;
 
@@ -468,7 +468,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
      * @return The world server, or else the overworld.
      */
     @Overwrite
-    public WorldServer getWorld(final int dimensionId) {
+    public ServerWorld getWorld(final int dimensionId) {
         return WorldManager.getWorldByDimensionId(dimensionId)
                 .orElse(WorldManager.getWorldByDimensionId(0)
                         .orElseThrow(() -> new RuntimeException("Attempt made to get world before overworld is loaded!")
@@ -515,7 +515,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
      * @reason uses the world manager to update.
      */
     @Overwrite
-    public void setDifficultyForAllWorlds(final EnumDifficulty difficulty) {
+    public void setDifficultyForAllWorlds(final Difficulty difficulty) {
         WorldManager.updateServerDifficulty();
     }
 }

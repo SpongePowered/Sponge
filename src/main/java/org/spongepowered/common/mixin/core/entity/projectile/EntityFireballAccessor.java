@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.projectile.EntityFireball;
+import net.minecraft.entity.projectile.DamagingProjectileEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EntityFireball.class)
+@Mixin(DamagingProjectileEntity.class)
 public interface EntityFireballAccessor {
 
     @Accessor("accelerationX") double accessor$getAccelerationX();

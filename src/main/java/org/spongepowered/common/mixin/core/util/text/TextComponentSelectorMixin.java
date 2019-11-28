@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.util.text;
 
-import net.minecraft.util.text.TextComponentSelector;
+import net.minecraft.util.text.SelectorTextComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.asm.mixin.Final;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.util.text.TextComponentBaseMixin;
 
-@Mixin(TextComponentSelector.class)
+@Mixin(SelectorTextComponent.class)
 public abstract class TextComponentSelectorMixin extends TextComponentBaseMixin {
 
     @Shadow @Final private String selector;

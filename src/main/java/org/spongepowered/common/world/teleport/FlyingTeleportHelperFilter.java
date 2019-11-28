@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.teleport;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 
 public class FlyingTeleportHelperFilter extends DefaultTeleportHelperFilter {
@@ -42,7 +41,7 @@ public class FlyingTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return ((IBlockState) blockState).func_185904_a() != Material.field_151570_A;
+        return ((net.minecraft.block.BlockState) blockState).func_185904_a() != Material.field_151570_A;
     }
 
 }

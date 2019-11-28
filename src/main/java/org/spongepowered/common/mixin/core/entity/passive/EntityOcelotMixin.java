@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.entity.passive;
 
-import net.minecraft.entity.passive.EntityOcelot;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.passive.OcelotEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.event.CauseStackManager;
@@ -42,11 +42,11 @@ import org.spongepowered.common.mixin.core.entity.EntityAgeableMixin;
 
 import java.util.Random;
 
-@Mixin(EntityOcelot.class)
+@Mixin(OcelotEntity.class)
 public abstract class EntityOcelotMixin extends EntityAgeableMixin {
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
-    private int impl$ThrowTameEvent(Random rand, int bound, EntityPlayer player, EnumHand hand) {
+    private int impl$ThrowTameEvent(Random rand, int bound, PlayerEntity player, Hand hand) {
         ItemStack stack = player.func_184586_b(hand);
         int random = rand.nextInt(bound);
         if (random == 0) {

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.tileentity.TileEntityStructure;
+import net.minecraft.tileentity.StructureBlockTileEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,13 +35,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.tileentity.TileEntityStructureBridge;
 import org.spongepowered.common.util.VecHelper;
 
-@Mixin(TileEntityStructure.class)
+@Mixin(StructureBlockTileEntity.class)
 public abstract class TileEntityStructureMixin extends TileEntityMixin implements TileEntityStructureBridge {
 
     @Shadow private String author;
     @Shadow private BlockPos position;
     @Shadow private BlockPos size = BlockPos.field_177992_a;
-    @Shadow private TileEntityStructure.Mode mode;
+    @Shadow private StructureBlockTileEntity.Mode mode;
     @Shadow private boolean ignoreEntities;
     @Shadow private boolean showAir;
     @Shadow private boolean showBoundingBox;
@@ -74,7 +74,7 @@ public abstract class TileEntityStructureMixin extends TileEntityMixin implement
 
     @Override
     public void bridge$setMode(StructureMode mode) {
-        this.mode = (TileEntityStructure.Mode) (Object) checkNotNull(mode, "mode");
+        this.mode = (StructureBlockTileEntity.Mode) (Object) checkNotNull(mode, "mode");
     }
 
     @Override

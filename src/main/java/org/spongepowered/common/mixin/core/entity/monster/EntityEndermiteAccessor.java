@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.monster.EntityEndermite;
+import net.minecraft.entity.monster.EndermiteEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EntityEndermite.class)
+@Mixin(EndermiteEntity.class)
 public interface EntityEndermiteAccessor {
 
     @Accessor("lifetime") int accessor$getLifetime();

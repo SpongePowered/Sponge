@@ -28,7 +28,6 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.projectile.EntityFireball;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
@@ -46,11 +45,12 @@ import org.spongepowered.common.mixin.core.entity.projectile.EntityFireballAcces
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.projectile.DamagingProjectileEntity;
 
-public class AccelerationDataProcessor extends AbstractEntitySingleDataProcessor<EntityFireball, Vector3d, Value<Vector3d>, AccelerationData, ImmutableAccelerationData> {
+public class AccelerationDataProcessor extends AbstractEntitySingleDataProcessor<DamagingProjectileEntity, Vector3d, Value<Vector3d>, AccelerationData, ImmutableAccelerationData> {
 
     public AccelerationDataProcessor() {
-        super(EntityFireball.class, Keys.ACCELERATION);
+        super(DamagingProjectileEntity.class, Keys.ACCELERATION);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class AccelerationDataProcessor extends AbstractEntitySingleDataProcessor
     }
 
     @Override
-    protected boolean set(final EntityFireball fireball, final Vector3d value) {
+    protected boolean set(final DamagingProjectileEntity fireball, final Vector3d value) {
         ((EntityFireballAccessor) fireball).accessor$setAccelerationX(value.getX());
         ((EntityFireballAccessor) fireball).accessor$setAccelerationY(value.getY());
         ((EntityFireballAccessor) fireball).accessor$setAccelerationZ(value.getZ());
@@ -67,7 +67,7 @@ public class AccelerationDataProcessor extends AbstractEntitySingleDataProcessor
     }
 
     @Override
-    protected Optional<Vector3d> getVal(final EntityFireball fireball) {
+    protected Optional<Vector3d> getVal(final DamagingProjectileEntity fireball) {
         return Optional.of(new Vector3d(fireball.field_70232_b, fireball.field_70233_c, fireball.field_70230_d));
     }
 

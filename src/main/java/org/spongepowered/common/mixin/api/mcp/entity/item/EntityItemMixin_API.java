@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -43,7 +43,7 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
 import java.util.Collection;
 
-@Mixin(EntityItem.class)
+@Mixin(ItemEntity.class)
 public abstract class EntityItemMixin_API extends EntityMixin_API implements Item {
 
     @Shadow public abstract ItemStack getItem();

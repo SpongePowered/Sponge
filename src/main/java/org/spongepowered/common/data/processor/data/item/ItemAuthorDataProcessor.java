@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.StringNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
@@ -63,7 +63,7 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
 
     @Override
     protected boolean set(final ItemStack itemStack, final Text value) {
-        itemStack.func_77983_a(Constants.Item.Book.ITEM_BOOK_AUTHOR, new NBTTagString(SpongeTexts.toLegacy(value)));
+        itemStack.func_77983_a(Constants.Item.Book.ITEM_BOOK_AUTHOR, new StringNBT(SpongeTexts.toLegacy(value)));
         return true;
     }
 

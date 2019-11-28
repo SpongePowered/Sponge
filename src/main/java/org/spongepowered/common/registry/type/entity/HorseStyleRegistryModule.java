@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type.entity;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.Maps;
-import net.minecraft.entity.passive.EntityHorse;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HorseStyle;
@@ -38,6 +37,7 @@ import org.spongepowered.common.entity.SpongeHorseStyle;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 import java.util.Map;
+import net.minecraft.entity.passive.horse.HorseEntity;
 
 @RegisterCatalog(HorseStyles.class)
 public class HorseStyleRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<HorseStyle> {
@@ -55,7 +55,7 @@ public class HorseStyleRegistryModule extends AbstractPrefixAlternateCatalogType
         super("minecraft");
     }
 
-    public static HorseStyle getHorseStyle(EntityHorse horse) {
+    public static HorseStyle getHorseStyle(HorseEntity horse) {
         return HORSE_STYLE_IDMAP.get((horse.func_110202_bQ() & 65280) >> 8);
     }
 

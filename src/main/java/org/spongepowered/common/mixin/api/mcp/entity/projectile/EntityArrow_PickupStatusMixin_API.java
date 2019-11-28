@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import net.minecraft.entity.projectile.EntityArrow;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Locale;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 
-@Mixin(EntityArrow.PickupStatus.class)
+@Mixin(AbstractArrowEntity.PickupStatus.class)
 public class EntityArrow_PickupStatusMixin_API implements PickupRule {
 
     @Nullable private String api$id;
@@ -49,7 +49,7 @@ public class EntityArrow_PickupStatusMixin_API implements PickupRule {
     @Override
     public String getName() {
         if (this.api$name == null) {
-            this.api$name = ((EntityArrow.PickupStatus) (Object) this).name();
+            this.api$name = ((AbstractArrowEntity.PickupStatus) (Object) this).name();
         }
         return this.api$name;
     }

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityLockableLoot;
+import net.minecraft.tileentity.LockableLootTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.data.CustomNameableBridge;
 
-@Mixin(TileEntityLockableLoot.class)
+@Mixin(LockableLootTileEntity.class)
 public abstract class TileEntityLockableLootMixin extends TileEntityLockableMixin implements CustomNameableBridge {
 
     @Shadow public abstract void setCustomName(String p_190575_1_);

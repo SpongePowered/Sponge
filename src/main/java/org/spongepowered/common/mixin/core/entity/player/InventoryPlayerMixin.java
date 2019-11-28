@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.server.SPacketHeldItemChange;
-import net.minecraft.util.EnumHand;
+import net.minecraft.network.play.server.SHeldItemChangePacket;
+import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -62,11 +61,11 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(InventoryPlayer.class)
+@Mixin(net.minecraft.entity.player.PlayerInventory.class)
 public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, InventoryAdapter, InventoryAdapterBridge, TrackedInventoryBridge {
 
     @Shadow public int currentItem;
-    @Shadow public EntityPlayer player;
+    @Shadow public PlayerEntity player;
     @Shadow @Final public NonNullList<ItemStack> mainInventory;
     @Shadow @Final public NonNullList<ItemStack> armorInventory;
     @Shadow @Final public NonNullList<ItemStack> offHandInventory;
@@ -87,7 +86,7 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
     private int impl$offhandIndex;
 
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
-    private void onConstructed(final EntityPlayer playerIn, final CallbackInfo ci) {
+    private void onConstructed(final PlayerEntity playerIn, final CallbackInfo ci) {
         // Find offhand slot
         for (final NonNullList<ItemStack> inventory : this.allInventories) {
             if (inventory == this.offHandInventory) {
@@ -100,7 +99,7 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
     @SuppressWarnings("RedundantCast")
     @Override
     public SlotProvider bridge$generateSlotProvider() {
-        if ((Class<?>) this.getClass() == InventoryPlayer.class) { // Build Player Lens
+        if ((Class<?>) this.getClass() == net.minecraft.entity.player.PlayerInventory.class) { // Build Player Lens
             return new SlotCollection.Builder()
                 .add(this.mainInventory.size())
                 .add(this.offHandInventory.size())
@@ -123,14 +122,14 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
     @SuppressWarnings({"RedundantCast", "Unchecked"})
     @Override
     public Lens bridge$generateLens(SlotProvider slots) {
-        if ((Class<?>) this.getClass() == InventoryPlayer.class) { // Build Player Lens
+        if ((Class<?>) this.getClass() == net.minecraft.entity.player.PlayerInventory.class) { // Build Player Lens
             return new PlayerInventoryLens(this.getSizeInventory(), (Class<? extends Inventory>) this.getClass(), slots);
         }
         return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
     }
 
     @Override
-    public int bridge$getHeldItemIndex(final EnumHand hand) {
+    public int bridge$getHeldItemIndex(final Hand hand) {
         switch (hand) {
             case MAIN_HAND:
                 return this.currentItem;
@@ -144,9 +143,9 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
     @Override
     public void bridge$setSelectedItem(int itemIndex, final boolean notify) {
         itemIndex = itemIndex % 9;
-        if (notify && this.player instanceof EntityPlayerMP) {
-            final SPacketHeldItemChange packet = new SPacketHeldItemChange(itemIndex);
-            ((EntityPlayerMP)this.player).field_71135_a.func_147359_a(packet);
+        if (notify && this.player instanceof ServerPlayerEntity) {
+            final SHeldItemChangePacket packet = new SHeldItemChangePacket(itemIndex);
+            ((ServerPlayerEntity)this.player).field_71135_a.func_147359_a(packet);
         }
         this.currentItem = itemIndex;
     }
@@ -184,7 +183,7 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
     }
 
     @Redirect(method = "storePartialItemStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addResource(ILnet/minecraft/item/ItemStack;)I"))
-    private int impl$ifCaptureDoTransactions(final InventoryPlayer inv, final int index, final ItemStack stack) {
+    private int impl$ifCaptureDoTransactions(final net.minecraft.entity.player.PlayerInventory inv, final int index, final ItemStack stack) {
         if (this.impl$doCapture) {
             // Capture items getting picked up
             final Slot slot = index == 40 ? ((PlayerInventory) this).getOffhand() : impl$getSpongeSlotByIndex(index);

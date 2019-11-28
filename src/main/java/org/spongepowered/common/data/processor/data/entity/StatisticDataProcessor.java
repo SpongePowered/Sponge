@@ -27,9 +27,9 @@ package org.spongepowered.common.data.processor.data.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.stats.ServerStatisticsManager;
 import net.minecraft.stats.Stat;
-import net.minecraft.stats.StatisticsManagerServer;
 import net.minecraft.util.TupleIntJsonSerializable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -49,10 +49,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Map<Statistic, Long>, MapValue<Statistic, Long>, StatisticData, ImmutableStatisticData> {
+public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<ServerPlayerEntity, Map<Statistic, Long>, MapValue<Statistic, Long>, StatisticData, ImmutableStatisticData> {
 
     public StatisticDataProcessor() {
-        super(EntityPlayerMP.class, Keys.STATISTICS);
+        super(ServerPlayerEntity.class, Keys.STATISTICS);
     }
 
     @Override
@@ -61,10 +61,10 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
     }
 
     @Override
-    protected boolean set(final EntityPlayerMP player, final Map<Statistic, Long> statMap) {
+    protected boolean set(final ServerPlayerEntity player, final Map<Statistic, Long> statMap) {
         checkNotNull(player, "null player");
         checkNotNull(statMap, "null stat map");
-        final StatisticsManagerServer stats = player.func_147099_x();
+        final ServerStatisticsManager stats = player.func_147099_x();
         for (final Entry<Statistic, Long> statEntry : statMap.entrySet()) {
             final Long value = statEntry.getValue();
             final Stat stat = (Stat) statEntry.getKey();
@@ -77,9 +77,9 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
     }
 
     @Override
-    protected Optional<Map<Statistic, Long>> getVal(final EntityPlayerMP player) {
+    protected Optional<Map<Statistic, Long>> getVal(final ServerPlayerEntity player) {
         checkNotNull(player, "null player");
-        final StatisticsManagerServer stats = player.func_147099_x();
+        final ServerStatisticsManager stats = player.func_147099_x();
         final Map<Stat, TupleIntJsonSerializable> data = ((StatisticsManagerBridge) stats).bridge$getStatsData();
         final Map<Statistic, Long> statMap = Maps.newHashMap();
         for (final Entry<Stat, TupleIntJsonSerializable> statEntry : data.entrySet()) {

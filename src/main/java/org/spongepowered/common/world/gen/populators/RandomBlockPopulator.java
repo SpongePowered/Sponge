@@ -27,8 +27,6 @@ package org.spongepowered.common.world.gen.populators;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.BlockChangeFlags;
@@ -45,6 +43,7 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Random;
 import java.util.function.Predicate;
+import net.minecraft.world.server.ServerWorld;
 
 public class RandomBlockPopulator implements RandomBlock {
 
@@ -85,11 +84,11 @@ public class RandomBlockPopulator implements RandomBlock {
                 if (((WorldBridge) world).bridge$isFake()) {
                     world.setBlock(pos.getBlockPosition(), this.state, BlockChangeFlags.PHYSICS_OBSERVER);
                 } else { // This is the most direct call to set a block state, due to neighboring updates we don't want to cause.
-                    PhaseTracker.getInstance().setBlockState((WorldServerBridge) world, VecHelper.toBlockPos(pos), (IBlockState) this.state, BlockChangeFlags.PHYSICS_OBSERVER);
+                    PhaseTracker.getInstance().setBlockState((WorldServerBridge) world, VecHelper.toBlockPos(pos), (net.minecraft.block.BlockState) this.state, BlockChangeFlags.PHYSICS_OBSERVER);
                 }
                 // Liquids force a block update tick so they may flow during world gen
                 try {
-                    ((WorldServer) world).func_189507_a(VecHelper.toBlockPos(pos), (IBlockState) this.state, random);
+                    ((ServerWorld) world).func_189507_a(VecHelper.toBlockPos(pos), (net.minecraft.block.BlockState) this.state, random);
                 } catch(IllegalArgumentException e) {
                     // ignore
                 }

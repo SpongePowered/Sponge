@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.text.TextFormatting;
@@ -204,7 +204,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
 
     @SuppressWarnings("EqualsBetweenInconvertibleTypes")
     @Override
-    public MessageChannel bridge$getTeamChannel(final EntityPlayerMP player) {
+    public MessageChannel bridge$getTeamChannel(final ServerPlayerEntity player) {
         return MessageChannel.fixed(this.getMembershipCollection().stream()
                 .map(name -> Sponge.getGame().getServer().getPlayer(name))
                 .filter(Optional::isPresent)
@@ -216,7 +216,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
     @Override
     public MessageChannel bridge$getNonTeamChannel() {
         return MessageChannel.fixed(Sponge.getGame().getServer().getOnlinePlayers().stream()
-                .filter(player -> ((EntityPlayerMP) player).func_96124_cp() != (Object) this)
+                .filter(player -> ((ServerPlayerEntity) player).func_96124_cp() != (Object) this)
                 .collect(Collectors.toSet()));
     }
 }

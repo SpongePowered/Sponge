@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.tileentity.CommandBlockBaseLogic;
+import net.minecraft.tileentity.CommandBlockLogic;
+import net.minecraft.tileentity.CommandBlockTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.block.tileentity.CommandBlock;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -49,7 +49,7 @@ public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock>
                 ((TileEntity) commandBlock).func_145843_s();
                 return Optional.empty();
             }
-            final CommandBlockBaseLogic cmdBlockLogic = ((TileEntityCommandBlock) commandBlock).func_145993_a();
+            final CommandBlockLogic cmdBlockLogic = ((CommandBlockTileEntity) commandBlock).func_145993_a();
             cmdBlockLogic.func_145752_a(container.getString(Constants.TileEntity.CommandBlock.STORED_COMMAND).get());
             cmdBlockLogic.func_184167_a(container.getInt(Constants.TileEntity.CommandBlock.SUCCESS_COUNT).get());
             cmdBlockLogic.func_175573_a(container.getBoolean(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT).get());
@@ -57,7 +57,7 @@ public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock>
                 cmdBlockLogic.func_145750_b(SpongeTexts.toComponent(SpongeTexts.fromLegacy(
                         container.getString(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT).get())));
             }
-            ((TileEntityCommandBlock)commandBlock).func_145829_t();
+            ((CommandBlockTileEntity)commandBlock).func_145829_t();
             return Optional.of(commandBlock);
         });
     }

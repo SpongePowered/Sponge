@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.passive.EntityZombieHorse;
+import net.minecraft.entity.passive.horse.ZombieHorseEntity;
 import org.spongepowered.api.entity.living.animal.ZombieHorse;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityZombieHorse.class)
+@Mixin(ZombieHorseEntity.class)
 public abstract class EntityZombieHorseMixin_API extends AbstractHorseMixin_API implements ZombieHorse {
 
 }

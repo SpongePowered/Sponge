@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
-import net.minecraft.entity.EntityFlying;
+import net.minecraft.entity.FlyingEntity;
 import org.spongepowered.api.entity.living.Aerial;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityFlying.class)
+@Mixin(FlyingEntity.class)
 public abstract class EntityFlyingMixin_API extends EntityLivingMixin_API implements Aerial {
 
 }

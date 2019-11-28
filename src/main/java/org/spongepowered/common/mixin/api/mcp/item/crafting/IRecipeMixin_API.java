@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
 import static org.spongepowered.common.item.inventory.util.InventoryUtil.toNativeInventory;
 
-import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipe;
@@ -49,10 +49,10 @@ import javax.annotation.Nonnull;
 @Mixin(IRecipe.class)
 public interface IRecipeMixin_API extends CraftingRecipe {
 
-    @Shadow boolean matches(InventoryCrafting inv, net.minecraft.world.World worldIn);
-    @Shadow net.minecraft.item.ItemStack getCraftingResult(InventoryCrafting inv);
+    @Shadow boolean matches(CraftingInventory inv, net.minecraft.world.World worldIn);
+    @Shadow net.minecraft.item.ItemStack getCraftingResult(CraftingInventory inv);
     @Shadow net.minecraft.item.ItemStack getRecipeOutput();
-    @Shadow NonNullList<net.minecraft.item.ItemStack> getRemainingItems(InventoryCrafting inv);
+    @Shadow NonNullList<net.minecraft.item.ItemStack> getRemainingItems(CraftingInventory inv);
 
     @Override
     @Nonnull

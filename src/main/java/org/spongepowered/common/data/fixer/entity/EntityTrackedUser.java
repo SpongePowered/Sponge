@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.fixer.entity;
 
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.datafix.IFixableData;
 import org.spongepowered.common.util.Constants;
 
@@ -39,13 +39,13 @@ public class EntityTrackedUser implements IFixableData {
     }
 
     @Override
-    public NBTTagCompound func_188217_a(NBTTagCompound compound) {
+    public CompoundNBT func_188217_a(CompoundNBT compound) {
         final NBTBase forgeCompound = compound.func_74781_a(Constants.Forge.FORGE_DATA);
         if (forgeCompound != null) {
-            final NBTTagCompound forgeData = (NBTTagCompound) forgeCompound;
+            final CompoundNBT forgeData = (CompoundNBT) forgeCompound;
             final NBTBase spongeCompound = forgeData.func_74781_a(Constants.Sponge.SPONGE_DATA);
             if (spongeCompound != null) {
-                final NBTTagCompound spongeData = (NBTTagCompound) spongeCompound;
+                final CompoundNBT spongeData = (CompoundNBT) spongeCompound;
                 process(spongeData, Constants.Sponge.SPONGE_ENTITY_CREATOR);
                 process(spongeData, Constants.Sponge.SPONGE_ENTITY_NOTIFIER);
             }
@@ -53,9 +53,9 @@ public class EntityTrackedUser implements IFixableData {
         return compound;
     }
 
-    private static void process(NBTTagCompound spongeData, String type) {
+    private static void process(CompoundNBT spongeData, String type) {
         if (spongeData.func_150297_b(type, Constants.NBT.TAG_COMPOUND)) {
-            final NBTTagCompound creatorTag = spongeData.func_74775_l(type);
+            final CompoundNBT creatorTag = spongeData.func_74775_l(type);
             final long least = creatorTag.func_74763_f(Constants.Legacy.Entity.UUID_LEAST_1_8);
             final long most = creatorTag.func_74763_f(Constants.Legacy.Entity.UUID_MOST_1_8);
             final UUID creator = new UUID(most, least);

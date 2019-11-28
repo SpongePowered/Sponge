@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockRedstoneWire;
+import net.minecraft.block.RedstoneWireBlock;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BlockRedstoneWire.EnumAttachPosition.class)
+@Mixin(RedstoneWireBlock.EnumAttachPosition.class)
 @Implements(@Interface(iface = WireAttachmentType.class, prefix = "type$"))
 public abstract class BlockRedstoneWire_EnumAttachPositionMixin_API implements WireAttachmentType {
 

@@ -25,10 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.ai;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.EntityAITasks;
-import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
@@ -52,19 +48,22 @@ import java.util.Iterator;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.GoalSelector;
+import net.minecraft.entity.ai.goal.GoalSelector.EntityAITaskEntry;
 
-@Mixin(EntityAITasks.class)
+@Mixin(GoalSelector.class)
 public abstract class EntityAITasksMixin implements EntityAITasksBridge {
 
-    @Shadow @Final private Set<EntityAITasks.EntityAITaskEntry> taskEntries;
-    @Shadow @Final private Set<EntityAITasks.EntityAITaskEntry> executingTaskEntries;
+    @Shadow @Final private Set<GoalSelector.EntityAITaskEntry> taskEntries;
+    @Shadow @Final private Set<GoalSelector.EntityAITaskEntry> executingTaskEntries;
 
-    @Nullable private EntityLiving owner;
+    @Nullable private MobEntity owner;
     @Nullable private GoalType type;
     private boolean initialized;
 
     @Override
-    public Set<EntityAITasks.EntityAITaskEntry> bridge$getTasksUnsafe() {
+    public Set<GoalSelector.EntityAITaskEntry> bridge$getTasksUnsafe() {
         return this.taskEntries;
     }
 
@@ -79,11 +78,11 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
      * @return
      */
     @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z", remap = false))
-    private boolean onAddEntityTask(final Set<EntityAITasks.EntityAITaskEntry> set, final Object entry, final int priority, final EntityAIBase base) {
+    private boolean onAddEntityTask(final Set<GoalSelector.EntityAITaskEntry> set, final Object entry, final int priority, final net.minecraft.entity.ai.goal.Goal base) {
         ((EntityAIBasesBridge) base).bridge$setGoal((Goal<?>) this);
         if (!ShouldFire.A_I_TASK_EVENT_ADD || this.owner == null || ((EntityBridge) this.owner).bridge$isConstructing()) {
             // Event is fired in bridge$fireConstructors
-            return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
+            return set.add(((GoalSelector) (Object) this).new EntityAITaskEntry(priority, base));
         }
         final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(), priority, priority,
                 (Goal<?>) this, (Agent) this.owner, (AITask<?>) base);
@@ -92,16 +91,16 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
             ((EntityAIBasesBridge) base).bridge$setGoal(null);
             return false;
         }
-        return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
+        return set.add(((GoalSelector) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
     }
 
     @Override
-    public EntityLiving bridge$getOwner() {
+    public MobEntity bridge$getOwner() {
         return this.owner;
     }
 
     @Override
-    public void bridge$setOwner(final EntityLiving owner) {
+    public void bridge$setOwner(final MobEntity owner) {
         this.owner = owner;
     }
 
@@ -124,12 +123,12 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
      */
     @SuppressWarnings({"rawtypes"})
     @Overwrite
-    public void removeTask(final EntityAIBase aiBase) {
+    public void removeTask(final net.minecraft.entity.ai.goal.Goal aiBase) {
         final Iterator iterator = this.taskEntries.iterator();
 
         while (iterator.hasNext()) {
-            final EntityAITasks.EntityAITaskEntry entityaitaskentry = (EntityAITasks.EntityAITaskEntry)iterator.next();
-            final EntityAIBase otherAiBase = entityaitaskentry.field_75733_a;
+            final GoalSelector.EntityAITaskEntry entityaitaskentry = (GoalSelector.EntityAITaskEntry)iterator.next();
+            final net.minecraft.entity.ai.goal.Goal otherAiBase = entityaitaskentry.field_75733_a;
 
             // Sponge start
             if (otherAiBase.equals(aiBase)) {
@@ -165,7 +164,7 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
-    private boolean areTasksCompatible(final EntityAITasks.EntityAITaskEntry taskEntry1, final EntityAITasks.EntityAITaskEntry taskEntry2) {
+    private boolean areTasksCompatible(final GoalSelector.EntityAITaskEntry taskEntry1, final GoalSelector.EntityAITaskEntry taskEntry2) {
         return (((AITask) taskEntry2.field_75733_a).canRunConcurrentWith((AITask) taskEntry1.field_75733_a));
     }
 

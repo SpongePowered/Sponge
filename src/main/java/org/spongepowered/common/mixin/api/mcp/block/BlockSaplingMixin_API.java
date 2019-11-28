@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.api.mcp.block;
 
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.BlockSapling;
+import net.minecraft.block.SaplingBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(BlockSapling.class)
+@Mixin(SaplingBlock.class)
 public abstract class BlockSaplingMixin_API extends BlockMixin_API {
 
     @Override

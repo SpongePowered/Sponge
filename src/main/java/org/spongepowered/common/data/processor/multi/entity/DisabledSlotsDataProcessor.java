@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.multi.entity;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;

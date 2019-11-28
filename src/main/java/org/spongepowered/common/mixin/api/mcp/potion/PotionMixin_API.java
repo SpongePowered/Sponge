@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.potion;
 
-import net.minecraft.potion.Potion;
+import net.minecraft.potion.Effect;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.RegistryNamespaced;
+import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
@@ -40,11 +40,11 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
 
-@Mixin(Potion.class)
+@Mixin(Effect.class)
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
 public abstract class PotionMixin_API implements PotionEffectType {
 
-    @Shadow @Final public static RegistryNamespaced<ResourceLocation, Potion> REGISTRY;
+    @Shadow @Final public static SimpleRegistry<ResourceLocation, Effect> REGISTRY;
 
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract boolean shadow$isInstant();
@@ -56,7 +56,7 @@ public abstract class PotionMixin_API implements PotionEffectType {
     @Intrinsic
     public String potion$getId() {
         if (this.spongeResourceID == null) {
-            final ResourceLocation location = REGISTRY.func_177774_c((Potion) (Object) this);
+            final ResourceLocation location = REGISTRY.func_177774_c((Effect) (Object) this);
             if (location == null) {
                 this.spongeResourceID = "unknown";
             } else {

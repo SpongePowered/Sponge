@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.item.inventory.custom;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IInteractionObject;
@@ -69,12 +68,12 @@ public class CustomInventory implements IInventory, IInteractionObject {
     private final Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners;
     private final PluginContainer plugin;
 
-    private InventoryBasic inv;
+    private net.minecraft.inventory.Inventory inv;
     protected InventoryArchetype archetype;
     private Map<String, InventoryProperty<?, ?>> properties;
     private Carrier carrier;
 
-    private Set<EntityPlayer> viewers = new HashSet<>();
+    private Set<PlayerEntity> viewers = new HashSet<>();
     private boolean registered;
 
     @SuppressWarnings("deprecation")
@@ -100,7 +99,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
         final String title = titleProperty == null ? "" :
                 isCustom ? TextSerializers.LEGACY_FORMATTING_CODE.serialize(titleProperty.getValue())
                         : ((TranslatableText) titleProperty.getValue()).getTranslation().getId();
-        this.inv = new InventoryBasic(title, isCustom, count);
+        this.inv = new net.minecraft.inventory.Inventory(title, isCustom, count);
 
         // Updates the Inventory for all viewers on any change
         this.inv.func_110134_a(i -> this.viewers.forEach(v -> {
@@ -143,7 +142,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public Container func_174876_a(final InventoryPlayer playerInventory, final EntityPlayer playerIn) {
+    public Container func_174876_a(final PlayerInventory playerInventory, final PlayerEntity playerIn) {
 
         // To be viewable the Inventory has to implement IInteractionObject and thus provide a Container
         // displayChest falls back to Chest for IInventory instance
@@ -241,19 +240,19 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public boolean func_70300_a(final EntityPlayer player) {
+    public boolean func_70300_a(final PlayerEntity player) {
         return this.inv.func_70300_a(player);
     }
 
     @Override
-    public void func_174889_b(final EntityPlayer player) {
+    public void func_174889_b(final PlayerEntity player) {
         this.viewers.add(player);
         this.inv.func_174889_b(player);
         this.ensureListenersRegistered();
     }
 
     @Override
-    public void func_174886_c(final EntityPlayer player) {
+    public void func_174886_c(final PlayerEntity player) {
         this.viewers.remove(player);
         this.inv.func_174886_c(player);
         if (this.viewers.isEmpty()) {

@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -53,6 +52,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.minecraft.entity.player.PlayerEntity;
 
 @Singleton
 public class SpongeScheduler implements Scheduler {
@@ -190,9 +190,9 @@ public class SpongeScheduler implements Scheduler {
 
         if (Sponge.isServerAvailable()) {
             for (Player player : Sponge.getServer().getOnlinePlayers()) {
-                if (player instanceof EntityPlayer) {
+                if (player instanceof PlayerEntity) {
                     // Detect Changes on PlayerInventories marked as dirty.
-                    ((InventoryPlayerBridge) ((EntityPlayer) player).field_71071_by).bridge$cleanupDirty();
+                    ((InventoryPlayerBridge) ((PlayerEntity) player).field_71071_by).bridge$cleanupDirty();
                 }
             }
         }

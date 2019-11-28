@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.command.server;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandPardonIp;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.UserListIPBans;
+import net.minecraft.server.management.IPBanList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -68,7 +68,7 @@ public abstract class CommandPardonIpMixin {
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/server/management/UserListIPBans;removeEntry(Ljava/lang/Object;)V"))
-    private void impl$removeBanEntryWithAddress(final UserListIPBans banList, Object address) {
+    private void impl$removeBanEntryWithAddress(final IPBanList banList, Object address) {
         if (this.address != null) {
             address = this.address.getHostAddress();
             this.address = null;

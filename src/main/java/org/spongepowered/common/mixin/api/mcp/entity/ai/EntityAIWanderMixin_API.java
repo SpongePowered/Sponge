@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.CreatureEntity;
+import net.minecraft.entity.ai.goal.RandomWalkingGoal;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
 import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.asm.mixin.Final;
@@ -33,10 +33,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityAIWander.class)
+@Mixin(RandomWalkingGoal.class)
 public abstract class EntityAIWanderMixin_API extends EntityAIBaseMixin_API<Creature> implements WanderAITask {
 
-    @Shadow @Final protected EntityCreature entity;
+    @Shadow @Final protected CreatureEntity entity;
     @Shadow @Final @Mutable protected double speed;
     @Shadow protected int executionChance;
 

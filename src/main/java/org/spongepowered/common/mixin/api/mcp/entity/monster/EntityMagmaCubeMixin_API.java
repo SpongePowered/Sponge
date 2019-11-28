@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.EntityMagmaCube;
+import net.minecraft.entity.monster.MagmaCubeEntity;
 import org.spongepowered.api.entity.living.monster.MagmaCube;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityMagmaCube.class)
+@Mixin(MagmaCubeEntity.class)
 public abstract class EntityMagmaCubeMixin_API extends EntitySlimeMixin_API implements MagmaCube {
 
 }

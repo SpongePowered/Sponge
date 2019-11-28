@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.bridge.entity.item;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 
 public interface EntityTNTPrimedBridge {
 
-    void bridge$setDetonator(EntityLivingBase detonator);
+    void bridge$setDetonator(LivingEntity detonator);
 
     boolean bridge$isExploding();
 }

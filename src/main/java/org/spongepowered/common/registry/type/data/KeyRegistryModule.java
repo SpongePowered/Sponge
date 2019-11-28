@@ -33,8 +33,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -728,13 +728,13 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
             objects.add(new EntityBabyConverter());
             return objects.build();
         })
-        .put(EntityLivingBase.class, () -> {
+        .put(LivingEntity.class, () -> {
             final ImmutableList.Builder<DataParameterConverter<?>> list = ImmutableList.builder();
             list.add(new EntityLivingBaseHealthConverter());
             list.add(new EntityLivingBaseArrowCountConverter());
             return list.build();
         })
-        .put(EntityLiving.class, () -> {
+        .put(MobEntity.class, () -> {
             final ImmutableList.Builder<DataParameterConverter<?>> list = ImmutableList.builder();
             list.add(new EntityLivingAIFlagsConverter());
             return list.build();

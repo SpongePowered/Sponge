@@ -27,9 +27,9 @@ package org.spongepowered.common.registry.type.effect;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemRecord;
+import net.minecraft.item.Items;
+import net.minecraft.item.MusicDiscItem;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -97,8 +97,8 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Rec
 
     @CustomCatalogRegistration
     public void customRegistration() {
-        for (Map.Entry<SoundEvent, ItemRecord> recordEntry : ((ItemRecordAccessor) Items.field_151093_ce).accessor$getRecords().entrySet()) {
-            final ItemRecord recordItem = recordEntry.getValue();
+        for (Map.Entry<SoundEvent, MusicDiscItem> recordEntry : ((ItemRecordAccessor) Items.field_151093_ce).accessor$getRecords().entrySet()) {
+            final MusicDiscItem recordItem = recordEntry.getValue();
             final String key = Item.field_150901_e.func_177774_c(recordItem).toString();
             if(!mappings.containsKey(key)) {
                 this.add(new SpongeRecordType(key, recordItem.func_77658_a(), (ItemType) recordItem, (SoundType) ((ItemRecordAccessor) recordItem).accessor$getSoundEvent()));

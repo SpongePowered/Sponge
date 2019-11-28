@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity.passive;
 
-import net.minecraft.entity.passive.EntitySheep;
-import net.minecraft.item.EnumDyeColor;
+import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.item.DyeColor;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(EntitySheep.class)
+@Mixin(SheepEntity.class)
 public interface EntitySheepAccessor {
 
     @Accessor("DYE_COLOR")
@@ -40,7 +40,7 @@ public interface EntitySheepAccessor {
     }
 
     @Invoker("createSheepColor")
-    static float[] accessor$createSheepColor(EnumDyeColor p_192020_0_) {
+    static float[] accessor$createSheepColor(DyeColor p_192020_0_) {
         throw new IllegalStateException("UntransformedAccessor!");
     }
 

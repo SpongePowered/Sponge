@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.inventory.Slot;
-import net.minecraft.inventory.SlotCrafting;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.CraftingResultSlot;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
-import net.minecraft.network.play.server.SPacketSetSlot;
+import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -64,11 +63,11 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(SlotCrafting.class)
+@Mixin(CraftingResultSlot.class)
 public abstract class SlotCraftingMixin extends Slot {
 
-    @Shadow @Final private EntityPlayer player;
-    @Shadow @Final private InventoryCrafting craftMatrix;
+    @Shadow @Final private PlayerEntity player;
+    @Shadow @Final private net.minecraft.inventory.CraftingInventory craftMatrix;
     @Shadow private int amountCrafted;
 
     public SlotCraftingMixin(final IInventory inventoryIn, final int index, final int xPosition, final int yPosition) {
@@ -82,8 +81,8 @@ public abstract class SlotCraftingMixin extends Slot {
     @Override
     public void func_75215_d(@Nullable final ItemStack stack) {
         super.func_75215_d(stack);
-        if (this.player instanceof EntityPlayerMP) {
-            ((EntityPlayerMP) this.player).field_71135_a.func_147359_a(new SPacketSetSlot(0, 0, stack));
+        if (this.player instanceof ServerPlayerEntity) {
+            ((ServerPlayerEntity) this.player).field_71135_a.func_147359_a(new SSetSlotPacket(0, 0, stack));
         }
     }
 
@@ -93,7 +92,7 @@ public abstract class SlotCraftingMixin extends Slot {
     }
 
     @Inject(method = "onTake", at = @At("HEAD"))
-    private void beforeTake(final EntityPlayer thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
+    private void beforeTake(final PlayerEntity thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
         this.impl$lastRecipe = ((CraftingRecipe) CraftingManager.func_192413_b(this.craftMatrix, thePlayer.field_70170_p));
         if (((ContainerBridge) thePlayer.field_71070_bA).bridge$isShiftCrafting()) {
             ((ContainerBridge) thePlayer.field_71070_bA).bridge$detectAndSendChanges(true);
@@ -115,7 +114,7 @@ public abstract class SlotCraftingMixin extends Slot {
     }
 
     @Redirect(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/crafting/CraftingManager;getRemainingItems(Lnet/minecraft/inventory/InventoryCrafting;Lnet/minecraft/world/World;)Lnet/minecraft/util/NonNullList;"))
-    private NonNullList<ItemStack> onGetRemainingItems(final InventoryCrafting craftMatrix, final net.minecraft.world.World worldIn) {
+    private NonNullList<ItemStack> onGetRemainingItems(final net.minecraft.inventory.CraftingInventory craftMatrix, final net.minecraft.world.World worldIn) {
         if (this.impl$lastRecipe == null) {
             return NonNullList.func_191197_a(craftMatrix.func_70302_i_(), ItemStack.field_190927_a);
         }
@@ -128,7 +127,7 @@ public abstract class SlotCraftingMixin extends Slot {
      * {@link ContainerMixin#redirectOnTakeThrow}
      */
     @Inject(method = "onTake", cancellable = true, at = @At("RETURN"))
-    private void afterTake(final EntityPlayer thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
+    private void afterTake(final PlayerEntity thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
         if (((WorldBridge) thePlayer.field_70170_p).bridge$isFake()) {
             return;
         }

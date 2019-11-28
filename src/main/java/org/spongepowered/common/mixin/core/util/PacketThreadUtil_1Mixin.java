@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.util;
 
 import net.minecraft.network.INetHandler;
-import net.minecraft.network.Packet;
+import net.minecraft.network.IPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -36,7 +36,7 @@ public class PacketThreadUtil_1Mixin {
 
     @Redirect(method = "run()V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") )
-    private void impl$redirectToPhaseTracker(final Packet<?> packetIn, final INetHandler netHandler) {
+    private void impl$redirectToPhaseTracker(final IPacket<?> packetIn, final INetHandler netHandler) {
         PacketPhaseUtil.onProcessPacket(packetIn, netHandler);
     }
 

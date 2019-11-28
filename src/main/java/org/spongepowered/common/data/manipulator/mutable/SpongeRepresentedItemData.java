@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
-import net.minecraft.init.Items;
+import net.minecraft.item.Items;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;

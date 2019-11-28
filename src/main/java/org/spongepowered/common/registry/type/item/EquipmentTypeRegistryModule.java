@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type.item;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -41,6 +40,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.inventory.EquipmentSlotType;
 
 public class EquipmentTypeRegistryModule implements CatalogRegistryModule<EquipmentType> {
 
@@ -62,29 +62,29 @@ public class EquipmentTypeRegistryModule implements CatalogRegistryModule<Equipm
         this.registerType("any");
         this.registerType("equipped");
 
-        final SpongeWornEquipmentType head = this.registerWornType("head", EntityEquipmentSlot.HEAD);
+        final SpongeWornEquipmentType head = this.registerWornType("head", EquipmentSlotType.HEAD);
         this.equipmentTypeMap.put("headwear", head);
-        this.registerWornType("chestplate", EntityEquipmentSlot.CHEST);
-        this.registerWornType("leggings", EntityEquipmentSlot.LEGS);
-        this.registerWornType("boots", EntityEquipmentSlot.FEET);
-        this.registerWornType("worn", EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.FEET);
+        this.registerWornType("chestplate", EquipmentSlotType.CHEST);
+        this.registerWornType("leggings", EquipmentSlotType.LEGS);
+        this.registerWornType("boots", EquipmentSlotType.FEET);
+        this.registerWornType("worn", EquipmentSlotType.HEAD, EquipmentSlotType.CHEST, EquipmentSlotType.LEGS, EquipmentSlotType.FEET);
 
-        this.registerHeldType("main_hand", EntityEquipmentSlot.MAINHAND);
-        this.registerHeldType("off_hand", EntityEquipmentSlot.OFFHAND);
-        this.registerHeldType("held", EntityEquipmentSlot.MAINHAND, EntityEquipmentSlot.OFFHAND);
+        this.registerHeldType("main_hand", EquipmentSlotType.MAINHAND);
+        this.registerHeldType("off_hand", EquipmentSlotType.OFFHAND);
+        this.registerHeldType("held", EquipmentSlotType.MAINHAND, EquipmentSlotType.OFFHAND);
     }
 
     private void registerType(String id) {
         this.equipmentTypeMap.put(id, new SpongeEquipmentType(id));
     }
 
-    private SpongeWornEquipmentType registerWornType(String id, EntityEquipmentSlot... types) {
+    private SpongeWornEquipmentType registerWornType(String id, EquipmentSlotType... types) {
         SpongeWornEquipmentType newType = new SpongeWornEquipmentType(id, types);
         this.equipmentTypeMap.put(id, newType);
         return newType;
     }
 
-    private void registerHeldType(String id, EntityEquipmentSlot... types) {
+    private void registerHeldType(String id, EquipmentSlotType... types) {
         this.equipmentTypeMap.put(id, new SpongeHeldEquipmentType(id, types));
     }
 }

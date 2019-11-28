@@ -30,12 +30,11 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -78,7 +77,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     private int quantity;
     private int damageValue = 0;
     @Nullable private LinkedHashMap<Key<?>, Object> keyValues;
-    @Nullable private NBTTagCompound compound;
+    @Nullable private CompoundNBT compound;
 
     public SpongeItemStackBuilder() {
         super(ItemStack.class, 1);
@@ -138,7 +137,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.quantity = itemStack.getQuantity();
         if (itemStack instanceof net.minecraft.item.ItemStack) {
             this.damageValue = ((net.minecraft.item.ItemStack) itemStack).func_77952_i();
-            final NBTTagCompound itemCompound = ((net.minecraft.item.ItemStack) itemStack).func_77978_p();
+            final CompoundNBT itemCompound = ((net.minecraft.item.ItemStack) itemStack).func_77978_p();
             if (itemCompound != null) {
                 this.compound = itemCompound.func_74737_b();
             }
@@ -168,7 +167,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 
         this.damageValue = getData(container, Constants.ItemStack.DAMAGE_VALUE, Integer.class);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            final CompoundNBT compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (compound.func_150297_b(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
                 compound.func_82580_o(Constants.Sponge.SPONGE_DATA);
             }
@@ -194,7 +193,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         }
         if (snapshot instanceof SpongeItemStackSnapshot) {
             this.damageValue = ((SpongeItemStackSnapshot) snapshot).getDamageValue();
-            final Optional<NBTTagCompound> compoundOptional = ((SpongeItemStackSnapshot) snapshot).getCompound();
+            final Optional<CompoundNBT> compoundOptional = ((SpongeItemStackSnapshot) snapshot).getCompound();
             if (compoundOptional.isPresent()) {
                 this.compound = compoundOptional.get();
             } else {
@@ -215,10 +214,10 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         quantity(1);
         if (blockSnapshot instanceof SpongeBlockSnapshot) {
             final Block block = (Block) blockType;
-            this.damageValue = block.func_180651_a((IBlockState) blockSnapshot.getState());
-            final Optional<NBTTagCompound> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
+            this.damageValue = block.func_180651_a((net.minecraft.block.BlockState) blockSnapshot.getState());
+            final Optional<CompoundNBT> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
             if (compound.isPresent()) {
-                this.compound = new NBTTagCompound();
+                this.compound = new CompoundNBT();
                 this.compound.func_74782_a(Constants.Item.BLOCK_ENTITY_TAG, compound.get());
             }
             // todo probably needs more testing, but this'll do donkey...
@@ -230,7 +229,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 
     @Override
     public ItemStack.Builder fromBlockState(BlockState blockState) {
-        final IBlockState minecraftState = (IBlockState) blockState;
+        final net.minecraft.block.BlockState minecraftState = (net.minecraft.block.BlockState) blockState;
         final Optional<ItemType> item = blockState.getType().getItem();
         if (!item.isPresent()) {
             new PrettyPrinter(60).add("Invalid BlockState").centre().hr()
@@ -278,7 +277,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         final int damage = getData(container, Constants.ItemStack.DAMAGE_VALUE, Integer.class);
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count, damage);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            final CompoundNBT compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             fixEnchantmentData(itemType, compound);
             itemStack.func_77982_d(compound);
         }
@@ -328,7 +327,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             this.keyValues.forEach((key, value) -> stack.offer((Key) key, value));
         }
         if (this.compound != null && this.compound.func_150297_b(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
-            final NBTTagCompound compoundTag = this.compound.func_74775_l(Constants.Forge.FORGE_CAPS);
+            final CompoundNBT compoundTag = this.compound.func_74775_l(Constants.Forge.FORGE_CAPS);
             if (compoundTag != null) {
                 SpongeImplHooks.setCapabilitiesFromSpongeBuilder(stack, compoundTag);
             }
@@ -344,8 +343,8 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
      * @param itemType the item type
      * @param compound the itemstacks NBTTagCompound
      */
-    public static void fixEnchantmentData(ItemType itemType, NBTTagCompound compound) {
-        NBTTagList nbttaglist;
+    public static void fixEnchantmentData(ItemType itemType, CompoundNBT compound) {
+        ListNBT nbttaglist;
         if (itemType == Items.field_151134_bR) {
             nbttaglist = compound.func_150295_c(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
         } else {
@@ -353,7 +352,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         }
         for (int i = 0; i < nbttaglist.func_74745_c(); ++i)
         {
-            NBTTagCompound nbttagcompound = nbttaglist.func_150305_b(i);
+            CompoundNBT nbttagcompound = nbttaglist.func_150305_b(i);
             short id = nbttagcompound.func_74765_d(Constants.Item.ITEM_ENCHANTMENT_ID);
             short lvl = nbttagcompound.func_74765_d(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
 

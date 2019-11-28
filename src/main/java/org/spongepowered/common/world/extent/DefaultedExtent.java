@@ -26,8 +26,6 @@ package org.spongepowered.common.world.extent;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
@@ -67,6 +65,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.nbt.DoubleNBT;
+import net.minecraft.nbt.ListNBT;
 
 /**
  * The Extent interface with extra defaults that are only available in the
@@ -201,15 +201,15 @@ public interface DefaultedExtent extends Extent {
         for (final Entity hit : intersectingEntities) {
             final net.minecraft.entity.Entity nms = (net.minecraft.entity.Entity) hit;
             final SpongeEntityArchetype archetype = (SpongeEntityArchetype) hit.createArchetype();
-            final NBTTagList tagList = archetype.getData().func_150295_c(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+            final ListNBT tagList = archetype.getData().func_150295_c(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
             if (tagList.func_82582_d()) {
-                tagList.func_74742_a(new NBTTagDouble(nms.field_70165_t - ox));
-                tagList.func_74742_a(new NBTTagDouble(nms.field_70163_u - oy));
-                tagList.func_74742_a(new NBTTagDouble(nms.field_70161_v - oz));
+                tagList.func_74742_a(new DoubleNBT(nms.field_70165_t - ox));
+                tagList.func_74742_a(new DoubleNBT(nms.field_70163_u - oy));
+                tagList.func_74742_a(new DoubleNBT(nms.field_70161_v - oz));
             } else {
-                tagList.func_150304_a(0, new NBTTagDouble(nms.field_70165_t - ox));
-                tagList.func_150304_a(1, new NBTTagDouble(nms.field_70163_u - oy));
-                tagList.func_150304_a(2, new NBTTagDouble(nms.field_70161_v - oz));
+                tagList.func_150304_a(0, new DoubleNBT(nms.field_70165_t - ox));
+                tagList.func_150304_a(1, new DoubleNBT(nms.field_70163_u - oy));
+                tagList.func_150304_a(2, new DoubleNBT(nms.field_70161_v - oz));
             }
             entities.add(archetype);
         }

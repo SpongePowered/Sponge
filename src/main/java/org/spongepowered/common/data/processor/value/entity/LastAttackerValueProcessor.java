@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -40,12 +39,13 @@ import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.LivingEntity;
 
 public class LastAttackerValueProcessor
-        extends AbstractSpongeValueProcessor<EntityLivingBase, Optional<EntitySnapshot>, OptionalValue<EntitySnapshot>> {
+        extends AbstractSpongeValueProcessor<LivingEntity, Optional<EntitySnapshot>, OptionalValue<EntitySnapshot>> {
 
     public LastAttackerValueProcessor() {
-        super(EntityLivingBase.class, Keys.LAST_ATTACKER);
+        super(LivingEntity.class, Keys.LAST_ATTACKER);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class LastAttackerValueProcessor
     }
 
     @Override
-    protected boolean set(EntityLivingBase dataHolder, @Nullable Optional<EntitySnapshot> lastAttacker) {
+    protected boolean set(LivingEntity dataHolder, @Nullable Optional<EntitySnapshot> lastAttacker) {
         if (lastAttacker == null || !lastAttacker.isPresent()) {
             dataHolder.func_70604_c(null);
             return true;
@@ -63,8 +63,8 @@ public class LastAttackerValueProcessor
             final Optional<Entity> optionalEntity = lastAttacker.get().restore();
             if (optionalEntity.isPresent()) {
                 final Entity entity = optionalEntity.get();
-                if (entity.isLoaded() && entity instanceof EntityLivingBase) {
-                    dataHolder.func_70604_c((EntityLivingBase) entity);
+                if (entity.isLoaded() && entity instanceof LivingEntity) {
+                    dataHolder.func_70604_c((LivingEntity) entity);
                     return true;
                 }
             }
@@ -73,8 +73,8 @@ public class LastAttackerValueProcessor
     }
 
     @Override
-    protected Optional<Optional<EntitySnapshot>> getVal(EntityLivingBase container) {
-        final EntityLivingBase entityLivingBase = ((EntityLivingBaseAccessor) container).accessor$getRevengeTarget();
+    protected Optional<Optional<EntitySnapshot>> getVal(LivingEntity container) {
+        final LivingEntity entityLivingBase = ((EntityLivingBaseAccessor) container).accessor$getRevengeTarget();
         return Optional.of(Optional.ofNullable(entityLivingBase == null ? null : ((Living) entityLivingBase).createSnapshot()));
     }
 

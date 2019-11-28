@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.monster.EntityPolarBear;
+import net.minecraft.entity.passive.PolarBearEntity;
 import org.spongepowered.api.entity.living.animal.PolarBear;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityPolarBear.class)
+@Mixin(PolarBearEntity.class)
 public abstract class EntityPolarBearMixin_API extends EntityAnimalMixin_API implements PolarBear {
 
 }

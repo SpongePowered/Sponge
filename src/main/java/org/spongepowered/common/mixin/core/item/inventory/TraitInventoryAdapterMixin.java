@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
-import net.minecraft.entity.item.EntityMinecartContainer;
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.CraftResultInventory;
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.inventory.InventoryCraftResult;
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.inventory.InventoryLargeChest;
-import net.minecraft.inventory.Slot;
-import net.minecraft.tileentity.TileEntityLockable;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.tileentity.LockableTileEntity;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
@@ -55,16 +55,16 @@ import javax.annotation.Nullable;
 @Mixin(value = {
         Slot.class,
         Container.class,
-        InventoryPlayer.class,
-        EntityVillager.class,
-        InventoryLargeChest.class,
-        TileEntityLockable.class,
+        PlayerInventory.class,
+        VillagerEntity.class,
+        DoubleSidedInventory.class,
+        LockableTileEntity.class,
         CustomInventory.class,
-        InventoryBasic.class,
+        Inventory.class,
         SpongeUserInventory.class,
-        InventoryCrafting.class,
-        InventoryCraftResult.class,
-        EntityMinecartContainer.class
+        CraftingInventory.class,
+        CraftResultInventory.class,
+        ContainerMinecartEntity.class
 }, priority = 999)
 public abstract class TraitInventoryAdapterMixin implements InventoryAdapter, InventoryAdapterBridge, InventoryBridge {
 

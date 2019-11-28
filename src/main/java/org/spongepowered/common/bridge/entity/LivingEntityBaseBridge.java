@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.entity;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
@@ -41,15 +41,15 @@ public interface LivingEntityBaseBridge {
 
     void bridge$setMaxAir(int max);
 
-    Optional<List<DamageFunction>> bridge$provideArmorModifiers(EntityLivingBase entityLivingBase, DamageSource source, double damage);
+    Optional<List<DamageFunction>> bridge$provideArmorModifiers(LivingEntity entityLivingBase, DamageSource source, double damage);
 
-    float bridge$applyModDamage(EntityLivingBase entityLivingBase, DamageSource source, float damage);
+    float bridge$applyModDamage(LivingEntity entityLivingBase, DamageSource source, float damage);
 
-    void bridge$applyArmorDamage(EntityLivingBase entityLivingBase, DamageSource source, DamageEntityEvent entityEvent, DamageModifier modifier);
+    void bridge$applyArmorDamage(LivingEntity entityLivingBase, DamageSource source, DamageEntityEvent entityEvent, DamageModifier modifier);
 
-    boolean bridge$hookModAttack(EntityLivingBase entityLivingBase, DamageSource source, float amount);
+    boolean bridge$hookModAttack(LivingEntity entityLivingBase, DamageSource source, float amount);
 
-    float bridge$applyModDamagePost(EntityLivingBase entityLivingBase, DamageSource source, float damage);
+    float bridge$applyModDamagePost(LivingEntity entityLivingBase, DamageSource source, float damage);
 
     void bridge$resetDeathEventsPosted();
 }

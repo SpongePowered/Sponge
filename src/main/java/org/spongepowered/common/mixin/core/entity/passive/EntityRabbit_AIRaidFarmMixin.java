@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.entity.passive;
 
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIMoveToBlock;
-import net.minecraft.entity.passive.EntityRabbit;
+import net.minecraft.entity.CreatureEntity;
+import net.minecraft.entity.ai.goal.MoveToBlockGoal;
+import net.minecraft.entity.passive.RabbitEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,12 +35,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 
-@Mixin(EntityRabbit.AIRaidFarm.class)
-public abstract class EntityRabbit_AIRaidFarmMixin extends EntityAIMoveToBlock {
+@Mixin(RabbitEntity.RaidFarmGoal.class)
+public abstract class EntityRabbit_AIRaidFarmMixin extends MoveToBlockGoal {
 
-    @Shadow @Final private EntityRabbit rabbit;
+    @Shadow @Final private RabbitEntity rabbit;
 
-    public EntityRabbit_AIRaidFarmMixin(final EntityCreature entityCreature, final double a, final int b) {
+    public EntityRabbit_AIRaidFarmMixin(final CreatureEntity entityCreature, final double a, final int b) {
         super(entityCreature, a, b);
     }
 

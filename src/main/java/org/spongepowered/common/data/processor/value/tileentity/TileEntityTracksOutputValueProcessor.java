@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
-import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -35,11 +34,12 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.tileentity.CommandBlockTileEntity;
 
-public class TileEntityTracksOutputValueProcessor extends AbstractSpongeValueProcessor<TileEntityCommandBlock, Boolean, Value<Boolean>> {
+public class TileEntityTracksOutputValueProcessor extends AbstractSpongeValueProcessor<CommandBlockTileEntity, Boolean, Value<Boolean>> {
 
     public TileEntityTracksOutputValueProcessor() {
-        super(TileEntityCommandBlock.class, Keys.TRACKS_OUTPUT);
+        super(CommandBlockTileEntity.class, Keys.TRACKS_OUTPUT);
     }
 
     @Override
@@ -53,13 +53,13 @@ public class TileEntityTracksOutputValueProcessor extends AbstractSpongeValuePro
     }
 
     @Override
-    protected boolean set(TileEntityCommandBlock container, Boolean value) {
+    protected boolean set(CommandBlockTileEntity container, Boolean value) {
         container.func_145993_a().func_175573_a(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(TileEntityCommandBlock container) {
+    protected Optional<Boolean> getVal(CommandBlockTileEntity container) {
         return Optional.of(container.func_145993_a().func_175571_m());
     }
 

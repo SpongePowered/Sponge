@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import net.minecraft.tileentity.TileEntityHopper;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
@@ -38,16 +37,17 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.tileentity.TileEntityHopperAccessor;
 
 import java.util.Optional;
+import net.minecraft.tileentity.HopperTileEntity;
 
 public class CooldownDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntityHopper, Integer, MutableBoundedValue<Integer>, CooldownData, ImmutableCooldownData> {
+        extends AbstractTileEntitySingleDataProcessor<HopperTileEntity, Integer, MutableBoundedValue<Integer>, CooldownData, ImmutableCooldownData> {
 
     public CooldownDataProcessor() {
-        super(TileEntityHopper.class, Keys.COOLDOWN);
+        super(HopperTileEntity.class, Keys.COOLDOWN);
     }
 
     @Override
-    public boolean set(final TileEntityHopper entity, final Integer value) {
+    public boolean set(final HopperTileEntity entity, final Integer value) {
         if (value < 1) {
             return false;
         }
@@ -56,7 +56,7 @@ public class CooldownDataProcessor
     }
 
     @Override
-    public Optional<Integer> getVal(final TileEntityHopper entity) {
+    public Optional<Integer> getVal(final HopperTileEntity entity) {
         return Optional.ofNullable(((TileEntityHopperAccessor) entity ).accessor$getTransferCooldown() < 1 ? null : ((TileEntityHopperAccessor) entity ).accessor$getTransferCooldown());
     }
 
@@ -82,8 +82,8 @@ public class CooldownDataProcessor
 
     @Override
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
-        if (container instanceof TileEntityHopper) {
-            final TileEntityHopper hopper = (TileEntityHopper) container;
+        if (container instanceof HopperTileEntity) {
+            final HopperTileEntity hopper = (HopperTileEntity) container;
             final Optional<Integer> old = getVal(hopper);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -35,11 +34,12 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.LivingEntity;
 
-public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<EntityLivingBase, Integer, MutableBoundedValue<Integer>> {
+public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<LivingEntity, Integer, MutableBoundedValue<Integer>> {
 
     public RemainingAirValueProcessor() {
-        super(EntityLivingBase.class, Keys.REMAINING_AIR);
+        super(LivingEntity.class, Keys.REMAINING_AIR);
     }
 
     @Override
@@ -53,13 +53,13 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected boolean set(final EntityLivingBase container, final Integer value) {
+    protected boolean set(final LivingEntity container, final Integer value) {
         container.func_70050_g(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(final EntityLivingBase container) {
+    protected Optional<Integer> getVal(final LivingEntity container) {
         return Optional.of(container.func_70086_ai());
     }
 
@@ -69,7 +69,7 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected boolean supports(final EntityLivingBase container) {
+    protected boolean supports(final LivingEntity container) {
         return container.func_70090_H();
     }
 

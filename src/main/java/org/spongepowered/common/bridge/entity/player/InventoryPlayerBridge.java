@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.bridge.entity.player;
 
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 
 public interface InventoryPlayerBridge {
 
-    int bridge$getHeldItemIndex(EnumHand hand);
+    int bridge$getHeldItemIndex(Hand hand);
 
     /**
      * Set the current hotbar item and optionally notify the client

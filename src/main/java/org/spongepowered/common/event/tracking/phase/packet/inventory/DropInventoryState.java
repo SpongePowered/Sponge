@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -41,12 +39,14 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 
 public final class DropInventoryState extends BasicInventoryPacketState {
 
     @Override
     public void unwind(InventoryPacketContext context) {
-        final EntityPlayerMP player = context.getPacketPlayer();
+        final ServerPlayerEntity player = context.getPacketPlayer();
         final ItemStack usedStack = context.getItemUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = (Entity) player;
@@ -60,7 +60,7 @@ public final class DropInventoryState extends BasicInventoryPacketState {
                 .acceptAndClearIfNotEmpty(items -> {
 
                     final ArrayList<Entity> entities = new ArrayList<>();
-                    for (EntityItem item : items) {
+                    for (ItemEntity item : items) {
                         entities.add((Entity) item);
                     }
                     final DropItemEvent.Dispense dropItemEvent =

@@ -26,8 +26,6 @@ package org.spongepowered.common.service.ban;
 
 import static org.spongepowered.common.util.NetworkUtil.LOCAL_ADDRESS;
 
-import net.minecraft.server.management.UserListIPBans;
-import net.minecraft.server.management.UserListIPBansEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.util.ban.Ban;
@@ -42,11 +40,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.management.IPBanEntry;
+import net.minecraft.server.management.IPBanList;
 
 /**
  * Redirects all calls to the {@link BanService}.
  */
-public class SpongeIPBanList extends UserListIPBans {
+public class SpongeIPBanList extends IPBanList {
 
     public SpongeIPBanList(File bansFile) {
         super(bansFile);
@@ -71,13 +71,13 @@ public class SpongeIPBanList extends UserListIPBans {
 
     @Override
     @Nullable
-    public UserListIPBansEntry getEntry(String obj) {
+    public IPBanEntry getEntry(String obj) {
         if (obj.equals(LOCAL_ADDRESS)) { // Check for single player
             return null;
         }
 
         try {
-            return (UserListIPBansEntry) getService().getBanFor(InetAddress.getByName(obj)).orElse(null);
+            return (IPBanEntry) getService().getBanFor(InetAddress.getByName(obj)).orElse(null);
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -106,7 +106,7 @@ public class SpongeIPBanList extends UserListIPBans {
     }
 
     @Override
-    public void addEntry(UserListIPBansEntry entry) {
+    public void addEntry(IPBanEntry entry) {
         getService().addBan((Ban) entry);
     }
 

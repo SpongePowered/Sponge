@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.block;
 
-import net.minecraft.block.BlockTallGrass;
+import net.minecraft.block.TallGrassBlock;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableShrubData;
 import org.spongepowered.api.data.manipulator.mutable.block.ShrubData;
@@ -54,12 +54,12 @@ public class ShrubDataProcessor extends AbstractCatalogDataProcessor<ShrubType, 
 
     @Override
     protected ShrubType getFromMeta(int meta) {
-        return (ShrubType) (Object) BlockTallGrass.EnumType.func_177045_a(meta);
+        return (ShrubType) (Object) TallGrassBlock.EnumType.func_177045_a(meta);
     }
 
     @Override
     protected int setToMeta(ShrubType type) {
-        return ((BlockTallGrass.EnumType) (Object) type).func_177044_a();
+        return ((TallGrassBlock.EnumType) (Object) type).func_177044_a();
     }
 
     @Override

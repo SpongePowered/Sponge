@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.api.text;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.HoverAction;
@@ -60,7 +60,7 @@ public abstract class TextMixin implements TextBridge {
     private ITextComponent component;
     private String json;
 
-    protected TextComponentBase createComponent() {
+    protected TextComponent createComponent() {
         throw new UnsupportedOperationException();
     }
 

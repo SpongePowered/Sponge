@@ -36,7 +36,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.EntityList;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraft.stats.StatList;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.ResourceLocation;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.logging.log4j.Level;
@@ -436,19 +436,19 @@ public class SpongeGameRegistry implements GameRegistry {
         checkNotNull(itemType, "null item type");
         Item item = (Item) itemType;
         if (statType.equals(StatisticTypes.ITEMS_CRAFTED)) {
-            return Optional.of((ItemStatistic) StatList.func_188060_a(item));
+            return Optional.of((ItemStatistic) Stats.func_188060_a(item));
         }
         if (statType.equals(StatisticTypes.ITEMS_USED)) {
-            return Optional.of((ItemStatistic) StatList.func_188057_b(item));
+            return Optional.of((ItemStatistic) Stats.func_188057_b(item));
         }
         if (statType.equals(StatisticTypes.ITEMS_BROKEN)) {
-            return Optional.of((ItemStatistic) StatList.func_188059_c(item));
+            return Optional.of((ItemStatistic) Stats.func_188059_c(item));
         }
         if (statType.equals(StatisticTypes.ITEMS_PICKED_UP)) {
-            return Optional.of((ItemStatistic) StatList.func_188056_d(item));
+            return Optional.of((ItemStatistic) Stats.func_188056_d(item));
         }
         if (statType.equals(StatisticTypes.ITEMS_DROPPED)) {
-            return Optional.of((ItemStatistic) StatList.func_188058_e(item));
+            return Optional.of((ItemStatistic) Stats.func_188058_e(item));
         }
         throw new IllegalArgumentException("invalid item stat type");
     }
@@ -459,7 +459,7 @@ public class SpongeGameRegistry implements GameRegistry {
         if (!statType.equals(StatisticTypes.BLOCKS_BROKEN)) {
             throw new IllegalArgumentException("invalid block stat type");
         }
-        return Optional.of((BlockStatistic) StatList.func_188055_a((Block) blockType));
+        return Optional.of((BlockStatistic) Stats.func_188055_a((Block) blockType));
     }
 
     @Override

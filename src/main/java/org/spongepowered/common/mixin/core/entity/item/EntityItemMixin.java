@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.event.CauseStackManager;
@@ -53,7 +53,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(EntityItem.class)
+@Mixin(ItemEntity.class)
 public abstract class EntityItemMixin extends EntityMixin implements EntityItemBridge {
 
     private static final int MAGIC_PREVIOUS = -1;
@@ -138,7 +138,7 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
 
         this.infinitePickupDelay = compound.func_74767_n(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY);
@@ -178,7 +178,7 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
 
         compound.func_74757_a(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
@@ -195,8 +195,8 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
             target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"),
         cancellable = true
     )
-    private void spongeImpl$ThrowPickupEvent(final EntityPlayer entityIn, final CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay)) {
+    private void spongeImpl$ThrowPickupEvent(final PlayerEntity entityIn, final CallbackInfo ci) {
+        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (ItemEntity) (Object) this, this.pickupDelay)) {
             ci.cancel();
         }
     }
@@ -223,7 +223,7 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
     }
 
     @Redirect(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addItemStackToInventory(Lnet/minecraft/item/ItemStack;)Z"))
-    private boolean spongeImpl$throwPikcupEventForAddItem(final InventoryPlayer inventory, final ItemStack itemStack, final EntityPlayer player) {
+    private boolean spongeImpl$throwPikcupEventForAddItem(final PlayerInventory inventory, final ItemStack itemStack, final PlayerEntity player) {
         final TrackedInventoryBridge inv = (TrackedInventoryBridge) inventory;
         inv.bridge$setCaptureInventory(true);
         final boolean added = inventory.func_70441_a(itemStack);

@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.core.world.chunk.storage;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -77,21 +77,21 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
     private final Object impl$lock = new Object();
 
     @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final private Map<ChunkPos, NBTTagCompound> chunksToSave;
+    @Shadow @Final private Map<ChunkPos, CompoundNBT> chunksToSave;
     @Shadow @Final private File chunkSaveLocation;
     @Shadow private boolean flushing;
 
-    @Shadow private void writeChunkData(final ChunkPos pos, final NBTTagCompound compound) { } // Shadow
+    @Shadow private void writeChunkData(final ChunkPos pos, final CompoundNBT compound) { } // Shadow
 
     @Inject(method = "writeChunkToNBT", at = @At(value = "RETURN"))
     private void impl$writeSpongeOwnerNotifierPosTable(final net.minecraft.world.chunk.Chunk chunkIn, final World worldIn,
-        final NBTTagCompound compound, final CallbackInfo ci) {
+        final CompoundNBT compound, final CallbackInfo ci) {
         final ChunkBridge chunk = (ChunkBridge) chunkIn;
 
         // Add tracked block positions
         if (chunk.bridge$getTrackedShortPlayerPositions().size() > 0 || chunk.bridge$getTrackedIntPlayerPositions().size() > 0) {
-            final NBTTagCompound trackedNbt = new NBTTagCompound();
-            final NBTTagList positions = new NBTTagList();
+            final CompoundNBT trackedNbt = new CompoundNBT();
+            final ListNBT positions = new ListNBT();
             trackedNbt.func_74782_a(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, positions);
             compound.func_74782_a(Constants.Sponge.SPONGE_DATA, trackedNbt);
 
@@ -99,7 +99,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                 final Short pos = mapEntry.getKey();
                 final int ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 final int notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
-                final NBTTagCompound valueNbt = new NBTTagCompound();
+                final CompoundNBT valueNbt = new CompoundNBT();
                 valueNbt.func_74768_a("owner", ownerUniqueIdIndex);
                 valueNbt.func_74768_a("notifier", notifierUniqueIdIndex);
                 valueNbt.func_74777_a("pos", pos);
@@ -110,7 +110,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                 final Integer pos = mapEntry.getKey();
                 final int ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 final int notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
-                final NBTTagCompound valueNbt = new NBTTagCompound();
+                final CompoundNBT valueNbt = new CompoundNBT();
                 valueNbt.func_74768_a("owner", ownerUniqueIdIndex);
                 valueNbt.func_74768_a("notifier", notifierUniqueIdIndex);
                 valueNbt.func_74768_a("ipos", pos);
@@ -120,15 +120,15 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
     }
 
     @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onReadChunkFromNBT(final World worldIn, final NBTTagCompound compound, final CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, final int chunkX,
+    private void onReadChunkFromNBT(final World worldIn, final CompoundNBT compound, final CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, final int chunkX,
       final int chunkZ, final net.minecraft.world.chunk.Chunk chunkIn) {
         if (compound.func_74764_b(Constants.Sponge.SPONGE_DATA)) {
             final Map<Integer, PlayerTracker> trackedIntPlayerPositions = new HashMap<>();
             final Map<Short, PlayerTracker> trackedShortPlayerPositions = new HashMap<>();
-            final NBTTagList positions = compound.func_74775_l(Constants.Sponge.SPONGE_DATA).func_150295_c(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, 10);
+            final ListNBT positions = compound.func_74775_l(Constants.Sponge.SPONGE_DATA).func_150295_c(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, 10);
             final ChunkBridge chunk = (ChunkBridge) chunkIn;
             for (int i = 0; i < positions.func_74745_c(); i++) {
-                final NBTTagCompound valueNbt = positions.func_150305_b(i);
+                final CompoundNBT valueNbt = positions.func_150305_b(i);
                 final boolean isShortPos = valueNbt.func_74764_b("pos");
                 final PlayerTracker tracker = new PlayerTracker();
                 if (valueNbt.func_74764_b("owner")) {
@@ -166,10 +166,10 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
             target = "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;createEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;"),
         require = 0,
         expect = 0)
-    private static Entity impl$createEntityFromCompound(final NBTTagCompound compound, final World world) {
+    private static Entity impl$createEntityFromCompound(final CompoundNBT compound, final World world) {
         if ("Minecart".equals(compound.func_74779_i(Constants.Entity.ENTITY_TYPE_ID))) {
             compound.func_74778_a(Constants.Entity.ENTITY_TYPE_ID,
-                    EntityMinecart.Type.values()[compound.func_74762_e(Constants.Entity.Minecart.MINECART_TYPE)].func_184954_b());
+                    AbstractMinecartEntity.Type.values()[compound.func_74762_e(Constants.Entity.Minecart.MINECART_TYPE)].func_184954_b());
             compound.func_82580_o(Constants.Entity.Minecart.MINECART_TYPE);
         }
         final Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(compound.func_74779_i(Constants.Entity.ENTITY_TYPE_ID)));
@@ -180,8 +180,8 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         if (type == null) {
             return null;
         }
-        final NBTTagList positionList = compound.func_150295_c(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
-        final NBTTagList rotationList = compound.func_150295_c(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
+        final ListNBT positionList = compound.func_150295_c(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+        final ListNBT rotationList = compound.func_150295_c(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
         final Vector3d position = new Vector3d(positionList.func_150309_d(0), positionList.func_150309_d(1), positionList.func_150309_d(2));
         final Vector3d rotation = new Vector3d(rotationList.func_150308_e(0), rotationList.func_150308_e(1), 0);
         final Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, position, rotation);
@@ -224,7 +224,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
      * @param compound The NBTTagCompound containing chunk data
      */
     @Overwrite
-    protected void addChunkToPending(final ChunkPos pos, final NBTTagCompound compound) {
+    protected void addChunkToPending(final ChunkPos pos, final CompoundNBT compound) {
         synchronized (this.impl$lock) {
             this.chunksToSave.put(pos, compound);
         }
@@ -253,7 +253,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
 
             try {
                 // this.field_193415_c.add(chunkpos);
-                final NBTTagCompound nbttagcompound = chunk.compound;
+                final CompoundNBT nbttagcompound = chunk.compound;
 
                 if (nbttagcompound != null) {
                     int attempts = 0;

@@ -26,8 +26,8 @@ package org.spongepowered.common.text.serializer;
 
 import com.google.common.collect.Lists;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
@@ -209,7 +209,7 @@ public final class LegacyTexts {
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static TextComponentString parseComponent(final TextComponentString component, final char code) {
+    public static StringTextComponent parseComponent(final StringTextComponent component, final char code) {
         String text = component.func_150265_g();
         int next = text.lastIndexOf(code, text.length() - 2);
 
@@ -217,7 +217,7 @@ public final class LegacyTexts {
         if (next >= 0) {
             parsed = new ArrayList<>();
 
-            TextComponentString current = null;
+            StringTextComponent current = null;
             boolean reset = false;
 
             int pos = text.length();
@@ -231,19 +231,19 @@ public final class LegacyTexts {
                                 parsed.add(current);
                                 current.func_150256_b().func_150221_a(component.func_150256_b());
                                 reset = false;
-                                current = new TextComponentString("");
+                                current = new StringTextComponent("");
                             } else {
-                                final TextComponentString old = current;
-                                current = new TextComponentString("");
+                                final StringTextComponent old = current;
+                                current = new StringTextComponent("");
                                 current.func_150257_a(old);
                             }
                         } else {
-                            current = new TextComponentString("");
+                            current = new StringTextComponent("");
                         }
 
                         ((TextComponentStringAccessor) current).accessor$setText(text.substring(from, pos));
                     } else if (current == null) {
-                        current = new TextComponentString("");
+                        current = new StringTextComponent("");
                     }
 
                     reset |= applyStyle(current.func_150256_b(), format);
@@ -261,7 +261,7 @@ public final class LegacyTexts {
             Collections.reverse(parsed);
             text = pos > 0 ? text.substring(0, pos) : "";
             if (component.func_150253_a().isEmpty()) {
-                final TextComponentString newComponent = new TextComponentString(text);
+                final StringTextComponent newComponent = new StringTextComponent(text);
                 newComponent.func_150253_a().addAll(parsed);
                 newComponent.func_150255_a(component.func_150256_b());
                 return newComponent;
@@ -270,15 +270,15 @@ public final class LegacyTexts {
             return component;
         }
 
-        final TextComponentString newComponent = new TextComponentString(text);
+        final StringTextComponent newComponent = new StringTextComponent(text);
         if (parsed != null) {
             newComponent.func_150253_a().addAll(parsed);
         }
 
         newComponent.func_150255_a(component.func_150256_b());
         for (ITextComponent child : component.func_150253_a()) {
-            if (child instanceof TextComponentString) {
-                child = parseComponent((TextComponentString) child, code);
+            if (child instanceof StringTextComponent) {
+                child = parseComponent((StringTextComponent) child, code);
             } else {
                 child = child.func_150259_f();
             }

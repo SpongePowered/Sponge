@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.nbt;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -33,6 +32,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 
 import java.util.Optional;
+import net.minecraft.nbt.CompoundNBT;
 
 public class SpongeNbtProcessorDelegate<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements NbtDataProcessor<M, I> {
 
@@ -55,7 +55,7 @@ public class SpongeNbtProcessorDelegate<M extends DataManipulator<M, I>, I exten
     }
 
     @Override
-    public boolean isCompatible(final NBTTagCompound compound) {
+    public boolean isCompatible(final CompoundNBT compound) {
         for (final NbtDataProcessor<M, I> processor : this.processors) {
             if (processor.isCompatible(compound)) {
                 return true;
@@ -65,7 +65,7 @@ public class SpongeNbtProcessorDelegate<M extends DataManipulator<M, I>, I exten
     }
 
     @Override
-    public Optional<M> readFrom(final NBTTagCompound compound) {
+    public Optional<M> readFrom(final CompoundNBT compound) {
         for (final NbtDataProcessor<M, I> processor : this.processors) {
             final Optional<M> returnVal = processor.readFrom(compound);
             if (returnVal.isPresent()) {
@@ -87,9 +87,9 @@ public class SpongeNbtProcessorDelegate<M extends DataManipulator<M, I>, I exten
     }
 
     @Override
-    public Optional<NBTTagCompound> storeToCompound(final NBTTagCompound compound, final M manipulator) {
+    public Optional<CompoundNBT> storeToCompound(final CompoundNBT compound, final M manipulator) {
         for (final NbtDataProcessor<M, I> processor : this.processors) {
-            final Optional<NBTTagCompound> returnVal = processor.storeToCompound(compound, manipulator);
+            final Optional<CompoundNBT> returnVal = processor.storeToCompound(compound, manipulator);
             if (returnVal.isPresent()) {
                 return returnVal;
             }
@@ -109,7 +109,7 @@ public class SpongeNbtProcessorDelegate<M extends DataManipulator<M, I>, I exten
     }
 
     @Override
-    public DataTransactionResult remove(final NBTTagCompound data) {
+    public DataTransactionResult remove(final CompoundNBT data) {
         return DataTransactionResult.failNoData();
     }
 

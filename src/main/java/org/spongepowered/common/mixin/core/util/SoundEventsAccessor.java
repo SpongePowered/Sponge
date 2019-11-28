@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.util;
 
-import net.minecraft.init.SoundEvents;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.SoundEvents;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 

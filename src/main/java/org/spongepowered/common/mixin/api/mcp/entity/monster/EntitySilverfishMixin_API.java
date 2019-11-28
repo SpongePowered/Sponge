@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.EntitySilverfish;
+import net.minecraft.entity.monster.SilverfishEntity;
 import org.spongepowered.api.entity.living.monster.Silverfish;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntitySilverfish.class)
+@Mixin(SilverfishEntity.class)
 public abstract class EntitySilverfishMixin_API extends EntityMobMixin_API implements Silverfish {
 
 }

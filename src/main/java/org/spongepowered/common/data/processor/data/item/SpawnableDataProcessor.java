@@ -26,10 +26,10 @@ package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -104,7 +104,7 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
             return DataTransactionResult.successNoData();
         }
         try {
-            final NBTTagCompound tag = itemStack.func_77978_p();
+            final CompoundNBT tag = itemStack.func_77978_p();
             if (tag != null) {
                 tag.func_82580_o(Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG);
             }

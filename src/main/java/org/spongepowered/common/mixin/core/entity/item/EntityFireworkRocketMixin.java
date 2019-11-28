@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityFireworkRocket;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.FireworkRocketEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.world.World;
@@ -55,7 +55,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityFireworkRocket.class)
+@Mixin(FireworkRocketEntity.class)
 public abstract class EntityFireworkRocketMixin extends EntityMixin implements FusedExplosiveBridge, ExplosiveBridge {
 
     @Shadow private int fireworkAge;
@@ -68,13 +68,13 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
 
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, (Firework) this);
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.impl$projectileSource, null);
     }
@@ -144,7 +144,7 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
 
     @Redirect(method = "dealExplosionDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;attackEntityFrom"
             + "(Lnet/minecraft/util/DamageSource;F)Z"))
-    private boolean useEntitySource(final EntityLivingBase entityLivingBase, final DamageSource source, final float amount) {
+    private boolean useEntitySource(final LivingEntity entityLivingBase, final DamageSource source, final float amount) {
         try {
             final DamageSource fireworks = new EntityDamageSource(DamageSource.field_191552_t.field_76373_n, (Entity) (Object) this).func_94540_d();
             ((DamageSourceBridge) fireworks).bridge$setFireworksSource();

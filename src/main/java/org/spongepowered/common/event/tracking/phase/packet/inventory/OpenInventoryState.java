@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.CauseStackManager;
@@ -40,7 +40,7 @@ public final class OpenInventoryState extends BasicInventoryPacketState {
 
     @Override
     public void unwind(InventoryPacketContext context) {
-        final EntityPlayerMP player = context.getPacketPlayer();
+        final ServerPlayerEntity player = context.getPacketPlayer();
         final ItemStackSnapshot lastCursor = context.getCursor();
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.field_71071_by.func_70445_o());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);

@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.init.Items;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
@@ -44,11 +44,11 @@ import java.util.Random;
 // added as the only thing needing to be done is a simple default implementation
 // with an empty MerchantRecipeList and diff the list with an empty one and
 // provide the resulting diff'ed MerchantRecipe (TradeOffer) as the result.
-@Mixin(EntityVillager.ListEnchantedItemForEmeralds.class)
+@Mixin(VillagerEntity.ListEnchantedItemForEmeralds.class)
 public class EntityVillager_ListEnchantedItemForEmeraldsMixin_API implements TradeOfferGenerator {
 
     @Shadow public ItemStack enchantedItemStack;
-    @Shadow public EntityVillager.PriceInfo priceInfo;
+    @Shadow public VillagerEntity.PriceInfo priceInfo;
 
     @Override
     public TradeOffer apply(Random random) {

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.realtime.entity.player;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,7 +34,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
-@Mixin(EntityPlayerMP.class)
+@Mixin(ServerPlayerEntity.class)
 public abstract class EntityPlayerMPMixin_RealTime extends EntityPlayerMixin_RealTime {
 
     @Redirect(
@@ -53,8 +53,8 @@ public abstract class EntityPlayerMPMixin_RealTime extends EntityPlayerMixin_Rea
             to = @At("RETURN")
         )
     )
-    private void realTimeImpl$adjustForRealTimePortalCooldown(final EntityPlayerMP self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer((EntityPlayerMP) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
+    private void realTimeImpl$adjustForRealTimePortalCooldown(final ServerPlayerEntity self, final int modifier) {
+        if (SpongeImplHooks.isFakePlayer((ServerPlayerEntity) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
             this.timeUntilPortal = modifier;
             return;
         }

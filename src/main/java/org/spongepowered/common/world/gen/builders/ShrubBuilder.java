@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.block.BlockTallGrass;
+import net.minecraft.block.TallGrassBlock;
 import net.minecraft.world.gen.feature.TallGrassFeature;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -100,7 +100,7 @@ public class ShrubBuilder implements Shrub.Builder {
 
     @Override
     public Shrub build() throws IllegalStateException {
-        Shrub pop = (Shrub) new TallGrassFeature(BlockTallGrass.EnumType.GRASS);
+        Shrub pop = (Shrub) new TallGrassFeature(TallGrassBlock.EnumType.GRASS);
         pop.getTypes().clear();
         pop.getTypes().addAll(this.types);
         pop.setShrubsPerChunk(this.count);

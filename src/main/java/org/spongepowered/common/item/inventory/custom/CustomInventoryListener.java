@@ -50,13 +50,13 @@ public class CustomInventoryListener implements EventListener<InteractInventoryE
 
     @Override
     public void handle(InteractInventoryEvent event) throws Exception {
-        net.minecraft.inventory.Container nativeContainer = ContainerUtil.toNative(event.getTargetInventory());
+        net.minecraft.inventory.container.Container nativeContainer = ContainerUtil.toNative(event.getTargetInventory());
         Inventory inventory = this.inventory.get();
         if (inventory == null) {
             Sponge.getEventManager().unregisterListeners(this);
             return;
         }
-        for (net.minecraft.inventory.Slot slot : nativeContainer.field_75151_b) {
+        for (net.minecraft.inventory.container.Slot slot : nativeContainer.field_75151_b) {
             if (slot.field_75224_c == inventory) {
                 // This container does contain our inventory
                 for (Consumer<InteractInventoryEvent> consumer : this.consumers) {

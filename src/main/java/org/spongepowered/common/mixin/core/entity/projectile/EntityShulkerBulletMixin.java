@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.projectile.EntityShulkerBullet;
+import net.minecraft.entity.projectile.ShulkerBulletEntity;
 import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
-@Mixin(EntityShulkerBullet.class)
+@Mixin(ShulkerBulletEntity.class)
 public abstract class EntityShulkerBulletMixin extends EntityMixin {
 
     @Inject(method = "bulletHit", at = @At("HEAD"), cancellable = true)

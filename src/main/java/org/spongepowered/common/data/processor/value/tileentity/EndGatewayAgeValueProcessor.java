@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
-import net.minecraft.tileentity.TileEntityEndGateway;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -35,11 +34,12 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.tileentity.TileEntityEndGatewayAccessor;
 
 import java.util.Optional;
+import net.minecraft.tileentity.EndGatewayTileEntity;
 
-public class EndGatewayAgeValueProcessor extends AbstractSpongeValueProcessor<TileEntityEndGateway, Long, Value<Long>> {
+public class EndGatewayAgeValueProcessor extends AbstractSpongeValueProcessor<EndGatewayTileEntity, Long, Value<Long>> {
 
     public EndGatewayAgeValueProcessor() {
-        super(TileEntityEndGateway.class, Keys.END_GATEWAY_AGE);
+        super(EndGatewayTileEntity.class, Keys.END_GATEWAY_AGE);
     }
 
     @Override
@@ -48,13 +48,13 @@ public class EndGatewayAgeValueProcessor extends AbstractSpongeValueProcessor<Ti
     }
 
     @Override
-    protected boolean set(TileEntityEndGateway container, Long value) {
+    protected boolean set(EndGatewayTileEntity container, Long value) {
         ((TileEntityEndGatewayAccessor) container).accessor$setAge(value);
         return true;
     }
 
     @Override
-    protected Optional<Long> getVal(TileEntityEndGateway container) {
+    protected Optional<Long> getVal(EndGatewayTileEntity container) {
         return Optional.of(((TileEntityEndGatewayAccessor) container).accessor$getAge());
     }
 

@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.network;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
+import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.network.PlayerConnection;
@@ -38,13 +38,13 @@ import org.spongepowered.common.bridge.network.NetworkManagerBridge;
 
 import java.net.InetSocketAddress;
 
-@Mixin(NetHandlerPlayServer.class)
+@Mixin(ServerPlayNetHandler.class)
 public abstract class NetHandlerPlayServerMixin_API implements PlayerConnection {
 
     @Shadow @Final public NetworkManager netManager;
-    @Shadow public EntityPlayerMP player;
+    @Shadow public ServerPlayerEntity player;
 
-    @Shadow public abstract void sendPacket(final Packet<?> packetIn);
+    @Shadow public abstract void sendPacket(final IPacket<?> packetIn);
     @Shadow public abstract void disconnect(ITextComponent reason);
 
     @Shadow protected abstract long currentTimeMillis();

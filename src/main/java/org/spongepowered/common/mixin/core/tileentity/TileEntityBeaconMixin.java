@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Potion;
-import net.minecraft.tileentity.TileEntityBeacon;
+import net.minecraft.potion.Effect;
+import net.minecraft.tileentity.BeaconTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,11 +44,11 @@ import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
 import javax.annotation.Nullable;
 
-@Mixin(TileEntityBeacon.class)
+@Mixin(BeaconTileEntity.class)
 public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin implements CustomNameableBridge, TileEntityBeaconBridge {
 
-    @Shadow private Potion primaryEffect;
-    @Shadow private Potion secondaryEffect;
+    @Shadow private Effect primaryEffect;
+    @Shadow private Effect secondaryEffect;
     @Shadow private String customName;
     @Shadow public abstract boolean isItemValidForSlot(int index, ItemStack stack);
 
@@ -60,7 +60,7 @@ public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin impl
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private SlotProvider impl$generateBeaconSlotProvider() {
-        final InputSlotLensImpl lens = new InputSlotLensImpl(0, ((Class) TileEntityBeacon.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
+        final InputSlotLensImpl lens = new InputSlotLensImpl(0, ((Class) BeaconTileEntity.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
                 itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)));
         return new SlotCollection.Builder()
                 .add(InputSlotAdapter.class, i -> lens)
@@ -85,8 +85,8 @@ public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin impl
         at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;")
     )
     @Nullable
-    private Potion impl$UsePotionUtilInsteadOfCheckingValidPotions(final int id) {
-        return Potion.func_188412_a(id);
+    private Effect impl$UsePotionUtilInsteadOfCheckingValidPotions(final int id) {
+        return Effect.func_188412_a(id);
     }
 
     @Override
@@ -95,12 +95,12 @@ public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin impl
     }
 
     @Override
-    public void bridge$forceSetPrimaryEffect(final Potion potion) {
+    public void bridge$forceSetPrimaryEffect(final Effect potion) {
         this.primaryEffect = potion;
     }
 
     @Override
-    public void bridge$forceSetSecondaryEffect(final Potion potion) {
+    public void bridge$forceSetSecondaryEffect(final Effect potion) {
         this.secondaryEffect = potion;
     }
 }

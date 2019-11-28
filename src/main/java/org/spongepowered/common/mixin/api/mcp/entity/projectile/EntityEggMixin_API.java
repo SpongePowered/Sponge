@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import net.minecraft.entity.projectile.EntityEgg;
+import net.minecraft.entity.projectile.EggEntity;
 import org.spongepowered.api.entity.projectile.Egg;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityEgg.class)
+@Mixin(EggEntity.class)
 public abstract class EntityEggMixin_API extends EntityThrowableMixin_API implements Egg {
 
 }

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAbsorptionData;
@@ -41,11 +40,12 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.entity.LivingEntity;
 
-public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityLivingBase, Double, Value<Double>, AbsorptionData, ImmutableAbsorptionData> {
+public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTargetProcessor<LivingEntity, Double, Value<Double>, AbsorptionData, ImmutableAbsorptionData> {
 
     public AbsorptionDataProcessor() {
-        super(Keys.ABSORPTION, EntityLivingBase.class);
+        super(Keys.ABSORPTION, LivingEntity.class);
     }
 
     @Override
@@ -54,14 +54,14 @@ public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTarge
     }
 
     @Override
-    protected boolean set(EntityLivingBase living, Double value) {
+    protected boolean set(LivingEntity living, Double value) {
         checkNotNull(value, "value");
         living.func_110149_m(value.floatValue());
         return true;
     }
 
     @Override
-    protected Optional<Double> getVal(EntityLivingBase living) {
+    protected Optional<Double> getVal(LivingEntity living) {
         return Optional.of((double) living.func_110139_bj());
     }
 

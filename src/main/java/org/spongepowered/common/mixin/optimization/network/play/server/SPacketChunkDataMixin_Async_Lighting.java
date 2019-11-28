@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.optimization.network.play.server;
 
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.INetHandlerPlayClient;
-import net.minecraft.network.play.server.SPacketChunkData;
+import net.minecraft.client.network.play.IClientPlayNetHandler;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.play.server.SChunkDataPacket;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.apache.commons.lang3.ArrayUtils;
@@ -40,8 +40,8 @@ import javax.annotation.Nullable;
  * Create a copy of the ExtendedBlockStorage array so that the
  * array can't be modified after the calculation is completed.
  */
-@Mixin(value = SPacketChunkData.class)
-public abstract class SPacketChunkDataMixin_Async_Lighting implements Packet<INetHandlerPlayClient>  {
+@Mixin(value = SChunkDataPacket.class)
+public abstract class SPacketChunkDataMixin_Async_Lighting implements IPacket<IClientPlayNetHandler>  {
 
     @Nullable private ExtendedBlockStorage[] asyncLightingImpl$blockStorageArray;
 

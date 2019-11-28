@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.command.vanilla;
 
 import net.minecraft.command.CommandGameRule;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -42,7 +42,7 @@ public abstract class CommandGameRuleMixin_GlobalCommand {
     @Redirect(method = "execute", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/GameRules;setOrCreateGameRule(Ljava/lang/String;Ljava/lang/String;)V"))
     private void globalCommand$setAllWorldGamerules(final GameRules gameRules, final String key, final String value) {
-        for (final WorldServer world : SpongeImpl.getServer().field_71305_c) {
+        for (final ServerWorld world : SpongeImpl.getServer().field_71305_c) {
             world.func_82736_K().func_82764_b(key, value);
         }
     }

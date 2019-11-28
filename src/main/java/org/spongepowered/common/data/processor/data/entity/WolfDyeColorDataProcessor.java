@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.passive.EntityWolf;
-import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
@@ -40,11 +38,12 @@ import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataPr
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
+import net.minecraft.entity.passive.WolfEntity;
 
-public class WolfDyeColorDataProcessor extends AbstractEntitySingleDataProcessor<EntityWolf, DyeColor, Value<DyeColor>, DyeableData, ImmutableDyeableData> {
+public class WolfDyeColorDataProcessor extends AbstractEntitySingleDataProcessor<WolfEntity, DyeColor, Value<DyeColor>, DyeableData, ImmutableDyeableData> {
 
     public WolfDyeColorDataProcessor() {
-        super(EntityWolf.class, Keys.DYE_COLOR);
+        super(WolfEntity.class, Keys.DYE_COLOR);
     }
 
     @Override
@@ -53,13 +52,13 @@ public class WolfDyeColorDataProcessor extends AbstractEntitySingleDataProcessor
     }
 
     @Override
-    protected boolean set(EntityWolf container, DyeColor value) {
-        container.func_175547_a((EnumDyeColor) (Object) value);
+    protected boolean set(WolfEntity container, DyeColor value) {
+        container.func_175547_a((net.minecraft.item.DyeColor) (Object) value);
         return true;
     }
 
     @Override
-    protected Optional<DyeColor> getVal(EntityWolf container) {
+    protected Optional<DyeColor> getVal(WolfEntity container) {
         return Optional.of((DyeColor) (Object) container.func_175546_cu());
     }
 

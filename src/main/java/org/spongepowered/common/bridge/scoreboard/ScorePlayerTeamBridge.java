@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.scoreboard;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.scoreboard.Scoreboard;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.text.Text;
@@ -56,7 +56,7 @@ public interface ScorePlayerTeamBridge extends TeamBridge {
 
     void bridge$setColor(TextColor color);
 
-    MessageChannel bridge$getTeamChannel(EntityPlayerMP player);
+    MessageChannel bridge$getTeamChannel(ServerPlayerEntity player);
 
     MessageChannel bridge$getNonTeamChannel();
 }

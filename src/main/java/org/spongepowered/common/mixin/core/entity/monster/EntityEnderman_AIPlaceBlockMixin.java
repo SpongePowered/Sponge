@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.monster.EntityEnderman;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
@@ -50,10 +50,10 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityEnderman.AIPlaceBlock.class)
-public abstract class EntityEnderman_AIPlaceBlockMixin extends EntityAIBase {
+@Mixin(EndermanEntity.PlaceBlockGoal.class)
+public abstract class EntityEnderman_AIPlaceBlockMixin extends Goal {
 
-    @Shadow @Final private EntityEnderman enderman;
+    @Shadow @Final private EndermanEntity enderman;
 
     /**
      * @author gabizou - April 13th, 2018
@@ -74,8 +74,8 @@ public abstract class EntityEnderman_AIPlaceBlockMixin extends EntityAIBase {
         )
     )
     @Nullable
-    private IBlockState onCanGrief(final EntityEnderman entityEnderman) {
-        final IBlockState heldBlockState = entityEnderman.func_175489_ck();
+    private BlockState onCanGrief(final EndermanEntity entityEnderman) {
+        final BlockState heldBlockState = entityEnderman.func_175489_ck();
         return ((GrieferBridge) this.enderman).bridge$CanGrief() ? heldBlockState : null;
     }
 
@@ -93,8 +93,8 @@ public abstract class EntityEnderman_AIPlaceBlockMixin extends EntityAIBase {
      * @return True if the state is a full cube, and the event didnt get cancelled
      */
     @Redirect(method = "canPlaceBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/state/IBlockState;isFullCube()Z"))
-    private boolean onUpdateCancel(final IBlockState blockState, final World world, final BlockPos pos, final Block toPlace,
-        final IBlockState old, final IBlockState state) {
+    private boolean onUpdateCancel(final BlockState blockState, final World world, final BlockPos pos, final Block toPlace,
+        final BlockState old, final BlockState state) {
         if (state.func_185917_h()) {
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
                 final Location<org.spongepowered.api.world.World> location =

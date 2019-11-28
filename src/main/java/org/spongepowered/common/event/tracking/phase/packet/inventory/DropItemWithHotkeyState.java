@@ -25,11 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.client.CPacketClickWindow;
-import net.minecraft.network.play.client.CPacketPlayerDigging;
-import net.minecraft.util.EnumHand;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -62,6 +57,11 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.client.CClickWindowPacket;
+import net.minecraft.network.play.client.CPlayerDiggingPacket;
+import net.minecraft.util.Hand;
 
 public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
@@ -76,7 +76,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
     @Override
     public void unwind(final InventoryPacketContext context) {
-        final EntityPlayerMP player = context.getPacketPlayer();
+        final ServerPlayerEntity player = context.getPacketPlayer();
         //final ItemStack usedStack = context.getItemUsed();
         //final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = (Entity) player;
@@ -91,18 +91,18 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                 .acceptAndClearIfNotEmpty(items -> {
 
                     final ArrayList<Entity> entities = new ArrayList<>();
-                    for (final EntityItem item : items) {
+                    for (final ItemEntity item : items) {
                         entities.add((Entity) item);
                     }
 
                     final int usedButton;
                     final Slot slot;
-                    if (context.getPacket() instanceof CPacketPlayerDigging) {
-                        final CPacketPlayerDigging packetIn = context.getPacket();
-                        usedButton = packetIn.func_180762_c() == CPacketPlayerDigging.Action.DROP_ITEM ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID : 1;
+                    if (context.getPacket() instanceof CPlayerDiggingPacket) {
+                        final CPlayerDiggingPacket packetIn = context.getPacket();
+                        usedButton = packetIn.func_180762_c() == CPlayerDiggingPacket.Action.DROP_ITEM ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID : 1;
                         slot = ((PlayerInventory) player.field_71071_by).getEquipment().getSlot(EquipmentTypes.MAIN_HAND).orElse(null);
                     } else {
-                        final CPacketClickWindow packetIn = context.getPacket();
+                        final CClickWindowPacket packetIn = context.getPacket();
                         usedButton = packetIn.func_149543_e();
                         slot = ((InventoryAdapter) player.field_71071_by).bridge$getSlot(packetIn.func_149544_d()).orElse(null);
                     }
@@ -115,7 +115,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
                     SpongeImpl.postEvent(dropItemEvent);
                     if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(dropItemEvent.getTransactions())) {
-                        ((EntityPlayerMPBridge) player).bridge$restorePacketItem(EnumHand.MAIN_HAND);
+                        ((EntityPlayerMPBridge) player).bridge$restorePacketItem(Hand.MAIN_HAND);
                         PacketPhaseUtil.handleSlotRestore(player, player.field_71070_bA, dropItemEvent.getTransactions(), true);
                     } else {
                         processSpawnedEntities(player, dropItemEvent);
@@ -139,7 +139,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public ClickInventoryEvent.Drop createInventoryEvent(final EntityPlayerMP playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
+    public ClickInventoryEvent.Drop createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
             final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable final Slot slot) {
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);

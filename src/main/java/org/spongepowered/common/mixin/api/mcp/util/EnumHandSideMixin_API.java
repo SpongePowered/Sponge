@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.util;
 
-import net.minecraft.util.EnumHandSide;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
@@ -36,7 +36,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
 
-@Mixin(EnumHandSide.class)
+@Mixin(HandSide.class)
 public abstract class EnumHandSideMixin_API implements HandPreference {
 
     @Shadow @Final private ITextComponent handName;
@@ -48,7 +48,7 @@ public abstract class EnumHandSideMixin_API implements HandPreference {
     @Override
     public String getId() {
         if (this.api$id == null) {
-            this.api$id = ((TextComponentTranslation) this.handName).func_150268_i().replace("options.mainHand.", "");
+            this.api$id = ((TranslationTextComponent) this.handName).func_150268_i().replace("options.mainHand.", "");
         }
         return this.api$id;
     }
@@ -64,7 +64,7 @@ public abstract class EnumHandSideMixin_API implements HandPreference {
     @Override
     public Translation getTranslation() {
         if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation(((TextComponentTranslation) this.handName).func_150268_i());
+            this.api$translation = new SpongeTranslation(((TranslationTextComponent) this.handName).func_150268_i());
         }
         return this.api$translation;
     }

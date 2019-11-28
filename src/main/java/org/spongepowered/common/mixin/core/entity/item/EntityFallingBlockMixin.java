@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityFallingBlock;
-import net.minecraft.init.Blocks;
+import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,10 +46,10 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
-@Mixin(EntityFallingBlock.class)
+@Mixin(FallingBlockEntity.class)
 public abstract class EntityFallingBlockMixin extends EntityMixin {
 
-    @Shadow private IBlockState fallTile;
+    @Shadow private BlockState fallTile;
 
     /**
      * @author gabizou - January 9th, 2018 - 1.12.2
@@ -82,7 +82,7 @@ public abstract class EntityFallingBlockMixin extends EntityMixin {
         cancellable = true
     )
     private void onWorldSetBlockToAir(final CallbackInfo ci) {
-        final BlockPos pos = new BlockPos((EntityFallingBlock) (Object) this);
+        final BlockPos pos = new BlockPos((FallingBlockEntity) (Object) this);
         // So, there's two cases here: either the world is not cared for, or the
         // ChangeBlockEvent is not being listened to. If it's not being listened to,
         // we need to specifically just proceed as normal.
@@ -131,14 +131,14 @@ public abstract class EntityFallingBlockMixin extends EntityMixin {
         final boolean isAnvil = this.fallTile.func_177230_c() == Blocks.field_150467_bQ;
         try {
             if (isAnvil) {
-                final MinecraftFallingBlockDamageSource anvil = new MinecraftFallingBlockDamageSource("anvil", (EntityFallingBlock) (Object) this);
+                final MinecraftFallingBlockDamageSource anvil = new MinecraftFallingBlockDamageSource("anvil", (FallingBlockEntity) (Object) this);
                 ((DamageSourceBridge) anvil).bridge$setAnvilSource();
 
                 return entity.func_70097_a(DamageSource.field_82728_o, damage);
             } else {
                 final MinecraftFallingBlockDamageSource
                     fallingblock =
-                    new MinecraftFallingBlockDamageSource("fallingblock", (EntityFallingBlock) (Object) this);
+                    new MinecraftFallingBlockDamageSource("fallingblock", (FallingBlockEntity) (Object) this);
                 ((DamageSourceBridge) fallingblock).bridge$setFallingBlockSource();
                 return entity.func_70097_a(DamageSource.field_82729_p, damage);
             }

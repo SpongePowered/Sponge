@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.DamageSource;
@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityLivingBase.class)
+@Mixin(LivingEntity.class)
 public interface EntityLivingBaseAccessor {
 
     @Accessor("HAND_STATES")
@@ -72,7 +72,7 @@ public interface EntityLivingBaseAccessor {
 
     @Accessor("dead") boolean accessor$isLivingDead();
 
-    @Accessor("revengeTarget") @Nullable EntityLivingBase accessor$getRevengeTarget();
+    @Accessor("revengeTarget") @Nullable LivingEntity accessor$getRevengeTarget();
 
     @Invoker("canBlockDamageSource")  boolean accessor$canBlockDamageSource(DamageSource damageSourceIn);
 

@@ -29,11 +29,11 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.IChunkLoader;
-import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.world.chunk.storage.ChunkLoader;
+import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
@@ -73,7 +73,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
-@Mixin(ChunkProviderServer.class)
+@Mixin(ServerChunkProvider.class)
 public abstract class ChunkProviderServerMixin implements ChunkProviderServerBridge, ChunkProviderBridge {
 
     @Nullable private SpongeEmptyChunk impl$EMPTY_CHUNK;
@@ -82,9 +82,9 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     private long impl$chunkUnloadDelay = Constants.World.DEFAULT_CHUNK_UNLOAD_DELAY;
     private int impl$maxChunkUnloads = Constants.World.MAX_CHUNK_UNLOADS;
 
-    @Shadow @Final private WorldServer world;
-    @Shadow @Final private IChunkLoader chunkLoader;
-    @Shadow @Final @Mutable private IChunkGenerator chunkGenerator;
+    @Shadow @Final private ServerWorld world;
+    @Shadow @Final private ChunkLoader chunkLoader;
+    @Shadow @Final @Mutable private ChunkGenerator chunkGenerator;
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Shadow @Final @Mutable private Long2ObjectMap<Chunk> loadedChunks = new CachedLong2ObjectMap();
 
@@ -95,7 +95,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setUpCommonFields(
-        final WorldServer worldObjIn, final IChunkLoader chunkLoaderIn, final IChunkGenerator chunkGeneratorIn, final CallbackInfo ci) {
+        final ServerWorld worldObjIn, final ChunkLoader chunkLoaderIn, final ChunkGenerator chunkGeneratorIn, final CallbackInfo ci) {
         if (((WorldBridge) worldObjIn).bridge$isFake()) {
             return;
         }
@@ -110,7 +110,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     }
 
     @Override
-    public void accessor$setChunkGenerator(final IChunkGenerator spongeGen) {
+    public void accessor$setChunkGenerator(final ChunkGenerator spongeGen) {
         this.chunkGenerator = spongeGen;
     }
 
@@ -120,7 +120,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     }
 
     @Override
-    public IChunkGenerator accessor$getChunkGenerator() {
+    public ChunkGenerator accessor$getChunkGenerator() {
         return this.chunkGenerator;
     }
 
@@ -153,7 +153,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
             value = "INVOKE",
             target = "Lnet/minecraft/world/gen/ChunkProviderServer;loadChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
     @Nullable
-    private Chunk impl$ProvideChunkForced(final ChunkProviderServer chunkProviderServer, final int x, final int z) {
+    private Chunk impl$ProvideChunkForced(final ServerChunkProvider chunkProviderServer, final int x, final int z) {
         if (!this.impl$denyChunkRequests) {
             return this.loadChunk(x, z);
         }

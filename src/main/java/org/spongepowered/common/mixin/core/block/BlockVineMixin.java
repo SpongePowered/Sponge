@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockVine;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -41,13 +39,14 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.block.VineBlock;
 
-@Mixin(BlockVine.class)
+@Mixin(VineBlock.class)
 public abstract class BlockVineMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getConnectedDirectionData(blockState));
     }
 
@@ -57,7 +56,7 @@ public abstract class BlockVineMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableConnectedDirectionData) {
             return Optional.of((BlockState) blockState);
         }
@@ -65,7 +64,7 @@ public abstract class BlockVineMixin extends BlockMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.CONNECTED_DIRECTIONS) || key.equals(Keys.CONNECTED_EAST) || key.equals(Keys.CONNECTED_NORTH)
                 || key.equals(Keys.CONNECTED_SOUTH) || key.equals(Keys.CONNECTED_WEST)) {
             return Optional.of((BlockState) blockState);
@@ -73,13 +72,13 @@ public abstract class BlockVineMixin extends BlockMixin {
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final IBlockState blockState) {
+    private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final net.minecraft.block.BlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.func_177229_b(BlockVine.field_176273_b);
-        final Boolean east = blockState.func_177229_b(BlockVine.field_176278_M);
-        final Boolean west = blockState.func_177229_b(BlockVine.field_176280_O);
-        final Boolean south = blockState.func_177229_b(BlockVine.field_176279_N);
-        final Boolean up = blockState.func_177229_b(BlockVine.field_176277_a);
+        final Boolean north = blockState.func_177229_b(VineBlock.field_176273_b);
+        final Boolean east = blockState.func_177229_b(VineBlock.field_176278_M);
+        final Boolean west = blockState.func_177229_b(VineBlock.field_176280_O);
+        final Boolean south = blockState.func_177229_b(VineBlock.field_176279_N);
+        final Boolean up = blockState.func_177229_b(VineBlock.field_176277_a);
         if (north) {
             directions.add(Direction.NORTH);
         }

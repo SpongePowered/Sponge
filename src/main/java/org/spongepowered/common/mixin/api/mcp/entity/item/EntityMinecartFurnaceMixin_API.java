@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.item.EntityMinecartFurnace;
+import net.minecraft.entity.item.minecart.FurnaceMinecartEntity;
 import org.spongepowered.api.entity.vehicle.minecart.FurnaceMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityMinecartFurnace.class)
+@Mixin(FurnaceMinecartEntity.class)
 public abstract class EntityMinecartFurnaceMixin_API extends EntityMinecartMixin_API implements FurnaceMinecart {
 
     @Shadow private int fuel;

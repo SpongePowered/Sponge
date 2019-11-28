@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.realtime.tileentity;
 
+import net.minecraft.tileentity.BrewingStandTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityBrewingStand;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
-@Mixin(TileEntityBrewingStand.class)
+@Mixin(BrewingStandTileEntity.class)
 public abstract class TileEntityBrewingStandMixin_RealTime extends TileEntity {
 
     @Shadow private int brewTime;
@@ -47,7 +47,7 @@ public abstract class TileEntityBrewingStandMixin_RealTime extends TileEntity {
             opcode = Opcodes.PUTFIELD, ordinal = 0
         )
     )
-    private void realTimeImpl$adjustForRealTimeBrewTime(final TileEntityBrewingStand self, final int modifier) {
+    private void realTimeImpl$adjustForRealTimeBrewTime(final BrewingStandTileEntity self, final int modifier) {
         if (((WorldBridge) this.field_145850_b).bridge$isFake()) {
             this.brewTime = modifier;
             return;

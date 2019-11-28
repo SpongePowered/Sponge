@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.TileEntityComparator;
+import net.minecraft.tileentity.ComparatorTileEntity;
 import org.spongepowered.api.block.tileentity.Comparator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
 @NonnullByDefault
-@Mixin(TileEntityComparator.class)
+@Mixin(ComparatorTileEntity.class)
 public abstract class TileEntityComparatorMixin_API extends TileEntityMixin_API implements Comparator {
 
 }

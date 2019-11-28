@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockRedstoneComparator;
+import net.minecraft.block.ComparatorBlock;
 import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BlockRedstoneComparator.Mode.class)
+@Mixin(ComparatorBlock.Mode.class)
 @Implements(@Interface(iface = ComparatorType.class, prefix = "comparator$"))
 public abstract class BlockRedstoneComparator_ModeMixin_API implements ComparatorType {
 

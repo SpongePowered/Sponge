@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.item.inventory;
 
-import net.minecraft.inventory.ContainerEnchantment;
-import net.minecraft.inventory.ContainerRepair;
-import net.minecraft.inventory.ContainerWorkbench;
+import net.minecraft.inventory.container.EnchantmentContainer;
+import net.minecraft.inventory.container.RepairContainer;
+import net.minecraft.inventory.container.WorkbenchContainer;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.SingleBlockCarrier;
 import org.spongepowered.api.util.Direction;
@@ -34,9 +34,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.DefaultSingleBlockCarrier;
 
 @Mixin({
-    ContainerRepair.class,
-    ContainerEnchantment.class,
-    ContainerWorkbench.class
+    RepairContainer.class,
+    EnchantmentContainer.class,
+    WorkbenchContainer.class
 })
 public abstract class SingleBlockCarrierMixin_API implements SingleBlockCarrier {
 

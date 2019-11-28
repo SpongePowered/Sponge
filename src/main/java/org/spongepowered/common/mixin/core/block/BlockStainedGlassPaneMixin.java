@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockStainedGlassPane;
+import net.minecraft.block.StainedGlassPaneBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.block.DyeableBlockBridge;
 
-@Mixin(BlockStainedGlassPane.class)
+@Mixin(StainedGlassPaneBlock.class)
 public abstract class BlockStainedGlassPaneMixin extends BlockMixin implements DyeableBlockBridge {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$SetPropertyOnInit(final CallbackInfo ci) {
-        this.bridge$setColorPropertyEnum(BlockStainedGlassPane.field_176245_a);
+        this.bridge$setColorPropertyEnum(StainedGlassPaneBlock.field_176245_a);
     }
 
 }

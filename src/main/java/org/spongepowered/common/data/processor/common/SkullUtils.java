@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.processor.common;
 
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.tileentity.TileEntitySkull;
+import net.minecraft.tileentity.SkullTileEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
@@ -46,7 +46,7 @@ import javax.annotation.Nullable;
 public class SkullUtils {
 
     public static boolean supportsObject(final Object object) {
-        return object instanceof TileEntitySkull || isValidItemStack(object);
+        return object instanceof SkullTileEntity || isValidItemStack(object);
     }
 
     public static SkullType getSkullType(final int skullType) {
@@ -62,7 +62,7 @@ public class SkullUtils {
         return container instanceof ItemStack && ((ItemStack) container).func_77973_b().equals(Items.field_151144_bL);
     }
 
-    public static boolean setProfile(final TileEntitySkull tileEntitySkull, @Nullable final GameProfile profile) {
+    public static boolean setProfile(final SkullTileEntity tileEntitySkull, @Nullable final GameProfile profile) {
         if (SkullUtils.getSkullType(tileEntitySkull.func_145904_a()).equals(SkullTypes.PLAYER)) {
             final GameProfile newProfile = SpongeRepresentedPlayerData.NULL_PROFILE.equals(profile) ? null : resolveProfileIfNecessary(profile);
             tileEntitySkull.func_152106_a((com.mojang.authlib.GameProfile) newProfile);
@@ -81,7 +81,7 @@ public class SkullUtils {
                     skull.func_77978_p().func_82580_o(Constants.Item.Skull.ITEM_SKULL_OWNER);
                 }
             } else {
-                final NBTTagCompound nbt = new NBTTagCompound();
+                final CompoundNBT nbt = new CompoundNBT();
                 NBTUtil.func_180708_a(nbt, (com.mojang.authlib.GameProfile) resolveProfileIfNecessary(profile));
                 skull.func_77983_a(Constants.Item.Skull.ITEM_SKULL_OWNER, nbt);
             }

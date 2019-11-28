@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.PropertyManager;
 import net.minecraft.server.management.PlayerProfileCache;
@@ -87,7 +87,7 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
      * will apply to any world. Additionally, fire a spawn protection event
      */
     @Overwrite
-    public boolean isBlockProtected(final net.minecraft.world.World worldIn, final BlockPos pos, final EntityPlayer playerIn) {
+    public boolean isBlockProtected(final net.minecraft.world.World worldIn, final BlockPos pos, final PlayerEntity playerIn) {
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
         final IPhaseState<?> phaseState = PhaseTracker.getInstance().getCurrentState();
         if (!phaseState.isInteraction()) {

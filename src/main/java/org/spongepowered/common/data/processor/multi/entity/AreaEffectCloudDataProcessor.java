@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.multi.entity;
 
-import net.minecraft.entity.EntityAreaEffectCloud;
+import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -48,10 +48,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<EntityAreaEffectCloud, AreaEffectCloudData, ImmutableAreaEffectCloudData> {
+public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<AreaEffectCloudEntity, AreaEffectCloudData, ImmutableAreaEffectCloudData> {
 
     public AreaEffectCloudDataProcessor() {
-        super(EntityAreaEffectCloud.class);
+        super(AreaEffectCloudEntity.class);
     }
 
     @Override
@@ -60,13 +60,13 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
     }
 
     @Override
-    protected boolean doesDataExist(EntityAreaEffectCloud dataHolder) {
+    protected boolean doesDataExist(AreaEffectCloudEntity dataHolder) {
         return true;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected boolean set(EntityAreaEffectCloud dataHolder, Map<Key<?>, Object> keyValues) {
+    protected boolean set(AreaEffectCloudEntity dataHolder, Map<Key<?>, Object> keyValues) {
         final int age = (int) keyValues.get(Keys.AREA_EFFECT_CLOUD_AGE);
         final Color color = (Color) keyValues.get(Keys.AREA_EFFECT_CLOUD_COLOR);
         final double radius = (double) keyValues.get(Keys.AREA_EFFECT_CLOUD_RADIUS);
@@ -87,9 +87,9 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
         final EnumParticleTypes internalType = ((SpongeParticleType) particleType).getInternalType();
         dataHolder.func_184491_a(internalType == null ? EnumParticleTypes.SPELL_MOB : internalType);
 
-        final List<net.minecraft.potion.PotionEffect> effects = new ArrayList<>();
+        final List<net.minecraft.potion.EffectInstance> effects = new ArrayList<>();
         for (PotionEffect effect : potionEffects) {
-            effects.add((net.minecraft.potion.PotionEffect) effect);
+            effects.add((net.minecraft.potion.EffectInstance) effect);
         }
         ((EntityAreaEffectCloudAccessor) dataHolder).setPotionEffects(effects);
         ((EntityAreaEffectCloudAccessor) dataHolder).setReapplicationDelay(reapplicationDelay);
@@ -97,15 +97,15 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityAreaEffectCloud dataHolder) {
+    protected Map<Key<?>, ?> getValues(AreaEffectCloudEntity dataHolder) {
         final HashMap<Key<?>, Object> map = new HashMap<>();
         map.put(Keys.AREA_EFFECT_CLOUD_AGE, dataHolder.field_70173_aa);
         map.put(Keys.AREA_EFFECT_CLOUD_COLOR, Color.ofRgb(dataHolder.func_184492_k()));
         map.put(Keys.AREA_EFFECT_CLOUD_RADIUS, dataHolder.func_184490_j());
         final EntityAreaEffectCloudAccessor mixinAreaEffect = (EntityAreaEffectCloudAccessor) dataHolder;
-        final List<net.minecraft.potion.PotionEffect> potionEffects = mixinAreaEffect.getPotionEffects();
+        final List<net.minecraft.potion.EffectInstance> potionEffects = mixinAreaEffect.getPotionEffects();
         final List<PotionEffect> effects = new ArrayList<>(potionEffects.size());
-        for (net.minecraft.potion.PotionEffect potionEffect : potionEffects) {
+        for (net.minecraft.potion.EffectInstance potionEffect : potionEffects) {
             effects.add((PotionEffect) potionEffect);
         }
         map.put(Keys.POTION_EFFECTS, effects);

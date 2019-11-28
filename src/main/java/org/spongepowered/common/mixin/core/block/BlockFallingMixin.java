@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.BlockFalling;
+import net.minecraft.block.FallingBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
-@Mixin(BlockFalling.class)
+@Mixin(FallingBlock.class)
 public class BlockFallingMixin {
 
     @Redirect(method = "checkFallable",

@@ -28,9 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.management.UserListBansEntry;
-import net.minecraft.server.management.UserListIPBans;
-import net.minecraft.server.management.UserListIPBansEntry;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
@@ -45,6 +42,9 @@ import java.time.Instant;
 import java.util.Date;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.management.IPBanEntry;
+import net.minecraft.server.management.IPBanList;
+import net.minecraft.server.management.ProfileBanEntry;
 
 public class SpongeBanBuilder implements Ban.Builder {
 
@@ -123,14 +123,14 @@ public class SpongeBanBuilder implements Ban.Builder {
 
         if (this.banType == BanTypes.PROFILE) {
             checkState(this.profile != null, "User cannot be null!");
-            return (Ban) new UserListBansEntry((GameProfile) this.profile, Date.from(this.start), sourceName, this.toDate(this.end),
+            return (Ban) new ProfileBanEntry((GameProfile) this.profile, Date.from(this.start), sourceName, this.toDate(this.end),
                     this.reason != null ? SpongeTexts.toLegacy(this.reason) : null);
         }
         checkState(this.address != null, "Address cannot be null!");
 
         // This *should* be a static method, but apparently not...
-        UserListIPBans ipBans = SpongeImpl.getServer().func_184103_al().func_72363_f();
-        return (Ban) new UserListIPBansEntry(ipBans.func_152707_c(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName,
+        IPBanList ipBans = SpongeImpl.getServer().func_184103_al().func_72363_f();
+        return (Ban) new IPBanEntry(ipBans.func_152707_c(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName,
                 this.toDate(this.end), this.reason != null ? SpongeTexts.toLegacy(this.reason) : null);
     }
 

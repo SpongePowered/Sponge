@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.core.entity.ai;
 
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.EntityAIEatGrass;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.EatGrassGoal;
+import net.minecraft.entity.ai.goal.Goal;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,10 +40,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 
-@Mixin(EntityAIEatGrass.class)
-public abstract class EntityAIEatGrassMixin extends EntityAIBase {
+@Mixin(EatGrassGoal.class)
+public abstract class EntityAIEatGrassMixin extends Goal {
 
-    @Shadow @Final private EntityLiving grassEaterEntity;
+    @Shadow @Final private MobEntity grassEaterEntity;
 
     /**
      * @author gabizou - April 13th, 2018
@@ -88,7 +88,7 @@ public abstract class EntityAIEatGrassMixin extends EntityAIBase {
             target = "Lnet/minecraft/block/state/IBlockState;getBlock()Lnet/minecraft/block/Block;"
         )
     )
-    private Block onSpongeGetBlockForgriefing(final IBlockState state) {
+    private Block onSpongeGetBlockForgriefing(final BlockState state) {
         return ((GrieferBridge) this.grassEaterEntity).bridge$CanGrief() ? state.func_177230_c() : Blocks.field_150350_a;
     }
 }

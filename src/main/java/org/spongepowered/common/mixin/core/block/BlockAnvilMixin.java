@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockAnvil;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -40,12 +38,13 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.block.AnvilBlock;
 
-@Mixin(BlockAnvil.class)
+@Mixin(AnvilBlock.class)
 public abstract class BlockAnvilMixin extends BlockMixin {
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.of(impl$getDirectionalData(blockState));
     }
 
@@ -55,25 +54,25 @@ public abstract class BlockAnvilMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.func_177226_a(BlockAnvil.field_176506_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(AnvilBlock.field_176506_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.func_177226_a(BlockAnvil.field_176506_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(AnvilBlock.field_176506_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
+    private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockAnvil.field_176506_a)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(AnvilBlock.field_176506_a)));
     }
 }

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.passive.EntityDonkey;
+import net.minecraft.entity.passive.horse.DonkeyEntity;
 import org.spongepowered.api.entity.living.animal.Donkey;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityDonkey.class)
+@Mixin(DonkeyEntity.class)
 public abstract class EntityDonkeyMixin_API extends AbstractHorseMixin_API implements Donkey {
 
 }

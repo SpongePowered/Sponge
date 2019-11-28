@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.block.BlockSilverfish;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.monster.EntitySilverfish;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SilverfishBlock;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.monster.SilverfishEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
@@ -37,10 +37,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 
-@Mixin(EntitySilverfish.AISummonSilverfish.class)
-public abstract class EntitySilverfish_AISummonSilverfishMixin extends EntityAIBase {
+@Mixin(SilverfishEntity.SummonSilverfishGoal.class)
+public abstract class EntitySilverfish_AISummonSilverfishMixin extends Goal {
 
-    @Shadow(aliases = "this$0") @Final private EntitySilverfish silverfish;
+    @Shadow(aliases = "this$0") @Final private SilverfishEntity silverfish;
 
     /**
      * @author gabizou - April 13th, 2018
@@ -60,9 +60,9 @@ public abstract class EntitySilverfish_AISummonSilverfishMixin extends EntityAIB
         )
     )
     private boolean onCanGrief(final World world, final BlockPos pos, final boolean dropBlock) {
-        final IBlockState blockState = world.func_180495_p(pos);
+        final BlockState blockState = world.func_180495_p(pos);
         return ((GrieferBridge) this.silverfish).bridge$CanGrief()
                ? world.func_175655_b(pos, dropBlock)
-               : world.func_180501_a(pos, blockState.func_177229_b(BlockSilverfish.field_176378_a).func_176883_d(), 3);
+               : world.func_180501_a(pos, blockState.func_177229_b(SilverfishBlock.field_176378_a).func_176883_d(), 3);
     }
 }

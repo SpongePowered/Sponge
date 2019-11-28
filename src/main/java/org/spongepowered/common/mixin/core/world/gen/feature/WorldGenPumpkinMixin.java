@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.block.BlockHorizontal;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.HorizontalBlock;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.PumpkinFeature;
@@ -56,7 +56,7 @@ public abstract class WorldGenPumpkinMixin extends WorldGeneratorMixin {
             if (worldIn.func_175623_d(blockpos1) && worldIn.func_180495_p(blockpos1.func_177977_b()).func_177230_c() == Blocks.field_150349_c
                     && Blocks.field_150423_aK.func_176196_c(worldIn, blockpos1)) {
                 worldIn.func_180501_a(blockpos1,
-                        Blocks.field_150423_aK.func_176223_P().func_177226_a(BlockHorizontal.field_185512_D, EnumFacing.Plane.HORIZONTAL.func_179518_a(rand)), 2);
+                        Blocks.field_150423_aK.func_176223_P().func_177226_a(HorizontalBlock.field_185512_D, Direction.Plane.HORIZONTAL.func_179518_a(rand)), 2);
             }
         }
 

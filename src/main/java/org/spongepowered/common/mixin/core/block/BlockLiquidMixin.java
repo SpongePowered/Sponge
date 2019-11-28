@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.block.BlockLiquid;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -52,16 +52,16 @@ public abstract class BlockLiquidMixin extends BlockMixin {
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"
         )
     )
-    private void impl$CheckForLiquidMixing(final World worldIn, final BlockPos pos, final IBlockState state,
+    private void impl$CheckForLiquidMixing(final World worldIn, final BlockPos pos, final BlockState state,
         final CallbackInfoReturnable<Boolean> cir, final boolean flag, final Integer integer) {
-        final IBlockState newState = integer == 0 ? Blocks.field_150343_Z.func_176223_P() : Blocks.field_150347_e.func_176223_P();
+        final BlockState newState = integer == 0 ? Blocks.field_150343_Z.func_176223_P() : Blocks.field_150347_e.func_176223_P();
         final ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, pos, newState, null);
         final Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
         if (event.isCancelled() || !transaction.isValid()) {
             cir.setReturnValue(false);
             return;
         }
-        final boolean success = worldIn.func_175656_a(pos, (IBlockState) transaction.getFinal().getState());
+        final boolean success = worldIn.func_175656_a(pos, (BlockState) transaction.getFinal().getState());
         if (!success) {
             cir.setReturnValue(false);
         }

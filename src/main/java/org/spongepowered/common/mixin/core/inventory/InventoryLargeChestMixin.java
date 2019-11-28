@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.inventory.InventoryLargeChest;
+import net.minecraft.inventory.DoubleSidedInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -36,7 +36,7 @@ import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.LargeChestInventoryLens;
 
-@Mixin(InventoryLargeChest.class)
+@Mixin(DoubleSidedInventory.class)
 public abstract class InventoryLargeChestMixin implements InventoryAdapter, ReusableLensProvider {
 
     @Override

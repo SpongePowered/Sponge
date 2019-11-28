@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.EntityAreaEffectCloud;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -35,11 +34,12 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.EntityAreaEffectCloudAccessor;
 
 import java.util.Optional;
+import net.minecraft.entity.AreaEffectCloudEntity;
 
-public class AreaEffectCloudWaitTimeProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Integer, MutableBoundedValue<Integer>> {
+public class AreaEffectCloudWaitTimeProcessor extends AbstractSpongeValueProcessor<AreaEffectCloudEntity, Integer, MutableBoundedValue<Integer>> {
 
     public AreaEffectCloudWaitTimeProcessor() {
-        super(EntityAreaEffectCloud.class, Keys.AREA_EFFECT_CLOUD_WAIT_TIME);
+        super(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_WAIT_TIME);
     }
 
     @Override
@@ -53,13 +53,13 @@ public class AreaEffectCloudWaitTimeProcessor extends AbstractSpongeValueProcess
     }
 
     @Override
-    protected boolean set(EntityAreaEffectCloud container, Integer value) {
+    protected boolean set(AreaEffectCloudEntity container, Integer value) {
         container.func_184485_d(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityAreaEffectCloud container) {
+    protected Optional<Integer> getVal(AreaEffectCloudEntity container) {
         return Optional.of(((EntityAreaEffectCloudAccessor) container).getWaitTime());
     }
 

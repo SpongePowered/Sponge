@@ -31,7 +31,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
@@ -103,7 +103,7 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
 
     @Override
     public void bridge$trigger(final Player player) {
-        final PlayerAdvancements playerAdvancements = ((EntityPlayerMP) player).func_192039_O();
+        final PlayerAdvancements playerAdvancements = ((ServerPlayerEntity) player).func_192039_O();
         final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
         final TypeToken<FilteredTriggerConfiguration> typeToken = TypeToken.of(this.triggerConfigurationClass);
         for (final Listener listener : new ArrayList<>(this.listeners.get(playerAdvancements))) {

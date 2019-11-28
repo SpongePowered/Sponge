@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.inventory.InventoryLargeChest;
+import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(InventoryLargeChest.class)
+@Mixin(DoubleSidedInventory.class)
 public interface InventoryLargeChestAccessor {
 
     @Accessor("upperChest") ILockableContainer accessor$getUpperChest();

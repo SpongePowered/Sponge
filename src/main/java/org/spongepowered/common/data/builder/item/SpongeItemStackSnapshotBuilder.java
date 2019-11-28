@@ -27,7 +27,6 @@ package org.spongepowered.common.data.builder.item;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -47,6 +46,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundNBT;
 
 public class SpongeItemStackSnapshotBuilder extends AbstractDataBuilder<ItemStackSnapshot> implements DataBuilder<ItemStackSnapshot> {
 
@@ -70,7 +70,7 @@ public class SpongeItemStackSnapshotBuilder extends AbstractDataBuilder<ItemStac
             } else {
                 manipulators = ImmutableList.of();
             }
-            @Nullable final NBTTagCompound compound;
+            @Nullable final CompoundNBT compound;
             if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
                 compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
                 SpongeItemStackBuilder.fixEnchantmentData(itemType, compound);

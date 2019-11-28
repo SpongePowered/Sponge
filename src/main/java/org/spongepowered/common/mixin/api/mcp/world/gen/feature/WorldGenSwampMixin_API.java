@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.AbstractTreeFeature;
 import net.minecraft.world.gen.feature.SwampTreeFeature;
@@ -84,7 +84,7 @@ public abstract class WorldGenSwampMixin_API extends AbstractTreeFeature impleme
                     for (l = z - b0; l <= z + b0 && flag; ++l) {
                         if (j >= 0 && j < 256) {
                             final BlockPos pos = new BlockPos(k, j, l);
-                            final IBlockState state = worldIn.func_180495_p(pos);
+                            final BlockState state = worldIn.func_180495_p(pos);
                             if (!((WorldGeneratorBridge) this).bridge$isAir(state, worldIn, pos) && !((WorldGeneratorBridge) this).bridge$isLeaves(state, worldIn, pos)) {
                                 if (state.func_177230_c() != Blocks.field_150355_j && state.func_177230_c() != Blocks.field_150358_i) {
                                     flag = false;
@@ -104,7 +104,7 @@ public abstract class WorldGenSwampMixin_API extends AbstractTreeFeature impleme
             }
             final BlockPos down = new BlockPos(x, y - 1, z);
             final Block block = worldIn.func_180495_p(down).func_177230_c();
-            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.field_150345_g) && y < 256 - i - 1) {
+            if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, Direction.UP, Blocks.field_150345_g) && y < 256 - i - 1) {
 
                 return true;
             }

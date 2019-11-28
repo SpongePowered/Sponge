@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.block;
 
-import net.minecraft.block.BlockSand;
+import net.minecraft.block.SandBlock;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSandData;
 import org.spongepowered.api.data.manipulator.mutable.block.SandData;
@@ -44,12 +44,12 @@ public class SandDataProcessor extends AbstractCatalogDataProcessor<SandType, Va
 
     @Override
     protected int setToMeta(SandType value) {
-        return ((BlockSand.EnumType) (Object) value).func_176688_a();
+        return ((SandBlock.EnumType) (Object) value).func_176688_a();
     }
 
     @Override
     protected SandType getFromMeta(int meta) {
-        return (SandType) (Object) BlockSand.EnumType.func_176686_a(meta);
+        return (SandType) (Object) SandBlock.EnumType.func_176686_a(meta);
     }
 
     @Override

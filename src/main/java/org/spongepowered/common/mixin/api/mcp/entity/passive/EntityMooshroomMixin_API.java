@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.passive.EntityMooshroom;
+import net.minecraft.entity.passive.MooshroomEntity;
 import org.spongepowered.api.entity.living.animal.Mooshroom;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityMooshroom.class)
+@Mixin(MooshroomEntity.class)
 public abstract class EntityMooshroomMixin_API extends EntityAnimalMixin_API implements Mooshroom {
 
 }

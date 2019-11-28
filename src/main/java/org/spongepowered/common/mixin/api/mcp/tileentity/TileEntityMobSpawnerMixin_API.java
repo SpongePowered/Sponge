@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.MobSpawnerBaseLogic;
-import net.minecraft.tileentity.TileEntityMobSpawner;
 import org.spongepowered.api.block.tileentity.MobSpawner;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -47,12 +45,14 @@ import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
+import net.minecraft.tileentity.MobSpawnerTileEntity;
+import net.minecraft.world.spawner.AbstractSpawner;
 
 @NonnullByDefault
-@Mixin(TileEntityMobSpawner.class)
+@Mixin(MobSpawnerTileEntity.class)
 public abstract class TileEntityMobSpawnerMixin_API extends TileEntityMixin_API implements MobSpawner {
 
-    @Shadow public abstract MobSpawnerBaseLogic getSpawnerBaseLogic();
+    @Shadow public abstract AbstractSpawner getSpawnerBaseLogic();
 
     @Override
     public void spawnEntityBatchImmediately(final boolean force) {

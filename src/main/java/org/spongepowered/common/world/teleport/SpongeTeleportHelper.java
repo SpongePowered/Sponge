@@ -64,7 +64,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             filters.add(TeleportHelperFilters.CONFIG);
         }
 
-        final ChunkProviderServerBridge chunkProviderServer = (ChunkProviderServerBridge)((net.minecraft.world.WorldServer) world).func_72863_F();
+        final ChunkProviderServerBridge chunkProviderServer = (ChunkProviderServerBridge)((net.minecraft.world.server.ServerWorld) world).func_72863_F();
         final boolean previous = chunkProviderServer.bridge$getForceChunkRequests();
         chunkProviderServer.bridge$setForceChunkRequests(true);
 

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.tileentity.TileEntityMobSpawner;
 import org.spongepowered.api.block.tileentity.MobSpawner;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 
 import java.util.Optional;
+import net.minecraft.tileentity.MobSpawnerTileEntity;
 
 public class SpongeMobSpawnerBuilder extends AbstractTileBuilder<MobSpawner> {
 
@@ -40,7 +40,7 @@ public class SpongeMobSpawnerBuilder extends AbstractTileBuilder<MobSpawner> {
     @Override
     protected Optional<MobSpawner> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(mobSpawner -> {
-            ((TileEntityMobSpawner) mobSpawner).func_145829_t();
+            ((MobSpawnerTileEntity) mobSpawner).func_145829_t();
             return mobSpawner;
         });
     }

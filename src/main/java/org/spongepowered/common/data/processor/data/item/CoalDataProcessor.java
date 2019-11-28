@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCoalData;

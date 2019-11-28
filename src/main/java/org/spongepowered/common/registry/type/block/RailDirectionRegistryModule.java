@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockRailBase;
+import net.minecraft.block.AbstractRailBlock;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 @RegisterCatalog(RailDirections.class)
-public final class RailDirectionRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockRailBase.EnumRailDirection, RailDirection> {
+public final class RailDirectionRegistryModule extends MinecraftEnumBasedCatalogTypeModule<AbstractRailBlock.EnumRailDirection, RailDirection> {
 
     @Override
-    protected BlockRailBase.EnumRailDirection[] getValues() {
-        return BlockRailBase.EnumRailDirection.values();
+    protected AbstractRailBlock.EnumRailDirection[] getValues() {
+        return AbstractRailBlock.EnumRailDirection.values();
     }
 }

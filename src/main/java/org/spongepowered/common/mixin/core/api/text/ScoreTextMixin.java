@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.api.text;
 
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentScore;
+import net.minecraft.util.text.ScoreTextComponent;
+import net.minecraft.util.text.TextComponent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.text.ScoreText;
@@ -47,13 +47,13 @@ public abstract class ScoreTextMixin extends TextMixin {
 
     @SuppressWarnings("deprecation")
     @Override
-    protected TextComponentBase createComponent() {
-        TextComponentScore textComponentScore;
+    protected TextComponent createComponent() {
+        ScoreTextComponent textComponentScore;
         String name = TextSerializers.LEGACY_FORMATTING_CODE.serialize(this.score.getName());
         if (this.score.getObjectives().isEmpty()) {
-            textComponentScore = new TextComponentScore(name, "");
+            textComponentScore = new ScoreTextComponent(name, "");
         } else {
-            textComponentScore = new TextComponentScore(name, this.score.getObjectives().iterator().next().getName());
+            textComponentScore = new ScoreTextComponent(name, this.score.getObjectives().iterator().next().getName());
             if (Sponge.isServerAvailable()) {
                 textComponentScore.func_186876_a((ICommandSender) Sponge.getServer());
             }

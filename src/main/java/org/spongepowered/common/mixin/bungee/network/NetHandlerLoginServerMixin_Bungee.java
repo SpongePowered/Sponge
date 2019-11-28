@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.bungee.network;
 import com.google.common.base.Charsets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import net.minecraft.network.NetHandlerLoginServer;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.network.login.ServerLoginNetHandler;
 import net.minecraft.server.MinecraftServer;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -41,7 +41,7 @@ import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
 
 import java.util.UUID;
 
-@Mixin(NetHandlerLoginServer.class)
+@Mixin(ServerLoginNetHandler.class)
 public abstract class NetHandlerLoginServerMixin_Bungee {
 
     @Shadow @Final private MinecraftServer server;

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkRocketData;
@@ -63,7 +63,7 @@ public class ItemFireworkRocketDataProcessor
 
     @Override
     protected Optional<Integer> getVal(ItemStack itemStack) {
-        NBTTagCompound fireworks = itemStack.func_190925_c("Fireworks");
+        CompoundNBT fireworks = itemStack.func_190925_c("Fireworks");
         if (fireworks.func_74764_b("Flight")) {
             return Optional.of((int) fireworks.func_74771_c("Flight"));
         }
@@ -72,7 +72,7 @@ public class ItemFireworkRocketDataProcessor
 
     @Override
     protected boolean set(ItemStack itemStack, Integer modifier) {
-        NBTTagCompound fireworks = itemStack.func_190925_c("Fireworks");
+        CompoundNBT fireworks = itemStack.func_190925_c("Fireworks");
         fireworks.func_74774_a("Flight", modifier.byteValue());
         return true;
     }
@@ -80,7 +80,7 @@ public class ItemFireworkRocketDataProcessor
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof ItemStack) {
-            NBTTagCompound fireworks = ((ItemStack) container).func_179543_a("Fireworks");
+            CompoundNBT fireworks = ((ItemStack) container).func_179543_a("Fireworks");
             if (fireworks != null) {
                 fireworks.func_82580_o("Flight");
             }

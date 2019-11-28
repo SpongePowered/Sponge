@@ -31,7 +31,7 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.NoiseGeneratorSimplex;
+import net.minecraft.world.gen.SimplexNoiseGenerator;
 import net.minecraft.world.gen.feature.EndIslandFeature;
 import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.block.BlockState;
@@ -50,7 +50,7 @@ import javax.annotation.Nullable;
 @Mixin(EndIslandFeature.class)
 public abstract class WorldGenEndIslandMixin_API extends Feature implements EndIsland {
 
-    @Nullable private NoiseGeneratorSimplex api$noise;
+    @Nullable private SimplexNoiseGenerator api$noise;
     private VariableAmount api$initial = VariableAmount.baseWithRandomAddition(4, 3);
     private VariableAmount api$decrement = VariableAmount.baseWithRandomAddition(0.5, 2);
     private BlockState api$state = BlockTypes.END_STONE.getDefaultState();
@@ -110,7 +110,7 @@ public abstract class WorldGenEndIslandMixin_API extends Feature implements EndI
         final World world = (World) worldIn;
         if (this.api$noise == null || worldIn.getProperties().getSeed() != this.api$lastSeed) {
             this.api$lastSeed = worldIn.getProperties().getSeed();
-            this.api$noise = new NoiseGeneratorSimplex(new Random(this.api$lastSeed));
+            this.api$noise = new SimplexNoiseGenerator(new Random(this.api$lastSeed));
         }
         final BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         final int chunkX = min.getX() / 16;

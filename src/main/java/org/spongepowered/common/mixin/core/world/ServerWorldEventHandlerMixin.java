@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.play.server.SPacketCustomSound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.play.server.SPlaySoundPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.ServerWorldEventHandler;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 @Mixin(ServerWorldEventHandler.class)
 public abstract class ServerWorldEventHandlerMixin implements ServerWorldEventHandlerBridge {
 
-    @Shadow @Final private WorldServer world;
+    @Shadow @Final private ServerWorld world;
     @Shadow @Final private MinecraftServer server;
 
     @Redirect(method = "playSoundToAllNearExcept", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
@@ -58,9 +58,9 @@ public abstract class ServerWorldEventHandlerMixin implements ServerWorldEventHa
     }
 
     @Override
-    public void bridge$playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category, double x, double y, double z,
+    public void bridge$playCustomSoundToAllNearExcept(@Nullable PlayerEntity player, String soundIn, SoundCategory category, double x, double y, double z,
             float volume, float pitch) {
         this.server.func_184103_al().func_148543_a(player, x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D,
-                ((WorldServerBridge) this.world).bridge$getDimensionId(), new SPacketCustomSound(soundIn, category, x, y, z, volume, pitch));
+                ((WorldServerBridge) this.world).bridge$getDimensionId(), new SPlaySoundPacket(soundIn, category, x, y, z, volume, pitch));
     }
 }

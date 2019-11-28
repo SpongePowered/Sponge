@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
-import net.minecraft.tileentity.TileEntityEndGateway;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -35,11 +34,12 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.tileentity.TileEntityEndGatewayAccessor;
 
 import java.util.Optional;
+import net.minecraft.tileentity.EndGatewayTileEntity;
 
-public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValueProcessor<TileEntityEndGateway, Integer, Value<Integer>> {
+public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValueProcessor<EndGatewayTileEntity, Integer, Value<Integer>> {
 
     public EndGatewayTeleportCooldownValueProcessor() {
-        super(TileEntityEndGateway.class, Keys.END_GATEWAY_TELEPORT_COOLDOWN);
+        super(EndGatewayTileEntity.class, Keys.END_GATEWAY_TELEPORT_COOLDOWN);
     }
 
 
@@ -49,13 +49,13 @@ public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValu
     }
 
     @Override
-    protected boolean set(TileEntityEndGateway container, Integer value) {
+    protected boolean set(EndGatewayTileEntity container, Integer value) {
         ((TileEntityEndGatewayAccessor) container).accessor$setTeleportCooldown(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(TileEntityEndGateway container) {
+    protected Optional<Integer> getVal(EndGatewayTileEntity container) {
         return Optional.of(((TileEntityEndGatewayAccessor) container).accessor$getTeleportCooldown());
     }
 

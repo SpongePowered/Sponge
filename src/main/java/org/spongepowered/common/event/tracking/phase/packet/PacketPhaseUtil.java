@@ -24,31 +24,31 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.passive.AbstractChestHorse;
-import net.minecraft.entity.passive.EntityPig;
-import net.minecraft.entity.passive.EntitySheep;
-import net.minecraft.entity.passive.EntityWolf;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.entity.passive.WolfEntity;
+import net.minecraft.entity.passive.horse.AbstractChestedHorseEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.INetHandler;
-import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.network.Packet;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.play.client.CPacketClientSettings;
-import net.minecraft.network.play.client.CPacketClientStatus;
-import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.network.play.server.SPacketSetSlot;
-import net.minecraft.util.EnumHand;
+import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.network.play.client.CClientSettingsPacket;
+import net.minecraft.network.play.client.CClientStatusPacket;
+import net.minecraft.network.play.client.CPlayerPacket;
+import net.minecraft.network.play.server.SSetSlotPacket;
+import net.minecraft.util.Hand;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
@@ -75,7 +75,7 @@ import javax.annotation.Nullable;
 public final class PacketPhaseUtil {
 
     @SuppressWarnings("rawtypes")
-    public static void handleSlotRestore(final EntityPlayer player, @Nullable final Container openContainer, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
+    public static void handleSlotRestore(final PlayerEntity player, @Nullable final Container openContainer, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
         for (final SlotTransaction slotTransaction : slotTransactions) {
 
             if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
@@ -101,17 +101,17 @@ public final class PacketPhaseUtil {
             ((TrackedInventoryBridge) openContainer).bridge$setCaptureInventory(capture);
             // If event is cancelled, always resync with player
             // we must also validate the player still has the same container open after the event has been processed
-            if (eventCancelled && player.field_71070_bA == openContainer && player instanceof EntityPlayerMP) {
-                ((EntityPlayerMP) player).func_71120_a(openContainer);
+            if (eventCancelled && player.field_71070_bA == openContainer && player instanceof ServerPlayerEntity) {
+                ((ServerPlayerEntity) player).func_71120_a(openContainer);
             }
         }
     }
 
-    public static void handleCustomCursor(final EntityPlayer player, final ItemStackSnapshot customCursor) {
+    public static void handleCustomCursor(final PlayerEntity player, final ItemStackSnapshot customCursor) {
         final ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
         player.field_71071_by.func_70437_b(cursor);
-        if (player instanceof EntityPlayerMP) {
-            ((EntityPlayerMP) player).field_71135_a.func_147359_a(new SPacketSetSlot(-1, -1, cursor));
+        if (player instanceof ServerPlayerEntity) {
+            ((ServerPlayerEntity) player).field_71135_a.func_147359_a(new SSetSlotPacket(-1, -1, cursor));
         }
     }
 
@@ -126,16 +126,16 @@ public final class PacketPhaseUtil {
         }
     }
 
-    public static void handlePlayerSlotRestore(final EntityPlayerMP player, final ItemStack itemStack, final EnumHand hand) {
+    public static void handlePlayerSlotRestore(final ServerPlayerEntity player, final ItemStack itemStack, final Hand hand) {
         if (itemStack.func_190926_b()) { // No need to check if it's NONE, NONE is checked by isEmpty.
             return;
         }
 
         player.field_71137_h = false;
         int slotId = 0;
-        if (hand == EnumHand.OFF_HAND) {
+        if (hand == Hand.OFF_HAND) {
             player.field_71071_by.field_184439_c.set(0, itemStack);
-            slotId = (player.field_71071_by.field_70462_a.size() + InventoryPlayer.func_70451_h());
+            slotId = (player.field_71071_by.field_70462_a.size() + PlayerInventory.func_70451_h());
         } else {
             player.field_71071_by.field_70462_a.set(player.field_71071_by.field_70461_c, itemStack);
             final Slot slot = player.field_71070_bA.func_75147_a(player.field_71071_by, player.field_71071_by.field_70461_c);
@@ -144,7 +144,7 @@ public final class PacketPhaseUtil {
 
         player.field_71070_bA.func_75142_b();
         player.field_71137_h = false;
-        player.field_71135_a.func_147359_a(new SPacketSetSlot(player.field_71070_bA.field_75152_c, slotId, itemStack));
+        player.field_71135_a.func_147359_a(new SSetSlotPacket(player.field_71070_bA.field_75152_c, slotId, itemStack));
     }
 
     // Check if all transactions are invalid
@@ -163,10 +163,10 @@ public final class PacketPhaseUtil {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static void onProcessPacket(final Packet packetIn, final INetHandler netHandler) {
-        if (netHandler instanceof NetHandlerPlayServer) {
+    public static void onProcessPacket(final IPacket packetIn, final INetHandler netHandler) {
+        if (netHandler instanceof ServerPlayNetHandler) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).field_147369_b;
+                ServerPlayerEntity packetPlayer = ((ServerPlayNetHandler) netHandler).field_147369_b;
                 frame.pushCause(packetPlayer);
                 if (SpongeImplHooks.creativeExploitCheck(packetIn, packetPlayer)) {
                     return;
@@ -174,9 +174,9 @@ public final class PacketPhaseUtil {
 
                 // Don't process movement capture logic if player hasn't moved
                 final boolean ignoreMovementCapture;
-                if (packetIn instanceof CPacketPlayer) {
-                    final CPacketPlayer movingPacket = ((CPacketPlayer) packetIn);
-                    if (movingPacket instanceof CPacketPlayer.Rotation) {
+                if (packetIn instanceof CPlayerPacket) {
+                    final CPlayerPacket movingPacket = ((CPlayerPacket) packetIn);
+                    if (movingPacket instanceof CPlayerPacket.RotationPacket) {
                         ignoreMovementCapture = true;
                     } else if (packetPlayer.field_70165_t == movingPacket.field_149479_a && packetPlayer.field_70163_u == movingPacket.field_149477_b && packetPlayer.field_70161_v == movingPacket.field_149478_c) {
                         ignoreMovementCapture = true;
@@ -186,7 +186,7 @@ public final class PacketPhaseUtil {
                 } else {
                     ignoreMovementCapture = false;
                 }
-                if (ignoreMovementCapture || (packetIn instanceof CPacketClientSettings)) {
+                if (ignoreMovementCapture || (packetIn instanceof CClientSettingsPacket)) {
                     packetIn.func_148833_a(netHandler);
                 } else {
                     final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.field_71071_by.func_70445_o());
@@ -210,9 +210,9 @@ public final class PacketPhaseUtil {
 
                     }
 
-                    if (packetIn instanceof CPacketClientStatus) {
+                    if (packetIn instanceof CClientStatusPacket) {
                         // update the reference of player
-                        packetPlayer = ((NetHandlerPlayServer) netHandler).field_147369_b;
+                        packetPlayer = ((ServerPlayNetHandler) netHandler).field_147369_b;
                     }
                     ((EntityPlayerMPBridge) packetPlayer).bridge$setPacketItem(ItemStack.field_190927_a);
                 }
@@ -236,12 +236,12 @@ public final class PacketPhaseUtil {
 
         if (item == Items.field_151100_aR) {
             // ItemDye.itemInteractionForEntity
-            if (entity instanceof EntitySheep) {
+            if (entity instanceof SheepEntity) {
                 return EntitySheepAccessor.accessor$getDyeColorParameter();
             }
 
             // EntityWolf.processInteract
-            if (entity instanceof EntityWolf) {
+            if (entity instanceof WolfEntity) {
                 return EntityWolfAccessor.accessor$getCollarColorParameter();
             }
 
@@ -250,17 +250,17 @@ public final class PacketPhaseUtil {
 
         if (item == Items.field_151057_cb) {
             // ItemNameTag.itemInteractionForEntity
-            return entity instanceof EntityLivingBase && !(entity instanceof EntityPlayer) && stack.func_82837_s() ? EntityAccessor.accessor$getCustomNameParameter() : null;
+            return entity instanceof LivingEntity && !(entity instanceof PlayerEntity) && stack.func_82837_s() ? EntityAccessor.accessor$getCustomNameParameter() : null;
         }
 
         if (item == Items.field_151141_av) {
             // ItemSaddle.itemInteractionForEntity
-            return entity instanceof EntityPig ? EntityPigAccessor.accessor$getSaddledParameter() : null;
+            return entity instanceof PigEntity ? EntityPigAccessor.accessor$getSaddledParameter() : null;
         }
 
-        if (item instanceof ItemBlock && ((ItemBlock) item).func_179223_d() == Blocks.field_150486_ae) {
+        if (item instanceof BlockItem && ((BlockItem) item).func_179223_d() == Blocks.field_150486_ae) {
             // AbstractChestHorse.processInteract
-            return entity instanceof AbstractChestHorse ? AbstractChestHorseAccessor.accessor$getDataIdChestParameter() : null;
+            return entity instanceof AbstractChestedHorseEntity ? AbstractChestHorseAccessor.accessor$getDataIdChestParameter() : null;
         }
 
         return null;

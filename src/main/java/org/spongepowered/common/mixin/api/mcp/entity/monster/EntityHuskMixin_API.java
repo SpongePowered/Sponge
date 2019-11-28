@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.EntityHusk;
+import net.minecraft.entity.monster.HuskEntity;
 import org.spongepowered.api.entity.living.monster.Husk;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityHusk.class)
+@Mixin(HuskEntity.class)
 public abstract class EntityHuskMixin_API extends EntityZombieMixin_API implements Husk {
 
 }

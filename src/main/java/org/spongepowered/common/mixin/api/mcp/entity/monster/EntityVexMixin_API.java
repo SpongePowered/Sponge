@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.EntityVex;
+import net.minecraft.entity.monster.VexEntity;
 import org.spongepowered.api.entity.living.monster.Vex;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityVex.class)
+@Mixin(VexEntity.class)
 public abstract class EntityVexMixin_API extends EntityMobMixin_API implements Vex {
 
 }

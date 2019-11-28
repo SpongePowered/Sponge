@@ -31,7 +31,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.world.Locatable;
@@ -59,7 +59,7 @@ public class WrapperICommandSender implements ICommandSender {
 
     @Override
     public ITextComponent func_145748_c_() {
-        return new TextComponentString(this.source.getName());
+        return new StringTextComponent(this.source.getName());
     }
 
     @Override

@@ -35,7 +35,7 @@ public class VanillaContainerAdapter extends AbstractInventoryAdapter {
      */
     private final Container rootContainer;
 
-    public VanillaContainerAdapter(Fabric inventory, net.minecraft.inventory.Container container) {
+    public VanillaContainerAdapter(Fabric inventory, net.minecraft.inventory.container.Container container) {
         super(inventory);
         this.rootContainer = (Container) container;
     }

@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockTripWireHook;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -44,13 +42,14 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.block.TripWireHookBlock;
 
-@Mixin(BlockTripWireHook.class)
+@Mixin(TripWireHookBlock.class)
 public abstract class BlockTripWireHookMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getIsAttachedFor(blockState),
                 impl$getIsPoweredFor(blockState), impl$getDirectionalData(blockState));
     }
@@ -62,22 +61,22 @@ public abstract class BlockTripWireHookMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableAttachedData) {
             return Optional.of((BlockState) blockState);
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockTripWireHook.field_176263_b, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.func_177226_a(TripWireHookBlock.field_176263_b, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.func_177226_a(BlockTripWireHook.field_176264_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(TripWireHookBlock.field_176264_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.SUSPENDED)) {
             return Optional.of((BlockState) blockState);
         }
@@ -85,25 +84,25 @@ public abstract class BlockTripWireHookMixin extends BlockMixin {
             return Optional.of((BlockState) blockState);
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockTripWireHook.field_176263_b, (Boolean) value));
+            return Optional.of((BlockState) blockState.func_177226_a(TripWireHookBlock.field_176263_b, (Boolean) value));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.func_177226_a(BlockTripWireHook.field_176264_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(TripWireHookBlock.field_176264_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableAttachedData impl$getIsAttachedFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.func_177229_b(BlockTripWireHook.field_176265_M));
+    private ImmutableAttachedData impl$getIsAttachedFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.func_177229_b(TripWireHookBlock.field_176265_M));
     }
 
-    private ImmutablePoweredData impl$getIsPoweredFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(BlockTripWireHook.field_176263_b));
+    private ImmutablePoweredData impl$getIsPoweredFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(TripWireHookBlock.field_176263_b));
     }
 
-    private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
+    private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockTripWireHook.field_176264_a)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(TripWireHookBlock.field_176264_a)));
     }
 }

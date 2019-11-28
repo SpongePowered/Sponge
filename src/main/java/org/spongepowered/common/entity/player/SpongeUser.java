@@ -29,12 +29,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.inventory.InventoryEnderChest;
+import net.minecraft.inventory.EnderChestInventory;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.world.WorldServer;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataSerializable;
@@ -108,8 +108,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     private boolean isVanishTarget;
 
     @Nullable private SpongeUserInventory inventory; // lazy load when accessing inventory
-    @Nullable private InventoryEnderChest enderChest; // lazy load when accessing inventory
-    @Nullable private NBTTagCompound nbt;
+    @Nullable private EnderChestInventory enderChest; // lazy load when accessing inventory
+    @Nullable private CompoundNBT nbt;
 
     public SpongeUser(final GameProfile profile) {
         this.profile = profile;
@@ -148,8 +148,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void initialize() {
-        this.nbt = new NBTTagCompound();
-        Optional<WorldServer> worldServer = WorldManager.getWorldByDimensionId(0);
+        this.nbt = new CompoundNBT();
+        Optional<ServerWorld> worldServer = WorldManager.getWorldByDimensionId(0);
         if (!worldServer.isPresent()) {
             return;
         }
@@ -170,15 +170,15 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         }
     }
 
-    public void readFromNbt(final NBTTagCompound compound) {
+    public void readFromNbt(final CompoundNBT compound) {
         this.reset();
         this.nbt = compound;
 
         // net.minecraft.entity.Entity#readFromNBT
 
-        final NBTTagList position = compound.func_150295_c(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+        final ListNBT position = compound.func_150295_c(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
         //NBTTagList motion = compound.getTagList("Motion", NbtDataUtil.TAG_DOUBLE);
-        final NBTTagList rotation = compound.func_150295_c(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
+        final ListNBT rotation = compound.func_150295_c(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
         //this.motionX = motion.getDoubleAt(0);
         //this.motionY = motion.getDoubleAt(1);
         //this.motionZ = motion.getDoubleAt(2);
@@ -342,7 +342,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         // org.spongepowered.common.mixin.core.entity.EntityMixin#readSpongeNBT
 
 
-        final NBTTagCompound spongeCompound = compound.func_74775_l(Constants.Forge.FORGE_DATA).func_74775_l(Constants.Sponge.SPONGE_DATA);
+        final CompoundNBT spongeCompound = compound.func_74775_l(Constants.Forge.FORGE_DATA).func_74775_l(Constants.Sponge.SPONGE_DATA);
         DataUtil.readCustomData(spongeCompound, (DataHolder) this);
         //if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
         //    ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
@@ -375,10 +375,10 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
                 this.isVanishCollide = spongeCompound.func_74767_n(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
             }
 
-            final NBTTagList spawnList = spongeCompound.func_150295_c(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
+            final ListNBT spawnList = spongeCompound.func_150295_c(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
 
             for (int i = 0; i < spawnList.func_74745_c(); i++) {
-                final NBTTagCompound spawnCompound = spawnList.func_150305_b(i);
+                final CompoundNBT spawnCompound = spawnList.func_150305_b(i);
 
                 final UUID uuid = spawnCompound.func_186857_a(Constants.UUID);
 
@@ -403,7 +403,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
                 initialize();
             }
             this.inventory = new SpongeUserInventory(this);
-            final NBTTagList nbttaglist = this.nbt.func_150295_c(Constants.Entity.Player.INVENTORY, 10);
+            final ListNBT nbttaglist = this.nbt.func_150295_c(Constants.Entity.Player.INVENTORY, 10);
             this.inventory.readFromNBT(nbttaglist);
             this.inventory.currentItem = this.nbt.func_74762_e(Constants.Entity.Player.SELECTED_ITEM_SLOT);
         }
@@ -418,18 +418,18 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             this.enderChest = new SpongeUserInventoryEnderchest(this);
             if (this.nbt.func_150297_b(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9))
             {
-                final NBTTagList nbttaglist1 = this.nbt.func_150295_c(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
+                final ListNBT nbttaglist1 = this.nbt.func_150295_c(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
                 this.enderChest.func_70486_a(nbttaglist1);
             }
         }
         return this;
     }
 
-    public void writeToNbt(final NBTTagCompound compound) {
+    public void writeToNbt(final CompoundNBT compound) {
 
         this.loadInventory();
         this.loadEnderInventory();
-        compound.func_74782_a(Constants.Entity.Player.INVENTORY, this.inventory.writeToNBT(new NBTTagList()));
+        compound.func_74782_a(Constants.Entity.Player.INVENTORY, this.inventory.writeToNBT(new ListNBT()));
         compound.func_74782_a(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.func_70487_g());
         compound.func_74768_a(Constants.Entity.Player.SELECTED_ITEM_SLOT, this.inventory.currentItem);
 
@@ -439,19 +439,19 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
         compound.func_74757_a(Constants.Entity.Player.INVULNERABLE, this.invulnerable);
 
-        final NBTTagCompound forgeCompound = compound.func_74775_l(Constants.Forge.FORGE_DATA);
-        final NBTTagCompound spongeCompound = forgeCompound.func_74775_l(Constants.Sponge.SPONGE_DATA);
+        final CompoundNBT forgeCompound = compound.func_74775_l(Constants.Forge.FORGE_DATA);
+        final CompoundNBT spongeCompound = forgeCompound.func_74775_l(Constants.Sponge.SPONGE_DATA);
         spongeCompound.func_82580_o(Constants.Sponge.User.USER_SPAWN_LIST);
         spongeCompound.func_82580_o(Constants.Sponge.Entity.IS_VANISHED);
         spongeCompound.func_82580_o(Constants.Sponge.Entity.IS_INVISIBLE);
         spongeCompound.func_82580_o(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
         spongeCompound.func_82580_o(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
 
-        final NBTTagList spawnList = new NBTTagList();
+        final ListNBT spawnList = new ListNBT();
         for (final Map.Entry<UUID, RespawnLocation> entry : this.spawnLocations.entrySet()) {
             final RespawnLocation respawn = entry.getValue();
 
-            final NBTTagCompound spawnCompound = new NBTTagCompound();
+            final CompoundNBT spawnCompound = new CompoundNBT();
             spawnCompound.func_186854_a(Constants.UUID, entry.getKey());
             spawnCompound.func_74780_a(Constants.Sponge.User.USER_SPAWN_X, respawn.getPosition().getX());
             spawnCompound.func_74780_a(Constants.Sponge.User.USER_SPAWN_Y, respawn.getPosition().getY());
@@ -594,12 +594,12 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         Preconditions.checkState(isInitialized(), "User {} is not initialized", this.profile.getId());
         final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) WorldManager.getWorldByDimensionId(0).get().func_72860_G();
         final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), getUniqueId() + ".dat");
-        NBTTagCompound tag;
+        CompoundNBT tag;
         try {
             tag = CompressedStreamTools.func_74796_a(new FileInputStream(dataFile));
         } catch (IOException ignored) {
             // Nevermind
-            tag = new NBTTagCompound();
+            tag = new CompoundNBT();
         }
         writeToNbt(tag);
         try (final FileOutputStream out = new FileOutputStream(dataFile)) {
@@ -633,7 +633,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     private Optional<ItemStack> getEquippedItem(final EquipmentType type) {
         if (type instanceof SpongeEquipmentType) {
-            final EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
+            final EquipmentSlotType[] slots = ((SpongeEquipmentType) type).getSlots();
             if (slots.length == 1) {
                 final net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
                 if (!nmsItem.func_190926_b()) {
@@ -646,8 +646,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     private void setEquippedItem(final EquipmentType type, @Nullable final ItemStack item) {
         if (type instanceof SpongeEquipmentType) {
-            final EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
-            for (final EntityEquipmentSlot slot : slots) {
+            final EquipmentSlotType[] slots = ((SpongeEquipmentType) type).getSlots();
+            for (final EquipmentSlotType slot : slots) {
                 this.setItemStackToSlot(slot, ItemStackUtil.toNative(item));
                 // TODO check canequip
                 return
@@ -656,23 +656,23 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         }
     }
 
-    private net.minecraft.item.ItemStack getItemStackFromSlot(final EntityEquipmentSlot slotIn) {
-        if (slotIn == EntityEquipmentSlot.MAINHAND) {
+    private net.minecraft.item.ItemStack getItemStackFromSlot(final EquipmentSlotType slotIn) {
+        if (slotIn == EquipmentSlotType.MAINHAND) {
             return this.inventory.getCurrentItem();
-        } else if (slotIn == EntityEquipmentSlot.OFFHAND) {
+        } else if (slotIn == EquipmentSlotType.OFFHAND) {
             return this.inventory.offHandInventory.get(0);
         } else {
-            return slotIn.func_188453_a() == EntityEquipmentSlot.Type.ARMOR ? this.inventory.armorInventory.get(slotIn.func_188454_b()) :
+            return slotIn.func_188453_a() == EquipmentSlotType.Group.ARMOR ? this.inventory.armorInventory.get(slotIn.func_188454_b()) :
                     net.minecraft.item.ItemStack.field_190927_a;
         }
     }
 
-    private void setItemStackToSlot(final EntityEquipmentSlot slotIn, final net.minecraft.item.ItemStack stack) {
-        if (slotIn == EntityEquipmentSlot.MAINHAND) {
+    private void setItemStackToSlot(final EquipmentSlotType slotIn, final net.minecraft.item.ItemStack stack) {
+        if (slotIn == EquipmentSlotType.MAINHAND) {
             this.inventory.mainInventory.set(this.inventory.currentItem, stack);
-        } else if (slotIn == EntityEquipmentSlot.OFFHAND) {
+        } else if (slotIn == EquipmentSlotType.OFFHAND) {
             this.inventory.offHandInventory.set(0, stack);
-        } else if (slotIn.func_188453_a() == EntityEquipmentSlot.Type.ARMOR) {
+        } else if (slotIn.func_188453_a() == EquipmentSlotType.Group.ARMOR) {
             this.inventory.armorInventory.set(slotIn.func_188454_b(), stack);
         }
     }

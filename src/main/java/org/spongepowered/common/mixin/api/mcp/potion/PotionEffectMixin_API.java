@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.potion;
 
-import net.minecraft.potion.Potion;
+import net.minecraft.potion.Effect;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -37,11 +37,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(net.minecraft.potion.PotionEffect.class)
+@Mixin(net.minecraft.potion.EffectInstance.class)
 @Implements(@Interface(iface = PotionEffect.class, prefix = "potionEffect$"))
 public abstract class PotionEffectMixin_API implements PotionEffect {
 
-    @Shadow @Final private Potion potion;
+    @Shadow @Final private Effect potion;
     @Shadow private int duration;
     @Shadow private int amplifier;
     @Shadow private boolean isAmbient;

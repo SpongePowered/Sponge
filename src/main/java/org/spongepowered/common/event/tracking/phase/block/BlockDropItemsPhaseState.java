@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
@@ -79,7 +79,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
                 final ArrayList<Entity> entities = new ArrayList<>();
-                for (EntityItem item : items) {
+                for (ItemEntity item : items) {
                     entities.add((Entity) item);
                 }
                 SpongeCommonEventFactory.callDropItemDestruct(entities, context);
@@ -102,8 +102,8 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
         TrackingUtil.processBlockCaptures(context);
         context.getCapturedItemStackSupplier()
             .acceptAndClearIfNotEmpty(drops -> maybeWorld.ifPresent(mixinWorld -> {
-                final List<EntityItem> items = drops.stream()
-                    .map(drop -> drop.create((WorldServer) mixinWorld))
+                final List<ItemEntity> items = drops.stream()
+                    .map(drop -> drop.create((ServerWorld) mixinWorld))
                     .collect(Collectors.toList());
                 final List<Entity> entities = (List<Entity>) (List<?>) items;
                 if (!entities.isEmpty()) {

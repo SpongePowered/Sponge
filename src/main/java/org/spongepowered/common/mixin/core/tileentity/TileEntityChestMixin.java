@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,15 +45,15 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensI
 
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
-@Mixin(TileEntityChest.class)
+@Mixin(ChestTileEntity.class)
 public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
 
     @Shadow public float lidAngle;
     @Shadow public int numPlayersUsing;
-    @Shadow public TileEntityChest adjacentChestZNeg;
-    @Shadow public TileEntityChest adjacentChestXPos;
-    @Shadow public TileEntityChest adjacentChestXNeg;
-    @Shadow public TileEntityChest adjacentChestZPos;
+    @Shadow public ChestTileEntity adjacentChestZNeg;
+    @Shadow public ChestTileEntity adjacentChestXPos;
+    @Shadow public ChestTileEntity adjacentChestXNeg;
+    @Shadow public ChestTileEntity adjacentChestZPos;
 
     @Shadow public abstract void checkForAdjacentChests();
     @Shadow public abstract int getSizeInventory();
@@ -91,7 +91,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"),
         cancellable = true)
-    private void impl$Moved(final EntityPlayer player, final CallbackInfo ci) {
+    private void impl$Moved(final PlayerEntity player, final CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();
@@ -126,7 +126,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"),
         cancellable = true)
-    private void impl$MovedSoundOutofTickLoop(final EntityPlayer player, final CallbackInfo ci) {
+    private void impl$MovedSoundOutofTickLoop(final PlayerEntity player, final CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();

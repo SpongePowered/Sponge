@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockSkull;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -42,13 +40,14 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.block.SkullBlock;
 
-@Mixin(BlockSkull.class)
+@Mixin(SkullBlock.class)
 public abstract class BlockSkullMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getShouldDropFor(blockState), impl$getDirectionalData(blockState));
     }
 
@@ -58,38 +57,38 @@ public abstract class BlockSkullMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDropData) {
             final boolean shouldDrop = ((ImmutableDropData) manipulator).willDrop().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSkull.field_176417_b, !shouldDrop));
+            return Optional.of((BlockState) blockState.func_177226_a(SkullBlock.field_176417_b, !shouldDrop));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSkull.field_176418_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(SkullBlock.field_176418_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.SHOULD_DROP)) {
             final boolean shouldDrop = (Boolean) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSkull.field_176417_b, !shouldDrop));
+            return Optional.of((BlockState) blockState.func_177226_a(SkullBlock.field_176417_b, !shouldDrop));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSkull.field_176418_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(SkullBlock.field_176418_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableDropData impl$getShouldDropFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDropData.class, !blockState.func_177229_b(BlockSkull.field_176417_b));
+    private ImmutableDropData impl$getShouldDropFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDropData.class, !blockState.func_177229_b(SkullBlock.field_176417_b));
     }
 
-    private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
+    private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockSkull.field_176418_a)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(SkullBlock.field_176418_a)));
     }
 
 }

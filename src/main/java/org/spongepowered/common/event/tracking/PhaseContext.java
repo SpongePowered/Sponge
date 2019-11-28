@@ -27,11 +27,10 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
@@ -401,14 +400,14 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.capturedEntitiesSupplier;
     }
 
-    public List<EntityItem> getCapturedItems() throws IllegalStateException {
+    public List<ItemEntity> getCapturedItems() throws IllegalStateException {
         if (this.capturedItemsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture dropped item entities!", this).get();
         }
         return this.capturedItemsSupplier.get();
     }
 
-    public CapturedSupplier<EntityItem> getCapturedItemsSupplier() throws IllegalStateException {
+    public CapturedSupplier<ItemEntity> getCapturedItemsSupplier() throws IllegalStateException {
         if (this.capturedItemsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture dropped item entities!", this).get();
         }
@@ -471,7 +470,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.blockItemDropsSupplier;
     }
 
-    public CapturedMultiMapSupplier<BlockPos, EntityItem> getBlockItemDropSupplier() throws IllegalStateException {
+    public CapturedMultiMapSupplier<BlockPos, ItemEntity> getBlockItemDropSupplier() throws IllegalStateException {
         if (this.blockItemEntityDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to track block item drops!", this).get();
         }
@@ -485,7 +484,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.entityItemDropsSupplier;
     }
 
-    public CapturedMultiMapSupplier<UUID, EntityItem> getPerEntityItemEntityDropSupplier() throws IllegalStateException {
+    public CapturedMultiMapSupplier<UUID, ItemEntity> getPerEntityItemEntityDropSupplier() throws IllegalStateException {
         if (this.entityItemEntityDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture entity drops!", this).get();
         }
@@ -541,8 +540,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         if (this.entityItemEntityDropsSupplier != null && !this.entityItemEntityDropsSupplier.isEmpty()) {
             return true;
         }
-        if (this.source != null && this.source instanceof EntityPlayer) {
-            if (!((TrackedInventoryBridge) ((EntityPlayer) this.source).field_71071_by).bridge$getCapturedSlotTransactions().isEmpty()) {
+        if (this.source != null && this.source instanceof PlayerEntity) {
+            if (!((TrackedInventoryBridge) ((PlayerEntity) this.source).field_71071_by).bridge$getCapturedSlotTransactions().isEmpty()) {
                 return true;
             }
         }
@@ -671,7 +670,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
         if (this.captureBlockPos != null) {
             this.captureBlockPos.setPos(null);
-            this.captureBlockPos.setWorld((WorldServer) null);
+            this.captureBlockPos.setWorld((ServerWorld) null);
         }
         if (this.entityItemDropsSupplier != null) {
             this.entityItemDropsSupplier.reset();
@@ -687,7 +686,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.capturedEntitiesSupplier != null ? this.capturedEntitiesSupplier.orEmptyList() : Collections.emptyList();
     }
 
-    public List<EntityItem> getCapturedItemsOrEmptyList() {
+    public List<ItemEntity> getCapturedItemsOrEmptyList() {
         return this.capturedItemsSupplier != null ? this.capturedItemsSupplier.orEmptyList() : Collections.emptyList();
     }
 
@@ -712,15 +711,15 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             // If we are, then go ahead and check if we can put it into the desired lists
             final Optional<BlockPos> pos = this.captureBlockPos.getPos();
             // Is it an item entity and are we capturing per block entity item spawns?
-            if (entity instanceof EntityItem && this.blockItemEntityDropsSupplier != null) {
-                return this.blockItemEntityDropsSupplier.get().get(pos.get()).add((EntityItem) entity);
+            if (entity instanceof ItemEntity && this.blockItemEntityDropsSupplier != null) {
+                return this.blockItemEntityDropsSupplier.get().get(pos.get()).add((ItemEntity) entity);
             }
             // Otherwise just default to per block entity spawns
             return this.blockEntitySpawnSupplier.get().get(pos.get()).add((net.minecraft.entity.Entity) entity);
 
             // Or check if we're just bulk capturing item entities
-        } else if (entity instanceof EntityItem && this.capturedItemsSupplier != null) {
-            return this.capturedItemsSupplier.get().add((EntityItem) entity);
+        } else if (entity instanceof ItemEntity && this.capturedItemsSupplier != null) {
+            return this.capturedItemsSupplier.get().add((ItemEntity) entity);
             // Or last check of whether entities in general are being captured
         } else if (this.capturedEntitiesSupplier != null) {
             return this.capturedEntitiesSupplier.get().add(entity);

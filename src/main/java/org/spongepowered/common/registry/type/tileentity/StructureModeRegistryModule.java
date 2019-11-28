@@ -26,7 +26,6 @@ package org.spongepowered.common.registry.type.tileentity;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import net.minecraft.tileentity.TileEntityStructure;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.StructureModes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -37,6 +36,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.tileentity.StructureBlockTileEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -47,10 +47,10 @@ public final class StructureModeRegistryModule implements CatalogRegistryModule<
 
     @Override
     public void registerDefaults() {
-        this.structureModes.put("corner", (StructureMode) (Object) TileEntityStructure.Mode.CORNER);
-        this.structureModes.put("data", (StructureMode) (Object) TileEntityStructure.Mode.DATA);
-        this.structureModes.put("load", (StructureMode) (Object) TileEntityStructure.Mode.LOAD);
-        this.structureModes.put("save", (StructureMode) (Object) TileEntityStructure.Mode.SAVE);
+        this.structureModes.put("corner", (StructureMode) (Object) StructureBlockTileEntity.Mode.CORNER);
+        this.structureModes.put("data", (StructureMode) (Object) StructureBlockTileEntity.Mode.DATA);
+        this.structureModes.put("load", (StructureMode) (Object) StructureBlockTileEntity.Mode.LOAD);
+        this.structureModes.put("save", (StructureMode) (Object) StructureBlockTileEntity.Mode.SAVE);
     }
 
     @Override
@@ -65,7 +65,7 @@ public final class StructureModeRegistryModule implements CatalogRegistryModule<
 
     @AdditionalRegistration
     public void customRegistration() {
-        for (TileEntityStructure.Mode mode : TileEntityStructure.Mode.values()) {
+        for (StructureBlockTileEntity.Mode mode : StructureBlockTileEntity.Mode.values()) {
             String name = mode.name().toLowerCase(Locale.ENGLISH);
             if (!this.structureModes.containsKey(name)) {
                 this.structureModes.put(name, (StructureMode) (Object) mode);

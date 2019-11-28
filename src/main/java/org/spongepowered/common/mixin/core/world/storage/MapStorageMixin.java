@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
-import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
+import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldSavedData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,7 +39,7 @@ import org.spongepowered.common.SpongeImpl;
 @Mixin(MapStorage.class)
 public abstract class MapStorageMixin {
 
-    @Shadow @Final private ISaveHandler saveHandler;
+    @Shadow @Final private SaveHandler saveHandler;
 
     // When we have a null saveHandler, we're not in the 'real' Overworld
     // MapStorage

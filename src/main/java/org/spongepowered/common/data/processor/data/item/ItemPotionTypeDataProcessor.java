@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import net.minecraft.init.Items;
-import net.minecraft.init.PotionTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.PotionUtils;
+import net.minecraft.potion.Potions;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionTypeData;
@@ -55,10 +55,10 @@ public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor
     @Override
     protected boolean set(ItemStack dataHolder, PotionType value) {
         if (!dataHolder.func_77942_o()) {
-            dataHolder.func_77982_d(new NBTTagCompound());
+            dataHolder.func_77982_d(new CompoundNBT());
         }
 
-        PotionUtils.func_185188_a(dataHolder, ((net.minecraft.potion.PotionType) value));
+        PotionUtils.func_185188_a(dataHolder, ((net.minecraft.potion.Potion) value));
         return true;
     }
 
@@ -98,7 +98,7 @@ public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor
 
         Optional<PotionType> val = getVal(itemStack);
         if (val.isPresent()) {
-            PotionUtils.func_185188_a(itemStack, PotionTypes.field_185229_a);
+            PotionUtils.func_185188_a(itemStack, Potions.field_185229_a);
             return DataTransactionResult.successRemove(constructImmutableValue(val.get()));
         }
         return DataTransactionResult.successNoData();

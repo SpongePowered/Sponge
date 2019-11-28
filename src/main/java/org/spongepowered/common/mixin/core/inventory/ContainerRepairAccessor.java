@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ContainerRepair;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.RepairContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ContainerRepair.class)
+@Mixin(RepairContainer.class)
 public interface ContainerRepairAccessor {
 
     @Accessor("inputSlots") IInventory accessor$getInputSlots();
 
-    @Accessor("player") EntityPlayer accessor$getPlayerCarrier();
+    @Accessor("player") PlayerEntity accessor$getPlayerCarrier();
 }

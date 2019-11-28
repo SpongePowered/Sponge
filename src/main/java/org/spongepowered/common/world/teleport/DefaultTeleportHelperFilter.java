@@ -25,14 +25,13 @@
 package org.spongepowered.common.world.teleport;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.BlockAnvil;
-import net.minecraft.block.BlockCauldron;
-import net.minecraft.block.BlockChorusPlant;
-import net.minecraft.block.BlockFence;
-import net.minecraft.block.BlockSlab;
-import net.minecraft.block.BlockSnowLayer;
+import net.minecraft.block.AnvilBlock;
+import net.minecraft.block.CauldronBlock;
+import net.minecraft.block.ChorusPlantBlock;
+import net.minecraft.block.FenceBlock;
+import net.minecraft.block.SlabBlock;
+import net.minecraft.block.SnowBlock;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 
@@ -55,12 +54,12 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return !NOT_SAFE_FLOOR.contains(((IBlockState) blockState).func_185904_a());
+        return !NOT_SAFE_FLOOR.contains(((net.minecraft.block.BlockState) blockState).func_185904_a());
     }
 
     @Override
     public boolean isSafeBodyMaterial(BlockState blockState) {
-        IBlockState state = (IBlockState) blockState;
+        net.minecraft.block.BlockState state = (net.minecraft.block.BlockState) blockState;
         Material material = state.func_185904_a();
 
         // Deny blocks that suffocate
@@ -75,12 +74,12 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
         // Sadly there is no easy way to check for this using vanilla right now as Blocks like Cauldron are technically marked as passable.
 
         // Deny non-passable non "full" blocks
-        return !(state.func_177230_c() instanceof BlockSlab ||
-                 state.func_177230_c() instanceof BlockCauldron ||
-                 state.func_177230_c() instanceof BlockAnvil ||
-                 state.func_177230_c() instanceof BlockFence ||
-                 state.func_177230_c() instanceof BlockChorusPlant ||
-                 state.func_177230_c() instanceof BlockSnowLayer ||
+        return !(state.func_177230_c() instanceof SlabBlock ||
+                 state.func_177230_c() instanceof CauldronBlock ||
+                 state.func_177230_c() instanceof AnvilBlock ||
+                 state.func_177230_c() instanceof FenceBlock ||
+                 state.func_177230_c() instanceof ChorusPlantBlock ||
+                 state.func_177230_c() instanceof SnowBlock ||
                  material == Material.field_151592_s ||
                  material == Material.field_151584_j);
     }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ArmorItem;
 import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.data.type.ArmorTypes;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
@@ -32,20 +32,20 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
 
 @RegisterCatalog(ArmorTypes.class)
-public class ArmorTypeRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<ItemArmor.ArmorMaterial, ArmorType> {
+public class ArmorTypeRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<ArmorItem.ArmorMaterial, ArmorType> {
 
     public ArmorTypeRegistryModule() {
         super(new String[] {"minecraft"}, id -> id.equals("chainmail") ? "chain" : id);
     }
 
     @Override
-    protected ItemArmor.ArmorMaterial[] getValues() {
-        return ItemArmor.ArmorMaterial.values();
+    protected ArmorItem.ArmorMaterial[] getValues() {
+        return ArmorItem.ArmorMaterial.values();
     }
 
     @AdditionalRegistration
     public void customRegistration() {
-        for (ItemArmor.ArmorMaterial armorMaterial : ItemArmor.ArmorMaterial.values()) {
+        for (ArmorItem.ArmorMaterial armorMaterial : ArmorItem.ArmorMaterial.values()) {
             if (!this.catalogTypeMap.containsKey(enumAs(armorMaterial).getId())) {
                 this.catalogTypeMap.put(enumAs(armorMaterial).getId(), enumAs(armorMaterial));
             }

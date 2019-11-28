@@ -26,14 +26,14 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import net.minecraft.block.BlockBeacon;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import javax.annotation.Nullable;
+import net.minecraft.block.BeaconBlock;
 
-@Mixin(BlockBeacon.class)
+@Mixin(BeaconBlock.class)
 public abstract class BlockBeaconMixin {
 
 

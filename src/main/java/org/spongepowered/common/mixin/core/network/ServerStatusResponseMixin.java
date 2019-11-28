@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.network;
 
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
@@ -70,7 +70,7 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
             this.description = motd;
             this.impl$descriptionText = SpongeTexts.toText(motd);
         } else {
-            this.description = new TextComponentString("");
+            this.description = new StringTextComponent("");
             this.impl$descriptionText = Text.of();
         }
     }

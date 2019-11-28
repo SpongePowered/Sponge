@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagInt;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.IntNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGenerationData;
@@ -66,7 +66,7 @@ public final class GenerationDataProcessor
 
     @Override
     protected boolean set(final ItemStack stack, final Integer value) {
-        stack.func_77983_a(Constants.Item.Book.ITEM_BOOK_GENERATION, new NBTTagInt(value));
+        stack.func_77983_a(Constants.Item.Book.ITEM_BOOK_GENERATION, new IntNBT(value));
         return true;
     }
 

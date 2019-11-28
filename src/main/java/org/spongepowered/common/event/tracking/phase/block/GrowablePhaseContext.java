@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.block;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -45,7 +45,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
     protected PhaseContext<?> priorContext;
     ItemStackSnapshot usedItem;
     World world;
-    IBlockState blockState;
+    BlockState blockState;
     BlockPos pos;
     SpongeBlockSnapshot snapshot;
 
@@ -64,7 +64,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         return this;
     }
 
-    public GrowablePhaseContext block(final IBlockState blockState) {
+    public GrowablePhaseContext block(final BlockState blockState) {
         this.blockState = blockState;
         return this;
     }

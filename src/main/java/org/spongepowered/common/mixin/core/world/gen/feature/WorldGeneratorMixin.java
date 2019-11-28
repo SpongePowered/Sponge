@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.Feature;
@@ -43,26 +43,26 @@ public abstract class WorldGeneratorMixin implements WorldGeneratorBridge {
 
     @Shadow public abstract void setDecorationDefaults();
     @Shadow public abstract boolean generate(World var1, Random var2, BlockPos var3);
-    @Shadow protected abstract void setBlockAndNotifyAdequately(World worldIn, BlockPos pos, IBlockState state);
+    @Shadow protected abstract void setBlockAndNotifyAdequately(World worldIn, BlockPos pos, BlockState state);
 
     //These are overridden in forge to call the forge added Block.isAir/isLeaves
     @Override
-    public boolean bridge$isAir(final IBlockState state, final World worldIn, final BlockPos pos) {
+    public boolean bridge$isAir(final BlockState state, final World worldIn, final BlockPos pos) {
         return state.func_185904_a() == Material.field_151579_a;
     }
 
     @Override
-    public boolean bridge$isLeaves(final IBlockState state, final World worldIn, final BlockPos pos) {
+    public boolean bridge$isLeaves(final BlockState state, final World worldIn, final BlockPos pos) {
         return state.func_185904_a() == Material.field_151584_j;
     }
 
     @Override
-    public boolean birdge$isWood(final IBlockState state, final World worldIn, final BlockPos pos) {
+    public boolean birdge$isWood(final BlockState state, final World worldIn, final BlockPos pos) {
         return state.func_185904_a() == Material.field_151575_d;
     }
     
     @Override
-    public boolean bridge$canSustainPlant(final Block block, final World worldIn, final BlockPos pos, final EnumFacing direction, final Block plant) {
+    public boolean bridge$canSustainPlant(final Block block, final World worldIn, final BlockPos pos, final Direction direction, final Block plant) {
         return block == Blocks.field_150349_c || block == Blocks.field_150346_d || block == Blocks.field_150458_ak;
     }
     

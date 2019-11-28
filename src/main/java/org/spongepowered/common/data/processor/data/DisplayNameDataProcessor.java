@@ -27,10 +27,10 @@ package org.spongepowered.common.data.processor.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.INameable;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -92,7 +92,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             }
 
             if (stack.func_77973_b() == Items.field_151164_bB) {
-                final NBTTagCompound compound = stack.func_77978_p();
+                final CompoundNBT compound = stack.func_77978_p();
                 if (compound == null) {
                     return Optional.empty(); // The book wasn't initialized.
                 }
@@ -100,7 +100,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
                 return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.func_74779_i(Constants.Item.Book.ITEM_BOOK_TITLE))));
             }
 
-            final NBTTagCompound compound = ((ItemStack) holder).func_179543_a(Constants.Item.ITEM_DISPLAY);
+            final CompoundNBT compound = ((ItemStack) holder).func_179543_a(Constants.Item.ITEM_DISPLAY);
             if (compound != null && compound.func_150297_b(Constants.Item.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
                 return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.func_74779_i(Constants.Item.ITEM_DISPLAY_NAME))));
             }
@@ -143,7 +143,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             } else {
                 final ItemStack stack = (ItemStack) holder;
                 if (stack.func_77973_b() == Items.field_151164_bB) {
-                    stack.func_77983_a(Constants.Item.Book.ITEM_BOOK_TITLE, new NBTTagString(SpongeTexts.toLegacy(newValue)));
+                    stack.func_77983_a(Constants.Item.Book.ITEM_BOOK_TITLE, new StringNBT(SpongeTexts.toLegacy(newValue)));
                 } else {
                     stack.func_151001_c(SpongeTexts.toLegacy(newValue));
                 }

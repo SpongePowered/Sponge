@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.tracking.world;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -99,7 +99,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             return;
         }
         // Don't track fake players
-        if (user instanceof EntityPlayerMP && SpongeImplHooks.isFakePlayer((EntityPlayerMP) user)) {
+        if (user instanceof ServerPlayerEntity && SpongeImplHooks.isFakePlayer((ServerPlayerEntity) user)) {
             return;
         }
         // Update TE tracking cache
@@ -260,7 +260,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         if (uuid.isPresent()) {
             final UUID userUniqueId = uuid.get();
             // get player if online
-            final EntityPlayer player = this.world.func_152378_a(userUniqueId);
+            final PlayerEntity player = this.world.func_152378_a(userUniqueId);
             if (player != null) {
                 return Optional.of((User) player);
             }

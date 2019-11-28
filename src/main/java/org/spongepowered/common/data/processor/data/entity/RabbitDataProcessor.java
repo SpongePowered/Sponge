@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.passive.EntityRabbit;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableRabbitData;
@@ -42,12 +41,13 @@ import org.spongepowered.common.entity.SpongeRabbitType;
 import org.spongepowered.common.registry.type.entity.RabbitTypeRegistryModule;
 
 import java.util.Optional;
+import net.minecraft.entity.passive.RabbitEntity;
 
 public class RabbitDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityRabbit, RabbitType, Value<RabbitType>, RabbitData, ImmutableRabbitData> {
+        extends AbstractEntitySingleDataProcessor<RabbitEntity, RabbitType, Value<RabbitType>, RabbitData, ImmutableRabbitData> {
 
     public RabbitDataProcessor() {
-        super(EntityRabbit.class, Keys.RABBIT_TYPE);
+        super(RabbitEntity.class, Keys.RABBIT_TYPE);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class RabbitDataProcessor
     }
 
     @Override
-    protected boolean set(EntityRabbit entity, RabbitType value) {
+    protected boolean set(RabbitEntity entity, RabbitType value) {
         if (value instanceof SpongeRabbitType) {
             entity.func_175529_r(((SpongeRabbitType) value).type);
             return true;
@@ -65,7 +65,7 @@ public class RabbitDataProcessor
     }
 
     @Override
-    protected Optional<RabbitType> getVal(EntityRabbit entity) {
+    protected Optional<RabbitType> getVal(RabbitEntity entity) {
         return Optional.ofNullable(RabbitTypeRegistryModule.RABBIT_IDMAP.get(entity.func_175531_cl()));
     }
 

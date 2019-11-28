@@ -34,9 +34,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
@@ -81,7 +81,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
     @Shadow @Final public long[] tickTimeArray;
     @Shadow private int tickCounter;
     @Shadow private String motd;
-    @Shadow public WorldServer[] worlds;
+    @Shadow public ServerWorld[] worlds;
     @Shadow private Thread serverThread;
 
     @Shadow public abstract void sendMessage(ITextComponent message);
@@ -89,7 +89,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
     @Shadow public abstract boolean isServerInOnlineMode();
     @Shadow public abstract String getFolderName();
     @Shadow public abstract PlayerList getPlayerList();
-    @Shadow public abstract EnumDifficulty getDifficulty();
+    @Shadow public abstract Difficulty getDifficulty();
     @Shadow public abstract GameType getGameType();
     @Shadow public abstract int getMaxPlayerIdleMinutes();
 
@@ -245,7 +245,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
     @Override
     public boolean unloadWorld(final World world) {
         // API is not allowed to unload overworld
-        return ((WorldServerBridge) world).bridge$getDimensionId() != 0 && WorldManager.unloadWorld((WorldServer) world, false, false);
+        return ((WorldServerBridge) world).bridge$getDimensionId() != 0 && WorldManager.unloadWorld((ServerWorld) world, false, false);
 
     }
 
@@ -257,7 +257,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public Optional<World> getWorld(final UUID uniqueId) {
-        for (final WorldServer worldserver : WorldManager.getWorlds()) {
+        for (final ServerWorld worldserver : WorldManager.getWorlds()) {
             if (((World) worldserver).getUniqueId().equals(uniqueId)) {
                 return Optional.of((World) worldserver);
             }

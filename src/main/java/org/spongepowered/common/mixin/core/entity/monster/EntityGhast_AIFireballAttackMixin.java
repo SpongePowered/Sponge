@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.monster.EntityGhast;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.monster.GhastEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,10 +34,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 
-@Mixin(EntityGhast.AIFireballAttack.class)
-public abstract class EntityGhast_AIFireballAttackMixin extends EntityAIBase {
+@Mixin(GhastEntity.FireballAttackGoal.class)
+public abstract class EntityGhast_AIFireballAttackMixin extends Goal {
 
-    @Shadow(aliases = "this$0") @Final private EntityGhast parentEntity;
+    @Shadow(aliases = "this$0") @Final private GhastEntity parentEntity;
 
     @ModifyArg(method = "updateTask", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     private Entity impl$onSpawnFireball(final Entity entity) {

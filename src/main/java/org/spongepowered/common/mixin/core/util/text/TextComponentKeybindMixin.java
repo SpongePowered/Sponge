@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.util.text;
 
-import net.minecraft.util.text.TextComponentKeybind;
+import net.minecraft.util.text.KeybindTextComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.util.text.TextComponentBaseMixin;
 
-@Mixin(TextComponentKeybind.class)
+@Mixin(KeybindTextComponent.class)
 public abstract class TextComponentKeybindMixin extends TextComponentBaseMixin {
 
     @Override

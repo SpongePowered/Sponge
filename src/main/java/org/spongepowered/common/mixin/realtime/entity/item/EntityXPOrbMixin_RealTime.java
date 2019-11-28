@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.realtime.entity.item;
 
-import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.item.ExperienceOrbEntity;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,7 +35,7 @@ import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.entity.EntityMixin_RealTime;
 
-@Mixin(EntityXPOrb.class)
+@Mixin(ExperienceOrbEntity.class)
 public abstract class EntityXPOrbMixin_RealTime extends EntityMixin_RealTime {
 
     @Shadow public int delayBeforeCanPickup;
@@ -59,7 +59,7 @@ public abstract class EntityXPOrbMixin_RealTime extends EntityMixin_RealTime {
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimePickupDelay(final EntityXPOrb self, final int modifier) {
+    private void realTimeImpl$adjustForRealTimePickupDelay(final ExperienceOrbEntity self, final int modifier) {
         if (((WorldBridge) this.world).bridge$isFake()) {
             this.delayBeforeCanPickup = modifier;
             return;
@@ -86,7 +86,7 @@ public abstract class EntityXPOrbMixin_RealTime extends EntityMixin_RealTime {
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeAge(final EntityXPOrb self, final int modifier) {
+    private void realTimeImpl$adjustForRealTimeAge(final ExperienceOrbEntity self, final int modifier) {
         if (((WorldBridge) this.world).bridge$isFake()) {
             this.xpOrbAge = modifier;
             return;

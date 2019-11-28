@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockDoublePlant;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -43,13 +41,14 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
 
 import java.util.Optional;
+import net.minecraft.block.DoublePlantBlock;
 
-@Mixin(BlockDoublePlant.class)
+@Mixin(DoublePlantBlock.class)
 public abstract class BlockDoublePlantMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getDoublePlantTypeFor(blockState), impl$getPortionData(blockState));
     }
 
@@ -60,43 +59,43 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDoublePlantData) {
-            final BlockDoublePlant.EnumPlantType doublePlantType =
-                    (BlockDoublePlant.EnumPlantType) (Object) ((ImmutableDoublePlantData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockDoublePlant.field_176493_a, doublePlantType));
+            final DoublePlantBlock.EnumPlantType doublePlantType =
+                    (DoublePlantBlock.EnumPlantType) (Object) ((ImmutableDoublePlantData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.field_176493_a, doublePlantType));
         } else if (manipulator instanceof ImmutablePortionData) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockDoublePlant.field_176492_b,
+            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.field_176492_b,
                     impl$convertPortionType(((ImmutablePortionData) manipulator).type().get())));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DOUBLE_PLANT_TYPE)) {
-            final BlockDoublePlant.EnumPlantType doublePlantType = (BlockDoublePlant.EnumPlantType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockDoublePlant.field_176493_a, doublePlantType));
+            final DoublePlantBlock.EnumPlantType doublePlantType = (DoublePlantBlock.EnumPlantType) value;
+            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.field_176493_a, doublePlantType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockDoublePlant.field_176492_b, impl$convertPortionType((PortionType) value)));
+            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.field_176492_b, impl$convertPortionType((PortionType) value)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private BlockDoublePlant.EnumBlockHalf impl$convertPortionType(final PortionType portionType) {
-        return portionType == PortionTypes.BOTTOM ? BlockDoublePlant.EnumBlockHalf.LOWER : BlockDoublePlant.EnumBlockHalf.UPPER;
+    private DoublePlantBlock.EnumBlockHalf impl$convertPortionType(final PortionType portionType) {
+        return portionType == PortionTypes.BOTTOM ? DoublePlantBlock.EnumBlockHalf.LOWER : DoublePlantBlock.EnumBlockHalf.UPPER;
     }
 
     @SuppressWarnings("ConstantConditions")
-    private ImmutableDoublePlantData impl$getDoublePlantTypeFor(final IBlockState blockState) {
+    private ImmutableDoublePlantData impl$getDoublePlantTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDoublePlantData.class,
-                (DoublePlantType) (Object) blockState.func_177229_b(BlockDoublePlant.field_176493_a));
+                (DoublePlantType) (Object) blockState.func_177229_b(DoublePlantBlock.field_176493_a));
     }
 
-    private ImmutablePortionData impl$getPortionData(final IBlockState blockState) {
-        final BlockDoublePlant.EnumBlockHalf half = blockState.func_177229_b(BlockDoublePlant.field_176492_b);
+    private ImmutablePortionData impl$getPortionData(final net.minecraft.block.BlockState blockState) {
+        final DoublePlantBlock.EnumBlockHalf half = blockState.func_177229_b(DoublePlantBlock.field_176492_b);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
-                half == BlockDoublePlant.EnumBlockHalf.LOWER ? PortionTypes.BOTTOM : PortionTypes.TOP);
+                half == DoublePlantBlock.EnumBlockHalf.LOWER ? PortionTypes.BOTTOM : PortionTypes.TOP);
     }
 }

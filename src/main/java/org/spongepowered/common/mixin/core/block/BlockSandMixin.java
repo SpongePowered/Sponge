@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockSand;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -39,13 +37,14 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSandData;
 
 import java.util.Optional;
+import net.minecraft.block.SandBlock;
 
-@Mixin(BlockSand.class)
+@Mixin(SandBlock.class)
 public abstract class BlockSandMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getSandTypeFor(blockState));
     }
 
@@ -56,25 +55,25 @@ public abstract class BlockSandMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableSandData) {
-            final BlockSand.EnumType sandType = (BlockSand.EnumType) (Object) ((ImmutableSandData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSand.field_176504_a, sandType));
+            final SandBlock.EnumType sandType = (SandBlock.EnumType) (Object) ((ImmutableSandData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.func_177226_a(SandBlock.field_176504_a, sandType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.SAND_TYPE)) {
-            final BlockSand.EnumType sandType = (BlockSand.EnumType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSand.field_176504_a, sandType));
+            final SandBlock.EnumType sandType = (SandBlock.EnumType) value;
+            return Optional.of((BlockState) blockState.func_177226_a(SandBlock.field_176504_a, sandType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @SuppressWarnings("ConstantConditions")
-    private ImmutableSandData impl$getSandTypeFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSandData.class, (SandType) (Object) blockState.func_177229_b(BlockSand.field_176504_a));
+    private ImmutableSandData impl$getSandTypeFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSandData.class, (SandType) (Object) blockState.func_177229_b(SandBlock.field_176504_a));
     }
 }

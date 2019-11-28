@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreedableData;
@@ -38,15 +37,16 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.entity.AgeableEntity;
 
-public class BreedableDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityAgeable, Boolean, Value<Boolean>, BreedableData, ImmutableBreedableData> {
+public class BreedableDataProcessor extends AbstractSingleDataSingleTargetProcessor<AgeableEntity, Boolean, Value<Boolean>, BreedableData, ImmutableBreedableData> {
 
     public BreedableDataProcessor() {
-        super(Keys.CAN_BREED, EntityAgeable.class);
+        super(Keys.CAN_BREED, AgeableEntity.class);
     }
 
     @Override
-    protected boolean set(EntityAgeable entity, Boolean value) {
+    protected boolean set(AgeableEntity entity, Boolean value) {
         if (entity.func_70874_b() < 0) {
             return false;
         }
@@ -59,7 +59,7 @@ public class BreedableDataProcessor extends AbstractSingleDataSingleTargetProces
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityAgeable entity) {
+    protected Optional<Boolean> getVal(AgeableEntity entity) {
         return Optional.of(entity.func_70874_b() == 0);
     }
 

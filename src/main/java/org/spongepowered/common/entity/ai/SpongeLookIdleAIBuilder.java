@@ -26,8 +26,8 @@ package org.spongepowered.common.entity.ai;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.LookRandomlyGoal;
 import org.spongepowered.api.entity.ai.task.builtin.LookIdleAITask;
 import org.spongepowered.api.entity.living.Agent;
 
@@ -47,6 +47,6 @@ public final class SpongeLookIdleAIBuilder implements LookIdleAITask.Builder {
     public LookIdleAITask build(Agent owner) {
         checkNotNull(owner);
 
-        return (LookIdleAITask) new EntityAILookIdle((EntityLiving) owner);
+        return (LookIdleAITask) new LookRandomlyGoal((MobEntity) owner);
     }
 }

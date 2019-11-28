@@ -25,11 +25,10 @@
 package org.spongepowered.common.effect.particle;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.network.Packet;
-
 import java.util.List;
+import net.minecraft.network.IPacket;
 
 interface ICachedParticleEffect {
 
-    void process(Vector3d position, List<Packet<?>> output);
+    void process(Vector3d position, List<IPacket<?>> output);
 }

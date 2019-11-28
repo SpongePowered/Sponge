@@ -26,16 +26,16 @@ package org.spongepowered.common.mixin.api.mcp.world;
 
 import com.flowpowered.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import net.minecraft.block.BlockPortal;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.NetherPortalBlock;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.Teleporter.PortalPosition;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
@@ -53,7 +53,7 @@ import java.util.Random;
 @Mixin(Teleporter.class)
 public class TeleporterMixin_API implements PortalAgent {
 
-    @Shadow @Final private WorldServer world;
+    @Shadow @Final private ServerWorld world;
     @Shadow @Final private Random random;
     @Shadow @Final private Long2ObjectMap<Teleporter.PortalPosition> destinationCoordinateCache;
 
@@ -300,7 +300,7 @@ public class TeleporterMixin_API implements PortalAgent {
             }
         }
 
-        IBlockState iblockstate = Blocks.field_150427_aO.func_176223_P().func_177226_a(BlockPortal.field_176550_a, targetDirection != 0 ? EnumFacing.Axis.X : EnumFacing.Axis.Z);
+        BlockState iblockstate = Blocks.field_150427_aO.func_176223_P().func_177226_a(NetherPortalBlock.field_176550_a, targetDirection != 0 ? Direction.Axis.X : Direction.Axis.Z);
 
         for (int i8 = 0; i8 < 4; ++i8) {
             for (int l8 = 0; l8 < 4; ++l8) {

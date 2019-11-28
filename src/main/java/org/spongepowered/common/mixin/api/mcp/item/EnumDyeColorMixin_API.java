@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.item;
 
 import com.flowpowered.math.GenericMath;
-import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Color;
@@ -36,7 +35,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(EnumDyeColor.class)
+@Mixin(net.minecraft.item.DyeColor.class)
 @Implements(@Interface(iface = DyeColor.class, prefix = "dye$"))
 public abstract class EnumDyeColorMixin_API implements DyeColor {
 

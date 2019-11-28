@@ -29,7 +29,7 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.Sponge;
@@ -68,7 +68,7 @@ import javax.annotation.Nullable;
 public class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
 
     @Shadow @Final private Map<Advancement, AdvancementProgress> progress;
-    @Shadow private EntityPlayerMP player;
+    @Shadow private ServerPlayerEntity player;
 
     private boolean impl$wasSuccess;
     @Nullable private Text impl$message;

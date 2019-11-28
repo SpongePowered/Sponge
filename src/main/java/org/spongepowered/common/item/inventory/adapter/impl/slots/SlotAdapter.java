@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.inventory.adapter.impl.slots;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.inventory.Container;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -40,6 +39,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import net.minecraft.inventory.container.Container;
 
 /**
  * Base SlotAdapter implementation for {@link net.minecraft.item.ItemStack} based Inventories.
@@ -220,7 +220,7 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
     public Slot transform(final Slot.Type type) {
         switch (type) {
             case INVENTORY:
-                if (this.bridge$getFabric() instanceof net.minecraft.inventory.Slot) {
+                if (this.bridge$getFabric() instanceof net.minecraft.inventory.container.Slot) {
                     return (Slot) this.bridge$getFabric();
                 }
                 if (this.bridge$getFabric() instanceof Container) {

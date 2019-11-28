@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockTallGrass;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -40,8 +38,9 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.block.TallGrassBlock;
 
-@Mixin(BlockTallGrass.class)
+@Mixin(TallGrassBlock.class)
 public abstract class BlockTallGrassMixin extends BlockMixin {
 
     @Override
@@ -51,34 +50,34 @@ public abstract class BlockTallGrassMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableShrubData) {
-            final BlockTallGrass.EnumType grassType = (BlockTallGrass.EnumType) (Object) ((ImmutableShrubData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockTallGrass.field_176497_a, grassType));
+            final TallGrassBlock.EnumType grassType = (TallGrassBlock.EnumType) (Object) ((ImmutableShrubData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.func_177226_a(TallGrassBlock.field_176497_a, grassType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.SHRUB_TYPE)) {
             final ShrubType shrubType = (ShrubType) value;
-            final BlockTallGrass.EnumType grassType = (BlockTallGrass.EnumType) (Object) shrubType;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockTallGrass.field_176497_a, grassType));
+            final TallGrassBlock.EnumType grassType = (TallGrassBlock.EnumType) (Object) shrubType;
+            return Optional.of((BlockState) blockState.func_177226_a(TallGrassBlock.field_176497_a, grassType));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
-    public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getPlantData(blockState));
     }
 
 
-    private ImmutableShrubData impl$getPlantData(final IBlockState blockState) {
-        final ShrubType shrubType = (ShrubType) (Object) blockState.func_177229_b(BlockTallGrass.field_176497_a);
+    private ImmutableShrubData impl$getPlantData(final net.minecraft.block.BlockState blockState) {
+        final ShrubType shrubType = (ShrubType) (Object) blockState.func_177229_b(TallGrassBlock.field_176497_a);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeShrubData.class, shrubType);
     }
 }

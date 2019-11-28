@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,11 +35,12 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 
 import java.util.Optional;
+import net.minecraft.entity.player.PlayerEntity;
 
-public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Integer, MutableBoundedValue<Integer>> {
+public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Integer, MutableBoundedValue<Integer>> {
 
     public TotalExperienceValueProcessor() {
-        super(EntityPlayer.class, Keys.TOTAL_EXPERIENCE);
+        super(PlayerEntity.class, Keys.TOTAL_EXPERIENCE);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected boolean set(final EntityPlayer container, final Integer value) {
+    protected boolean set(final PlayerEntity container, final Integer value) {
         int level = -1;
 
         int experienceForCurrentLevel;
@@ -92,7 +92,7 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected Optional<Integer> getVal(final EntityPlayer container) {
+    protected Optional<Integer> getVal(final PlayerEntity container) {
         return Optional.of(container.field_71067_cb);
     }
 

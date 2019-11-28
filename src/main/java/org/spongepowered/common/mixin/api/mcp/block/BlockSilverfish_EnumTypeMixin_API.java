@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockSilverfish;
+import net.minecraft.block.SilverfishBlock;
 import org.spongepowered.api.data.type.DisguisedBlockType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BlockSilverfish.EnumType.class)
+@Mixin(SilverfishBlock.EnumType.class)
 @Implements(@Interface(iface = DisguisedBlockType.class, prefix = "silver$"))
 public abstract class BlockSilverfish_EnumTypeMixin_API {
 

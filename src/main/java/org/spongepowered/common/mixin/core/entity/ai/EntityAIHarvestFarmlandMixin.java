@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.ai.EntityAIHarvestFarmland;
-import net.minecraft.entity.ai.EntityAIMoveToBlock;
-import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.ai.goal.MoveToBlockGoal;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,11 +37,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 @Mixin(net.minecraft.entity.ai.EntityAIHarvestFarmland.class)
-public abstract class EntityAIHarvestFarmlandMixin extends EntityAIMoveToBlock {
+public abstract class EntityAIHarvestFarmlandMixin extends MoveToBlockGoal {
 
-    @Shadow @Final private EntityVillager villager;
+    @Shadow @Final private VillagerEntity villager;
 
-    public EntityAIHarvestFarmlandMixin(final EntityCreature creature, final double a, final int b) {
+    public EntityAIHarvestFarmlandMixin(final CreatureEntity creature, final double a, final int b) {
         super(creature, a, b);
     }
 

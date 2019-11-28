@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockJukebox;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.JukeboxBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(BlockJukebox.class)
+@Mixin(JukeboxBlock.class)
 public interface BlockJukeboxAccessor {
 
-    @Invoker("dropRecord") void accessor$dropRecordItem(World worldIn, BlockPos pos, IBlockState state);
+    @Invoker("dropRecord") void accessor$dropRecordItem(World worldIn, BlockPos pos, BlockState state);
 
 }

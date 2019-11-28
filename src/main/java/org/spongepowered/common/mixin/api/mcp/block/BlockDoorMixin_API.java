@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockDoor;
+import net.minecraft.block.DoorBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(BlockDoor.class)
+@Mixin(DoorBlock.class)
 public abstract class BlockDoorMixin_API extends BlockMixin_API {
 
     @Override

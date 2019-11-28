@@ -26,8 +26,7 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.BlockSapling;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.SaplingBlock;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -43,12 +42,12 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 
 import java.util.Optional;
 
-@Mixin(BlockSapling.class)
+@Mixin(SaplingBlock.class)
 public abstract class BlockSaplingMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getTreeTypeFor(blockState), impl$getGrowthData(blockState));
     }
 
@@ -59,44 +58,44 @@ public abstract class BlockSaplingMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableStoneData) {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) (Object) ((ImmutableStoneData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSapling.field_176480_a, treeType));
+            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.field_176480_a, treeType));
         }
         if (manipulator instanceof ImmutableGrowthData) {
             int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
             if (growth > 1) {
                 growth = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSapling.field_176479_b, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.field_176479_b, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.TREE_TYPE)) {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSapling.field_176480_a, treeType));
+            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.field_176480_a, treeType));
         }
         if (key.equals(Keys.GROWTH_STAGE)) {
             int growth = (Integer) value;
             if (growth > 1) {
                 growth = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSapling.field_176479_b, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.field_176479_b, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @SuppressWarnings("ConstantConditions")
-    private ImmutableSpongeTreeData impl$getTreeTypeFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.func_177229_b(BlockSapling.field_176480_a));
+    private ImmutableSpongeTreeData impl$getTreeTypeFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.func_177229_b(SaplingBlock.field_176480_a));
     }
 
-    private ImmutableGrowthData impl$getGrowthData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(BlockSapling.field_176479_b), 0, 1);
+    private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(SaplingBlock.field_176479_b), 0, 1);
     }
 
 }

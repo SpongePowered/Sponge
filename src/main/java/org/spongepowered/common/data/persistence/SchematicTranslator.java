@@ -28,7 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import org.spongepowered.api.Sponge;
@@ -296,7 +296,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                             .ifPresent(type -> {
                                 final DataView upgraded;
                                 if (needsFixers) {
-                                    NBTTagCompound tileNbt = NbtTranslator.getInstance().translate(tile);
+                                    CompoundNBT tileNbt = NbtTranslator.getInstance().translate(tile);
                                     tileNbt = VANILLA_FIXER.func_188251_a(FixTypes.BLOCK_ENTITY, tileNbt, version);
                                     upgraded = NbtTranslator.getInstance().translate(tileNbt);
                                 } else {
@@ -330,7 +330,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                     .map((view, type) -> {
                         final DataView upgraded;
                         if (needsFixers) {
-                            NBTTagCompound entityNbt = NbtTranslator.getInstance().translate(view);
+                            CompoundNBT entityNbt = NbtTranslator.getInstance().translate(view);
                             entityNbt = VANILLA_FIXER.func_188251_a(FixTypes.ENTITY, entityNbt, version);
                             upgraded = NbtTranslator.getInstance().translate(entityNbt);
                         } else {

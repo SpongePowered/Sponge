@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.inventory.ContainerHopper;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.HopperContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ContainerHopper.class)
+@Mixin(HopperContainer.class)
 public interface ContainerHopperAccessor {
 
     @Accessor("hopperInventory") IInventory accessor$getHopperInventory();

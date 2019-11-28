@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.command.multiworld;
 
 import net.minecraft.command.CommandDefaultGameMode;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
@@ -55,7 +55,7 @@ public abstract class CommandDefaultGameModeMixin_MultiWorldCommand {
         world.func_72912_H().func_76060_a(type);
 
         if (server.func_104056_am()) {
-            for (final EntityPlayer player : world.field_73010_i) {
+            for (final PlayerEntity player : world.field_73010_i) {
                 if (!((EntityPlayerMPBridge) player).bridge$hasForcedGamemodeOverridePermission()) {
                     player.func_71033_a(type);
                 }

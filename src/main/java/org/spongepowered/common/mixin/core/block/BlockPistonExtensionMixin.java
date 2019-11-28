@@ -25,9 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockDirectional;
-import net.minecraft.block.BlockPistonExtension;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -44,13 +41,15 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.block.DirectionalBlock;
+import net.minecraft.block.PistonHeadBlock;
 
-@Mixin(BlockPistonExtension.class)
+@Mixin(PistonHeadBlock.class)
 public abstract class BlockPistonExtensionMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getPistonTypeFor(blockState), impl$getDirectionalData(blockState));
     }
 
@@ -61,40 +60,40 @@ public abstract class BlockPistonExtensionMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePistonData) {
-            final BlockPistonExtension.EnumPistonType pistonType =
-                    (BlockPistonExtension.EnumPistonType) (Object) ((ImmutablePistonData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockPistonExtension.field_176325_b, pistonType));
+            final PistonHeadBlock.EnumPistonType pistonType =
+                    (PistonHeadBlock.EnumPistonType) (Object) ((ImmutablePistonData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.func_177226_a(PistonHeadBlock.field_176325_b, pistonType));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockDirectional.field_176387_N, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(DirectionalBlock.field_176387_N, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.PISTON_TYPE)) {
-            final BlockPistonExtension.EnumPistonType pistonType = (BlockPistonExtension.EnumPistonType) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockPistonExtension.field_176325_b, pistonType));
+            final PistonHeadBlock.EnumPistonType pistonType = (PistonHeadBlock.EnumPistonType) value;
+            return Optional.of((BlockState) blockState.func_177226_a(PistonHeadBlock.field_176325_b, pistonType));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockDirectional.field_176387_N, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(DirectionalBlock.field_176387_N, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @SuppressWarnings("ConstantConditions")
-    private ImmutablePistonData impl$getPistonTypeFor(final IBlockState blockState) {
+    private ImmutablePistonData impl$getPistonTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePistonData.class,
-                (PistonType) (Object) blockState.func_177229_b(BlockPistonExtension.field_176325_b));
+                (PistonType) (Object) blockState.func_177229_b(PistonHeadBlock.field_176325_b));
     }
 
-    private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
+    private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockDirectional.field_176387_N)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(DirectionalBlock.field_176387_N)));
     }
 }

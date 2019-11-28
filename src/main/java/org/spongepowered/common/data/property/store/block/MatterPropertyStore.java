@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.data.property.block.MatterProperty.Matter;
 import org.spongepowered.api.world.Location;
@@ -49,7 +49,7 @@ public class MatterPropertyStore extends AbstractBlockPropertyStore<MatterProper
     }
 
     @Override
-    protected Optional<MatterProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
+    protected Optional<MatterProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
         if (block.func_177230_c() instanceof BlockLiquid) {
             return Optional.of(LIQUID);
         } else if (block.func_185904_a() == Material.field_151579_a) {

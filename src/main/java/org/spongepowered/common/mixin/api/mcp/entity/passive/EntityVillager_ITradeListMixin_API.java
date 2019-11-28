@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.IMerchant;
-import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.merchant.IMerchant;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.item.merchant.Merchant;
@@ -37,8 +37,8 @@ import org.spongepowered.common.item.inventory.util.TradeOfferUtil;
 import java.util.List;
 import java.util.Random;
 
-@Mixin(EntityVillager.ITradeList.class)
-public interface EntityVillager_ITradeListMixin_API extends TradeOfferListMutator, EntityVillager.ITradeList {
+@Mixin(VillagerEntity.ITradeList.class)
+public interface EntityVillager_ITradeListMixin_API extends TradeOfferListMutator, VillagerEntity.ITradeList {
 
     @Override
     default void accept(final Merchant owner, final List<TradeOffer> tradeOffers, final Random random) {

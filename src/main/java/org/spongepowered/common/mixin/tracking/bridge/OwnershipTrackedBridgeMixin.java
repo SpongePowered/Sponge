@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.tracking.bridge;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IEntityOwnable;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -152,7 +152,7 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
             this.tracked$notifier = uuid;
         }
         if (((DataCompoundHolder) this).data$hasRootCompound()) {
-            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
             if (uuid == null) {
                 if (spongeData.func_74764_b(type.compoundKey)) {
                     spongeData.func_82580_o(type.compoundKey);
@@ -160,11 +160,11 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
                 return;
             }
             if (!spongeData.func_74764_b(type.compoundKey)) {
-                final NBTTagCompound sourceNbt = new NBTTagCompound();
+                final CompoundNBT sourceNbt = new CompoundNBT();
                 sourceNbt.func_186854_a(Constants.UUID, uuid);
                 spongeData.func_74782_a(type.compoundKey, sourceNbt);
             } else {
-                final NBTTagCompound compoundTag = spongeData.func_74775_l(type.compoundKey);
+                final CompoundNBT compoundTag = spongeData.func_74775_l(type.compoundKey);
                 compoundTag.func_186854_a(Constants.UUID, uuid);
             }
         }
@@ -178,18 +178,18 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
         if (this instanceof IEntityOwnable) {
             final IEntityOwnable ownable = (IEntityOwnable) this;
             final Entity owner = ownable.func_70902_q();
-            if (owner instanceof EntityPlayer) {
+            if (owner instanceof PlayerEntity) {
                 this.tracked$setTrackedUUID(PlayerTracker.Type.OWNER, owner.func_110124_au());
                 return owner.func_110124_au();
             }
         } else if (this.tracked$notifier != null && PlayerTracker.Type.NOTIFIER == nbtKey) {
             return this.tracked$notifier;
         }
-        final NBTTagCompound nbt = ((DataCompoundHolder) this).data$getSpongeCompound();
+        final CompoundNBT nbt = ((DataCompoundHolder) this).data$getSpongeCompound();
         if (!nbt.func_74764_b(nbtKey.compoundKey)) {
             return null;
         }
-        final NBTTagCompound creatorNbt = nbt.func_74775_l(nbtKey.compoundKey);
+        final CompoundNBT creatorNbt = nbt.func_74775_l(nbtKey.compoundKey);
 
 
         if (!creatorNbt.func_74764_b(Constants.UUID_MOST) && !creatorNbt.func_74764_b(Constants.UUID_LEAST)) {

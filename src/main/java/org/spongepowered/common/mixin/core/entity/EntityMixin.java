@@ -29,26 +29,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
-import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.entity.effect.LightningBoltEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.Packet;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.network.play.server.SPacketDestroyEntities;
-import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.play.server.SDestroyEntitiesPacket;
+import net.minecraft.network.play.server.SPlayerListItemPacket;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumParticleTypes;
@@ -56,7 +56,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Transform;
@@ -170,14 +170,14 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public abstract UUID getUniqueID();
     @Shadow public abstract AxisAlignedBB getEntityBoundingBox();
     @Shadow public abstract void setFire(int seconds);
-    @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
+    @Shadow public abstract CompoundNBT writeToNBT(CompoundNBT compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract int getEntityId();
     @Shadow public abstract boolean isBeingRidden();
     @Shadow public abstract SoundCategory getSoundCategory();
     @Shadow public abstract List<Entity> shadow$getPassengers();
     @Shadow public abstract Entity getRidingEntity();
-    @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
+    @Shadow public abstract void setItemStackToSlot(EquipmentSlotType slotIn, ItemStack stack);
     @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
     @Shadow public abstract boolean isSprinting();
@@ -189,7 +189,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
     @Shadow protected abstract void removePassenger(Entity passenger);
     @Shadow protected abstract void setSize(float width, float height);
-    @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, Entity entityIn);
+    @Shadow protected abstract void applyEnchantments(LivingEntity entityLivingBaseIn, Entity entityIn);
     @Shadow public abstract void extinguish();
     @Shadow protected abstract void setFlag(int flag, boolean set);
     @Shadow @Nullable public Entity changeDimension(final int dimension) { return null; } // Shadow
@@ -212,7 +212,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if (this.entityType.isKnown()) {
             this.bridge$refreshTrackerStates();
             if (this.entityType.getEnumCreatureType() == null) {
-                for (final EnumCreatureType type : EnumCreatureType.values()) {
+                for (final EntityClassification type : EntityClassification.values()) {
                     if (SpongeImplHooks.isCreatureOfType((Entity) (Object) this, type)) {
                         this.entityType.setEnumCreatureType(type);
                         break;
@@ -370,8 +370,8 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "setPosition", at = @At("HEAD"))
     private void onSetPosition(final double x, final double y, final double z, final CallbackInfo ci) {
-        if ((Entity) (Object) this instanceof EntityPlayerMP) {
-            final EntityPlayerMP player = (EntityPlayerMP) (Object) this;
+        if ((Entity) (Object) this instanceof ServerPlayerEntity) {
+            final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
             if (player.field_71135_a != null) {
                 ((NetHandlerPlayServerBridge) player.field_71135_a).bridge$captureCurrentPlayerPosition();
             }
@@ -387,9 +387,9 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Override
     public void bridge$setLocationAndAngles(final Transform<World> transform) {
         final Vector3d position = transform.getPosition();
-        EntityPlayerMP player = null;
-        if ((Entity) (Object) this instanceof EntityPlayerMP) {
-            player = (EntityPlayerMP) (Object) this;
+        ServerPlayerEntity player = null;
+        if ((Entity) (Object) this instanceof ServerPlayerEntity) {
+            player = (ServerPlayerEntity) (Object) this;
         }
         if (player != null && player.field_71135_a != null) {
             player.field_71135_a.func_147364_a(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
@@ -407,31 +407,31 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Inject(method = "onUpdate", at = @At("RETURN"))
     private void impl$updateVanishState(final CallbackInfo callbackInfo) {
         if (this.vanish$pendingVisibilityUpdate && !this.world.field_72995_K) {
-            final EntityTracker entityTracker = ((WorldServer) this.world).func_73039_n();
+            final EntityTracker entityTracker = ((ServerWorld) this.world).func_73039_n();
             // TODO - remove once Mixin 0.8 fixes accessors
             final EntityTrackerEntry lookup = entityTracker.field_72794_c.func_76041_a(this.getEntityId());
             if (lookup != null && this.vanish$visibilityTicks % 4 == 0) {
                 if (this.vanish$isVanished) {
-                    for (final EntityPlayerMP entityPlayerMP : lookup.field_73134_o) { // TODO - remove once Mixin 0.8 fixes accessors
-                        entityPlayerMP.field_71135_a.func_147359_a(new SPacketDestroyEntities(this.getEntityId()));
-                        if ((Entity) (Object) this instanceof EntityPlayerMP) {
+                    for (final ServerPlayerEntity entityPlayerMP : lookup.field_73134_o) { // TODO - remove once Mixin 0.8 fixes accessors
+                        entityPlayerMP.field_71135_a.func_147359_a(new SDestroyEntitiesPacket(this.getEntityId()));
+                        if ((Entity) (Object) this instanceof ServerPlayerEntity) {
                             entityPlayerMP.field_71135_a.func_147359_a(
-                                    new SPacketPlayerListItem(SPacketPlayerListItem.Action.REMOVE_PLAYER, (EntityPlayerMP) (Object) this));
+                                    new SPlayerListItemPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER, (ServerPlayerEntity) (Object) this));
                         }
                     }
                 } else {
                     this.vanish$visibilityTicks = 1;
                     this.vanish$pendingVisibilityUpdate = false;
-                    for (final EntityPlayerMP entityPlayerMP : SpongeImpl.getServer().func_184103_al().func_181057_v()) {
+                    for (final ServerPlayerEntity entityPlayerMP : SpongeImpl.getServer().func_184103_al().func_181057_v()) {
                         if ((Entity) (Object) this == entityPlayerMP) {
                             continue;
                         }
-                        if ((Entity) (Object) this instanceof EntityPlayerMP) {
-                            final Packet<?> packet = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) (Object) this);
+                        if ((Entity) (Object) this instanceof ServerPlayerEntity) {
+                            final IPacket<?> packet = new SPlayerListItemPacket(SPlayerListItemPacket.Action.ADD_PLAYER, (ServerPlayerEntity) (Object) this);
                             entityPlayerMP.field_71135_a.func_147359_a(packet);
                         }
                         // TODO - replace with accessor once Mixin 0.8 fixes accessors within mixins
-                        final Packet<?> newPacket = lookup.func_151260_c(); // creates the spawn packet for us
+                        final IPacket<?> newPacket = lookup.func_151260_c(); // creates the spawn packet for us
                         entityPlayerMP.field_71135_a.func_147359_a(newPacket);
                     }
                 }
@@ -460,7 +460,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      * @param ci (Unused) callback info
      */
     @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
-    private void onSpongeWriteToNBT(final NBTTagCompound compound, final CallbackInfoReturnable<NBTTagCompound> ci) {
+    private void onSpongeWriteToNBT(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
         if (((CustomDataHolderBridge) this).bridge$hasManipulators()) {
             this.spongeImpl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeCompound());
         }
@@ -477,7 +477,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      * @param ci (Unused) callback info
      */
     @Inject(method = "readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
-    private void onSpongeReadFromNBT(final NBTTagCompound compound, final CallbackInfo ci) {
+    private void onSpongeReadFromNBT(final CompoundNBT compound, final CallbackInfo ci) {
         if (this.isConstructing) {
             bridge$fireConstructors(); // Do this early as possible
         }
@@ -493,7 +493,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      *
      * @param compound The SpongeData compound to read from
      */
-    protected void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
+    protected void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         DataUtil.readCustomData(compound, ((org.spongepowered.api.entity.Entity) this));
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.func_74764_b(Constants.Sponge.Entity.CAN_GRIEF)) {
             ((GrieferBridge) this).bridge$SetCanGrief(compound.func_74767_n(Constants.Sponge.Entity.CAN_GRIEF));
@@ -517,7 +517,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      *
      * @param compound The SpongeData compound to write to
      */
-    protected void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
+    protected void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         DataUtil.writeCustomData(compound, (org.spongepowered.api.entity.Entity) this);
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && ((GrieferBridge) this).bridge$CanGrief()) {
             compound.func_74757_a(Constants.Sponge.Entity.CAN_GRIEF, true);
@@ -553,7 +553,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             return;
         }
 
-        final IBlockState state = world.func_180495_p(pos);
+        final BlockState state = world.func_180495_p(pos);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.func_176199_a(world, pos, entity);
             this.lastCollidedBlockPos = pos;
@@ -563,7 +563,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollision(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
     private void spongeImpl$onEntityCollideWithBlockState(
-        final Block block, final net.minecraft.world.World world, final BlockPos pos, final IBlockState state, final Entity entity) {
+        final Block block, final net.minecraft.world.World world, final BlockPos pos, final BlockState state, final Entity entity) {
         // if block can't collide, return
         if (!((BlockBridge) block).bridge$hasCollideWithStateLogic()) {
             return;
@@ -589,7 +589,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             return;
         }
 
-        final IBlockState state = world.func_180495_p(pos);
+        final BlockState state = world.func_180495_p(pos);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.UP)) {
             block.func_180658_a(world, pos, entity, fallDistance);
             this.lastCollidedBlockPos = pos;
@@ -607,7 +607,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     public void bridge$setInvisible(final boolean invisible) {
         this.setInvisible(invisible);
         if (invisible) {
-            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
             spongeData.func_74757_a(Constants.Sponge.Entity.IS_INVISIBLE, true);
         } else {
             if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
@@ -627,11 +627,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         this.vanish$pendingVisibilityUpdate = true;
         this.vanish$visibilityTicks = 20;
         if (vanished) {
-            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
             spongeData.func_74757_a(Constants.Sponge.Entity.IS_VANISHED, true);
         } else {
             if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
-                final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+                final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
                 spongeData.func_82580_o(Constants.Sponge.Entity.IS_VANISHED);
                 spongeData.func_82580_o(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
                 spongeData.func_82580_o(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
@@ -736,7 +736,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      */
     @Overwrite
     @Nullable
-    public EntityItem entityDropItem(final ItemStack stack, final float offsetY) {
+    public ItemEntity entityDropItem(final ItemStack stack, final float offsetY) {
         // Sponge Start
         // Gotta stick with the client side handling things
         if (this.world.field_72995_K) {
@@ -744,7 +744,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             if (stack.func_190926_b()) {
                 return null;
             } else {
-                final EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY + (double) offsetY, this.posZ, stack);
+                final ItemEntity entityitem = new ItemEntity(this.world, this.posX, this.posY + (double) offsetY, this.posZ, stack);
                 entityitem.func_174869_p();
                 this.world.func_72838_d(entityitem);
                 return entityitem;
@@ -836,7 +836,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @Redirect(method = "onStruckByLightning", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     private boolean spongeImpl$ThrowDamageEventWithLightingSource(
-        final Entity entity, final DamageSource source, final float damage, final EntityLightningBolt lightningBolt) {
+        final Entity entity, final DamageSource source, final float damage, final LightningBoltEntity lightningBolt) {
         if (!this.world.field_72995_K) {
             return entity.func_70097_a(source, damage);
         }
@@ -853,7 +853,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     private void impl$createDestructionEventOnDeath(final CallbackInfo ci) {
         if (ShouldFire.DESTRUCT_ENTITY_EVENT
             && !((WorldBridge) this.world).bridge$isFake()
-            && !((Entity) (Object) this instanceof EntityLiving)) {
+            && !((Entity) (Object) this instanceof MobEntity)) {
             final MessageChannel originalChannel = MessageChannel.TO_NONE;
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 

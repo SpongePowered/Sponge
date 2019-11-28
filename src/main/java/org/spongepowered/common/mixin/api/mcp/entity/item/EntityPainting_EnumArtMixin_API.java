@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.PaintingEntity;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(EntityPainting.EnumArt.class)
+@Mixin(PaintingEntity.EnumArt.class)
 public abstract class EntityPainting_EnumArtMixin_API implements Art {
 
     @Shadow @Final public String title;

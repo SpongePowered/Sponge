@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.feature.DungeonsFeature;
+import net.minecraft.world.spawner.AbstractSpawner;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
@@ -41,7 +41,7 @@ import org.spongepowered.common.data.processor.common.SpawnerUtils;
 public abstract class WorldGenDungeonsMixin extends WorldGeneratorMixin {
 
     @Redirect(method = "generate", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/MobSpawnerBaseLogic;setEntityId(Lnet/minecraft/util/ResourceLocation;)V"))
-    private void impl$updateDataAndChoices(final MobSpawnerBaseLogic logic, final ResourceLocation mobName) {
+    private void impl$updateDataAndChoices(final AbstractSpawner logic, final ResourceLocation mobName) {
         if (((Dungeon) this).getMobSpawnerData().isPresent()) {
             // Use custom spawner data
             SpawnerUtils.applyData(logic, ((Dungeon) this).getMobSpawnerData().get());

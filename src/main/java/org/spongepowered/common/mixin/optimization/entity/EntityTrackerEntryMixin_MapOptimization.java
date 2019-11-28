@@ -26,9 +26,9 @@ package org.spongepowered.common.mixin.optimization.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.item.ItemFrameEntity;
+import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -59,8 +59,8 @@ public abstract class EntityTrackerEntryMixin_MapOptimization {
             target = "Lnet/minecraft/item/ItemStack;getItem()Lnet/minecraft/item/Item;",
             ordinal = 0))
     private Item mapOptimization$onGetItem(final ItemStack itemStack) {
-        if (itemStack.func_77973_b() instanceof ItemMap) {
-            ((OptimizedMapDataBridge) ((ItemMap) itemStack.func_77973_b()).func_77873_a(itemStack, this.trackedEntity.field_70170_p)).mapOptimizationBridge$updateItemFrameDecoration((EntityItemFrame) this.trackedEntity);
+        if (itemStack.func_77973_b() instanceof FilledMapItem) {
+            ((OptimizedMapDataBridge) ((FilledMapItem) itemStack.func_77973_b()).func_77873_a(itemStack, this.trackedEntity.field_70170_p)).mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) this.trackedEntity);
         }
         return null;
     }

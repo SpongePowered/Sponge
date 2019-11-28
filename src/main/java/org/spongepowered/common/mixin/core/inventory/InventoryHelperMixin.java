@@ -28,7 +28,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -47,12 +47,12 @@ public class InventoryHelperMixin {
             value = "INVOKE",
             target = "Lnet/minecraft/inventory/InventoryHelper;dropInventoryItems(Lnet/minecraft/world/World;DDDLnet/minecraft/inventory/IInventory;)V"))
     private static void impl$dropItemsAndThrowEvents(final World world, final double x, final double y, final double z, final IInventory inventory) {
-        if (world instanceof WorldServer) {
+        if (world instanceof ServerWorld) {
             // Don't drop items if we are restoring blocks
             if (SpongeImplHooks.isRestoringBlocks(world)) {
                 return;
             }
-            ContainerUtil.performBlockInventoryDrops((WorldServer) world, x, y, z, inventory);
+            ContainerUtil.performBlockInventoryDrops((ServerWorld) world, x, y, z, inventory);
         } else {
             for (int i = 0; i < inventory.func_70302_i_(); ++i) {
                 final ItemStack itemstack = inventory.func_70301_a(i);

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.entityactivation.entity;
 
-import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.AgeableEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.SoftOverride;
 
-@Mixin(EntityAgeable.class)
+@Mixin(AgeableEntity.class)
 public abstract class EntityAgeableMixin_Activation extends EntityMixin_Activation {
 
     @Shadow public abstract int getGrowingAge();

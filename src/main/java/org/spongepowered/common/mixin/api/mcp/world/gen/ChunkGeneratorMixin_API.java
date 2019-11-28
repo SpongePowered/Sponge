@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.world.gen;
 
 import com.flowpowered.math.GenericMath;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.ChunkGeneratorNether;
+import net.minecraft.world.gen.NetherChunkGenerator;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -38,7 +38,7 @@ import org.spongepowered.common.util.gen.ChunkBufferPrimer;
 
 import java.util.Random;
 
-@Mixin(ChunkGeneratorNether.class)
+@Mixin(NetherChunkGenerator.class)
 public abstract class ChunkGeneratorMixin_API implements GenerationPopulator {
 
     @Shadow @Final private Random rand;

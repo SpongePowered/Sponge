@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.BlockTallGrass;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.TallGrassBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.Feature;
@@ -57,7 +57,7 @@ import javax.annotation.Nullable;
 @Mixin(TallGrassFeature.class)
 public abstract class WorldGenTallGrassMixin_API extends Feature implements Shrub {
 
-    @Shadow @Final @Mutable private IBlockState tallGrassState;
+    @Shadow @Final @Mutable private BlockState tallGrassState;
 
     private final WeightedTable<ShrubType> types = new WeightedTable<ShrubType>();
     @Nullable private Function<Location<Extent>, ShrubType> override = null;
@@ -93,8 +93,8 @@ public abstract class WorldGenTallGrassMixin_API extends Feature implements Shru
                 }
                 stype = result.get(0);
             }
-            final BlockTallGrass.EnumType type = (BlockTallGrass.EnumType) (Object) stype;
-            this.tallGrassState = Blocks.field_150329_H.func_176223_P().func_177226_a(BlockTallGrass.field_176497_a, type);
+            final TallGrassBlock.EnumType type = (TallGrassBlock.EnumType) (Object) stype;
+            this.tallGrassState = Blocks.field_150329_H.func_176223_P().func_177226_a(TallGrassBlock.field_176497_a, type);
             func_180709_b(world, random, pos);
         }
     }

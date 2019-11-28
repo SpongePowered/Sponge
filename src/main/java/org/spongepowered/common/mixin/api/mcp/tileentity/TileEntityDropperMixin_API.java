@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.TileEntityDropper;
+import net.minecraft.tileentity.DropperTileEntity;
 import org.spongepowered.api.block.tileentity.carrier.Dropper;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
 @NonnullByDefault
-@Mixin(TileEntityDropper.class)
+@Mixin(DropperTileEntity.class)
 public abstract class TileEntityDropperMixin_API extends TileEntityDispenserMixin_API implements Dropper {
 
 }

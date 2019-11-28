@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.FurnaceContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ContainerFurnace.class)
+@Mixin(FurnaceContainer.class)
 public interface ContainerFurnaceAccessor {
 
     @Accessor("tileFurnace") IInventory accessor$getFurnaceInventory();

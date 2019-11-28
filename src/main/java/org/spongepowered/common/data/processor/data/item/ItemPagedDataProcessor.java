@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import net.minecraft.init.Items;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.StringNBT;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
@@ -42,8 +42,8 @@ public class ItemPagedDataProcessor extends AbstractItemBookPagesProcessor<Text,
     }
 
     @Override
-    NBTTagString translateTo(final Text type) {
-        return new NBTTagString(TextSerializers.JSON.serialize(type));
+    StringNBT translateTo(final Text type) {
+        return new StringNBT(TextSerializers.JSON.serialize(type));
     }
 
     @Override

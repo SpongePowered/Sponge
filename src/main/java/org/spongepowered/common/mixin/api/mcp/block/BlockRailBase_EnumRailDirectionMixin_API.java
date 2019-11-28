@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockRailBase;
+import net.minecraft.block.AbstractRailBlock;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BlockRailBase.EnumRailDirection.class)
+@Mixin(AbstractRailBlock.EnumRailDirection.class)
 @Implements(@Interface(iface = RailDirection.class, prefix = "rail$"))
 public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDirection {
 
@@ -57,6 +57,6 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
         } else {
             meta++;
         }
-        return (RailDirection) (Object) BlockRailBase.EnumRailDirection.func_177016_a(meta);
+        return (RailDirection) (Object) AbstractRailBlock.EnumRailDirection.func_177016_a(meta);
     }
 }

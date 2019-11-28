@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityHopper;
+import net.minecraft.tileentity.HopperTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(TileEntityHopper.class)
+@Mixin(HopperTileEntity.class)
 public interface TileEntityHopperAccessor {
 
     @Accessor("transferCooldown") int accessor$getTransferCooldown();

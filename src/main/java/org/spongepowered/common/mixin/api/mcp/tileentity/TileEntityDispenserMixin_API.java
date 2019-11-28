@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.tileentity.TileEntityDispenser;
 import org.spongepowered.api.block.tileentity.carrier.Dispenser;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -35,10 +34,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 
 import java.util.Optional;
+import net.minecraft.tileentity.DispenserTileEntity;
 
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
-@Mixin(TileEntityDispenser.class)
+@Mixin(DispenserTileEntity.class)
 public abstract class TileEntityDispenserMixin_API extends TileEntityLockableLootMixin_API<Dispenser> implements Dispenser {
 
     @Override

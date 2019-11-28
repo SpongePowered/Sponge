@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.passive.EntityLlama;
+import net.minecraft.entity.passive.horse.LlamaEntity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.LlamaVariant;
 import org.spongepowered.api.data.type.LlamaVariants;
@@ -37,7 +37,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(EntityLlama.class)
+@Mixin(LlamaEntity.class)
 public abstract class EntityLlamaMixin_API extends AbstractHorseMixin_API implements Llama {
 
     @Shadow public abstract int getStrength();

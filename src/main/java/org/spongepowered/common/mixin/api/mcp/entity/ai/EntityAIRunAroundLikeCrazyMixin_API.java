@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
-import net.minecraft.entity.ai.EntityAIRunAroundLikeCrazy;
+import net.minecraft.entity.ai.goal.RunAroundLikeCrazyGoal;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.ai.EntityAIBaseMixin;
 
-@Mixin(EntityAIRunAroundLikeCrazy.class)
+@Mixin(RunAroundLikeCrazyGoal.class)
 public abstract class EntityAIRunAroundLikeCrazyMixin_API extends EntityAIBaseMixin implements RunAroundLikeCrazyAITask {
 
     @Shadow @Final @Mutable private double speed;

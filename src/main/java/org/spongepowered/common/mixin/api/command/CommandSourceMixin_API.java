@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.api.command;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.item.EntityMinecartCommandBlock;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntityCommandBlock;
+import net.minecraft.tileentity.CommandBlockTileEntity;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
@@ -43,7 +43,7 @@ import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
-@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class},
+@Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, MinecraftServer.class, RConConsoleSource.class},
         targets = "net/minecraft/tileentity/TileEntitySign$1", priority = 899) // Allows for other implementations of CommandSource to override/write
 public abstract class CommandSourceMixin_API implements CommandSource {
 

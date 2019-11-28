@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.item.EntityPainting;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
@@ -39,11 +38,12 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityHangingMixin_API;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
+import net.minecraft.entity.item.PaintingEntity;
 
-@Mixin(EntityPainting.class)
+@Mixin(PaintingEntity.class)
 public abstract class EntityPaintingMixin_API extends EntityHangingMixin_API implements Painting {
 
-    @Shadow public EntityPainting.EnumArt art;
+    @Shadow public PaintingEntity.EnumArt art;
 
     @Override
     public ArtData getArtData() {

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.item.ItemFrameEntity;
 import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityHangingMixin_API;
 
-@Mixin(EntityItemFrame.class)
+@Mixin(ItemFrameEntity.class)
 public abstract class EntityItemFrameMixin_API extends EntityHangingMixin_API implements ItemFrame {
 
 }

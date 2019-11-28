@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import net.minecraft.block.BlockSkull;
-import net.minecraft.tileentity.TileEntitySkull;
-import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
@@ -43,12 +40,14 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.tileentity.TileEntitySkullAccessor;
 
 import java.util.Optional;
+import net.minecraft.block.SkullBlock;
+import net.minecraft.tileentity.SkullTileEntity;
 
 public class SkullRotationDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntitySkull, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
+        extends AbstractTileEntitySingleDataProcessor<SkullTileEntity, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
 
     public SkullRotationDataProcessor() {
-        super(TileEntitySkull.class, Keys.DIRECTION);
+        super(SkullTileEntity.class, Keys.DIRECTION);
     }
 
     @Override
@@ -63,7 +62,7 @@ public class SkullRotationDataProcessor
     }
 
     @Override
-    protected boolean set(final TileEntitySkull skull, final Direction value) {
+    protected boolean set(final SkullTileEntity skull, final Direction value) {
         if (value.ordinal() > 15) {
             return false;
         }
@@ -72,8 +71,8 @@ public class SkullRotationDataProcessor
     }
 
     @Override
-    protected Optional<Direction> getVal(final TileEntitySkull skull) {
-        if (skull.func_145831_w().func_180495_p(skull.func_174877_v()).func_177229_b(BlockSkull.field_176418_a) != EnumFacing.UP) {
+    protected Optional<Direction> getVal(final SkullTileEntity skull) {
+        if (skull.func_145831_w().func_180495_p(skull.func_174877_v()).func_177229_b(SkullBlock.field_176418_a) != net.minecraft.util.Direction.UP) {
             return Optional.empty();
         }
         final int rot = ((TileEntitySkullAccessor) skull).accessor$getSkullRotation() % 16;

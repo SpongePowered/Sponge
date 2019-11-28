@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.api.text;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
@@ -41,8 +41,8 @@ public abstract class TranslatableTextMixin extends TextMixin {
     @Shadow @Final ImmutableList<Object> arguments;
 
     @Override
-    protected TextComponentBase createComponent() {
-        return new TextComponentTranslation(this.translation.getId(), unwrapArguments(this.arguments));
+    protected TextComponent createComponent() {
+        return new TranslationTextComponent(this.translation.getId(), unwrapArguments(this.arguments));
     }
 
     private Object[] unwrapArguments(final ImmutableList<Object> args) {

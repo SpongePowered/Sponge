@@ -27,14 +27,14 @@ package org.spongepowered.common.event.tracking.context;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Queues;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -60,19 +60,19 @@ import javax.annotation.Nullable;
 public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable {
     private static final boolean DEBUG_PROXY = Boolean.valueOf(System.getProperty("sponge.debugProxyChanges", "false"));
 
-    private final LinkedHashMap<BlockPos, IBlockState> processed = new LinkedHashMap<>();
+    private final LinkedHashMap<BlockPos, BlockState> processed = new LinkedHashMap<>();
     private final LinkedHashMap<BlockPos, TileEntity> affectedTileEntities = new LinkedHashMap<>();
     private final ListMultimap<BlockPos, TileEntity> queuedTiles = LinkedListMultimap.create();
     private final ListMultimap<BlockPos, TileEntity> queuedRemovals = LinkedListMultimap.create();
     private final Set<BlockPos> markedRemoved = new HashSet<>();
     private final Deque<Proxy> proxies = Queues.newArrayDeque();
-    private WorldServer processingWorld;
+    private ServerWorld processingWorld;
     @Nullable private BlockTransaction processingTransaction;
     @Nullable private Deque<BlockTransaction> processingStack;
     private boolean isNeighbor = false;
 
     public SpongeProxyBlockAccess(final WorldServerBridge worldServer) {
-        this.processingWorld = ((WorldServer) worldServer);
+        this.processingWorld = ((ServerWorld) worldServer);
     }
 
     Proxy pushProxy() {
@@ -84,11 +84,11 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         return proxy;
     }
 
-    SpongeProxyBlockAccess proceed(final BlockPos pos, final IBlockState state, final boolean b) {
+    SpongeProxyBlockAccess proceed(final BlockPos pos, final BlockState state, final boolean b) {
         if (this.proxies.isEmpty()) {
             throw new IllegalStateException("Cannot push a new block change without having proxies!");
         }
-        final IBlockState existing = this.processed.put(pos, state);
+        final BlockState existing = this.processed.put(pos, state);
 
         if (!this.proxies.isEmpty()) {
             final Proxy proxy = this.proxies.peek();
@@ -166,7 +166,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         }
         if (proxy.hasStored()) {
             if (!this.proxies.isEmpty()) {
-                for (final Map.Entry<BlockPos, IBlockState> entry : proxy.processed.entrySet()) {
+                for (final Map.Entry<BlockPos, BlockState> entry : proxy.processed.entrySet()) {
                     this.processed.put(entry.getKey(), entry.getValue());
                 }
             } else {
@@ -263,7 +263,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     }
 
     @Override
-    public IBlockState func_180495_p(final BlockPos pos) {
+    public BlockState func_180495_p(final BlockPos pos) {
         return this.processed.get(pos);
     }
 
@@ -273,11 +273,11 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     }
 
     @Override
-    public int func_175627_a(final BlockPos pos, final EnumFacing direction) {
+    public int func_175627_a(final BlockPos pos, final Direction direction) {
         return this.processingWorld.func_175627_a(pos, direction);
     }
 
-    public void onChunkChanged(final BlockPos pos, final IBlockState newState) {
+    public void onChunkChanged(final BlockPos pos, final BlockState newState) {
         // We can prune the existing block state.
         if (this.proxies.isEmpty()) {
             // Don't push any changes to the proxy when we're not actually
@@ -290,7 +290,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         if (this.processingTransaction != null) {
             for (BlockTransaction transaction = this.processingTransaction; transaction != null; transaction = transaction.next) {
                 if (transaction.acceptChunkChange(pos, newState)) {
-                    final IBlockState existing = transaction.blocksNotAffected.put(pos, newState);
+                    final BlockState existing = transaction.blocksNotAffected.put(pos, newState);
                 }
             }
         }
@@ -553,7 +553,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         return tiles.get(0);
     }
 
-    public boolean isProcessingTransactionWithNextHavingBreak(final BlockPos pos, final IBlockState state) {
+    public boolean isProcessingTransactionWithNextHavingBreak(final BlockPos pos, final BlockState state) {
         if (this.processingTransaction == null) {
             return false;
         }
@@ -576,7 +576,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
 
         private final SpongeProxyBlockAccess proxyAccess;
         @Nullable Exception stack_debug;
-        @Nullable private LinkedHashMap<BlockPos, IBlockState> processed;
+        @Nullable private LinkedHashMap<BlockPos, BlockState> processed;
         @Nullable private Set<BlockPos> newBlocks;
         @Nullable private Set<BlockPos> markedRemovedTiles;
         @Nullable private LinkedHashMap<BlockPos, TileEntity> removedTiles;
@@ -615,7 +615,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         }
 
 
-        void store(final BlockPos pos, final IBlockState state) {
+        void store(final BlockPos pos, final BlockState state) {
             if (this.processed == null) {
                 this.processed = new LinkedHashMap<>();
             }

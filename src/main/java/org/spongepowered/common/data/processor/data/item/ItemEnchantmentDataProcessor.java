@@ -29,8 +29,8 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -65,9 +65,9 @@ public class ItemEnchantmentDataProcessor
 
     @Override
     protected boolean set(final ItemStack itemStack, final List<Enchantment> value) {
-        final NBTTagCompound compound;
+        final CompoundNBT compound;
         if (itemStack.func_77978_p() == null) {
-            compound = new NBTTagCompound();
+            compound = new CompoundNBT();
             itemStack.func_77982_d(compound);
         } else {
             compound = itemStack.func_77978_p();
@@ -80,9 +80,9 @@ public class ItemEnchantmentDataProcessor
             for (final Enchantment enchantment : value) { // convert ItemEnchantment to map
                 valueMap.put(enchantment.getType(), enchantment.getLevel());
             }
-            final NBTTagList newList = new NBTTagList(); // construct the enchantment list
+            final ListNBT newList = new ListNBT(); // construct the enchantment list
             for (final Map.Entry<EnchantmentType, Integer> entry : valueMap.entrySet()) {
-                final NBTTagCompound enchantmentCompound = new NBTTagCompound();
+                final CompoundNBT enchantmentCompound = new CompoundNBT();
                 enchantmentCompound.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_ID,
                     (short) net.minecraft.enchantment.Enchantment.func_185258_b((net.minecraft.enchantment.Enchantment) entry.getKey()));
                 enchantmentCompound.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());

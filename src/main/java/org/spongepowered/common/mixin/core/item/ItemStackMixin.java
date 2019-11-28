@@ -29,8 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
@@ -63,12 +63,12 @@ import javax.annotation.Nullable;
 public abstract class ItemStackMixin implements CustomDataHolderBridge {       // conflict from overriding ValueContainer#copy() from DataHolder
 
     @Shadow public abstract boolean shadow$isEmpty();
-    @Shadow public abstract NBTTagCompound getTagCompound();
-    @Shadow public abstract NBTTagCompound getOrCreateSubCompound(String key);
+    @Shadow public abstract CompoundNBT getTagCompound();
+    @Shadow public abstract CompoundNBT getOrCreateSubCompound(String key);
     @Shadow public abstract boolean hasTagCompound();
-    @Shadow public abstract void setTagCompound(@Nullable NBTTagCompound compound);
+    @Shadow public abstract void setTagCompound(@Nullable CompoundNBT compound);
 
-    @Shadow private NBTTagCompound stackTagCompound;
+    @Shadow private CompoundNBT stackTagCompound;
     private List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
     private List<DataView> failedData = new ArrayList<>();
 
@@ -126,19 +126,19 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     private void resyncCustomToTag() {
         if (!this.manipulators.isEmpty()) {
-            final NBTTagList newList = new NBTTagList();
+            final ListNBT newList = new ListNBT();
             final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(this.bridge$getCustomManipulators());
             for (DataView dataView : manipulatorViews) {
                 newList.func_74742_a(NbtTranslator.getInstance().translateData(dataView));
             }
-            final NBTTagCompound spongeCompound = getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
+            final CompoundNBT spongeCompound = getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
             spongeCompound.func_74782_a(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else if (!this.failedData.isEmpty()) {
-            final NBTTagList newList = new NBTTagList();
+            final ListNBT newList = new ListNBT();
             for (DataView failedDatum : this.failedData) {
                 newList.func_74742_a(NbtTranslator.getInstance().translateData(failedDatum));
             }
-            final NBTTagCompound spongeCompound = getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
+            final CompoundNBT spongeCompound = getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
             spongeCompound.func_74782_a(Constants.Sponge.FAILED_CUSTOM_DATA, newList);
         } else {
             if (hasTagCompound()) {
@@ -271,14 +271,14 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     // Read custom data from nbt
     @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
-    private void onRead(NBTTagCompound compound, CallbackInfo info) {
+    private void onRead(CompoundNBT compound, CallbackInfo info) {
         if (hasTagCompound() && getTagCompound().func_150297_b(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
             DataUtil.readCustomData(getTagCompound().func_74775_l(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
         }
     }
 
     @Inject(method = "setTagCompound", at = @At("RETURN"))
-    private void onSet(NBTTagCompound compound, CallbackInfo callbackInfo) {
+    private void onSet(CompoundNBT compound, CallbackInfo callbackInfo) {
         if (this.stackTagCompound != compound) {
             this.manipulators.clear();
         }

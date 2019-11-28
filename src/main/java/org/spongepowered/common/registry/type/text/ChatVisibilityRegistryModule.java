@@ -25,7 +25,7 @@
 package org.spongepowered.common.registry.type.text;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -39,7 +39,7 @@ import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalog
 
 @RegisterCatalog(ChatVisibilities.class)
 @RegistrationDependency(ChatTypeRegistryModule.class)
-public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<EntityPlayer.EnumChatVisibility, ChatVisibility>{
+public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<PlayerEntity.EnumChatVisibility, ChatVisibility>{
 
     @Override
     public void registerDefaults() {
@@ -48,9 +48,9 @@ public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAltern
 
     private void setChatTypes() {
         // We can't do this in the EnumChatVisibility constructor, since the registry isn't initialized then
-        EntityPlayer.EnumChatVisibility FULL = EntityPlayer.EnumChatVisibility.FULL;
-        EntityPlayer.EnumChatVisibility SYSTEM = EntityPlayer.EnumChatVisibility.SYSTEM;
-        EntityPlayer.EnumChatVisibility HIDDEN = EntityPlayer.EnumChatVisibility.HIDDEN;
+        PlayerEntity.EnumChatVisibility FULL = PlayerEntity.EnumChatVisibility.FULL;
+        PlayerEntity.EnumChatVisibility SYSTEM = PlayerEntity.EnumChatVisibility.SYSTEM;
+        PlayerEntity.EnumChatVisibility HIDDEN = PlayerEntity.EnumChatVisibility.HIDDEN;
 
         ((EnumChatVisibilityBridge) (Object) FULL).bridge$setChatTypes(ImmutableSet.copyOf(Sponge.getRegistry().getAllOf(ChatType.class)));
         ((EnumChatVisibilityBridge) (Object) SYSTEM).bridge$setChatTypes(ImmutableSet.of(ChatTypes.SYSTEM, ChatTypes.ACTION_BAR));
@@ -59,7 +59,7 @@ public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAltern
 
     @AdditionalRegistration
     public void customRegistration() {
-        for (EntityPlayer.EnumChatVisibility visibility : EntityPlayer.EnumChatVisibility.values()) {
+        for (PlayerEntity.EnumChatVisibility visibility : PlayerEntity.EnumChatVisibility.values()) {
             if (!this.catalogTypeMap.containsKey(enumAs(visibility).getId())) {
                 this.catalogTypeMap.put(enumAs(visibility).getId(), enumAs(visibility));
             }
@@ -67,8 +67,8 @@ public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAltern
     }
 
     @Override
-    protected EntityPlayer.EnumChatVisibility[] getValues() {
-        return EntityPlayer.EnumChatVisibility.values();
+    protected PlayerEntity.EnumChatVisibility[] getValues() {
+        return PlayerEntity.EnumChatVisibility.values();
     }
 
 }

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.player;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.entity.player.PlayerCapabilities;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.InventoryEnderChest;
+import net.minecraft.entity.player.PlayerAbilities;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.EnderChestInventory;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
@@ -43,20 +43,20 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityPlayer.class)
+@Mixin(PlayerEntity.class)
 @Implements(@Interface(iface = User.class, prefix = "api$"))
 public abstract class EntityPlayerMixin_API extends EntityLivingBaseMixin_API {
 
     @Shadow public Container openContainer;
     @Shadow public float experience;
-    @Shadow public PlayerCapabilities capabilities;
-    @Shadow public InventoryPlayer inventory;
-    @Shadow protected InventoryEnderChest enderChest;
+    @Shadow public PlayerAbilities capabilities;
+    @Shadow public PlayerInventory inventory;
+    @Shadow protected EnderChestInventory enderChest;
     @Shadow public abstract String shadow$getName();
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 
-    final boolean impl$isFake = SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this);
+    final boolean impl$isFake = SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this);
 
     @Intrinsic
     public String api$getName() {

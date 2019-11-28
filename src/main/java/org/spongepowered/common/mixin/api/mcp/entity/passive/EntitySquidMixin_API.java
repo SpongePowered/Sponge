@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.passive.EntitySquid;
+import net.minecraft.entity.passive.SquidEntity;
 import org.spongepowered.api.entity.living.Squid;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntitySquid.class)
+@Mixin(SquidEntity.class)
 public abstract class EntitySquidMixin_API extends EntityWaterMobMixin_API implements Squid {
 
 }

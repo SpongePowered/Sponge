@@ -59,14 +59,14 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
 
     @Shadow public abstract void shadow$setAllowFriendlyFire(boolean friendlyFire);
     @Shadow public abstract void setSeeFriendlyInvisiblesEnabled(boolean friendlyInvisibles);
-    @Shadow public abstract void shadow$setNameTagVisibility(net.minecraft.scoreboard.Team.EnumVisible visibility);
-    @Shadow public abstract void shadow$setDeathMessageVisibility(net.minecraft.scoreboard.Team.EnumVisible visibility);
+    @Shadow public abstract void shadow$setNameTagVisibility(net.minecraft.scoreboard.Team.Visible visibility);
+    @Shadow public abstract void shadow$setDeathMessageVisibility(net.minecraft.scoreboard.Team.Visible visibility);
     @Shadow public abstract void shadow$setCollisionRule(net.minecraft.scoreboard.Team.CollisionRule rule);
     @Shadow public abstract void setDisplayName(String name);
     @Shadow public abstract boolean shadow$getAllowFriendlyFire();
     @Shadow public abstract boolean getSeeFriendlyInvisiblesEnabled();
-    @Shadow public abstract net.minecraft.scoreboard.Team.EnumVisible shadow$getNameTagVisibility();
-    @Shadow public abstract net.minecraft.scoreboard.Team.EnumVisible shadow$getDeathMessageVisibility();
+    @Shadow public abstract net.minecraft.scoreboard.Team.Visible shadow$getNameTagVisibility();
+    @Shadow public abstract net.minecraft.scoreboard.Team.Visible shadow$getDeathMessageVisibility();
     @Shadow public abstract net.minecraft.scoreboard.Team.CollisionRule shadow$getCollisionRule();
     @Shadow public abstract Collection<String> getMembershipCollection();
 
@@ -146,7 +146,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void setNameTagVisibility(final Visibility visibility) {
-        this.shadow$setNameTagVisibility((net.minecraft.scoreboard.Team.EnumVisible) (Object) visibility);
+        this.shadow$setNameTagVisibility((net.minecraft.scoreboard.Team.Visible) (Object) visibility);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -158,7 +158,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void setDeathMessageVisibility(final Visibility visibility) {
-        this.shadow$setDeathMessageVisibility((net.minecraft.scoreboard.Team.EnumVisible) (Object) visibility);
+        this.shadow$setDeathMessageVisibility((net.minecraft.scoreboard.Team.Visible) (Object) visibility);
     }
 
     @SuppressWarnings("ConstantConditions")

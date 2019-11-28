@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
@@ -49,7 +49,7 @@ import org.spongepowered.common.util.VectorSerializer;
 
 import java.util.ArrayList;
 
-@Mixin(EntityMinecart.class)
+@Mixin(AbstractMinecartEntity.class)
 public abstract class EntityMinecartMixin extends EntityMixin implements EntityMinecartBridge {
 
     private double impl$maxSpeed = Constants.Entity.Minecart.DEFAULT_MAX_SPEED;
@@ -87,7 +87,7 @@ public abstract class EntityMinecartMixin extends EntityMixin implements EntityM
     }
 
     @Redirect(method = "applyDrag", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;isBeingRidden()Z"))
-    private boolean onIsRidden(final EntityMinecart self) {
+    private boolean onIsRidden(final AbstractMinecartEntity self) {
         return !this.impl$slowWhenEmpty || isBeingRidden();
     }
 
@@ -105,7 +105,7 @@ public abstract class EntityMinecartMixin extends EntityMixin implements EntityM
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.func_74764_b(Constants.Entity.Minecart.MAX_SPEED)) {
             this.impl$maxSpeed = compound.func_74769_h(Constants.Entity.Minecart.MAX_SPEED);
@@ -122,7 +122,7 @@ public abstract class EntityMinecartMixin extends EntityMixin implements EntityM
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         compound.func_74780_a(Constants.Entity.Minecart.MAX_SPEED, this.impl$maxSpeed);
         compound.func_74757_a(Constants.Entity.Minecart.SLOW_WHEN_EMPTY, this.impl$slowWhenEmpty);

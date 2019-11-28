@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockRedstoneComparator;
+import net.minecraft.block.ComparatorBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(BlockRedstoneComparator.class)
+@Mixin(ComparatorBlock.class)
 public abstract class BlockRedstoneComparatorMixin_API extends BlockMixin_API {
 
     @Override

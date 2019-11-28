@@ -28,26 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.IMerchant;
-import net.minecraft.entity.passive.AbstractHorse;
-import net.minecraft.inventory.ContainerBeacon;
-import net.minecraft.inventory.ContainerBrewingStand;
-import net.minecraft.inventory.ContainerChest;
-import net.minecraft.inventory.ContainerDispenser;
-import net.minecraft.inventory.ContainerEnchantment;
-import net.minecraft.inventory.ContainerFurnace;
-import net.minecraft.inventory.ContainerHopper;
-import net.minecraft.inventory.ContainerHorseInventory;
-import net.minecraft.inventory.ContainerMerchant;
-import net.minecraft.inventory.ContainerRepair;
-import net.minecraft.inventory.ContainerWorkbench;
-import net.minecraft.tileentity.TileEntityBeacon;
-import net.minecraft.tileentity.TileEntityBrewingStand;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.tileentity.TileEntityDispenser;
-import net.minecraft.tileentity.TileEntityDropper;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.tileentity.TileEntityHopper;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.property.AcceptsItems;
@@ -74,6 +54,26 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.merchant.IMerchant;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
+import net.minecraft.inventory.container.BeaconContainer;
+import net.minecraft.inventory.container.BrewingStandContainer;
+import net.minecraft.inventory.container.ChestContainer;
+import net.minecraft.inventory.container.DispenserContainer;
+import net.minecraft.inventory.container.EnchantmentContainer;
+import net.minecraft.inventory.container.FurnaceContainer;
+import net.minecraft.inventory.container.HopperContainer;
+import net.minecraft.inventory.container.HorseInventoryContainer;
+import net.minecraft.inventory.container.MerchantContainer;
+import net.minecraft.inventory.container.RepairContainer;
+import net.minecraft.inventory.container.WorkbenchContainer;
+import net.minecraft.tileentity.BeaconTileEntity;
+import net.minecraft.tileentity.BrewingStandTileEntity;
+import net.minecraft.tileentity.ChestTileEntity;
+import net.minecraft.tileentity.DispenserTileEntity;
+import net.minecraft.tileentity.DropperTileEntity;
+import net.minecraft.tileentity.FurnaceTileEntity;
+import net.minecraft.tileentity.HopperTileEntity;
 
 @RegistrationDependency(GuiIdRegistryModule.class)
 public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistryModule<InventoryArchetype>,
@@ -168,7 +168,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .with(MENU_GRID)
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.chest"))))
             .property(new GuiIdProperty(GuiIds.CHEST))
-            .container((i, p) -> new ContainerChest(p.field_71071_by, i, p))
+            .container((i, p) -> new ChestContainer(p.field_71071_by, i, p))
             .build("minecraft:chest", "Chest");
 
         DOUBLE_CHEST = builder.reset()
@@ -176,7 +176,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryDimension(9, 6))
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.chestDouble"))))
             .property(new GuiIdProperty(GuiIds.CHEST))
-            .container((i, p) -> new ContainerChest(p.field_71071_by, i, p))
+            .container((i, p) -> new ChestContainer(p.field_71071_by, i, p))
             .build("minecraft:double_chest", "DoubleChest");
 
         FURNACE = builder.reset()
@@ -197,7 +197,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryTitle(Text.of(new SpongeTranslation("container.furnace"))))
             .property(new InventoryDimension(3, 1))
             .property(new GuiIdProperty(GuiIds.FURNACE))
-            .container((i, p) -> new ContainerFurnace(p.field_71071_by, i))
+            .container((i, p) -> new FurnaceContainer(p.field_71071_by, i))
             .build("minecraft:furnace", "Furnace");
 
         DISPENSER = builder.reset()
@@ -205,7 +205,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryDimension(3, 3))
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.dispenser"))))
             .property(new GuiIdProperty(GuiIds.DISPENSER))
-            .container((i, p) -> new ContainerDispenser(p.field_71071_by, i))
+            .container((i, p) -> new DispenserContainer(p.field_71071_by, i))
             .build("minecraft:dispenser", "Dispenser");
 
         WORKBENCH = builder.reset()
@@ -217,7 +217,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.crafting"))))
             .property(new GuiIdProperty(GuiIds.CRAFTING_TABLE))
             .container((i, p) -> {
-                ContainerWorkbench container = new ContainerWorkbench(p.field_71071_by, p.func_130014_f_(), p.func_180425_c());
+                WorkbenchContainer container = new WorkbenchContainer(p.field_71071_by, p.func_130014_f_(), p.func_180425_c());
                 // Pre-Fills the container input with the items from the inventory
                 for (int index = 0; index < container.field_75162_e.func_70302_i_(); index++) {
                     container.field_75162_e.func_70299_a(index, i.func_70301_a(index));
@@ -232,7 +232,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryDimension(5, 1))
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.brewing"))))
             .property(new GuiIdProperty(GuiIds.BREWING_STAND))
-            .container((i, p) -> new ContainerBrewingStand(p.field_71071_by, i))
+            .container((i, p) -> new BrewingStandContainer(p.field_71071_by, i))
             .build("minecraft:brewing_stand", "BrewingStand");
 
         HOPPER = builder.reset()
@@ -240,7 +240,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryDimension(5, 1))
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.hopper"))))
             .property(new GuiIdProperty(GuiIds.HOPPER))
-            .container((i, p) -> new ContainerHopper(p.field_71071_by, i, p))
+            .container((i, p) -> new HopperContainer(p.field_71071_by, i, p))
             .build("minecraft:hopper", "Hopper");
 
         BEACON = builder.reset()
@@ -248,7 +248,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryDimension(1, 1))
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.beacon"))))
             .property(new GuiIdProperty(GuiIds.BEACON))
-            .container((i, p) -> new ContainerBeacon(p.field_71071_by, i))
+            .container((i, p) -> new BeaconContainer(p.field_71071_by, i))
             .build("minecraft:beacon", "Beacon");
 
         ENCHANTING_TABLE = builder.reset()
@@ -258,7 +258,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.enchant"))))
             .property(new GuiIdProperty(GuiIds.ENCHANTING_TABLE))
             .container((i, p) -> {
-                ContainerEnchantment container = new ContainerEnchantment(p.field_71071_by, p.func_130014_f_(), p.func_180425_c());
+                EnchantmentContainer container = new EnchantmentContainer(p.field_71071_by, p.func_130014_f_(), p.func_180425_c());
                 // Pre-Fills the container with the items from the inventory
                 for (int index = 0; index < container.field_75168_e.func_70302_i_(); index++) {
                     container.field_75168_e.func_70299_a(index, i.func_70301_a(index));
@@ -276,7 +276,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.repair"))))
             .property(new GuiIdProperty(GuiIds.ANVIL))
             .container((i, p) -> {
-                ContainerRepair container = new ContainerRepair(p.field_71071_by, p.func_130014_f_(), p.func_180425_c(), p);
+                RepairContainer container = new RepairContainer(p.field_71071_by, p.func_130014_f_(), p.func_180425_c(), p);
                 // Pre-Fills the container input with the items from the inventory
                 for (int index = 0; index < ((ContainerRepairAccessor) container).accessor$getInputSlots().func_70302_i_(); index++) {
                     ((ContainerRepairAccessor) container).accessor$getInputSlots().func_70299_a(index, i.func_70301_a(index));
@@ -297,7 +297,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
                             && ((CarriedInventory) i).getCarrier().isPresent()
                             && ((CarriedInventory) i).getCarrier().get() instanceof IMerchant) {
                         IMerchant merchant = ((IMerchant) ((CarriedInventory) i).getCarrier().get());
-                        ContainerMerchant container = new ContainerMerchant(p.field_71071_by, merchant, p.func_130014_f_());
+                        MerchantContainer container = new MerchantContainer(p.field_71071_by, merchant, p.func_130014_f_());
                         // TODO Pre-Fill the Container?
                         return container;
                     }
@@ -313,9 +313,9 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
                 .container((i, p) -> {
                     if (i instanceof CarriedInventory
                             && ((CarriedInventory) i).getCarrier().isPresent()
-                            && ((CarriedInventory) i).getCarrier().get() instanceof AbstractHorse) {
-                        AbstractHorse horse = ((AbstractHorse) ((CarriedInventory) i).getCarrier().get());
-                        return new ContainerHorseInventory(p.field_71071_by, i, horse, p);
+                            && ((CarriedInventory) i).getCarrier().get() instanceof AbstractHorseEntity) {
+                        AbstractHorseEntity horse = ((AbstractHorseEntity) ((CarriedInventory) i).getCarrier().get());
+                        return new HorseInventoryContainer(p.field_71071_by, i, horse, p);
                     }
                     throw new IllegalArgumentException("Cannot open horse inventory without a horse as Carrier");
                 })
@@ -332,10 +332,10 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .container((i, p) -> {
                 if (i instanceof CarriedInventory
                         && ((CarriedInventory) i).getCarrier().isPresent()
-                        && ((CarriedInventory) i).getCarrier().get() instanceof AbstractHorse) {
-                    AbstractHorse horse = ((AbstractHorse) ((CarriedInventory) i).getCarrier().get());
+                        && ((CarriedInventory) i).getCarrier().get() instanceof AbstractHorseEntity) {
+                    AbstractHorseEntity horse = ((AbstractHorseEntity) ((CarriedInventory) i).getCarrier().get());
                     // TODO size
-                    return new ContainerHorseInventory(p.field_71071_by, i, horse, p);
+                    return new HorseInventoryContainer(p.field_71071_by, i, horse, p);
                 }
                 throw new IllegalArgumentException("Cannot open horse inventory without a horse as Carrier");
             })
@@ -378,37 +378,37 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
         registerAdditionalCatalog(MENU_COLUMN);
         registerAdditionalCatalog(MENU_GRID);
         registerAdditionalCatalog(CHEST);
-        SpongeInventoryBuilder.registerInventory(TileEntityChest.class, CHEST);
-        SpongeInventoryBuilder.registerContainer(ContainerChest.class, CHEST);
+        SpongeInventoryBuilder.registerInventory(ChestTileEntity.class, CHEST);
+        SpongeInventoryBuilder.registerContainer(ChestContainer.class, CHEST);
         registerAdditionalCatalog(DOUBLE_CHEST);
         registerAdditionalCatalog(FURNACE);
-        SpongeInventoryBuilder.registerInventory(TileEntityFurnace.class, FURNACE);
-        SpongeInventoryBuilder.registerContainer(ContainerFurnace.class, FURNACE);
+        SpongeInventoryBuilder.registerInventory(FurnaceTileEntity.class, FURNACE);
+        SpongeInventoryBuilder.registerContainer(FurnaceContainer.class, FURNACE);
         registerAdditionalCatalog(DISPENSER);
-        SpongeInventoryBuilder.registerInventory(TileEntityDispenser.class, DISPENSER);
-        SpongeInventoryBuilder.registerInventory(TileEntityDropper.class, DISPENSER);
-        SpongeInventoryBuilder.registerContainer(ContainerDispenser.class, DISPENSER);
+        SpongeInventoryBuilder.registerInventory(DispenserTileEntity.class, DISPENSER);
+        SpongeInventoryBuilder.registerInventory(DropperTileEntity.class, DISPENSER);
+        SpongeInventoryBuilder.registerContainer(DispenserContainer.class, DISPENSER);
         registerAdditionalCatalog(WORKBENCH);
-        SpongeInventoryBuilder.registerContainer(ContainerWorkbench.class, WORKBENCH);
+        SpongeInventoryBuilder.registerContainer(WorkbenchContainer.class, WORKBENCH);
         registerAdditionalCatalog(BREWING_STAND);
-        SpongeInventoryBuilder.registerInventory(TileEntityBrewingStand.class, BREWING_STAND);
-        SpongeInventoryBuilder.registerContainer(ContainerBrewingStand.class, BREWING_STAND);
+        SpongeInventoryBuilder.registerInventory(BrewingStandTileEntity.class, BREWING_STAND);
+        SpongeInventoryBuilder.registerContainer(BrewingStandContainer.class, BREWING_STAND);
         registerAdditionalCatalog(HOPPER);
-        SpongeInventoryBuilder.registerInventory(TileEntityHopper.class, HOPPER);
-        SpongeInventoryBuilder.registerContainer(ContainerHopper.class, HOPPER);
+        SpongeInventoryBuilder.registerInventory(HopperTileEntity.class, HOPPER);
+        SpongeInventoryBuilder.registerContainer(HopperContainer.class, HOPPER);
         registerAdditionalCatalog(BEACON);
-        SpongeInventoryBuilder.registerInventory(TileEntityBeacon.class, BEACON);
-        SpongeInventoryBuilder.registerContainer(ContainerBeacon.class, BEACON);
+        SpongeInventoryBuilder.registerInventory(BeaconTileEntity.class, BEACON);
+        SpongeInventoryBuilder.registerContainer(BeaconContainer.class, BEACON);
         registerAdditionalCatalog(ENCHANTING_TABLE);
-        SpongeInventoryBuilder.registerContainer(ContainerEnchantment.class, ENCHANTING_TABLE);
+        SpongeInventoryBuilder.registerContainer(EnchantmentContainer.class, ENCHANTING_TABLE);
         registerAdditionalCatalog(ANVIL);
-        SpongeInventoryBuilder.registerContainer(ContainerRepair.class, ANVIL);
+        SpongeInventoryBuilder.registerContainer(RepairContainer.class, ANVIL);
         registerAdditionalCatalog(VILLAGER);
         // TODO internal Villager Inventory? make Villager Carrier?
-        SpongeInventoryBuilder.registerContainer(ContainerMerchant.class, VILLAGER);
+        SpongeInventoryBuilder.registerContainer(MerchantContainer.class, VILLAGER);
         registerAdditionalCatalog(HORSE);
         // TODO Horse IInventory? SpongeInventoryBuilder.registerInventory(EntityHorse.class, HORSE);
-        SpongeInventoryBuilder.registerContainer(ContainerHorseInventory.class, HORSE);
+        SpongeInventoryBuilder.registerContainer(HorseInventoryContainer.class, HORSE);
         registerAdditionalCatalog(HORSE_WITH_CHEST);
         registerAdditionalCatalog(CRAFTING);
         registerAdditionalCatalog(PLAYER);

@@ -24,12 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.entity;
 
-import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraft.entity.monster.AbstractSkeleton;
-import net.minecraft.entity.monster.EntityGiantZombie;
-import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import org.spongepowered.api.entity.Equipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -42,9 +36,15 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.entity.monster.AbstractSkeletonEntity;
+import net.minecraft.entity.monster.GiantEntity;
+import net.minecraft.entity.monster.ZombieEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 
 // All living implementors of ArmorEquipable
-@Mixin({EntityArmorStand.class, EntityGiantZombie.class, EntityPlayerMP.class, AbstractSkeleton.class, EntityZombie.class, EntityHuman.class})
+@Mixin({ArmorStandEntity.class, GiantEntity.class, ServerPlayerEntity.class, AbstractSkeletonEntity.class, ZombieEntity.class, EntityHuman.class})
 public abstract class EquippableMixin_API extends EntityLivingBaseMixin_API implements Equipable {
 
     @Override
@@ -60,7 +60,7 @@ public abstract class EquippableMixin_API extends EntityLivingBaseMixin_API impl
     @Override
     public Optional<ItemStack> getEquipped(final EquipmentType type) {
         if (type instanceof SpongeEquipmentType) {
-            final EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
+            final EquipmentSlotType[] slots = ((SpongeEquipmentType) type).getSlots();
             if (slots.length != 1) {
                 throw new IllegalArgumentException("Only EquipmentTypes for a single Slot are possible");
             }
@@ -73,11 +73,11 @@ public abstract class EquippableMixin_API extends EntityLivingBaseMixin_API impl
     @Override
     public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
         if (type instanceof SpongeEquipmentType) {
-            EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
+            EquipmentSlotType[] slots = ((SpongeEquipmentType) type).getSlots();
             if (slots.length == 0) {
-                slots = EntityEquipmentSlot.values();
+                slots = EquipmentSlotType.values();
             }
-            for (final EntityEquipmentSlot slot : slots) {
+            for (final EquipmentSlotType slot : slots) {
                 // TODO check if canEquip
                 this.setItemStackToSlot(slot, ItemStackUtil.toNative(equipment));
                 return true;

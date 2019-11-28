@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.service.whitelist;
 
-import net.minecraft.server.management.UserListWhitelist;
-import net.minecraft.server.management.UserListWhitelistEntry;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.SpongeImpl;
@@ -36,6 +34,8 @@ import org.spongepowered.common.util.UserListUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import net.minecraft.server.management.WhiteList;
+import net.minecraft.server.management.WhitelistEntry;
 
 public class SpongeWhitelistService implements WhitelistService {
 
@@ -44,8 +44,8 @@ public class SpongeWhitelistService implements WhitelistService {
     public Collection<GameProfile> getWhitelistedProfiles() {
         final List<GameProfile> profiles = new ArrayList<>();
 
-        final UserListWhitelist list = SpongeImpl.getServer().func_184103_al().func_152599_k();
-        for (final UserListWhitelistEntry entry: ((UserListAccessor<com.mojang.authlib.GameProfile, UserListWhitelistEntry>) list).accessor$getValues().values()) {
+        final WhiteList list = SpongeImpl.getServer().func_184103_al().func_152599_k();
+        for (final WhitelistEntry entry: ((UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry>) list).accessor$getValues().values()) {
             profiles.add((GameProfile) ((UserLIstEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$getValue());
         }
 
@@ -55,7 +55,7 @@ public class SpongeWhitelistService implements WhitelistService {
     @SuppressWarnings("unchecked")
     @Override
     public boolean isWhitelisted(final GameProfile profile) {
-        final UserListAccessor<com.mojang.authlib.GameProfile, UserListWhitelistEntry> whitelist = (UserListAccessor<com.mojang.authlib.GameProfile, UserListWhitelistEntry>) getWhitelist();
+        final UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry> whitelist = (UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry>) getWhitelist();
 
         whitelist.accessor$removeExpired();
         return whitelist.accessor$getValues().containsKey(whitelist.accessor$getObjectKey((com.mojang.authlib.GameProfile) profile));
@@ -64,7 +64,7 @@ public class SpongeWhitelistService implements WhitelistService {
     @Override
     public boolean addProfile(final GameProfile profile) {
         final boolean wasWhitelisted = this.isWhitelisted(profile);
-        UserListUtils.addEntry(getWhitelist(), new UserListWhitelistEntry((com.mojang.authlib.GameProfile) profile));
+        UserListUtils.addEntry(getWhitelist(), new WhitelistEntry((com.mojang.authlib.GameProfile) profile));
         return wasWhitelisted;
     }
 
@@ -75,7 +75,7 @@ public class SpongeWhitelistService implements WhitelistService {
         return wasWhitelisted;
     }
 
-    private static UserListWhitelist getWhitelist() {
+    private static WhiteList getWhitelist() {
         return SpongeImpl.getServer().func_184103_al().func_152599_k();
     }
 }

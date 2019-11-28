@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -37,11 +36,12 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.AgeableEntity;
 
-public class IsAdultValueProcessor extends AbstractSpongeValueProcessor<EntityAgeable, Boolean, Value<Boolean>> {
+public class IsAdultValueProcessor extends AbstractSpongeValueProcessor<AgeableEntity, Boolean, Value<Boolean>> {
 
     public IsAdultValueProcessor() {
-        super(EntityAgeable.class, Keys.IS_ADULT);
+        super(AgeableEntity.class, Keys.IS_ADULT);
     }
 
     @Override
@@ -50,13 +50,13 @@ public class IsAdultValueProcessor extends AbstractSpongeValueProcessor<EntityAg
     }
 
     @Override
-    protected boolean set(EntityAgeable container, Boolean adult) {
+    protected boolean set(AgeableEntity container, Boolean adult) {
         container.func_70873_a(adult ? Constants.Entity.Ageable.ADULT : Constants.Entity.Ageable.CHILD);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityAgeable container) {
+    protected Optional<Boolean> getVal(AgeableEntity container) {
         return OptBool.of((Boolean) !container.func_70631_g_());
     }
 

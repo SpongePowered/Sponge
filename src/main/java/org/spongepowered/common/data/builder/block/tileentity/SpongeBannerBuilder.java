@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
+import net.minecraft.tileentity.BannerTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataView;
@@ -69,7 +69,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
             patternsList.forEach(patternLayers::add);
             bannerData.set(patternLayers);
             banner1.offer(bannerData);
-            ((TileEntityBanner) banner1).func_145829_t();
+            ((BannerTileEntity) banner1).func_145829_t();
             return Optional.of(banner1);
         });
 

@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -37,11 +36,12 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
+import net.minecraft.entity.item.ArmorStandEntity;
 
-public class HeadRotationValueProcessor extends AbstractSpongeValueProcessor<EntityArmorStand, Vector3d, Value<Vector3d>> {
+public class HeadRotationValueProcessor extends AbstractSpongeValueProcessor<ArmorStandEntity, Vector3d, Value<Vector3d>> {
 
     public HeadRotationValueProcessor() {
-        super(EntityArmorStand.class, Keys.HEAD_ROTATION);
+        super(ArmorStandEntity.class, Keys.HEAD_ROTATION);
     }
 
     @Override
@@ -55,13 +55,13 @@ public class HeadRotationValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected boolean set(EntityArmorStand container, Vector3d value) {
+    protected boolean set(ArmorStandEntity container, Vector3d value) {
         container.func_175415_a(VecHelper.toRotation(value));
         return true;
     }
 
     @Override
-    protected Optional<Vector3d> getVal(EntityArmorStand container) {
+    protected Optional<Vector3d> getVal(ArmorStandEntity container) {
         return Optional.of(VecHelper.toVector3d(container.func_175418_s()));
     }
 

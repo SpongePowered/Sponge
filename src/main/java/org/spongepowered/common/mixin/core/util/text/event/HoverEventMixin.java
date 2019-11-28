@@ -26,9 +26,9 @@ package org.spongepowered.common.mixin.core.util.text.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.api.entity.EntityType;
@@ -67,7 +67,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
                         bridge$setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(loadNbt()))));
                         break;
                     case SHOW_ENTITY:
-                        NBTTagCompound nbt = loadNbt();
+                        CompoundNBT nbt = loadNbt();
                         String name = nbt.func_74779_i("name");
                         EntityType type = null;
                         if (nbt.func_150297_b("type", Constants.NBT.TAG_STRING)) {
@@ -87,7 +87,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
         return this.handle;
     }
 
-    private NBTTagCompound loadNbt() {
+    private CompoundNBT loadNbt() {
         try {
             return checkNotNull(JsonToNBT.func_180713_a(this.value.func_150260_c()), "NBT");
         } catch (NBTException e) {

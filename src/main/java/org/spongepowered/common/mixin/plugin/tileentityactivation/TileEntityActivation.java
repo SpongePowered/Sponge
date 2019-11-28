@@ -25,15 +25,15 @@
 package org.spongepowered.common.mixin.plugin.tileentityactivation;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
@@ -128,10 +128,10 @@ public class TileEntityActivation {
     *
     * @param world The world to perform activation checks in
     */
-    public static void activateTileEntities(final WorldServer world) {
+    public static void activateTileEntities(final ServerWorld world) {
         final PlayerChunkMap playerChunkMap = world.func_184164_w();
         for (final PlayerChunkMapEntry playerChunkMapEntry : ((PlayerChunkMapAccessor) playerChunkMap).accessor$getEntries()) {
-            for (final EntityPlayer player : ((PlayerchunkMapEntryAccessor) playerChunkMapEntry).accessor$getPlayers()) {
+            for (final PlayerEntity player : ((PlayerchunkMapEntryAccessor) playerChunkMapEntry).accessor$getPlayers()) {
                 final Chunk chunk = ((PlayerchunkMapEntryAccessor) playerChunkMapEntry).accessor$getChunk();
                 if (chunk == null || chunk.field_189550_d || ((ChunkBridge) chunk).bridge$isPersistedChunk()) {
                     continue;
@@ -148,7 +148,7 @@ public class TileEntityActivation {
      *
      * @param chunk Chunk to check for activation
      */
-    private static void activateChunkTileEntities(final EntityPlayer player, final Chunk chunk) {
+    private static void activateChunkTileEntities(final PlayerEntity player, final Chunk chunk) {
         final Vector3i playerPos = VecHelper.toVector3i(player.func_180425_c());
         final long currentTick = SpongeImpl.getServer().func_71259_af();
         for (final Map.Entry<BlockPos, TileEntity> mapEntry : chunk.func_177434_r().entrySet()) {

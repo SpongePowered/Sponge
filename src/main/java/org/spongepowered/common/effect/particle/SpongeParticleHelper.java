@@ -27,19 +27,18 @@ package org.spongepowered.common.effect.particle;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3f;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.network.Packet;
+import net.minecraft.item.Items;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.network.play.server.SPacketDestroyEntities;
-import net.minecraft.network.play.server.SPacketEffect;
-import net.minecraft.network.play.server.SPacketEntityMetadata;
-import net.minecraft.network.play.server.SPacketEntityStatus;
-import net.minecraft.network.play.server.SPacketParticles;
-import net.minecraft.network.play.server.SPacketSpawnObject;
+import net.minecraft.network.play.server.SDestroyEntitiesPacket;
+import net.minecraft.network.play.server.SEntityMetadataPacket;
+import net.minecraft.network.play.server.SEntityStatusPacket;
+import net.minecraft.network.play.server.SPlaySoundEventPacket;
+import net.minecraft.network.play.server.SSpawnObjectPacket;
+import net.minecraft.network.play.server.SSpawnParticlePacket;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionType;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -80,7 +79,7 @@ public final class SpongeParticleHelper {
      * @param position The position
      * @return The packets
      */
-    public static List<Packet<?>> toPackets(final SpongeParticleEffect effect, final Vector3d position) {
+    public static List<IPacket<?>> toPackets(final SpongeParticleEffect effect, final Vector3d position) {
         ICachedParticleEffect cachedPacket = effect.cachedParticle;
         if (cachedPacket == null) {
             cachedPacket = effect.cachedParticle = toCachedPacket(effect);
@@ -88,7 +87,7 @@ public final class SpongeParticleHelper {
         if (cachedPacket == EmptyCachedPacket.INSTANCE) {
             return Collections.emptyList();
         }
-        final List<Packet<?>> packets = new ArrayList<>();
+        final List<IPacket<?>> packets = new ArrayList<>();
         cachedPacket.process(position, packets);
         return packets;
     }
@@ -97,7 +96,7 @@ public final class SpongeParticleHelper {
     private static int getBlockState(final SpongeParticleEffect effect, final Optional<BlockState> defaultBlockState) {
         final Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
         if (blockState.isPresent()) {
-            return Block.func_176210_f((IBlockState) blockState.get());
+            return Block.func_176210_f((net.minecraft.block.BlockState) blockState.get());
         }
         final Optional<ItemStackSnapshot> optSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
         if (optSnapshot.isPresent()) {
@@ -109,7 +108,7 @@ public final class SpongeParticleHelper {
             }
             return 0;
         }
-        return Block.func_176210_f((IBlockState) defaultBlockState.get());
+        return Block.func_176210_f((net.minecraft.block.BlockState) defaultBlockState.get());
     }
 
     private static int getDirectionData(Direction direction) {
@@ -152,7 +151,7 @@ public final class SpongeParticleHelper {
                 }
                 final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.field_151152_bP);
                 FireworkUtils.setFireworkEffects(itemStack, effects);
-                final SPacketEntityMetadata packetEntityMetadata = new SPacketEntityMetadata();
+                final SEntityMetadataPacket packetEntityMetadata = new SEntityMetadataPacket();
                 ((SPacketEntityMetadataAccessor) packetEntityMetadata).accessor$setEntityId(CachedFireworkPacket.FIREWORK_ROCKET_ID);
                 ((SPacketEntityMetadataAccessor) packetEntityMetadata).accessor$setManagerEntires(new ArrayList<>());
                 ((SPacketEntityMetadataAccessor) packetEntityMetadata).accessor$getManagerEntires().add(new EntityDataManager.DataEntry<>(
@@ -163,11 +162,11 @@ public final class SpongeParticleHelper {
                 final int quantity = effect.getOptionOrDefault(ParticleOptions.QUANTITY).get();
                 return new CachedEffectPacket(2005, quantity, false);
             } else if (type == ParticleTypes.SPLASH_POTION) {
-                final Potion potion = (Potion) effect.getOptionOrDefault(ParticleOptions.POTION_EFFECT_TYPE).get();
-                for (final PotionType potionType : PotionType.field_185176_a) {
-                    for (final net.minecraft.potion.PotionEffect potionEffect : potionType.func_185170_a()) {
+                final Effect potion = (Effect) effect.getOptionOrDefault(ParticleOptions.POTION_EFFECT_TYPE).get();
+                for (final Potion potionType : Potion.field_185176_a) {
+                    for (final net.minecraft.potion.EffectInstance potionEffect : potionType.func_185170_a()) {
                         if (potionEffect.func_188419_a() == potion) {
-                            return new CachedEffectPacket(2002, PotionType.field_185176_a.func_148757_b(potionType), false);
+                            return new CachedEffectPacket(2002, Potion.field_185176_a.func_148757_b(potionType), false);
                         }
                     }
                 }
@@ -226,7 +225,7 @@ public final class SpongeParticleHelper {
                     final Optional<ItemType> optItemType = blockState.getType().getItem();
                     if (optItemType.isPresent()) {
                         extra = new int[] { Item.func_150891_b((Item) optItemType.get()),
-                                ((Block) blockState.getType()).func_176201_c((IBlockState) blockState) };
+                                ((Block) blockState.getType()).func_176201_c((net.minecraft.block.BlockState) blockState) };
                     } else {
                         return EmptyCachedPacket.INSTANCE;
                     }
@@ -334,7 +333,7 @@ public final class SpongeParticleHelper {
         public static final EmptyCachedPacket INSTANCE = new EmptyCachedPacket();
 
         @Override
-        public void process(final Vector3d position, final List<Packet<?>> output) {
+        public void process(final Vector3d position, final List<IPacket<?>> output) {
         }
     }
 
@@ -345,17 +344,17 @@ public final class SpongeParticleHelper {
         private static final int FIREWORK_ROCKET_ID;
         private static final UUID FIREWORK_ROCKET_UNIQUE_ID;
 
-        private static final SPacketDestroyEntities DESTROY_FIREWORK_ROCKET_DUMMY;
-        private static final SPacketEntityStatus FIREWORK_ROCKET_DUMMY_EFFECT;
+        private static final SDestroyEntitiesPacket DESTROY_FIREWORK_ROCKET_DUMMY;
+        private static final SEntityStatusPacket FIREWORK_ROCKET_DUMMY_EFFECT;
 
         static {
             FIREWORK_ROCKET_ID = EntityAccessor.accessor$getNextEntityId();
             EntityAccessor.accessor$setNextEntityId(FIREWORK_ROCKET_ID + 1);
             FIREWORK_ROCKET_UNIQUE_ID = MathHelper.func_180182_a(new Random());
 
-            DESTROY_FIREWORK_ROCKET_DUMMY = new SPacketDestroyEntities(FIREWORK_ROCKET_ID);
+            DESTROY_FIREWORK_ROCKET_DUMMY = new SDestroyEntitiesPacket(FIREWORK_ROCKET_ID);
 
-            FIREWORK_ROCKET_DUMMY_EFFECT = new SPacketEntityStatus();
+            FIREWORK_ROCKET_DUMMY_EFFECT = new SEntityStatusPacket();
             ((SPacketEntityStatusAccessor) FIREWORK_ROCKET_DUMMY_EFFECT).accessor$setEntityId(FIREWORK_ROCKET_ID);
             // The status index that is used to trigger the fireworks effect,
             // can be found at: EntityFireworkRocket#handleStatusUpdate
@@ -363,15 +362,15 @@ public final class SpongeParticleHelper {
             ((SPacketEntityStatusAccessor) FIREWORK_ROCKET_DUMMY_EFFECT).accessor$setLogicOpcoe((byte) 17);
         }
 
-        private final SPacketEntityMetadata entityMetadataPacket;
+        private final SEntityMetadataPacket entityMetadataPacket;
 
-        private CachedFireworkPacket(final SPacketEntityMetadata entityMetadataPacket) {
+        private CachedFireworkPacket(final SEntityMetadataPacket entityMetadataPacket) {
             this.entityMetadataPacket = entityMetadataPacket;
         }
 
         @Override
-        public void process(final Vector3d position, final List<Packet<?>> output) {
-            final SPacketSpawnObject packetSpawnObject = new SPacketSpawnObject();
+        public void process(final Vector3d position, final List<IPacket<?>> output) {
+            final SSpawnObjectPacket packetSpawnObject = new SSpawnObjectPacket();
             final SPacketSpawnObjectAccessor accessor = ((SPacketSpawnObjectAccessor) packetSpawnObject);
             accessor.accessor$setEntityId(FIREWORK_ROCKET_ID);
             accessor.accessor$setUniqueId(FIREWORK_ROCKET_UNIQUE_ID);
@@ -404,7 +403,7 @@ public final class SpongeParticleHelper {
         }
 
         @Override
-        public void process(final Vector3d position, final List<Packet<?>> output) {
+        public void process(final Vector3d position, final List<IPacket<?>> output) {
             final float px = (float) position.getX();
             final float py = (float) position.getY();
             final float pz = (float) position.getZ();
@@ -413,7 +412,7 @@ public final class SpongeParticleHelper {
             final float ody = this.offset.getY();
             final float odz = this.offset.getZ();
 
-            final SPacketParticles message = new SPacketParticles(
+            final SSpawnParticlePacket message = new SSpawnParticlePacket(
                     this.particleType, true, px, py, pz, odx, ody, odz, 0f, this.quantity, this.extra);
             output.add(message);
         }
@@ -436,7 +435,7 @@ public final class SpongeParticleHelper {
         }
 
         @Override
-        public void process(final Vector3d position, final List<Packet<?>> output) {
+        public void process(final Vector3d position, final List<IPacket<?>> output) {
             final float px = (float) position.getX();
             final float py = (float) position.getY();
             final float pz = (float) position.getZ();
@@ -446,7 +445,7 @@ public final class SpongeParticleHelper {
             final float odz = this.offsetData.getZ();
 
             if (this.offset.equals(Vector3f.ZERO)) {
-                final SPacketParticles message = new SPacketParticles(
+                final SSpawnParticlePacket message = new SSpawnParticlePacket(
                         this.particleType, true, px, py, pz, odx, ody, odz, 1f, 0, this.extra);
                 for (int i = 0; i < this.quantity; i++) {
                     output.add(message);
@@ -463,7 +462,7 @@ public final class SpongeParticleHelper {
                     final float py0 = py + (random.nextFloat() * 2f - 1f) * oy;
                     final float pz0 = pz + (random.nextFloat() * 2f - 1f) * oz;
 
-                    final SPacketParticles message = new SPacketParticles(
+                    final SSpawnParticlePacket message = new SSpawnParticlePacket(
                             this.particleType, true, px0, py0, pz0, odx, ody, odz, 1f, 0, this.extra);
                     output.add(message);
                 }
@@ -484,9 +483,9 @@ public final class SpongeParticleHelper {
         }
 
         @Override
-        public void process(final Vector3d position, final List<Packet<?>> output) {
+        public void process(final Vector3d position, final List<IPacket<?>> output) {
             final BlockPos blockPos = new BlockPos(position.getFloorX(), position.getFloorY(), position.getFloorZ());
-            output.add(new SPacketEffect(this.type, blockPos, this.data, this.broadcast));
+            output.add(new SPlaySoundEventPacket(this.type, blockPos, this.data, this.broadcast));
         }
     }
 

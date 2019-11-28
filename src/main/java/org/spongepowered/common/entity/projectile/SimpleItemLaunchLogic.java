@@ -25,7 +25,7 @@
 package org.spongepowered.common.entity.projectile;
 
 import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntityDispenser;
+import net.minecraft.tileentity.DispenserTileEntity;
 import org.spongepowered.api.block.tileentity.carrier.Dispenser;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -43,7 +43,7 @@ public class SimpleItemLaunchLogic<P extends Projectile> extends SimpleEntityLau
 
     @Override
     public Optional<P> launch(ProjectileSource source) {
-        if (source instanceof TileEntityDispenser) {
+        if (source instanceof DispenserTileEntity) {
             return ProjectileLauncher.getSourceLogic(Dispenser.class).launch(this, (Dispenser) source, this.projectileClass, this.item);
         }
         return super.launch(source);

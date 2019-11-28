@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -36,6 +35,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.player.ServerPlayerEntity;
 
 public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends PluginPhaseContext<L> {
 
@@ -139,7 +139,7 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
                 .toString();
         }
 
-        public void addPlayer(final EntityPlayerMP playerMP) {
+        public void addPlayer(final ServerPlayerEntity playerMP) {
             this.player = ((Player) playerMP);
         }
     }

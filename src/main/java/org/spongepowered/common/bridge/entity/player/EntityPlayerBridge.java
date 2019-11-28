@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.bridge.entity.player;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 

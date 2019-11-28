@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -35,11 +34,12 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 
-public class EntityTracksOutputValueProcessor extends AbstractSpongeValueProcessor<EntityMinecartCommandBlock, Boolean, Value<Boolean>> {
+public class EntityTracksOutputValueProcessor extends AbstractSpongeValueProcessor<MinecartCommandBlockEntity, Boolean, Value<Boolean>> {
 
     public EntityTracksOutputValueProcessor() {
-        super(EntityMinecartCommandBlock.class, Keys.TRACKS_OUTPUT);
+        super(MinecartCommandBlockEntity.class, Keys.TRACKS_OUTPUT);
     }
 
     @Override
@@ -53,13 +53,13 @@ public class EntityTracksOutputValueProcessor extends AbstractSpongeValueProcess
     }
 
     @Override
-    protected boolean set(EntityMinecartCommandBlock container, Boolean value) {
+    protected boolean set(MinecartCommandBlockEntity container, Boolean value) {
         container.func_145822_e().func_175573_a(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityMinecartCommandBlock container) {
+    protected Optional<Boolean> getVal(MinecartCommandBlockEntity container) {
         return Optional.of(container.func_145822_e().func_175571_m());
     }
 

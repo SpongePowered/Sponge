@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.projectile.EntityTippedArrow;
-import net.minecraft.potion.PotionEffect;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Set;
+import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.potion.EffectInstance;
 
-@Mixin(EntityTippedArrow.class)
+@Mixin(ArrowEntity.class)
 public interface EntityTippedArrowAccessor {
 
-    @Accessor("customPotionEffects") Set<PotionEffect> accessor$getCustomPotionEffects();
+    @Accessor("customPotionEffects") Set<EffectInstance> accessor$getCustomPotionEffects();
 
 }

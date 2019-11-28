@@ -27,8 +27,8 @@ package org.spongepowered.common.world.storage;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
@@ -86,7 +86,7 @@ public final class SpongePlayerDataHandler {
             }
             for (final Path playerFile : playerFiles) {
                 if (Files.isReadable(playerFile)) {
-                    final NBTTagCompound compound;
+                    final CompoundNBT compound;
 
                     try (final InputStream stream = Files.newInputStream(playerFile)) {
                         compound = CompressedStreamTools.func_74796_a(stream);
@@ -126,11 +126,11 @@ public final class SpongePlayerDataHandler {
         }
     }
 
-    private static NBTTagCompound createCompoundFor(final SpongePlayerData data) {
+    private static CompoundNBT createCompoundFor(final SpongePlayerData data) {
         return NbtTranslator.getInstance().translateData(data.toContainer());
     }
 
-    private static void saveFile(final String id, final NBTTagCompound compound) {
+    private static void saveFile(final String id, final CompoundNBT compound) {
         checkState(Holder.INSTANCE.hasInitialized, "PlayerDataHandler hasn't initialized yet!");
         final SpongePlayerDataHandler instance = Holder.INSTANCE;
         try {

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import net.minecraft.tileentity.TileEntityLockable;
+import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.world.LockCode;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -41,18 +41,18 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 
 public final class TileEntityLockableDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntityLockable, String, Value<String>, LockableData, ImmutableLockableData> {
+        extends AbstractTileEntitySingleDataProcessor<LockableTileEntity, String, Value<String>, LockableData, ImmutableLockableData> {
 
     public TileEntityLockableDataProcessor() {
-        super(TileEntityLockable.class, Keys.LOCK_TOKEN);
+        super(LockableTileEntity.class, Keys.LOCK_TOKEN);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (!(container instanceof TileEntityLockable)) {
+        if (!(container instanceof LockableTileEntity)) {
             return DataTransactionResult.failNoData();
         }
-        TileEntityLockable tile = (TileEntityLockable) container;
+        LockableTileEntity tile = (LockableTileEntity) container;
         Optional<String> old = getVal(tile);
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
@@ -62,13 +62,13 @@ public final class TileEntityLockableDataProcessor
     }
 
     @Override
-    protected boolean set(TileEntityLockable tile, String value) {
+    protected boolean set(LockableTileEntity tile, String value) {
         tile.func_174892_a(value.length() == 0 ? LockCode.field_180162_a : new LockCode(value));
         return true;
     }
 
     @Override
-    protected Optional<String> getVal(TileEntityLockable tile) {
+    protected Optional<String> getVal(LockableTileEntity tile) {
         if (tile.func_174893_q_()) {
             return Optional.of(tile.func_174891_i().func_180159_b());
         }

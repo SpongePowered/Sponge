@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityTNTPrimed;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -45,14 +43,16 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.TNTEntity;
 
-@Mixin(EntityTNTPrimed.class)
+@Mixin(TNTEntity.class)
 public abstract class EntityTNTPrimedMixin_API extends EntityMixin_API implements PrimedTNT {
 
     private static final BlockType BLOCK_TYPE = BlockTypes.TNT;
 
     @Shadow private int fuse;
-    @Shadow @Nullable private EntityLivingBase tntPlacedBy;
+    @Shadow @Nullable private LivingEntity tntPlacedBy;
     @Shadow private void explode() { }
 
     @Override

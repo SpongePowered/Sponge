@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.multi.entity;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -41,21 +40,22 @@ import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.LivingEntity;
 
-public class DamageableDataProcessor extends AbstractEntityDataProcessor<EntityLivingBase, DamageableData, ImmutableDamageableData> {
+public class DamageableDataProcessor extends AbstractEntityDataProcessor<LivingEntity, DamageableData, ImmutableDamageableData> {
 
     public DamageableDataProcessor() {
-        super(EntityLivingBase.class);
+        super(LivingEntity.class);
     }
 
     @Override
-    protected boolean doesDataExist(EntityLivingBase dataHolder) {
+    protected boolean doesDataExist(LivingEntity dataHolder) {
         return true;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected boolean set(EntityLivingBase dataHolder, Map<Key<?>, Object> keyValues) {
+    protected boolean set(LivingEntity dataHolder, Map<Key<?>, Object> keyValues) {
         final Optional<EntitySnapshot> lastAttacker = (Optional<EntitySnapshot>) keyValues.get(Keys.LAST_ATTACKER);
         if (lastAttacker == null || !lastAttacker.isPresent()) {
             dataHolder.func_70604_c(null);
@@ -65,8 +65,8 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<EntityL
             final Optional<Entity> optionalEntity = lastAttacker.get().restore();
             if (optionalEntity.isPresent()) {
                 final Entity entity = optionalEntity.get();
-                if (entity.isLoaded() && entity instanceof EntityLivingBase) {
-                    dataHolder.func_70604_c((EntityLivingBase) entity);
+                if (entity.isLoaded() && entity instanceof LivingEntity) {
+                    dataHolder.func_70604_c((LivingEntity) entity);
                     ((EntityLivingBaseAccessor) dataHolder).accessor$setLastDamage(((Optional<Double>)keyValues.get(Keys.LAST_DAMAGE)).orElse(0D).floatValue());
                     return true;
                 }
@@ -76,7 +76,7 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<EntityL
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityLivingBase dataHolder) {
+    protected Map<Key<?>, ?> getValues(LivingEntity dataHolder) {
         EntitySnapshot snapshot = dataHolder.func_94060_bK() != null ? ((Entity) dataHolder.func_94060_bK()).createSnapshot() : null;
         return ImmutableMap.of(Keys.LAST_ATTACKER, Optional.ofNullable(snapshot),
                 Keys.LAST_DAMAGE, Optional.ofNullable(dataHolder.func_94060_bK() == null ? null : ((EntityLivingBaseAccessor) dataHolder).accessor$getLastDamage()));

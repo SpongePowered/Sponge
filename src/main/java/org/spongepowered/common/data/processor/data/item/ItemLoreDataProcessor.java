@@ -26,8 +26,8 @@ package org.spongepowered.common.data.processor.data.item;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -84,21 +84,21 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
 
     @Override
     protected boolean set(ItemStack itemStack, List<Text> value) {
-        final NBTTagList list =  SpongeTexts.asLegacy(value);
+        final ListNBT list =  SpongeTexts.asLegacy(value);
         itemStack.func_190925_c(Constants.Item.ITEM_DISPLAY).func_74782_a(Constants.Item.ITEM_LORE, list); // setSubCompound
         return true;
     }
 
     @Override
     protected Optional<List<Text>> getVal(ItemStack itemStack) {
-        final NBTTagCompound subCompound = itemStack.func_179543_a(Constants.Item.ITEM_DISPLAY);
+        final CompoundNBT subCompound = itemStack.func_179543_a(Constants.Item.ITEM_DISPLAY);
         if (subCompound == null) {
             return Optional.empty();
         }
         if (!subCompound.func_150297_b(Constants.Item.ITEM_LORE, Constants.NBT.TAG_LIST)) {
             return Optional.empty();
         }
-        final NBTTagList list = subCompound.func_150295_c(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
+        final ListNBT list = subCompound.func_150295_c(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
         return Optional.of(SpongeTexts.fromNbtLegacy(list));
     }
 

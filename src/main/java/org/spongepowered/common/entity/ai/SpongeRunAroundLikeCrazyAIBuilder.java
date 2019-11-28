@@ -25,8 +25,8 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.entity.ai.EntityAIRunAroundLikeCrazy;
-import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.ai.goal.RunAroundLikeCrazyGoal;
+import net.minecraft.entity.passive.horse.HorseEntity;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
 import org.spongepowered.api.entity.living.animal.RideableHorse;
 
@@ -58,6 +58,6 @@ public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCra
     @Override
     public RunAroundLikeCrazyAITask build(RideableHorse owner) {
         Preconditions.checkNotNull(owner);
-        return (RunAroundLikeCrazyAITask) new EntityAIRunAroundLikeCrazy((EntityHorse) owner, this.speed);
+        return (RunAroundLikeCrazyAITask) new RunAroundLikeCrazyGoal((HorseEntity) owner, this.speed);
     }
 }

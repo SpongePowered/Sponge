@@ -48,12 +48,11 @@ import co.aikar.timings.Timings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -370,7 +369,7 @@ public class SpongeCommandFactory {
                     throws CommandException {
                     for (final World world : SpongeImpl.getGame().getServer().getWorlds()) {
                         source.sendMessage(Text.of("World ", Text.of(TextStyles.BOLD, world.getName()),
-                            getChunksInfo(((WorldServer) world))));
+                            getChunksInfo(((ServerWorld) world))));
                     }
                     return Text.of("Printed chunk info for all worlds ");
                 }
@@ -381,7 +380,7 @@ public class SpongeCommandFactory {
                     throws CommandException {
                     SpongeImpl.getGame().getServer().getWorlds().stream().filter(world -> world.getDimension().getType().equals(dim))
                         .forEach(world -> source.sendMessage(Text.of("World ", Text.of(TextStyles.BOLD, world.getName()),
-                            getChunksInfo(((WorldServer) world)))));
+                            getChunksInfo(((ServerWorld) world)))));
                     return Text.of("Printed chunk info for all worlds in dimension ", dim.getName());
                 }
 
@@ -389,7 +388,7 @@ public class SpongeCommandFactory {
                 protected Text processWorld(
                     final SpongeConfig<WorldConfig> config, final World world, final CommandSource source, final CommandContext args)
                     throws CommandException {
-                    return getChunksInfo((WorldServer) world);
+                    return getChunksInfo((ServerWorld) world);
                 }
 
                 protected Text key(final Object text) {
@@ -400,7 +399,7 @@ public class SpongeCommandFactory {
                     return Text.of(TextColors.GRAY, text);
                 }
 
-                protected Text getChunksInfo(final WorldServer worldserver) {
+                protected Text getChunksInfo(final ServerWorld worldserver) {
                     if (((WorldBridge) worldserver).bridge$isFake() || worldserver.func_72912_H() == null) {
                         return Text.of(NEWLINE_TEXT, "Fake world");
                     }
@@ -533,17 +532,17 @@ public class SpongeCommandFactory {
                     src.sendMessage(Text.of(TextColors.RED, "Players must execute this command!"));
                     return CommandResult.empty();
                 }
-                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Player) src;
+                final ServerPlayerEntity entityPlayerMP = (ServerPlayerEntity) (Player) src;
                 final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F);
                 if (rayTraceResult.field_72313_a != RayTraceResult.Type.BLOCK) {
                     src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,
                         "Failed to find a block! Please execute the command when looking at a block!"));
                     return CommandResult.empty();
                 }
-                final WorldServer worldServer = (WorldServer) entityPlayerMP.field_70170_p;
+                final ServerWorld worldServer = (ServerWorld) entityPlayerMP.field_70170_p;
                 final Chunk chunk = worldServer.func_175726_f(rayTraceResult.func_178782_a());
                 final ChunkBridge mixinChunk = (ChunkBridge) chunk;
-                final IBlockState blockState = worldServer.func_180495_p(rayTraceResult.func_178782_a());
+                final net.minecraft.block.BlockState blockState = worldServer.func_180495_p(rayTraceResult.func_178782_a());
                 final BlockState spongeState = (BlockState) blockState;
                 src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Type: ", TextColors.BLUE, TextStyles.RESET, spongeState.getId()));
                 src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Owner: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.bridge$getBlockOwner(rayTraceResult.func_178782_a())));
@@ -561,7 +560,7 @@ public class SpongeCommandFactory {
                 if (!(src instanceof Player)) {
                     return CommandResult.empty();
                 }
-                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Player) src;
+                final ServerPlayerEntity entityPlayerMP = (ServerPlayerEntity) (Player) src;
                 final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F, true);
                 if (rayTraceResult.field_72313_a != RayTraceResult.Type.ENTITY) {
                     src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,

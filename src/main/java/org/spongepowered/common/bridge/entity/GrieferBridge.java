@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.entity;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 
 public interface GrieferBridge {
 
@@ -33,6 +33,6 @@ public interface GrieferBridge {
     void bridge$SetCanGrief(boolean grief);
 
     default boolean bridge$isGriefer() {
-        return !(this instanceof EntityPlayerMP);
+        return !(this instanceof ServerPlayerEntity);
     }
 }

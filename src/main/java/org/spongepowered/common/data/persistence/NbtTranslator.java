@@ -31,19 +31,19 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
+import net.minecraft.nbt.ByteArrayNBT;
+import net.minecraft.nbt.ByteNBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
+import net.minecraft.nbt.FloatNBT;
+import net.minecraft.nbt.IntArrayNBT;
+import net.minecraft.nbt.IntNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.LongArrayNBT;
+import net.minecraft.nbt.LongNBT;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagByte;
-import net.minecraft.nbt.NBTTagByteArray;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagFloat;
-import net.minecraft.nbt.NBTTagInt;
-import net.minecraft.nbt.NBTTagIntArray;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagLong;
-import net.minecraft.nbt.NBTTagLongArray;
-import net.minecraft.nbt.NBTTagShort;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.ShortNBT;
+import net.minecraft.nbt.StringNBT;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
@@ -56,10 +56,10 @@ import org.spongepowered.common.util.Constants;
 import java.util.List;
 import java.util.Map;
 
-public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
+public final class NbtTranslator implements DataTranslator<CompoundNBT> {
 
     private static final NbtTranslator instance = new NbtTranslator();
-    private static final TypeToken<NBTTagCompound> TOKEN = TypeToken.of(NBTTagCompound.class);
+    private static final TypeToken<CompoundNBT> TOKEN = TypeToken.of(CompoundNBT.class);
     public static final String BOOLEAN_IDENTIFIER = "$Boolean";
 
     public static NbtTranslator getInstance() {
@@ -68,14 +68,14 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
     private NbtTranslator() { } // #NOPE
 
-    private static NBTTagCompound containerToCompound(final DataView container) {
+    private static CompoundNBT containerToCompound(final DataView container) {
         checkNotNull(container);
-        NBTTagCompound compound = new NBTTagCompound();
+        CompoundNBT compound = new CompoundNBT();
         containerToCompound(container, compound);
         return compound;
     }
 
-    private static void containerToCompound(final DataView container, final NBTTagCompound compound) {
+    private static void containerToCompound(final DataView container, final CompoundNBT compound) {
         // We don't need to get deep values since all nested DataViews will be found
         // from the instance of checks.
         checkNotNull(container);
@@ -84,11 +84,11 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             Object value = entry.getValue();
             String key = entry.getKey().asString('.');
             if (value instanceof DataView) {
-                NBTTagCompound inner = new NBTTagCompound();
+                CompoundNBT inner = new CompoundNBT();
                 containerToCompound(container.getView(entry.getKey()).get(), inner);
                 compound.func_74782_a(key, inner);
             } else if (value instanceof Boolean) {
-                compound.func_74782_a(key + BOOLEAN_IDENTIFIER, new NBTTagByte(((Boolean) value) ? (byte) 1 : 0));
+                compound.func_74782_a(key + BOOLEAN_IDENTIFIER, new ByteNBT(((Boolean) value) ? (byte) 1 : 0));
             } else {
                 compound.func_74782_a(key, getBaseFromObject(value));
             }
@@ -99,52 +99,52 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     private static NBTBase getBaseFromObject(Object value) {
         checkNotNull(value);
         if (value instanceof Boolean) {
-            return new NBTTagByte((Boolean) value ? (byte) 1 : 0);
+            return new ByteNBT((Boolean) value ? (byte) 1 : 0);
         } else if (value instanceof Byte) {
-            return new NBTTagByte((Byte) value);
+            return new ByteNBT((Byte) value);
         } else if (value instanceof Short) {
-            return new NBTTagShort((Short) value);
+            return new ShortNBT((Short) value);
         } else if (value instanceof Integer) {
-            return new NBTTagInt((Integer) value);
+            return new IntNBT((Integer) value);
         } else if (value instanceof Long) {
-            return new NBTTagLong((Long) value);
+            return new LongNBT((Long) value);
         } else if (value instanceof Float) {
-            return new NBTTagFloat((Float) value);
+            return new FloatNBT((Float) value);
         } else if (value instanceof Double) {
-            return new NBTTagDouble((Double) value);
+            return new DoubleNBT((Double) value);
         } else if (value instanceof String) {
-            return new NBTTagString((String) value);
+            return new StringNBT((String) value);
         } else if (value.getClass().isArray()) {
             if (value instanceof byte[]) {
-                return new NBTTagByteArray((byte[]) value);
+                return new ByteArrayNBT((byte[]) value);
             } else if (value instanceof Byte[]) {
                 byte[] array = new byte[((Byte[]) value).length];
                 int counter = 0;
                 for (Byte data : (Byte[]) value) {
                     array[counter++] = data;
                 }
-                return new NBTTagByteArray(array);
+                return new ByteArrayNBT(array);
             } else if (value instanceof int[]) {
-                return new NBTTagIntArray((int[]) value);
+                return new IntArrayNBT((int[]) value);
             } else if (value instanceof Integer[]) {
                 int[] array = new int[((Integer[]) value).length];
                 int counter = 0;
                 for (Integer data : (Integer[]) value) {
                     array[counter++] = data;
                 }
-                return new NBTTagIntArray(array);
+                return new IntArrayNBT(array);
             } else if (value instanceof long[]) {
-                return new NBTTagLongArray((long[]) value);
+                return new LongArrayNBT((long[]) value);
             } else if (value instanceof Long[]) {
                 long[] array = new long[((Long[]) value).length];
                 int counter = 0;
                 for (Long data : (Long[]) value) {
                     array[counter++] = data;
                 }
-                return new NBTTagLongArray(array);
+                return new LongArrayNBT(array);
             }
         } else if (value instanceof List) {
-            NBTTagList list = new NBTTagList();
+            ListNBT list = new ListNBT();
             for (Object object : (List) value) {
                 // Oh hey, we already have a translation already
                 // since DataView only supports some primitive types anyways...
@@ -152,7 +152,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             }
             return list;
         } else if (value instanceof Map) {
-            NBTTagCompound compound = new NBTTagCompound();
+            CompoundNBT compound = new CompoundNBT();
             for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
                 if (entry.getKey() instanceof DataQuery) {
                     if (entry.getValue() instanceof Boolean) {
@@ -175,7 +175,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         throw new IllegalArgumentException("Unable to translate object to NBTBase: " + value);
     }
 
-    private static DataContainer getViewFromCompound(NBTTagCompound compound) {
+    private static DataContainer getViewFromCompound(CompoundNBT compound) {
         checkNotNull(compound);
         DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
         NbtTranslator.getInstance().addTo(compound, container);
@@ -192,34 +192,34 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         switch (type) {
             case Constants.NBT.TAG_BYTE:
                 if (key.contains(BOOLEAN_IDENTIFIER)) {
-                    view.set(of(key.replace(BOOLEAN_IDENTIFIER, "")), (((NBTTagByte) base).func_150290_f() != 0));
+                    view.set(of(key.replace(BOOLEAN_IDENTIFIER, "")), (((ByteNBT) base).func_150290_f() != 0));
                 } else {
-                    view.set(of(key), ((NBTTagByte) base).func_150290_f());
+                    view.set(of(key), ((ByteNBT) base).func_150290_f());
                 }
                 break;
             case Constants.NBT.TAG_SHORT:
-                view.set(of(key), ((NBTTagShort) base).func_150289_e());
+                view.set(of(key), ((ShortNBT) base).func_150289_e());
                 break;
             case Constants.NBT.TAG_INT:
-                view.set(of(key), ((NBTTagInt) base).func_150287_d());
+                view.set(of(key), ((IntNBT) base).func_150287_d());
                 break;
             case Constants.NBT.TAG_LONG:
-                view.set(of(key), ((NBTTagLong) base).func_150291_c());
+                view.set(of(key), ((LongNBT) base).func_150291_c());
                 break;
             case Constants.NBT.TAG_FLOAT:
-                view.set(of(key), ((NBTTagFloat) base).func_150288_h());
+                view.set(of(key), ((FloatNBT) base).func_150288_h());
                 break;
             case Constants.NBT.TAG_DOUBLE:
-                view.set(of(key), ((NBTTagDouble) base).func_150286_g());
+                view.set(of(key), ((DoubleNBT) base).func_150286_g());
                 break;
             case Constants.NBT.TAG_BYTE_ARRAY:
-                view.set(of(key), ((NBTTagByteArray) base).func_150292_c());
+                view.set(of(key), ((ByteArrayNBT) base).func_150292_c());
                 break;
             case Constants.NBT.TAG_STRING:
-                view.set(of(key), ((NBTTagString) base).func_150285_a_());
+                view.set(of(key), ((StringNBT) base).func_150285_a_());
                 break;
             case Constants.NBT.TAG_LIST:
-                NBTTagList list = (NBTTagList) base;
+                ListNBT list = (ListNBT) base;
                 byte listType = (byte) list.func_150303_d();
                 int count = list.func_74745_c();
                 List objectList = Lists.newArrayListWithCapacity(count);
@@ -230,7 +230,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 break;
             case Constants.NBT.TAG_COMPOUND:
                 DataView internalView = view.createView(of(key));
-                NBTTagCompound compound = (NBTTagCompound) base;
+                CompoundNBT compound = (CompoundNBT) base;
                 for (String internalKey : compound.func_150296_c()) {
                     NBTBase internalBase = compound.func_74781_a(internalKey);
                     byte internalType = internalBase.func_74732_a();
@@ -242,7 +242,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 }
                 break;
             case Constants.NBT.TAG_INT_ARRAY:
-                view.set(of(key), ((NBTTagIntArray) base).func_150302_c());
+                view.set(of(key), ((IntArrayNBT) base).func_150302_c());
                 break;
             case Constants.NBT.TAG_LONG_ARRAY:
                 view.set(of(key), ((NBTTagLongArrayAccessor) base).accessor$getLongArray());
@@ -256,23 +256,23 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     private static Object fromTagBase(NBTBase base, byte type) {
         switch (type) {
             case Constants.NBT.TAG_BYTE:
-                return ((NBTTagByte) base).func_150290_f();
+                return ((ByteNBT) base).func_150290_f();
             case Constants.NBT.TAG_SHORT:
-                return (((NBTTagShort) base)).func_150289_e();
+                return (((ShortNBT) base)).func_150289_e();
             case Constants.NBT.TAG_INT:
-                return ((NBTTagInt) base).func_150287_d();
+                return ((IntNBT) base).func_150287_d();
             case Constants.NBT.TAG_LONG:
-                return ((NBTTagLong) base).func_150291_c();
+                return ((LongNBT) base).func_150291_c();
             case Constants.NBT.TAG_FLOAT:
-                return ((NBTTagFloat) base).func_150288_h();
+                return ((FloatNBT) base).func_150288_h();
             case Constants.NBT.TAG_DOUBLE:
-                return ((NBTTagDouble) base).func_150286_g();
+                return ((DoubleNBT) base).func_150286_g();
             case Constants.NBT.TAG_BYTE_ARRAY:
-                return ((NBTTagByteArray) base).func_150292_c();
+                return ((ByteArrayNBT) base).func_150292_c();
             case Constants.NBT.TAG_STRING:
-                return ((NBTTagString) base).func_150285_a_();
+                return ((StringNBT) base).func_150285_a_();
             case Constants.NBT.TAG_LIST:
-                NBTTagList list = (NBTTagList) base;
+                ListNBT list = (ListNBT) base;
                 byte listType = (byte) list.func_150303_d();
                 int count = list.func_74745_c();
                 List objectList = Lists.newArrayListWithCapacity(count);
@@ -281,9 +281,9 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 }
                 return objectList;
             case Constants.NBT.TAG_COMPOUND:
-                return getViewFromCompound((NBTTagCompound) base);
+                return getViewFromCompound((CompoundNBT) base);
             case Constants.NBT.TAG_INT_ARRAY:
-                return ((NBTTagIntArray) base).func_150302_c();
+                return ((IntArrayNBT) base).func_150302_c();
             case Constants.NBT.TAG_LONG_ARRAY:
                 return ((NBTTagLongArrayAccessor) base).accessor$getLongArray();
             default :
@@ -291,35 +291,35 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         }
     }
 
-    public NBTTagCompound translateData(DataView container) {
+    public CompoundNBT translateData(DataView container) {
         return NbtTranslator.containerToCompound(container);
     }
 
-    public void translateContainerToData(NBTTagCompound node, DataView container) {
+    public void translateContainerToData(CompoundNBT node, DataView container) {
         NbtTranslator.containerToCompound(container, node);
     }
 
-    public DataContainer translateFrom(NBTTagCompound node) {
+    public DataContainer translateFrom(CompoundNBT node) {
         return NbtTranslator.getViewFromCompound(node);
     }
 
     @Override
-    public TypeToken<NBTTagCompound> getToken() {
+    public TypeToken<CompoundNBT> getToken() {
         return TOKEN;
     }
 
     @Override
-    public NBTTagCompound translate(DataView view) throws InvalidDataException {
+    public CompoundNBT translate(DataView view) throws InvalidDataException {
         return containerToCompound(view);
     }
 
     @Override
-    public DataContainer translate(NBTTagCompound obj) throws InvalidDataException {
+    public DataContainer translate(CompoundNBT obj) throws InvalidDataException {
         return getViewFromCompound(obj);
     }
 
     @Override
-    public DataView addTo(NBTTagCompound compound, DataView container) {
+    public DataView addTo(CompoundNBT compound, DataView container) {
         for (String key : compound.func_150296_c()) {
             NBTBase base = compound.func_74781_a(key);
             byte type = base.func_74732_a();

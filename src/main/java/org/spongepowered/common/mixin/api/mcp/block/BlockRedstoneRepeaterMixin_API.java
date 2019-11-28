@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockRedstoneRepeater;
+import net.minecraft.block.RepeaterBlock;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(BlockRedstoneRepeater.class)
+@Mixin(RepeaterBlock.class)
 public abstract class BlockRedstoneRepeaterMixin_API extends BlockMixin_API {
 
     @Override

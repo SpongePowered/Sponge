@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -40,6 +39,7 @@ import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.entity.player.PlayerEntity;
 
 public class FirstJoinValueProcessor extends AbstractSpongeValueProcessor<Identifiable, Instant, Value<Instant>> {
 
@@ -49,7 +49,7 @@ public class FirstJoinValueProcessor extends AbstractSpongeValueProcessor<Identi
 
     @Override
     protected boolean supports(Identifiable dataHolder) {
-        return dataHolder instanceof EntityPlayer || dataHolder instanceof SpongeUser;
+        return dataHolder instanceof PlayerEntity || dataHolder instanceof SpongeUser;
     }
 
     @Override

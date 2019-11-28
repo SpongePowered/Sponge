@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.item.inventory.custom;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 
 public class CustomContainer extends Container {
 
     public CustomInventory inv;
 
-    public CustomContainer(final EntityPlayer player, final CustomInventory inventory) {
+    public CustomContainer(final PlayerEntity player, final CustomInventory inventory) {
         this.inv = inventory;
 
         // TODO what significance has the x/y coord on the Slots?
@@ -52,18 +52,18 @@ public class CustomContainer extends Container {
     }
 
     @Override
-    public boolean func_75145_c(final EntityPlayer playerIn) {
+    public boolean func_75145_c(final PlayerEntity playerIn) {
         return true;
     }
 
     @Override
-    public void func_75134_a(final EntityPlayer playerIn) {
+    public void func_75134_a(final PlayerEntity playerIn) {
         super.func_75134_a(playerIn);
         this.inv.func_174886_c(playerIn);
     }
 
     @Override
-    public ItemStack func_82846_b(final EntityPlayer playerIn, final int index) {
+    public ItemStack func_82846_b(final PlayerEntity playerIn, final int index) {
         ItemStack itemstack = ItemStack.field_190927_a;
         final Slot slot = this.field_75151_b.get(index);
 

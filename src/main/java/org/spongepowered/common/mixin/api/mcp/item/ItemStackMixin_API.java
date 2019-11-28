@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.item;
 
 import com.google.common.collect.Lists;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -66,12 +66,12 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     @Shadow public abstract int getCount();
     @Shadow public abstract void setCount(int size); // Do not use field directly as Minecraft tracks the empty state
     @Shadow public abstract void setItemDamage(int meta);
-    @Shadow public abstract void setTagCompound(@Nullable NBTTagCompound compound);
+    @Shadow public abstract void setTagCompound(@Nullable CompoundNBT compound);
     @Shadow public abstract int getItemDamage();
     @Shadow public abstract int getMaxStackSize();
     @Shadow public abstract boolean hasTagCompound();
     @Shadow public abstract boolean shadow$isEmpty();
-    @Shadow public abstract NBTTagCompound getTagCompound();
+    @Shadow public abstract CompoundNBT getTagCompound();
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
 
@@ -108,7 +108,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
         try {
             final int integer = container.getInt(Constants.ItemStack.DAMAGE_VALUE).orElse(this.getItemDamage());
             this.setItemDamage(integer);
-            final NBTTagCompound stackCompound = NbtTranslator.getInstance().translate(nbtData);
+            final CompoundNBT stackCompound = NbtTranslator.getInstance().translate(nbtData);
             this.setTagCompound(stackCompound);
         } catch (Exception e) {
             throw new InvalidDataException("Unable to set raw data or translate raw data for ItemStack setting", e);
@@ -137,9 +137,9 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
                 .set(Constants.ItemStack.COUNT, this.apiStack$getQuantity())
                 .set(Constants.ItemStack.DAMAGE_VALUE, this.getItemDamage());
         if (hasTagCompound()) { // no tag? no data, simple as that.
-            final NBTTagCompound compound = getTagCompound().func_74737_b();
+            final CompoundNBT compound = getTagCompound().func_74737_b();
             if (compound.func_74764_b(Constants.Sponge.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.func_74775_l(Constants.Sponge.SPONGE_DATA);
+                final CompoundNBT spongeCompound = compound.func_74775_l(Constants.Sponge.SPONGE_DATA);
                 if (spongeCompound.func_74764_b(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
                     spongeCompound.func_82580_o(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
                 }

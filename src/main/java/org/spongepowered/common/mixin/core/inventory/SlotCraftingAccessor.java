@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.inventory.SlotCrafting;
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.container.CraftingResultSlot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(SlotCrafting.class)
+@Mixin(CraftingResultSlot.class)
 public interface SlotCraftingAccessor {
 
-    @Accessor("craftMatrix") InventoryCrafting accessor$getCraftingMatrix();
+    @Accessor("craftMatrix") CraftingInventory accessor$getCraftingMatrix();
 
 }

@@ -24,24 +24,24 @@
  */
 package org.spongepowered.common.mixin.api.mcp.util;
 
-import net.minecraft.util.EnumHand;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Locale;
+import net.minecraft.util.Hand;
 
-@Mixin(EnumHand.class)
+@Mixin(Hand.class)
 public abstract class EnumHandMixin_API implements HandType {
 
     @Override
     public String getId() {
-        return "minecraft:" + ((EnumHand) (Object) this).name().toLowerCase(Locale.ENGLISH);
+        return "minecraft:" + ((Hand) (Object) this).name().toLowerCase(Locale.ENGLISH);
     }
 
     @Override
     public String getName() {
-        return ((EnumHand) (Object) this).name();
+        return ((Hand) (Object) this).name();
     }
 
     @Override

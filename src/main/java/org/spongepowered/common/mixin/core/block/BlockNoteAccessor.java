@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockNote;
+import net.minecraft.block.NoteBlock;
 import net.minecraft.util.SoundEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
 
-@Mixin(BlockNote.class)
+@Mixin(NoteBlock.class)
 public interface BlockNoteAccessor {
 
     @Accessor("INSTRUMENTS")

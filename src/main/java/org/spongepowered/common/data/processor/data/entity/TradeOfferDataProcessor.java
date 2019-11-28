@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -45,10 +45,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class TradeOfferDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityVillager, List<TradeOffer>, ListValue<TradeOffer>, TradeOfferData, ImmutableTradeOfferData> {
+        extends AbstractEntitySingleDataProcessor<VillagerEntity, List<TradeOffer>, ListValue<TradeOffer>, TradeOfferData, ImmutableTradeOfferData> {
 
     public TradeOfferDataProcessor() {
-        super(EntityVillager.class, Keys.TRADE_OFFERS);
+        super(VillagerEntity.class, Keys.TRADE_OFFERS);
     }
 
     private static List<TradeOffer> toTradeOfferList(final MerchantRecipeList list) {
@@ -73,14 +73,14 @@ public class TradeOfferDataProcessor
     }
 
     @Override
-    protected boolean set(final EntityVillager entity, final List<TradeOffer> value) {
+    protected boolean set(final VillagerEntity entity, final List<TradeOffer> value) {
         ((EntityVillagerAccessor) entity).accessor$setBuyingList(toMerchantRecipeList(value));
         return true;
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    protected Optional<List<TradeOffer>> getVal(final EntityVillager entity) {
+    protected Optional<List<TradeOffer>> getVal(final VillagerEntity entity) {
         final MerchantRecipeList recipes = ((EntityVillagerAccessor) entity).accessor$getBuyingList();
         if (recipes == null) {
             ((EntityVillagerAccessor) entity).accessor$PopulateBuyingList();

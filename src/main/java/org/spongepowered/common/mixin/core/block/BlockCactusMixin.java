@@ -25,8 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockCactus;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.CactusBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
@@ -48,14 +47,14 @@ import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 
 import java.util.Optional;
 
-@Mixin(BlockCactus.class)
+@Mixin(CactusBlock.class)
 public abstract class BlockCactusMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Redirect(method = "onEntityCollision",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     private boolean impl$reAssignForBlockDamageSource(final Entity entity, final DamageSource source, final float damage,
-        final net.minecraft.world.World world, final BlockPos pos, final IBlockState state, final Entity entityIn) {
+        final net.minecraft.world.World world, final BlockPos pos, final net.minecraft.block.BlockState state, final Entity entityIn) {
         if (world.field_72995_K) {
             return entity.func_70097_a(source, damage);
         }
@@ -71,7 +70,7 @@ public abstract class BlockCactusMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments")
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getGrowthData(blockState));
     }
 
@@ -81,25 +80,25 @@ public abstract class BlockCactusMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             final int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockCactus.field_176587_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(CactusBlock.field_176587_a, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             final int growth = (Integer) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockCactus.field_176587_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(CactusBlock.field_176587_a, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableGrowthData impl$getGrowthData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(BlockCactus.field_176587_a), 0, 15);
+    private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(CactusBlock.field_176587_a), 0, 15);
     }
 
 }

@@ -26,13 +26,13 @@ package org.spongepowered.common.world;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EnumLightType;
+import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
@@ -65,7 +65,7 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public IBlockState func_177435_g(BlockPos pos) {
+    public BlockState func_177435_g(BlockPos pos) {
         return Blocks.field_150350_a.func_176223_P();
     }
 
@@ -75,12 +75,12 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public int func_177413_a(EnumLightType p_177413_1_, BlockPos pos) {
+    public int func_177413_a(LightType p_177413_1_, BlockPos pos) {
         return p_177413_1_.field_77198_c;
     }
 
     @Override
-    public void func_177431_a(EnumLightType p_177431_1_, BlockPos pos, int value) {
+    public void func_177431_a(LightType p_177431_1_, BlockPos pos, int value) {
     }
 
     @Override
@@ -107,7 +107,7 @@ public class SpongeEmptyChunk extends Chunk {
 
     @Override
     @Nullable
-    public TileEntity func_177424_a(BlockPos pos, Chunk.EnumCreateEntityType p_177424_2_) {
+    public TileEntity func_177424_a(BlockPos pos, Chunk.CreateEntityType p_177424_2_) {
         return null;
     }
 

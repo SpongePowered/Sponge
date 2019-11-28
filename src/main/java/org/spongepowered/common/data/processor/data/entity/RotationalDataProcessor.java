@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.item.EntityItemFrame;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRotationalData;
@@ -41,22 +40,23 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.entity.item.ItemFrameEntity;
 
 public class RotationalDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityItemFrame, Rotation, Value<Rotation>, RotationalData, ImmutableRotationalData> {
+        extends AbstractEntitySingleDataProcessor<ItemFrameEntity, Rotation, Value<Rotation>, RotationalData, ImmutableRotationalData> {
 
     public RotationalDataProcessor() {
-        super(EntityItemFrame.class, Keys.ROTATION);
+        super(ItemFrameEntity.class, Keys.ROTATION);
     }
 
     @Override
-    protected boolean set(EntityItemFrame entity, Rotation value) {
+    protected boolean set(ItemFrameEntity entity, Rotation value) {
         entity.func_82336_g(value.getAngle() / 45);
         return true;
     }
 
     @Override
-    protected Optional<Rotation> getVal(EntityItemFrame entity) {
+    protected Optional<Rotation> getVal(ItemFrameEntity entity) {
         return Optional.of(SpongeImpl.getGame().getRegistry().getRotationFromDegree(entity.func_82333_j() * 45).get());
     }
 

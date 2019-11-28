@@ -25,11 +25,10 @@
 package org.spongepowered.common.data.processor.multi.item;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.BannerPattern;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -64,23 +63,23 @@ public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerD
     @Override
     public boolean set(final ItemStack itemStack, final Map<Key<?>, Object> keyValues) {
         if (itemStack.func_77978_p() == null) {
-            itemStack.func_77982_d(new NBTTagCompound());
+            itemStack.func_77982_d(new CompoundNBT());
         }
-        final NBTTagCompound blockEntity = itemStack.func_190925_c(Constants.Item.BLOCK_ENTITY_TAG);
+        final CompoundNBT blockEntity = itemStack.func_190925_c(Constants.Item.BLOCK_ENTITY_TAG);
         final DyeColor baseColor = (DyeColor) keyValues.get(Keys.BANNER_BASE_COLOR);
         final PatternListValue patternLayers = (PatternListValue) keyValues.get(Keys.BANNER_PATTERNS);
         if (!patternLayers.isEmpty()) {
-            final NBTTagList patterns = new NBTTagList();
+            final ListNBT patterns = new ListNBT();
 
             for (final PatternLayer layer : patternLayers) {
-                final NBTTagCompound compound = new NBTTagCompound();
+                final CompoundNBT compound = new CompoundNBT();
                 compound.func_74778_a(Constants.TileEntity.Banner.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).func_190993_b());
-                compound.func_74768_a(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).func_176767_b());
+                compound.func_74768_a(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).func_176767_b());
                 patterns.func_74742_a(compound);
             }
             blockEntity.func_74782_a(Constants.TileEntity.Banner.BANNER_PATTERNS, patterns);
         }
-        blockEntity.func_74768_a(Constants.TileEntity.Banner.BANNER_BASE, ((EnumDyeColor) (Object) baseColor).func_176767_b());
+        blockEntity.func_74768_a(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.item.DyeColor) (Object) baseColor).func_176767_b());
         return true;
     }
 

@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.potion;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.RegistryNamespacedDefaultedByKey;
+import net.minecraft.util.registry.DefaultedRegistry;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.asm.mixin.Final;
@@ -37,11 +37,11 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-@Mixin(net.minecraft.potion.PotionType.class)
+@Mixin(net.minecraft.potion.Potion.class)
 public abstract class PotionTypeMixin_API implements PotionType {
 
-    @Shadow @Final public static RegistryNamespacedDefaultedByKey<ResourceLocation, net.minecraft.potion.PotionType> REGISTRY;
-    @Shadow @Final private ImmutableList<net.minecraft.potion.PotionEffect> effects;
+    @Shadow @Final public static DefaultedRegistry<ResourceLocation, net.minecraft.potion.Potion> REGISTRY;
+    @Shadow @Final private ImmutableList<net.minecraft.potion.EffectInstance> effects;
 
     @Nullable private String spongeResourceID;
 
@@ -54,7 +54,7 @@ public abstract class PotionTypeMixin_API implements PotionType {
     @Override
     public String getId() {
         if (this.spongeResourceID == null) {
-            this.spongeResourceID = REGISTRY.func_177774_c((net.minecraft.potion.PotionType) (Object) this).toString();
+            this.spongeResourceID = REGISTRY.func_177774_c((net.minecraft.potion.Potion) (Object) this).toString();
         }
         return this.spongeResourceID;
     }

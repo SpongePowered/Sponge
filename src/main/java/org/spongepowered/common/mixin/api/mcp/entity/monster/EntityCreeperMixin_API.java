@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.CreeperEntity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -38,7 +38,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFuseData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(EntityCreeper.class)
+@Mixin(CreeperEntity.class)
 public abstract class EntityCreeperMixin_API extends EntityMobMixin_API implements Creeper {
 
     @Shadow public abstract int getCreeperState();

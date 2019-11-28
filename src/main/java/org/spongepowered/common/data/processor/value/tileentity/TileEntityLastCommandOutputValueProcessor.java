@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
-import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,11 +35,12 @@ import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
+import net.minecraft.tileentity.CommandBlockTileEntity;
 
-public class TileEntityLastCommandOutputValueProcessor extends AbstractSpongeValueProcessor<TileEntityCommandBlock, Optional<Text>, OptionalValue<Text>> {
+public class TileEntityLastCommandOutputValueProcessor extends AbstractSpongeValueProcessor<CommandBlockTileEntity, Optional<Text>, OptionalValue<Text>> {
 
     public TileEntityLastCommandOutputValueProcessor() {
-        super(TileEntityCommandBlock.class, Keys.LAST_COMMAND_OUTPUT);
+        super(CommandBlockTileEntity.class, Keys.LAST_COMMAND_OUTPUT);
     }
 
     @Override
@@ -54,13 +54,13 @@ public class TileEntityLastCommandOutputValueProcessor extends AbstractSpongeVal
     }
 
     @Override
-    protected boolean set(TileEntityCommandBlock container, Optional<Text> value) {
+    protected boolean set(CommandBlockTileEntity container, Optional<Text> value) {
         container.func_145993_a().func_145750_b(SpongeTexts.toComponent(value.orElse(Text.of())));
         return true;
     }
 
     @Override
-    protected Optional<Optional<Text>> getVal(TileEntityCommandBlock container) {
+    protected Optional<Optional<Text>> getVal(CommandBlockTileEntity container) {
         Text text = SpongeTexts.toText(container.func_145993_a().func_145749_h());
         return Optional.of(Optional.of(text)); //#OptionalWrapping o.o
     }

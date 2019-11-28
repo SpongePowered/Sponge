@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.monster.EntityPigZombie;
+import net.minecraft.entity.monster.ZombiePigmanEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EntityPigZombie.class)
+@Mixin(ZombiePigmanEntity.class)
 public interface EntityPigZombieAccessor {
 
     @Accessor("angerLevel") int accessor$getAngerLevel();

@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.api.mcp.network;
 
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.minecraft.network.INetHandler;
-import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.ServerPlayNetHandler;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,16 +44,16 @@ public abstract class NetworkManagerMixin_API extends SimpleChannelInboundHandle
 
     @Override
     public Player getPlayer() {
-        if(this.packetListener instanceof NetHandlerPlayServer) {
-            return (Player) ((NetHandlerPlayServer) this.packetListener).field_147369_b;
+        if(this.packetListener instanceof ServerPlayNetHandler) {
+            return (Player) ((ServerPlayNetHandler) this.packetListener).field_147369_b;
         }
         throw new IllegalStateException("Player is not currently available");
     }
 
     @Override
     public int getLatency() {
-        if(this.packetListener instanceof NetHandlerPlayServer) {
-            return ((NetHandlerPlayServer) this.packetListener).field_147369_b.field_71138_i;
+        if(this.packetListener instanceof ServerPlayNetHandler) {
+            return ((ServerPlayNetHandler) this.packetListener).field_147369_b.field_71138_i;
         }
         throw new IllegalStateException("Latency is not currently available");
     }

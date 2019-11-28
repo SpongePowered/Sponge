@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.multi.entity;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -39,20 +38,21 @@ import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.item.ArmorStandEntity;
 
-public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<EntityArmorStand, ArmorStandData, ImmutableArmorStandData> {
+public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<ArmorStandEntity, ArmorStandData, ImmutableArmorStandData> {
 
     public ArmorStandDataProcessor() {
-        super(EntityArmorStand.class);
+        super(ArmorStandEntity.class);
     }
 
     @Override
-    protected boolean doesDataExist(final EntityArmorStand dataHolder) {
+    protected boolean doesDataExist(final ArmorStandEntity dataHolder) {
         return true;
     }
 
     @Override
-    protected boolean set(final EntityArmorStand dataHolder, final Map<Key<?>, Object> keyValues) {
+    protected boolean set(final ArmorStandEntity dataHolder, final Map<Key<?>, Object> keyValues) {
         final boolean hasArms = (boolean) keyValues.get(Keys.ARMOR_STAND_HAS_ARMS);
         final boolean hasBasePlate = (boolean) keyValues.get(Keys.ARMOR_STAND_HAS_BASE_PLATE);
         final boolean isSmall = (boolean) keyValues.get(Keys.ARMOR_STAND_IS_SMALL);
@@ -65,7 +65,7 @@ public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<EntityA
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(final EntityArmorStand dataHolder) {
+    protected Map<Key<?>, ?> getValues(final ArmorStandEntity dataHolder) {
         return ImmutableMap.<Key<?>, Object>builder()
                 .put(Keys.ARMOR_STAND_HAS_ARMS, dataHolder.func_175402_q())
                 .put(Keys.ARMOR_STAND_HAS_BASE_PLATE, !dataHolder.func_175414_r())

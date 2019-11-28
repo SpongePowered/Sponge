@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemWritableBook;
+import net.minecraft.item.WritableBookItem;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlainPagedData;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.List;
 
-@Mixin(ItemWritableBook.class)
+@Mixin(WritableBookItem.class)
 public abstract class ItemWritableBookMixin extends ItemMixin {
 
     @Override

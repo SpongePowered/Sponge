@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.entity.player;
 
-import net.minecraft.inventory.InventoryEnderChest;
+import net.minecraft.inventory.EnderChestInventory;
 import net.minecraft.item.ItemStack;
 
-public class SpongeUserInventoryEnderchest extends InventoryEnderChest {
+public class SpongeUserInventoryEnderchest extends EnderChestInventory {
 
     private SpongeUser user;
 

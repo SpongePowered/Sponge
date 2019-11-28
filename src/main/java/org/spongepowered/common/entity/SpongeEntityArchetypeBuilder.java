@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.entity.EntityTypes.UNKNOWN;
 
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
@@ -46,12 +45,13 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.nbt.CompoundNBT;
 
 public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArchetype> implements EntityArchetype.Builder {
 
     EntityType entityType = UNKNOWN;
     DataContainer entityData;
-    NBTTagCompound compound;
+    CompoundNBT compound;
 
     public SpongeEntityArchetypeBuilder() {
         super(EntityArchetype.class, Constants.Sponge.EntityArchetype.BASE_VERSION);
@@ -106,7 +106,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         checkNotNull(entity, "Cannot build an EntityArchetype for a null entity!");
         this.entityType = checkNotNull(entity.getType(), "Entity is returning a null EntityType!");
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
-        final NBTTagCompound compound = new NBTTagCompound();
+        final CompoundNBT compound = new CompoundNBT();
         minecraftEntity.func_189511_e(compound);
         compound.func_74778_a(Constants.Sponge.EntityArchetype.ENTITY_ID, entity.getType().getId());
         compound.func_82580_o(Constants.UUID);

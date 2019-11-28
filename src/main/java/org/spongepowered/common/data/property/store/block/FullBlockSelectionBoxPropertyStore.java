@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.FullBlockSelectionBoxProperty;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
@@ -32,6 +31,7 @@ import org.spongepowered.common.data.property.store.common.AbstractBlockProperty
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.block.BlockState;
 
 public class FullBlockSelectionBoxPropertyStore extends AbstractBlockPropertyStore<FullBlockSelectionBoxProperty> {
 
@@ -43,7 +43,7 @@ public class FullBlockSelectionBoxPropertyStore extends AbstractBlockPropertySto
     }
 
     @Override
-    protected Optional<FullBlockSelectionBoxProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
+    protected Optional<FullBlockSelectionBoxProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
         return block.func_185917_h() ? TRUE : FALSE;
     }
 

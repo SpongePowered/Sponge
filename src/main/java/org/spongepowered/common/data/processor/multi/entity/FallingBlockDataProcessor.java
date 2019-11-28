@@ -27,8 +27,6 @@ package org.spongepowered.common.data.processor.multi.entity;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityFallingBlock;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -43,6 +41,8 @@ import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccesso
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.item.FallingBlockEntity;
 
 public class FallingBlockDataProcessor extends
     AbstractMultiDataSingleTargetProcessor<EntityFallingBlockAccessor, FallingBlockData, ImmutableFallingBlockData> {
@@ -60,9 +60,9 @@ public class FallingBlockDataProcessor extends
     protected boolean set(final EntityFallingBlockAccessor entity, final Map<Key<?>, Object> keyValues) {
         entity.accessor$setFallHurtAmount(((Double) keyValues.get(Keys.FALL_DAMAGE_PER_BLOCK)).floatValue());
         entity.accessor$setFallHurtMax(((Double) keyValues.get(Keys.MAX_FALL_DAMAGE)).intValue());
-        entity.accessor$setFallBlockState((IBlockState) keyValues.get(Keys.FALLING_BLOCK_STATE));
+        entity.accessor$setFallBlockState((BlockState) keyValues.get(Keys.FALLING_BLOCK_STATE));
         entity.accessor$setDontSetAsBlock(!(Boolean) keyValues.get(Keys.CAN_PLACE_AS_BLOCK));
-        ((EntityFallingBlock) entity).field_145813_c = (Boolean) keyValues.get(Keys.CAN_DROP_AS_ITEM);
+        ((FallingBlockEntity) entity).field_145813_c = (Boolean) keyValues.get(Keys.CAN_DROP_AS_ITEM);
         entity.accessor$setFallTime((Integer) keyValues.get(Keys.FALL_TIME));
         entity.accessor$setHurtEntities((Boolean) keyValues.get(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES));
         return true;
@@ -75,7 +75,7 @@ public class FallingBlockDataProcessor extends
                 .put(Keys.MAX_FALL_DAMAGE, (double)entity.accessor$getFallHurtMax())
                 .put(Keys.FALLING_BLOCK_STATE, entity.accessor$getFallBlockState())
                 .put(Keys.CAN_PLACE_AS_BLOCK, !entity.accessor$getDontSetAsBlock())
-                .put(Keys.CAN_DROP_AS_ITEM, ((EntityFallingBlock) entity).field_145813_c)
+                .put(Keys.CAN_DROP_AS_ITEM, ((FallingBlockEntity) entity).field_145813_c)
                 .put(Keys.FALL_TIME, entity.accessor$getFallTime())
                 .put(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, entity.accessor$getHurtEntities())
                 .build();

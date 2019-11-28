@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.api.text;
 
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,8 +37,8 @@ public abstract class LiteralTextMixin extends TextMixin {
     @Shadow @Final String content;
 
     @Override
-    protected TextComponentBase createComponent() {
-        return new TextComponentString(this.content);
+    protected TextComponent createComponent() {
+        return new StringTextComponent(this.content);
     }
 
 }

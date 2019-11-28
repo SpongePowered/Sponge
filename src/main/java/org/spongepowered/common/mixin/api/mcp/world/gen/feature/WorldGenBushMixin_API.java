@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.BlockBush;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.BushBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.BushFeature;
@@ -56,7 +56,7 @@ import javax.annotation.Nullable;
 @Mixin(BushFeature.class)
 public abstract class WorldGenBushMixin_API extends Feature implements Mushroom {
 
-    @Shadow @Final @Mutable private BlockBush block;
+    @Shadow @Final @Mutable private BushBlock block;
 
     @Nullable private Function<Location<Extent>, MushroomType> api$override = null;
     private final ChanceTable<MushroomType> api$types = new ChanceTable<>();

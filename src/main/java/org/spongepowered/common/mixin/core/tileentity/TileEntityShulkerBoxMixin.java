@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityShulkerBox;
+import net.minecraft.tileentity.ShulkerBoxTileEntity;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -35,7 +35,7 @@ import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
-@Mixin(TileEntityShulkerBox.class)
+@Mixin(ShulkerBoxTileEntity.class)
 public abstract class TileEntityShulkerBoxMixin extends TileEntityLockableLootMixin {
 
     @Override

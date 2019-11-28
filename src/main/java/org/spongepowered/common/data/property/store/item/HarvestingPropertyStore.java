@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import com.google.common.collect.ImmutableSet;  
-import net.minecraft.block.state.IBlockState;
+import com.google.common.collect.ImmutableSet;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemTool;
+import net.minecraft.item.PickaxeItem;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.property.item.HarvestingProperty;
 import org.spongepowered.common.SpongeImpl;
@@ -46,13 +45,13 @@ public class HarvestingPropertyStore extends AbstractItemStackPropertyStore<Harv
     @Override
     protected Optional<HarvestingProperty> getFor(ItemStack itemStack) {
         final Item item = itemStack.func_77973_b();
-        if (item instanceof ItemToolAccessor && !(item instanceof ItemPickaxe)) {
+        if (item instanceof ItemToolAccessor && !(item instanceof PickaxeItem)) {
             final ImmutableSet<BlockType> blocks = ImmutableSet.copyOf((Set) ((ItemToolAccessor) item).accessor$getEffectiveBlocks());
             return Optional.of(new HarvestingProperty(blocks));
         }
         final Collection<BlockType> blockTypes = SpongeImpl.getRegistry().getAllOf(BlockType.class);
         final ImmutableSet.Builder<BlockType> builder = ImmutableSet.builder();
-        blockTypes.stream().filter(blockType -> item.func_150897_b((IBlockState) blockType.getDefaultState())).forEach(builder::add);
+        blockTypes.stream().filter(blockType -> item.func_150897_b((BlockState) blockType.getDefaultState())).forEach(builder::add);
         final ImmutableSet<BlockType> blocks = builder.build();
         if (blocks.isEmpty()) {
             return Optional.empty();

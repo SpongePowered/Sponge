@@ -29,32 +29,32 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.IRangedAttackMob;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MultiPartEntityPart;
-import net.minecraft.entity.boss.EntityDragon;
-import net.minecraft.entity.boss.EntityWither;
+import net.minecraft.entity.boss.WitherEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.effect.EntityWeatherEffect;
-import net.minecraft.entity.item.EntityEnderCrystal;
-import net.minecraft.entity.item.EntityFallingBlock;
-import net.minecraft.entity.item.EntityFireworkRocket;
-import net.minecraft.entity.item.EntityTNTPrimed;
-import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.item.EnderCrystalEntity;
+import net.minecraft.entity.item.FallingBlockEntity;
+import net.minecraft.entity.item.FireworkRocketEntity;
+import net.minecraft.entity.item.TNTEntity;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.passive.EntitySheep;
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityFireball;
-import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.entity.monster.MonsterEntity;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.DamagingProjectileEntity;
+import net.minecraft.entity.projectile.ThrowableEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.explosive.FusedExplosive;
@@ -110,14 +110,14 @@ public class EntityActivationRange {
 
         // account for entities that dont extend EntityMob, EntityAmbientCreature, EntityCreature
         if (((IMob.class.isAssignableFrom(entity.getClass())
-                || IRangedAttackMob.class.isAssignableFrom(entity.getClass())) && (entity.getClass() != EntityMob.class))
-                || SpongeImplHooks.isCreatureOfType(entity, EnumCreatureType.MONSTER)) {
+                || IRangedAttackMob.class.isAssignableFrom(entity.getClass())) && (entity.getClass() != MonsterEntity.class))
+                || SpongeImplHooks.isCreatureOfType(entity, EntityClassification.MONSTER)) {
             return 1; // Monster
-        } else if (SpongeImplHooks.isCreatureOfType(entity, EnumCreatureType.CREATURE)) {
+        } else if (SpongeImplHooks.isCreatureOfType(entity, EntityClassification.CREATURE)) {
             return 2; // Creature
-        } else if (SpongeImplHooks.isCreatureOfType(entity, EnumCreatureType.WATER_CREATURE)) {
+        } else if (SpongeImplHooks.isCreatureOfType(entity, EntityClassification.WATER_CREATURE)) {
             return 3; // Aquatic
-        } else if (SpongeImplHooks.isCreatureOfType(entity, EnumCreatureType.AMBIENT)) {
+        } else if (SpongeImplHooks.isCreatureOfType(entity, EntityClassification.AMBIENT)) {
             return 4; // Ambient
         } else {
             return 5; // Misc
@@ -136,17 +136,17 @@ public class EntityActivationRange {
         }
 
         // types that should always be active
-        if (entity instanceof EntityPlayer && !SpongeImplHooks.isFakePlayer(entity)
-            || entity instanceof EntityThrowable
-            || entity instanceof EntityDragon
+        if (entity instanceof PlayerEntity && !SpongeImplHooks.isFakePlayer(entity)
+            || entity instanceof ThrowableEntity
+            || entity instanceof EnderDragonEntity
             || entity instanceof MultiPartEntityPart
-            || entity instanceof EntityWither
-            || entity instanceof EntityFireball
+            || entity instanceof WitherEntity
+            || entity instanceof DamagingProjectileEntity
             || entity instanceof EntityWeatherEffect
-            || entity instanceof EntityTNTPrimed
-            || entity instanceof EntityEnderCrystal
-            || entity instanceof EntityFireworkRocket
-            || entity instanceof EntityFallingBlock) // Always tick falling blocks
+            || entity instanceof TNTEntity
+            || entity instanceof EnderCrystalEntity
+            || entity instanceof FireworkRocketEntity
+            || entity instanceof FallingBlockEntity) // Always tick falling blocks
         {
             return;
         }
@@ -225,7 +225,7 @@ public class EntityActivationRange {
             return;
         }
 
-        for (final EntityPlayer player : world.field_73010_i) {
+        for (final PlayerEntity player : world.field_73010_i) {
 
             int maxRange = 0;
             for (final Integer range : maxActivationRanges.values()) {
@@ -245,7 +245,7 @@ public class EntityActivationRange {
 
             for (int i1 = i; i1 <= j; ++i1) {
                 for (int j1 = k; j1 <= l; ++j1) {
-                    final WorldServer worldserver = (WorldServer) world;
+                    final ServerWorld worldserver = (ServerWorld) world;
                     final Chunk chunk = ((ChunkProviderBridge) worldserver.func_72863_F()).bridge$getLoadedChunkWithoutMarkingActive(i1, j1);
                     if (chunk != null) {
                         activateChunkEntities(player, chunk);
@@ -260,7 +260,7 @@ public class EntityActivationRange {
      *
      * @param chunk Chunk to check for activation
      */
-    private static void activateChunkEntities(final EntityPlayer player, final Chunk chunk) {
+    private static void activateChunkEntities(final PlayerEntity player, final Chunk chunk) {
         for (int i = 0; i < chunk.func_177429_s().length; ++i) {
 
             for (final Object o : chunk.func_177429_s()[i]) {
@@ -355,23 +355,23 @@ public class EntityActivationRange {
             return true;
         }
         // special cases.
-        if (entity instanceof EntityLivingBase) {
-            final EntityLivingBase living = (EntityLivingBase) entity;
+        if (entity instanceof LivingEntity) {
+            final LivingEntity living = (LivingEntity) entity;
             if (living.field_70737_aN > 0 || living.func_70651_bq().size() > 0) {
                 return true;
             }
-            if (entity instanceof EntityLiving && (((EntityLivingBaseAccessor) entity).accessor$getRevengeTarget() != null || ((EntityLiving) entity).func_70638_az() != null)) {
+            if (entity instanceof MobEntity && (((EntityLivingBaseAccessor) entity).accessor$getRevengeTarget() != null || ((MobEntity) entity).func_70638_az() != null)) {
                 return true;
             }
-            if (entity instanceof EntityVillager && ((EntityVillager) entity).func_70941_o()) {
+            if (entity instanceof VillagerEntity && ((VillagerEntity) entity).func_70941_o()) {
                 return true;
             }
-            if (entity instanceof EntityAnimal) {
-                final EntityAnimal animal = (EntityAnimal) entity;
+            if (entity instanceof AnimalEntity) {
+                final AnimalEntity animal = (AnimalEntity) entity;
                 if (animal.func_70631_g_() || animal.func_70880_s()) {
                     return true;
                 }
-                if (entity instanceof EntitySheep && ((EntitySheep) entity).func_70892_o()) {
+                if (entity instanceof SheepEntity && ((SheepEntity) entity).func_70892_o()) {
                     return true;
                 }
             }
@@ -390,7 +390,7 @@ public class EntityActivationRange {
      */
     public static boolean checkIfActive(final Entity entity) {
         // Never safe to skip fireworks or entities not yet added to chunk
-        if (entity instanceof EntityPlayer || entity.field_70170_p.field_72995_K || !entity.field_70175_ag || entity instanceof EntityFireworkRocket) {
+        if (entity instanceof PlayerEntity || entity.field_70170_p.field_72995_K || !entity.field_70175_ag || entity instanceof FireworkRocketEntity) {
             return true;
         }
         final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();
@@ -404,7 +404,7 @@ public class EntityActivationRange {
         }
 
         // If in forced chunk or is player
-        if (activeChunk.bridge$isPersistedChunk() || (!SpongeImplHooks.isFakePlayer(entity) && entity instanceof EntityPlayerMP)) {
+        if (activeChunk.bridge$isPersistedChunk() || (!SpongeImplHooks.isFakePlayer(entity) && entity instanceof ServerPlayerEntity)) {
             return true;
         }
 

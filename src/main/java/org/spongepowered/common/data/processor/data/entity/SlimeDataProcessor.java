@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import static org.spongepowered.common.util.Constants.Functional.intComparator;
 
-import net.minecraft.entity.monster.EntitySlime;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeData;
@@ -40,22 +39,23 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.monster.EntitySlimeAccessor;
 
 import java.util.Optional;
+import net.minecraft.entity.monster.SlimeEntity;
 
 public class SlimeDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntitySlime, Integer, MutableBoundedValue<Integer>, SlimeData, ImmutableSlimeData> {
+        extends AbstractEntitySingleDataProcessor<SlimeEntity, Integer, MutableBoundedValue<Integer>, SlimeData, ImmutableSlimeData> {
 
     public SlimeDataProcessor() {
-        super(EntitySlime.class, Keys.SLIME_SIZE);
+        super(SlimeEntity.class, Keys.SLIME_SIZE);
     }
 
     @Override
-    protected boolean set(final EntitySlime entity, final Integer value) {
+    protected boolean set(final SlimeEntity entity, final Integer value) {
         ((EntitySlimeAccessor) entity).accessor$setSlimeSize(value + 1, false);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(final EntitySlime entity) {
+    protected Optional<Integer> getVal(final SlimeEntity entity) {
         return Optional.of(entity.func_70809_q() - 1);
     }
 

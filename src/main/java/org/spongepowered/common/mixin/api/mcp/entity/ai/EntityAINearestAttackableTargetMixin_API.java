@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.util.Functional;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @SuppressWarnings("rawtypes")
-@Mixin(EntityAINearestAttackableTarget.class)
+@Mixin(NearestAttackableTargetGoal.class)
 public abstract class EntityAINearestAttackableTargetMixin_API extends EntityAITargetMixin_API<FindNearestAttackableTargetAITask>
         implements FindNearestAttackableTargetAITask {
 

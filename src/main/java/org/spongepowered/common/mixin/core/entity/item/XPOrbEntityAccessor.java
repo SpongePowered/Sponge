@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.item.ExperienceOrbEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EntityXPOrb.class)
+@Mixin(ExperienceOrbEntity.class)
 public interface XPOrbEntityAccessor {
 
     @Accessor("xpValue") int accessor$getExperience();

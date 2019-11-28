@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import net.minecraft.entity.projectile.EntityDragonFireball;
+import net.minecraft.entity.projectile.DragonFireballEntity;
 import org.spongepowered.api.entity.projectile.explosive.DragonFireball;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityDragonFireball.class)
+@Mixin(DragonFireballEntity.class)
 public abstract class EntityDragonFireballMixin_API extends EntityFireballMixin_API implements DragonFireball {
 
 }

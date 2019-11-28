@@ -25,14 +25,14 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(EntityMinecart.class)
+@Mixin(AbstractMinecartEntity.class)
 public abstract class EntityMinecartMixin_API extends EntityMixin_API implements Minecart {
 
     @Shadow protected abstract double shadow$getMaximumSpeed();

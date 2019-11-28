@@ -25,22 +25,22 @@
 package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.CommandBlockBaseLogic;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.tileentity.CommandBlockLogic;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin({EntityPlayer.class, CommandBlockBaseLogic.class})
+@Mixin({PlayerEntity.class, CommandBlockLogic.class})
 public abstract class CommandFeedbackReceiverMixin implements ICommandSender {
 
     @Redirect(method = "sendCommandFeedback()Z",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/WorldServer;getGameRules()Lnet/minecraft/world/GameRules;"))
-    private GameRules impl$useSenderWorldGamerules(final WorldServer overworld) {
+    private GameRules impl$useSenderWorldGamerules(final ServerWorld overworld) {
         // Check the game rules of the current world instead of overworld game rules
         return func_130014_f_().func_82736_K();
     }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.monster.EntityEnderman;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
@@ -39,12 +38,13 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.entity.monster.EntityEndermanAccessor;
 
 import java.util.Optional;
+import net.minecraft.entity.monster.EndermanEntity;
 
 public class ScreamingDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityEnderman, Boolean, Value<Boolean>, ScreamingData, ImmutableScreamingData> {
+        extends AbstractEntitySingleDataProcessor<EndermanEntity, Boolean, Value<Boolean>, ScreamingData, ImmutableScreamingData> {
 
     public ScreamingDataProcessor() {
-        super(EntityEnderman.class, Keys.IS_SCREAMING);
+        super(EndermanEntity.class, Keys.IS_SCREAMING);
     }
 
     @Override
@@ -53,13 +53,13 @@ public class ScreamingDataProcessor
     }
 
     @Override
-    protected boolean set(final EntityEnderman entity, final Boolean value) {
+    protected boolean set(final EndermanEntity entity, final Boolean value) {
         entity.func_184212_Q().func_187227_b(EntityEndermanAccessor.accessor$getScreamingParameter(), value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(final EntityEnderman entity) {
+    protected Optional<Boolean> getVal(final EndermanEntity entity) {
         return Optional.of(entity.func_70823_r());
     }
 

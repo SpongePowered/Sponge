@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.block;
 
-import net.minecraft.block.BlockWall;
+import net.minecraft.block.WallBlock;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWallData;
 import org.spongepowered.api.data.manipulator.mutable.block.WallData;
@@ -44,12 +44,12 @@ public class WallDataProcessor extends AbstractCatalogDataProcessor<WallType, Va
 
     @Override
     protected int setToMeta(WallType value) {
-        return ((BlockWall.EnumType) (Object) value).func_176657_a();
+        return ((WallBlock.EnumType) (Object) value).func_176657_a();
     }
 
     @Override
     protected WallType getFromMeta(int meta) {
-        return (WallType) (Object) BlockWall.EnumType.func_176660_a(meta);
+        return (WallType) (Object) WallBlock.EnumType.func_176660_a(meta);
     }
 
     @Override

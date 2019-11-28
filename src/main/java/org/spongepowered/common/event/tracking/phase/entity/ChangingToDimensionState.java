@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 
@@ -44,7 +44,7 @@ final class ChangingToDimensionState extends EntityPhaseState<DimensionChangeCon
 
     @Override
     public boolean spawnEntityOrCapture(final DimensionChangeContext context, final Entity entity, final int chunkX, final int chunkZ) {
-        final WorldServer worldServer = context.getTargetWorld();
+        final ServerWorld worldServer = context.getTargetWorld();
         // Allowed to use the force spawn because it's the same "entity"
         ((WorldServerBridge) worldServer).bridge$forceSpawnEntity((net.minecraft.entity.Entity) entity);
         return true;

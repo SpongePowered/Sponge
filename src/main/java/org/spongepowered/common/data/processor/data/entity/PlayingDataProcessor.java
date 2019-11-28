@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.passive.EntityVillager;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePlayingData;
@@ -38,22 +37,23 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 
 public class PlayingDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityVillager, Boolean, Value<Boolean>, PlayingData, ImmutablePlayingData> {
+        extends AbstractEntitySingleDataProcessor<VillagerEntity, Boolean, Value<Boolean>, PlayingData, ImmutablePlayingData> {
 
     public PlayingDataProcessor() {
-        super(EntityVillager.class, Keys.IS_PLAYING);
+        super(VillagerEntity.class, Keys.IS_PLAYING);
     }
 
     @Override
-    protected boolean set(EntityVillager entity, Boolean value) {
+    protected boolean set(VillagerEntity entity, Boolean value) {
         entity.func_70939_f(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityVillager entity) {
+    protected Optional<Boolean> getVal(VillagerEntity entity) {
         return Optional.of(entity.func_70945_p());
     }
 

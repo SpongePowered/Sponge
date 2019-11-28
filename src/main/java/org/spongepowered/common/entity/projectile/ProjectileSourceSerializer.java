@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.entity.projectile;
 
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.LongNBT;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagLong;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -46,24 +46,24 @@ public class ProjectileSourceSerializer {
 
     public static NBTBase toNbt(ProjectileSource projectileSource) {
         if (projectileSource instanceof Entity) {
-            return new NBTTagString(((Entity) projectileSource).getUniqueId().toString());
+            return new StringNBT(((Entity) projectileSource).getUniqueId().toString());
         }
         if (projectileSource instanceof BlockProjectileSource) {
-            return new NBTTagLong(VecHelper.toBlockPos(((BlockProjectileSource) projectileSource).getLocation()).func_177986_g());
+            return new LongNBT(VecHelper.toBlockPos(((BlockProjectileSource) projectileSource).getLocation()).func_177986_g());
         }
         return null;
     }
 
     public static ProjectileSource fromNbt(World worldObj, NBTBase tag) {
-        if (tag instanceof NBTTagString) {
+        if (tag instanceof StringNBT) {
             Entity entity =
-                    ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(((NBTTagString) tag).func_150285_a_())).orElse(null);
+                    ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(((StringNBT) tag).func_150285_a_())).orElse(null);
             if (entity instanceof ProjectileSource) {
                 return (ProjectileSource) entity;
             }
         }
-        if (tag instanceof NBTTagLong) {
-            BlockPos pos = BlockPos.func_177969_a(((NBTTagLong) tag).func_150291_c());
+        if (tag instanceof LongNBT) {
+            BlockPos pos = BlockPos.func_177969_a(((LongNBT) tag).func_150291_c());
             if (worldObj.func_175667_e(pos)) {
                 TileEntity tileEntity = worldObj.func_175625_s(pos);
                 if (tileEntity instanceof ProjectileSource) {
@@ -74,7 +74,7 @@ public class ProjectileSourceSerializer {
         return ProjectileSource.UNKNOWN;
     }
 
-    public static void writeSourceToNbt(NBTTagCompound compound, ProjectileSource projectileSource, net.minecraft.entity.Entity potentialEntity) {
+    public static void writeSourceToNbt(CompoundNBT compound, ProjectileSource projectileSource, net.minecraft.entity.Entity potentialEntity) {
         if (projectileSource == null && potentialEntity instanceof ProjectileSource) {
             projectileSource = (ProjectileSource) potentialEntity;
         }
@@ -84,7 +84,7 @@ public class ProjectileSourceSerializer {
         }
     }
 
-    public static void readSourceFromNbt(NBTTagCompound compound, Projectile projectile) {
+    public static void readSourceFromNbt(CompoundNBT compound, Projectile projectile) {
         if (compound.func_74764_b("projectileSource")) {
             projectile.setShooter(fromNbt((World) projectile.getWorld(), compound.func_74781_a("projectileSource")));
         }

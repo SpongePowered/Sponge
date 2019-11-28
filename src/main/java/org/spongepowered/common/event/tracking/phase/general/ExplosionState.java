@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.general;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -136,9 +136,9 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         return context.getBlockPosition().map(blockPos -> {
             // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't
             final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getPerBlockEntitySpawnSuppplier().get();
-            final Multimap<BlockPos, EntityItem> blockPosEntityItemMultimap = context.getBlockItemDropSupplier().get();
-            if (entity instanceof EntityItem) {
-                blockPosEntityItemMultimap.put(blockPos, (EntityItem) entity);
+            final Multimap<BlockPos, ItemEntity> blockPosEntityItemMultimap = context.getBlockItemDropSupplier().get();
+            if (entity instanceof ItemEntity) {
+                blockPosEntityItemMultimap.put(blockPos, (ItemEntity) entity);
             } else {
                 blockPosEntityMultimap.put(blockPos, (net.minecraft.entity.Entity) entity);
             }

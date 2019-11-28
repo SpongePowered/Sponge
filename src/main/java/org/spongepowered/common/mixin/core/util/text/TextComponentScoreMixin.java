@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.util.text;
 
-import net.minecraft.util.text.TextComponentScore;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.objective.Objective;
@@ -36,8 +35,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.util.text.TextComponentBaseMixin;
 
 import java.util.Optional;
+import net.minecraft.util.text.ScoreTextComponent;
 
-@Mixin(TextComponentScore.class)
+@Mixin(ScoreTextComponent.class)
 public abstract class TextComponentScoreMixin extends TextComponentBaseMixin {
 
     @Shadow @Final private String objective;

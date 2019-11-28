@@ -26,9 +26,9 @@ package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -82,7 +82,7 @@ public abstract class WorldGenIceSpikeMixin extends WorldGeneratorMixin {
 
                     if ((i1 == 0 && j1 == 0 || f1 * f1 + f2 * f2 <= f * f)
                             && (i1 != -l && i1 != l && j1 != -l && j1 != l || rand.nextFloat() <= 0.75F)) {
-                        IBlockState iblockstate = worldIn.func_180495_p(position.func_177982_a(i1, k, j1));
+                        BlockState iblockstate = worldIn.func_180495_p(position.func_177982_a(i1, k, j1));
                         Block block = iblockstate.func_177230_c();
 
                         if (iblockstate.func_185904_a() == Material.field_151579_a || block == Blocks.field_150346_d || block == Blocks.field_150433_aE || block == Blocks.field_150432_aD) {
@@ -120,7 +120,7 @@ public abstract class WorldGenIceSpikeMixin extends WorldGeneratorMixin {
                 }
 
                 while (blockpos.func_177956_o() > 50) {
-                    final IBlockState iblockstate1 = worldIn.func_180495_p(blockpos);
+                    final BlockState iblockstate1 = worldIn.func_180495_p(blockpos);
                     final Block block1 = iblockstate1.func_177230_c();
 
                     if (iblockstate1.func_185904_a() != Material.field_151579_a && block1 != Blocks.field_150346_d && block1 != Blocks.field_150433_aE && block1 != Blocks.field_150432_aD

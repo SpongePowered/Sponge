@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.realtime.entity;
 
-import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.AgeableEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,13 +32,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 
-@Mixin(EntityAgeable.class)
+@Mixin(AgeableEntity.class)
 public abstract class EntityAgeableMixin_RealTime extends EntityMixin_RealTime {
 
     @Shadow public abstract void setGrowingAge(int age);
 
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityAgeable;setGrowingAge(I)V"))
-    private void realTimeImpl$adjustForRealTimeGrowingUp(final EntityAgeable self, final int age) {
+    private void realTimeImpl$adjustForRealTimeGrowingUp(final AgeableEntity self, final int age) {
         if (((WorldBridge) this.world).bridge$isFake()) {
             this.setGrowingAge(age);
             return;

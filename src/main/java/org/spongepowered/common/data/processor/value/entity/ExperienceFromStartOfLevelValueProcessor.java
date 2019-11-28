@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -34,11 +33,12 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
+import net.minecraft.entity.player.PlayerEntity;
 
-public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Integer, ImmutableBoundedValue<Integer>> {
+public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Integer, ImmutableBoundedValue<Integer>> {
 
     public ExperienceFromStartOfLevelValueProcessor() {
-        super(EntityPlayer.class, Keys.EXPERIENCE_FROM_START_OF_LEVEL);
+        super(PlayerEntity.class, Keys.EXPERIENCE_FROM_START_OF_LEVEL);
     }
 
 
@@ -64,12 +64,12 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
     }
 
     @Override
-    protected boolean set(EntityPlayer container, Integer value) {
+    protected boolean set(PlayerEntity container, Integer value) {
         return false;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityPlayer container) {
+    protected Optional<Integer> getVal(PlayerEntity container) {
         return Optional.of(container.func_71050_bK());
     }
 

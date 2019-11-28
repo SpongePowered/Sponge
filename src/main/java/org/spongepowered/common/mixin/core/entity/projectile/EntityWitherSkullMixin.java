@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.EntityWitherSkull;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.projectile.WitherSkullEntity;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.event.CauseStackManager;
@@ -49,7 +49,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityWitherSkull.class)
+@Mixin(WitherSkullEntity.class)
 public abstract class EntityWitherSkullMixin extends EntityFireballMixin implements EntityWitherSkullBridge, ExplosiveBridge {
 
     private int explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
@@ -69,7 +69,7 @@ public abstract class EntityWitherSkullMixin extends EntityFireballMixin impleme
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.func_74764_b(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
             this.impl$damage = compound.func_74760_g(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
@@ -78,7 +78,7 @@ public abstract class EntityWitherSkullMixin extends EntityFireballMixin impleme
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         if (this.impl$damageSet) {
             compound.func_74776_a(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damage);

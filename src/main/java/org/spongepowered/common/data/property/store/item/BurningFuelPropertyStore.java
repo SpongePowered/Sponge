@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.property.store.item;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.tileentity.FurnaceTileEntity;
 import org.spongepowered.api.data.property.item.BurningFuelProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
@@ -35,7 +35,7 @@ public class BurningFuelPropertyStore extends AbstractItemStackPropertyStore<Bur
 
     @Override
     protected Optional<BurningFuelProperty> getFor(ItemStack itemStack) {
-        final int burnTime = TileEntityFurnace.func_145952_a(itemStack);
+        final int burnTime = FurnaceTileEntity.func_145952_a(itemStack);
         if (burnTime > 0) {
             return Optional.of(new BurningFuelProperty(burnTime));
         }

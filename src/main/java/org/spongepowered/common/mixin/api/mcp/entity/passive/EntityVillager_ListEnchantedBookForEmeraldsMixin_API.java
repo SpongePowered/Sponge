@@ -28,10 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemEnchantedBook;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
+import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.item.merchant.Merchant;
@@ -46,7 +46,7 @@ import java.util.Random;
 // added as the only thing needing to be done is a simple default implementation
 // with an empty MerchantRecipeList and diff the list with an empty one and
 // provide the resulting diff'ed MerchantRecipe (TradeOffer) as the result.
-@Mixin(EntityVillager.ListEnchantedBookForEmeralds.class)
+@Mixin(VillagerEntity.ListEnchantedBookForEmeralds.class)
 public class EntityVillager_ListEnchantedBookForEmeraldsMixin_API implements TradeOfferGenerator {
 
     @Override
@@ -54,7 +54,7 @@ public class EntityVillager_ListEnchantedBookForEmeraldsMixin_API implements Tra
         checkNotNull(random, "Random cannot be null!");
         Enchantment enchantment = Enchantment.field_185264_b.func_186801_a(random);
         int enchantmentLevel = MathHelper.func_76136_a(random, enchantment.func_77319_d(), enchantment.func_77325_b());
-        ItemStack itemstack = ItemEnchantedBook.func_92111_a(new EnchantmentData(enchantment, enchantmentLevel));
+        ItemStack itemstack = EnchantedBookItem.func_92111_a(new EnchantmentData(enchantment, enchantmentLevel));
         int emeraldCount = 2 + random.nextInt(5 + enchantmentLevel * 10) + 3 * enchantmentLevel;
 
         if (enchantment.func_185261_e()) {

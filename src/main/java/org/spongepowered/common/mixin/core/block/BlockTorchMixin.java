@@ -25,9 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockTorch;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -43,13 +40,14 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.block.TorchBlock;
 
-@Mixin(BlockTorch.class)
+@Mixin(TorchBlock.class)
 public abstract class BlockTorchMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getIsAttachedFor(blockState), impl$getDirectionalData(blockState));
     }
 
@@ -59,36 +57,36 @@ public abstract class BlockTorchMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableAttachedData) {
             return Optional.of((BlockState) blockState);
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.func_177226_a(BlockTorch.field_176596_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(TorchBlock.field_176596_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.ATTACHED)) {
             return Optional.of((BlockState) blockState);
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown((Direction) value);
-            return Optional.of((BlockState) blockState.func_177226_a(BlockTorch.field_176596_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(TorchBlock.field_176596_a, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableAttachedData impl$getIsAttachedFor(final IBlockState blockState) {
+    private ImmutableAttachedData impl$getIsAttachedFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class,
-                blockState.func_177229_b(BlockTorch.field_176596_a) != EnumFacing.UP);
+                blockState.func_177229_b(TorchBlock.field_176596_a) != net.minecraft.util.Direction.UP);
     }
 
-    private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
+    private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockTorch.field_176596_a)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(TorchBlock.field_176596_a)));
     }
 }

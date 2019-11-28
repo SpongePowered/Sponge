@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.monster.EntityZombie;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,11 +35,12 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.entity.monster.ZombieEntity;
 
-public class IsAdultZombieValueProcessor extends AbstractSpongeValueProcessor<EntityZombie, Boolean, Value<Boolean>> {
+public class IsAdultZombieValueProcessor extends AbstractSpongeValueProcessor<ZombieEntity, Boolean, Value<Boolean>> {
 
     public IsAdultZombieValueProcessor() {
-        super(EntityZombie.class, Keys.IS_ADULT);
+        super(ZombieEntity.class, Keys.IS_ADULT);
     }
 
     @Override
@@ -49,13 +49,13 @@ public class IsAdultZombieValueProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    protected boolean set(EntityZombie container, Boolean adult) {
+    protected boolean set(ZombieEntity container, Boolean adult) {
         container.func_82227_f(!adult);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityZombie container) {
+    protected Optional<Boolean> getVal(ZombieEntity container) {
         return OptBool.of((Boolean) !container.func_70631_g_());
     }
 

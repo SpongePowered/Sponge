@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
@@ -60,7 +60,7 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
             if (!ColorUtil.hasColorInNbt(stack)) {
                 return DataTransactionResult.failNoData();
             }
-            final NBTTagCompound display = stack.func_179543_a(Constants.Item.ITEM_DISPLAY);
+            final CompoundNBT display = stack.func_179543_a(Constants.Item.ITEM_DISPLAY);
             if(display != null) {
                 display.func_82580_o(Constants.Item.ITEM_COLOR);
             }

@@ -26,7 +26,7 @@ package org.spongepowered.common.bridge.world.chunk;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.minecraft.world.EnumLightType;
+import net.minecraft.world.LightType;
 
 public interface ChunkBridge_AsyncLighting extends ChunkBridge {
 
@@ -36,5 +36,5 @@ public interface ChunkBridge_AsyncLighting extends ChunkBridge {
 
     void asyncLightingBridge$setLightUpdateTime(long time);
 
-    Set<Short> asyncLightingBridge$getQueuedLightingUpdates(EnumLightType type);
+    Set<Short> asyncLightingBridge$getQueuedLightingUpdates(LightType type);
 }

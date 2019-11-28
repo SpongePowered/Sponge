@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
-import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.AgeableEntity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgeableData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
@@ -37,7 +37,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(EntityAgeable.class)
+@Mixin(AgeableEntity.class)
 public abstract class EntityAgeableMixin_API extends EntityCreatureMixin_API implements Ageable {
 
     @Shadow public abstract void setScaleForAge(boolean child);

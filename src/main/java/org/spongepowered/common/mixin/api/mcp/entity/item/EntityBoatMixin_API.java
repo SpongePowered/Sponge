@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.item.EntityBoat;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.entity.vehicle.Boat;
@@ -37,13 +36,14 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
 import java.util.Collection;
+import net.minecraft.entity.item.BoatEntity;
 
 // TODO 1.9: Refactor this for boat overhaul
-@Mixin(EntityBoat.class)
+@Mixin(BoatEntity.class)
 @Implements(@Interface(iface = Boat.class, prefix = "apiBoat$"))
 public abstract class EntityBoatMixin_API extends EntityMixin_API implements Boat {
 
-    @Shadow public abstract EntityBoat.Type getBoatType();
+    @Shadow public abstract BoatEntity.Type getBoatType();
 
     private double maxSpeed = 0.35D;
     private boolean moveOnLand = false;
@@ -53,18 +53,18 @@ public abstract class EntityBoatMixin_API extends EntityMixin_API implements Boa
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        final EntityBoat.Type boatType = this.getBoatType();
-        if (boatType == EntityBoat.Type.OAK) {
+        final BoatEntity.Type boatType = this.getBoatType();
+        if (boatType == BoatEntity.Type.OAK) {
             manipulators.add(new SpongeTreeData(TreeTypes.OAK));
-        } else if ( boatType == EntityBoat.Type.BIRCH) {
+        } else if ( boatType == BoatEntity.Type.BIRCH) {
             manipulators.add(new SpongeTreeData(TreeTypes.BIRCH));
-        } else if ( boatType == EntityBoat.Type.JUNGLE) {
+        } else if ( boatType == BoatEntity.Type.JUNGLE) {
             manipulators.add(new SpongeTreeData(TreeTypes.JUNGLE));
-        } else if ( boatType == EntityBoat.Type.DARK_OAK) {
+        } else if ( boatType == BoatEntity.Type.DARK_OAK) {
             manipulators.add(new SpongeTreeData(TreeTypes.DARK_OAK));
-        } else if ( boatType == EntityBoat.Type.ACACIA) {
+        } else if ( boatType == BoatEntity.Type.ACACIA) {
             manipulators.add(new SpongeTreeData(TreeTypes.ACACIA));
-        } else if ( boatType == EntityBoat.Type.SPRUCE) {
+        } else if ( boatType == BoatEntity.Type.SPRUCE) {
             manipulators.add(new SpongeTreeData(TreeTypes.SPRUCE));
         }
     }

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.optimization.world;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
@@ -37,7 +37,7 @@ import org.spongepowered.common.mixin.core.world.WorldServerMixin;
 
 import java.util.Optional;
 
-@Mixin(value = WorldServer.class, priority = 1500)
+@Mixin(value = ServerWorld.class, priority = 1500)
 public abstract class WorldServerMixin_UseActiveChunkForCollisions extends WorldMixin_UseActiveChunkForCollisions {
 
     @Override

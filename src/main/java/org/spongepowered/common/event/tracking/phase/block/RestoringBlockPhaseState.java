@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -54,7 +54,7 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
 
     @Override
     public boolean shouldCaptureBlockChangeOrSkip(
-        final GeneralizedContext phaseContext, final BlockPos pos, final IBlockState currentState, final IBlockState newState,
+        final GeneralizedContext phaseContext, final BlockPos pos, final BlockState currentState, final BlockState newState,
         final BlockChangeFlag flags) {
         return false;
     }

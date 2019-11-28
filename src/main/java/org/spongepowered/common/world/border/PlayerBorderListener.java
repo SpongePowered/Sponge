@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.world.border;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.SPacketWorldBorder;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.play.server.SWorldBorderPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
@@ -44,27 +44,27 @@ public final class PlayerBorderListener implements IBorderListener {
 
     @Override
     public void func_177694_a(WorldBorder border, double newSize) {
-        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_SIZE));
+        sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_SIZE));
     }
 
     @Override
     public void func_177692_a(WorldBorder border, double oldSize, double newSize, long time) {
-        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.LERP_SIZE));
+        sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.LERP_SIZE));
     }
 
     @Override
     public void func_177693_a(WorldBorder border, double x, double z) {
-        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_CENTER));
+        sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_CENTER));
     }
 
     @Override
     public void func_177691_a(WorldBorder border, int newTime) {
-        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_WARNING_TIME));
+        sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_TIME));
     }
 
     @Override
     public void func_177690_b(WorldBorder border, int newDistance) {
-        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_WARNING_BLOCKS));
+        sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_BLOCKS));
     }
 
     @Override
@@ -75,8 +75,8 @@ public final class PlayerBorderListener implements IBorderListener {
     public void func_177695_c(WorldBorder border, double newSize) {
     }
 
-    private void sendBorderPacket(Packet<?> packet) {
-        for (EntityPlayerMP player : this.server.func_184103_al().func_181057_v()) {
+    private void sendBorderPacket(IPacket<?> packet) {
+        for (ServerPlayerEntity player : this.server.func_184103_al().func_181057_v()) {
             if (player.field_71093_bK == this.dimensionId && !((Player) player).getWorldBorder().isPresent()) {
                 player.field_71135_a.func_147359_a(packet);
             }

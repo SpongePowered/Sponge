@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -34,6 +34,6 @@ import java.util.Set;
 @Mixin(EntityTrackerEntry.class)
 public interface EntityTrackerEntryAccessor {
 
-    @Accessor("trackingPlayers") Set<EntityPlayerMP> accessor$getTrackingPlayers();
+    @Accessor("trackingPlayers") Set<ServerPlayerEntity> accessor$getTrackingPlayers();
 
 }

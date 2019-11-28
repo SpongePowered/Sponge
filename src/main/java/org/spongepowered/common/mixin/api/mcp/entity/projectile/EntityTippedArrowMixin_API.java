@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import net.minecraft.entity.projectile.EntityTippedArrow;
+import net.minecraft.entity.projectile.ArrowEntity;
 import org.spongepowered.api.entity.projectile.arrow.TippedArrow;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityTippedArrow.class)
+@Mixin(ArrowEntity.class)
 public abstract class EntityTippedArrowMixin_API extends EntityArrowMixin_API implements TippedArrow {
 
 }

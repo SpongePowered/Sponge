@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.projectile.EntityThrowable;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,13 +31,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.projectile.ThrowableEntity;
 
-@Mixin(EntityThrowable.class)
+@Mixin(ThrowableEntity.class)
 public abstract class EntityThrowableMixin_API extends EntityMixin_API implements Projectile {
 
-    @Shadow protected EntityLivingBase thrower;
+    @Shadow protected LivingEntity thrower;
     @Shadow private String throwerName;
-    @Shadow public abstract EntityLivingBase getThrower();
+    @Shadow public abstract LivingEntity getThrower();
 
     @Nullable
     public ProjectileSource projectileSource;
@@ -57,9 +57,9 @@ public abstract class EntityThrowableMixin_API extends EntityMixin_API implement
 
     @Override
     public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof EntityLivingBase) {
+        if (shooter instanceof LivingEntity) {
             // This allows things like Vanilla kill attribution to take place
-            this.thrower = (EntityLivingBase) shooter;
+            this.thrower = (LivingEntity) shooter;
         } else {
             this.thrower = null;
         }

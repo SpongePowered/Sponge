@@ -26,7 +26,7 @@ package org.spongepowered.common.data.processor.multi.item;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -60,7 +60,7 @@ public class DurabilityDataProcessor extends AbstractItemDataProcessor<Durabilit
             itemStack.func_77964_b(0);
         }
         if (!itemStack.func_77942_o()) {
-            itemStack.func_77982_d(new NBTTagCompound());
+            itemStack.func_77982_d(new CompoundNBT());
         }
         itemStack.func_77978_p().func_74757_a(Constants.Item.ITEM_UNBREAKABLE, unbreakable);
         return true;

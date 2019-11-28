@@ -25,9 +25,9 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockDragonEgg;
-import net.minecraft.block.BlockFalling;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.DragonEggBlock;
+import net.minecraft.block.FallingBlock;
 import org.spongepowered.api.data.property.block.GravityAffectedProperty;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
@@ -46,11 +46,11 @@ public class GravityAffectedPropertyStore extends AbstractBlockPropertyStore<Gra
     }
 
     @Override
-    protected Optional<GravityAffectedProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
+    protected Optional<GravityAffectedProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
         return Optional.of(this.isFallingBlock(block.func_177230_c()) ? TRUE : FALSE);
     }
 
     private boolean isFallingBlock(Block block) {
-        return block instanceof BlockFalling || block instanceof BlockDragonEgg;
+        return block instanceof FallingBlock || block instanceof DragonEggBlock;
     }
 }

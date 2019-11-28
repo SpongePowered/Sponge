@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.optimization.item;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemMap;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,14 +33,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 
-@Mixin(ItemMap.class)
+@Mixin(FilledMapItem.class)
 public class ItemMapMixin_MapOptimization {
 
     @Redirect(method = "onUpdate",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/storage/MapData;updateVisiblePlayers(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"))
-    private void mapOptimization$onUpdateVisiblePlayers(final MapData mapData, final EntityPlayer player, final ItemStack itemStack) {
+    private void mapOptimization$onUpdateVisiblePlayers(final MapData mapData, final PlayerEntity player, final ItemStack itemStack) {
         ((OptimizedMapDataBridge) mapData).mapOptimizationBridge$updatePlayer(player, itemStack);
     }
 }

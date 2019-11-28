@@ -26,9 +26,9 @@ package org.spongepowered.common.mixin.core.server.management;
 
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 @Mixin(PlayerChunkMap.class)
 public abstract class PlayerChunkMapMixin implements PlayerChunkMapBridge {
 
-    @Shadow @Final private WorldServer world;
+    @Shadow @Final private ServerWorld world;
 
     @Shadow @Nullable public abstract PlayerChunkMapEntry getEntry(int chunkX, int chunkZ);
 
@@ -63,7 +63,7 @@ public abstract class PlayerChunkMapMixin implements PlayerChunkMapBridge {
 
     @Redirect(method = "removeEntry", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;"
             + "queueUnload(Lnet/minecraft/world/chunk/Chunk;)V"))
-    private void impl$ScheduleUnloadWithChunkGC(final ChunkProviderServer chunkProvider, final Chunk chunk) {
+    private void impl$ScheduleUnloadWithChunkGC(final ServerChunkProvider chunkProvider, final Chunk chunk) {
         // We remove the ability for a PlayerChunkMap to queue chunks for unload to prevent chunk thrashing
         // where the same chunks repeatedly unload and load. This is caused by a player moving in and out of the same chunks.
         // Instead, the Chunk GC will now be responsible for going through loaded chunks and queuing any chunk where no player

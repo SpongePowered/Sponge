@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.context;
 
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.ItemEntity;
 
-public final class CapturedItemsSupplier extends CapturedSupplier<EntityItem> {
+public final class CapturedItemsSupplier extends CapturedSupplier<ItemEntity> {
 
     public CapturedItemsSupplier() {
     }

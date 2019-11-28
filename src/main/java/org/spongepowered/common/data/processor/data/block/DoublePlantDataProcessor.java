@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.block;
 
-import net.minecraft.block.BlockDoublePlant;
+import net.minecraft.block.DoublePlantBlock;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDoublePlantData;
 import org.spongepowered.api.data.manipulator.mutable.block.DoublePlantData;
@@ -55,12 +55,12 @@ public class DoublePlantDataProcessor extends
 
     @Override
     protected int setToMeta(DoublePlantType value) {
-        return ((BlockDoublePlant.EnumPlantType) (Object) value).func_176936_a();
+        return ((DoublePlantBlock.EnumPlantType) (Object) value).func_176936_a();
     }
 
     @Override
     protected DoublePlantType getFromMeta(int meta) {
-        return (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.func_176938_a(meta);
+        return (DoublePlantType) (Object) DoublePlantBlock.EnumPlantType.func_176938_a(meta);
     }
 
     @Override

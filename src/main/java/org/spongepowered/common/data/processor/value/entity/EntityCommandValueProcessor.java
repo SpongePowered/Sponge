@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -35,11 +34,12 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.tileentity.CommandBlockBaseLogicAccessor;
 
 import java.util.Optional;
+import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 
-public class EntityCommandValueProcessor extends AbstractSpongeValueProcessor<EntityMinecartCommandBlock, String, Value<String>> {
+public class EntityCommandValueProcessor extends AbstractSpongeValueProcessor<MinecartCommandBlockEntity, String, Value<String>> {
 
     public EntityCommandValueProcessor() {
-        super(EntityMinecartCommandBlock.class, Keys.COMMAND);
+        super(MinecartCommandBlockEntity.class, Keys.COMMAND);
     }
 
     @Override
@@ -53,13 +53,13 @@ public class EntityCommandValueProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    protected boolean set(final EntityMinecartCommandBlock container, final String value) {
+    protected boolean set(final MinecartCommandBlockEntity container, final String value) {
         ((CommandBlockBaseLogicAccessor) container.func_145822_e()).accessor$setCommandStored(value);
         return true;
     }
 
     @Override
-    protected Optional<String> getVal(final EntityMinecartCommandBlock container) {
+    protected Optional<String> getVal(final MinecartCommandBlockEntity container) {
         return Optional.of(container.func_145822_e().func_145753_i());
     }
 

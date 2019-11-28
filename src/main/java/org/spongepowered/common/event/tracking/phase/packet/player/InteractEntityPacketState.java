@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.CPacketUseEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
@@ -52,6 +49,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.play.client.CUseEntityPacket;
 
 public final class InteractEntityPacketState extends BasicPacketState {
 
@@ -60,16 +60,16 @@ public final class InteractEntityPacketState extends BasicPacketState {
         return true;
     }
     @Override
-    public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
-        final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
+    public boolean isPacketIgnored(IPacket<?> packetIn, ServerPlayerEntity packetPlayer) {
+        final CUseEntityPacket useEntityPacket = (CUseEntityPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
         @Nullable net.minecraft.entity.Entity entity = useEntityPacket.func_149564_a(packetPlayer.field_70170_p);
         return entity == null;
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
-        final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
+    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
+        final CUseEntityPacket useEntityPacket = (CUseEntityPacket) packet;
         net.minecraft.entity.Entity entity = useEntityPacket.func_149564_a(playerMP.field_70170_p);
         if (entity != null) {
             final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.func_184586_b(useEntityPacket.func_186994_b()));
@@ -90,8 +90,8 @@ public final class InteractEntityPacketState extends BasicPacketState {
     @Override
     public void unwind(BasicPacketContext phaseContext) {
 
-        final EntityPlayerMP player = phaseContext.getPacketPlayer();
-        final CPacketUseEntity useEntityPacket = phaseContext.getPacket();
+        final ServerPlayerEntity player = phaseContext.getPacketPlayer();
+        final CUseEntityPacket useEntityPacket = phaseContext.getPacket();
         final net.minecraft.entity.Entity entity = useEntityPacket.func_149564_a(player.field_70170_p);
         if (entity == null) {
             // Something happened?

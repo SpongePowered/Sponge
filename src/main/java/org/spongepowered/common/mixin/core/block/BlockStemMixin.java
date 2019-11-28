@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockStem;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -42,13 +40,14 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.block.StemBlock;
 
-@Mixin(BlockStem.class)
+@Mixin(StemBlock.class)
 public abstract class BlockStemMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getGrowthData(blockState), impl$getDirectionalData(blockState));
     }
 
@@ -58,44 +57,44 @@ public abstract class BlockStemMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
             if (growth > 7) {
                 growth = 7;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(BlockStem.field_176484_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.field_176484_a, growth));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.func_177226_a(BlockStem.field_176483_b, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.field_176483_b, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             int growth = (Integer) value;
             if (growth > 7) {
                 growth = 7;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(BlockStem.field_176484_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.field_176484_a, growth));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown((Direction) value);
-            return Optional.of((BlockState) blockState.func_177226_a(BlockStem.field_176483_b, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.field_176483_b, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableGrowthData impl$getGrowthData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(BlockStem.field_176484_a), 0, 7);
+    private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(StemBlock.field_176484_a), 0, 7);
     }
 
-    private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
+    private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(BlockStem.field_176483_b)));
+                Constants.DirectionFunctions.getFor(blockState.func_177229_b(StemBlock.field_176483_b)));
     }
 
 }

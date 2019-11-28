@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.monster.EntityBlaze;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlammableData;
@@ -38,12 +37,13 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
+import net.minecraft.entity.monster.BlazeEntity;
 
 public final class BlazeFlammableDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityBlaze, Boolean, Value<Boolean>, FlammableData, ImmutableFlammableData> {
+        extends AbstractEntitySingleDataProcessor<BlazeEntity, Boolean, Value<Boolean>, FlammableData, ImmutableFlammableData> {
 
     public BlazeFlammableDataProcessor() {
-        super(EntityBlaze.class, Keys.IS_AFLAME);
+        super(BlazeEntity.class, Keys.IS_AFLAME);
     }
 
     @Override
@@ -57,13 +57,13 @@ public final class BlazeFlammableDataProcessor
     }
 
     @Override
-    protected boolean set(EntityBlaze dataHolder, Boolean value) {
+    protected boolean set(BlazeEntity dataHolder, Boolean value) {
         dataHolder.func_70844_e(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityBlaze dataHolder) {
+    protected Optional<Boolean> getVal(BlazeEntity dataHolder) {
         return Optional.of(dataHolder.func_70027_ad());
     }
 

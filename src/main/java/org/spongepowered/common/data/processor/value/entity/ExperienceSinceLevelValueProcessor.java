@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,11 +35,12 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 
 import java.util.Optional;
+import net.minecraft.entity.player.PlayerEntity;
 
-public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Integer, MutableBoundedValue<Integer>> {
+public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Integer, MutableBoundedValue<Integer>> {
 
     public ExperienceSinceLevelValueProcessor() {
-        super(EntityPlayer.class, Keys.EXPERIENCE_SINCE_LEVEL);
+        super(PlayerEntity.class, Keys.EXPERIENCE_SINCE_LEVEL);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
     }
 
     @Override
-    protected boolean set(EntityPlayer container, Integer value) {
+    protected boolean set(PlayerEntity container, Integer value) {
         while (value >= container.func_71050_bK()) {
             value -= container.func_71050_bK();
         }
@@ -69,7 +69,7 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityPlayer container) {
+    protected Optional<Integer> getVal(PlayerEntity container) {
         return Optional.of(((EntityPlayerBridge) container).bridge$getExperienceSinceLevel());
     }
 

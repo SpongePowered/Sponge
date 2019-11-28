@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockFlowerPot;
+import net.minecraft.block.FlowerPotBlock;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(BlockFlowerPot.class)
+@Mixin(FlowerPotBlock.class)
 public interface BlockFlowerPotAccessor {
 
     @Invoker("canBePotted") boolean accessor$canItemBePotted(ItemStack stack);

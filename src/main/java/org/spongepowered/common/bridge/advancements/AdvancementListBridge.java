@@ -42,5 +42,5 @@ public interface AdvancementListBridge {
     Set<Advancement> bridge$getNonRootsSet();
 
     @Nullable
-    AdvancementList.Listener bridge$getListener();
+    AdvancementList.IListener bridge$getListener();
 }

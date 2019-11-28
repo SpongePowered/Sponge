@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.entity.passive;
 
-import net.minecraft.entity.passive.AbstractChestHorse;
+import net.minecraft.entity.passive.horse.AbstractChestedHorseEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(AbstractChestHorse.class)
+@Mixin(AbstractChestedHorseEntity.class)
 public interface AbstractChestHorseAccessor {
 
     @Accessor("DATA_ID_CHEST")

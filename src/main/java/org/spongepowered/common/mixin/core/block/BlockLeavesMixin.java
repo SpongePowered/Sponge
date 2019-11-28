@@ -25,11 +25,10 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockNewLeaf;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.LeavesBlock;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
@@ -64,7 +63,7 @@ import java.util.List;
 import java.util.Optional;
 
 @NonnullByDefault
-@Mixin(BlockLeaves.class)
+@Mixin(LeavesBlock.class)
 public abstract class BlockLeavesMixin extends BlockMixin {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
@@ -73,7 +72,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
     }
 
     @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
-    private boolean onUpdateDecayState(final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, final int flags) {
+    private boolean onUpdateDecayState(final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, final int flags) {
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState<?> currentState = currentContext.state;
         try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext()
@@ -103,7 +102,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
      */
     @Overwrite
     private void destroy(final net.minecraft.world.World worldIn, final BlockPos pos) {
-        final IBlockState state = worldIn.func_180495_p(pos);
+        final net.minecraft.block.BlockState state = worldIn.func_180495_p(pos);
         // Sponge Start - Cause tracking
         if (!((WorldBridge) worldIn).bridge$isFake()) {
             final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
@@ -128,7 +127,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
 
     }
 
-    private ImmutableTreeData impl$getTreeData(final IBlockState blockState) {
+    private ImmutableTreeData impl$getTreeData(final net.minecraft.block.BlockState blockState) {
         final BlockPlanks.EnumType type;
         if (blockState.func_177230_c() instanceof BlockOldLeaf) {
             type = blockState.func_177229_b(BlockOldLeaf.field_176239_P);
@@ -143,8 +142,8 @@ public abstract class BlockLeavesMixin extends BlockMixin {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType);
     }
 
-    private ImmutableDecayableData impl$getIsDecayableFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.func_177229_b(BlockLeaves.field_176237_a));
+    private ImmutableDecayableData impl$getIsDecayableFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.func_177229_b(LeavesBlock.field_176237_a));
     }
 
     @Override
@@ -153,7 +152,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableTreeData) {
             final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
@@ -173,13 +172,13 @@ public abstract class BlockLeavesMixin extends BlockMixin {
         }
         if (manipulator instanceof ImmutableDecayableData) {
             final boolean decayable = ((ImmutableDecayableData) manipulator).decayable().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockLeaves.field_176237_a, decayable));
+            return Optional.of((BlockState) blockState.func_177226_a(LeavesBlock.field_176237_a, decayable));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.TREE_TYPE)) {
             final TreeType treeType = (TreeType) value;
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
@@ -199,13 +198,13 @@ public abstract class BlockLeavesMixin extends BlockMixin {
         }
         if (key.equals(Keys.DECAYABLE)) {
             final boolean decayable = (Boolean) value;
-            return Optional.of((BlockState) blockState.func_177226_a(BlockLeaves.field_176237_a, decayable));
+            return Optional.of((BlockState) blockState.func_177226_a(LeavesBlock.field_176237_a, decayable));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @Override
-    public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getTreeData(blockState), impl$getIsDecayableFor(blockState));
 
     }

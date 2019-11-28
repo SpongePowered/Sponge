@@ -26,9 +26,8 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.BlockSlab;
 import net.minecraft.block.BlockWoodSlab;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.SlabBlock;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -50,7 +49,7 @@ public abstract class BlockWoodSlabMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getTreeTypeFor(blockState), impl$getPortionTypeFor(blockState));
     }
 
@@ -61,36 +60,36 @@ public abstract class BlockWoodSlabMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableTreeData) {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) (Object) ((ImmutableTreeData) manipulator).type().get();
             return Optional.of((BlockState) blockState.func_177226_a(BlockPlanks.field_176383_a, treeType));
         }
         if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSlab.field_176554_a, (BlockSlab.EnumBlockHalf) (Object) portionType));
+            return Optional.of((BlockState) blockState.func_177226_a(SlabBlock.field_176554_a, (SlabBlock.EnumBlockHalf) (Object) portionType));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.TREE_TYPE)) {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) value;
             return Optional.of((BlockState) blockState.func_177226_a(BlockPlanks.field_176383_a, treeType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSlab.field_176554_a, (BlockSlab.EnumBlockHalf) value));
+            return Optional.of((BlockState) blockState.func_177226_a(SlabBlock.field_176554_a, (SlabBlock.EnumBlockHalf) value));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @SuppressWarnings("ConstantConditions")
-    private ImmutableTreeData impl$getTreeTypeFor(final IBlockState blockState) {
+    private ImmutableTreeData impl$getTreeTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.func_177229_b(BlockPlanks.field_176383_a));
     }
 
-    private ImmutablePortionData impl$getPortionTypeFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class, blockState.func_177229_b(BlockSlab.field_176554_a));
+    private ImmutablePortionData impl$getPortionTypeFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class, blockState.func_177229_b(SlabBlock.field_176554_a));
     }
 }

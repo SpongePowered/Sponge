@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.network.play.server;
 
-import net.minecraft.network.play.server.SPacketPlayerListItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
+import net.minecraft.network.play.server.SPlayerListItemPacket;
 
-@Mixin(SPacketPlayerListItem.class)
+@Mixin(SPlayerListItemPacket.class)
 public interface SPacketPlayerListItemAccessor {
 
     @Accessor("players")
-    List<SPacketPlayerListItem.AddPlayerData> accessor$getPlayerDatas();
+    List<SPlayerListItemPacket.AddPlayerData> accessor$getPlayerDatas();
 
-    @Accessor("action") SPacketPlayerListItem.Action accessor$getAction();
+    @Accessor("action") SPlayerListItemPacket.Action accessor$getAction();
 
-    @Accessor("action") void accessor$setAction(SPacketPlayerListItem.Action action);
+    @Accessor("action") void accessor$setAction(SPlayerListItemPacket.Action action);
 
 }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
@@ -46,9 +46,9 @@ public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataC
     @Override
     public DataView update(DataView content) {
         if (content.contains(Constants.Sponge.UNSAFE_NBT)) {
-            NBTTagCompound compound = NbtTranslator.getInstance().translateData(content.getView(Constants.Sponge.UNSAFE_NBT).get());
+            CompoundNBT compound = NbtTranslator.getInstance().translateData(content.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (compound.func_74764_b(Constants.Sponge.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.func_74775_l(Constants.Sponge.SPONGE_DATA);
+                final CompoundNBT spongeCompound = compound.func_74775_l(Constants.Sponge.SPONGE_DATA);
                 if (spongeCompound.func_74764_b(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
                     spongeCompound.func_82580_o(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
                 }

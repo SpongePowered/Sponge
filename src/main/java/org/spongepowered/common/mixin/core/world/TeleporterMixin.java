@@ -26,14 +26,14 @@ package org.spongepowered.common.mixin.core.world;
 
 import com.google.common.base.MoreObjects;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import net.minecraft.block.state.pattern.BlockPattern;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.pattern.BlockPattern;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Teleporter;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
@@ -59,7 +59,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
     private boolean impl$createNetherPortal = true;
     private PortalAgentType impl$portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(this);
 
-    @Shadow @Final private WorldServer world;
+    @Shadow @Final private ServerWorld world;
     @Shadow @Final private Long2ObjectMap<Teleporter.PortalPosition> destinationCoordinateCache;
 
     /**
@@ -89,7 +89,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
     @Override
     public void bridge$placeEntity(net.minecraft.world.World world, Entity entity, float yaw) {
         boolean didPort;
-        if (entity instanceof EntityPlayerMP) {
+        if (entity instanceof ServerPlayerEntity) {
             this.placeInPortal(entity, yaw);
             didPort = true;
         } else {
@@ -153,8 +153,8 @@ public abstract class TeleporterMixin implements TeleporterBridge {
         double yTarget;
         double zTarget = portalLocation.getZ() + 0.5D;
         BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.field_150427_aO.func_181089_f(this.world, blockPos);
-        boolean flag1 = blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c() == EnumFacing.AxisDirection.NEGATIVE;
-        double d2 = blockpattern$patternhelper.func_177669_b().func_176740_k() == EnumFacing.Axis.X ? (double) blockpattern$patternhelper.func_181117_a().func_177952_p()
+        boolean flag1 = blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c() == Direction.AxisDirection.NEGATIVE;
+        double d2 = blockpattern$patternhelper.func_177669_b().func_176740_k() == Direction.Axis.X ? (double) blockpattern$patternhelper.func_181117_a().func_177952_p()
                 : (double) blockpattern$patternhelper.func_181117_a().func_177958_n();
         yTarget = blockpattern$patternhelper.func_181117_a().func_177956_o() + 1
                 - entityIn.func_181014_aG().field_72448_b * blockpattern$patternhelper.func_181119_e();
@@ -163,7 +163,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
             ++d2;
         }
 
-        if (blockpattern$patternhelper.func_177669_b().func_176740_k() == EnumFacing.Axis.X) {
+        if (blockpattern$patternhelper.func_177669_b().func_176740_k() == Direction.Axis.X) {
             zTarget = d2 + (1.0D - entityIn.func_181014_aG().field_72450_a) * blockpattern$patternhelper.func_181118_d()
                     * blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c().func_179524_a();
         } else {

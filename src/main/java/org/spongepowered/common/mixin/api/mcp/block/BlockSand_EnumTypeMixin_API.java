@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.BlockSand;
 import org.spongepowered.api.data.type.SandType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -35,8 +34,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
+import net.minecraft.block.SandBlock;
 
-@Mixin(BlockSand.EnumType.class)
+@Mixin(SandBlock.EnumType.class)
 @Implements(@Interface(iface = SandType.class, prefix = "sand$"))
 public abstract class BlockSand_EnumTypeMixin_API {
 

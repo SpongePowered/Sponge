@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockTallGrass;
+import net.minecraft.block.TallGrassBlock;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 @RegisterCatalog(ShrubTypes.class)
-public final class ShrubTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockTallGrass.EnumType, ShrubType> {
+public final class ShrubTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<TallGrassBlock.EnumType, ShrubType> {
 
     @Override
-    protected BlockTallGrass.EnumType[] getValues() {
-        return BlockTallGrass.EnumType.values();
+    protected TallGrassBlock.EnumType[] getValues() {
+        return TallGrassBlock.EnumType.values();
     }
 }

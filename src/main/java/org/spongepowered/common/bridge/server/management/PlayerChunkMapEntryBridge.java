@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.server.management;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.chunk.Chunk;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public interface PlayerChunkMapEntryBridge {
 
     // TODO Mixin 0.8
     @Deprecated
-    List<EntityPlayerMP> accessor$getPlayers();
+    List<ServerPlayerEntity> accessor$getPlayers();
 
     void bridge$setChunk(Chunk newChunk);
 }

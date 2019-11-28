@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.monster.EntityPigZombie;
+import net.minecraft.entity.monster.ZombiePigmanEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.AggressiveBridge;
 
-@Mixin(EntityPigZombie.class)
+@Mixin(ZombiePigmanEntity.class)
 public abstract class EntityPigZombieMixin extends EntityMobMixin implements AggressiveBridge {
 
     @Shadow private int angerLevel;

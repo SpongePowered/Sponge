@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.command.vanilla;
 
 import net.minecraft.command.CommandToggleDownfall;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -40,7 +40,7 @@ public abstract class CommandToggleDownfallMixin_GlobalCommand {
     @Overwrite
     protected void toggleRainfall(final MinecraftServer server) {
         final boolean raining = !server.field_71305_c[0].func_72912_H().func_76059_o();
-        for (final WorldServer world : server.field_71305_c) {
+        for (final ServerWorld world : server.field_71305_c) {
             world.func_72912_H().func_76084_b(raining);
         }
     }

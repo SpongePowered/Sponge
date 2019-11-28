@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.CPacketClickWindow;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -59,6 +56,9 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.play.client.CClickWindowPacket;
 
 public class BasicInventoryPacketState extends PacketState<InventoryPacketContext> {
 
@@ -106,7 +106,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Nullable
-    public ClickInventoryEvent createInventoryEvent(final EntityPlayerMP playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
+    public ClickInventoryEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
             final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable final Slot slot) {
         return null;
     }
@@ -125,7 +125,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Override
-    public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final InventoryPacketContext context) {
+    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final InventoryPacketContext context) {
         ((TrackedInventoryBridge) playerMP.field_71070_bA).bridge$setCaptureInventory(true);
     }
 
@@ -145,7 +145,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     @Override
     public void unwind(final InventoryPacketContext context) {
-        final EntityPlayerMP player = context.getPacketPlayer();
+        final ServerPlayerEntity player = context.getPacketPlayer();
 
         // The server will disable the player's crafting after receiving a client packet
         // that did not pass validation (server click item != packet click item)
@@ -162,10 +162,10 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             return;
         }
 
-        final CPacketClickWindow packetIn = context.getPacket();
+        final CClickWindowPacket packetIn = context.getPacket();
         final Transaction<ItemStackSnapshot> cursorTransaction = this.getCursorTransaction(context, player);
 
-        final net.minecraft.inventory.Container openContainer = player.field_71070_bA;
+        final net.minecraft.inventory.container.Container openContainer = player.field_71070_bA;
         final List<SlotTransaction> slotTransactions = trackedInventory.bridge$getCapturedSlotTransactions();
 
         final int usedButton = packetIn.func_149543_e();
@@ -277,7 +277,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         }
     }
 
-    public Transaction<ItemStackSnapshot> getCursorTransaction(final InventoryPacketContext context, final EntityPlayerMP player) {
+    public Transaction<ItemStackSnapshot> getCursorTransaction(final InventoryPacketContext context, final ServerPlayerEntity player) {
         final ItemStackSnapshot lastCursor = context.getCursor();
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.field_71071_by.func_70445_o());
         return new Transaction<>(lastCursor, newCursor);

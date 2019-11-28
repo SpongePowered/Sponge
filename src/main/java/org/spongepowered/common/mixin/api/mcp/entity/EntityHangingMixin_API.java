@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
-import net.minecraft.entity.EntityHanging;
-import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
@@ -41,11 +39,12 @@ import org.spongepowered.common.util.Constants;
 import java.util.Collection;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.item.HangingEntity;
 
-@Mixin(EntityHanging.class)
+@Mixin(HangingEntity.class)
 public abstract class EntityHangingMixin_API extends EntityMixin_API implements Hanging {
 
-    @Shadow @Nullable public EnumFacing facingDirection;
+    @Shadow @Nullable public net.minecraft.util.Direction facingDirection;
 
     @Override
     public DirectionalData getDirectionalData() {

@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
-import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.inventory.InventoryCraftResult;
-import net.minecraft.inventory.InventoryLargeChest;
-import net.minecraft.tileentity.TileEntityLockable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
@@ -42,6 +38,10 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 
 import javax.annotation.Nullable;
+import net.minecraft.inventory.CraftResultInventory;
+import net.minecraft.inventory.DoubleSidedInventory;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.tileentity.LockableTileEntity;
 
 /**
  * Implement {@link InventoryAdapter#bridge$getSlotProvider()}
@@ -49,10 +49,10 @@ import javax.annotation.Nullable;
  * using a {@link ReusableLensProvider} or {@link LensProviderBridge}
  */
 @Mixin(value = {
-        TileEntityLockable.class,
-        InventoryBasic.class,
-        InventoryCraftResult.class,
-        InventoryLargeChest.class
+        LockableTileEntity.class,
+        Inventory.class,
+        CraftResultInventory.class,
+        DoubleSidedInventory.class
 }, priority = 999)
 public abstract class ReusableLensInventoryAdapterMixin implements ReusableLensInventoryAdapaterBridge, InventoryAdapterBridge, InventoryBridge {
 

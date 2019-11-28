@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.inventory;
 
-import net.minecraft.inventory.InventoryLargeChest;
+import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -44,7 +44,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Mixin(InventoryLargeChest.class)
+@Mixin(DoubleSidedInventory.class)
 public abstract class InventoryLargeChestMixin_API implements CarriedInventory<MultiBlockCarrier>, MultiBlockCarrier {
 
     @Shadow @Final private ILockableContainer upperChest;

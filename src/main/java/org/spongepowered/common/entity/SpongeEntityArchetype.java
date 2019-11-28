@@ -27,11 +27,11 @@ package org.spongepowered.common.entity;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -66,7 +66,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     private Vector3d position;
 
     SpongeEntityArchetype(SpongeEntityArchetypeBuilder builder) {
-        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new NBTTagCompound() : NbtTranslator.getInstance().translateData(builder.entityData));
+        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundNBT() : NbtTranslator.getInstance().translateData(builder.entityData));
     }
 
     @Override
@@ -75,7 +75,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     @Nullable
-    public NBTTagCompound getData() {
+    public CompoundNBT getData() {
         return this.data;
     }
 
@@ -87,7 +87,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             return Optional.empty();
         }
         try {
-            NBTTagList pos = this.data.func_150295_c(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+            ListNBT pos = this.data.func_150295_c(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
             double x = pos.func_150309_d(0);
             double y = pos.func_150309_d(1);
             double z = pos.func_150309_d(2);
@@ -112,7 +112,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final double z = position.getZ();
         final BlockPos blockPos = new BlockPos(x, y, z);
         final World world = location.getExtent();
-        final WorldServer worldServer = (WorldServer) world;
+        final ServerWorld worldServer = (ServerWorld) world;
 
         Entity entity = null;
 
@@ -152,12 +152,12 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             final WorldServerBridge mixinWorldServer = (WorldServerBridge) worldServer;
             entity.func_70080_a(x, y, z, entity.field_70177_z, entity.field_70125_A);
             mixinWorldServer.bridge$forceSpawnEntity(entity);
-            if (entity instanceof EntityLiving) {
+            if (entity instanceof MobEntity) {
                 // This is ok to force spawn since we aren't considering custom items.
                 if (requiresInitialSpawn) {
-                    ((EntityLiving) entity).func_180482_a(worldServer.func_175649_E(blockPos), null);
+                    ((MobEntity) entity).func_180482_a(worldServer.func_175649_E(blockPos), null);
                 }
-                ((EntityLiving) entity).func_70656_aK();
+                ((MobEntity) entity).func_70656_aK();
             }
             return Optional.of(spongeEntity);
         }
@@ -168,7 +168,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     public EntitySnapshot toSnapshot(Location<World> location) {
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
         builder.entityType = this.type;
-        NBTTagCompound newCompound = this.data.func_74737_b();
+        CompoundNBT newCompound = this.data.func_74737_b();
         newCompound.func_74782_a("Pos", Constants.NBT
                 .newDoubleNBTList(new double[] { location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ() }));
         newCompound.func_74768_a("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());

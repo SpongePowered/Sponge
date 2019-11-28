@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.property.store.item;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemTool;
 import org.spongepowered.api.data.property.item.EfficiencyProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 import org.spongepowered.common.mixin.core.item.ItemToolAccessor;

@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.item.EntityEnderEye;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.item.EyeOfEnderEntity;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,7 +35,7 @@ import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
-@Mixin(EntityEnderEye.class)
+@Mixin(EyeOfEnderEntity.class)
 public abstract class EntityEnderEyeMixin extends EntityMixin implements LocationTargetingBridge {
 
     @Shadow private double targetX;
@@ -44,13 +44,13 @@ public abstract class EntityEnderEyeMixin extends EntityMixin implements Locatio
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, (EyeOfEnder) this);
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, null);
     }

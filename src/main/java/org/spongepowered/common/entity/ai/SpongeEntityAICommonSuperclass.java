@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.entity.ai;
 
-import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.goal.Goal;
 
-public abstract class SpongeEntityAICommonSuperclass extends EntityAIBase {
+public abstract class SpongeEntityAICommonSuperclass extends Goal {
 
     @Override
     public boolean func_75250_a() {

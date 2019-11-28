@@ -28,7 +28,7 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.provider.BiomeProvider;
-import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.world.gen.ChunkGenerator;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,7 +52,7 @@ public abstract class WorldTypeMixin implements WorldTypeBridge {
     @Shadow @Final private int id;
 
     @Nullable private Function<World, BiomeProvider> impl$biomeProvider;
-    @Nullable private BiFunction<World, String, IChunkGenerator> impl$chunkGenerator;
+    @Nullable private BiFunction<World, String, ChunkGenerator> impl$chunkGenerator;
 
 
     @Inject(method = "<init>(ILjava/lang/String;)V", at = @At("RETURN"))
@@ -95,12 +95,12 @@ public abstract class WorldTypeMixin implements WorldTypeBridge {
     }
 
     @Override
-    public Optional<BiFunction<World, String, IChunkGenerator>> bridge$getChunkGenerator() {
+    public Optional<BiFunction<World, String, ChunkGenerator>> bridge$getChunkGenerator() {
         return Optional.ofNullable(this.impl$chunkGenerator);
     }
 
     @Override
-    public void bridge$setChunkGenerator(final BiFunction<World, String, IChunkGenerator> function) {
+    public void bridge$setChunkGenerator(final BiFunction<World, String, ChunkGenerator> function) {
         this.impl$chunkGenerator = function;
     }
 

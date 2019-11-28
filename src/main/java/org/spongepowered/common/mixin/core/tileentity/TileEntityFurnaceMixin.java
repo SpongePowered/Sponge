@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import static net.minecraft.inventory.SlotFurnaceFuel.func_178173_c_;
+import static net.minecraft.inventory.container.FurnaceFuelSlot.func_178173_c_;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.MathHelper;
 import org.objectweb.asm.Opcodes;
@@ -66,7 +66,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.Collections;
 
-@Mixin(TileEntityFurnace.class)
+@Mixin(FurnaceTileEntity.class)
 public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin implements CustomNameableBridge {
 
     @Shadow private NonNullList<ItemStack> furnaceItemStacks;
@@ -83,10 +83,10 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
 
     private SlotProvider impl$generateSlotProvider() {
         return new SlotCollection.Builder().add(InputSlotAdapter.class, InputSlotLensImpl::new)
-                .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> TileEntityFurnace.func_145954_b((ItemStack) s) || func_178173_c_(
+                .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> FurnaceTileEntity.func_145954_b((ItemStack) s) || func_178173_c_(
                         (ItemStack) s), t -> {
                     final ItemStack nmsStack = (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1);
-                    return TileEntityFurnace.func_145954_b(nmsStack) || func_178173_c_(nmsStack);
+                    return FurnaceTileEntity.func_145954_b(nmsStack) || func_178173_c_(nmsStack);
                 }))
                 // TODO represent the filtering in the API somehow
                 .add(OutputSlotAdapter.class, (i) -> new OutputSlotLensImpl(i, (s) -> true, (t) -> true))
@@ -99,7 +99,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
 
     @Override
     public void bridge$setCustomDisplayName(final String customName) {
-        ((TileEntityFurnace) (Object) this).func_145951_a(customName);
+        ((FurnaceTileEntity) (Object) this).func_145951_a(customName);
     }
 
     // Shrink Fuel
@@ -131,7 +131,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
 
     // Tick up and Start
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityFurnace;canSmelt()Z", ordinal = 1))
-    private boolean impl$checkIfCanSmelt(final TileEntityFurnace furnace) {
+    private boolean impl$checkIfCanSmelt(final FurnaceTileEntity furnace) {
         if (!this.canSmelt()) {
             return false;
         }

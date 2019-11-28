@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.api.item.merchant;
 
-import net.minecraft.entity.IMerchant;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.merchant.IMerchant;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
@@ -47,19 +47,19 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = IMerchant.class, prefix = "imerchant$"))
 public interface MerchantMixin extends Merchant {
 
-    default void imerchant$setCustomer(@Nullable final EntityPlayer player) {
+    default void imerchant$setCustomer(@Nullable final PlayerEntity player) {
         this.setCustomer((Humanoid) player);
     }
 
     @Nullable
-    default EntityPlayer imerchant$getCustomer() {
-        return (EntityPlayer) this.getCustomer()
-            .filter(humanoid -> humanoid instanceof EntityPlayer)
+    default PlayerEntity imerchant$getCustomer() {
+        return (PlayerEntity) this.getCustomer()
+            .filter(humanoid -> humanoid instanceof PlayerEntity)
             .orElse(null);
     }
 
     @Nullable
-    default MerchantRecipeList imerchant$getRecipes(final EntityPlayer player) {
+    default MerchantRecipeList imerchant$getRecipes(final PlayerEntity player) {
         final MerchantRecipeList merchantRecipes = new MerchantRecipeList();
         for (final TradeOffer tradeOffer : getTradeOfferData().tradeOffers()) {
             merchantRecipes.add((MerchantRecipe) tradeOffer);
@@ -76,7 +76,7 @@ public interface MerchantMixin extends Merchant {
     }
 
     default ITextComponent imerchant$getDisplayName() {
-        return new TextComponentString("nitwit");
+        return new StringTextComponent("nitwit");
     }
 
     default World imerchant$getWorld() {

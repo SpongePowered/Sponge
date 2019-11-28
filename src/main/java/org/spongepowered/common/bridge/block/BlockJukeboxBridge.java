@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.block;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -32,5 +32,5 @@ public interface BlockJukeboxBridge {
 
     // TODO Mixin 0.8
     @Deprecated
-    void accessor$dropRecordItem(World worldIn, BlockPos pos, IBlockState state);
+    void accessor$dropRecordItem(World worldIn, BlockPos pos, BlockState state);
 }

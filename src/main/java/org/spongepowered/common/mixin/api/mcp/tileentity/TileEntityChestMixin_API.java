@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.TileEntityChest;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
@@ -38,16 +37,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.tileentity.ChestTileEntity;
 
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
-@Mixin(TileEntityChest.class)
+@Mixin(ChestTileEntity.class)
 public abstract class TileEntityChestMixin_API extends TileEntityLockableLootMixin_API<Chest> implements Chest {
 
-    @Shadow public TileEntityChest adjacentChestZNeg;
-    @Shadow public TileEntityChest adjacentChestXPos;
-    @Shadow public TileEntityChest adjacentChestXNeg;
-    @Shadow public TileEntityChest adjacentChestZPos;
+    @Shadow public ChestTileEntity adjacentChestZNeg;
+    @Shadow public ChestTileEntity adjacentChestXPos;
+    @Shadow public ChestTileEntity adjacentChestXNeg;
+    @Shadow public ChestTileEntity adjacentChestZPos;
 
     @Shadow public abstract void checkForAdjacentChests();
 
@@ -62,7 +62,7 @@ public abstract class TileEntityChestMixin_API extends TileEntityLockableLootMix
 
     @Override
     public Optional<Inventory> getDoubleChestInventory() {
-        return InventoryUtil.getDoubleChestInventory(((TileEntityChest)(Object) this));
+        return InventoryUtil.getDoubleChestInventory(((ChestTileEntity)(Object) this));
     }
 
     @Override

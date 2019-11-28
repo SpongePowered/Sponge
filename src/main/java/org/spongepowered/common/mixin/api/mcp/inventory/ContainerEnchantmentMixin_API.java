@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.inventory;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.inventory.ContainerEnchantment;
+import net.minecraft.inventory.container.EnchantmentContainer;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.Shadow;
  * aspects of {@link SingleBlockCarrier} since the remainder of
  * {@link Inventory} implementation is defaulted in {@link SingleBlockCarrier}
  */
-@Mixin(ContainerEnchantment.class)
+@Mixin(EnchantmentContainer.class)
 public abstract class ContainerEnchantmentMixin_API implements SingleBlockCarrier {
 
     @Shadow @Final private net.minecraft.world.World world;

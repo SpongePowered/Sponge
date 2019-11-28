@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.optimization.world.gen;
 
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,10 +35,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge_AsyncLighting;
 
-@Mixin(value = ChunkProviderServer.class, priority = 1002)
+@Mixin(value = ServerChunkProvider.class, priority = 1002)
 public abstract class ChunkProviderServerMixin_Async_Lighting {
 
-    @Shadow @Final private WorldServer world;
+    @Shadow @Final private ServerWorld world;
 
     @Dynamic
     @Redirect(method = "tick",

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFlowerPot;
 import org.spongepowered.api.data.DataTransactionResult;

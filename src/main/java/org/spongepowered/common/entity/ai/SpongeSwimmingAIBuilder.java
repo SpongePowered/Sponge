@@ -25,8 +25,8 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.SwimGoal;
 import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
 import org.spongepowered.api.entity.living.Agent;
 
@@ -58,7 +58,7 @@ public final class SpongeSwimmingAIBuilder implements SwimmingAITask.Builder {
     @Override
     public SwimmingAITask build(Agent owner) {
         Preconditions.checkNotNull(owner);
-        final SwimmingAITask task = (SwimmingAITask) new EntityAISwimming((EntityLiving) owner);
+        final SwimmingAITask task = (SwimmingAITask) new SwimGoal((MobEntity) owner);
         task.setSwimChance(this.chance);
         return task;
     }

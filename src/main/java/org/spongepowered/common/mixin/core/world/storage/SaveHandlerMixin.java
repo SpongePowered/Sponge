@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -87,10 +87,10 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
     }
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
-    private void impl$saveLevelSpongeDataFile(final WorldInfo worldInformation, final NBTTagCompound tagCompound, final CallbackInfo ci) {
+    private void impl$saveLevelSpongeDataFile(final WorldInfo worldInformation, final CompoundNBT tagCompound, final CallbackInfo ci) {
         try {
             // If the returned NBT is empty, then we should warn the user.
-            NBTTagCompound spongeRootLevelNBT = ((WorldInfoBridge) worldInformation).bridge$getSpongeRootLevelNbt();
+            CompoundNBT spongeRootLevelNBT = ((WorldInfoBridge) worldInformation).bridge$getSpongeRootLevelNbt();
             if (spongeRootLevelNBT.func_82582_d()) {
                 Integer dimensionId = ((WorldInfoBridge) worldInformation).bridge$getDimensionId();
                 String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
@@ -224,19 +224,19 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
     @Redirect(method = "readPlayerData(Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At(value = "INVOKE", target =
         "Lnet/minecraft/nbt/CompressedStreamTools;readCompressed(Ljava/io/InputStream;)"
             + "Lnet/minecraft/nbt/NBTTagCompound;"))
-    private NBTTagCompound impl$readLegacyDataAndOrSpongeData(final InputStream inputStream) throws IOException {
+    private CompoundNBT impl$readLegacyDataAndOrSpongeData(final InputStream inputStream) throws IOException {
         Instant creation = this.impl$file == null ? Instant.now() : Files.readAttributes(this.impl$file, BasicFileAttributes.class).creationTime().toInstant();
-        final NBTTagCompound compound = CompressedStreamTools.func_74796_a(inputStream);
+        final CompoundNBT compound = CompressedStreamTools.func_74796_a(inputStream);
         Instant lastPlayed = Instant.now();
         // first try to migrate bukkit join data stuff
         if (compound.func_150297_b(Constants.Bukkit.BUKKIT, Constants.NBT.TAG_COMPOUND)) {
-            final NBTTagCompound bukkitCompound = compound.func_74775_l(Constants.Bukkit.BUKKIT);
+            final CompoundNBT bukkitCompound = compound.func_74775_l(Constants.Bukkit.BUKKIT);
             creation = Instant.ofEpochMilli(bukkitCompound.func_74763_f(Constants.Bukkit.BUKKIT_FIRST_PLAYED));
             lastPlayed = Instant.ofEpochMilli(bukkitCompound.func_74763_f(Constants.Bukkit.BUKKIT_LAST_PLAYED));
         }
         // migrate canary join data
         if (compound.func_150297_b(Constants.Canary.ROOT, Constants.NBT.TAG_COMPOUND)) {
-            final NBTTagCompound canaryCompound = compound.func_74775_l(Constants.Canary.ROOT);
+            final CompoundNBT canaryCompound = compound.func_74775_l(Constants.Canary.ROOT);
             creation = Instant.ofEpochMilli(canaryCompound.func_74763_f(Constants.Canary.FIRST_JOINED));
             lastPlayed = Instant.ofEpochMilli(canaryCompound.func_74763_f(Constants.Canary.LAST_JOINED));
         }
@@ -263,7 +263,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/nbt/CompressedStreamTools;writeCompressed(Lnet/minecraft/nbt/NBTTagCompound;Ljava/io/OutputStream;)V",
             shift = At.Shift.AFTER))
-    private void impl$saveSpongePlayerData(final EntityPlayer player, final CallbackInfo callbackInfo) {
+    private void impl$saveSpongePlayerData(final PlayerEntity player, final CallbackInfo callbackInfo) {
         SpongePlayerDataHandler.savePlayer(player.func_110124_au());
     }
 
@@ -273,7 +273,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
             target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
             remap = false),
         locals = LocalCapture.CAPTURE_FAILHARD)
-    private void impl$trackExceptionForLogging(final EntityPlayer player, final CallbackInfo ci, final Exception exception) {
+    private void impl$trackExceptionForLogging(final PlayerEntity player, final CallbackInfo ci, final Exception exception) {
         this.impl$capturedException = exception;
     }
 
@@ -300,7 +300,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
     }
 
     private boolean impl$loadSpongeDatFile(final WorldInfo info, final File file, boolean isCurrent) {
-        final NBTTagCompound compound;
+        final CompoundNBT compound;
         try (final FileInputStream stream = new FileInputStream(file)) {
             compound = CompressedStreamTools.func_74796_a(stream);
         } catch (Exception ex) {
@@ -332,7 +332,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
         }
         ((WorldInfoBridge) info).bridge$setSpongeRootLevelNBT(compound);
         if (compound.func_74764_b(Constants.Sponge.SPONGE_DATA)) {
-            final NBTTagCompound spongeCompound = compound.func_74775_l(Constants.Sponge.SPONGE_DATA);
+            final CompoundNBT spongeCompound = compound.func_74775_l(Constants.Sponge.SPONGE_DATA);
             DataUtil.spongeDataFixer.func_188257_a(FixTypes.LEVEL, spongeCompound);
             ((WorldInfoBridge) info).bridge$readSpongeNbt(spongeCompound);
         }

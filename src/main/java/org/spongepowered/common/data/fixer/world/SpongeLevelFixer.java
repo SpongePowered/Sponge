@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.fixer.world;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.datafix.IFixableData;
 import org.spongepowered.common.util.Constants;
 
@@ -39,7 +39,7 @@ public class SpongeLevelFixer implements IFixableData {
     }
 
     @Override
-    public NBTTagCompound func_188217_a(NBTTagCompound compound) {
+    public CompoundNBT func_188217_a(CompoundNBT compound) {
         { // Fixes the world unique id
             final long least = compound.func_74763_f(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
             final long most = compound.func_74763_f(Constants.Legacy.World.WORLD_UUID_MOST_1_8);
@@ -51,9 +51,9 @@ public class SpongeLevelFixer implements IFixableData {
         }
         // Fixes the Player Id Table
         if (compound.func_150297_b(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
-            final NBTTagList playerIdList = compound.func_150295_c(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
+            final ListNBT playerIdList = compound.func_150295_c(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < playerIdList.func_74745_c(); i++) {
-                final NBTTagCompound playerIdCompound = playerIdList.func_150305_b(i);
+                final CompoundNBT playerIdCompound = playerIdList.func_150305_b(i);
                 final long least = playerIdCompound.func_74763_f(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);
                 final long most = playerIdCompound.func_74763_f(Constants.Legacy.World.WORLD_UUID_MOST_1_8);
                 playerIdCompound.func_82580_o(Constants.Legacy.World.WORLD_UUID_LEAST_1_8);

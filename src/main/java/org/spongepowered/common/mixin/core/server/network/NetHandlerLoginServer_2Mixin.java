@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
-import net.minecraft.network.NetHandlerLoginServer;
+import net.minecraft.network.login.ServerLoginNetHandler;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,7 +39,7 @@ public class NetHandlerLoginServer_2Mixin extends Thread {
 
     @Shadow(aliases = {"this$0", "field_180221_a"})
     @Final
-    private NetHandlerLoginServer handler;
+    private ServerLoginNetHandler handler;
 
     @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
             remap = false, cancellable = true)

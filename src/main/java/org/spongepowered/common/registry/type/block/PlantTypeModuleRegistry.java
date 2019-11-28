@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockFlower;
+import net.minecraft.block.FlowerBlock;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 @RegisterCatalog(PlantTypes.class)
-public final class PlantTypeModuleRegistry extends MinecraftEnumBasedCatalogTypeModule<BlockFlower.EnumFlowerType, PlantType> {
+public final class PlantTypeModuleRegistry extends MinecraftEnumBasedCatalogTypeModule<FlowerBlock.EnumFlowerType, PlantType> {
 
     @Override
-    protected BlockFlower.EnumFlowerType[] getValues() {
-        return BlockFlower.EnumFlowerType.values();
+    protected FlowerBlock.EnumFlowerType[] getValues() {
+        return FlowerBlock.EnumFlowerType.values();
     }
 
 }

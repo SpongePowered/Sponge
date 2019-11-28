@@ -25,8 +25,7 @@
 package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -37,7 +36,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
  */
 public class ChunkBufferPrimer extends ChunkPrimer {
 
-    private static final IBlockState defaultState = Blocks.field_150350_a.func_176223_P();
+    private static final net.minecraft.block.BlockState defaultState = Blocks.field_150350_a.func_176223_P();
     private final MutableBlockVolume buffer;
     private final Vector3i min;
 
@@ -47,19 +46,19 @@ public class ChunkBufferPrimer extends ChunkPrimer {
     }
 
     @Override
-    public IBlockState func_177856_a(int x, int y, int z) {
-        return (IBlockState) this.buffer.getBlock(this.min.getX() + x, this.min.getY() + y, this.min.getZ() + z);
+    public net.minecraft.block.BlockState func_177856_a(int x, int y, int z) {
+        return (net.minecraft.block.BlockState) this.buffer.getBlock(this.min.getX() + x, this.min.getY() + y, this.min.getZ() + z);
     }
 
     @Override
-    public void func_177855_a(int x, int y, int z, IBlockState state) {
+    public void func_177855_a(int x, int y, int z, net.minecraft.block.BlockState state) {
         this.buffer.setBlock(this.min.getX() + x, this.min.getY() + y, this.min.getZ() + z, (BlockState) state);
     }
 
     @Override
     public int func_186138_a(int x, int z) {
         for (int y = 255; y >= 0; --y) {
-            IBlockState iblockstate = func_177856_a(x, y, z);
+            net.minecraft.block.BlockState iblockstate = func_177856_a(x, y, z);
 
             if (iblockstate != null && iblockstate != defaultState) {
                 return y;

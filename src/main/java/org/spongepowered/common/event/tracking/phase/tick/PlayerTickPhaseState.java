@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -37,6 +36,7 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.entity.item.ItemEntity;
 
 class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
 
@@ -61,7 +61,7 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
                 final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                for (final EntityItem entity : entities) {
+                for (final ItemEntity entity : entities) {
                     capturedEntities.add((Entity) entity);
                 }
 

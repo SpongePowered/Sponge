@@ -26,9 +26,8 @@ package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -62,7 +61,7 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
     }
 
     @Inject(method = "canFlowInto", at = @At("HEAD"), cancellable = true)
-    private void impl$throwPreForFlowingInto(final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state,
+    private void impl$throwPreForFlowingInto(final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state,
         final CallbackInfoReturnable<Boolean> cir) {
         if (!((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE &&
             SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) worldIn, pos).isCancelled()) {
@@ -72,7 +71,7 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
 
     @Inject(method = "updateTick", at = @At("HEAD"), cancellable = true)
     private void impl$throwPreOnUpdate(
-        final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, final Random rand, final CallbackInfo ci) {
+        final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, final Random rand, final CallbackInfo ci) {
         if (!((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             if (SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) worldIn, pos).isCancelled()) {
                 ci.cancel();
@@ -90,21 +89,21 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"
         )
     )
-    private void impl$throwModifyForLavaToStone(final net.minecraft.world.World worldIn, final BlockPos sourcePos, final IBlockState state,
+    private void impl$throwModifyForLavaToStone(final net.minecraft.world.World worldIn, final BlockPos sourcePos, final net.minecraft.block.BlockState state,
         final Random rand, final CallbackInfo ci) {
         if (!ShouldFire.CHANGE_BLOCK_EVENT_MODIFY) {
             return;
         }
         final BlockPos targetPos = sourcePos.func_177977_b();
         final LocatableBlock source = new SpongeLocatableBlockBuilder().world((World) worldIn).position(sourcePos.func_177958_n(), sourcePos.func_177956_o(), sourcePos.func_177952_p()).state((BlockState) state).build();
-        final IBlockState newState = Blocks.field_150348_b.func_176223_P();
+        final net.minecraft.block.BlockState newState = Blocks.field_150348_b.func_176223_P();
         final ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, targetPos, newState, source);
         final Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
         if (event.isCancelled() || !transaction.isValid()) {
             ci.cancel();
             return;
         }
-        if (!worldIn.func_175656_a(targetPos, (IBlockState) transaction.getFinal().getState())) {
+        if (!worldIn.func_175656_a(targetPos, (net.minecraft.block.BlockState) transaction.getFinal().getState())) {
             ci.cancel();
         }
     }
@@ -129,13 +128,13 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
         )
     )
     private void impl$throwBreakForReplacingotherBlocksDuringFlow(
-        final net.minecraft.world.World worldIn, final BlockPos pos, final IBlockState state, final int level, final CallbackInfo ci) {
+        final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, final int level, final CallbackInfo ci) {
         if (!ShouldFire.CHANGE_BLOCK_EVENT_BREAK) {
             return;
         }
         // Do not call events when just flowing into air or same liquid
         if (state.func_185904_a() != Material.field_151579_a && state.func_185904_a() != this.shadow$getDefaultState().func_185904_a()) {
-            final IBlockState newState = this.shadow$getDefaultState().func_177226_a(BlockLiquid.field_176367_b, level);
+            final net.minecraft.block.BlockState newState = this.shadow$getDefaultState().func_177226_a(BlockLiquid.field_176367_b, level);
             final ChangeBlockEvent.Break event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidBreak(worldIn, pos, newState);
 
             final Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
@@ -146,7 +145,7 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
 
             // Transaction modified?
             if (transaction.getCustom().isPresent()) {
-                worldIn.func_175656_a(pos, (IBlockState) transaction.getFinal().getState());
+                worldIn.func_175656_a(pos, (net.minecraft.block.BlockState) transaction.getFinal().getState());
                 ci.cancel();
             }
             // else do vanilla logic

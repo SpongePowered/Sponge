@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.common;
 
 import com.google.common.collect.Sets;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
@@ -40,7 +40,7 @@ import java.util.Set;
 public final class BreakablePlaceableUtils {
 
     public static boolean set(final ItemStack stack, final String nbtKey, final Set<? extends BlockType> value) {
-        NBTTagCompound stackTag = stack.func_77978_p();
+        CompoundNBT stackTag = stack.func_77978_p();
 
         if (value.isEmpty()) {
             if (stackTag != null) {
@@ -50,16 +50,16 @@ public final class BreakablePlaceableUtils {
                 }
             }
         } else {
-            final NBTTagList breakableIds = new NBTTagList();
+            final ListNBT breakableIds = new ListNBT();
             for (final BlockType breakable : value) {
                 String id = breakable.getId();
                 if (id.startsWith("minecraft:")) {
                     id = id.substring("minecraft:".length());
                 }
-                breakableIds.func_74742_a(new NBTTagString(id));
+                breakableIds.func_74742_a(new StringNBT(id));
             }
             if (stackTag == null) {
-                stackTag = new NBTTagCompound();
+                stackTag = new CompoundNBT();
                 stack.func_77982_d(stackTag);
             }
             stackTag.func_74782_a(nbtKey, breakableIds);
@@ -69,11 +69,11 @@ public final class BreakablePlaceableUtils {
     }
 
     public static Optional<Set<BlockType>> get(final ItemStack stack, final String nbtKey) {
-        final NBTTagCompound tag = stack.func_77978_p();
+        final CompoundNBT tag = stack.func_77978_p();
         if (tag == null) {
             return Optional.empty();
         }
-        final NBTTagList blockIds = tag.func_150295_c(nbtKey, Constants.NBT.TAG_STRING);
+        final ListNBT blockIds = tag.func_150295_c(nbtKey, Constants.NBT.TAG_STRING);
         if (blockIds.func_82582_d()) {
             return Optional.empty();
         }

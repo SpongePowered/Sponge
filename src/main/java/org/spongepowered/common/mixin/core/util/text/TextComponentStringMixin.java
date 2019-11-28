@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.util.text;
 
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.util.text.TextComponentBaseMixin;
 
-@Mixin(TextComponentString.class)
+@Mixin(StringTextComponent.class)
 public abstract class TextComponentStringMixin extends TextComponentBaseMixin {
 
     @Shadow @Final private String text;

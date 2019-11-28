@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.data.property.block.SolidCubeProperty;
@@ -47,15 +47,15 @@ public class SolidCubePropertyStore extends AbstractBlockPropertyStore<SolidCube
     }
 
     @Override
-    protected Optional<SolidCubeProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
+    protected Optional<SolidCubeProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
         return Optional.of(block.func_185904_a().func_76220_a() ? TRUE : FALSE);
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    protected Optional<SolidCubeProperty> getForDirection(World world, int x, int y, int z, EnumFacing facing) {
+    protected Optional<SolidCubeProperty> getForDirection(World world, int x, int y, int z, Direction facing) {
         BlockPos pos = new BlockPos(x, y, z);
-        IBlockState state = world.func_180495_p(pos);
+        BlockState state = world.func_180495_p(pos);
         Block block = state.func_177230_c();
         return Optional.of(block.func_149688_o(state).func_76220_a() ? TRUE : FALSE);
     }

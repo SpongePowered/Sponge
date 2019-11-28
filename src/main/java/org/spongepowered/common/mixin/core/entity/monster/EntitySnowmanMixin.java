@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.monster.EntitySnowman;
+import net.minecraft.entity.passive.SnowGolemEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.mixin.core.entity.EntityLivingMixin;
 
-@Mixin(EntitySnowman.class)
+@Mixin(SnowGolemEntity.class)
 public abstract class EntitySnowmanMixin extends EntityLivingMixin {
 
     @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;floor(D)I", ordinal = 3),

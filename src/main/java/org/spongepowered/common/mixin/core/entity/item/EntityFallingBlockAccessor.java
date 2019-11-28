@@ -24,24 +24,24 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityFallingBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.item.FallingBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EntityFallingBlock.class)
+@Mixin(FallingBlockEntity.class)
 public interface EntityFallingBlockAccessor {
 
     @Accessor("dontSetBlock") boolean accessor$getDontSetAsBlock();
     @Accessor("hurtEntities") boolean accessor$getHurtEntities();
     @Accessor("fallHurtMax") int accessor$getFallHurtMax();
     @Accessor("fallHurtAmount") float accessor$getFallHurtAmount();
-    @Accessor("fallTile") IBlockState accessor$getFallBlockState();
+    @Accessor("fallTile") BlockState accessor$getFallBlockState();
     @Accessor("fallTime") int accessor$getFallTime();
     @Accessor("dontSetBlock") void accessor$setDontSetAsBlock(boolean dontSetBlock);
     @Accessor("fallHurtMax") void accessor$setFallHurtMax(int fallHurtMax);
     @Accessor("fallHurtAmount") void accessor$setFallHurtAmount(float fallHurtAmount);
-    @Accessor("fallTile") void accessor$setFallBlockState(IBlockState fallTile);
+    @Accessor("fallTile") void accessor$setFallBlockState(BlockState fallTile);
     @Accessor("fallTime") void accessor$setFallTime(int fallTime);
     @Accessor("hurtEntities") void accessor$setHurtEntities(boolean hurtEntities);
 

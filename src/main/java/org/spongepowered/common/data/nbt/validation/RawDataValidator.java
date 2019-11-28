@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.nbt.validation;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataView;
 
 public interface RawDataValidator {
@@ -39,7 +39,7 @@ public interface RawDataValidator {
      * @param view The view to validate
      * @return True if the view contains valid data
      */
-    boolean validate(NBTTagCompound view);
+    boolean validate(CompoundNBT view);
 
     boolean validate(DataView view);
 

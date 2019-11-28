@@ -27,11 +27,10 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -89,7 +88,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public void associateNeighborStateNotifier(
         final BlockEventTickContext context, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-                                               final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
+                                               final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
             final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.func_175726_f(notifyPos);
@@ -131,7 +130,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (final EntityItem entity : items) {
+                        for (final ItemEntity entity : items) {
                             capturedEntities.add((Entity) entity);
                         }
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
@@ -148,7 +147,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             final LocatableBlock source = (LocatableBlock) context.getSource();
             // Basically, if the source was a tile entity, and during the block event, it changed?
             // and if any of the transaction cancelled, the whole thing should be cancelled.
-            if (SpongeImplHooks.hasBlockTileEntity(((IBlockState) source.getBlockState()).func_177230_c(), (IBlockState) source.getBlockState())) {
+            if (SpongeImplHooks.hasBlockTileEntity(((net.minecraft.block.BlockState) source.getBlockState()).func_177230_c(), (net.minecraft.block.BlockState) source.getBlockState())) {
                 context.setWasNotCancelled(noCancelledTransactions);
                 return !noCancelledTransactions;
             }
@@ -159,12 +158,12 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             return postEvent.getTransactions().stream().anyMatch(transaction -> {
                 final BlockState state = transaction.getOriginal().getState();
                 final BlockType type = state.getType();
-                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, (IBlockState) state);
+                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, (net.minecraft.block.BlockState) state);
                 if (!hasTile && !transaction.getIntermediary().isEmpty()) { // Check intermediary
                     return transaction.getIntermediary().stream().anyMatch(inter -> {
                         final BlockState iterState = inter.getState();
                         final BlockType interType = state.getType();
-                        final boolean interMediaryHasTile = SpongeImplHooks.hasBlockTileEntity((Block) interType, (IBlockState) iterState);
+                        final boolean interMediaryHasTile = SpongeImplHooks.hasBlockTileEntity((Block) interType, (net.minecraft.block.BlockState) iterState);
                         context.setWasNotCancelled(!interMediaryHasTile);
                         return interMediaryHasTile;
                     });

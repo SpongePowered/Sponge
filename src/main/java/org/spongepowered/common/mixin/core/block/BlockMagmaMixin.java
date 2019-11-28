@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.BlockMagma;
+import net.minecraft.block.MagmaBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
@@ -38,7 +38,7 @@ import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.VecHelper;
 
-@Mixin(BlockMagma.class)
+@Mixin(MagmaBlock.class)
 public abstract class BlockMagmaMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")

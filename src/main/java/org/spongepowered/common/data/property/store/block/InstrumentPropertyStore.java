@@ -25,9 +25,9 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import org.spongepowered.api.data.property.block.InstrumentProperty;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.InstrumentTypes;
@@ -45,12 +45,12 @@ public class InstrumentPropertyStore extends AbstractBlockPropertyStore<Instrume
     }
 
     @Override
-    protected Optional<InstrumentProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
+    protected Optional<InstrumentProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
         return Optional.of(new InstrumentProperty(getInstrumentType(block)));
     }
 
     @SuppressWarnings("deprecation")
-    private InstrumentType getInstrumentType(IBlockState block) {
+    private InstrumentType getInstrumentType(BlockState block) {
         final Block blockType = block.func_177230_c();
         if (blockType == Blocks.field_150435_aG) {
             return InstrumentTypes.FLUTE;

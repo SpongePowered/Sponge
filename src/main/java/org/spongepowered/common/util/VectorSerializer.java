@@ -25,20 +25,20 @@
 package org.spongepowered.common.util;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 
 
 public class VectorSerializer {
 
-    public static NBTTagCompound toNbt(Vector3d vector) {
-        NBTTagCompound compound = new NBTTagCompound();
+    public static CompoundNBT toNbt(Vector3d vector) {
+        CompoundNBT compound = new CompoundNBT();
         compound.func_74780_a("x", vector.getX());
         compound.func_74780_a("y", vector.getY());
         compound.func_74780_a("z", vector.getZ());
         return compound;
     }
 
-    public static Vector3d fromNbt(NBTTagCompound compound) {
+    public static Vector3d fromNbt(CompoundNBT compound) {
         return new Vector3d(compound.func_74769_h("x"), compound.func_74769_h("y"), compound.func_74769_h("z"));
     }
 

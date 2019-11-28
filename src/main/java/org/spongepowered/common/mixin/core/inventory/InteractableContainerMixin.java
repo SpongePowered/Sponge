@@ -24,42 +24,42 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ContainerBeacon;
-import net.minecraft.inventory.ContainerBrewingStand;
-import net.minecraft.inventory.ContainerChest;
-import net.minecraft.inventory.ContainerDispenser;
-import net.minecraft.inventory.ContainerEnchantment;
-import net.minecraft.inventory.ContainerFurnace;
-import net.minecraft.inventory.ContainerHopper;
-import net.minecraft.inventory.ContainerHorseInventory;
-import net.minecraft.inventory.ContainerMerchant;
-import net.minecraft.inventory.ContainerPlayer;
-import net.minecraft.inventory.ContainerRepair;
-import net.minecraft.inventory.ContainerWorkbench;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.BeaconContainer;
+import net.minecraft.inventory.container.BrewingStandContainer;
+import net.minecraft.inventory.container.ChestContainer;
+import net.minecraft.inventory.container.DispenserContainer;
+import net.minecraft.inventory.container.EnchantmentContainer;
+import net.minecraft.inventory.container.FurnaceContainer;
+import net.minecraft.inventory.container.HopperContainer;
+import net.minecraft.inventory.container.HorseInventoryContainer;
+import net.minecraft.inventory.container.MerchantContainer;
+import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.container.RepairContainer;
+import net.minecraft.inventory.container.WorkbenchContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = {
-        ContainerChest.class,
-        ContainerHopper.class,
-        ContainerDispenser.class,
-        ContainerFurnace.class,
-        ContainerEnchantment.class,
-        ContainerRepair.class,
-        ContainerBrewingStand.class,
-        ContainerBeacon.class,
-        ContainerHorseInventory.class,
-        ContainerMerchant.class,
-        ContainerPlayer.class,
-        ContainerWorkbench.class
+        ChestContainer.class,
+        HopperContainer.class,
+        DispenserContainer.class,
+        FurnaceContainer.class,
+        EnchantmentContainer.class,
+        RepairContainer.class,
+        BrewingStandContainer.class,
+        BeaconContainer.class,
+        HorseInventoryContainer.class,
+        MerchantContainer.class,
+        PlayerContainer.class,
+        WorkbenchContainer.class
 })
 public abstract class InteractableContainerMixin extends ContainerMixin {
 
     @Inject(method = "canInteractWith", at = @At("HEAD"), cancellable = true)
-    private void impl$canInteractWith(final EntityPlayer playerIn, final CallbackInfoReturnable<Boolean> cir) {
+    private void impl$canInteractWith(final PlayerEntity playerIn, final CallbackInfoReturnable<Boolean> cir) {
         if (this.impl$canInteractWithPredicate != null) {
             cir.setReturnValue(this.impl$canInteractWithPredicate.test(playerIn));
         }

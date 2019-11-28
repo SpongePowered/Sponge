@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.player;
 
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -37,6 +36,7 @@ import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import net.minecraft.world.server.ServerWorld;
 
 final class PlayerLogoutPhaseState extends PooledPhaseState<GeneralizedContext> implements IPhaseState<GeneralizedContext> {
 
@@ -62,7 +62,7 @@ final class PlayerLogoutPhaseState extends PooledPhaseState<GeneralizedContext> 
             });
             phaseContext.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(items -> {
                 final List<Entity> drops = items.stream()
-                    .map(drop -> drop.create((WorldServer) player.getWorld()))
+                    .map(drop -> drop.create((ServerWorld) player.getWorld()))
                     .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
                 SpongeCommonEventFactory.callDropItemCustom(drops, phaseContext);

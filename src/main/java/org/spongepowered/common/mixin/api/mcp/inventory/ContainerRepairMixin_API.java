@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.inventory;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.inventory.ContainerRepair;
+import net.minecraft.inventory.container.RepairContainer;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.SingleBlockCarrier;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ContainerRepair.class)
+@Mixin(RepairContainer.class)
 public abstract class ContainerRepairMixin_API implements SingleBlockCarrier {
 
     @Shadow @Final private net.minecraft.world.World world;

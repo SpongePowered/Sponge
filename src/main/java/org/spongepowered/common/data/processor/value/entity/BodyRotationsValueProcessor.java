@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
-import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.BodyPart;
@@ -41,11 +40,12 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.item.ArmorStandEntity;
 
-public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<EntityArmorStand, Map<BodyPart, Vector3d>, MapValue<BodyPart, Vector3d>> {
+public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<ArmorStandEntity, Map<BodyPart, Vector3d>, MapValue<BodyPart, Vector3d>> {
 
     public BodyRotationsValueProcessor() {
-        super(EntityArmorStand.class, Keys.BODY_ROTATIONS);
+        super(ArmorStandEntity.class, Keys.BODY_ROTATIONS);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    protected boolean set(final EntityArmorStand container, final Map<BodyPart, Vector3d> value) {
+    protected boolean set(final ArmorStandEntity container, final Map<BodyPart, Vector3d> value) {
         container.func_175415_a(VecHelper.toRotation(value.get(BodyParts.HEAD)));
         container.func_175424_b(VecHelper.toRotation(value.get(BodyParts.CHEST)));
         container.func_175405_c(VecHelper.toRotation(value.get(BodyParts.LEFT_ARM)));
@@ -70,7 +70,7 @@ public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    protected Optional<Map<BodyPart, Vector3d>> getVal(final EntityArmorStand container) {
+    protected Optional<Map<BodyPart, Vector3d>> getVal(final ArmorStandEntity container) {
         final Map<BodyPart, Vector3d> values = Maps.newHashMap();
         
         values.put(BodyParts.HEAD, VecHelper.toVector3d(container.func_175418_s()));

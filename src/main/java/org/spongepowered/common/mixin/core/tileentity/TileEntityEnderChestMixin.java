@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.init.SoundEvents;
-import net.minecraft.tileentity.TileEntityEnderChest;
+import net.minecraft.tileentity.EnderChestTileEntity;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @NonnullByDefault
-@Mixin(TileEntityEnderChest.class)
+@Mixin(EnderChestTileEntity.class)
 public abstract class TileEntityEnderChestMixin extends TileEntityMixin {
 
     @Shadow public float lidAngle;

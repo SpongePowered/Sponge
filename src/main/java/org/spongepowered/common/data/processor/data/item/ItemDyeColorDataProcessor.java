@@ -25,11 +25,10 @@
 package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
@@ -78,9 +77,9 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
         Item item = container.func_77973_b();
 
         if(item.equals(Items.field_151100_aR) || item.equals(Items.field_179564_cE)) {
-            container.func_77964_b(((EnumDyeColor) (Object) value).func_176767_b());
+            container.func_77964_b(((net.minecraft.item.DyeColor) (Object) value).func_176767_b());
         } else {
-            container.func_77964_b(((EnumDyeColor) (Object) value).func_176765_a());
+            container.func_77964_b(((net.minecraft.item.DyeColor) (Object) value).func_176765_a());
         }
         return true;
     }
@@ -90,9 +89,9 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
         Item item = container.func_77973_b();
 
         if(item.equals(Items.field_151100_aR) || item.equals(Items.field_179564_cE)) {
-            return Optional.of((DyeColor) (Object) EnumDyeColor.func_176766_a(container.func_77952_i()));
+            return Optional.of((DyeColor) (Object) net.minecraft.item.DyeColor.func_176766_a(container.func_77952_i()));
         }
-        return Optional.of((DyeColor) (Object) EnumDyeColor.func_176764_b(container.func_77952_i()));
+        return Optional.of((DyeColor) (Object) net.minecraft.item.DyeColor.func_176764_b(container.func_77952_i()));
     }
 
     @Override

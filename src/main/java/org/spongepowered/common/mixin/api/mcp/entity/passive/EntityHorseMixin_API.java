@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.entity.passive.EntityHorse;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
@@ -40,23 +39,24 @@ import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
+import net.minecraft.entity.passive.horse.HorseEntity;
 
-@Mixin(EntityHorse.class)
+@Mixin(HorseEntity.class)
 public abstract class EntityHorseMixin_API extends AbstractHorseMixin_API implements RideableHorse {
 
     @Override
     public Value<HorseStyle> style() {
-        return new SpongeValue<>(Keys.HORSE_STYLE, Constants.Entity.Horse.DEFAULT_STYLE, HorseStyleRegistryModule.getHorseStyle((EntityHorse) (Object) this));
+        return new SpongeValue<>(Keys.HORSE_STYLE, Constants.Entity.Horse.DEFAULT_STYLE, HorseStyleRegistryModule.getHorseStyle((HorseEntity) (Object) this));
     }
 
     @Override
     public Value<HorseColor> color() {
-        return new SpongeValue<>(Keys.HORSE_COLOR, Constants.Entity.Horse.DEFAULT_COLOR, HorseColorRegistryModule.getHorseColor((EntityHorse) (Object) this));
+        return new SpongeValue<>(Keys.HORSE_COLOR, Constants.Entity.Horse.DEFAULT_COLOR, HorseColorRegistryModule.getHorseColor((HorseEntity) (Object) this));
     }
 
     @Override
     public HorseData getHorseData() {
-        return new SpongeHorseData(HorseColorRegistryModule.getHorseColor((EntityHorse) (Object) this), HorseStyleRegistryModule.getHorseStyle((EntityHorse) (Object) this));
+        return new SpongeHorseData(HorseColorRegistryModule.getHorseColor((HorseEntity) (Object) this), HorseStyleRegistryModule.getHorseStyle((HorseEntity) (Object) this));
     }
 
     @Override

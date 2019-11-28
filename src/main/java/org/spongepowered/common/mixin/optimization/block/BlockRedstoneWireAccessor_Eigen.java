@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.mixin.optimization.block;
 
-import net.minecraft.block.BlockRedstoneWire;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.RedstoneWireBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(BlockRedstoneWire.class)
+@Mixin(RedstoneWireBlock.class)
 public interface BlockRedstoneWireAccessor_Eigen {
 
     @Accessor("canProvidePower") void accessor$setCanProvidePower(boolean can);
 
-    @Invoker("calculateCurrentChanges") IBlockState accessor$calculateCurrentChanges(World worldIn, BlockPos pos1, BlockPos pos2, IBlockState state);
+    @Invoker("calculateCurrentChanges") BlockState accessor$calculateCurrentChanges(World worldIn, BlockPos pos1, BlockPos pos2, BlockState state);
 
 }

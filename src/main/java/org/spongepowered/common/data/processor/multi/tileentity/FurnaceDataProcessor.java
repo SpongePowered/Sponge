@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.multi.tileentity;
 
 import com.google.common.collect.Maps;
-import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -41,20 +40,21 @@ import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProc
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.tileentity.FurnaceTileEntity;
 
-public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEntityFurnace, FurnaceData, ImmutableFurnaceData> {
+public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<FurnaceTileEntity, FurnaceData, ImmutableFurnaceData> {
 
     public FurnaceDataProcessor() {
-        super(TileEntityFurnace.class);
+        super(FurnaceTileEntity.class);
     }
 
     @Override
-    protected boolean doesDataExist(TileEntityFurnace tileEntity) {
+    protected boolean doesDataExist(FurnaceTileEntity tileEntity) {
         return true; //if it's an TileEntityFurnace it always has the data
     }
 
     @Override
-    protected boolean set(TileEntityFurnace tileEntity, Map<Key<?>, Object> keyValues) {
+    protected boolean set(FurnaceTileEntity tileEntity, Map<Key<?>, Object> keyValues) {
         // getField() / setField()
         //
         // 0 : furnaceBurnTime -> NOT equal to passedBurnTime --> the remaining burn time
@@ -77,7 +77,7 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEn
             final World world = (World) tileEntity.func_145831_w();
             world.setBlockType(tileEntity.func_174877_v().func_177958_n(), tileEntity.func_174877_v().func_177956_o(),
                     tileEntity.func_174877_v().func_177952_p(), maxBurnTime > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
-            tileEntity = (TileEntityFurnace) tileEntity.func_145831_w().func_175625_s(tileEntity.func_174877_v());
+            tileEntity = (FurnaceTileEntity) tileEntity.func_145831_w().func_175625_s(tileEntity.func_174877_v());
         }
 
         tileEntity.func_174885_b(0, maxBurnTime - passedBurnTime);
@@ -89,7 +89,7 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEn
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(TileEntityFurnace tileEntity) {
+    protected Map<Key<?>, ?> getValues(FurnaceTileEntity tileEntity) {
         HashMap<Key<?>, Integer> values = Maps.newHashMapWithExpectedSize(3);
 
         final int passedBurnTime = tileEntity.func_174887_a_(1) - tileEntity.func_174887_a_(0);

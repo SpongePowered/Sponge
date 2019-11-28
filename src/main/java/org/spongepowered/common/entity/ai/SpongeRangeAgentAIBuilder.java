@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.entity.IRangedAttackMob;
-import net.minecraft.entity.ai.EntityAIAttackRanged;
+import net.minecraft.entity.ai.goal.RangedAttackGoal;
 import org.spongepowered.api.entity.ai.task.builtin.creature.RangeAgentAITask;
 import org.spongepowered.api.entity.living.Ranger;
 
@@ -82,6 +82,6 @@ public final class SpongeRangeAgentAIBuilder implements RangeAgentAITask.Builder
     public RangeAgentAITask build(Ranger owner) {
         checkNotNull(owner);
         checkArgument(owner instanceof IRangedAttackMob, "Ranger must be an IRangedAttackMob!");
-        return (RangeAgentAITask) new EntityAIAttackRanged((IRangedAttackMob) owner, this.maxSpeed, this.delayBetweenAttacks, this.attackRadius);
+        return (RangeAgentAITask) new RangedAttackGoal((IRangedAttackMob) owner, this.maxSpeed, this.delayBetweenAttacks, this.attackRadius);
     }
 }

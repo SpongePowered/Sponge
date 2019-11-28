@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.TileEntityStructure;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -36,8 +35,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Locale;
 
 import javax.annotation.Nullable;
+import net.minecraft.tileentity.StructureBlockTileEntity;
 
-@Mixin(TileEntityStructure.Mode.class)
+@Mixin(StructureBlockTileEntity.Mode.class)
 @Implements(@Interface(iface = StructureMode.class, prefix = "structure$"))
 public abstract class TileEntityStructure_ModeMixin_API implements StructureMode {
 

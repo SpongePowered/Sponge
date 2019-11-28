@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.multi.entity;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -42,11 +41,12 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.player.PlayerEntity;
 
-public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<EntityPlayer, ExperienceHolderData, ImmutableExperienceHolderData> {
+public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<PlayerEntity, ExperienceHolderData, ImmutableExperienceHolderData> {
 
     public ExperienceHolderDataProcessor() {
-        super(EntityPlayer.class);
+        super(PlayerEntity.class);
     }
 
     @Override
@@ -55,12 +55,12 @@ public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<E
     }
 
     @Override
-    protected boolean doesDataExist(EntityPlayer entity) {
+    protected boolean doesDataExist(PlayerEntity entity) {
         return true;
     }
 
     @Override
-    protected boolean set(EntityPlayer entity, Map<Key<?>, Object> keyValues) {
+    protected boolean set(PlayerEntity entity, Map<Key<?>, Object> keyValues) {
         entity.field_71068_ca = (Integer) keyValues.get(Keys.EXPERIENCE_LEVEL);
         entity.field_71067_cb = (Integer) keyValues.get(Keys.TOTAL_EXPERIENCE);
         entity.field_71106_cc = (float) (Integer) keyValues.get(Keys.EXPERIENCE_SINCE_LEVEL) / entity.func_71050_bK();
@@ -69,7 +69,7 @@ public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<E
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityPlayer entity) {
+    protected Map<Key<?>, ?> getValues(PlayerEntity entity) {
         final int level = entity.field_71068_ca;
         final int totalExp = entity.field_71067_cb;
         final int expSinceLevel = ((EntityPlayerBridge) entity).bridge$getExperienceSinceLevel();

@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.bridge.scoreboard;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 
 public interface ServerScoreboardBridge extends ScoreboardBridge {
 
-    void bridge$addPlayer(EntityPlayerMP player, boolean sendPackets);
+    void bridge$addPlayer(ServerPlayerEntity player, boolean sendPackets);
 
-    void bridge$removePlayer(EntityPlayerMP player, boolean sendPackets);
+    void bridge$removePlayer(ServerPlayerEntity player, boolean sendPackets);
 
-    void bridge$sendToPlayers(Packet<?> packet);
+    void bridge$sendToPlayers(IPacket<?> packet);
 }

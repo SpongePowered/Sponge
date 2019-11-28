@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ContainerPlayer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.PlayerContainer;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Final;
@@ -45,10 +45,10 @@ import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.Con
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
 
-@Mixin(ContainerPlayer.class)
+@Mixin(PlayerContainer.class)
 public abstract class ContainerPlayerMixin extends ContainerMixin implements ContainerPlayerBridge, LensProviderBridge {
 
-    @Shadow @Final private EntityPlayer player;
+    @Shadow @Final private PlayerEntity player;
 
     private int impl$offHandSlot = -1;
 

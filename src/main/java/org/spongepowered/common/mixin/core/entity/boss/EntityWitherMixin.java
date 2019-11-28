@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.entity.boss;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.boss.EntityWither;
+import net.minecraft.entity.boss.WitherEntity;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.living.monster.Wither;
 import org.spongepowered.api.world.Location;
@@ -49,7 +49,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(value = EntityWither.class)
+@Mixin(value = WitherEntity.class)
 public abstract class EntityWitherMixin extends EntityMobMixin implements FusedExplosiveBridge, ExplosiveBridge {
 
     @Shadow private int blockBreakCounter;
@@ -90,7 +90,7 @@ public abstract class EntityWitherMixin extends EntityMobMixin implements FusedE
                 opcode = Opcodes.GETFIELD
             )
     )
-    private int spongeImpl$onCanGrief(final EntityWither thisEntity) {
+    private int spongeImpl$onCanGrief(final WitherEntity thisEntity) {
         return this.blockBreakCounter == 0 ? ((GrieferBridge) this).bridge$CanGrief() ? 0 : -1 : -1;
     }
 
@@ -141,7 +141,7 @@ public abstract class EntityWitherMixin extends EntityMobMixin implements FusedE
      */
     @Redirect(method = "ignite", at = @At(value = "INVOKE",
               target = "Lnet/minecraft/entity/boss/EntityWither;setInvulTime(I)V"))
-    private void onSpawnPrime(final EntityWither self, final int fuseTicks) {
+    private void onSpawnPrime(final WitherEntity self, final int fuseTicks) {
         ((Wither) this).prime();
     }
 

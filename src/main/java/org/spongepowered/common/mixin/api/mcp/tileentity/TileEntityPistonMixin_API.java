@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.TileEntityPiston;
+import net.minecraft.tileentity.PistonTileEntity;
 import org.spongepowered.api.block.tileentity.Piston;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(TileEntityPiston.class)
+@Mixin(PistonTileEntity.class)
 public abstract class TileEntityPistonMixin_API extends TileEntityMixin_API implements Piston {
 
 }

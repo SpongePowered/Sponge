@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -39,6 +37,8 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 
 final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
 
@@ -79,15 +79,15 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         final Entity dyingEntity =
             context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
-        final boolean isPlayer = dyingEntity instanceof EntityPlayer;
-        final EntityPlayer entityPlayer = isPlayer ? (EntityPlayer) dyingEntity : null;
+        final boolean isPlayer = dyingEntity instanceof PlayerEntity;
+        final PlayerEntity entityPlayer = isPlayer ? (PlayerEntity) dyingEntity : null;
         // WE have to handle per-item entity drops and entity item drops before we handle other entity spawns
         // the reason we have to do it this way is because forge allows for item drops to potentially spawn
         // other entities at the same time.
         final boolean hasCaptures = !context.getPerEntityItemEntityDropSupplier().isEmpty();
         context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
             final ArrayList<Entity> entities = new ArrayList<>();
-            for (final EntityItem item : items) {
+            for (final ItemEntity item : items) {
                 entities.add((Entity) item);
             }
 

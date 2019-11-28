@@ -27,7 +27,6 @@ package org.spongepowered.common.data.processor.multi.entity;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -41,20 +40,21 @@ import org.spongepowered.common.bridge.entity.EntityItemBridge;
 
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.item.ItemEntity;
 
-public final class DespawnDelayDataProcessor extends AbstractEntityDataProcessor<EntityItem, DespawnDelayData, ImmutableDespawnDelayData> {
+public final class DespawnDelayDataProcessor extends AbstractEntityDataProcessor<ItemEntity, DespawnDelayData, ImmutableDespawnDelayData> {
 
     public DespawnDelayDataProcessor() {
-        super(EntityItem.class);
+        super(ItemEntity.class);
     }
 
     @Override
-    protected boolean doesDataExist(EntityItem container) {
+    protected boolean doesDataExist(ItemEntity container) {
         return true;
     }
 
     @Override
-    protected boolean set(EntityItem container, Map<Key<?>, Object> keyValues) {
+    protected boolean set(ItemEntity container, Map<Key<?>, Object> keyValues) {
         ((EntityItemBridge) container).bridge$setDespawnDelay(
                 (Integer) keyValues.get(Keys.DESPAWN_DELAY),
                 (Boolean) keyValues.get(Keys.INFINITE_DESPAWN_DELAY)
@@ -63,7 +63,7 @@ public final class DespawnDelayDataProcessor extends AbstractEntityDataProcessor
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityItem container) {
+    protected Map<Key<?>, ?> getValues(ItemEntity container) {
         return ImmutableMap.<Key<?>, Object> builder()
                 .put(Keys.DESPAWN_DELAY, ((EntityItemBridge) container).bridge$getDespawnDelay())
                 .put(Keys.INFINITE_DESPAWN_DELAY, ((EntityItemBridge) container).bridge$infiniteDespawnDelay())

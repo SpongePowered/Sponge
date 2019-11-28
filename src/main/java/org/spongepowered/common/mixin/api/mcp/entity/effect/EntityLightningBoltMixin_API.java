@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.entity.effect;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.effect.EntityLightningBolt;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
@@ -41,8 +40,9 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Collection;
 import java.util.List;
+import net.minecraft.entity.effect.LightningBoltEntity;
 
-@Mixin(EntityLightningBolt.class)
+@Mixin(LightningBoltEntity.class)
 public abstract class EntityLightningBoltMixin_API extends EntityWeatherEffectMixin_API implements Lightning {
 
     @Shadow private int lightningState;

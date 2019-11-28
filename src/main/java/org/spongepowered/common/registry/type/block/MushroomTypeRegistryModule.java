@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;

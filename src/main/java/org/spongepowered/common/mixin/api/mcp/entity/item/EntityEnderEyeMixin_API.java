@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.item.EntityEnderEye;
+import net.minecraft.entity.item.EyeOfEnderEntity;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-@Mixin(EntityEnderEye.class)
+@Mixin(EyeOfEnderEntity.class)
 public abstract class EntityEnderEyeMixin_API extends EntityMixin_API implements EyeOfEnder {
 
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;

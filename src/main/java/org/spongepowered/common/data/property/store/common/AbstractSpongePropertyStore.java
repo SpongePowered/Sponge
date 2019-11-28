@@ -26,7 +26,6 @@ package org.spongepowered.common.data.property.store.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.PropertyStore;
@@ -53,7 +52,7 @@ public abstract class AbstractSpongePropertyStore<T extends Property<?, ?>> impl
         return 100;
     }
 
-    public static EnumFacing toEnumFacing(Direction direction) {
+    public static net.minecraft.util.Direction toEnumFacing(Direction direction) {
         checkArgument(direction.isCardinal() || direction.isUpright(), "Direction must be a valid block face");
         return DirectionFacingProvider.getInstance().get(direction).get();
     }

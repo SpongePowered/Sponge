@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.EntityCaveSpider;
+import net.minecraft.entity.monster.CaveSpiderEntity;
 import org.spongepowered.api.entity.living.monster.CaveSpider;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityCaveSpider.class)
+@Mixin(CaveSpiderEntity.class)
 public abstract class EntityCaveSpiderMixin_API extends EntityMobMixin_API implements CaveSpider {
 
 }

@@ -26,11 +26,10 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.MinableFeature;
+import net.minecraft.world.gen.feature.OreFeature;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
@@ -44,12 +43,12 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Random;
 
-@Mixin(MinableFeature.class)
+@Mixin(OreFeature.class)
 public abstract class WorldGenMinableMixin_API extends Feature implements Ore {
 
-    @Shadow @Final @Mutable private IBlockState oreBlock;
+    @Shadow @Final @Mutable private net.minecraft.block.BlockState oreBlock;
     @Shadow @Final @Mutable private int numberOfBlocks;
-    @Shadow @Final @Mutable private Predicate<IBlockState> predicate;
+    @Shadow @Final @Mutable private Predicate<net.minecraft.block.BlockState> predicate;
 
     private VariableAmount api$size = VariableAmount.fixed(1); // default but overridden  in WorldGenMineableMixin
     private VariableAmount api$count = VariableAmount.fixed(16);
@@ -82,7 +81,7 @@ public abstract class WorldGenMinableMixin_API extends Feature implements Ore {
 
     @Override
     public void setOreBlock(final BlockState block) {
-        this.oreBlock = (IBlockState) block;
+        this.oreBlock = (net.minecraft.block.BlockState) block;
     }
 
     @Override

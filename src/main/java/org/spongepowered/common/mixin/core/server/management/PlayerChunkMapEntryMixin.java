@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.server.management;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.SPacketChunkData;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.play.server.SChunkDataPacket;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.ChunkPos;
@@ -50,9 +50,9 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     @Shadow @Final private ChunkPos pos;
     @Shadow private int changes;
     @Shadow private int changedSectionFilter;
-    @Shadow public abstract void sendPacket(Packet<?> packetIn);
+    @Shadow public abstract void sendPacket(IPacket<?> packetIn);
 
-    @Shadow @Final private List<EntityPlayerMP> players;
+    @Shadow @Final private List<ServerPlayerEntity> players;
     @Shadow @Nullable private Chunk chunk;
     private boolean impl$updateBiomes;
 
@@ -60,8 +60,8 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     private void impl$updateBiomes(final CallbackInfo ci) {
         if (this.impl$updateBiomes) {
             final Chunk chunk = this.playerChunkMap.func_72688_a().func_72964_e(this.pos.field_77276_a, this.pos.field_77275_b);
-            this.sendPacket(new SPacketChunkData(chunk, 65534));
-            this.sendPacket(new SPacketChunkData(chunk, 1));
+            this.sendPacket(new SChunkDataPacket(chunk, 65534));
+            this.sendPacket(new SChunkDataPacket(chunk, 1));
             this.changes = 0;
             this.changedSectionFilter = 0;
             this.impl$updateBiomes = false;
@@ -76,7 +76,7 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     }
 
     @Override
-    public List<EntityPlayerMP> accessor$getPlayers() {
+    public List<ServerPlayerEntity> accessor$getPlayers() {
         return this.players;
     }
 

@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.command.multiworld;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandSetDefaultSpawnpoint;
-import net.minecraft.network.Packet;
+import net.minecraft.network.IPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +40,7 @@ public abstract class CommandSetDefaultSpawnpointMixin_MultiWorldCommand {
     // Set new spawn point packet only to players in the affected dimensions
     @Redirect(method = "execute", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
-    private void multiWorldCommand$onSendSpawnPointPacket(final PlayerList playerList, final Packet<?> packet, final MinecraftServer server,
+    private void multiWorldCommand$onSendSpawnPointPacket(final PlayerList playerList, final IPacket<?> packet, final MinecraftServer server,
         final ICommandSender sender, final String[] args) {
         playerList.func_148537_a(packet, ((WorldServerBridge) sender.func_130014_f_()).bridge$getDimensionId());
     }

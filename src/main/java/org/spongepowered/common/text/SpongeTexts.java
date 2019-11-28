@@ -25,11 +25,11 @@
 package org.spongepowered.common.text;
 
 import com.google.common.collect.Lists;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextParseException;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -46,12 +46,12 @@ public final class SpongeTexts {
     }
 
     public static Text[] splitChatMessage(ITextComponent component) {
-        if (!(component instanceof TextComponentTranslation)){
+        if (!(component instanceof TranslationTextComponent)){
             return new Text[] { null, null };
         }
         Text source = null;
         Text body = null;
-        for (Object arg : ((TextComponentTranslation) (component)).func_150271_j()) {
+        for (Object arg : ((TranslationTextComponent) (component)).func_150271_j()) {
             if (source == null) {
                 if (arg instanceof ITextComponent) {
                     source = SpongeTexts.toText((ITextComponent) arg);
@@ -109,7 +109,7 @@ public final class SpongeTexts {
             }
         }
 
-        TextComponentString result = new TextComponentString(((ITextComponentBridge) component).bridge$getLegacyFormatting());
+        StringTextComponent result = new StringTextComponent(((ITextComponentBridge) component).bridge$getLegacyFormatting());
         result.func_150257_a(component);
         return result;
     }
@@ -122,10 +122,10 @@ public final class SpongeTexts {
         return json;
     }
 
-    public static NBTTagList asJsonNBT(List<Text> list) {
-        final NBTTagList legacy = new NBTTagList();
+    public static ListNBT asJsonNBT(List<Text> list) {
+        final ListNBT legacy = new ListNBT();
         for (Text line : list) {
-            legacy.func_74742_a(new NBTTagString(TextSerializers.JSON.serialize(line)));
+            legacy.func_74742_a(new StringNBT(TextSerializers.JSON.serialize(line)));
         }
         return legacy;
     }
@@ -138,7 +138,7 @@ public final class SpongeTexts {
         return list;
     }
 
-    public static List<Text> fromNbtJson(NBTTagList legacy) throws TextParseException {
+    public static List<Text> fromNbtJson(ListNBT legacy) throws TextParseException {
         List<Text> list = Lists.newArrayList();
         for (int i = 0; i < legacy.func_74745_c(); i++) {
             list.add(TextSerializers.JSON.deserialize(legacy.func_150307_f(i)));
@@ -146,7 +146,7 @@ public final class SpongeTexts {
         return list;
     }
 
-    public static List<Text> fromNbtLegacy(NBTTagList legacy) {
+    public static List<Text> fromNbtLegacy(ListNBT legacy) {
         List<Text> list = Lists.newArrayList();
         for (int i = 0; i < legacy.func_74745_c(); i++) {
             list.add(SpongeTexts.fromLegacy(legacy.func_150307_f(i)));
@@ -154,10 +154,10 @@ public final class SpongeTexts {
         return list;
     }
 
-    public static NBTTagList asLegacy(List<Text> list) {
-        final NBTTagList legacy = new NBTTagList();
+    public static ListNBT asLegacy(List<Text> list) {
+        final ListNBT legacy = new ListNBT();
         for (Text line : list) {
-            legacy.func_74742_a(new NBTTagString(toLegacy(line)));
+            legacy.func_74742_a(new StringNBT(toLegacy(line)));
         }
         return legacy;
     }

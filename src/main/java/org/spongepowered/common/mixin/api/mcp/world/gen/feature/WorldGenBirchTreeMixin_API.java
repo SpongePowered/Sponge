@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.Blocks;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.AbstractTreeFeature;
 import net.minecraft.world.gen.feature.BirchTreeFeature;
@@ -107,7 +107,7 @@ public abstract class WorldGenBirchTreeMixin_API extends AbstractTreeFeature imp
             if (flag) {
                 final BlockPos down = new BlockPos(x, y - 1, z);
                 final Block block1 = worldIn.func_180495_p(down).func_177230_c();
-                return ((WorldGeneratorBridge) this).bridge$canSustainPlant(block1, worldIn, down, EnumFacing.UP, Blocks.field_150345_g) && y < 256 - i - 1;
+                return ((WorldGeneratorBridge) this).bridge$canSustainPlant(block1, worldIn, down, Direction.UP, Blocks.field_150345_g) && y < 256 - i - 1;
             }
         }
         return false;

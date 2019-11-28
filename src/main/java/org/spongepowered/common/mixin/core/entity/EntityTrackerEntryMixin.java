@@ -27,11 +27,11 @@ package org.spongepowered.common.mixin.core.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.network.Packet;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.network.play.server.SPlayerListItemPacket;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -54,13 +54,13 @@ import java.util.Set;
 public abstract class EntityTrackerEntryMixin {
 
     @Shadow @Final private Entity trackedEntity;
-    @Shadow @Final public Set<EntityPlayerMP> trackingPlayers;
+    @Shadow @Final public Set<ServerPlayerEntity> trackingPlayers;
 
-    @Shadow public abstract void sendToTrackingAndSelf(Packet<?> packetIn);
+    @Shadow public abstract void sendToTrackingAndSelf(IPacket<?> packetIn);
 
     @Redirect(method = "updatePlayerEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 0))
-    public void onSendSpawnPacket(final NetHandlerPlayServer thisCtx, final Packet<?> spawnPacket, final EntityPlayerMP playerIn) {
+    public void onSendSpawnPacket(final ServerPlayNetHandler thisCtx, final IPacket<?> spawnPacket, final ServerPlayerEntity playerIn) {
         if (!(this.trackedEntity instanceof EntityHuman)) {
             // This is the method call that was @Redirected
             thisCtx.func_147359_a(spawnPacket);
@@ -68,11 +68,11 @@ public abstract class EntityTrackerEntryMixin {
         }
         final EntityHuman human = (EntityHuman) this.trackedEntity;
         // Adds the GameProfile to the client
-        thisCtx.func_147359_a(human.createPlayerListPacket(SPacketPlayerListItem.Action.ADD_PLAYER));
+        thisCtx.func_147359_a(human.createPlayerListPacket(SPlayerListItemPacket.Action.ADD_PLAYER));
         // Actually spawn the human (a player)
         thisCtx.func_147359_a(spawnPacket);
         // Remove from tab list
-        final SPacketPlayerListItem removePacket = human.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER);
+        final SPlayerListItemPacket removePacket = human.createPlayerListPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER);
         if (human.canRemoveFromListImmediately()) {
             thisCtx.func_147359_a(removePacket);
         } else {
@@ -81,14 +81,14 @@ public abstract class EntityTrackerEntryMixin {
     }
 
     @Redirect(method = "updatePlayerList", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityTrackerEntry;sendPacketToTrackedPlayers(Lnet/minecraft/network/Packet;)V", ordinal = 0))
-    public void onSendPassengerPacket(EntityTrackerEntry entityTrackerEntry, Packet<?> packet) {
+    public void onSendPassengerPacket(EntityTrackerEntry entityTrackerEntry, IPacket<?> packet) {
         // We need to notify a player of their passengers (since that can't normally happen in Vanilla)
         entityTrackerEntry.func_151261_b(packet);
     }
 
     // The spawn packet for a human is a player
     @Inject(method = "createSpawnPacket", at = @At("HEAD"), cancellable = true)
-    public void onGetSpawnPacket(CallbackInfoReturnable<Packet<?>> cir) {
+    public void onGetSpawnPacket(CallbackInfoReturnable<IPacket<?>> cir) {
         if (this.trackedEntity instanceof EntityHuman) {
             cir.setReturnValue(((EntityHuman) this.trackedEntity).createSpawnPacket());
         }
@@ -100,16 +100,16 @@ public abstract class EntityTrackerEntryMixin {
             return;
         }
         EntityHuman human = (EntityHuman) this.trackedEntity;
-        Packet<?>[] packets = human.popQueuedPackets(null);
-        for (EntityPlayerMP player : this.trackingPlayers) {
+        IPacket<?>[] packets = human.popQueuedPackets(null);
+        for (ServerPlayerEntity player : this.trackingPlayers) {
             if (packets != null) {
-                for (Packet<?> packet : packets) {
+                for (IPacket<?> packet : packets) {
                     player.field_71135_a.func_147359_a(packet);
                 }
             }
-            Packet<?>[] playerPackets = human.popQueuedPackets(player);
+            IPacket<?>[] playerPackets = human.popQueuedPackets(player);
             if (playerPackets != null) {
-                for (Packet<?> packet : playerPackets) {
+                for (IPacket<?> packet : playerPackets) {
                     player.field_71135_a.func_147359_a(packet);
                 }
             }
@@ -117,14 +117,14 @@ public abstract class EntityTrackerEntryMixin {
     }
 
     @Inject(method = "isVisibleTo", at = @At("HEAD"), cancellable = true)
-    private void onVisibilityCheck(EntityPlayerMP entityPlayerMP, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
+    private void onVisibilityCheck(ServerPlayerEntity entityPlayerMP, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
         if (((VanishableBridge) this.trackedEntity).bridge$isVanished()) {
             callbackInfoReturnable.setReturnValue(false);
         }
     }
 
     @Inject(method = "sendPacketToTrackedPlayers", at = @At("HEAD"), cancellable = true)
-    private void checkIfTrackedIsInvisiblePriorToSendingPacketToPlayers(Packet<?> packet, CallbackInfo callBackInfo) {
+    private void checkIfTrackedIsInvisiblePriorToSendingPacketToPlayers(IPacket<?> packet, CallbackInfo callBackInfo) {
         if (((VanishableBridge) this.trackedEntity).bridge$isVanished()) {
             callBackInfo.cancel();
         }
@@ -132,7 +132,7 @@ public abstract class EntityTrackerEntryMixin {
 
     @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityProperties;<init>(ILjava/util/Collection;)V"))
     private Collection<IAttributeInstance> spongeInjectHealth(Collection<IAttributeInstance> set) {
-        if (this.trackedEntity instanceof EntityPlayerMP) {
+        if (this.trackedEntity instanceof ServerPlayerEntity) {
             if (((EntityPlayerMPBridge) this.trackedEntity).bridge$isHealthScaled()) {
                 ((EntityPlayerMPBridge) this.trackedEntity).bridge$injectScaledHealth(set);
             }
@@ -153,7 +153,7 @@ public abstract class EntityTrackerEntryMixin {
 
     @ModifyArg(method = "updatePlayerEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityProperties;<init>(ILjava/util/Collection;)V"))
     private Collection<IAttributeInstance> spongeInjectHealthForUpdate(Collection<IAttributeInstance> set) {
-        if (this.trackedEntity instanceof EntityPlayerMP) {
+        if (this.trackedEntity instanceof ServerPlayerEntity) {
             if (((EntityPlayerMPBridge) this.trackedEntity).bridge$isHealthScaled()) {
                 ((EntityPlayerMPBridge) this.trackedEntity).bridge$injectScaledHealth(set);
             }

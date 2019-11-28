@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.multi.tileentity;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -43,21 +42,22 @@ import org.spongepowered.common.bridge.tileentity.TileEntityBannerBridge;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.tileentity.BannerTileEntity;
 
-public class TileEntityBannerDataProcessor extends AbstractTileEntityDataProcessor<TileEntityBanner, BannerData, ImmutableBannerData> {
+public class TileEntityBannerDataProcessor extends AbstractTileEntityDataProcessor<BannerTileEntity, BannerData, ImmutableBannerData> {
 
     public TileEntityBannerDataProcessor() {
-        super(TileEntityBanner.class);
+        super(BannerTileEntity.class);
     }
 
     @Override
-    protected boolean doesDataExist(TileEntityBanner entity) {
+    protected boolean doesDataExist(BannerTileEntity entity) {
         return true;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected boolean set(TileEntityBanner entity, Map<Key<?>, Object> keyValues) {
+    protected boolean set(BannerTileEntity entity, Map<Key<?>, Object> keyValues) {
         if (!entity.func_145831_w().field_72995_K) {
             List<PatternLayer> layers = (List<PatternLayer>) keyValues.get(Keys.BANNER_PATTERNS);
             DyeColor baseColor = (DyeColor) keyValues.get(Keys.BANNER_BASE_COLOR);
@@ -69,7 +69,7 @@ public class TileEntityBannerDataProcessor extends AbstractTileEntityDataProcess
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(TileEntityBanner entity) {
+    protected Map<Key<?>, ?> getValues(BannerTileEntity entity) {
         List<PatternLayer> layers = ((TileEntityBannerBridge) entity).bridge$getLayers();
         DyeColor color = ((TileEntityBannerBridge) entity).bridge$getBaseColor();
         return ImmutableMap.of(Keys.BANNER_BASE_COLOR, color, Keys.BANNER_PATTERNS, layers);

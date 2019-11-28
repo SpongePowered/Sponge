@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.end;
 
-import net.minecraft.entity.boss.EntityDragon;
-import net.minecraft.entity.item.EntityEnderCrystal;
-import net.minecraft.util.EntitySelectors;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.item.EnderCrystalEntity;
+import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BossInfo;
-import net.minecraft.world.BossInfoServer;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.ServerBossInfo;
 import net.minecraft.world.end.DragonFightManager;
 import net.minecraft.world.end.DragonSpawnState;
+import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,8 +49,8 @@ import java.util.UUID;
 public abstract class DragonFightManagerMixin implements DragonFightManagerBridge {
 
     @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final private BossInfoServer bossInfo;
-    @Shadow @Final private WorldServer world;
+    @Shadow @Final private ServerBossInfo bossInfo;
+    @Shadow @Final private ServerWorld world;
     @Shadow private int ticksSinceDragonSeen;
     @Shadow private int ticksSinceCrystalsScanned;
     @Shadow private int ticksSinceLastPlayerScan;
@@ -61,7 +61,7 @@ public abstract class DragonFightManagerMixin implements DragonFightManagerBridg
     @Shadow private BlockPos exitPortalLocation;
     @Shadow private DragonSpawnState respawnState;
     @Shadow private int respawnStateTicks;
-    @Shadow private List<EntityEnderCrystal> crystals;
+    @Shadow private List<EnderCrystalEntity> crystals;
 
     @Shadow public abstract void respawnDragon();
     @Shadow private boolean hasDragonBeenKilled() {
@@ -71,7 +71,7 @@ public abstract class DragonFightManagerMixin implements DragonFightManagerBridg
     @Shadow private void findAliveCrystals() { }
     @Shadow private void loadChunks() { }
     @Shadow private void generatePortal(final boolean flag) { }
-    @Shadow private EntityDragon createNewDragon() {
+    @Shadow private EnderDragonEntity createNewDragon() {
         return null; // Shadowed
     }
 
@@ -104,12 +104,12 @@ public abstract class DragonFightManagerMixin implements DragonFightManagerBridg
                     this.generatePortal(false);
                 }
 
-                final List<EntityDragon> list = this.world.func_175644_a(EntityDragon.class, EntitySelectors.field_94557_a);
+                final List<EnderDragonEntity> list = this.world.func_175644_a(EnderDragonEntity.class, EntityPredicates.field_94557_a);
 
                 if (list.isEmpty()) {
                     this.dragonKilled = true;
                 } else {
-                    final EntityDragon entitydragon = list.get(0);
+                    final EnderDragonEntity entitydragon = list.get(0);
                     this.dragonUniqueId = entitydragon.func_110124_au();
                     LOGGER.info("Found that there\'s a dragon still alive ({})", entitydragon);
                     this.dragonKilled = false;
@@ -144,7 +144,7 @@ public abstract class DragonFightManagerMixin implements DragonFightManagerBridg
             if (!this.dragonKilled) {
                 if (this.dragonUniqueId == null || ++this.ticksSinceDragonSeen >= 1200) {
                     this.loadChunks();
-                    final List<EntityDragon> list1 = this.world.func_175644_a(EntityDragon.class, EntitySelectors.field_94557_a);
+                    final List<EnderDragonEntity> list1 = this.world.func_175644_a(EnderDragonEntity.class, EntityPredicates.field_94557_a);
 
                     if (list1.isEmpty()) {
                         LOGGER.debug("Haven\'t seen the dragon, respawning it");

@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFire;
+import net.minecraft.block.FireBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(BlockFire.class)
+@Mixin(FireBlock.class)
 public interface BlockFireAccessor {
 
     @Invoker("getFlammability") int accessor$getBlockFlamability(Block block);

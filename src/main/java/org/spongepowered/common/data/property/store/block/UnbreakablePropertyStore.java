@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.property.block.UnbreakableProperty;
 import org.spongepowered.api.world.Location;
@@ -46,7 +46,7 @@ public class UnbreakablePropertyStore extends AbstractBlockPropertyStore<Unbreak
     }
 
     @Override
-    protected Optional<UnbreakableProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
+    protected Optional<UnbreakableProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
         if (location == null) {
             return Optional.empty();
         }
@@ -58,7 +58,7 @@ public class UnbreakablePropertyStore extends AbstractBlockPropertyStore<Unbreak
 
     @Override
     public Optional<UnbreakableProperty> getFor(Location<World> location) {
-        final IBlockState blockState = (IBlockState) location.getBlock();
+        final BlockState blockState = (BlockState) location.getBlock();
         final net.minecraft.world.World extent = (net.minecraft.world.World) location.getExtent();
         final float hardness = blockState.func_185887_b(extent, VecHelper.toBlockPos(location));
         return Optional.of(hardness < 0 ? TRUE : FALSE);

@@ -27,11 +27,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntityBanner;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
@@ -50,13 +45,17 @@ import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.tileentity.BannerTileEntity;
+import net.minecraft.world.server.ServerWorld;
 
 @NonnullByDefault
-@Mixin(TileEntityBanner.class)
+@Mixin(BannerTileEntity.class)
 public abstract class TileEntityBannerMixin extends TileEntityMixin implements TileEntityBannerBridge {
 
-    @Shadow private EnumDyeColor baseColor;
-    @Shadow private NBTTagList patterns;
+    @Shadow private net.minecraft.item.DyeColor baseColor;
+    @Shadow private ListNBT patterns;
 
     private List<PatternLayer> impl$patternLayers = Lists.newArrayList();
 
@@ -66,20 +65,20 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
     }
 
     @Override
-    public void bridge$readFromSpongeCompound(final NBTTagCompound compound) {
+    public void bridge$readFromSpongeCompound(final CompoundNBT compound) {
         super.bridge$readFromSpongeCompound(compound);
         impl$updatePatterns();
     }
 
     @Override
-    protected void bridge$writeToSpongeCompound(final NBTTagCompound compound) {
+    protected void bridge$writeToSpongeCompound(final CompoundNBT compound) {
         super.bridge$writeToSpongeCompound(compound);
     }
 
     private void impl$markDirtyAndUpdate() {
         this.bridge$markDirty();
         if (this.world != null && !this.world.field_72995_K) {
-            ((WorldServer) this.world).func_184164_w().func_180244_a(this.getPos());
+            ((ServerWorld) this.world).func_184164_w().func_180244_a(this.getPos());
         }
     }
 
@@ -88,12 +87,12 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
         if (this.patterns != null) {
             final SpongeGameRegistry registry = SpongeImpl.getRegistry();
             for (int i = 0; i < this.patterns.func_74745_c(); i++) {
-                final NBTTagCompound tagCompound = this.patterns.func_150305_b(i);
+                final CompoundNBT tagCompound = this.patterns.func_150305_b(i);
                 final String patternId = tagCompound.func_74779_i(Constants.TileEntity.Banner.BANNER_PATTERN_ID);
                 final int patternColor = tagCompound.func_74762_e(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR);
                 this.impl$patternLayers.add(new SpongePatternLayer(
                     registry.getType(BannerPatternShape.class, patternId).get(),
-                    registry.getType(DyeColor.class, EnumDyeColor.func_176766_a(patternColor).func_176610_l()).get()));
+                    registry.getType(DyeColor.class, net.minecraft.item.DyeColor.func_176766_a(patternColor).func_176610_l()).get()));
             }
         }
         this.impl$markDirtyAndUpdate();
@@ -108,11 +107,11 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
     public void bridge$setLayers(final List<PatternLayer> layers) {
         this.impl$patternLayers = new NonNullArrayList<>();
         this.impl$patternLayers.addAll(layers);
-        this.patterns = new NBTTagList();
+        this.patterns = new ListNBT();
         for (final PatternLayer layer : this.impl$patternLayers) {
-            final NBTTagCompound compound = new NBTTagCompound();
+            final CompoundNBT compound = new CompoundNBT();
             compound.func_74778_a(Constants.TileEntity.Banner.BANNER_PATTERN_ID, layer.getShape().getName());
-            compound.func_74768_a(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).func_176767_b());
+            compound.func_74768_a(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).func_176767_b());
             this.patterns.func_74742_a(compound);
         }
         impl$markDirtyAndUpdate();
@@ -129,10 +128,10 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
     public void bridge$setBaseColor(final DyeColor baseColor) {
         checkNotNull(baseColor, "Null DyeColor!");
         try {
-            final EnumDyeColor color = (EnumDyeColor) (Object) baseColor;
+            final net.minecraft.item.DyeColor color = (net.minecraft.item.DyeColor) (Object) baseColor;
             this.baseColor = color;
         } catch (final Exception e) {
-            this.baseColor = EnumDyeColor.BLACK;
+            this.baseColor = net.minecraft.item.DyeColor.BLACK;
         }
         impl$markDirtyAndUpdate();
     }

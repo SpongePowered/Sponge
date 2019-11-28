@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.Blocks;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.GlowStoneFeature;
@@ -64,11 +64,11 @@ public abstract class WorldGenGlowstoneMixin extends WorldGeneratorMixin {
                 if (bridge$isAir(worldIn.func_180495_p(blockpos1), worldIn, blockpos1)) {
                     // Sponge end
                     int j = 0;
-                    final EnumFacing[] aenumfacing = EnumFacing.values();
+                    final Direction[] aenumfacing = Direction.values();
                     final int k = aenumfacing.length;
 
                     for (int l = 0; l < k; ++l) {
-                        final EnumFacing enumfacing = aenumfacing[l];
+                        final Direction enumfacing = aenumfacing[l];
 
                         if (worldIn.func_180495_p(blockpos1.func_177972_a(enumfacing)).func_177230_c() == Blocks.field_150426_aN) {
                             ++j;

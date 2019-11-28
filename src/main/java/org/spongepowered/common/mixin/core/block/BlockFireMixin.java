@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockFire;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.FireBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
@@ -43,7 +43,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 import java.util.Random;
 
-@Mixin(BlockFire.class)
+@Mixin(FireBlock.class)
 public abstract class BlockFireMixin extends BlockMixin {
 
     @Redirect(method = "updateTick",
@@ -51,7 +51,7 @@ public abstract class BlockFireMixin extends BlockMixin {
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z",
             ordinal = 1))
-    private boolean impl$onFireSpread(final World world, final BlockPos pos, final IBlockState state, final int updateFlag) {
+    private boolean impl$onFireSpread(final World world, final BlockPos pos, final BlockState state, final int updateFlag) {
         if (!((WorldBridge) world).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.FIRE_SPREAD, (org.spongepowered.api.world.World) world);

@@ -26,12 +26,12 @@ package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityLockable;
 import net.minecraft.world.LockCode;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -53,15 +53,15 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
     public ItemLockableDataProcessor() {
         super(stack -> {
             final Item item = stack.func_77973_b();
-            if (!(item instanceof ItemBlock)) {
+            if (!(item instanceof BlockItem)) {
                 return false;
             }
-            final Block block = ((ItemBlock) item).func_179223_d();
+            final Block block = ((BlockItem) item).func_179223_d();
             if (!(block instanceof ITileEntityProvider)) {
                 return false;
             }
             final TileEntity tile = ((ITileEntityProvider) block).func_149915_a(null, item.func_77647_b(stack.func_77952_i()));
-            return tile instanceof TileEntityLockable;
+            return tile instanceof LockableTileEntity;
         } , Keys.LOCK_TOKEN);
     }
 
@@ -92,7 +92,7 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
         if (container.func_77978_p() == null) {
             return Optional.of("");
         }
-        final NBTTagCompound tileCompound = container.func_77978_p().func_74775_l(Constants.Item.BLOCK_ENTITY_TAG);
+        final CompoundNBT tileCompound = container.func_77978_p().func_74775_l(Constants.Item.BLOCK_ENTITY_TAG);
         final LockCode code = LockCode.func_180158_b(tileCompound);
         if (code.func_180160_a()) {
             return Optional.empty();

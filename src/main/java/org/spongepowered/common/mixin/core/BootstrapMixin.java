@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core;
 
-import net.minecraft.init.Bootstrap;
+import net.minecraft.util.registry.Bootstrap;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

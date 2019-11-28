@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;

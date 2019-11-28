@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -36,11 +35,12 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.entity.item.ItemEntity;
 
-public class InfiniteDespawnDelayValueProcessor extends AbstractSpongeValueProcessor<EntityItem, Boolean, Value<Boolean>> {
+public class InfiniteDespawnDelayValueProcessor extends AbstractSpongeValueProcessor<ItemEntity, Boolean, Value<Boolean>> {
 
     public InfiniteDespawnDelayValueProcessor() {
-        super(EntityItem.class, Keys.INFINITE_DESPAWN_DELAY);
+        super(ItemEntity.class, Keys.INFINITE_DESPAWN_DELAY);
     }
 
     @Override
@@ -49,13 +49,13 @@ public class InfiniteDespawnDelayValueProcessor extends AbstractSpongeValueProce
     }
 
     @Override
-    protected boolean set(EntityItem container, Boolean value) {
+    protected boolean set(ItemEntity container, Boolean value) {
         ((EntityItemBridge) container).bridge$setDespawnDelay(value ? Constants.Entity.Item.MAGIC_NO_DESPAWN : Constants.Entity.Item.DEFAULT_DESPAWN_DELAY, value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityItem container) {
+    protected Optional<Boolean> getVal(ItemEntity container) {
         return Optional.of(((EntityItemBridge) container).bridge$infiniteDespawnDelay());
     }
 
@@ -65,7 +65,7 @@ public class InfiniteDespawnDelayValueProcessor extends AbstractSpongeValueProce
     }
 
     @Override
-    protected boolean supports(EntityItem container) {
+    protected boolean supports(ItemEntity container) {
         return true;
     }
 

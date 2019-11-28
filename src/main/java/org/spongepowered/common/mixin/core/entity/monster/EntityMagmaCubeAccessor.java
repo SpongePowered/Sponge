@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.monster.EntityMagmaCube;
+import net.minecraft.entity.monster.MagmaCubeEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(EntityMagmaCube.class)
+@Mixin(MagmaCubeEntity.class)
 public interface EntityMagmaCubeAccessor {
 
     @Invoker("setSlimeSize") void accessor$setSlimeSize(int size, boolean resetHealth);

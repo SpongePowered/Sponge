@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.hanging.ItemFrame;
@@ -44,7 +44,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityItemFrame.class)
+@Mixin(ItemFrameEntity.class)
 public abstract class EntityItemFrameMixin extends EntityHangingMixin {
 
     @Shadow public abstract void setDisplayedItem(@Nullable net.minecraft.item.ItemStack p_82334_1_);

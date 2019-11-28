@@ -25,7 +25,7 @@
 package org.spongepowered.common.boss;
 
 import net.minecraft.world.BossInfo;
-import net.minecraft.world.BossInfoServer;
+import net.minecraft.world.ServerBossInfo;
 import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
@@ -130,7 +130,7 @@ public final class ServerBossBarBuilder implements ServerBossBar.Builder {
         checkState(this.color != null, "color must be set");
         checkState(this.overlay != null, "overlay must be set");
 
-        BossInfoServer bar = new BossInfoServer(
+        ServerBossInfo bar = new ServerBossInfo(
             SpongeTexts.toComponent(this.name),
             (BossInfo.Color) (Object) this.color,
             (BossInfo.Overlay) (Object) this.overlay

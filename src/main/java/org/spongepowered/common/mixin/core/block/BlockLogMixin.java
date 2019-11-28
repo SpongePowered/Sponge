@@ -25,11 +25,10 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockNewLog;
 import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.LogBlock;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -49,10 +48,10 @@ import org.spongepowered.common.registry.type.block.TreeTypeRegistryModule;
 import java.util.List;
 import java.util.Optional;
 
-@Mixin(BlockLog.class)
+@Mixin(LogBlock.class)
 public abstract class BlockLogMixin extends BlockMixin {
 
-    private ImmutableTreeData getTreeData(final IBlockState blockState) {
+    private ImmutableTreeData getTreeData(final net.minecraft.block.BlockState blockState) {
         final BlockPlanks.EnumType type;
         if(blockState.func_177230_c() instanceof BlockOldLog) {
             type = blockState.func_177229_b(BlockOldLog.field_176301_b);
@@ -68,8 +67,8 @@ public abstract class BlockLogMixin extends BlockMixin {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private ImmutableLogAxisData getLogAxisData(final IBlockState blockState) {
-        final LogAxis logAxis = (LogAxis) (Object) blockState.func_177229_b(BlockLog.field_176299_a);
+    private ImmutableLogAxisData getLogAxisData(final net.minecraft.block.BlockState blockState) {
+        final LogAxis logAxis = (LogAxis) (Object) blockState.func_177229_b(LogBlock.field_176299_a);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLogAxisData.class, logAxis);
     }
 
@@ -81,7 +80,7 @@ public abstract class BlockLogMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableTreeData) {
             final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
@@ -89,24 +88,24 @@ public abstract class BlockLogMixin extends BlockMixin {
         }
         if (manipulator instanceof ImmutableLogAxisData) {
             final LogAxis logAxis = ((ImmutableLogAxisData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(BlockLog.field_176299_a, (BlockLog.EnumAxis) (Object) logAxis));
+            return Optional.of((BlockState) blockState.func_177226_a(LogBlock.field_176299_a, (LogBlock.EnumAxis) (Object) logAxis));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.TREE_TYPE)) {
             final TreeType treeType = (TreeType) value;
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
             return impl$processLogType(blockState, type, treeType);
         } else if (key.equals(Keys.LOG_AXIS)) {
-            return Optional.of((BlockState) blockState.func_177226_a(BlockLog.field_176299_a, (BlockLog.EnumAxis) value));
+            return Optional.of((BlockState) blockState.func_177226_a(LogBlock.field_176299_a, (LogBlock.EnumAxis) value));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private Optional<BlockState> impl$processLogType(final IBlockState blockState, final BlockPlanks.EnumType type, final TreeType treeType) {
+    private Optional<BlockState> impl$processLogType(final net.minecraft.block.BlockState blockState, final BlockPlanks.EnumType type, final TreeType treeType) {
         if (blockState.func_177230_c() instanceof BlockOldLog) {
             if (treeType.equals(TreeTypes.OAK) ||
                 treeType.equals(TreeTypes.BIRCH) ||
@@ -124,7 +123,7 @@ public abstract class BlockLogMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeData(blockState), getLogAxisData(blockState));
     }
 }

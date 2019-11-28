@@ -26,11 +26,11 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.entity.item.EntityPainting;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.SPacketDestroyEntities;
-import net.minecraft.network.play.server.SPacketSpawnPainting;
-import net.minecraft.world.WorldServer;
+import net.minecraft.entity.item.PaintingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.server.SDestroyEntitiesPacket;
+import net.minecraft.network.play.server.SSpawnPaintingPacket;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArtData;
@@ -54,18 +54,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPainting, Art, Value<Art>, ArtData, ImmutableArtData> {
+public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<PaintingEntity, Art, Value<Art>, ArtData, ImmutableArtData> {
 
     public ArtDataProcessor() {
-        super(EntityPainting.class, Keys.ART);
+        super(PaintingEntity.class, Keys.ART);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    protected boolean set(final EntityPainting entity, final Art value) {
+    protected boolean set(final PaintingEntity entity, final Art value) {
         if (!entity.field_70170_p.field_72995_K) {
-            final EntityPainting.EnumArt oldArt = entity.field_70522_e;
-            entity.field_70522_e = (EntityPainting.EnumArt) (Object) value;
+            final PaintingEntity.EnumArt oldArt = entity.field_70522_e;
+            entity.field_70522_e = (PaintingEntity.EnumArt) (Object) value;
             ((EntityHangingAccessor) entity).accessor$updateFacingWithBoundingBox(entity.field_174860_b);
             if (!entity.func_70518_d()) {
                 entity.field_70522_e = oldArt;
@@ -73,19 +73,19 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
                 return false;
             }
 
-            final EntityTracker paintingTracker = ((WorldServer) entity.field_70170_p).func_73039_n();
+            final EntityTracker paintingTracker = ((ServerWorld) entity.field_70170_p).func_73039_n();
             final EntityTrackerEntry paintingEntry = ((EntityTrackerAccessor) paintingTracker).accessor$getTrackedEntityTable().func_76041_a(entity.func_145782_y());
-            final List<EntityPlayerMP> playerMPs = new ArrayList<>();
-            for (final EntityPlayerMP player : ((EntityTrackerEntryAccessor) paintingEntry).accessor$getTrackingPlayers()) {
-                final SPacketDestroyEntities packet = new SPacketDestroyEntities(entity.func_145782_y());
+            final List<ServerPlayerEntity> playerMPs = new ArrayList<>();
+            for (final ServerPlayerEntity player : ((EntityTrackerEntryAccessor) paintingEntry).accessor$getTrackingPlayers()) {
+                final SDestroyEntitiesPacket packet = new SDestroyEntitiesPacket(entity.func_145782_y());
                 player.field_71135_a.func_147359_a(packet);
                 playerMPs.add(player);
             }
-            for (final EntityPlayerMP playerMP : playerMPs) {
+            for (final ServerPlayerEntity playerMP : playerMPs) {
                 SpongeImpl.getGame().getScheduler().createTaskBuilder()
                         .delayTicks(SpongeImpl.getGlobalConfigAdapter().getConfig().getEntity().getPaintingRespawnDelaly())
                         .execute(() -> {
-                            final SPacketSpawnPainting packet = new SPacketSpawnPainting(entity);
+                            final SSpawnPaintingPacket packet = new SSpawnPaintingPacket(entity);
                             playerMP.field_71135_a.func_147359_a(packet);
                         })
                         .submit(SpongeImpl.getPlugin());
@@ -96,7 +96,7 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
     }
 
     @Override
-    protected Optional<Art> getVal(final EntityPainting entity) {
+    protected Optional<Art> getVal(final PaintingEntity entity) {
         return Optional.of((Art) (Object) entity.field_70522_e);
     }
 

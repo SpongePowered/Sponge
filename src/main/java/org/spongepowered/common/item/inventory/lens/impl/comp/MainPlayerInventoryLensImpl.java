@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.player.PlayerInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.MainPlayerInventoryAdapter;
@@ -62,7 +62,7 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
     private void lateInit(SlotProvider slots) {
         int base = this.base;
 
-        int hotbarSize = InventoryPlayer.func_70451_h();
+        int hotbarSize = PlayerInventory.func_70451_h();
 
         if (this.isContainer) {
             this.grid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);

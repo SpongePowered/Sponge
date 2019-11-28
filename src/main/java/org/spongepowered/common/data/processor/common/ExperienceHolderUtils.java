@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.common;
 
-import net.minecraft.entity.player.EntityPlayer;
-
 public class ExperienceHolderUtils {
 
     private static final int XP_AT_LEVEL_30 = xpAtLevel(30);

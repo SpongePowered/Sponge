@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.inventory;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -50,11 +50,11 @@ public interface ContainerBridge {
 
     Optional<Carrier> bridge$getCarrier();
 
-    LinkedHashMap<IInventory, Set<net.minecraft.inventory.Slot>> bridge$getInventories();
+    LinkedHashMap<IInventory, Set<net.minecraft.inventory.container.Slot>> bridge$getInventories();
 
     void bridge$detectAndSendChanges(boolean captureOnly);
 
-    void bridge$setCanInteractWith(@Nullable Predicate<EntityPlayer> predicate);
+    void bridge$setCanInteractWith(@Nullable Predicate<PlayerEntity> predicate);
     
     void bridge$setSpectatorChest(boolean spectatorChest);
 

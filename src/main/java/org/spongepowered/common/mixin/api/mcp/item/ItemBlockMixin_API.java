@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.item.ItemAir;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.item.AirItem;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemBlockSpecial;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @NonnullByDefault
-@Mixin(value = { ItemBlock.class, ItemBlockSpecial.class, ItemAir.class })
+@Mixin(value = { BlockItem.class, ItemBlockSpecial.class, AirItem.class })
 // Mixin into ItemAir too because ItemAir does not extend ItemBlock but has a Block
 public abstract class ItemBlockMixin_API extends ItemMixin_API {
 

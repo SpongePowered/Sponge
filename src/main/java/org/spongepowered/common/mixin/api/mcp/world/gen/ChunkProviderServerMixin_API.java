@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.IChunkLoader;
-import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.chunk.storage.ChunkLoader;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.storage.ChunkDataStream;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -43,11 +43,11 @@ import org.spongepowered.common.world.storage.WorldStorageUtil;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-@Mixin(ChunkProviderServer.class)
+@Mixin(ServerChunkProvider.class)
 public abstract class ChunkProviderServerMixin_API implements WorldStorage {
 
-    @Shadow @Final private WorldServer world;
-    @Shadow @Final private IChunkLoader chunkLoader;
+    @Shadow @Final private ServerWorld world;
+    @Shadow @Final private ChunkLoader chunkLoader;
 
     @Shadow public abstract Chunk loadChunk(int x, int z);
 

@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.entity.item.EntityBoat;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.item.BoatEntity;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(EntityBoat.class)
+@Mixin(BoatEntity.class)
 public abstract class EntityBoatMixin extends EntityMixin {
 
     private double maxSpeed = 0.35D;
@@ -39,7 +39,7 @@ public abstract class EntityBoatMixin extends EntityMixin {
     private double unoccupiedDecelerationSpeed = 0.8D;
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.func_74764_b(Constants.Entity.Boat.BOAT_MAX_SPEED)) {
             this.maxSpeed = compound.func_74769_h(Constants.Entity.Boat.BOAT_MAX_SPEED);
@@ -56,7 +56,7 @@ public abstract class EntityBoatMixin extends EntityMixin {
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         compound.func_74780_a(Constants.Entity.Boat.BOAT_MAX_SPEED, this.maxSpeed);
         compound.func_74757_a(Constants.Entity.Boat.BOAT_MOVE_ON_LAND, this.moveOnLand);

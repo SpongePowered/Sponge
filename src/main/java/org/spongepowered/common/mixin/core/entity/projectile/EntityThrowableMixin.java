@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.projectile.ThrowableEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -40,29 +40,29 @@ import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityThrowable.class)
+@Mixin(ThrowableEntity.class)
 public abstract class EntityThrowableMixin extends EntityMixin {
 
-    @Shadow protected EntityLivingBase thrower;
+    @Shadow protected LivingEntity thrower;
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
     @Nullable
     public ProjectileSource projectileSource;
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, ((Projectile) this));
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, ((Projectile) this).getShooter(), this.thrower);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityThrowable;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
-    public void onProjectileImpact(EntityThrowable projectile, RayTraceResult movingObjectPosition) {
+    public void onProjectileImpact(ThrowableEntity projectile, RayTraceResult movingObjectPosition) {
         if (this.world.field_72995_K || movingObjectPosition.field_72313_a == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;

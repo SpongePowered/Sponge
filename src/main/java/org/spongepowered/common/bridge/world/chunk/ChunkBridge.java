@@ -26,12 +26,12 @@ package org.spongepowered.common.bridge.world.chunk;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.world.gen.ChunkGenerator;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Direction;
@@ -66,7 +66,7 @@ public interface ChunkBridge {
     Optional<UUID> bridge$getBlockNotifierUUID(BlockPos pos);
 
     @Nullable
-    IBlockState bridge$setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockChangeFlag flag);
+    BlockState bridge$setBlockState(BlockPos pos, BlockState newState, BlockState currentState, BlockChangeFlag flag);
 
     void bridge$setBlockNotifier(BlockPos pos, UUID uuid);
 
@@ -130,5 +130,5 @@ public interface ChunkBridge {
 
     // TODO Mixin 0.8
     @Deprecated
-    void accessor$populate(IChunkGenerator generator);
+    void accessor$populate(ChunkGenerator generator);
 }

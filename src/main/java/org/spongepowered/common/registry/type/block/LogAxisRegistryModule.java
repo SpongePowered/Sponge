@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockLog;
+import net.minecraft.block.LogBlock;
 import org.spongepowered.api.data.type.LogAxes;
 import org.spongepowered.api.data.type.LogAxis;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 @RegisterCatalog(LogAxes.class)
-public final class LogAxisRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockLog.EnumAxis, LogAxis> {
+public final class LogAxisRegistryModule extends MinecraftEnumBasedCatalogTypeModule<LogBlock.EnumAxis, LogAxis> {
 
     @Override
-    protected BlockLog.EnumAxis[] getValues() {
-        return BlockLog.EnumAxis.values();
+    protected LogBlock.EnumAxis[] getValues() {
+        return LogBlock.EnumAxis.values();
     }
 }

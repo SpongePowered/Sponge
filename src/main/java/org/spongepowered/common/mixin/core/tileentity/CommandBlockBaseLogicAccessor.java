@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.CommandBlockBaseLogic;
+import net.minecraft.tileentity.CommandBlockLogic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(CommandBlockBaseLogic.class)
+@Mixin(CommandBlockLogic.class)
 public interface CommandBlockBaseLogicAccessor {
 
     @Accessor("successCount") void accessor$setSuccessCount(int successCount);

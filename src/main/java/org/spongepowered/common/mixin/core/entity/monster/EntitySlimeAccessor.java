@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.monster.EntitySlime;
+import net.minecraft.entity.monster.SlimeEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(EntitySlime.class)
+@Mixin(SlimeEntity.class)
 public interface EntitySlimeAccessor {
 
     @Invoker("setSlimeSize") void accessor$setSlimeSize(int size, boolean resetHealth);

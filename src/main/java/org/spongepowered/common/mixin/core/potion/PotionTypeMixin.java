@@ -25,14 +25,14 @@
 package org.spongepowered.common.mixin.core.potion;
 
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.RegistryNamespacedDefaultedByKey;
+import net.minecraft.util.registry.DefaultedRegistry;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.registry.type.item.PotionTypeRegistryModule;
 
-@Mixin(net.minecraft.potion.PotionType.class)
+@Mixin(net.minecraft.potion.Potion.class)
 public abstract class PotionTypeMixin {
 
 
@@ -41,10 +41,10 @@ public abstract class PotionTypeMixin {
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/util/registry/RegistryNamespacedDefaultedByKey;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
-    private static void impl$registerForSponge(final RegistryNamespacedDefaultedByKey registry, final int id, final Object location,
+    private static void impl$registerForSponge(final DefaultedRegistry registry, final int id, final Object location,
         final Object potion) {
         final ResourceLocation resource = (ResourceLocation) location;
-        final net.minecraft.potion.PotionType mcPotion = (net.minecraft.potion.PotionType) potion;
+        final net.minecraft.potion.Potion mcPotion = (net.minecraft.potion.Potion) potion;
 
         PotionTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionType) mcPotion);
         registry.func_177775_a(id, location, potion);

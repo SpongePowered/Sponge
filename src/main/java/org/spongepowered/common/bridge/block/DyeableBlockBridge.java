@@ -25,9 +25,9 @@
 package org.spongepowered.common.bridge.block;
 
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.DyeColor;
 
 public interface DyeableBlockBridge {
 
-    void bridge$setColorPropertyEnum(PropertyEnum<EnumDyeColor> property);
+    void bridge$setColorPropertyEnum(PropertyEnum<DyeColor> property);
 }

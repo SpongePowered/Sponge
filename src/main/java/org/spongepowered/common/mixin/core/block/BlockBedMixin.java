@@ -25,8 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockBed;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BedBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
@@ -44,11 +43,11 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 
 import java.util.Optional;
 
-@Mixin(BlockBed.class)
+@Mixin(BedBlock.class)
 public abstract class BlockBedMixin extends BlockHorizontalMixin {
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
                 .add(impl$getIsOccupiedFor(blockState))
@@ -61,7 +60,7 @@ public abstract class BlockBedMixin extends BlockHorizontalMixin {
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableOccupiedData) {
             return Optional.of((BlockState) blockState);
         }
@@ -69,15 +68,15 @@ public abstract class BlockBedMixin extends BlockHorizontalMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.OCCUPIED)) {
             return Optional.of((BlockState) blockState);
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableOccupiedData impl$getIsOccupiedFor(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOccupiedData.class, blockState.func_177229_b(BlockBed.field_176471_b));
+    private ImmutableOccupiedData impl$getIsOccupiedFor(final net.minecraft.block.BlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOccupiedData.class, blockState.func_177229_b(BedBlock.field_176471_b));
     }
 
     @Inject(method = "hasRoomForPlayer", at = @At(value = "RETURN"), cancellable = true)

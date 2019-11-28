@@ -26,7 +26,7 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -38,10 +38,10 @@ import org.spongepowered.common.mixin.core.entity.player.PlayerCapabilitiesAcces
 
 import java.util.Optional;
 
-public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double, Value<Double>> {
+public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Double, Value<Double>> {
 
     public WalkingSpeedValueProcessor() {
-        super(EntityPlayer.class, Keys.WALKING_SPEED);
+        super(PlayerEntity.class, Keys.WALKING_SPEED);
     }
 
     @Override
@@ -55,14 +55,14 @@ public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected boolean set(final EntityPlayer container, final Double value) {
+    protected boolean set(final PlayerEntity container, final Double value) {
         setWalkSpeed(container, value);
         container.func_71016_p();
         return true;
     }
 
     @Override
-    protected Optional<Double> getVal(final EntityPlayer container) {
+    protected Optional<Double> getVal(final PlayerEntity container) {
         return Optional.of(((double) container.field_71075_bZ.func_75094_b()));
     }
 
@@ -71,7 +71,7 @@ public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<Ent
         return DataTransactionResult.failNoData();
     }
 
-    public static void setWalkSpeed(final EntityPlayer container, final double value) {
+    public static void setWalkSpeed(final PlayerEntity container, final double value) {
         ((PlayerCapabilitiesAccessor) container.field_71075_bZ).accessor$setWalkSpeed((float) value);
         final IAttributeInstance attribute = container.func_110148_a(SharedMonsterAttributes.field_111263_d);
         attribute.func_111128_a(value);

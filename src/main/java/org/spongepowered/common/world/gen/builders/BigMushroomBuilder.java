@@ -27,7 +27,7 @@ package org.spongepowered.common.world.gen.builders;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedObject;

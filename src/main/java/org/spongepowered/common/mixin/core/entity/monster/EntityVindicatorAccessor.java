@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.monster.EntityVindicator;
+import net.minecraft.entity.monster.VindicatorEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EntityVindicator.class)
+@Mixin(VindicatorEntity.class)
 public interface EntityVindicatorAccessor {
 
     @Accessor("johnny") boolean accessor$getIsJohnny();

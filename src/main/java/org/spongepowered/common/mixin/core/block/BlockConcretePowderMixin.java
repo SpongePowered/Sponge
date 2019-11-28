@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockConcretePowder;
+import net.minecraft.block.ConcretePowderBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.block.DyeableBlockBridge;
 
-@Mixin(BlockConcretePowder.class)
+@Mixin(ConcretePowderBlock.class)
 public abstract class BlockConcretePowderMixin extends BlockMixin implements DyeableBlockBridge {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$SetColorProperty(final CallbackInfo ci) {
-        this.bridge$setColorPropertyEnum(BlockConcretePowder.field_192426_a);
+        this.bridge$setColorPropertyEnum(ConcretePowderBlock.field_192426_a);
     }
 
 }

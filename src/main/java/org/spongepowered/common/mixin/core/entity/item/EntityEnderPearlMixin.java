@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityEnderPearl;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.EnderPearlEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
@@ -46,10 +46,10 @@ import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityEnderPearl.class)
+@Mixin(EnderPearlEntity.class)
 public abstract class EntityEnderPearlMixin extends EntityThrowableMixin {
 
-    @Shadow private EntityLivingBase perlThrower;
+    @Shadow private LivingEntity perlThrower;
 
     private double damageAmount;
 
@@ -61,7 +61,7 @@ public abstract class EntityEnderPearlMixin extends EntityThrowableMixin {
 
     @SuppressWarnings("deprecation")
     @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isPlayerSleeping()Z"))
-    private boolean onEnderPearlImpact(final EntityPlayerMP player) {
+    private boolean onEnderPearlImpact(final ServerPlayerEntity player) {
         if (player.func_70608_bn()) {
             return true;
         }
@@ -81,7 +81,7 @@ public abstract class EntityEnderPearlMixin extends EntityThrowableMixin {
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.func_74764_b(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
             this.damageAmount = compound.func_74769_h(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
@@ -89,7 +89,7 @@ public abstract class EntityEnderPearlMixin extends EntityThrowableMixin {
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         compound.func_74780_a(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
     }
@@ -103,7 +103,7 @@ public abstract class EntityEnderPearlMixin extends EntityThrowableMixin {
     public Entity changeDimension(final int dimensionIn) {
         final Entity entity = super.changeDimension(dimensionIn);
 
-        if (entity instanceof EntityEnderPearl) {
+        if (entity instanceof EnderPearlEntity) {
             // We actually teleported so...
             this.perlThrower = null;
             this.thrower = null;

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EntityPlayer.class)
+@Mixin(PlayerEntity.class)
 public interface EntityPlayerAccessor {
 
     @Accessor("ABSORPTION")

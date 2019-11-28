@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.TileEntityDaylightDetector;
+import net.minecraft.tileentity.DaylightDetectorTileEntity;
 import org.spongepowered.api.block.tileentity.DaylightDetector;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(TileEntityDaylightDetector.class)
+@Mixin(DaylightDetectorTileEntity.class)
 public abstract class TileEntityDaylightDetectorMixin_API extends TileEntityMixin_API implements DaylightDetector {
 
 }

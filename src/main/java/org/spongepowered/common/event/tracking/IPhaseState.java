@@ -30,18 +30,18 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -265,7 +265,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param entityitem The item to be dropped
      * @return True if we are capturing, false if we are to let the item spawn
      */
-    default boolean spawnItemOrCapture(final C phaseContext, final Entity entity, final EntityItem entityitem) {
+    default boolean spawnItemOrCapture(final C phaseContext, final Entity entity, final ItemEntity entityitem) {
         if (this.doesCaptureEntityDrops(phaseContext)) {
             if (this.tracksEntitySpecificDrops()) {
                 // We are capturing per entity drop
@@ -322,7 +322,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param currentDepth The current processing depth, to prevenet stack overflows
      */
     default void performPostBlockNotificationsAndNeighborUpdates(final C context,
-        final IBlockState newState, final SpongeBlockChangeFlag changeFlag,
+        final BlockState newState, final SpongeBlockChangeFlag changeFlag,
         final int currentDepth) {
 
     }
@@ -592,8 +592,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param flags
      * @return
      */
-    default boolean shouldCaptureBlockChangeOrSkip(final C phaseContext, final BlockPos pos, final IBlockState currentState,
-        final IBlockState newState, final BlockChangeFlag flags) {
+    default boolean shouldCaptureBlockChangeOrSkip(final C phaseContext, final BlockPos pos, final BlockState currentState,
+        final BlockState newState, final BlockChangeFlag flags) {
         return true;
     }
 
@@ -696,7 +696,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param notifier The tracker type (owner or notifier)
      */
     default void associateNeighborStateNotifier(final C unwindingContext, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-        final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
+        final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
 
     }
 
@@ -723,7 +723,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param phaseContext the block tick context being entered
      */
     default void appendNotifierPreBlockTick(final WorldServerBridge mixinWorld, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
-        final Chunk chunk = ((WorldServer) mixinWorld).func_175726_f(pos);
+        final Chunk chunk = ((ServerWorld) mixinWorld).func_175726_f(pos);
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.func_76621_g()) {
             mixinChunk.bridge$getBlockOwner(pos).ifPresent(phaseContext::owner);
@@ -752,7 +752,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param playerIn
      * @param context
      */
-    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final EntityPlayerMP playerIn, final C context) {
+    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final ServerPlayerEntity playerIn, final C context) {
 
     }
 
@@ -821,7 +821,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     @Nullable
     default BlockTransaction.ChangeBlock captureBlockChange(final C phaseContext, final BlockPos pos, final SpongeBlockSnapshot originalBlockSnapshot,
-        final IBlockState newState, final BlockChangeFlag flags, @Nullable final TileEntity tileEntity) {
+        final BlockState newState, final BlockChangeFlag flags, @Nullable final TileEntity tileEntity) {
         if (!this.doesBulkBlockCapture(phaseContext)) {
             phaseContext.setSingleSnapshot(originalBlockSnapshot);
             return null;
@@ -870,8 +870,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     }
 
-    default BlockChange associateBlockChangeWithSnapshot(final C phaseContext, final IBlockState newState, final Block newBlock,
-        final IBlockState currentState, final SpongeBlockSnapshot snapshot,
+    default BlockChange associateBlockChangeWithSnapshot(final C phaseContext, final BlockState newState, final Block newBlock,
+        final BlockState currentState, final SpongeBlockSnapshot snapshot,
         final Block originalBlock) {
         if (newBlock == Blocks.field_150350_a) {
             return BlockChange.BREAK;

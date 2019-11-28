@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.EntityZombieVillager;
+import net.minecraft.entity.monster.ZombieVillagerEntity;
 import org.spongepowered.api.entity.living.monster.ZombieVillager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityZombieVillager.class)
+@Mixin(ZombieVillagerEntity.class)
 public abstract class EntityZombieVillagerMixin_API extends EntityZombieMixin_API implements ZombieVillager {
 
     @Shadow public abstract int getProfession();

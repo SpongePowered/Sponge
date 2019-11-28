@@ -25,9 +25,9 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
@@ -72,7 +72,7 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
 
     @Override
     public void associateNeighborStateNotifier(final L unwindingContext, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-        final WorldServer minecraftWorld, final PlayerTracker.Type notifier) {
+        final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
         unwindingContext.getCapturedPlayer().ifPresent(player ->
             ((ChunkBridge) minecraftWorld.func_175726_f(notifyPos))
                 .bridge$addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
@@ -80,7 +80,7 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlock(@Nullable final ItemStack stack, final EntityPlayerMP playerMP, final L context) {
+    public void capturePlayerUsingStackToBreakBlock(@Nullable final ItemStack stack, final ServerPlayerEntity playerMP, final L context) {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 

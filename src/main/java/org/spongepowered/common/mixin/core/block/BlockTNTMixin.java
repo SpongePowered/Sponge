@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockTNT;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.TNTBlock;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
@@ -48,7 +48,7 @@ import org.spongepowered.common.event.ShouldFire;
 
 import javax.annotation.Nullable;
 
-@Mixin(BlockTNT.class)
+@Mixin(TNTBlock.class)
 public abstract class BlockTNTMixin extends BlockMixin {
 
     private boolean primeCancelled;
@@ -64,8 +64,8 @@ public abstract class BlockTNTMixin extends BlockMixin {
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
-    private void impl$ThrowPrimeAndMaybeCancel(final World worldIn, final BlockPos pos, final IBlockState state, @Nullable
-        final EntityLivingBase igniter, final CallbackInfo ci, final EntityTNTPrimed tnt) {
+    private void impl$ThrowPrimeAndMaybeCancel(final World worldIn, final BlockPos pos, final BlockState state, @Nullable
+        final LivingEntity igniter, final CallbackInfo ci, final TNTEntity tnt) {
         ((EntityTNTPrimedBridge) tnt).bridge$setDetonator(igniter);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -86,7 +86,7 @@ public abstract class BlockTNTMixin extends BlockMixin {
         cancellable = true
     )
     private void impl$CheckIfCanPrimeFromExplosion(
-        final World worldIn, final BlockPos pos, final Explosion explosionIn, final CallbackInfo ci, final EntityTNTPrimed tnt) {
+        final World worldIn, final BlockPos pos, final Explosion explosionIn, final CallbackInfo ci, final TNTEntity tnt) {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
@@ -111,7 +111,7 @@ public abstract class BlockTNTMixin extends BlockMixin {
     }
 
     @Redirect(method = "onBlockActivated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
-    private boolean impl$removeActivated(final World world, final BlockPos pos, final IBlockState state, final int flag) {
+    private boolean impl$removeActivated(final World world, final BlockPos pos, final BlockState state, final int flag) {
         // Called when player manually ignites TNT
         final boolean removed = !this.primeCancelled && world.func_180501_a(pos, state, flag);
         this.primeCancelled = false;

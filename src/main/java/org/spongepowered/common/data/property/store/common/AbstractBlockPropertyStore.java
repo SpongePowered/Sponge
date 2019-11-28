@@ -25,11 +25,10 @@
 package org.spongepowered.common.data.property.store.common;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.util.Direction;
@@ -57,7 +56,7 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
      * @param block The block
      * @return The property, if available
      */
-    protected abstract Optional<T> getForBlock(@Nullable Location<?> location, IBlockState block);
+    protected abstract Optional<T> getForBlock(@Nullable Location<?> location, BlockState block);
 
     /**
      * This is intended for properties that are intentionally for directional
@@ -71,7 +70,7 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
      * @param facing The facing direction
      * @return The property, if available
      */
-    protected Optional<T> getForDirection(net.minecraft.world.World world, int x, int y, int z, EnumFacing facing) {
+    protected Optional<T> getForDirection(net.minecraft.world.World world, int x, int y, int z, net.minecraft.util.Direction facing) {
         return Optional.empty();
     }
 
@@ -79,18 +78,18 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
     public Optional<T> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {
             final Location<?> location = (Location<?>) propertyHolder;
-            final IBlockState block = (IBlockState) location.getBlock();
+            final BlockState block = (BlockState) location.getBlock();
             return getForBlock(location, block);
         } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
             final Item item = ((ItemStack) propertyHolder).func_77973_b();
-            if (item instanceof ItemBlock) {
-                final Block block = ((ItemBlock) item).func_179223_d();
+            if (item instanceof BlockItem) {
+                final Block block = ((BlockItem) item).func_179223_d();
                 if (block != null) {
                     return getForBlock(null, block.func_176223_P());
                 }
             }
-        } else if (propertyHolder instanceof IBlockState) {
-            return getForBlock(null, ((IBlockState) propertyHolder));
+        } else if (propertyHolder instanceof BlockState) {
+            return getForBlock(null, ((BlockState) propertyHolder));
         } else if (propertyHolder instanceof Block) {
             return getForBlock(null, ((Block) propertyHolder).func_176223_P());
         }
@@ -99,7 +98,7 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
 
     @Override
     public Optional<T> getFor(Location<World> location) {
-        return getForBlock(location, (IBlockState) location.getBlock());
+        return getForBlock(location, (BlockState) location.getBlock());
     }
 
     @Override

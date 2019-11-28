@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.network.play.server;
 
-import net.minecraft.network.play.server.SPacketWorldBorder;
+import net.minecraft.network.play.server.SWorldBorderPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.packet.SPacketWorldBorderBridge;
 
-@Mixin(SPacketWorldBorder.class)
+@Mixin(SWorldBorderPacket.class)
 public abstract class SPacketWorldBorderMixin implements SPacketWorldBorderBridge {
 
     @Shadow private double centerX;

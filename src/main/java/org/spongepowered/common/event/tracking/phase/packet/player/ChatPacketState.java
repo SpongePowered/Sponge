@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
 public final class ChatPacketState extends BasicPacketState {
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
 //        CPacketChatMessage chatMessage = (CPacketChatMessage) packet;
         // unused, to be removed and re-located when phase context is cleaned up
 //        if (chatMessage.getMessage().contains("kill")) {

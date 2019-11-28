@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -35,12 +33,14 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 
 @SuppressWarnings("unchecked")
 public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
-    @SuppressWarnings("NullableProblems") protected EntityPlayerMP packetPlayer; // Set by packetPlayer(EntityPlayerMP)
-    @Nullable Packet<?> packet;
+    @SuppressWarnings("NullableProblems") protected ServerPlayerEntity packetPlayer; // Set by packetPlayer(EntityPlayerMP)
+    @Nullable IPacket<?> packet;
     private ItemStackSnapshot cursor = ItemStackSnapshot.NONE;
     private ItemStack itemUsed = ItemStack.empty();
     private SpongeItemStackSnapshot itemUsedSnapshot = (SpongeItemStackSnapshot) ItemStackSnapshot.NONE;
@@ -52,12 +52,12 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         super(state);
     }
 
-    public P packet(Packet<?> packet) {
+    public P packet(IPacket<?> packet) {
         this.packet = packet;
         return (P) this;
     }
 
-    public P packetPlayer(EntityPlayerMP playerMP) {
+    public P packetPlayer(ServerPlayerEntity playerMP) {
         this.packetPlayer = playerMP;
         return (P) this;
     }
@@ -72,7 +72,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return (P) this;
     }
 
-    public EntityPlayerMP getPacketPlayer() {
+    public ServerPlayerEntity getPacketPlayer() {
         return this.packetPlayer;
     }
 
@@ -81,7 +81,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return (Player) this.packetPlayer;
     }
 
-    public <K extends Packet<?>> K getPacket() {
+    public <K extends IPacket<?>> K getPacket() {
         return (K) this.packet;
     }
 

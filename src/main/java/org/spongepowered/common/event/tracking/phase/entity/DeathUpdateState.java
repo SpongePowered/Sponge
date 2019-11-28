@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
@@ -43,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import net.minecraft.entity.item.ItemEntity;
 
 final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
 
@@ -106,7 +106,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                     frame.pushCause(damageSource);
                 }
                 frame.pushCause(dyingEntity);
-                for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                for (Map.Entry<UUID, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
                     if (entry.getKey().equals(dyingEntity.getUniqueId())) {
 
                             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);

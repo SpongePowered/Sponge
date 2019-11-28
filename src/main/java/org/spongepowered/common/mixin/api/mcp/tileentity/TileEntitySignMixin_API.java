@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import com.google.common.collect.Lists;
-import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataContainer;
@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.List;
 
 @NonnullByDefault
-@Mixin(TileEntitySign.class)
+@Mixin(SignTileEntity.class)
 public abstract class TileEntitySignMixin_API extends TileEntityMixin_API implements Sign {
 
     @Shadow @Final public ITextComponent[] signText;

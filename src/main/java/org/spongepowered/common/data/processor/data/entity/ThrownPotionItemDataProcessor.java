@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.projectile.EntityPotion;
-import net.minecraft.init.Items;
+import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
@@ -44,14 +44,14 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import java.util.Optional;
 
 public class ThrownPotionItemDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityPotion, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
+        AbstractEntitySingleDataProcessor<PotionEntity, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
 
     public ThrownPotionItemDataProcessor() {
-        super(EntityPotion.class, Keys.REPRESENTED_ITEM);
+        super(PotionEntity.class, Keys.REPRESENTED_ITEM);
     }
 
     @Override
-    protected boolean set(EntityPotion container, ItemStackSnapshot value) {
+    protected boolean set(PotionEntity container, ItemStackSnapshot value) {
         final ItemStack itemStack = ItemStackUtil.fromSnapshotToNative(value);
         if (itemStack.func_77973_b() != Items.field_185155_bH && itemStack.func_77973_b() != Items.field_185156_bI) {
             // Minecraft will throw a hissy fit if we do allow any other type of potion
@@ -63,7 +63,7 @@ public class ThrownPotionItemDataProcessor extends
     }
 
     @Override
-    protected Optional<ItemStackSnapshot> getVal(EntityPotion container) {
+    protected Optional<ItemStackSnapshot> getVal(PotionEntity container) {
         return Optional.of(ItemStackUtil.snapshotOf(container.func_184543_l()));
     }
 
@@ -78,7 +78,7 @@ public class ThrownPotionItemDataProcessor extends
     }
 
     @Override
-    protected boolean supports(EntityPotion holder) {
+    protected boolean supports(PotionEntity holder) {
         return true;
     }
 

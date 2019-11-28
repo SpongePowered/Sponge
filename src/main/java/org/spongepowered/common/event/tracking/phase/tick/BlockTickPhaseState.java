@@ -27,11 +27,10 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.IGrowable;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.init.Blocks;
+import net.minecraft.entity.item.ExperienceOrbEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -101,7 +100,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
             return postEvent.getTransactions().stream().anyMatch(transaction -> {
                 final BlockState state = transaction.getOriginal().getState();
                 final BlockType type = state.getType();
-                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, (IBlockState) state);
+                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, (net.minecraft.block.BlockState) state);
                 final BlockPos pos = VecHelper.toBlockPos(context.getSource(LocatableBlock.class).get().getPosition());
                 final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
                 if (pos.equals(blockPos) && !transaction.isValid()) {
@@ -111,7 +110,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
                     return transaction.getIntermediary().stream().anyMatch(inter -> {
                         final BlockState iterState = inter.getState();
                         final BlockType interType = state.getType();
-                        return SpongeImplHooks.hasBlockTileEntity((Block) interType, (IBlockState) iterState);
+                        return SpongeImplHooks.hasBlockTileEntity((Block) interType, (net.minecraft.block.BlockState) iterState);
                     });
                 }
                 return hasTile;
@@ -143,7 +142,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
                     .acceptAndClearIfNotEmpty(items -> {
                         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (EntityItem entity : items) {
+                        for (ItemEntity entity : items) {
                             capturedEntities.add((Entity) entity);
                         }
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
@@ -167,7 +166,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatableBlock);
-            if (entity instanceof EntityXPOrb) {
+            if (entity instanceof ExperienceOrbEntity) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                 final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
                 entities.add(entity);
@@ -212,8 +211,8 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public BlockChange associateBlockChangeWithSnapshot(BlockTickContext phaseContext, IBlockState newState, Block newBlock,
-        IBlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
+    public BlockChange associateBlockChangeWithSnapshot(BlockTickContext phaseContext, net.minecraft.block.BlockState newState, Block newBlock,
+        net.minecraft.block.BlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
         if (phaseContext.tickingBlock instanceof IGrowable) {
             if (newBlock == Blocks.field_150350_a) {
                 return BlockChange.BREAK;

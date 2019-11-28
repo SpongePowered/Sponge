@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAITasks;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
@@ -46,13 +43,16 @@ import java.util.Collection;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.GoalSelector;
 
-@Mixin(EntityLiving.class)
+@Mixin(MobEntity.class)
 public abstract class EntityLivingMixin_API extends EntityLivingBaseMixin_API implements Agent {
 
-    @Shadow @Final protected EntityAITasks tasks;
-    @Shadow @Final protected EntityAITasks targetTasks;
-    @Shadow @Nullable private EntityLivingBase attackTarget;
+    @Shadow @Final protected GoalSelector tasks;
+    @Shadow @Final protected GoalSelector targetTasks;
+    @Shadow @Nullable private LivingEntity attackTarget;
 
     @Shadow public abstract boolean isAIDisabled();
 
@@ -74,8 +74,8 @@ public abstract class EntityLivingMixin_API extends EntityLivingBaseMixin_API im
 
     @Override
     public void setTarget(@Nullable Entity target) {
-        if (target instanceof EntityLivingBase) {
-            this.attackTarget = (EntityLivingBase) target;
+        if (target instanceof LivingEntity) {
+            this.attackTarget = (LivingEntity) target;
         } else {
             this.attackTarget = null;
         }

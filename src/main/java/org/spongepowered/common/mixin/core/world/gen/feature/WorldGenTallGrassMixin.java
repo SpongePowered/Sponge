@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.block.BlockTallGrass;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.TallGrassBlock;
 import net.minecraft.world.gen.feature.TallGrassFeature;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.util.weighted.WeightedObject;
@@ -42,11 +42,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(TallGrassFeature.class)
 public abstract class WorldGenTallGrassMixin extends WorldGeneratorMixin{
 
-    @Shadow @Final @Mutable private IBlockState tallGrassState;
+    @Shadow @Final @Mutable private BlockState tallGrassState;
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>(Lnet/minecraft/block/BlockTallGrass$EnumType;)V", at = @At("RETURN"))
-    private void impl$assignShrubTypeOnCtor(final BlockTallGrass.EnumType type, final CallbackInfo ci) {
+    private void impl$assignShrubTypeOnCtor(final TallGrassBlock.EnumType type, final CallbackInfo ci) {
         ((Shrub) this).getTypes().add(new WeightedObject<>((ShrubType) (Object) type, 1));
     }
 

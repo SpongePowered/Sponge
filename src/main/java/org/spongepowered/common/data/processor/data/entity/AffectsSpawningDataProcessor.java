@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAffectsSpawningData;
@@ -39,22 +38,23 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 
 import java.util.Optional;
+import net.minecraft.entity.player.ServerPlayerEntity;
 
 public class AffectsSpawningDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityPlayerMP, Boolean, Value<Boolean>, AffectsSpawningData, ImmutableAffectsSpawningData> {
+        AbstractEntitySingleDataProcessor<ServerPlayerEntity, Boolean, Value<Boolean>, AffectsSpawningData, ImmutableAffectsSpawningData> {
 
     public AffectsSpawningDataProcessor() {
-        super(EntityPlayerMP.class, Keys.AFFECTS_SPAWNING);
+        super(ServerPlayerEntity.class, Keys.AFFECTS_SPAWNING);
     }
 
     @Override
-    protected boolean set(EntityPlayerMP entity, Boolean value) {
+    protected boolean set(ServerPlayerEntity entity, Boolean value) {
         ((EntityPlayerBridge) entity).bridge$setAffectsSpawning(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityPlayerMP entity) {
+    protected Optional<Boolean> getVal(ServerPlayerEntity entity) {
         return Optional.of(((EntityPlayerBridge) entity).bridge$affectsSpawning());
     }
 

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.type.data;
 
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -33,7 +33,7 @@ import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModul
 import org.spongepowered.common.registry.type.data.HandTypeRegistryModule.Holder;
 
 @RegisterCatalog(HandTypes.class)
-public class HandTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<EnumHand, HandType>
+public class HandTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<Hand, HandType>
         implements SpongeAdditionalCatalogRegistryModule<HandType> {
 
     public static HandTypeRegistryModule getInstance() {
@@ -54,8 +54,8 @@ public class HandTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<
     }
 
     @Override
-    protected EnumHand[] getValues() {
-        return EnumHand.values();
+    protected Hand[] getValues() {
+        return Hand.values();
     }
 
     static final class Holder {

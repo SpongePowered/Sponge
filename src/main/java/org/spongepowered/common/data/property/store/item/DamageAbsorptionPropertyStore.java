@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.DamageAbsorptionProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
@@ -35,8 +35,8 @@ public class DamageAbsorptionPropertyStore extends AbstractItemStackPropertyStor
 
     @Override
     protected Optional<DamageAbsorptionProperty> getFor(ItemStack itemStack) {
-        if (itemStack.func_77973_b() instanceof ItemArmor) {
-            final ItemArmor armor = (ItemArmor) itemStack.func_77973_b();
+        if (itemStack.func_77973_b() instanceof ArmorItem) {
+            final ArmorItem armor = (ArmorItem) itemStack.func_77973_b();
             final int reduction = armor.field_77879_b;
             return Optional.of(new DamageAbsorptionProperty(reduction));
         }

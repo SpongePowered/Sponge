@@ -27,7 +27,7 @@ package org.spongepowered.common.item.recipe.crafting;
 import static org.spongepowered.common.item.inventory.util.InventoryUtil.toSpongeInventory;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.NonNullList;
@@ -45,12 +45,12 @@ import java.util.function.Supplier;
 public abstract class AbstractSpongeCraftingRecipe implements CraftingRecipe, IRecipe {
 
     @Override
-    public boolean func_77569_a(InventoryCrafting inv, net.minecraft.world.World worldIn) {
+    public boolean func_77569_a(CraftingInventory inv, net.minecraft.world.World worldIn) {
         return matches(this::isValid, inv, worldIn);
     }
 
     @Override
-    public ItemStack func_77572_b(InventoryCrafting inv) {
+    public ItemStack func_77572_b(CraftingInventory inv) {
         return getCraftingResult(this::getResult, inv);
     }
 
@@ -60,15 +60,15 @@ public abstract class AbstractSpongeCraftingRecipe implements CraftingRecipe, IR
     }
 
     @Override
-    public NonNullList<ItemStack> func_179532_b(InventoryCrafting inv) {
+    public NonNullList<ItemStack> func_179532_b(CraftingInventory inv) {
         return getRemainingItems(this::getRemainingItems, inv);
     }
 
-    public static boolean matches(BiFunction<CraftingGridInventory, World, Boolean> isValid, InventoryCrafting inv, net.minecraft.world.World worldIn) {
+    public static boolean matches(BiFunction<CraftingGridInventory, World, Boolean> isValid, CraftingInventory inv, net.minecraft.world.World worldIn) {
         return isValid.apply(toSpongeInventory(inv), (World) worldIn);
     }
 
-    public static ItemStack getCraftingResult(Function<CraftingGridInventory, ItemStackSnapshot> getResult, InventoryCrafting inv) {
+    public static ItemStack getCraftingResult(Function<CraftingGridInventory, ItemStackSnapshot> getResult, CraftingInventory inv) {
         ItemStackSnapshot result = getResult.apply(toSpongeInventory(inv));
 
         Preconditions.checkNotNull(result, "The Sponge implementation returned a `null` result.");
@@ -80,7 +80,7 @@ public abstract class AbstractSpongeCraftingRecipe implements CraftingRecipe, IR
         return ItemStackUtil.fromSnapshotToNative(getExemplaryResult.get());
     }
 
-    public static NonNullList<ItemStack> getRemainingItems(Function<CraftingGridInventory, List<ItemStackSnapshot>> getRemainingItems, InventoryCrafting inv) {
+    public static NonNullList<ItemStack> getRemainingItems(Function<CraftingGridInventory, List<ItemStackSnapshot>> getRemainingItems, CraftingInventory inv) {
         List<ItemStackSnapshot> spongeResult = getRemainingItems.apply(toSpongeInventory(inv));
 
         if (spongeResult.size() != inv.func_70302_i_()) {

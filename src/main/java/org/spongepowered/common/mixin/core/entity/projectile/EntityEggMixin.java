@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.projectile.EntityEgg;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.projectile.EggEntity;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(EntityEgg.class)
+@Mixin(EggEntity.class)
 public abstract class EntityEggMixin extends EntityThrowableMixin {
 
     public double damageAmount;
@@ -44,7 +44,7 @@ public abstract class EntityEggMixin extends EntityThrowableMixin {
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.func_74764_b(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
             this.damageAmount = compound.func_74769_h(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
@@ -52,7 +52,7 @@ public abstract class EntityEggMixin extends EntityThrowableMixin {
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         compound.func_74780_a(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
     }

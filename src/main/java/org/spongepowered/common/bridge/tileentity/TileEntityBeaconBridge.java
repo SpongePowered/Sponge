@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.bridge.tileentity;
 
-import net.minecraft.potion.Potion;
+import net.minecraft.potion.Effect;
 
 public interface TileEntityBeaconBridge {
 
-    void bridge$forceSetPrimaryEffect(Potion potion);
+    void bridge$forceSetPrimaryEffect(Effect potion);
 
-    void bridge$forceSetSecondaryEffect(Potion potion);
+    void bridge$forceSetSecondaryEffect(Effect potion);
 }

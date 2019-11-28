@@ -27,11 +27,11 @@ package org.spongepowered.common.mixin.core.world.storage;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.play.server.SPacketServerDifficulty;
-import net.minecraft.world.EnumDifficulty;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.network.play.server.SServerDifficultyPacket;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
@@ -86,10 +86,10 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Shadow private String levelName;
     @Shadow private GameType gameType;
     @Shadow private boolean hardcore;
-    @Shadow private EnumDifficulty difficulty;
-    @Shadow public abstract void setDifficulty(EnumDifficulty newDifficulty);
+    @Shadow private Difficulty difficulty;
+    @Shadow public abstract void setDifficulty(Difficulty newDifficulty);
 
-    private final NBTTagList impl$playerUniqueIdNbt = new NBTTagList();
+    private final ListNBT impl$playerUniqueIdNbt = new ListNBT();
     private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
     private final List<UUID> impl$pendingUniqueIds = new ArrayList<>();
     private int impl$trackedUniqueIdCount = 0;
@@ -97,8 +97,8 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     private boolean impl$isMod = false;
     private boolean impl$generateBonusChest;
     private DimensionType impl$dimensionType = DimensionTypes.OVERWORLD;
-    private NBTTagCompound impl$spongeRootLevelNbt = new NBTTagCompound();
-    private NBTTagCompound impl$spongeNbt = new NBTTagCompound();
+    private CompoundNBT impl$spongeRootLevelNbt = new CompoundNBT();
+    private CompoundNBT impl$spongeNbt = new CompoundNBT();
     @Nullable private UUID impl$uuid;
     @Nullable private Integer impl$dimensionId;
     @Nullable private SpongeConfig<WorldConfig> impl$worldConfig;
@@ -113,7 +113,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
 
     //     public WorldInfo(NBTTagCompound nbt)
     @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN") )
-    private void impl$MaybeClientConstruction(final NBTTagCompound nbt, final CallbackInfo ci) {
+    private void impl$MaybeClientConstruction(final CompoundNBT nbt, final CallbackInfo ci) {
         if (SpongeImplHooks.isMainThread() && !PhaseTracker.getInstance().getCurrentContext().state.isConvertingMaps()) {
             this.impl$commonConstructionSetUpSpongeCompounds();
         }
@@ -141,7 +141,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
             worldCat.setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
         }
         worldCat.setGenerateSpawnOnLoad(archetype.doesGenerateSpawnOnLoad());
-        this.bridge$forceSetDifficulty((EnumDifficulty) (Object) archetype.getDifficulty());
+        this.bridge$forceSetDifficulty((Difficulty) (Object) archetype.getDifficulty());
         final Collection<WorldGeneratorModifier> modifiers = WorldGeneratorModifierRegistryModule.getInstance().toModifiers(config.getWorldGenModifiers());
         if (modifiers.isEmpty()) {
             config.getWorldGenModifiers().clear();
@@ -174,7 +174,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Inject(method = "updateTagCompound", at = @At("HEAD"))
-    private void impl$ensureLevelNameMatchesDirectory(final NBTTagCompound compound, final NBTTagCompound player, final CallbackInfo ci) {
+    private void impl$ensureLevelNameMatchesDirectory(final CompoundNBT compound, final CompoundNBT player, final CallbackInfo ci) {
         if (this.impl$dimensionId == null) {
             return;
         }
@@ -222,7 +222,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
 
     @SuppressWarnings("RedundantCast")
     @Inject(method = "setDifficulty", at = @At("HEAD"), cancellable = true)
-    private void onSetDifficultyVanilla(@Nullable final EnumDifficulty newDifficulty, final CallbackInfo ci) {
+    private void onSetDifficultyVanilla(@Nullable final Difficulty newDifficulty, final CallbackInfo ci) {
         if (newDifficulty == null) {
             // This is an error from someone
             new PrettyPrinter(60).add("Null Difficulty being set!").centre().hr()
@@ -248,7 +248,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Override
-    public void bridge$forceSetDifficulty(final EnumDifficulty difficulty) {
+    public void bridge$forceSetDifficulty(final Difficulty difficulty) {
         this.difficulty = difficulty;
 
         this.bridge$updatePlayersForDifficulty();
@@ -260,9 +260,9 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
                 .stream()
                 .filter(world -> world.func_72912_H() == (WorldInfo) (Object) this)
                 .flatMap(world -> world.field_73010_i.stream())
-                .filter(player -> player instanceof EntityPlayerMP)
-                .map(player -> (EntityPlayerMP) player)
-                .forEach(player -> player.field_71135_a.func_147359_a(new SPacketServerDifficulty(this.difficulty, ((WorldInfo) (Object) this).func_176123_z
+                .filter(player -> player instanceof ServerPlayerEntity)
+                .map(player -> (ServerPlayerEntity) player)
+                .forEach(player -> player.field_71135_a.func_147359_a(new SServerDifficultyPacket(this.difficulty, ((WorldInfo) (Object) this).func_176123_z
                         ())));
     }
 
@@ -344,13 +344,13 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Override
-    public NBTTagCompound bridge$getSpongeRootLevelNbt() {
+    public CompoundNBT bridge$getSpongeRootLevelNbt() {
         this.writeSpongeNbt();
         return this.impl$spongeRootLevelNbt;
     }
 
     @Override
-    public void bridge$setSpongeRootLevelNBT(final NBTTagCompound nbt) {
+    public void bridge$setSpongeRootLevelNBT(final CompoundNBT nbt) {
         this.impl$spongeRootLevelNbt = nbt;
         if (nbt.func_74764_b(Constants.Sponge.SPONGE_DATA)) {
             this.impl$spongeNbt = nbt.func_74775_l(Constants.Sponge.SPONGE_DATA);
@@ -358,7 +358,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Override
-    public void bridge$readSpongeNbt(final NBTTagCompound nbt) {
+    public void bridge$readSpongeNbt(final CompoundNBT nbt) {
         final UUID nbtUniqueId = nbt.func_186857_a(Constants.UUID);
         if (UUID.fromString("00000000-0000-0000-0000-000000000000").equals(nbtUniqueId)) {
             return;
@@ -385,9 +385,9 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
             }
         }
         if (nbt.func_150297_b(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
-            final NBTTagList playerIdList = nbt.func_150295_c(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
+            final ListNBT playerIdList = nbt.func_150295_c(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < playerIdList.func_74745_c(); i++) {
-                final NBTTagCompound playerId = playerIdList.func_150305_b(i);
+                final CompoundNBT playerId = playerIdList.func_150305_b(i);
                 final UUID playerUuid = playerId.func_186857_a(Constants.UUID);
                 final Integer playerIndex = this.impl$playerUniqueIdMap.inverse().get(playerUuid);
                 if (playerIndex == null) {
@@ -421,9 +421,9 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
             this.impl$spongeNbt.func_74777_a(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
             this.impl$spongeNbt.func_74757_a(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY, this.impl$hasCustomDifficulty);
             final Iterator<UUID> iterator = this.impl$pendingUniqueIds.iterator();
-            final NBTTagList playerIdList = this.impl$spongeNbt.func_150295_c(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
+            final ListNBT playerIdList = this.impl$spongeNbt.func_150295_c(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
             while (iterator.hasNext()) {
-                final NBTTagCompound compound = new NBTTagCompound();
+                final CompoundNBT compound = new CompoundNBT();
                 compound.func_186854_a(Constants.UUID, iterator.next());
                 playerIdList.func_74742_a(compound);
                 iterator.remove();

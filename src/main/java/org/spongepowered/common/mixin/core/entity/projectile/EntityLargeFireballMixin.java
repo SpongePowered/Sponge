@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.EntityLargeFireball;
+import net.minecraft.entity.projectile.FireballEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
@@ -49,7 +49,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityLargeFireball.class)
+@Mixin(FireballEntity.class)
 public abstract class EntityLargeFireballMixin extends EntityFireballMixin implements EntityLargeFireballBridge, ExplosiveBridge {
 
     @Shadow public int explosionPower;

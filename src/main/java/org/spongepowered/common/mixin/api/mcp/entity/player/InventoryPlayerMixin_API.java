@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.player;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.Player;
@@ -53,11 +52,11 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
-@Mixin(InventoryPlayer.class)
+@Mixin(net.minecraft.entity.player.PlayerInventory.class)
 public abstract class InventoryPlayerMixin_API implements PlayerInventory {
 
     @Shadow public int currentItem;
-    @Shadow public EntityPlayer player;
+    @Shadow public PlayerEntity player;
 
     @Shadow public abstract int getSizeInventory();
     @Shadow public abstract ItemStack getStackInSlot(int index);

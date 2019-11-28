@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.inventory;
 
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IContainerListener;
-import net.minecraft.inventory.Slot;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.IContainerListener;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.Player;
@@ -73,7 +73,7 @@ public abstract class ContainerMixin_API implements org.spongepowered.api.item.i
                     }
                     // TODO better detection of viewer inventory - needs tracking of who views a container
                     // For now assume that a player inventory is always the viewers inventory
-                    if (((Slot) slot).field_75224_c.getClass() != InventoryPlayer.class) {
+                    if (((Slot) slot).field_75224_c.getClass() != PlayerInventory.class) {
                         return true;
                     }
                 }

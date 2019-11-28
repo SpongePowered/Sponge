@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockQuartz;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -45,7 +44,7 @@ public abstract class BlockQuartzMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
+    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getQuartzTypeFor(blockState));
     }
 
@@ -56,7 +55,7 @@ public abstract class BlockQuartzMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableQuartzData) {
             final BlockQuartz.EnumType quartzType = (BlockQuartz.EnumType) (Object) ((ImmutableQuartzData) manipulator).type().get();
             return Optional.of((BlockState) blockState.func_177226_a(BlockQuartz.field_176335_a, quartzType));
@@ -65,7 +64,7 @@ public abstract class BlockQuartzMixin extends BlockMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.QUARTZ_TYPE)) {
             final BlockQuartz.EnumType quartzType = (BlockQuartz.EnumType) value;
             return Optional.of((BlockState) blockState.func_177226_a(BlockQuartz.field_176335_a, quartzType));
@@ -74,7 +73,7 @@ public abstract class BlockQuartzMixin extends BlockMixin {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private ImmutableQuartzData impl$getQuartzTypeFor(final IBlockState blockState) {
+    private ImmutableQuartzData impl$getQuartzTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeQuartzData.class,
                 (QuartzType) (Object) blockState.func_177229_b(BlockQuartz.field_176335_a));
     }

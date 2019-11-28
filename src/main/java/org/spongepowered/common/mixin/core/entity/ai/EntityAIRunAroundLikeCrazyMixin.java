@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.entity.ai;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.EntityAIRunAroundLikeCrazy;
-import net.minecraft.entity.passive.AbstractHorse;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.ai.goal.RunAroundLikeCrazyGoal;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.event.CauseStackManager;
@@ -41,10 +41,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 
-@Mixin(EntityAIRunAroundLikeCrazy.class)
+@Mixin(RunAroundLikeCrazyGoal.class)
 public abstract class EntityAIRunAroundLikeCrazyMixin extends EntityAIBaseMixin {
 
-    @Shadow @Final @Mutable private AbstractHorse horseHost;
+    @Shadow @Final @Mutable private AbstractHorseEntity horseHost;
 
     /**
      * @author rexbut - December 16th, 2016
@@ -60,7 +60,7 @@ public abstract class EntityAIRunAroundLikeCrazyMixin extends EntityAIBaseMixin 
                 return;
             }
 
-            if (entity instanceof EntityPlayer) {
+            if (entity instanceof PlayerEntity) {
                 int i = this.horseHost.func_110252_cg();
                 int j = this.horseHost.func_190676_dC();
 
@@ -71,7 +71,7 @@ public abstract class EntityAIRunAroundLikeCrazyMixin extends EntityAIBaseMixin 
                             return;
                         }
                     }
-                    this.horseHost.func_110263_g((EntityPlayer)entity);
+                    this.horseHost.func_110263_g((PlayerEntity)entity);
                     this.horseHost.field_70170_p.func_72960_a(this.horseHost, (byte)7);
                     return;
                 }

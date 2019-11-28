@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.ChatType;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.RegistryModule;

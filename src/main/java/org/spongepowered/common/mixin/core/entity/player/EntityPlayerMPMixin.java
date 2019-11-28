@@ -28,52 +28,52 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IMerchant;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.ContainerChest;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.merchant.IMerchant;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
-import net.minecraft.inventory.SlotCrafting;
+import net.minecraft.inventory.container.ChestContainer;
+import net.minecraft.inventory.container.CraftingResultSlot;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.network.play.client.CPacketClientSettings;
-import net.minecraft.network.play.server.SPacketAnimation;
-import net.minecraft.network.play.server.SPacketBlockChange;
-import net.minecraft.network.play.server.SPacketCombatEvent;
-import net.minecraft.network.play.server.SPacketEntityProperties;
-import net.minecraft.network.play.server.SPacketSetSlot;
-import net.minecraft.network.play.server.SPacketSpawnPosition;
-import net.minecraft.network.play.server.SPacketUpdateHealth;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.network.play.client.CClientSettingsPacket;
+import net.minecraft.network.play.server.SAnimateHandPacket;
+import net.minecraft.network.play.server.SChangeBlockPacket;
+import net.minecraft.network.play.server.SCombatPacket;
+import net.minecraft.network.play.server.SEntityPropertiesPacket;
+import net.minecraft.network.play.server.SSetSlotPacket;
+import net.minecraft.network.play.server.SSpawnPositionPacket;
+import net.minecraft.network.play.server.SUpdateHealthPacket;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.stats.StatList;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IInteractionObject;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -153,19 +153,19 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityPlayerMP.class)
+@Mixin(ServerPlayerEntity.class)
 public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements SubjectBridge, EntityPlayerMPBridge, CommandSenderBridge,
     CommandSourceBridge {
 
     @Shadow @Final public MinecraftServer server;
     @Shadow @Final public PlayerInteractionManager interactionManager;
-    @Shadow public NetHandlerPlayServer connection;
+    @Shadow public ServerPlayNetHandler connection;
     @Shadow private int lastExperience;
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
     @Shadow public boolean isChangingQuantityOnly;
 
-    @Shadow public abstract WorldServer getServerWorld();
+    @Shadow public abstract ServerWorld getServerWorld();
 
     // Used to restore original item received in a packet after canceling an event
     private ItemStack impl$packetItem = ItemStack.field_190927_a;
@@ -174,16 +174,16 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     private int impl$viewDistance;
     @Nullable private GameType impl$pendingGameType;
     private Scoreboard impl$spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
-    @Nullable private EntityPlayerMP impl$delegate;
+    @Nullable private ServerPlayerEntity impl$delegate;
     @Nullable private Vector3d impl$velocityOverride = null;
     private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
     private float impl$cachedModifiedHealth = -1;
-    private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
+    private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((ServerPlayerEntity) (Object) this);
     private boolean impl$keepInventory = false;
     @Nullable private Text impl$displayName = null;
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         if (bridge$isHealthScaled()) {
             compound.func_74780_a(Constants.Sponge.Entity.Player.HEALTH_SCALE, this.impl$healthScale);
@@ -191,7 +191,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.func_150297_b(Constants.Sponge.Entity.Player.HEALTH_SCALE, Constants.NBT.TAG_DOUBLE)) {
             this.impl$healthScale = compound.func_74769_h(Constants.Sponge.Entity.Player.HEALTH_SCALE);
@@ -202,7 +202,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
     private void impl$removeHumanHook(final Entity entityIn, final CallbackInfo ci) {
         if (entityIn instanceof EntityHuman) {
-            ((EntityHuman) entityIn).onRemovedFrom((EntityPlayerMP) (Object) this);
+            ((EntityHuman) entityIn).onRemovedFrom((ServerPlayerEntity) (Object) this);
         }
     }
 
@@ -223,7 +223,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     public void onDeath(final DamageSource cause) {
         // Sponge start
         final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
-        final Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause, isMainThread);
+        final Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((ServerPlayerEntity) (Object) this, cause, isMainThread);
         if (optEvent.map(Cancellable::isCancelled).orElse(true)) {
             return;
         }
@@ -243,18 +243,18 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             // Sponge end
 
             final boolean flag = this.world.func_82736_K().func_82766_b(Constants.GameRule.SHOW_DEATH_MESSAGES);
-            this.connection.func_147359_a(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
+            this.connection.func_147359_a(new SCombatPacket(this.getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, flag));
 
             if (flag) {
                 final Team team = this.getTeam();
 
-                if (team != null && team.func_178771_j() != Team.EnumVisible.ALWAYS) {
-                    if (team.func_178771_j() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
+                if (team != null && team.func_178771_j() != Team.Visible.ALWAYS) {
+                    if (team.func_178771_j() == Team.Visible.HIDE_FOR_OTHER_TEAMS) {
                         this.server.func_184103_al()
-                            .func_177453_a((EntityPlayerMP) (Object) this, this.getCombatTracker().func_151521_b());
-                    } else if (team.func_178771_j() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
+                            .func_177453_a((ServerPlayerEntity) (Object) this, this.getCombatTracker().func_151521_b());
+                    } else if (team.func_178771_j() == Team.Visible.HIDE_FOR_OWN_TEAM) {
                         this.server.func_184103_al()
-                            .func_177452_b((EntityPlayerMP) (Object) this, this.getCombatTracker().func_151521_b());
+                            .func_177452_b((ServerPlayerEntity) (Object) this, this.getCombatTracker().func_151521_b());
                     }
                 } else {
                     this.server.func_184103_al().func_148539_a(this.getCombatTracker().func_151521_b());
@@ -274,7 +274,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
                 score.func_96648_a();
             }
 
-            final EntityLivingBase entitylivingbase = this.getAttackingEntity();
+            final LivingEntity entitylivingbase = this.getAttackingEntity();
 
             if (entitylivingbase != null) {
                 final EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.field_75627_a.get(EntityList.func_191301_a(entitylivingbase));
@@ -283,11 +283,11 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
                     this.addStat(entitylist$entityegginfo.field_151513_e);
                 }
 
-                entitylivingbase.func_191956_a((EntityPlayerMP) (Object) this, this.scoreValue, cause);
+                entitylivingbase.func_191956_a((ServerPlayerEntity) (Object) this, this.scoreValue, cause);
             }
 
-            this.addStat(StatList.field_188069_A);
-            this.takeStat(StatList.field_188098_h);
+            this.addStat(Stats.field_188069_A);
+            this.takeStat(Stats.field_188098_h);
             this.extinguish();
             this.setFlag(0, false);
             this.getCombatTracker().func_94549_h();
@@ -306,7 +306,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Inject(method = "copyFrom", at = @At("HEAD"))
-    private void impl$copySpongeDataOnRespawn(final EntityPlayerMP oldPlayer, final boolean respawnFromEnd, final CallbackInfo ci) {
+    private void impl$copySpongeDataOnRespawn(final ServerPlayerEntity oldPlayer, final boolean respawnFromEnd, final CallbackInfo ci) {
         // Copy over sponge data from the old player.
         // Allows plugins to specify data that persists after players respawn.
         if (!(oldPlayer instanceof DataCompoundHolder)) {
@@ -320,7 +320,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean impl$useKeepFromBridge(final GameRules gameRules, final String key, final EntityPlayerMP corpse, final boolean keepEverything) {
+    private boolean impl$useKeepFromBridge(final GameRules gameRules, final String key, final ServerPlayerEntity corpse, final boolean keepEverything) {
         final boolean keep = ((EntityPlayerBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
         if (!keep) {
             // Copy corpse inventory to respawned player
@@ -347,7 +347,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
             if (this.isPlayerSleeping()) {
                 this.getServerWorld().func_73039_n()
-                        .func_151248_b((Entity) (Object) this, new SPacketAnimation((Entity) (Object) this, 2)); // Sponge - cast to Entity
+                        .func_151248_b((Entity) (Object) this, new SAnimateHandPacket((Entity) (Object) this, 2)); // Sponge - cast to Entity
             }
 
             super.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
@@ -381,7 +381,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     // Post before the player values are updated
     @SuppressWarnings({"ConstantConditions", "UnstableApiUsage"})
     @Inject(method = "handleClientSettings", at = @At("HEAD"))
-    private void impl$throwClientSettingsEvent(final CPacketClientSettings packet, final CallbackInfo ci) {
+    private void impl$throwClientSettingsEvent(final CClientSettingsPacket packet, final CallbackInfo ci) {
         if (ShouldFire.PLAYER_CHANGE_CLIENT_SETTINGS_EVENT) {
             final CauseStackManager csm = Sponge.getCauseStackManager();
             csm.pushCause(this);
@@ -404,7 +404,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @SuppressWarnings("UnstableApiUsage")
     @Inject(method = "handleClientSettings", at = @At("RETURN"))
-    private void impl$updateSkinFromPacket(final CPacketClientSettings packet, final CallbackInfo ci) {
+    private void impl$updateSkinFromPacket(final CClientSettingsPacket packet, final CallbackInfo ci) {
         this.impl$skinParts = SkinPartRegistryModule.getInstance().getAll().stream()
             .map(part -> (SpongeSkinPart) part)
             .filter(part -> part.test(packet.func_149521_d()))
@@ -466,7 +466,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public void bridge$restorePacketItem(final EnumHand hand) {
+    public void bridge$restorePacketItem(final Hand hand) {
         if (this.impl$packetItem.func_190926_b()) {
             return;
         }
@@ -478,13 +478,13 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         this.isChangingQuantityOnly = false;
         // force client itemstack update if place event was cancelled
         if (slot != null) {
-            this.connection.func_147359_a(new SPacketSetSlot(this.openContainer.field_75152_c, slot.field_75222_d, this.impl$packetItem));
+            this.connection.func_147359_a(new SSetSlotPacket(this.openContainer.field_75152_c, slot.field_75222_d, this.impl$packetItem));
         }
     }
 
     @Override
     public void bridge$initScoreboard() {
-        ((ServerScoreboardBridge) this.getWorldScoreboard()).bridge$addPlayer((EntityPlayerMP) (Object) this, true);
+        ((ServerScoreboardBridge) this.getWorldScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, true);
     }
 
     @Override
@@ -504,24 +504,24 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Override
     public void bridge$setScoreboardOnRespawn(final Scoreboard scoreboard) {
         this.impl$spongeScoreboard = scoreboard;
-        ((ServerScoreboardBridge) ((Player) this).getScoreboard()).bridge$addPlayer((EntityPlayerMP) (Object) this, false);
+        ((ServerScoreboardBridge) ((Player) this).getScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, false);
     }
 
     @Override
     public void bridge$removeScoreboardOnRespawn() {
-        ((ServerScoreboardBridge) ((Player) this).getScoreboard()).bridge$removePlayer((EntityPlayerMP) (Object) this, false);
+        ((ServerScoreboardBridge) ((Player) this).getScoreboard()).bridge$removePlayer((ServerPlayerEntity) (Object) this, false);
     }
 
     @Override
     public MessageChannel bridge$getDeathMessageChannel() {
-        final EntityPlayerMP player = (EntityPlayerMP) (Object) this;
+        final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
         if (player.field_70170_p.func_82736_K().func_82766_b(Constants.GameRule.SHOW_DEATH_MESSAGES)) {
             @Nullable final Team team = player.func_96124_cp();
 
-            if (team != null && team.func_178771_j() != Team.EnumVisible.ALWAYS) {
-                if (team.func_178771_j() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
+            if (team != null && team.func_178771_j() != Team.Visible.ALWAYS) {
+                if (team.func_178771_j() == Team.Visible.HIDE_FOR_OTHER_TEAMS) {
                     return ((ScorePlayerTeamBridge) team).bridge$getTeamChannel(player);
-                } else if (team.func_178771_j() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
+                } else if (team.func_178771_j() == Team.Visible.HIDE_FOR_OWN_TEAM) {
                     return ((ScorePlayerTeamBridge) team).bridge$getNonTeamChannel();
                 }
             } else {
@@ -582,7 +582,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @Nullable
     @Override
-    public EntityPlayerMP bridge$getDelegate() {
+    public ServerPlayerEntity bridge$getDelegate() {
         return this.impl$delegate;
     }
 
@@ -625,7 +625,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Override
     public void bridge$setTargetedLocation(@Nullable final Vector3d vec) {
         super.bridge$setTargetedLocation(vec);
-        this.connection.func_147359_a(new SPacketSpawnPosition(VecHelper.toBlockPos(this.bridge$getTargetedLocation())));
+        this.connection.func_147359_a(new SSpawnPositionPacket(VecHelper.toBlockPos(this.bridge$getTargetedLocation())));
     }
 
     @Override
@@ -640,8 +640,8 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public void bridge$sendBlockChange(final BlockPos pos, final IBlockState state) {
-        final SPacketBlockChange packet = new SPacketBlockChange();
+    public void bridge$sendBlockChange(final BlockPos pos, final BlockState state) {
+        final SChangeBlockPacket packet = new SChangeBlockPacket();
         packet.field_179828_a = pos;
         packet.field_148883_d = state;
         this.connection.func_147359_a(packet);
@@ -656,7 +656,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
      */
     @Override
     @Nullable
-    public EntityItem dropItem(final boolean dropAll) {
+    public ItemEntity dropItem(final boolean dropAll) {
         final ItemStack currentItem = this.inventory.func_70448_g();
         if (currentItem.func_190926_b()) {
             return null;
@@ -681,7 +681,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         // We need to re-send the player's inventory to overwrite any client-side inventory changes that may have occured as a result
         // of the client (but not the server) calling Item#onPlayerStoppedUsing (which in the case of a bow, removes one arrow from the inventory).
         if (this.activeItemStack.func_190926_b()) {
-            ((EntityPlayerMP) (Object) this).func_71120_a(((EntityPlayerMP) (Object) this).field_71069_bz);
+            ((ServerPlayerEntity) (Object) this).func_71120_a(((ServerPlayerEntity) (Object) this).field_71069_bz);
         }
         super.stopActiveHand();
     }
@@ -703,7 +703,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             ordinal = 1,
             shift = At.Shift.AFTER))
     private void onSetContainer(final IInventory chestInventory, final CallbackInfo ci) {
-        if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ContainerChest && this.isSpectator()) {
+        if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ChestContainer && this.isSpectator()) {
             SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
             ((ContainerBridge) this.openContainer).bridge$setSpectatorChest(true);
         }
@@ -722,9 +722,9 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
      */
     @Inject(method = "sendSlotContents", at = @At("HEAD"))
     private void sendSlotContents(
-        final net.minecraft.inventory.Container containerToSend, final int slotInd, final ItemStack stack, final CallbackInfo ci) {
-        if (containerToSend.func_75139_a(slotInd) instanceof SlotCrafting) {
-            this.connection.func_147359_a(new SPacketSetSlot(containerToSend.field_75152_c, slotInd, stack));
+        final net.minecraft.inventory.container.Container containerToSend, final int slotInd, final ItemStack stack, final CallbackInfo ci) {
+        if (containerToSend.func_75139_a(slotInd) instanceof CraftingResultSlot) {
+            this.connection.func_147359_a(new SSetSlotPacket(containerToSend.field_75152_c, slotInd, stack));
         }
     }
 
@@ -744,7 +744,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
                     )
             )
     )
-    private float spongeGetScaledHealthForPacket(final EntityPlayerMP entityPlayerMP) {
+    private float spongeGetScaledHealthForPacket(final ServerPlayerEntity entityPlayerMP) {
         return bridge$getInternalScaledHealth();
     }
 
@@ -761,7 +761,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         this.impl$cachedModifiedHealth = -1;
         this.lastHealth = -1.0F;
         if (scale != Constants.Entity.Player.DEFAULT_HEALTH_SCALE) {
-            final NBTTagCompound spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
             spongeData.func_74780_a(Constants.Sponge.Entity.Player.HEALTH_SCALE, scale);
         } else {
             if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
@@ -780,8 +780,8 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         bridge$injectScaledHealth(dirtyInstances);
 
         // Send the new information to the client.
-        this.connection.func_147359_a(new SPacketUpdateHealth(bridge$getInternalScaledHealth(), getFoodStats().func_75116_a(), getFoodStats().func_75115_e()));
-        this.connection.func_147359_a(new SPacketEntityProperties(this.getEntityId(), dirtyInstances));
+        this.connection.func_147359_a(new SUpdateHealthPacket(bridge$getInternalScaledHealth(), getFoodStats().func_75116_a(), getFoodStats().func_75115_e()));
+        this.connection.func_147359_a(new SEntityPropertiesPacket(this.getEntityId(), dirtyInstances));
         // Reset the dirty instances since they've now been manually updated on the client.
         dirtyInstances.clear();
 
@@ -875,7 +875,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     }
 
     @Override
-    public void bridge$setDelegateAfterRespawn(final EntityPlayerMP delegate) {
+    public void bridge$setDelegateAfterRespawn(final ServerPlayerEntity delegate) {
         this.impl$delegate = delegate;
     }
 
@@ -889,7 +889,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         if (this.impl$displayName == null) {
             return chestInventory.func_145748_c_();
         }
-        return new TextComponentString(SpongeTexts.toLegacy(this.impl$displayName));
+        return new StringTextComponent(SpongeTexts.toLegacy(this.impl$displayName));
     }
 
     @Redirect(method = "displayGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IInteractionObject;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
@@ -897,7 +897,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         if (this.impl$displayName == null) {
             return guiOwner.func_145748_c_();
         }
-        return new TextComponentString(SpongeTexts.toLegacy(this.impl$displayName));
+        return new StringTextComponent(SpongeTexts.toLegacy(this.impl$displayName));
     }
 
     @Redirect(method = "openGuiHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
@@ -905,7 +905,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         if (this.impl$displayName == null) {
             return inventoryIn.func_145748_c_();
         }
-        return new TextComponentString(SpongeTexts.toLegacy(this.impl$displayName));
+        return new StringTextComponent(SpongeTexts.toLegacy(this.impl$displayName));
     }
 
     @Redirect(method = "displayVillagerTradeGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/IMerchant;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
@@ -913,12 +913,12 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         if (this.impl$displayName == null) {
             return villager.func_145748_c_();
         }
-        return new TextComponentString(SpongeTexts.toLegacy(this.impl$displayName));
+        return new StringTextComponent(SpongeTexts.toLegacy(this.impl$displayName));
     }
 
     @SuppressWarnings("BoundedWildcard")
     @Inject(method = "canAttackPlayer", at = @At("HEAD"), cancellable = true)
-    private void impl$useWorldBasedAttackRules(final EntityPlayer other, final CallbackInfoReturnable<Boolean> cir) {
+    private void impl$useWorldBasedAttackRules(final PlayerEntity other, final CallbackInfoReturnable<Boolean> cir) {
         final boolean worldPVP = ((WorldProperties) other.field_70170_p.func_72912_H()).isPVPEnabled();
 
         if (!worldPVP) {
