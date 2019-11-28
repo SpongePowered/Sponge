@@ -27,7 +27,7 @@ package org.spongepowered.common.data.builder.block.tileentity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityNote;
 import org.spongepowered.api.block.tileentity.Note;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.util.Constants;
 

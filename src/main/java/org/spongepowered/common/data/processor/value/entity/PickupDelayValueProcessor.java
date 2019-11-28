@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.bridge.entity.EntityItemBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -37,14 +37,14 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 import net.minecraft.entity.item.ItemEntity;
 
-public class PickupDelayValueProcessor extends AbstractSpongeValueProcessor<ItemEntity, Integer, MutableBoundedValue<Integer>> {
+public class PickupDelayValueProcessor extends AbstractSpongeValueProcessor<ItemEntity, Integer, Mutable<Integer>> {
 
     public PickupDelayValueProcessor() {
         super(ItemEntity.class, Keys.PICKUP_DELAY);
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(final Integer defaultValue) {
+    public Mutable<Integer> constructValue(final Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.PICKUP_DELAY)
                 .defaultValue(Constants.Entity.Item.DEFAULT_PICKUP_DELAY)
                 .minimum(Constants.Entity.Item.MIN_PICKUP_DELAY)

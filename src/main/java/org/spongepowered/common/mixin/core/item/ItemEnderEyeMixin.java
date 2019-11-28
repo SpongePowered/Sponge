@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EyeOfEnderEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnderEyeItem;
@@ -39,11 +38,11 @@ import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -54,7 +53,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
-
+import org.spongepowered.math.vector.Vector3d;
 import javax.annotation.Nullable;
 
 @Mixin(EnderEyeItem.class)

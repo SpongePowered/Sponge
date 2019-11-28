@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.tileentity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.OptionalValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -39,14 +39,14 @@ import net.minecraft.potion.Effect;
 import net.minecraft.tileentity.BeaconTileEntity;
 
 public class BeaconSecondaryEffectValueProcessor
-        extends AbstractSpongeValueProcessor<BeaconTileEntity, Optional<PotionEffectType>, OptionalValue<PotionEffectType>> {
+        extends AbstractSpongeValueProcessor<BeaconTileEntity, Optional<PotionEffectType>, Mutable<PotionEffectType>> {
 
     public BeaconSecondaryEffectValueProcessor() {
         super(BeaconTileEntity.class, Keys.BEACON_SECONDARY_EFFECT);
     }
 
     @Override
-    protected OptionalValue<PotionEffectType> constructValue(Optional<PotionEffectType> actualValue) {
+    protected Mutable<PotionEffectType> constructValue(Optional<PotionEffectType> actualValue) {
         return SpongeValueFactory.getInstance().createOptionalValue(Keys.BEACON_SECONDARY_EFFECT, actualValue.orElse(null));
     }
 
@@ -73,7 +73,7 @@ public class BeaconSecondaryEffectValueProcessor
     }
 
     @Override
-    protected ImmutableValue<Optional<PotionEffectType>> constructImmutableValue(Optional<PotionEffectType> value) {
+    protected Immutable<Optional<PotionEffectType>> constructImmutableValue(Optional<PotionEffectType> value) {
         return constructValue(value).asImmutable();
     }
 

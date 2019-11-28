@@ -26,12 +26,11 @@ package org.spongepowered.common.data.manipulator.mutable.item;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableDurabilityData;
 import org.spongepowered.api.data.manipulator.mutable.item.DurabilityData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeDurabilityData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -72,7 +71,7 @@ public class SpongeDurabilityData extends AbstractData<DurabilityData, Immutable
     }
 
     @Override
-    public MutableBoundedValue<Integer> durability() {
+    public Mutable<Integer> durability() {
         return SpongeValueFactory.boundedBuilder(Keys.ITEM_DURABILITY)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -82,7 +81,7 @@ public class SpongeDurabilityData extends AbstractData<DurabilityData, Immutable
     }
 
     @Override
-    public Value<Boolean> unbreakable() {
+    public org.spongepowered.api.data.value.Value.Mutable<Boolean> unbreakable() {
         return SpongeValueFactory.getInstance().createValue(Keys.UNBREAKABLE, this.unbreakable, false);
     }
 

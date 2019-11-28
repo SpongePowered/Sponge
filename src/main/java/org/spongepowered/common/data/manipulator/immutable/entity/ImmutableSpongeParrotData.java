@@ -27,16 +27,16 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableParrotData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ParrotData;
-import org.spongepowered.api.data.type.ParrotVariant;
-import org.spongepowered.api.data.type.ParrotVariants;
+import org.spongepowered.api.data.type.ParrotType;
+import org.spongepowered.api.data.type.ParrotTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeParrotData;
 
-public class ImmutableSpongeParrotData extends AbstractImmutableSingleCatalogData<ParrotVariant, ImmutableParrotData, ParrotData>
+public class ImmutableSpongeParrotData extends AbstractImmutableSingleCatalogData<ParrotType, ImmutableParrotData, ParrotData>
         implements ImmutableParrotData {
 
-    public ImmutableSpongeParrotData(ParrotVariant variant) {
-        super(ImmutableParrotData.class, variant, ParrotVariants.RED, Keys.PARROT_VARIANT, SpongeParrotData.class);
+    public ImmutableSpongeParrotData(ParrotType variant) {
+        super(ImmutableParrotData.class, variant, ParrotTypes.RED, Keys.PARROT_VARIANT, SpongeParrotData.class);
     }
 
 }

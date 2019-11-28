@@ -27,7 +27,7 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.mixin.core.entity.EntityLivingAccessor;
@@ -54,8 +54,8 @@ public class EntityLivingAIFlagsConverter extends DataParameterConverter<Byte> {
     }
 
     @Override
-    public Byte getValueFromEvent(Byte originalValue, final List<ImmutableValue<?>> immutableValues) {
-        for (final ImmutableValue<?> immutableValue : immutableValues) {
+    public Byte getValueFromEvent(Byte originalValue, final List<Immutable<?>> immutableValues) {
+        for (final Immutable<?> immutableValue : immutableValues) {
             if (immutableValue.getKey() == Keys.AI_ENABLED) {
                 final Boolean hasAi = (Boolean) immutableValue.get();
                 originalValue = Byte.valueOf(hasAi ? (byte) (originalValue.byteValue() & -2) : (byte) (originalValue.byteValue() | 1));

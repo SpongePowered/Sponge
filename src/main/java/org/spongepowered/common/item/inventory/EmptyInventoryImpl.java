@@ -31,7 +31,7 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
+import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -188,7 +188,7 @@ public class EmptyInventoryImpl implements EmptyInventory {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends Inventory> T query(QueryOperation<?>... operations) {
+    public <T extends Inventory> T query(Query<?>... operations) {
         return (T) this;
     }
 

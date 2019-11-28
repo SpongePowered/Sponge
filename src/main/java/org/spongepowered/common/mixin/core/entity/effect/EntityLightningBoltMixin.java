@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.effect;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.effect.LightningBoltEntity;
@@ -48,7 +47,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.List;
 
 @Mixin(LightningBoltEntity.class)

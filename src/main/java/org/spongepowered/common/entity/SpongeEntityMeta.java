@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.entity;
 
-import static org.spongepowered.api.data.DataQuery.of;
+import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.SpongeCatalogType;
 
 public class SpongeEntityMeta extends SpongeCatalogType {

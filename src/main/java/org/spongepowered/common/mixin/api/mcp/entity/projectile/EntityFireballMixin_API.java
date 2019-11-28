@@ -24,18 +24,16 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAccelerationData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Collection;
 
 import javax.annotation.Nullable;
@@ -53,7 +51,7 @@ public abstract class EntityFireballMixin_API extends EntityMixin_API implements
     @Nullable private ProjectileSource projectileSource = null;
 
     @Override
-    public Value<Vector3d> acceleration() {
+    public Mutable<Vector3d> acceleration() {
         return new SpongeValue<>(Keys.ACCELERATION, new Vector3d(this.accelerationX, this.accelerationY, this.accelerationZ));
     }
 
@@ -81,7 +79,7 @@ public abstract class EntityFireballMixin_API extends EntityMixin_API implements
     }
 
     @Override
-    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeAccelerationData(this.accelerationX, this.accelerationY, this.accelerationZ));
     }

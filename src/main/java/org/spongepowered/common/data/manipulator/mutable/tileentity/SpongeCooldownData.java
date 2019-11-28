@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.tileentity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCooldownData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 import org.spongepowered.common.util.Constants;
@@ -43,7 +43,7 @@ public class SpongeCooldownData extends AbstractBoundedComparableData<Integer, C
     }
 
     @Override
-    public MutableBoundedValue<Integer> cooldown() {
+    public Mutable<Integer> cooldown() {
         return getValueGetter();
     }
 }

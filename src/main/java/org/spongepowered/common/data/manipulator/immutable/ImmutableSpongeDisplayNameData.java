@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
@@ -49,7 +49,7 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableSingleData<
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
+    protected Immutable<?> getValueGetter() {
         return this.displayName();
     }
 
@@ -59,7 +59,7 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableSingleData<
     }
 
     @Override
-    public ImmutableValue<Text> displayName() {
+    public Immutable<Text> displayName() {
         return this.nameValue;
     }
 

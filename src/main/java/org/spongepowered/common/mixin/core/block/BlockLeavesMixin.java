@@ -31,14 +31,14 @@ import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDecayableData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.data.type.WoodTypes;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -137,7 +137,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
             type = BlockPlanks.EnumType.OAK;
         }
 
-        final TreeType treeType = TreeTypeRegistryModule.getFor(type);
+        final WoodType treeType = TreeTypeRegistryModule.getFor(type);
 
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType);
     }
@@ -147,24 +147,24 @@ public abstract class BlockLeavesMixin extends BlockMixin {
     }
 
     @Override
-    public boolean bridge$supports(final Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
         return ImmutableTreeData.class.isAssignableFrom(immutable) || ImmutableDecayableData.class.isAssignableFrom(immutable);
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
         if (manipulator instanceof ImmutableTreeData) {
-            final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
+            final WoodType treeType = ((ImmutableTreeData) manipulator).type().get();
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
             if (blockState.getBlock() instanceof BlockOldLeaf) {
-                if (treeType.equals(TreeTypes.OAK) ||
-                        treeType.equals(TreeTypes.BIRCH) ||
-                        treeType.equals(TreeTypes.SPRUCE) ||
-                        treeType.equals(TreeTypes.JUNGLE)) {
+                if (treeType.equals(WoodTypes.OAK) ||
+                        treeType.equals(WoodTypes.BIRCH) ||
+                        treeType.equals(WoodTypes.SPRUCE) ||
+                        treeType.equals(WoodTypes.JUNGLE)) {
                     return Optional.of((BlockState) blockState.withProperty(BlockOldLeaf.VARIANT, type));
                 }
             } else if (blockState.getBlock() instanceof BlockNewLeaf) {
-                if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
+                if (treeType.equals(WoodTypes.ACACIA) || treeType.equals(WoodTypes.DARK_OAK)) {
                     return Optional.of((BlockState) blockState.withProperty(BlockNewLeaf.VARIANT, type));
                 }
             }
@@ -178,19 +178,19 @@ public abstract class BlockLeavesMixin extends BlockMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
         if (key.equals(Keys.TREE_TYPE)) {
-            final TreeType treeType = (TreeType) value;
+            final WoodType treeType = (WoodType) value;
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
             if (blockState.getBlock() instanceof BlockOldLeaf) {
-                if (treeType.equals(TreeTypes.OAK) ||
-                        treeType.equals(TreeTypes.BIRCH) ||
-                        treeType.equals(TreeTypes.SPRUCE) ||
-                        treeType.equals(TreeTypes.JUNGLE)) {
+                if (treeType.equals(WoodTypes.OAK) ||
+                        treeType.equals(WoodTypes.BIRCH) ||
+                        treeType.equals(WoodTypes.SPRUCE) ||
+                        treeType.equals(WoodTypes.JUNGLE)) {
                     return Optional.of((BlockState) blockState.withProperty(BlockOldLeaf.VARIANT, type));
                 }
             } else if (blockState.getBlock() instanceof BlockNewLeaf) {
-                if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
+                if (treeType.equals(WoodTypes.ACACIA) || treeType.equals(WoodTypes.DARK_OAK)) {
                     return Optional.of((BlockState) blockState.withProperty(BlockNewLeaf.VARIANT, type));
                 }
             }
@@ -204,8 +204,8 @@ public abstract class BlockLeavesMixin extends BlockMixin {
     }
 
     @Override
-    public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getTreeData(blockState), impl$getIsDecayableFor(blockState));
+    public List<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
+        return ImmutableList.<Immutable<?, ?>>of(impl$getTreeData(blockState), impl$getIsDecayableFor(blockState));
 
     }
 

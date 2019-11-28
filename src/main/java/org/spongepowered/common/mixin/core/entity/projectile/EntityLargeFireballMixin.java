@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.FireballEntity;
 import org.spongepowered.api.Sponge;
@@ -44,7 +43,7 @@ import org.spongepowered.common.bridge.entity.item.EntityLargeFireballBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 
 import javax.annotation.Nullable;

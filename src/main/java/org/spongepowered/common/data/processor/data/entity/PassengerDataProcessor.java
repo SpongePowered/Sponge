@@ -25,14 +25,14 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePassengerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PassengerData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.ListValue.Immutable;
+import org.spongepowered.api.data.value.ListValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePassengerData;
@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<net.minecraft.entity.Entity, List<UUID>, ListValue<UUID>, PassengerData, ImmutablePassengerData> {
+public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<net.minecraft.entity.Entity, List<UUID>, Mutable<UUID>, PassengerData, ImmutablePassengerData> {
 
     public PassengerDataProcessor() {
         super(net.minecraft.entity.Entity.class, Keys.PASSENGERS);
@@ -82,12 +82,12 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
     }
 
     @Override
-    protected ImmutableListValue<UUID> constructImmutableValue(List<UUID> value) {
+    protected Immutable<UUID> constructImmutableValue(List<UUID> value) {
         return new ImmutableSpongeListValue<>(Keys.PASSENGERS, ImmutableList.copyOf(value));
     }
 
     @Override
-    protected ListValue<UUID> constructValue(List<UUID> actualValue) {
+    protected Mutable<UUID> constructValue(List<UUID> actualValue) {
         return new SpongeListValue<>(Keys.PASSENGERS, actualValue);
     }
 

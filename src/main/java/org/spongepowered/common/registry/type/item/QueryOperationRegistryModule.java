@@ -25,7 +25,7 @@
 package org.spongepowered.common.registry.type.item;
 
 import org.spongepowered.api.item.inventory.query.QueryOperationType;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.item.inventory.query.SpongeQueryOperationType;
@@ -47,7 +47,7 @@ import java.util.Optional;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class QueryOperationRegistryModule implements CatalogRegistryModule<QueryOperationType> {
 
-    @RegisterCatalog(QueryOperationTypes.class)
+    @RegisterCatalog(QueryTypes.class)
     private final Map<String, QueryOperationType> types = new HashMap<>();
 
     @Override

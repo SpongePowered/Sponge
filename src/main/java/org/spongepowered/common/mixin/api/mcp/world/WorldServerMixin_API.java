@@ -27,8 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -55,11 +53,10 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -67,9 +64,9 @@ import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
-import org.spongepowered.api.world.PortalAgent;
-import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.gen.TerrainGenerator;
 import org.spongepowered.api.world.storage.WorldStorage;
+import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
@@ -106,7 +103,8 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldManager;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -155,7 +153,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     @Override
-    public WorldGenerator getWorldGenerator() {
+    public TerrainGenerator getWorldGenerator() {
         return ((WorldServerBridge) this).bridge$getSpongeGenerator();
     }
 
@@ -209,10 +207,10 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
     @SuppressWarnings("deprecation")
     @Override
-    public Optional<org.spongepowered.api.world.Chunk> regenerateChunk(final int cx, final int cy, final int cz, final ChunkRegenerateFlag flag) {
+    public Optional<org.spongepowered.api.world.chunk.Chunk> regenerateChunk(final int cx, final int cy, final int cz, final ChunkRegenerateFlag flag) {
         final List<ServerPlayerEntity> playerList = new ArrayList<>();
         final List<net.minecraft.entity.Entity> entityList = new ArrayList<>();
-        org.spongepowered.api.world.Chunk spongeChunk;
+        org.spongepowered.api.world.chunk.Chunk spongeChunk;
         try (final PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING.createPhaseContext()
             .world((net.minecraft.world.World)(Object) this)) {
             context.buildAndSwitch();
@@ -267,7 +265,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
                 }
 
                 if (((ChunkProviderBridge) chunkProviderServer).bridge$getLoadedChunkWithoutMarkingActive(cx, cz) == null) {
-                    return Optional.of((org.spongepowered.api.world.Chunk) newChunk);
+                    return Optional.of((org.spongepowered.api.world.chunk.Chunk) newChunk);
                 }
 
                 final PlayerChunkMapEntry playerChunkMapEntry = ((ServerWorld) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
@@ -286,7 +284,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
                 }
             }
 
-            return Optional.of((org.spongepowered.api.world.Chunk) newChunk);
+            return Optional.of((org.spongepowered.api.world.chunk.Chunk) newChunk);
         }
     }
 
@@ -531,7 +529,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     @Override
-    public void playRecord(final Vector3i position, final RecordType recordType) {
+    public void playRecord(final Vector3i position, final MusicDisc recordType) {
         api$playRecord(position, checkNotNull(recordType, "recordType"));
     }
 
@@ -540,7 +538,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         api$playRecord(position, null);
     }
 
-    private void api$playRecord(final Vector3i position, @Nullable final RecordType recordType) {
+    private void api$playRecord(final Vector3i position, @Nullable final MusicDisc recordType) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
                 SpongeRecordType.createPacket(position, recordType), ((WorldServerBridge) this).bridge$getDimensionId());
     }

@@ -26,8 +26,8 @@ package org.spongepowered.common.item;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.util.Color;

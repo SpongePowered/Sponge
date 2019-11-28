@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
@@ -38,21 +36,21 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslator;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TypeTokens;
@@ -78,7 +76,8 @@ import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.TypeTokenHelper;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -114,7 +113,7 @@ public final class DataUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    public static <T> T getData(final DataView dataView, final Key<? extends BaseValue<T>> key) throws InvalidDataException {
+    public static <T> T getData(final DataView dataView, final Key<? extends Value<T>> key) throws InvalidDataException {
         checkDataExists(dataView, checkNotNull(key).getQuery());
         final Object object;
         final TypeToken<?> elementToken = key.getElementToken();
@@ -180,11 +179,11 @@ public final class DataUtil {
         throw new InvalidDataException("Data does not match!");
     }
 
-    public static List<DataView> getSerializedManipulatorList(final Iterable<? extends DataManipulator<?, ?>> manipulators) {
+    public static List<DataView> getSerializedManipulatorList(final Iterable<? extends Mutable<?, ?>> manipulators) {
         return getSerializedManipulatorList(manipulators, DataUtil::getRegistrationFor);
     }
 
-    public static List<DataView> getSerializedImmutableManipulatorList(final Iterable<? extends ImmutableDataManipulator<?, ?>> manipulators) {
+    public static List<DataView> getSerializedImmutableManipulatorList(final Iterable<? extends Immutable<?, ?>> manipulators) {
         return getSerializedManipulatorList(manipulators, DataUtil::getRegistrationFor);
     }
 
@@ -225,7 +224,7 @@ public final class DataUtil {
     private static void tryDeserializeManipulator(final SerializedDataTransaction.Builder builder, final DataView view, final String dataId) {
         final DataView manipulatorView = view.getView(Constants.Sponge.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
         try {
-            final Optional<DataManipulator<?, ?>> build = deserializeManipulator(dataId, manipulatorView);
+            final Optional<Mutable<?, ?>> build = deserializeManipulator(dataId, manipulatorView);
             if (build.isPresent()) {
                 builder.successfulData(build.get());
             } else {
@@ -236,7 +235,7 @@ public final class DataUtil {
         }
     }
 
-    private static <T extends DataManipulator<?, ?>> Optional<T> deserializeManipulator(final String dataId, final DataView data) {
+    private static <T extends Mutable<?, ?>> Optional<T> deserializeManipulator(final String dataId, final DataView data) {
         return getRegistrationFor(dataId) // Get Registration
                 .map(DataRegistration::getDataManipulatorBuilder) // Find Builder
                 .flatMap(b -> (Optional<T>) b.build(data)); // Build CustomData
@@ -258,22 +257,22 @@ public final class DataUtil {
         final int version = dataView.getInt(Queries.CONTENT_VERSION).orElse(1);
         if (version != Constants.Sponge.CURRENT_CUSTOM_DATA) {
             final DataContentUpdater contentUpdater = SpongeDataManager.getInstance()
-                .getWrappedContentUpdater(DataManipulator.class, version, Constants.Sponge.CURRENT_CUSTOM_DATA)
+                .getWrappedContentUpdater(Mutable.class, version, Constants.Sponge.CURRENT_CUSTOM_DATA)
                 .orElseThrow(() -> new IllegalArgumentException("Could not find a content updater for DataManipulator information with version: " + version));
             return contentUpdater.update(dataView);
         }
         return dataView;
     }
 
-    public static ImmutableList<ImmutableDataManipulator<?, ?>> deserializeImmutableManipulatorList(final List<? extends DataView> containers) {
+    public static ImmutableList<Immutable<?, ?>> deserializeImmutableManipulatorList(final List<? extends DataView> containers) {
         checkNotNull(containers);
-        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
+        final ImmutableList.Builder<Immutable<?, ?>> builder = ImmutableList.builder();
         for (DataView view : containers) {
             view = updateDataViewForDataManipulator(view);
             final String dataId = view.getString(Constants.Sponge.DATA_ID).orElseThrow(DataUtil.dataNotFound());
             final DataView manipulatorView = view.getView(Constants.Sponge.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
             try {
-                deserializeManipulator(dataId, manipulatorView).map(DataManipulator::asImmutable).ifPresent(builder::add);
+                deserializeManipulator(dataId, manipulatorView).map(Mutable::asImmutable).ifPresent(builder::add);
             } catch (final Exception e) {
                 new InvalidDataException("Could not translate " + dataId + "!", e).printStackTrace();
             }
@@ -330,7 +329,7 @@ public final class DataUtil {
      * @param <T> The type of data manipulator
      * @param <I> The type of immutable data manipulator
      */
-    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
+    public static <T extends Mutable<T, I>, I extends Immutable<I, T>> void
     registerDataProcessorAndImpl(final Class<T> manipulatorClass, final Class<? extends T> implClass, final Class<I> immutableDataManipulator,
         final Class<? extends I> implImClass, final DataProcessor<T, I> processor) {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Registrations are no longer allowed!");
@@ -343,7 +342,7 @@ public final class DataUtil {
         SpongeManipulatorRegistry.getInstance().register(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
     }
 
-    public static <E, V extends BaseValue<E>, T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
+    public static <E, V extends Value<E>, T extends Mutable<T, I>, I extends Immutable<I, T>> void
     registerDualProcessor(final Class<T> manipulatorClass, final Class<? extends T> implClass, final Class<I> immutableDataManipulator,
         final Class<? extends I> implImClass, final AbstractSingleDataSingleTargetProcessor<?, E, V, T, I> processor) {
         registerDataProcessorAndImpl(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
@@ -358,7 +357,7 @@ public final class DataUtil {
      * @param <I> The type of immutable data manipulator
      * @return The data processor
      */
-    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>> getProcessor(
+    public static <T extends Mutable<T, I>, I extends Immutable<I, T>> Optional<DataProcessor<T, I>> getProcessor(
         final Class<T> mutableClass) {
         return Optional.ofNullable((DataProcessor<T, I>) SpongeManipulatorRegistry.getInstance().getDelegate(mutableClass));
     }
@@ -371,7 +370,7 @@ public final class DataUtil {
      * @param mutableClass The mutable class
      * @return The data processor
      */
-    public static Optional<DataProcessor<?, ?>> getWildProcessor(final Class<? extends DataManipulator<?, ?>> mutableClass) {
+    public static Optional<DataProcessor<?, ?>> getWildProcessor(final Class<? extends Mutable<?, ?>> mutableClass) {
         return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getDelegate(mutableClass));
     }
 
@@ -382,7 +381,7 @@ public final class DataUtil {
      * @return The raw typed data processor
      */
     @SuppressWarnings("rawtypes")
-    public static Optional<DataProcessor> getWildDataProcessor(final Class<? extends DataManipulator> mutableClass) {
+    public static Optional<DataProcessor> getWildDataProcessor(final Class<? extends Mutable> mutableClass) {
         return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getDelegate(mutableClass));
     }
 
@@ -395,7 +394,7 @@ public final class DataUtil {
      * @param <I> The type of ImmutableDataManipulator
      * @return The data processor
      */
-    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>>
+    public static <T extends Mutable<T, I>, I extends Immutable<I, T>> Optional<DataProcessor<T, I>>
     getImmutableProcessor(final Class<I> immutableClass) {
         return Optional.ofNullable((DataProcessor<T, I>) SpongeManipulatorRegistry.getInstance().getDelegate(immutableClass));
     }
@@ -408,12 +407,12 @@ public final class DataUtil {
      * @return The raw typed data processor
      */
     @SuppressWarnings("rawtypes")
-    public static Optional<DataProcessor> getWildImmutableProcessor(final Class<? extends ImmutableDataManipulator<?, ?>> immutableClass) {
+    public static Optional<DataProcessor> getWildImmutableProcessor(final Class<? extends Immutable<?, ?>> immutableClass) {
         return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getDelegate(immutableClass));
     }
 
 
-    public static <E, V extends BaseValue<E>> void registerValueProcessor(final Key<V> key, final ValueProcessor<E, V> valueProcessor) {
+    public static <E, V extends Value<E>> void registerValueProcessor(final Key<V> key, final ValueProcessor<E, V> valueProcessor) {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Registrations are no longer allowed!");
         checkNotNull(valueProcessor);
         checkArgument(!(valueProcessor instanceof ValueProcessorDelegate), "Cannot register ValueProcessorDelegates! READ THE DOCS!");
@@ -421,7 +420,7 @@ public final class DataUtil {
         SpongeManipulatorRegistry.getInstance().registerValueProcessor(key, valueProcessor);
     }
 
-    public static <E, V extends BaseValue<E>> Optional<ValueProcessor<E, V>> getValueProcessor(final Key<V> key) {
+    public static <E, V extends Value<E>> Optional<ValueProcessor<E, V>> getValueProcessor(final Key<V> key) {
         return Optional.ofNullable((ValueProcessor<E, V>) SpongeManipulatorRegistry.getInstance().getDelegate(key));
     }
 
@@ -429,8 +428,8 @@ public final class DataUtil {
         return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getDelegate(key));
     }
 
-    public static <E> Optional<ValueProcessor<E, ? extends BaseValue<E>>> getBaseValueProcessor(final Key<? extends BaseValue<E>> key) {
-        return Optional.ofNullable((ValueProcessor<E, ? extends BaseValue<E>>) SpongeManipulatorRegistry.getInstance().getDelegate(key));
+    public static <E> Optional<ValueProcessor<E, ? extends Value<E>>> getBaseValueProcessor(final Key<? extends Value<E>> key) {
+        return Optional.ofNullable((ValueProcessor<E, ? extends Value<E>>) SpongeManipulatorRegistry.getInstance().getDelegate(key));
     }
 
     public static RawDataValidator getValidators(final ValidationType validationType) {
@@ -438,12 +437,12 @@ public final class DataUtil {
         return new DelegateDataValidator(ImmutableList.of(), validationType);
     }
 
-    public static <E, V extends BaseValue<E>> Optional<NbtValueProcessor<E, V>> getNbtProcessor(final NbtDataType dataType, final Key<V> key) {
+    public static <E, V extends Value<E>> Optional<NbtValueProcessor<E, V>> getNbtProcessor(final NbtDataType dataType, final Key<V> key) {
         return Optional.ofNullable((NbtValueProcessor<E, V>) SpongeManipulatorRegistry.getInstance().getNbtProcessor(dataType, key));
     }
 
     @SuppressWarnings("rawtypes")
-    public static Optional<NbtDataProcessor> getRawNbtProcessor(final NbtDataType dataType, final Class<? extends DataManipulator> aClass) {
+    public static Optional<NbtDataProcessor> getRawNbtProcessor(final NbtDataType dataType, final Class<? extends Mutable> aClass) {
         return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getNbtDelegate(dataType, aClass));
     }
 
@@ -460,11 +459,11 @@ public final class DataUtil {
         return SpongeManipulatorRegistry.getInstance().getNbtValueProcessors(type);
     }
 
-    public static DataRegistration<?, ?> getRegistrationFor(final DataManipulator<?, ?> manipulator) {
+    public static DataRegistration<?, ?> getRegistrationFor(final Mutable<?, ?> manipulator) {
         return SpongeManipulatorRegistry.getInstance().getRegistrationFor(manipulator);
     }
 
-    private static DataRegistration<?, ?> getRegistrationFor(final ImmutableDataManipulator<?, ?> immutableDataManipulator) {
+    private static DataRegistration<?, ?> getRegistrationFor(final Immutable<?, ?> immutableDataManipulator) {
         return SpongeManipulatorRegistry.getInstance().getRegistrationFor(immutableDataManipulator);
     }
 
@@ -472,7 +471,7 @@ public final class DataUtil {
         return (Optional<DataRegistration<?, ?>>) (Optional<?>) SpongeManipulatorRegistry.getInstance().getRegistrationFor(id);
     }
 
-    public static DataTransactionResult apply(final CompoundNBT compound, final DataManipulator<?, ?> manipulator) {
+    public static DataTransactionResult apply(final CompoundNBT compound, final Mutable<?, ?> manipulator) {
         if (!compound.contains(Constants.Forge.FORGE_DATA, Constants.NBT.TAG_COMPOUND)) {
             compound.setTag(Constants.Forge.FORGE_DATA, new CompoundNBT());
         }
@@ -494,11 +493,11 @@ public final class DataUtil {
                 if (dataId.equalsIgnoreCase(registration.getId())) {
                     final CompoundNBT current = dataCompound.getCompound(Constants.Sponge.CUSTOM_DATA);
                     final DataContainer currentView = NbtTranslator.getInstance().translate(current);
-                    final Optional<DataManipulator<?, ?>> existingManipulator = deserializeManipulator(dataId, currentView);
+                    final Optional<Mutable<?, ?>> existingManipulator = deserializeManipulator(dataId, currentView);
                     final DataContainer replacement = manipulator.toContainer();
                     final CompoundNBT replacementCompound = NbtTranslator.getInstance().translateData(replacement);
                     dataCompound.setTag(Constants.Sponge.CUSTOM_DATA, replacementCompound);
-                    return DataTransactionResult.successReplaceResult(manipulator.getValues(), existingManipulator.map(DataManipulator::getValues)
+                    return DataTransactionResult.successReplaceResult(manipulator.getValues(), existingManipulator.map(Mutable::getValues)
                         .orElseGet(ImmutableSet::of));
                 }
             }
@@ -518,7 +517,7 @@ public final class DataUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    public static DataTransactionResult remove(final CompoundNBT data, final Class<? extends DataManipulator<?, ?>> containerClass) {
+    public static DataTransactionResult remove(final CompoundNBT data, final Class<? extends Mutable<?, ?>> containerClass) {
         if (!data.contains(Constants.Forge.FORGE_DATA, Constants.NBT.TAG_COMPOUND)) {
             return DataTransactionResult.successNoData();
         }
@@ -541,9 +540,9 @@ public final class DataUtil {
             if (registration.getId().equalsIgnoreCase(dataId)) {
                 final CompoundNBT current = dataCompound.getCompound(Constants.Sponge.CUSTOM_DATA);
                 final DataContainer currentView = NbtTranslator.getInstance().translate(current);
-                final Optional<DataManipulator<?, ?>> existing = deserializeManipulator(dataId, currentView);
+                final Optional<Mutable<?, ?>> existing = deserializeManipulator(dataId, currentView);
                 dataList.removeTag(i);
-                return existing.map(DataManipulator::getValues)
+                return existing.map(Mutable::getValues)
                     .map(DataTransactionResult::successRemove)
                     .orElseGet(DataTransactionResult::successNoData);
             }
@@ -560,8 +559,8 @@ public final class DataUtil {
                 translateTagListToView(builder, list);
                 try {
                     final SerializedDataTransaction transaction = deserializeManipulatorList(builder.build());
-                    final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
-                    for (final DataManipulator<?, ?> manipulator : manipulators) {
+                    final List<Mutable<?, ?>> manipulators = transaction.deserializedManipulators;
+                    for (final Mutable<?, ?> manipulator : manipulators) {
                         dataHolder.offer(manipulator);
                     }
                     if (!transaction.failedData.isEmpty()) {
@@ -579,11 +578,11 @@ public final class DataUtil {
                 compound.remove(Constants.Sponge.FAILED_CUSTOM_DATA);
                 // Re-attempt to deserialize custom data
                 final SerializedDataTransaction transaction = deserializeManipulatorList(builder.build());
-                final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
-                final List<Class<? extends DataManipulator<?, ?>>> classesLoaded = new ArrayList<>();
-                for (final DataManipulator<?, ?> manipulator : manipulators) {
+                final List<Mutable<?, ?>> manipulators = transaction.deserializedManipulators;
+                final List<Class<? extends Mutable<?, ?>>> classesLoaded = new ArrayList<>();
+                for (final Mutable<?, ?> manipulator : manipulators) {
                     if (!classesLoaded.contains(manipulator.getClass())) {
-                        classesLoaded.add((Class<? extends DataManipulator<?, ?>>) manipulator.getClass());
+                        classesLoaded.add((Class<? extends Mutable<?, ?>>) manipulator.getClass());
                         // If for any reason a failed data was not deserialized, but
                         // there already exists new data, we just simply want to
                         // ignore the failed data for removal.
@@ -611,7 +610,7 @@ public final class DataUtil {
 
     public static void writeCustomData(final CompoundNBT compound, final DataHolder dataHolder) {
         if (dataHolder instanceof CustomDataHolderBridge) {
-            final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) dataHolder).bridge$getCustomManipulators();
+            final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) dataHolder).bridge$getCustomManipulators();
             if (!manipulators.isEmpty()) {
                 final List<DataView> manipulatorViews = getSerializedManipulatorList(manipulators);
                 final ListNBT manipulatorTagList = new ListNBT();

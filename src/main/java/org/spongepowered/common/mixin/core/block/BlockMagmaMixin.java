@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.MagmaBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
@@ -37,6 +36,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(MagmaBlock.class)
 public abstract class BlockMagmaMixin extends BlockMixin {

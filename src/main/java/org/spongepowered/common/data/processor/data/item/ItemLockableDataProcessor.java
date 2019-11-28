@@ -37,9 +37,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableLockableData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeLockableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -48,7 +48,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public final class ItemLockableDataProcessor extends AbstractItemSingleDataProcessor<String, Value<String>, LockableData, ImmutableLockableData> {
+public final class ItemLockableDataProcessor extends AbstractItemSingleDataProcessor<String, Mutable<String>, LockableData, ImmutableLockableData> {
 
     public ItemLockableDataProcessor() {
         super(stack -> {
@@ -101,12 +101,12 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
     }
 
     @Override
-    protected Value<String> constructValue(final String actualValue) {
+    protected Mutable<String> constructValue(final String actualValue) {
         return new SpongeValue<String>(Keys.LOCK_TOKEN, "", actualValue);
     }
 
     @Override
-    protected ImmutableValue<String> constructImmutableValue(final String value) {
+    protected Immutable<String> constructImmutableValue(final String value) {
         return new ImmutableSpongeValue<String>(Keys.LOCK_TOKEN, "", value);
     }
 

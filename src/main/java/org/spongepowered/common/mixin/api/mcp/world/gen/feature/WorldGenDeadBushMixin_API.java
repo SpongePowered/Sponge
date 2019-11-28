@@ -24,18 +24,16 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.DeadBushFeature;
 import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.DeadBush;
 import org.spongepowered.asm.mixin.Mixin;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 @Mixin(DeadBushFeature.class)
@@ -44,7 +42,7 @@ public abstract class WorldGenDeadBushMixin_API extends Feature implements DeadB
     private VariableAmount api$count = VariableAmount.fixed(128);
 
     @Override
-    public PopulatorType getType() {
+    public org.spongepowered.api.world.gen.feature.Feature getType() {
         return PopulatorTypes.DEAD_BUSH;
     }
 

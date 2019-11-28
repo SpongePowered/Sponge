@@ -29,9 +29,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.type.SkullTypes;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
@@ -43,7 +43,7 @@ import java.util.Optional;
 import net.minecraft.tileentity.SkullTileEntity;
 
 public class SkullRepresentedPlayerDataProcessor extends
-        AbstractTileEntitySingleDataProcessor<SkullTileEntity, GameProfile, Value<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
+        AbstractTileEntitySingleDataProcessor<SkullTileEntity, GameProfile, Mutable<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
 
     public SkullRepresentedPlayerDataProcessor() {
         super(SkullTileEntity.class, Keys.REPRESENTED_PLAYER);
@@ -81,12 +81,12 @@ public class SkullRepresentedPlayerDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<GameProfile> constructImmutableValue(GameProfile value) {
+    protected Immutable<GameProfile> constructImmutableValue(GameProfile value) {
         return new ImmutableSpongeValue<>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, value);
     }
 
     @Override
-    protected Value<GameProfile> constructValue(GameProfile actualValue) {
+    protected Mutable<GameProfile> constructValue(GameProfile actualValue) {
         return new SpongeValue<>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, actualValue);
     }
 

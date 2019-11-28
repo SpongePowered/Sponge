@@ -29,7 +29,7 @@ import static org.spongepowered.common.util.Constants.Functional.intComparator;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDelayableData;
 import org.spongepowered.api.data.manipulator.mutable.block.DelayableData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDelayableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 
@@ -49,7 +49,7 @@ public class SpongeDelayableData extends AbstractBoundedComparableData<Integer, 
     }
 
     @Override
-    public MutableBoundedValue<Integer> delay() {
+    public Mutable<Integer> delay() {
         return getValueGetter();
     }
 }

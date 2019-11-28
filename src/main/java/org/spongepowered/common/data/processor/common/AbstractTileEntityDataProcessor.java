@@ -25,10 +25,10 @@
 package org.spongepowered.common.data.processor.common;
 
 import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 
-public abstract class AbstractTileEntityDataProcessor<Tile extends TileEntity, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+public abstract class AbstractTileEntityDataProcessor<Tile extends TileEntity, M extends Mutable<M, I>, I extends Immutable<I, M>>
     extends AbstractMultiDataSingleTargetProcessor<Tile, M, I> {
 
     protected AbstractTileEntityDataProcessor(Class<Tile> tileEntityClass) {

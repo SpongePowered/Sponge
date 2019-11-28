@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDisabledSlotsData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DisabledSlotsData;
-import org.spongepowered.api.data.value.mutable.SetValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.SetValue.Mutable;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeDisabledSlotsData;
@@ -58,12 +58,12 @@ public class SpongeDisabledSlotsData extends AbstractData<DisabledSlotsData, Imm
 
 
     @Override
-    public SetValue<EquipmentType> takingDisabled() {
+    public Mutable<EquipmentType> takingDisabled() {
         return new SpongeSetValue<>(Keys.ARMOR_STAND_TAKING_DISABLED, new HashSet<>(), this.takingDisabled);
     }
 
     @Override
-    public SetValue<EquipmentType> placingDisabled() {
+    public Mutable<EquipmentType> placingDisabled() {
         return new SpongeSetValue<>(Keys.ARMOR_STAND_PLACING_DISABLED, new HashSet<>(), this.placingDisabled);
     }
 

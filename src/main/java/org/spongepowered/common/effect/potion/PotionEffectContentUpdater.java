@@ -26,8 +26,8 @@ package org.spongepowered.common.effect.potion;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 

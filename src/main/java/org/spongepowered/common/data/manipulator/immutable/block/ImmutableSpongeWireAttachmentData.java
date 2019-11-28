@@ -25,14 +25,13 @@
 package org.spongepowered.common.data.manipulator.immutable.block;
 
 import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWireAttachmentData;
 import org.spongepowered.api.data.manipulator.mutable.block.WireAttachmentData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WireAttachmentTypes;
-import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.MapValue.Immutable;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeWireAttachmentData;
@@ -46,11 +45,11 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
 
     private final ImmutableMap<Direction, WireAttachmentType> wireAttachmentMap;
 
-    private final ImmutableMapValue<Direction, WireAttachmentType> wireAttachmentsValue;
-    private final ImmutableValue<WireAttachmentType> northValue;
-    private final ImmutableValue<WireAttachmentType> southValue;
-    private final ImmutableValue<WireAttachmentType> eastValue;
-    private final ImmutableValue<WireAttachmentType> westValue;
+    private final Immutable<Direction, WireAttachmentType> wireAttachmentsValue;
+    private final org.spongepowered.api.data.value.Value.Immutable<WireAttachmentType> northValue;
+    private final org.spongepowered.api.data.value.Value.Immutable<WireAttachmentType> southValue;
+    private final org.spongepowered.api.data.value.Value.Immutable<WireAttachmentType> eastValue;
+    private final org.spongepowered.api.data.value.Value.Immutable<WireAttachmentType> westValue;
 
     public ImmutableSpongeWireAttachmentData(Map<Direction, WireAttachmentType> wireAttachmentMap) {
         super(ImmutableWireAttachmentData.class);
@@ -66,27 +65,27 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
     }
 
     @Override
-    public ImmutableMapValue<Direction, WireAttachmentType> wireAttachments() {
+    public Immutable<Direction, WireAttachmentType> wireAttachments() {
         return this.wireAttachmentsValue;
     }
 
     @Override
-    public ImmutableValue<WireAttachmentType> wireAttachmentNorth() {
+    public org.spongepowered.api.data.value.Value.Immutable<WireAttachmentType> wireAttachmentNorth() {
         return this.northValue;
     }
 
     @Override
-    public ImmutableValue<WireAttachmentType> wireAttachmentSouth() {
+    public org.spongepowered.api.data.value.Value.Immutable<WireAttachmentType> wireAttachmentSouth() {
         return this.southValue;
     }
 
     @Override
-    public ImmutableValue<WireAttachmentType> wireAttachmentEast() {
+    public org.spongepowered.api.data.value.Value.Immutable<WireAttachmentType> wireAttachmentEast() {
         return this.eastValue;
     }
 
     @Override
-    public ImmutableValue<WireAttachmentType> wireAttachmentWest() {
+    public org.spongepowered.api.data.value.Value.Immutable<WireAttachmentType> wireAttachmentWest() {
         return this.westValue;
     }
 

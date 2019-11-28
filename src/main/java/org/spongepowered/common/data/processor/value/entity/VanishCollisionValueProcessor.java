@@ -27,9 +27,9 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -37,14 +37,14 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<VanishableBridge, Boolean, Value<Boolean>> {
+public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<VanishableBridge, Boolean, Mutable<Boolean>> {
 
     public VanishCollisionValueProcessor() {
         super(VanishableBridge.class, Keys.VANISH_IGNORES_COLLISION);
     }
 
     @Override
-    protected Value<Boolean> constructValue(final Boolean actualValue) {
+    protected Mutable<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<Boolean>(Keys.VANISH_IGNORES_COLLISION, false, actualValue);
     }
 
@@ -66,7 +66,7 @@ public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.VANISH_IGNORES_COLLISION, false, value);
     }
 

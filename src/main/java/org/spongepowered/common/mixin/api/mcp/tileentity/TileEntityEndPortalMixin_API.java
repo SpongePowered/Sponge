@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.EndPortalTileEntity;
-import org.spongepowered.api.block.tileentity.EndPortal;
+import org.spongepowered.api.block.entity.EndPortal;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 

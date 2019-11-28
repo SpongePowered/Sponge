@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command;
 
-import com.flowpowered.math.GenericMath;
 import com.google.gson.stream.JsonWriter;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -37,7 +36,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.mixin.core.world.storage.SaveHandlerAccessor;
-
+import org.spongepowered.math.GenericMath;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

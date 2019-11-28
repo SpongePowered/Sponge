@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetedEntityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTargetedEntityData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
@@ -64,7 +64,7 @@ public final class SpongeTargetedEntityData extends AbstractData<TargetedEntityD
     }
 
     @Override
-    public Value<EntitySnapshot> value() {
+    public Mutable<EntitySnapshot> value() {
         return new SpongeValue<>(Keys.TARGETED_ENTITY, this.value);
     }
 

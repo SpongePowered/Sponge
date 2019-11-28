@@ -24,26 +24,26 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.tileentity;
 
-import com.flowpowered.math.vector.Vector3i;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableEndGatewayData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.EndGatewayData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeEndGatewayData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.math.vector.Vector3i;
 
 public final class ImmutableSpongeEndGatewayData extends AbstractImmutableData<ImmutableEndGatewayData, EndGatewayData> implements ImmutableEndGatewayData {
 
     private final Vector3i exitPortal;
-    private final ImmutableValue<Vector3i> exitPortalValue;
+    private final Immutable<Vector3i> exitPortalValue;
     private final boolean exactTeleport;
-    private final ImmutableValue<Boolean> exactTeleportValue;
+    private final Immutable<Boolean> exactTeleportValue;
     private final long age;
-    private final ImmutableValue<Long> ageValue;
+    private final Immutable<Long> ageValue;
     private final int teleportCooldown;
-    private final ImmutableValue<Integer> teleportCooldownValue;
+    private final Immutable<Integer> teleportCooldownValue;
 
     public ImmutableSpongeEndGatewayData(Vector3i exitPortal, boolean exactTeleport, long age, int teleportCooldown) {
         super(ImmutableEndGatewayData.class);
@@ -71,7 +71,7 @@ public final class ImmutableSpongeEndGatewayData extends AbstractImmutableData<I
     }
 
     @Override
-    public ImmutableValue<Vector3i> exitPortal() {
+    public Immutable<Vector3i> exitPortal() {
         return this.exitPortalValue;
     }
 
@@ -80,7 +80,7 @@ public final class ImmutableSpongeEndGatewayData extends AbstractImmutableData<I
     }
 
     @Override
-    public ImmutableValue<Boolean> exactTeleport() {
+    public Immutable<Boolean> exactTeleport() {
         return this.exactTeleportValue;
     }
 
@@ -89,7 +89,7 @@ public final class ImmutableSpongeEndGatewayData extends AbstractImmutableData<I
     }
 
     @Override
-    public ImmutableValue<Long> age() {
+    public Immutable<Long> age() {
         return this.ageValue;
     }
 
@@ -98,7 +98,7 @@ public final class ImmutableSpongeEndGatewayData extends AbstractImmutableData<I
     }
 
     @Override
-    public ImmutableValue<Integer> teleportCooldown() {
+    public Immutable<Integer> teleportCooldown() {
         return this.teleportCooldownValue;
     }
 

@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePlayerCreatedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PlayerCreatedData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePlayerCreatedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
@@ -42,7 +42,7 @@ public class SpongePlayerCreatedData extends AbstractBooleanData<PlayerCreatedDa
     }
 
     @Override
-    public Value<Boolean> playerCreated() {
+    public Mutable<Boolean> playerCreated() {
         return getValueGetter();
     }
 

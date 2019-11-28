@@ -27,9 +27,9 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.EntityAccessor;
@@ -37,7 +37,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity, Integer, MutableBoundedValue<Integer>> {
+public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity, Integer, Mutable<Integer>> {
 
     public FireTicksValueProcessor() {
         super(Entity.class, Keys.FIRE_TICKS);
@@ -58,7 +58,7 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(final Integer defaultValue) {
+    protected Mutable<Integer> constructValue(final Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.FIRE_TICKS)
             .defaultValue(Constants.Entity.DEFAULT_FIRE_TICKS)
             .minimum(Constants.Entity.MINIMUM_FIRE_TICKS)
@@ -82,7 +82,7 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
+    protected Immutable<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 

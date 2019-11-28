@@ -26,22 +26,21 @@ package org.spongepowered.common.data.processor.data.tileentity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.tileentity.EndGatewayTileEntity;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableEndGatewayData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.EndGatewayData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeEndGatewayData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
 import org.spongepowered.common.mixin.core.tileentity.TileEntityEndGatewayAccessor;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Map;
 import java.util.Optional;
 

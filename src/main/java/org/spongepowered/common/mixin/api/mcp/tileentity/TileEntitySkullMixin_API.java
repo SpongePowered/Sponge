@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import org.spongepowered.api.block.tileentity.Skull;
+import org.spongepowered.api.block.entity.PlayerHead;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.type.SkullType;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.processor.common.SkullUtils;
@@ -42,7 +41,7 @@ import java.util.Optional;
 import net.minecraft.tileentity.SkullTileEntity;
 
 @Mixin(SkullTileEntity.class)
-public abstract class TileEntitySkullMixin_API extends TileEntityMixin_API implements Skull {
+public abstract class TileEntitySkullMixin_API extends TileEntityMixin_API implements PlayerHead {
 
     @Override
     public SkullData getSkullData() {
@@ -50,13 +49,13 @@ public abstract class TileEntitySkullMixin_API extends TileEntityMixin_API imple
     }
 
     @Override
-    public Value<SkullType> skullType() {
+    public Mutable<SkullType> skullType() {
         return new SpongeValue<>(Keys.SKULL_TYPE, Constants.TileEntity.Skull.DEFAULT_TYPE,
             SkullUtils.getSkullType(((SkullTileEntity) (Object) this).getSkullType()));
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(List<org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getSkullData());
         Optional<RepresentedPlayerData> profileData = get(RepresentedPlayerData.class);

@@ -24,40 +24,40 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.tileentity;
 
-import com.flowpowered.math.vector.Vector3i;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableStructureData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.StructureData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.StructureMode;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeStructureData;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public final class ImmutableSpongeStructureData extends AbstractImmutableData<ImmutableStructureData, StructureData> implements ImmutableStructureData {
 
     private final String author;
-    private final ImmutableValue<String> authorValue;
+    private final Immutable<String> authorValue;
     private final boolean ignoreEntities;
-    private final ImmutableValue<Boolean> ignoreEntitiesValue;
+    private final Immutable<Boolean> ignoreEntitiesValue;
     private final float integrity;
-    private final ImmutableValue<Float> integrityValue;
+    private final Immutable<Float> integrityValue;
     private final StructureMode mode;
-    private final ImmutableValue<StructureMode> modeValue;
+    private final Immutable<StructureMode> modeValue;
     private final Vector3i position;
-    private final ImmutableValue<Vector3i> positionValue;
+    private final Immutable<Vector3i> positionValue;
     private final boolean powered;
-    private final ImmutableValue<Boolean> poweredValue;
+    private final Immutable<Boolean> poweredValue;
     private final long seed;
-    private final ImmutableValue<Long> seedValue;
+    private final Immutable<Long> seedValue;
     private final boolean showAir;
-    private final ImmutableValue<Boolean> showAirValue;
+    private final Immutable<Boolean> showAirValue;
     private final boolean showBoundingBox;
-    private final ImmutableValue<Boolean> showBoundingBoxValue;
+    private final Immutable<Boolean> showBoundingBoxValue;
     private final Vector3i size;
-    private final ImmutableValue<Vector3i> sizeValue;
+    private final Immutable<Vector3i> sizeValue;
 
     public ImmutableSpongeStructureData(String author, boolean ignoreEntities, float integrity, StructureMode mode, Vector3i position, boolean powered, boolean showAir, boolean showBoundingBox, long seed, Vector3i size) {
         super(ImmutableStructureData.class);
@@ -111,7 +111,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<String> author() {
+    public Immutable<String> author() {
         return this.authorValue;
     }
 
@@ -120,7 +120,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Boolean> ignoreEntities() {
+    public Immutable<Boolean> ignoreEntities() {
         return this.ignoreEntitiesValue;
     }
 
@@ -129,7 +129,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Float> integrity() {
+    public Immutable<Float> integrity() {
         return this.integrityValue;
     }
 
@@ -138,7 +138,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<StructureMode> mode() {
+    public Immutable<StructureMode> mode() {
         return this.modeValue;
     }
 
@@ -147,7 +147,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Vector3i> position() {
+    public Immutable<Vector3i> position() {
         return this.positionValue;
     }
 
@@ -156,7 +156,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Boolean> powered() {
+    public Immutable<Boolean> powered() {
         return this.poweredValue;
     }
 
@@ -165,7 +165,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Long> seed() {
+    public Immutable<Long> seed() {
         return this.seedValue;
     }
 
@@ -174,7 +174,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Boolean> showAir() {
+    public Immutable<Boolean> showAir() {
         return this.showAirValue;
     }
 
@@ -183,7 +183,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Boolean> showBoundingBox() {
+    public Immutable<Boolean> showBoundingBox() {
         return this.showBoundingBoxValue;
     }
 
@@ -192,7 +192,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Vector3i> size() {
+    public Immutable<Vector3i> size() {
         return this.sizeValue;
     }
 

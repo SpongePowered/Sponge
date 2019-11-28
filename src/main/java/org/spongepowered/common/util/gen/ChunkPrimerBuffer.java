@@ -26,16 +26,15 @@ package org.spongepowered.common.util.gen;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.world.extent.ImmutableBlockVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
-import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.volume.StorageType;
+import org.spongepowered.api.world.volume.block.ImmutableBlockVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
+import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeStream;
 import org.spongepowered.common.mixin.core.world.chunk.ChunkPrimerAccessor;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
@@ -43,6 +42,7 @@ import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
+import org.spongepowered.math.vector.Vector3i;
 
 /**
  * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockVolume}.
@@ -91,7 +91,7 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker() {
+    public MutableBlockVolumeStream<? extends MutableBlockVolume> getBlockWorker() {
         return new SpongeMutableBlockVolumeWorker<>(this);
     }
 

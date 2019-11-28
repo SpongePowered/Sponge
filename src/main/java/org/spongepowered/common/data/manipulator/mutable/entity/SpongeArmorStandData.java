@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArmorStandData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArmorStandData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeArmorStandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
@@ -75,22 +75,22 @@ public class SpongeArmorStandData extends AbstractData<ArmorStandData, Immutable
     }
 
     @Override
-    public Value<Boolean> marker() {
+    public Mutable<Boolean> marker() {
         return new SpongeValue<>(Keys.ARMOR_STAND_MARKER, false, this.marker);
     }
 
     @Override
-    public Value<Boolean> small() {
+    public Mutable<Boolean> small() {
         return new SpongeValue<>(Keys.ARMOR_STAND_IS_SMALL, false, this.small);
     }
 
     @Override
-    public Value<Boolean> arms() {
+    public Mutable<Boolean> arms() {
         return new SpongeValue<>(Keys.ARMOR_STAND_HAS_ARMS, false, this.arms);
     }
 
     @Override
-    public Value<Boolean> basePlate() {
+    public Mutable<Boolean> basePlate() {
         return new SpongeValue<>(Keys.ARMOR_STAND_HAS_BASE_PLATE, true, this.basePlate);
     }
 

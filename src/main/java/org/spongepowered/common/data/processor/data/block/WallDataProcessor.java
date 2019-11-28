@@ -30,13 +30,13 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWallData;
 import org.spongepowered.api.data.manipulator.mutable.block.WallData;
 import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.data.type.WallTypes;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeWallData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class WallDataProcessor extends AbstractCatalogDataProcessor<WallType, Value<WallType>, WallData, ImmutableWallData> {
+public class WallDataProcessor extends AbstractCatalogDataProcessor<WallType, Mutable<WallType>, WallData, ImmutableWallData> {
 
     public WallDataProcessor() {
         super(Keys.WALL_TYPE, input -> input.getItem() == ItemTypes.COBBLESTONE_WALL);
@@ -63,7 +63,7 @@ public class WallDataProcessor extends AbstractCatalogDataProcessor<WallType, Va
     }
 
     @Override
-    protected Value<WallType> constructValue(WallType actualValue) {
+    protected Mutable<WallType> constructValue(WallType actualValue) {
         return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 

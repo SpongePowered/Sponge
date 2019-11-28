@@ -25,11 +25,11 @@
 package org.spongepowered.common.data.processor.common;
 
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 
-public abstract class AbstractEntityDataProcessor<EntityType extends Entity, Manipulator extends DataManipulator<Manipulator, Immutable>,
-    Immutable extends ImmutableDataManipulator<Immutable, Manipulator>>
+public abstract class AbstractEntityDataProcessor<EntityType extends Entity, Manipulator extends Mutable<Manipulator, Immutable>,
+    Immutable extends Immutable<Immutable, Manipulator>>
     extends AbstractMultiDataSingleTargetProcessor<EntityType, Manipulator, Immutable> {
 
     protected AbstractEntityDataProcessor(Class<EntityType> entityClass) {

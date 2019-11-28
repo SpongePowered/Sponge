@@ -31,18 +31,18 @@ import com.google.gson.JsonParseException;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.api.world.teleport.PortalAgentTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -81,7 +81,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     private boolean pvpEnabled = true;
     private boolean generateBonusChest = false;
     @Nullable private PortalAgentType portalAgentType;
-    private Collection<WorldGeneratorModifier> generatorModifiers = ImmutableList.of();
+    private Collection<TerrainGeneratorConfig> generatorModifiers = ImmutableList.of();
     private boolean seedRandomized = false;
 
     @SuppressWarnings("ConstantConditions")
@@ -208,7 +208,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Override
-    public Collection<WorldGeneratorModifier> bridge$getGeneratorModifiers() {
+    public Collection<TerrainGeneratorConfig> bridge$getGeneratorModifiers() {
         return this.generatorModifiers;
     }
 
@@ -264,7 +264,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Override
-    public void bridge$setGeneratorModifiers(ImmutableList<WorldGeneratorModifier> generatorModifiers) {
+    public void bridge$setGeneratorModifiers(ImmutableList<TerrainGeneratorConfig> generatorModifiers) {
         this.generatorModifiers = generatorModifiers;
     }
 

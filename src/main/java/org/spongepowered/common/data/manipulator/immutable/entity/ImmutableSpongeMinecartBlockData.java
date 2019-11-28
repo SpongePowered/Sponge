@@ -27,11 +27,11 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import com.google.common.base.Preconditions;
 import net.minecraft.block.Blocks;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMinecartBlockData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MinecartBlockData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMinecartBlockData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -41,8 +41,8 @@ public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<Immu
     private final BlockState block;
     private final int offset;
 
-    private final ImmutableValue<BlockState> blockValue;
-    private final ImmutableValue<Integer> offsetValue;
+    private final Immutable<BlockState> blockValue;
+    private final Immutable<Integer> offsetValue;
 
     public ImmutableSpongeMinecartBlockData() {
         this((BlockState) Blocks.AIR.getDefaultState(), 6);
@@ -58,12 +58,12 @@ public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<Immu
     }
 
     @Override
-    public ImmutableValue<BlockState> block() {
+    public Immutable<BlockState> block() {
         return this.blockValue;
     }
 
     @Override
-    public ImmutableValue<Integer> offset() {
+    public Immutable<Integer> offset() {
         return this.offsetValue;
     }
 

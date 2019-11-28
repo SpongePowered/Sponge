@@ -27,16 +27,16 @@ package org.spongepowered.common.data.manipulator.immutable.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
+import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
 
-public class ImmutableSpongeTreeData extends AbstractImmutableSingleCatalogData<TreeType, ImmutableTreeData, TreeData>
+public class ImmutableSpongeTreeData extends AbstractImmutableSingleCatalogData<WoodType, ImmutableTreeData, TreeData>
     implements ImmutableTreeData {
 
-    public ImmutableSpongeTreeData(TreeType value) {
-        super(ImmutableTreeData.class, value, TreeTypes.OAK, Keys.TREE_TYPE, SpongeTreeData.class);
+    public ImmutableSpongeTreeData(WoodType value) {
+        super(ImmutableTreeData.class, value, WoodTypes.OAK, Keys.TREE_TYPE, SpongeTreeData.class);
     }
 
 }

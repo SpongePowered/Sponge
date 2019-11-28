@@ -32,13 +32,13 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSlabData;
 import org.spongepowered.api.data.manipulator.mutable.block.SlabData;
 import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.SlabTypes;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSlabData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Value<SlabType>, SlabData, ImmutableSlabData> {
+public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Mutable<SlabType>, SlabData, ImmutableSlabData> {
 
     public SlabDataProcessor() {
         super(Keys.SLAB_TYPE, input -> input.getItem() == ItemTypes.STONE_SLAB || input.getItem() == ItemTypes.STONE_SLAB2);
@@ -83,7 +83,7 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
     }
 
     @Override
-    protected Value<SlabType> constructValue(SlabType actualValue) {
+    protected Mutable<SlabType> constructValue(SlabType actualValue) {
         return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 

@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGlowingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GlowingData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGlowingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 import org.spongepowered.common.util.Constants;
@@ -43,7 +43,7 @@ public class SpongeGlowingData extends AbstractBooleanData<GlowingData, Immutabl
     }
 
     @Override
-    public Value<Boolean> glowing() {
+    public Mutable<Boolean> glowing() {
         return this.getValueGetter();
     }
 }

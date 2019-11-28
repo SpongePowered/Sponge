@@ -29,7 +29,7 @@ import net.minecraft.stats.StatCrafting;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.statistic.ItemStatistic;
-import org.spongepowered.api.statistic.StatisticType;
+import org.spongepowered.api.statistic.StatisticCategory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,7 +39,7 @@ public abstract class StatCraftingMixin_API extends StatBaseMixin_API implements
 
     @Shadow @Final private Item item;
 
-    private StatisticType api$statType;
+    private StatisticCategory api$statType;
 
     @Override
     public ItemType getItemType() {
@@ -47,9 +47,9 @@ public abstract class StatCraftingMixin_API extends StatBaseMixin_API implements
     }
 
     @Override
-    public StatisticType getType() {
+    public StatisticCategory getType() {
         if (this.api$statType == null) {
-            this.api$statType = Sponge.getRegistry().getType(StatisticType.class, getId().substring(0, getId().indexOf("."))).get();
+            this.api$statType = Sponge.getRegistry().getType(StatisticCategory.class, getId().substring(0, getId().indexOf("."))).get();
         }
         return this.api$statType;
     }

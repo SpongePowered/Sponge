@@ -33,7 +33,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.entity.living.Villager;
+import org.spongepowered.api.entity.living.trader.Villager;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.item.merchant.VillagerRegistry;

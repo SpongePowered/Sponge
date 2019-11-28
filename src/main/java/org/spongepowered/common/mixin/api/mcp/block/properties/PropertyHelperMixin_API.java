@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.block.properties;
 
 import net.minecraft.block.properties.AbstractProperty;
 import net.minecraft.block.properties.IProperty;
-import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
  * @param <T> The type of comparable
  */
 @Mixin(value = AbstractProperty.class)
-public abstract class PropertyHelperMixin_API<T extends Comparable<T>> implements BlockTrait<T> {
+public abstract class PropertyHelperMixin_API<T extends Comparable<T>> implements StateProperty<T> {
 
     @Nullable private String api$IdString = null;
 

@@ -25,11 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.living.animal.RideableHorse;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
@@ -45,12 +44,12 @@ import net.minecraft.entity.passive.horse.HorseEntity;
 public abstract class EntityHorseMixin_API extends AbstractHorseMixin_API implements RideableHorse {
 
     @Override
-    public Value<HorseStyle> style() {
+    public Mutable<HorseStyle> style() {
         return new SpongeValue<>(Keys.HORSE_STYLE, Constants.Entity.Horse.DEFAULT_STYLE, HorseStyleRegistryModule.getHorseStyle((HorseEntity) (Object) this));
     }
 
     @Override
-    public Value<HorseColor> color() {
+    public Mutable<HorseColor> color() {
         return new SpongeValue<>(Keys.HORSE_COLOR, Constants.Entity.Horse.DEFAULT_COLOR, HorseColorRegistryModule.getHorseColor((HorseEntity) (Object) this));
     }
 
@@ -60,7 +59,7 @@ public abstract class EntityHorseMixin_API extends AbstractHorseMixin_API implem
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getHorseData());
     }

@@ -27,20 +27,19 @@ package org.spongepowered.common.world.gen;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
-import com.flowpowered.math.GenericMath;
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkGenerator;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
-
+import org.spongepowered.math.GenericMath;
+import org.spongepowered.math.vector.Vector3i;
 import javax.annotation.Nullable;
 
 /**

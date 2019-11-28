@@ -26,11 +26,11 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -53,7 +53,7 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
     }
 
     @Override
-    public MutableBoundedValue<Double> health() {
+    public Mutable<Double> health() {
         return SpongeValueFactory.boundedBuilder(Keys.HEALTH)
             .minimum(0D)
             .maximum(this.maxHealth)
@@ -63,7 +63,7 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
     }
 
     @Override
-    public MutableBoundedValue<Double> maxHealth() {
+    public Mutable<Double> maxHealth() {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_HEALTH)
             .defaultValue(20D)
             .minimum(0D)

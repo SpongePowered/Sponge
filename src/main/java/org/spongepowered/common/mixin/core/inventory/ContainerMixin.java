@@ -48,7 +48,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -439,7 +439,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
         final World world, final PlayerEntity player, final net.minecraft.inventory.CraftingInventory craftingInventory, final CraftResultInventory output, final CallbackInfo ci)
     {
         if (this.impl$firePreview && !this.impl$capturedCraftPreviewTransactions.isEmpty()) {
-            final Inventory inv = ((CarriedInventory<?>) this).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+            final Inventory inv = ((CarriedInventory<?>) this).query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
             if (!(inv instanceof CraftingInventory)) {
                 SpongeImpl.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + this.getClass().getName());
                 return;

@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.explosives;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.explosive.FusedExplosive;
+import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.explosive.DefuseExplosiveEvent;
 import org.spongepowered.api.event.entity.explosive.PrimeExplosiveEvent;

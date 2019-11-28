@@ -25,11 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.ShulkerBullet;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -58,7 +57,7 @@ public abstract class EntityShulkerBulletMixin_API extends EntityMixin_API imple
     }
 
     @Override
-    public Value<Direction> direction() {
+    public Mutable<Direction> direction() {
         return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, this.direction != null ? Constants.DirectionFunctions.getFor(this.direction) : Direction.NONE);
     }
 
@@ -88,7 +87,7 @@ public abstract class EntityShulkerBulletMixin_API extends EntityMixin_API imple
 
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getTargetData());
         manipulators.add(getDirectionalData());

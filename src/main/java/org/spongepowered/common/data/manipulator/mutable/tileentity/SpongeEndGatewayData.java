@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
-import com.flowpowered.math.vector.Vector3i;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableEndGatewayData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.EndGatewayData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeEndGatewayData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.math.vector.Vector3i;
 
 public final class SpongeEndGatewayData extends AbstractData<EndGatewayData, ImmutableEndGatewayData> implements EndGatewayData {
 
@@ -71,7 +71,7 @@ public final class SpongeEndGatewayData extends AbstractData<EndGatewayData, Imm
     }
 
     @Override
-    public Value<Vector3i> exitPosition() {
+    public Mutable<Vector3i> exitPosition() {
         return new SpongeValue<>(Keys.EXIT_POSITION, Vector3i.ONE, this.exitPortal);
     }
 
@@ -84,7 +84,7 @@ public final class SpongeEndGatewayData extends AbstractData<EndGatewayData, Imm
     }
 
     @Override
-    public Value<Boolean> exactTeleport() {
+    public Mutable<Boolean> exactTeleport() {
         return new SpongeValue<>(Keys.EXACT_TELEPORT, false, this.exactTeleport);
     }
 
@@ -97,7 +97,7 @@ public final class SpongeEndGatewayData extends AbstractData<EndGatewayData, Imm
     }
 
     @Override
-    public Value<Long> age() {
+    public Mutable<Long> age() {
         return new SpongeValue<>(Keys.END_GATEWAY_AGE, 0L, this.age);
     }
 
@@ -110,7 +110,7 @@ public final class SpongeEndGatewayData extends AbstractData<EndGatewayData, Imm
     }
 
     @Override
-    public Value<Integer> teleportCooldown() {
+    public Mutable<Integer> teleportCooldown() {
         return new SpongeValue<>(Keys.END_GATEWAY_TELEPORT_COOLDOWN, 0, this.teleportCooldown);
     }
 

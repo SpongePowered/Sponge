@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAngerableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -40,14 +40,14 @@ import org.spongepowered.common.mixin.core.entity.monster.EntityPigZombieAccesso
 import java.util.Optional;
 
 public class AngerableDataProcessor extends
-    AbstractSingleDataSingleTargetProcessor<EntityPigZombieAccessor, Integer, MutableBoundedValue<Integer>, AngerableData, ImmutableAngerableData> {
+    AbstractSingleDataSingleTargetProcessor<EntityPigZombieAccessor, Integer, Mutable<Integer>, AngerableData, ImmutableAngerableData> {
 
     public AngerableDataProcessor() {
         super(Keys.ANGER, EntityPigZombieAccessor.class);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(final Integer actualValue) {
+    protected Mutable<Integer> constructValue(final Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.ANGER)
                 .actualValue(actualValue)
                 .defaultValue(0)
@@ -68,7 +68,7 @@ public class AngerableDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
+    protected Immutable<Integer> constructImmutableValue(final Integer value) {
         return new ImmutableSpongeValue<Integer>(Keys.ANGER, 0, value);
     }
 

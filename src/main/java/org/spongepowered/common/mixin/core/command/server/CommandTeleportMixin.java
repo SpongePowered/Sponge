@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.command.server;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -45,7 +44,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.entity.EntityUtil;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.EnumSet;
 import java.util.Set;
 

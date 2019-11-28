@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDamageableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
-import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.OptionalValue.Immutable;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
@@ -44,8 +44,8 @@ public class ImmutableSpongeDamageableData extends AbstractImmutableData<Immutab
     @Nullable private final EntitySnapshot lastAttacker;
     @Nullable private final Double lastDamage;
 
-    private final ImmutableOptionalValue<EntitySnapshot> lastAttackerValue;
-    private final ImmutableOptionalValue<Double> lastDamageValue;
+    private final Immutable<EntitySnapshot> lastAttackerValue;
+    private final Immutable<Double> lastDamageValue;
 
     public ImmutableSpongeDamageableData() {
         this((EntitySnapshot) null, null);
@@ -65,12 +65,12 @@ public class ImmutableSpongeDamageableData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public ImmutableOptionalValue<EntitySnapshot> lastAttacker() {
+    public Immutable<EntitySnapshot> lastAttacker() {
         return this.lastAttackerValue;
     }
 
     @Override
-    public ImmutableOptionalValue<Double> lastDamage() {
+    public Immutable<Double> lastDamage() {
         return this.lastDamageValue;
     }
 

@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthScalingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthScalingData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthScalingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -43,7 +43,7 @@ public class SpongeHealthScaleData extends AbstractSingleData<Double, HealthScal
     }
 
     @Override
-    public MutableBoundedValue<Double> healthScale() {
+    public Mutable<Double> healthScale() {
         return SpongeValueFactory.boundedBuilder(Keys.HEALTH_SCALE)
                 .actualValue(this.getValue())
                 .minimum(1D)
@@ -53,7 +53,7 @@ public class SpongeHealthScaleData extends AbstractSingleData<Double, HealthScal
     }
 
     @Override
-    protected MutableBoundedValue<Double> getValueGetter() {
+    protected Mutable<Double> getValueGetter() {
         return healthScale();
     }
 

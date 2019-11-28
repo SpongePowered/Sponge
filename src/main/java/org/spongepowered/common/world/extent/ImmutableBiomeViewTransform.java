@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.extent.worker.BiomeVolumeWorker;
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.worker.BiomeVolumeStream;
 import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
+import org.spongepowered.math.vector.Vector3i;
 
 public class ImmutableBiomeViewTransform extends AbstractBiomeViewTransform<ImmutableBiomeVolume> implements ImmutableBiomeVolume {
 
@@ -48,7 +48,7 @@ public class ImmutableBiomeViewTransform extends AbstractBiomeViewTransform<Immu
     }
 
     @Override
-    public BiomeVolumeWorker<? extends ImmutableBiomeVolume> getBiomeWorker() {
+    public BiomeVolumeStream<? extends ImmutableBiomeVolume> getBiomeWorker() {
         return new SpongeBiomeVolumeWorker<>(this);
     }
 

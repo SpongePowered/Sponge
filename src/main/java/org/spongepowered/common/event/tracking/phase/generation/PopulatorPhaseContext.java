@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
 
 public class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseContext> {
 
-    @Nullable private PopulatorType type;
+    @Nullable private Feature type;
 
     PopulatorPhaseContext(final IPhaseState<? extends PopulatorPhaseContext> state) {
         super(state);
@@ -44,12 +44,12 @@ public class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseConte
         this.type = null;
     }
 
-    public PopulatorPhaseContext populator(final PopulatorType type) {
+    public PopulatorPhaseContext populator(final Feature type) {
         this.type = type;
         return this;
     }
 
-    public PopulatorType getPopulatorType() {
+    public Feature getPopulatorType() {
         return this.type;
     }
 

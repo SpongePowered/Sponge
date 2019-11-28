@@ -31,15 +31,15 @@ import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.item.enchantment.Enchantment;
+import org.spongepowered.api.data.value.ListValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
@@ -52,7 +52,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ItemEnchantmentDataProcessor
-        extends AbstractItemSingleDataProcessor<List<Enchantment>, ListValue<Enchantment>, EnchantmentData, ImmutableEnchantmentData> {
+        extends AbstractItemSingleDataProcessor<List<Enchantment>, Mutable<Enchantment>, EnchantmentData, ImmutableEnchantmentData> {
 
     public ItemEnchantmentDataProcessor() {
         super(input -> true, Keys.ITEM_ENCHANTMENTS);
@@ -103,12 +103,12 @@ public class ItemEnchantmentDataProcessor
     }
 
     @Override
-    protected ListValue<Enchantment> constructValue(final List<Enchantment> actualValue) {
+    protected Mutable<Enchantment> constructValue(final List<Enchantment> actualValue) {
         return new SpongeListValue<>(Keys.ITEM_ENCHANTMENTS, actualValue);
     }
 
     @Override
-    protected ImmutableValue<List<Enchantment>> constructImmutableValue(final List<Enchantment> value) {
+    protected Immutable<List<Enchantment>> constructImmutableValue(final List<Enchantment> value) {
         return new ImmutableSpongeListValue<>(Keys.ITEM_ENCHANTMENTS, ImmutableList.copyOf(value));
     }
 
@@ -116,7 +116,7 @@ public class ItemEnchantmentDataProcessor
     public Optional<EnchantmentData> fill(final DataContainer container, final EnchantmentData enchantmentData) {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
         final List<Enchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(), Enchantment.class).get();
-        final ListValue<Enchantment> existing = enchantmentData.enchantments();
+        final Mutable<Enchantment> existing = enchantmentData.enchantments();
         existing.addAll(enchantments);
         enchantmentData.set(existing);
         return Optional.of(enchantmentData);

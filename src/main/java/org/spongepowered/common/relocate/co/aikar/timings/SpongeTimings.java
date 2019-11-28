@@ -27,8 +27,8 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 import co.aikar.timings.Timing;
 import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -113,8 +113,8 @@ public final class SpongeTimings {
      * @param entity
      * @return
      */
-    public static Timing getTileEntityTiming(TileEntity entity) {
-        TileEntityType type = entity.getType();
+    public static Timing getTileEntityTiming(BlockEntity entity) {
+        BlockEntityType type = entity.getType();
         String entityType = type != null ? type.getId() : entity.getClass().getName();
         return SpongeTimingsFactory.ofSafe("Minecraft", "## tickTileEntity - " + entityType);
     }

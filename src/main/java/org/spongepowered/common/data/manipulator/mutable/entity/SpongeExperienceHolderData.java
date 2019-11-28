@@ -26,12 +26,12 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
@@ -76,7 +76,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     }
 
     @Override
-    public MutableBoundedValue<Integer> level() {
+    public Mutable<Integer> level() {
         return SpongeValueFactory.boundedBuilder(Keys.EXPERIENCE_LEVEL)
             .defaultValue(0)
             .minimum(0)
@@ -86,7 +86,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     }
 
     @Override
-    public MutableBoundedValue<Integer> totalExperience() {
+    public Mutable<Integer> totalExperience() {
         return SpongeValueFactory.boundedBuilder(Keys.TOTAL_EXPERIENCE)
             .defaultValue(0)
             .minimum(0)
@@ -96,7 +96,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     }
 
     @Override
-    public MutableBoundedValue<Integer> experienceSinceLevel() {
+    public Mutable<Integer> experienceSinceLevel() {
         return SpongeValueFactory.boundedBuilder(Keys.EXPERIENCE_SINCE_LEVEL)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)

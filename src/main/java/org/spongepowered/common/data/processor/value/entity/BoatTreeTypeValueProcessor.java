@@ -28,11 +28,11 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
+import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.data.type.WoodTypes;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -41,7 +41,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 import net.minecraft.entity.item.BoatEntity;
 
-public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcessor<BoatEntity, TreeType, Value<TreeType>, TreeData, ImmutableTreeData> {
+public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcessor<BoatEntity, WoodType, Mutable<WoodType>, TreeData, ImmutableTreeData> {
 
     public BoatTreeTypeValueProcessor() {
         super(BoatEntity.class, Keys.TREE_TYPE);
@@ -53,18 +53,18 @@ public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcesso
     }
 
     @Override
-    protected boolean set(BoatEntity dataHolder, TreeType value) {
-        if (value == TreeTypes.OAK) {
+    protected boolean set(BoatEntity dataHolder, WoodType value) {
+        if (value == WoodTypes.OAK) {
             dataHolder.setBoatType(BoatEntity.Type.OAK);
-        } else if (value == TreeTypes.SPRUCE) {
+        } else if (value == WoodTypes.SPRUCE) {
             dataHolder.setBoatType(BoatEntity.Type.SPRUCE);
-        } else if (value == TreeTypes.JUNGLE) {
+        } else if (value == WoodTypes.JUNGLE) {
             dataHolder.setBoatType(BoatEntity.Type.JUNGLE);
-        } else if (value == TreeTypes.DARK_OAK) {
+        } else if (value == WoodTypes.DARK_OAK) {
             dataHolder.setBoatType(BoatEntity.Type.DARK_OAK);
-        } else if (value == TreeTypes.BIRCH) {
+        } else if (value == WoodTypes.BIRCH) {
             dataHolder.setBoatType(BoatEntity.Type.BIRCH);
-        } else if (value == TreeTypes.ACACIA) {
+        } else if (value == WoodTypes.ACACIA) {
             dataHolder.setBoatType(BoatEntity.Type.ACACIA);
         } else {
             return false;
@@ -74,20 +74,20 @@ public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcesso
     }
 
     @Override
-    protected Optional<TreeType> getVal(BoatEntity dataHolder) {
+    protected Optional<WoodType> getVal(BoatEntity dataHolder) {
         switch (dataHolder.getBoatType()) {
             case OAK:
-                return Optional.of(TreeTypes.OAK);
+                return Optional.of(WoodTypes.OAK);
             case SPRUCE:
-                return Optional.of(TreeTypes.SPRUCE);
+                return Optional.of(WoodTypes.SPRUCE);
             case BIRCH:
-                return Optional.of(TreeTypes.BIRCH);
+                return Optional.of(WoodTypes.BIRCH);
             case JUNGLE:
-                return Optional.of(TreeTypes.JUNGLE);
+                return Optional.of(WoodTypes.JUNGLE);
             case ACACIA:
-                return Optional.of(TreeTypes.ACACIA);
+                return Optional.of(WoodTypes.ACACIA);
             case DARK_OAK:
-                return Optional.of(TreeTypes.DARK_OAK);
+                return Optional.of(WoodTypes.DARK_OAK);
             default:
                 break;
         }
@@ -101,12 +101,12 @@ public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcesso
     }
 
     @Override
-    protected ImmutableValue<TreeType> constructImmutableValue(TreeType value) {
+    protected Immutable<WoodType> constructImmutableValue(WoodType value) {
         return new ImmutableSpongeValue<>(this.key, value);
     }
 
     @Override
-    protected Value<TreeType> constructValue(TreeType actualValue) {
+    protected Mutable<WoodType> constructValue(WoodType actualValue) {
         return new SpongeValue<>(this.key, actualValue);
     }
 }

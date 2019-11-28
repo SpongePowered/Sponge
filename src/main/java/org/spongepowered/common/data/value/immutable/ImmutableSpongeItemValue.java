@@ -27,9 +27,9 @@ package org.spongepowered.common.data.value.immutable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.data.value.mutable.SpongeItemValue;
 
@@ -37,27 +37,27 @@ import java.util.function.Function;
 
 public class ImmutableSpongeItemValue extends ImmutableSpongeValue<ItemStack> {
 
-    public ImmutableSpongeItemValue(Key<? extends BaseValue<ItemStack>> key, ItemStack defaultValue) {
+    public ImmutableSpongeItemValue(Key<? extends Value<ItemStack>> key, ItemStack defaultValue) {
         super(key, defaultValue.copy());
     }
 
-    public ImmutableSpongeItemValue(Key<? extends BaseValue<ItemStack>> key, ItemStack defaultValue, ItemStack actualValue) {
+    public ImmutableSpongeItemValue(Key<? extends Value<ItemStack>> key, ItemStack defaultValue, ItemStack actualValue) {
         super(key, defaultValue.copy(), actualValue.copy());
     }
 
     @Override
-    public ImmutableValue<ItemStack> with(ItemStack value) {
+    public Immutable<ItemStack> with(ItemStack value) {
         return super.with(value.copy());
     }
 
     @Override
-    public ImmutableValue<ItemStack> transform(Function<ItemStack, ItemStack> function) {
+    public Immutable<ItemStack> transform(Function<ItemStack, ItemStack> function) {
         final ItemStack value = checkNotNull(function).apply(get());
         return new ImmutableSpongeItemValue(this.getKey(), getDefault(), checkNotNull(value));
     }
 
     @Override
-    public Value<ItemStack> asMutable() {
+    public Mutable<ItemStack> asMutable() {
         return new SpongeItemValue(getKey(), getDefault(), get());
     }
 

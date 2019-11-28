@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.reflect.TypeToken;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
@@ -46,7 +45,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
@@ -71,7 +70,7 @@ import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -473,7 +472,7 @@ public class SpongeHooks {
                 ((BlockBridge) blockType).bridge$initializeTrackerState();
             }
         }
-        for (final TileEntityType tileEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {
+        for (final BlockEntityType tileEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {
             ((SpongeTileEntityType) tileEntityType).initializeTrackerState();
         }
         for (final EntityType entityType : EntityTypeRegistryModule.getInstance().getAll()) {

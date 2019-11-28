@@ -27,12 +27,12 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockPlanks;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
@@ -44,18 +44,18 @@ public abstract class BlockPlanksMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getTreeTypeFor(blockState));
+    public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
+        return ImmutableList.<Immutable<?, ?>>of(impl$getTreeTypeFor(blockState));
     }
 
     @Override
-    public boolean bridge$supports(final Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
         return ImmutableTreeData.class.isAssignableFrom(immutable);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
         if (manipulator instanceof ImmutableTreeData) {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) (Object) ((ImmutableTreeData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockPlanks.VARIANT, treeType));
@@ -64,7 +64,7 @@ public abstract class BlockPlanksMixin extends BlockMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
         if (key.equals(Keys.TREE_TYPE)) {
             final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) value;
             return Optional.of((BlockState) blockState.withProperty(BlockPlanks.VARIANT, treeType));
@@ -74,6 +74,6 @@ public abstract class BlockPlanksMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableTreeData impl$getTreeTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.get(BlockPlanks.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (WoodType) (Object) blockState.get(BlockPlanks.VARIANT));
     }
 }

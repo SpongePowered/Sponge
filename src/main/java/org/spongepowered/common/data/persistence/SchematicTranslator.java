@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
@@ -34,21 +33,21 @@ import net.minecraft.util.datafix.FixTypes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataTranslator;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
+import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.schematic.SchematicUpdater1_to_2;
@@ -66,7 +65,7 @@ import org.spongepowered.common.world.schematic.BimapPalette;
 import org.spongepowered.common.world.schematic.BlockPaletteWrapper;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -283,7 +282,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             builder.biomes(biomeBuffer);
         });
 
-        final Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
+        final Map<Vector3i, BlockEntityArchetype> tiles = Maps.newHashMap();
 
         updatedView.getViewList(Constants.Sponge.Schematic.BLOCKENTITY_DATA)
             .ifPresent(tileData ->
@@ -303,7 +302,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                                     upgraded = tile;
                                 }
 
-                                final TileEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
+                                final BlockEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
                                     .state(buffer.getBlock(pos[0] - offset[0], pos[1] - offset[1], pos[2] - offset[2]))
                                     .tileData(upgraded)
                                     .tile(type)
@@ -454,7 +453,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         }
 
         final List<DataView> tileEntities = Lists.newArrayList();
-        for (final Map.Entry<Vector3i, TileEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
+        for (final Map.Entry<Vector3i, BlockEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
             final Vector3i pos = entry.getKey();
             final DataContainer tiledata = entry.getValue().getTileData();
             final int[] apos = new int[] {pos.getX() - xMin, pos.getY() - yMin, pos.getZ() - zMin};

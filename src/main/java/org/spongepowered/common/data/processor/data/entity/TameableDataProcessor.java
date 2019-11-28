@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.OptionalValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -42,7 +42,7 @@ import java.util.UUID;
 import net.minecraft.entity.passive.TameableEntity;
 
 public class TameableDataProcessor
-        extends AbstractEntitySingleDataProcessor<TameableEntity, Optional<UUID>, OptionalValue<UUID>, TameableData, ImmutableTameableData> {
+        extends AbstractEntitySingleDataProcessor<TameableEntity, Optional<UUID>, Mutable<UUID>, TameableData, ImmutableTameableData> {
 
     public TameableDataProcessor() {
         super(TameableEntity.class, Keys.TAMED_OWNER);
@@ -80,12 +80,12 @@ public class TameableDataProcessor
     }
 
     @Override
-    protected OptionalValue<UUID> constructValue(Optional<UUID> defaultValue) {
+    protected Mutable<UUID> constructValue(Optional<UUID> defaultValue) {
         return new SpongeOptionalValue<>(this.getKey(), defaultValue);
     }
 
     @Override
-    protected ImmutableValue<Optional<UUID>> constructImmutableValue(Optional<UUID> value) {
+    protected Immutable<Optional<UUID>> constructImmutableValue(Optional<UUID> value) {
         return new ImmutableSpongeValue<>(Keys.TAMED_OWNER, Optional.empty(), value);
     }
 

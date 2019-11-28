@@ -28,16 +28,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ValueProcessor;
 
 import java.util.Optional;
 
-public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>> implements ValueProcessor<E, V> {
+public abstract class AbstractSpongeValueProcessor<C, E, V extends Value<E>> implements ValueProcessor<E, V> {
 
     private final Class<C> containerClass;
     protected final Key<V> key;
@@ -60,7 +59,7 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
 
     protected abstract Optional<E> getVal(C container);
 
-    protected abstract ImmutableValue<E> constructImmutableValue(E value);
+    protected abstract Immutable<E> constructImmutableValue(E value);
 
     protected boolean supports(C container) {
         return true;
@@ -74,7 +73,7 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
 
 
     @Override
-    public final Key<? extends BaseValue<E>> getKey() {
+    public final Key<? extends Value<E>> getKey() {
         return this.key;
     }
 
@@ -105,7 +104,7 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
     @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, E value) {
-        final ImmutableValue<E> newValue = constructImmutableValue(value);
+        final Immutable<E> newValue = constructImmutableValue(value);
         if (supports(container)) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<E> oldVal = getVal((C) container);

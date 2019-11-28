@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.TNTEntity;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.explosive.PrimedTNT;
+import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -46,7 +45,7 @@ import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 
 import javax.annotation.Nullable;

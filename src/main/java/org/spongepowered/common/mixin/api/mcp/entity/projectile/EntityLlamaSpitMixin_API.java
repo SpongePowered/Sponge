@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 import net.minecraft.entity.passive.horse.LlamaEntity;
 import net.minecraft.entity.projectile.LlamaSpitEntity;
 import org.spongepowered.api.entity.projectile.LlamaSpit;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;

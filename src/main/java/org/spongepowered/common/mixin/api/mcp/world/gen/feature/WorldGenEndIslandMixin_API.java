@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -38,11 +37,10 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.EndIsland;
 import org.spongepowered.asm.mixin.Mixin;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -58,7 +56,7 @@ public abstract class WorldGenEndIslandMixin_API extends Feature implements EndI
     private int api$exclusion = 1024;
 
     @Override
-    public PopulatorType getType() {
+    public org.spongepowered.api.world.gen.feature.Feature getType() {
         return PopulatorTypes.END_ISLAND;
     }
 

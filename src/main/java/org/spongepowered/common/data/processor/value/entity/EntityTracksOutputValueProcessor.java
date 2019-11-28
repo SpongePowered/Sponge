@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -36,7 +36,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 
-public class EntityTracksOutputValueProcessor extends AbstractSpongeValueProcessor<MinecartCommandBlockEntity, Boolean, Value<Boolean>> {
+public class EntityTracksOutputValueProcessor extends AbstractSpongeValueProcessor<MinecartCommandBlockEntity, Boolean, Mutable<Boolean>> {
 
     public EntityTracksOutputValueProcessor() {
         super(MinecartCommandBlockEntity.class, Keys.TRACKS_OUTPUT);
@@ -48,7 +48,7 @@ public class EntityTracksOutputValueProcessor extends AbstractSpongeValueProcess
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Mutable<Boolean> constructValue(Boolean actualValue) {
         return new SpongeValue<>(Keys.TRACKS_OUTPUT, actualValue);
     }
 
@@ -64,7 +64,7 @@ public class EntityTracksOutputValueProcessor extends AbstractSpongeValueProcess
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.TRACKS_OUTPUT, false, value);
     }
 

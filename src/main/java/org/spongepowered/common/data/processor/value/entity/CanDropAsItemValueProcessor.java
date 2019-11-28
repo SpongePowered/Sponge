@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
@@ -36,14 +36,14 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 import net.minecraft.entity.item.FallingBlockEntity;
 
-public class CanDropAsItemValueProcessor extends AbstractSpongeValueProcessor<FallingBlockEntity, Boolean, Value<Boolean>> {
+public class CanDropAsItemValueProcessor extends AbstractSpongeValueProcessor<FallingBlockEntity, Boolean, Mutable<Boolean>> {
 
     public CanDropAsItemValueProcessor() {
         super(FallingBlockEntity.class, Keys.CAN_DROP_AS_ITEM);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean value) {
+    protected Mutable<Boolean> constructValue(Boolean value) {
         return new SpongeValue<>(Keys.CAN_DROP_AS_ITEM, Constants.Entity.FallingBlock.DEFAULT_CAN_DROP_AS_ITEM, value);
     }
 
@@ -59,7 +59,7 @@ public class CanDropAsItemValueProcessor extends AbstractSpongeValueProcessor<Fa
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(Boolean value) {
         return constructValue(value).asImmutable();
     }
 

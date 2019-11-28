@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
-import com.flowpowered.math.vector.Vector3i;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableStructureData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.StructureData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.StructureMode;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeStructureData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public final class SpongeStructureData extends AbstractData<StructureData, ImmutableStructureData> implements StructureData {
@@ -108,7 +108,7 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<String> author() {
+    public Mutable<String> author() {
         return new SpongeValue<>(Keys.STRUCTURE_AUTHOR, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_AUTHOR, this.author);
     }
 
@@ -121,7 +121,7 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Boolean> ignoreEntities() {
+    public Mutable<Boolean> ignoreEntities() {
         return new SpongeValue<>(Keys.STRUCTURE_IGNORE_ENTITIES, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_IGNORE_ENTITIES, this.ignoreEntities);
     }
 
@@ -134,7 +134,7 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Float> integrity() {
+    public Mutable<Float> integrity() {
         return new SpongeValue<>(Keys.STRUCTURE_INTEGRITY, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_INTEGRITY, this.integrity);
     }
 
@@ -147,7 +147,7 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<StructureMode> mode() {
+    public Mutable<StructureMode> mode() {
         return new SpongeValue<>(Keys.STRUCTURE_MODE, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_MODE, this.mode);
     }
 
@@ -160,7 +160,7 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Vector3i> position() {
+    public Mutable<Vector3i> position() {
         return new SpongeValue<>(Keys.STRUCTURE_POSITION, Vector3i.ONE, this.position);
     }
 
@@ -173,7 +173,7 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Boolean> powered() {
+    public Mutable<Boolean> powered() {
         return new SpongeValue<>(Keys.STRUCTURE_POWERED, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_POWERED, this.powered);
     }
 
@@ -186,7 +186,7 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Long> seed() {
+    public Mutable<Long> seed() {
         return new SpongeValue<>(Keys.STRUCTURE_SEED, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_SEED, this.seed);
     }
 
@@ -199,7 +199,7 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Boolean> showAir() {
+    public Mutable<Boolean> showAir() {
         return new SpongeValue<>(Keys.STRUCTURE_SHOW_AIR, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_SHOW_AIR, this.showAir);
     }
 
@@ -212,7 +212,7 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Boolean> showBoundingBox() {
+    public Mutable<Boolean> showBoundingBox() {
         return new SpongeValue<>(Keys.STRUCTURE_SHOW_BOUNDING_BOX, Constants.TileEntity.Structure.DEFAULT_STRUCTURE_SHOW_BOUNDING_BOX, this.showBoundingBox);
     }
 
@@ -225,7 +225,7 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Vector3i> size() {
+    public Mutable<Vector3i> size() {
         return new SpongeValue<>(Keys.STRUCTURE_SIZE, Vector3i.ONE, this.size);
     }
 

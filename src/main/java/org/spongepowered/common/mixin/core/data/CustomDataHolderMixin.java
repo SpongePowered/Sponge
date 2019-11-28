@@ -30,13 +30,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
@@ -52,21 +51,21 @@ import javax.annotation.Nullable;
 @Mixin({TileEntity.class, Entity.class, SpongeUser.class})
 public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
 
-    private List<DataManipulator<?, ?>> impl$manipulators = Lists.newArrayList();
+    private List<Mutable<?, ?>> impl$manipulators = Lists.newArrayList();
     private List<DataView> impl$failedData = Lists.newArrayList();
 
     @SuppressWarnings({"rawtypes", "Duplicates"})
     @Override
-    public DataTransactionResult bridge$offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function) {
-        @Nullable DataManipulator<?, ?> existingManipulator = null;
-        for (DataManipulator<?, ?> existing : this.impl$manipulators) {
+    public DataTransactionResult bridge$offerCustom(Mutable<?, ?> manipulator, MergeFunction function) {
+        @Nullable Mutable<?, ?> existingManipulator = null;
+        for (Mutable<?, ?> existing : this.impl$manipulators) {
             if (manipulator.getClass().isInstance(existing)) {
                 existingManipulator = existing;
                 break;
             }
         }
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        final DataManipulator<?, ?> newManipulator = checkNotNull(function.merge(existingManipulator, (DataManipulator) manipulator.copy()));
+        final Mutable<?, ?> newManipulator = checkNotNull(function.merge(existingManipulator, (Mutable) manipulator.copy()));
         if (existingManipulator != null) {
             builder.replace(existingManipulator.getValues());
             this.impl$manipulators.remove(existingManipulator);
@@ -79,8 +78,8 @@ public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> bridge$getCustom(Class<T> customClass) {
-        for (DataManipulator<?, ?> existing : this.impl$manipulators) {
+    public <T extends Mutable<?, ?>> Optional<T> bridge$getCustom(Class<T> customClass) {
+        for (Mutable<?, ?> existing : this.impl$manipulators) {
             if (customClass.isInstance(existing)) {
                 return Optional.of((T) existing.copy());
             }
@@ -89,9 +88,9 @@ public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
     }
 
     @Override
-    public DataTransactionResult bridge$removeCustom(Class<? extends DataManipulator<?, ?>> customClass) {
-        @Nullable DataManipulator<?, ?> manipulator = null;
-        for (DataManipulator<?, ?> existing : this.impl$manipulators) {
+    public DataTransactionResult bridge$removeCustom(Class<? extends Mutable<?, ?>> customClass) {
+        @Nullable Mutable<?, ?> manipulator = null;
+        for (Mutable<?, ?> existing : this.impl$manipulators) {
             if (customClass.isInstance(existing)) {
                 manipulator = existing;
             }
@@ -116,7 +115,7 @@ public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
     }
 
     @Override
-    public <E> Optional<E> bridge$getCustom(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> bridge$getCustom(Key<? extends Value<E>> key) {
         return this.impl$manipulators.stream()
                 .filter(manipulator -> manipulator.supports(key))
                 .findFirst()
@@ -124,7 +123,7 @@ public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> bridge$getCustomValue(Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> bridge$getCustomValue(Key<V> key) {
         return this.impl$manipulators.stream()
                 .filter(manipulator -> manipulator.supports(key))
                 .findFirst()
@@ -132,19 +131,19 @@ public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
     }
 
     @Override
-    public Collection<DataManipulator<?, ?>> bridge$getCustomManipulators() {
-        return this.impl$manipulators.stream().map(DataManipulator::copy).collect(Collectors.toList());
+    public Collection<Mutable<?, ?>> bridge$getCustomManipulators() {
+        return this.impl$manipulators.stream().map(Mutable::copy).collect(Collectors.toList());
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public <E> DataTransactionResult bridge$offerCustom(Key<? extends BaseValue<E>> key, E value) {
-        for (DataManipulator<?, ?> manipulator : this.impl$manipulators) {
+    public <E> DataTransactionResult bridge$offerCustom(Key<? extends Value<E>> key, E value) {
+        for (Mutable<?, ?> manipulator : this.impl$manipulators) {
             if (manipulator.supports(key)) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-                builder.replace(((Value) manipulator.getValue((Key) key).get()).asImmutable());
+                builder.replace(((org.spongepowered.api.data.value.Value.Mutable) manipulator.getValue((Key) key).get()).asImmutable());
                 manipulator.set(key, value);
-                builder.success(((Value) manipulator.getValue((Key) key).get()).asImmutable());
+                builder.success(((org.spongepowered.api.data.value.Value.Mutable) manipulator.getValue((Key) key).get()).asImmutable());
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
@@ -153,9 +152,9 @@ public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
 
     @Override
     public DataTransactionResult bridge$removeCustom(Key<?> key) {
-        final Iterator<DataManipulator<?, ?>> iterator = this.impl$manipulators.iterator();
+        final Iterator<Mutable<?, ?>> iterator = this.impl$manipulators.iterator();
         while (iterator.hasNext()) {
-            final DataManipulator<?, ?> manipulator = iterator.next();
+            final Mutable<?, ?> manipulator = iterator.next();
             if (manipulator.getKeys().size() == 1 && manipulator.supports(key)) {
                 iterator.remove();
                 bridge$removeCustomFromNbt(manipulator);

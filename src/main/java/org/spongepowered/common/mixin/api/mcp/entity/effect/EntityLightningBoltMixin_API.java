@@ -28,9 +28,8 @@ import com.google.common.collect.Lists;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.asm.mixin.Mixin;
@@ -71,7 +70,7 @@ public abstract class EntityLightningBoltMixin_API extends EntityWeatherEffectMi
     }
 
     @Override
-    public MutableBoundedValue<Integer> expireTicks() {
+    public Mutable<Integer> expireTicks() {
         return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
                 .minimum((int) Short.MIN_VALUE)
                 .maximum(2)
@@ -81,7 +80,7 @@ public abstract class EntityLightningBoltMixin_API extends EntityWeatherEffectMi
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getExpiringData());
     }

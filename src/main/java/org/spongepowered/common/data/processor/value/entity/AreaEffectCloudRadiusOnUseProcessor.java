@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.EntityAreaEffectCloudAccessor;
@@ -36,14 +36,14 @@ import org.spongepowered.common.mixin.core.entity.EntityAreaEffectCloudAccessor;
 import java.util.Optional;
 import net.minecraft.entity.AreaEffectCloudEntity;
 
-public class AreaEffectCloudRadiusOnUseProcessor extends AbstractSpongeValueProcessor<AreaEffectCloudEntity, Double, MutableBoundedValue<Double>> {
+public class AreaEffectCloudRadiusOnUseProcessor extends AbstractSpongeValueProcessor<AreaEffectCloudEntity, Double, Mutable<Double>> {
 
     public AreaEffectCloudRadiusOnUseProcessor() {
         super(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE);
     }
 
     @Override
-    protected MutableBoundedValue<Double> constructValue(Double actualValue) {
+    protected Mutable<Double> constructValue(Double actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE)
                 .minimum(0.0D)
                 .maximum(((double) Float.MAX_VALUE))
@@ -64,7 +64,7 @@ public class AreaEffectCloudRadiusOnUseProcessor extends AbstractSpongeValueProc
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
+    protected Immutable<Double> constructImmutableValue(Double value) {
         return constructValue(value).asImmutable();
     }
 

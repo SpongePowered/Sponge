@@ -27,7 +27,7 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.mixin.core.entity.EntityAccessor;
@@ -90,7 +90,7 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
     }
 
     @Override
-    public Byte getValueFromEvent(final Byte originalValue, final List<ImmutableValue<?>> immutableValues) {
+    public Byte getValueFromEvent(final Byte originalValue, final List<Immutable<?>> immutableValues) {
         if (immutableValues.isEmpty()) {
             // Short circuit when there are no changes.
             return originalValue;
@@ -101,7 +101,7 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
         boolean newInvisible = getFlag(originalValue, INVISIBLE_MASK);
         boolean newGlowing = getFlag(originalValue, GLOWING_MASK);
         boolean newElytra = getFlag(originalValue, FLYING_ELYTRA_MASK);
-        for (final ImmutableValue<?> immutableValue : immutableValues) {
+        for (final Immutable<?> immutableValue : immutableValues) {
             if (immutableValue.getKey() == Keys.IS_SNEAKING) {
                 newIsSneaking = ((Boolean) immutableValue.get());
             }

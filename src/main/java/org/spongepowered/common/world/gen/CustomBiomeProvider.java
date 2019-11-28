@@ -26,7 +26,6 @@ package org.spongepowered.common.world.gen;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
@@ -34,7 +33,7 @@ import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.gen.layer.IntCache;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;

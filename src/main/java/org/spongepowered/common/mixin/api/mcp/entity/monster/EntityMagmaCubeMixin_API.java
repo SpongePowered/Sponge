@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.MagmaCubeEntity;
-import org.spongepowered.api.entity.living.monster.MagmaCube;
+import org.spongepowered.api.entity.living.monster.slime.MagmaCube;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(MagmaCubeEntity.class)

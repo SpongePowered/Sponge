@@ -30,13 +30,13 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableShrubData
 import org.spongepowered.api.data.manipulator.mutable.block.ShrubData;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.ShrubTypes;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeShrubData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class ShrubDataProcessor extends AbstractCatalogDataProcessor<ShrubType, Value<ShrubType>, ShrubData, ImmutableShrubData> {
+public class ShrubDataProcessor extends AbstractCatalogDataProcessor<ShrubType, Mutable<ShrubType>, ShrubData, ImmutableShrubData> {
 
     public ShrubDataProcessor() {
         super(Keys.SHRUB_TYPE, input -> input.getItem() == ItemTypes.TALLGRASS);
@@ -63,7 +63,7 @@ public class ShrubDataProcessor extends AbstractCatalogDataProcessor<ShrubType, 
     }
 
     @Override
-    protected Value<ShrubType> constructValue(ShrubType actualValue) {
+    protected Mutable<ShrubType> constructValue(ShrubType actualValue) {
         return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 

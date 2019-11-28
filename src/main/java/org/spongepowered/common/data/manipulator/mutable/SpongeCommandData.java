@@ -27,13 +27,11 @@ package org.spongepowered.common.data.manipulator.mutable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableCommandData;
 import org.spongepowered.api.data.manipulator.mutable.CommandData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCommandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
@@ -59,12 +57,12 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     }
 
     @Override
-    public Value<String> storedCommand() {
+    public Mutable<String> storedCommand() {
         return new SpongeValue<>(Keys.COMMAND, getStoredCommand());
     }
 
     @Override
-    public MutableBoundedValue<Integer> successCount() {
+    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> successCount() {
         return SpongeValueFactory.boundedBuilder(Keys.SUCCESS_COUNT)
                 .actualValue(this.success)
                 .defaultValue(0)
@@ -74,12 +72,12 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     }
 
     @Override
-    public Value<Boolean> doesTrackOutput() {
+    public Mutable<Boolean> doesTrackOutput() {
         return new SpongeValue<>(Keys.TRACKS_OUTPUT, this.tracks);
     }
 
     @Override
-    public OptionalValue<Text> lastOutput() {
+    public org.spongepowered.api.data.value.OptionalValue.Mutable<Text> lastOutput() {
         return new SpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, getLastOutput());
     }
 

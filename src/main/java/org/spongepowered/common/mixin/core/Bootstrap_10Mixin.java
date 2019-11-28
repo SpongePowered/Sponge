@@ -28,7 +28,7 @@ import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import org.spongepowered.api.entity.projectile.Firework;
+import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,7 +41,7 @@ public class Bootstrap_10Mixin {
     @Redirect(method = "dispenseStack(Lnet/minecraft/dispenser/IBlockSource;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     private boolean impl$setShooterOnFirework(final World world, final Entity firework, final IBlockSource source, final ItemStack stack) {
-        ((Firework) firework).setShooter(source.getBlockTileEntity());
+        ((FireworkRocket) firework).setShooter(source.getBlockTileEntity());
         return world.addEntity0(firework);
     }
 

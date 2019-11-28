@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.api.data;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.data.MemoryDataContainer;

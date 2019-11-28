@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.registry.type.text;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.registry.RegistryModule;
@@ -37,7 +35,8 @@ import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.text.selector.SpongeArgumentHolder;
 import org.spongepowered.common.text.selector.SpongeSelectorFactory;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.HashMap;
 import java.util.Map;
 

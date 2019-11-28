@@ -27,9 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -64,12 +63,12 @@ public abstract class EntityItemMixin_API extends EntityMixin_API implements Ite
     }
 
     @Override
-    public Value<ItemStackSnapshot> item() {
+    public Mutable<ItemStackSnapshot> item() {
         return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(getItem()));
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getItemData());
     }

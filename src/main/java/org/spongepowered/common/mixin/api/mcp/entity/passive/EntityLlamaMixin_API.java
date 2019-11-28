@@ -26,11 +26,10 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.horse.LlamaEntity;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.LlamaVariant;
-import org.spongepowered.api.data.type.LlamaVariants;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.living.animal.Llama;
+import org.spongepowered.api.data.type.LlamaType;
+import org.spongepowered.api.data.type.LlamaTypes;
+import org.spongepowered.api.data.value.Value.Mutable;
+import org.spongepowered.api.entity.living.animal.horse.llama.Llama;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -45,26 +44,26 @@ public abstract class EntityLlamaMixin_API extends AbstractHorseMixin_API implem
     @Shadow public abstract void setVariant(int p_190710_1_);
 
     @Override
-    public Value<LlamaVariant> llamaVariant() {
+    public Mutable<LlamaType> llamaVariant() {
         final int i = getVariant();
-        final LlamaVariant variant;
+        final LlamaType variant;
         if (i == 0) {
-            variant = LlamaVariants.CREAMY;
+            variant = LlamaTypes.CREAMY;
         } else if (i == 1) {
-            variant = LlamaVariants.WHITE;
+            variant = LlamaTypes.WHITE;
         } else if (i == 2) {
-            variant = LlamaVariants.BROWN;
+            variant = LlamaTypes.BROWN;
         } else if (i == 3) {
-            variant = LlamaVariants.GRAY;
+            variant = LlamaTypes.GRAY;
         } else {
             setVariant(0); // Basically some validation
-            variant = LlamaVariants.CREAMY;
+            variant = LlamaTypes.CREAMY;
         }
         return new SpongeValue<>(Keys.LLAMA_VARIANT, Constants.Entity.Llama.DEFAULT_VARIANT, variant);
     }
 
     @Override
-    public MutableBoundedValue<Integer> strength() {
+    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> strength() {
         return SpongeValueFactory.getInstance()
                 .createBoundedValueBuilder(Keys.LLAMA_STRENGTH)
                 .defaultValue(Constants.Entity.Llama.DEFAULT_STRENGTH)

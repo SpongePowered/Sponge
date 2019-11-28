@@ -37,7 +37,7 @@ import com.google.gson.JsonObject;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -144,7 +144,7 @@ class TimingsExport extends Thread {
                     return JSONUtil.singleObjectPair(input.getName(), JSONUtil.arrayOf(input.getCollectionCount(), input.getCollectionTime()));
                 })));
 
-        Set<TileEntityType> tileEntityTypeSet = Sets.newHashSet();
+        Set<BlockEntityType> tileEntityTypeSet = Sets.newHashSet();
         Set<EntityType> entityTypeSet = Sets.newHashSet();
 
         int size = TimingsManager.HISTORY.size();

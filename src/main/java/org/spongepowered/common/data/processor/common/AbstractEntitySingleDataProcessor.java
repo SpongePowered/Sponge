@@ -25,10 +25,10 @@
 package org.spongepowered.common.data.processor.common;
 
 import net.minecraft.entity.Entity;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 
 /**
  * A superclass for targeting specific {@link Entity} hierarchical types,
@@ -39,8 +39,8 @@ import org.spongepowered.api.data.value.BaseValue;
  * @param <Manipulator>
  * @param <Immutable>
  */
-public abstract class AbstractEntitySingleDataProcessor<E extends Entity, ValueType, ValueClassType extends BaseValue<ValueType>,
-    Manipulator extends DataManipulator<Manipulator, Immutable>, Immutable extends ImmutableDataManipulator<Immutable, Manipulator>>
+public abstract class AbstractEntitySingleDataProcessor<E extends Entity, ValueType, ValueClassType extends Value<ValueType>,
+    Manipulator extends Mutable<Manipulator, Immutable>, Immutable extends Immutable<Immutable, Manipulator>>
     extends AbstractSingleDataSingleTargetProcessor<E, ValueType, ValueClassType, Manipulator, Immutable> {
 
     public AbstractEntitySingleDataProcessor(Class<E> entityClass, Key<ValueClassType> key) {

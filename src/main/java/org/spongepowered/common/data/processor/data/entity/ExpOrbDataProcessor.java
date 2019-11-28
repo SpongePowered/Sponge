@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -39,7 +39,7 @@ import org.spongepowered.common.mixin.core.entity.item.XPOrbEntityAccessor;
 import java.util.Optional;
 
 public class ExpOrbDataProcessor extends
-    AbstractSingleDataSingleTargetProcessor<XPOrbEntityAccessor, Integer, MutableBoundedValue<Integer>, ExpOrbData, ImmutableExpOrbData> {
+    AbstractSingleDataSingleTargetProcessor<XPOrbEntityAccessor, Integer, Mutable<Integer>, ExpOrbData, ImmutableExpOrbData> {
 
     public ExpOrbDataProcessor() {
         super(Keys.CONTAINED_EXPERIENCE, XPOrbEntityAccessor.class);
@@ -57,7 +57,7 @@ public class ExpOrbDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected Immutable<Integer> constructImmutableValue(Integer value) {
         return constructValue(value).asImmutable();
     }
 
@@ -67,7 +67,7 @@ public class ExpOrbDataProcessor extends
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Mutable<Integer> constructValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.CONTAINED_EXPERIENCE)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)

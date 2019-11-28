@@ -27,14 +27,13 @@ package org.spongepowered.common.world.gen.populators;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorObject;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.RandomObject;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 public class RandomObjectPopulator implements RandomObject {
@@ -59,7 +58,7 @@ public class RandomObjectPopulator implements RandomObject {
     }
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return PopulatorTypes.GENERIC_OBJECT;
     }
 

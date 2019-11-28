@@ -28,9 +28,9 @@ import static org.spongepowered.common.util.Constants.Functional.doubleComparato
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.bridge.entity.LivingEntityBaseBridge;
@@ -39,14 +39,14 @@ import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import java.util.Optional;
 import net.minecraft.entity.LivingEntity;
 
-public class HealthValueProcessor extends AbstractSpongeValueProcessor<LivingEntity, Double, MutableBoundedValue<Double>> {
+public class HealthValueProcessor extends AbstractSpongeValueProcessor<LivingEntity, Double, Mutable<Double>> {
 
     public HealthValueProcessor() {
         super(LivingEntity.class, Keys.HEALTH);
     }
 
     @Override
-    public MutableBoundedValue<Double> constructValue(Double health) {
+    public Mutable<Double> constructValue(Double health) {
         return SpongeValueFactory.boundedBuilder(Keys.HEALTH)
             .comparator(doubleComparator())
             .minimum(0D)
@@ -72,7 +72,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<LivingEnt
     }
 
     @Override
-    public Optional<MutableBoundedValue<Double>> getApiValueFromContainer(ValueContainer<?> container) {
+    public Optional<Mutable<Double>> getApiValueFromContainer(ValueContainer<?> container) {
         if (container instanceof LivingEntity) {
             final double health = ((LivingEntity) container).getHealth();
             final double maxHealth = ((LivingEntity) container).getMaxHealth();

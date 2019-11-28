@@ -29,8 +29,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -74,7 +74,7 @@ public abstract class InventoryPlayerMixin_API implements PlayerInventory {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public MainPlayerInventory getMain() {
+    public PrimaryPlayerInventory getMain() {
         if (this.api$main == null && ((InventoryAdapter) this).bridge$getRootLens() instanceof PlayerInventoryLens) {
             final Lens lens = ((InventoryAdapter) this).bridge$getRootLens();
             final Fabric fabric = ((InventoryAdapter) this).bridge$getFabric();

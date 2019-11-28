@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.DoublePlantBlock;
@@ -42,7 +41,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.gen.feature.WorldGenDoublePlantBridge;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;

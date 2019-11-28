@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGriefingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GriefingData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGriefingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
@@ -42,7 +42,7 @@ public class SpongeGriefingData extends AbstractBooleanData<GriefingData, Immuta
     }
 
     @Override
-    public Value<Boolean> canGrief() {
+    public Mutable<Boolean> canGrief() {
         return getValueGetter();
     }
 

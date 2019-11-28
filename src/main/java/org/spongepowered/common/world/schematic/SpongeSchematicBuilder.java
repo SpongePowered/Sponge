@@ -26,35 +26,34 @@ package org.spongepowered.common.world.schematic;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.ArchetypeVolume;
-import org.spongepowered.api.world.extent.EntityUniverse;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.schematic.Schematic.Builder;
+import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
+import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
+import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeStream;
+import org.spongepowered.api.world.volume.entity.ReadableEntityVolume;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -83,7 +82,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
     // Package private accessors for the Schematic constructor
     @Nullable MutableBlockVolume backingVolume;
     @Nullable MutableBiomeVolume biomeVolume;
-    @Nullable Map<Vector3i, TileEntityArchetype> tiles;
+    @Nullable Map<Vector3i, BlockEntityArchetype> tiles;
 
 
     @Override
@@ -110,7 +109,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
         return this;
     }
 
-    public SpongeSchematicBuilder tiles(Map<Vector3i, TileEntityArchetype> tiles) {
+    public SpongeSchematicBuilder tiles(Map<Vector3i, BlockEntityArchetype> tiles) {
         this.tiles = new HashMap<>(tiles);
         return this;
     }
@@ -265,12 +264,12 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             if (this.volume == null) {
                 if (this.view != null) {
                     final MutableBlockVolume volume = new ArrayMutableBlockBuffer(this.blockPalette, min, size);
-                    Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
-                    final MutableBlockVolumeWorker<? extends Extent> blockWorker = this.view.getBlockWorker();
+                    Map<Vector3i, BlockEntityArchetype> tiles = Maps.newHashMap();
+                    final MutableBlockVolumeStream<? extends Extent> blockWorker = this.view.getBlockWorker();
                     blockWorker.iterate((v, x, y, z) -> {
                         volume.setBlock(x, y, z, v.getBlock(x, y, z));
-                        Optional<TileEntity> tile = v.getTileEntity(x, y, z);
-                        tile.map(TileEntity::createArchetype)
+                        Optional<BlockEntity> tile = v.getTileEntity(x, y, z);
+                        tile.map(BlockEntity::createArchetype)
                             .ifPresent(archetype -> tiles.put(new Vector3i(x, y, z), archetype));
                     });
                     this.backingVolume = volume;
@@ -299,7 +298,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
                 this.entities = this.volume.getEntityArchetypes();
             } else if (this.view != null && this.backingVolume != null) {
                 this.entities = this.view.getIntersectingEntities(this.backingVolume.getBlockMin().toDouble(), this.backingVolume.getBlockMax().toDouble()).stream()
-                    .map(EntityUniverse.EntityHit::getEntity)
+                    .map(ReadableEntityVolume.EntityHit::getEntity)
                     .filter(Objects::nonNull)
                     .filter(entity -> !(entity instanceof Player) || !SpongeImplHooks.isFakePlayer((net.minecraft.entity.Entity) entity))
                     .map(Entity::createArchetype)

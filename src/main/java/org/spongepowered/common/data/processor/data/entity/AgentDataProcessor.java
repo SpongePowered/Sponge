@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAgentData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -40,7 +40,7 @@ import org.spongepowered.common.mixin.core.entity.EntityLivingAccessor;
 import java.util.Optional;
 
 public class AgentDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<EntityLivingAccessor, Boolean, Value<Boolean>, AgentData, ImmutableAgentData> {
+        extends AbstractSingleDataSingleTargetProcessor<EntityLivingAccessor, Boolean, Mutable<Boolean>, AgentData, ImmutableAgentData> {
 
     public AgentDataProcessor() {
         super(Keys.AI_ENABLED, EntityLivingAccessor.class);
@@ -58,7 +58,7 @@ public class AgentDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.AI_ENABLED, true, value);
     }
 
@@ -68,7 +68,7 @@ public class AgentDataProcessor
     }
 
     @Override
-    protected Value<Boolean> constructValue(final Boolean actualValue) {
+    protected Mutable<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<>(Keys.AI_ENABLED, true, actualValue);
     }
 

@@ -26,11 +26,11 @@ package org.spongepowered.common.data.manipulator.mutable.item;
 
 import com.google.common.collect.Sets;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlaceableData;
-import org.spongepowered.api.data.value.mutable.SetValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.SetValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePlaceableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleSetData;
 
@@ -62,7 +62,7 @@ public class SpongePlaceableData extends AbstractSingleSetData<BlockType, Placea
 
     @SuppressWarnings("unchecked")
     @Override
-    public SetValue<BlockType> placeable() {
-        return (SetValue<BlockType>) getValueGetter();
+    public Mutable<BlockType> placeable() {
+        return (Mutable<BlockType>) getValueGetter();
     }
 }

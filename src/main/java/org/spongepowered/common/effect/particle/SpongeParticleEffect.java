@@ -25,7 +25,7 @@
 package org.spongepowered.common.effect.particle;
 
 import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.common.util.Constants;

@@ -33,9 +33,9 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCookedFish
 import org.spongepowered.api.data.manipulator.mutable.item.CookedFishData;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.CookedFishes;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeCookedFishData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
@@ -45,7 +45,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class CookedFishDataProcessor extends AbstractItemSingleDataProcessor<CookedFish, Value<CookedFish>, CookedFishData, ImmutableCookedFishData> {
+public class CookedFishDataProcessor extends AbstractItemSingleDataProcessor<CookedFish, Mutable<CookedFish>, CookedFishData, ImmutableCookedFishData> {
 
     public CookedFishDataProcessor() {
         super(stack -> stack.getItem().equals(Items.COOKED_FISH), Keys.COOKED_FISH);
@@ -69,12 +69,12 @@ public class CookedFishDataProcessor extends AbstractItemSingleDataProcessor<Coo
     }
 
     @Override
-    protected Value<CookedFish> constructValue(CookedFish actualValue) {
+    protected Mutable<CookedFish> constructValue(CookedFish actualValue) {
         return new SpongeValue<>(Keys.COOKED_FISH, CookedFishes.COD, actualValue);
     }
 
     @Override
-    protected ImmutableValue<CookedFish> constructImmutableValue(CookedFish value) {
+    protected Immutable<CookedFish> constructImmutableValue(CookedFish value) {
         return ImmutableSpongeValue.cachedOf(Keys.COOKED_FISH, CookedFishes.COD, value);
     }
 

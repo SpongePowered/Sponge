@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.MultiPartEntityPart;
-import org.spongepowered.api.entity.living.complex.EnderDragon;
-import org.spongepowered.api.entity.living.complex.EnderDragonPart;
+import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragon;
+import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragonPart;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

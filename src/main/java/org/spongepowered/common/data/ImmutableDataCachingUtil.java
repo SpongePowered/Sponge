@@ -29,10 +29,9 @@ import static org.spongepowered.common.util.ReflectionUtil.createUnsafeInstance;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.SpongeImpl;
 
 import java.lang.reflect.InvocationTargetException;
@@ -48,12 +47,12 @@ public final class ImmutableDataCachingUtil {
     public static final int MANIPULATOR_CACHE_LIMIT = 100000;
     public static final int VALUE_CACHE_LIMIT = 100000;
 
-    private static final Cache<String, ImmutableDataManipulator<?, ?>> manipulatorCache = CacheBuilder.newBuilder()
+    private static final Cache<String, Immutable<?, ?>> manipulatorCache = CacheBuilder.newBuilder()
         .maximumSize(MANIPULATOR_CACHE_LIMIT)
         .concurrencyLevel(4)
         .build();
 
-    private static final Cache<String, ImmutableValue<?>> valueCache = CacheBuilder.newBuilder()
+    private static final Cache<String, org.spongepowered.api.data.value.Value.Immutable<?>> valueCache = CacheBuilder.newBuilder()
         .concurrencyLevel(4)
         .maximumSize(VALUE_CACHE_LIMIT)
         .build();
@@ -74,12 +73,12 @@ public final class ImmutableDataCachingUtil {
      * @return The newly created immutable data manipulators
      */
     @SuppressWarnings("unchecked")
-    public static <T extends ImmutableDataManipulator<?, ?>> T getManipulator(final Class<T> immutableClass, final Object... args) {
+    public static <T extends Immutable<?, ?>> T getManipulator(final Class<T> immutableClass, final Object... args) {
         final String key = getKey(immutableClass, args);
         // We can't really use the generic typing here because it's complicated...
         try {
             // Let's get the key
-            return (T) ImmutableDataCachingUtil.manipulatorCache.get(key, (Callable<ImmutableDataManipulator<?, ?>>) () -> {
+            return (T) ImmutableDataCachingUtil.manipulatorCache.get(key, (Callable<Immutable<?, ?>>) () -> {
                     try {
                         return createUnsafeInstance(immutableClass, args);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -95,11 +94,11 @@ public final class ImmutableDataCachingUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E, V extends ImmutableValue<?>, T extends ImmutableValue<E>> T getValue(final Class<V> valueClass,
-            final Key<? extends BaseValue<E>> usedKey, final E defaultArg, final E arg, final Object... extraArgs) {
+    public static <E, V extends org.spongepowered.api.data.value.Value.Immutable<?>, T extends org.spongepowered.api.data.value.Value.Immutable<E>> T getValue(final Class<V> valueClass,
+            final Key<? extends Value<E>> usedKey, final E defaultArg, final E arg, final Object... extraArgs) {
         final String key = getKey(valueClass, usedKey.getQuery().asString('.'), arg.getClass(), arg);
         try {
-            return (T) ImmutableDataCachingUtil.valueCache.get(key, (Callable<ImmutableValue<?>>) () -> {
+            return (T) ImmutableDataCachingUtil.valueCache.get(key, (Callable<org.spongepowered.api.data.value.Value.Immutable<?>>) () -> {
                     try {
                         if (extraArgs == null || extraArgs.length == 0) {
                             return createUnsafeInstance(valueClass, usedKey, defaultArg, arg);

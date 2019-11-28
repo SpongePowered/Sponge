@@ -25,9 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.entity.living.monster.Endermite;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,7 +48,7 @@ public abstract class EntityEndermiteMixin_API extends EntityMobMixin_API implem
     }
 
     @Override
-    public MutableBoundedValue<Integer> expireTicks() {
+    public Mutable<Integer> expireTicks() {
         return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
                 .minimum(0)
                 .maximum(Constants.Entity.Silverfish.MAX_EXPIRATION_TICKS)
@@ -59,7 +58,7 @@ public abstract class EntityEndermiteMixin_API extends EntityMobMixin_API implem
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getExpirableData());
     }

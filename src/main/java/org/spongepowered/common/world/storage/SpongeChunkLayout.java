@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.world.storage;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.world.storage.ChunkLayout;
+import org.spongepowered.math.vector.Vector3i;
 
 public final class SpongeChunkLayout implements ChunkLayout {
 

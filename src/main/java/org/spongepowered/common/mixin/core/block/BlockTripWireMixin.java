@@ -26,14 +26,14 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAttachedData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableConnectedDirectionData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDisarmedData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
@@ -51,20 +51,20 @@ import net.minecraft.block.TripWireBlock;
 public abstract class BlockTripWireMixin extends BlockMixin {
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getIsDisarmedFor(blockState),
+    public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
+        return ImmutableList.<Immutable<?, ?>>of(impl$getIsDisarmedFor(blockState),
                 impl$getIsAttachedFor(blockState), impl$getIsPoweredFor(blockState), impl$getConnectedDirectionData(blockState));
     }
 
     @Override
-    public boolean bridge$supports(final Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
         return ImmutableDisarmedData.class.isAssignableFrom(immutable)
                 || ImmutableAttachedData.class.isAssignableFrom(immutable) || ImmutablePoweredData.class.isAssignableFrom(immutable)
                 || ImmutableConnectedDirectionData.class.isAssignableFrom(immutable);
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDisarmedData) {
             final boolean disarmed = ((ImmutableDisarmedData) manipulator).disarmed().get();
             return Optional.of((BlockState) blockState.withProperty(TripWireBlock.DISARMED, disarmed));
@@ -82,7 +82,7 @@ public abstract class BlockTripWireMixin extends BlockMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
         if (key.equals(Keys.DISARMED)) {
             final boolean disarmed = (Boolean) value;
             return Optional.of((BlockState) blockState.withProperty(TripWireBlock.DISARMED, disarmed));

@@ -25,11 +25,11 @@
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBlockItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.BlockItemData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBlockItemData;
 import org.spongepowered.common.util.Constants;
@@ -38,7 +38,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 public class ImmutableSpongeBlockItemData extends AbstractImmutableSingleData<BlockState, ImmutableBlockItemData, BlockItemData>
         implements ImmutableBlockItemData {
 
-    private final ImmutableValue<BlockState> state;
+    private final Immutable<BlockState> state;
 
     public ImmutableSpongeBlockItemData(BlockState value) {
         super(ImmutableBlockItemData.class, value, Keys.ITEM_BLOCKSTATE);
@@ -46,12 +46,12 @@ public class ImmutableSpongeBlockItemData extends AbstractImmutableSingleData<Bl
     }
 
     @Override
-    public ImmutableValue<BlockState> state() {
+    public Immutable<BlockState> state() {
         return this.state;
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
+    protected Immutable<?> getValueGetter() {
         return state();
     }
 

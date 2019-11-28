@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.util;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.nbt.CompoundNBT;
+import org.spongepowered.math.vector.Vector3d;
 
 
 public class VectorSerializer {

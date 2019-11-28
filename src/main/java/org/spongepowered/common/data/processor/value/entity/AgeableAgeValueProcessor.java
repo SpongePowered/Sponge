@@ -26,23 +26,23 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 import net.minecraft.entity.AgeableEntity;
 
-public class AgeableAgeValueProcessor extends AbstractSpongeValueProcessor<AgeableEntity, Integer, MutableBoundedValue<Integer>> {
+public class AgeableAgeValueProcessor extends AbstractSpongeValueProcessor<AgeableEntity, Integer, Mutable<Integer>> {
 
     public AgeableAgeValueProcessor() {
         super(AgeableEntity.class, Keys.AGE);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Mutable<Integer> constructValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.AGE)
             .defaultValue(0)
             .minimum(Integer.MIN_VALUE)
@@ -63,7 +63,7 @@ public class AgeableAgeValueProcessor extends AbstractSpongeValueProcessor<Ageab
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected Immutable<Integer> constructImmutableValue(Integer value) {
         return constructValue(value).asImmutable();
     }
 

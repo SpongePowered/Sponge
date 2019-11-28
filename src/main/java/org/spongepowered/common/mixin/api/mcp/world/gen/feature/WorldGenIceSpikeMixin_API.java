@@ -24,19 +24,17 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
-import com.flowpowered.math.GenericMath;
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.IceSpikeFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.IceSpike;
 import org.spongepowered.asm.mixin.Mixin;
-
+import org.spongepowered.math.GenericMath;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 @Mixin(IceSpikeFeature.class)
@@ -48,7 +46,7 @@ public abstract class WorldGenIceSpikeMixin_API extends Feature implements IceSp
     private double api$probability = 0.0166667D;
 
     @Override
-    public PopulatorType getType() {
+    public org.spongepowered.api.world.gen.feature.Feature getType() {
         return PopulatorTypes.ICE_SPIKE;
     }
 

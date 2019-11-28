@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.tileentity.StructureBlockTileEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.type.StructureMode;
@@ -34,6 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.tileentity.TileEntityStructureBridge;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(StructureBlockTileEntity.class)
 public abstract class TileEntityStructureMixin extends TileEntityMixin implements TileEntityStructureBridge {

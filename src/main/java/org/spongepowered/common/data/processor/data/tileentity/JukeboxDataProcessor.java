@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import org.spongepowered.api.block.tileentity.Jukebox;
+import org.spongepowered.api.block.entity.Jukebox;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
@@ -46,7 +46,7 @@ import net.minecraft.block.JukeboxBlock.TileEntityJukebox;
 import net.minecraft.item.MusicDiscItem;
 
 public class JukeboxDataProcessor extends
-        AbstractTileEntitySingleDataProcessor<JukeboxBlock.TileEntityJukebox, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
+        AbstractTileEntitySingleDataProcessor<JukeboxBlock.TileEntityJukebox, ItemStackSnapshot, Mutable<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
 
     public JukeboxDataProcessor() {
         super(JukeboxBlock.TileEntityJukebox.class, Keys.REPRESENTED_ITEM);
@@ -105,12 +105,12 @@ public class JukeboxDataProcessor extends
     }
 
     @Override
-    protected Value<ItemStackSnapshot> constructValue(ItemStackSnapshot value) {
+    protected Mutable<ItemStackSnapshot> constructValue(ItemStackSnapshot value) {
         return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemTypeRegistryModule.getInstance().NONE_SNAPSHOT, value);
     }
 
     @Override
-    protected ImmutableValue<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
+    protected Immutable<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
         return new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, ItemTypeRegistryModule.getInstance().NONE_SNAPSHOT, value);
     }
 

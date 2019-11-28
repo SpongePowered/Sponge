@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.multi.tileentity;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
@@ -34,6 +33,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBannerData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;

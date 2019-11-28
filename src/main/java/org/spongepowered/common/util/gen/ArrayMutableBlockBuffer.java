@@ -24,18 +24,17 @@
  */
 package org.spongepowered.common.util.gen;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.world.extent.ImmutableBlockVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
-import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteTypes;
+import org.spongepowered.api.world.volume.StorageType;
+import org.spongepowered.api.world.volume.block.ImmutableBlockVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
+import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeStream;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.PackedBackingData;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
@@ -44,7 +43,7 @@ import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWork
 import org.spongepowered.common.world.schematic.BimapPalette;
 import org.spongepowered.common.world.schematic.BlockPaletteWrapper;
 import org.spongepowered.common.world.schematic.GlobalPalette;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -162,7 +161,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker() {
+    public MutableBlockVolumeStream<? extends MutableBlockVolume> getBlockWorker() {
         return new SpongeMutableBlockVolumeWorker<>(this);
     }
 

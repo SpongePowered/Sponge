@@ -27,10 +27,10 @@ package org.spongepowered.common.registry.type.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.IntegerTrait;
-import org.spongepowered.api.block.trait.IntegerTraits;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.state.IntegerStateProperties;
+import org.spongepowered.api.state.IntegerStateProperty;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
@@ -38,10 +38,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-@RegisterCatalog(IntegerTraits.class)
+@RegisterCatalog(IntegerStateProperties.class)
 public final class IntegerTraitRegistryModule
-    extends AbstractPrefixCheckCatalogRegistryModule<IntegerTrait>
-        implements SpongeAdditionalCatalogRegistryModule<IntegerTrait>, AlternateCatalogRegistryModule<IntegerTrait> {
+    extends AbstractPrefixCheckCatalogRegistryModule<IntegerStateProperty>
+        implements SpongeAdditionalCatalogRegistryModule<IntegerStateProperty>, AlternateCatalogRegistryModule<IntegerStateProperty> {
 
     public static IntegerTraitRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -53,11 +53,11 @@ public final class IntegerTraitRegistryModule
     }
 
     @Override
-    public void registerAdditionalCatalog(IntegerTrait extraCatalog) {
+    public void registerAdditionalCatalog(IntegerStateProperty extraCatalog) {
         this.catalogTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
-    public void registerBlock(String id, BlockType block, IntegerTrait property) {
+    public void registerBlock(String id, BlockType block, IntegerStateProperty property) {
         checkNotNull(id, "Id was null!");
         this.catalogTypeMap.put(id.toLowerCase(Locale.ENGLISH), property);
         final String propertyId = block.getId().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
@@ -69,9 +69,9 @@ public final class IntegerTraitRegistryModule
     }
 
     @Override
-    public Map<String, IntegerTrait> provideCatalogMap() {
-        Map<String, IntegerTrait> map = new HashMap<>();
-        for (Map.Entry<String, IntegerTrait> enumTraitEntry : this.catalogTypeMap.entrySet()) {
+    public Map<String, IntegerStateProperty> provideCatalogMap() {
+        Map<String, IntegerStateProperty> map = new HashMap<>();
+        for (Map.Entry<String, IntegerStateProperty> enumTraitEntry : this.catalogTypeMap.entrySet()) {
             map.put(enumTraitEntry.getKey().replace("minecraft:", ""), enumTraitEntry.getValue());
         }
         return map;

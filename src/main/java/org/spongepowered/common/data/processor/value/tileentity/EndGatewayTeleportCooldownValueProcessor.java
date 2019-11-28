@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.tileentity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.tileentity.TileEntityEndGatewayAccessor;
@@ -36,7 +36,7 @@ import org.spongepowered.common.mixin.core.tileentity.TileEntityEndGatewayAccess
 import java.util.Optional;
 import net.minecraft.tileentity.EndGatewayTileEntity;
 
-public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValueProcessor<EndGatewayTileEntity, Integer, Value<Integer>> {
+public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValueProcessor<EndGatewayTileEntity, Integer, Mutable<Integer>> {
 
     public EndGatewayTeleportCooldownValueProcessor() {
         super(EndGatewayTileEntity.class, Keys.END_GATEWAY_TELEPORT_COOLDOWN);
@@ -44,7 +44,7 @@ public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValu
 
 
     @Override
-    protected Value<Integer> constructValue(Integer actualValue) {
+    protected Mutable<Integer> constructValue(Integer actualValue) {
         return new SpongeValue<>(Keys.END_GATEWAY_TELEPORT_COOLDOWN, actualValue);
     }
 
@@ -60,7 +60,7 @@ public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValu
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected Immutable<Integer> constructImmutableValue(Integer value) {
         return constructValue(value).asImmutable();
     }
 

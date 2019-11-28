@@ -29,8 +29,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.JukeboxBlock;
 import net.minecraft.item.Item;
 import net.minecraft.item.MusicDiscItem;
-import org.spongepowered.api.block.tileentity.Jukebox;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.block.entity.Jukebox;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -86,7 +86,7 @@ public abstract class TileEntityJukeboxMixin_API extends TileEntityMixin_API imp
     }
 
     @Override
-    public void supplyVanillaManipulators(final List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(final List<Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         get(RepresentedItemData.class).ifPresent(manipulators::add);
     }

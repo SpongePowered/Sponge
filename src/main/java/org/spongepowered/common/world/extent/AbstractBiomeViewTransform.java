@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.BiomeVolume;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
-import org.spongepowered.api.world.extent.StorageType;
+import org.spongepowered.api.world.volume.StorageType;
+import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.ReadableBiomeVolume;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.schematic.GlobalPalette;
+import org.spongepowered.math.vector.Vector3i;
 
-public abstract class AbstractBiomeViewTransform<V extends BiomeVolume> implements BiomeVolume {
+public abstract class AbstractBiomeViewTransform<V extends ReadableBiomeVolume> implements ReadableBiomeVolume {
 
     protected final V volume;
     protected final DiscreteTransform3 transform;

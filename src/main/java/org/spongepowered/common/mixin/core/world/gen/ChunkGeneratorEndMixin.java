@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.core.world.gen;
 import net.minecraft.world.gen.EndChunkGenerator;
 import net.minecraft.world.gen.feature.EndCityStructure;
 import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.gen.TerrainGenerator;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,9 +41,9 @@ public abstract class ChunkGeneratorEndMixin implements PopulatorProviderBridge 
     @Shadow @Final private boolean mapFeaturesEnabled;
 
     @Override
-    public void bridge$addPopulators(final WorldGenerator generator) {
+    public void bridge$addPopulators(final TerrainGenerator generator) {
         if (this.mapFeaturesEnabled) {
-            generator.getPopulators().add((Populator) this.endCityGen);
+            generator.getPopulators().add((Feature) this.endCityGen);
             generator.getGenerationPopulators().add((GenerationPopulator) this.endCityGen);
         }
     }

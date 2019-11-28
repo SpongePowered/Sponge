@@ -24,19 +24,18 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.MelonFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.Melon;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.world.gen.feature.WorldGeneratorMixin;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 @Mixin(MelonFeature.class)
@@ -45,7 +44,7 @@ public abstract class WorldGenMelonMixin_API extends WorldGeneratorMixin impleme
     private VariableAmount api$count = VariableAmount.fixed(10);
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return PopulatorTypes.MELON;
     }
 

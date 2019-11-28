@@ -27,7 +27,7 @@ package org.spongepowered.common.data;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spongepowered.api.data.DataQuery.of;
+import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -39,14 +39,14 @@ import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslator;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Coerce;
 
 import java.util.ArrayList;
@@ -193,7 +193,7 @@ public class MemoryDataView implements DataView {
             if (object == null) {
                 return Optional.empty();
             }
-            if (this.safety == SafetyMode.ALL_DATA_CLONED) {
+            if (this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.ALL_DATA_CLONED) {
                 if (object.getClass().isArray()) {
                     if (object instanceof byte[]) {
                         return Optional.<Object>of(ArrayUtils.clone((byte[]) object));
@@ -280,7 +280,7 @@ public class MemoryDataView implements DataView {
         } else if (value instanceof Map) {
             setMap(key, (Map) value);
         } else if (value.getClass().isArray()) {
-            if (this.safety == SafetyMode.ALL_DATA_CLONED || this.safety == SafetyMode.CLONED_ON_SET) {
+            if (this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.ALL_DATA_CLONED || this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.CLONED_ON_SET) {
                 if (value instanceof byte[]) {
                     this.map.put(key, ArrayUtils.clone((byte[]) value));
                 } else if (value instanceof short[]) {
@@ -308,7 +308,7 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public <E> DataView set(Key<? extends BaseValue<E>> key, E value) {
+    public <E> DataView set(Key<? extends Value<E>> key, E value) {
         return set(checkNotNull(key, "Key was null!").getQuery(), value);
     }
 
@@ -327,7 +327,7 @@ public class MemoryDataView implements DataView {
             if (object instanceof DataSerializable) {
                 builder.add(((DataSerializable) object).toContainer());
             } else if (object instanceof DataView) {
-                if (this.safety == SafetyMode.ALL_DATA_CLONED || this.safety == SafetyMode.CLONED_ON_SET) {
+                if (this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.ALL_DATA_CLONED || this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.CLONED_ON_SET) {
                     MemoryDataView view = new MemoryDataContainer(this.safety);
                     DataView internalView = (DataView) object;
                     for (Map.Entry<DataQuery, Object> entry : internalView.getValues(false).entrySet()) {
@@ -812,7 +812,7 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public DataContainer copy(SafetyMode safety) {
+    public DataContainer copy(org.spongepowered.api.data.persistence.DataView.SafetyMode safety) {
         final DataContainer container = new MemoryDataContainer(safety);
         getKeys(false)
             .forEach(query ->
@@ -829,7 +829,7 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public SafetyMode getSafetyMode() {
+    public org.spongepowered.api.data.persistence.DataView.SafetyMode getSafetyMode() {
         return this.safety;
     }
 

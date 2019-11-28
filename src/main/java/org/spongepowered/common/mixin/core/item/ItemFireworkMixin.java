@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -38,14 +37,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.projectile.Firework;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -56,6 +55,7 @@ import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(ItemFirework.class)
 public class ItemFireworkMixin extends Item {
@@ -195,7 +195,7 @@ public class ItemFireworkMixin extends Item {
         if (((WorldBridge) world).bridge$isFake() ) {
             return false;
         }
-        ((Firework) rocket).setShooter((Player) player);
+        ((FireworkRocket) rocket).setShooter((Player) player);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));

@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
@@ -41,7 +41,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ShulkerBulletDirectionalDataProcessor extends AbstractSingleDataSingleTargetProcessor<ShulkerBulletEntityAccessor, Direction, Value<Direction>,
+public class ShulkerBulletDirectionalDataProcessor extends AbstractSingleDataSingleTargetProcessor<ShulkerBulletEntityAccessor, Direction, Mutable<Direction>,
         DirectionalData, ImmutableDirectionalData> {
 
     public ShulkerBulletDirectionalDataProcessor() {
@@ -65,7 +65,7 @@ public class ShulkerBulletDirectionalDataProcessor extends AbstractSingleDataSin
     }
 
     @Override
-    protected ImmutableValue<Direction> constructImmutableValue(Direction value) {
+    protected Immutable<Direction> constructImmutableValue(Direction value) {
         return new ImmutableSpongeValue<>(Keys.DIRECTION, Direction.NONE, value);
     }
 
@@ -75,7 +75,7 @@ public class ShulkerBulletDirectionalDataProcessor extends AbstractSingleDataSin
     }
 
     @Override
-    protected Value<Direction> constructValue(Direction actualValue) {
+    protected Mutable<Direction> constructValue(Direction actualValue) {
         return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, actualValue);
     }
 

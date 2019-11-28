@@ -25,24 +25,23 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.Queries.POSITION_X;
-import static org.spongepowered.api.data.Queries.POSITION_Y;
-import static org.spongepowered.api.data.Queries.POSITION_Z;
+import static org.spongepowered.api.data.persistence.Queries.POSITION_X;
+import static org.spongepowered.api.data.persistence.Queries.POSITION_Y;
+import static org.spongepowered.api.data.persistence.Queries.POSITION_Z;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBodyPartRotationalData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BodyPartRotationalData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
-import org.spongepowered.api.data.value.mutable.MapValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.MapValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBodyPartRotationalData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -102,37 +101,37 @@ public class SpongeBodyPartRotationalData extends AbstractData<BodyPartRotationa
     }
 
     @Override
-    public MapValue<BodyPart, Vector3d> partRotation() {
+    public Mutable<BodyPart, Vector3d> partRotation() {
         return new SpongeMapValue<>(Keys.BODY_ROTATIONS, this.rotations);
     }
 
     @Override
-    public Value<Vector3d> headDirection() {
+    public org.spongepowered.api.data.value.Value.Mutable<Vector3d> headDirection() {
         return new SpongeValue<>(Keys.HEAD_ROTATION, this.rotations.get(BodyParts.HEAD));
     }
 
     @Override
-    public Value<Vector3d> bodyRotation() {
+    public org.spongepowered.api.data.value.Value.Mutable<Vector3d> bodyRotation() {
         return new SpongeValue<>(Keys.CHEST_ROTATION, this.rotations.get(BodyParts.CHEST));
     }
 
     @Override
-    public Value<Vector3d> leftArmDirection() {
+    public org.spongepowered.api.data.value.Value.Mutable<Vector3d> leftArmDirection() {
         return new SpongeValue<>(Keys.LEFT_ARM_ROTATION, this.rotations.get(BodyParts.LEFT_ARM));
     }
 
     @Override
-    public Value<Vector3d> rightArmDirection() {
+    public org.spongepowered.api.data.value.Value.Mutable<Vector3d> rightArmDirection() {
         return new SpongeValue<>(Keys.RIGHT_ARM_ROTATION, this.rotations.get(BodyParts.RIGHT_ARM));
     }
 
     @Override
-    public Value<Vector3d> leftLegDirection() {
+    public org.spongepowered.api.data.value.Value.Mutable<Vector3d> leftLegDirection() {
         return new SpongeValue<>(Keys.LEFT_LEG_ROTATION, this.rotations.get(BodyParts.LEFT_LEG));
     }
 
     @Override
-    public Value<Vector3d> rightLegDirection() {
+    public org.spongepowered.api.data.value.Value.Mutable<Vector3d> rightLegDirection() {
         return new SpongeValue<>(Keys.RIGHT_LEG_ROTATION, this.rotations.get(BodyParts.RIGHT_LEG));
     }
 

@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.WritableBookItem;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlainPagedData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +37,7 @@ import java.util.List;
 public abstract class ItemWritableBookMixin extends ItemMixin {
 
     @Override
-    public void bridge$gatherManipulators(ItemStack itemStack, List<DataManipulator<?, ?>> list) {
+    public void bridge$gatherManipulators(ItemStack itemStack, List<Mutable<?, ?>> list) {
         super.bridge$gatherManipulators(itemStack, list);
         ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(AuthorData.class).ifPresent(list::add);
         ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(PlainPagedData.class).ifPresent(list::add);

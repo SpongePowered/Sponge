@@ -31,9 +31,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableData;
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
+import org.spongepowered.api.data.value.SetValue.Immutable;
+import org.spongepowered.api.data.value.SetValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
-import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.BreakablePlaceableUtils;
@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class BreakableDataProcessor
-        extends AbstractItemSingleDataProcessor<Set<BlockType>, SetValue<BlockType>, BreakableData, ImmutableBreakableData> {
+        extends AbstractItemSingleDataProcessor<Set<BlockType>, Mutable<BlockType>, BreakableData, ImmutableBreakableData> {
 
     public BreakableDataProcessor() {
         super(stack -> true, Keys.BREAKABLE_BLOCK_TYPES);
@@ -83,12 +83,12 @@ public class BreakableDataProcessor
     }
 
     @Override
-    protected SetValue<BlockType> constructValue(Set<BlockType> actualValue) {
+    protected Mutable<BlockType> constructValue(Set<BlockType> actualValue) {
         return new SpongeSetValue<>(Keys.BREAKABLE_BLOCK_TYPES, actualValue);
     }
 
     @Override
-    protected ImmutableSetValue<BlockType> constructImmutableValue(Set<BlockType> value) {
+    protected Immutable<BlockType> constructImmutableValue(Set<BlockType> value) {
         return new ImmutableSpongeSetValue<>(Keys.BREAKABLE_BLOCK_TYPES, value);
     }
 

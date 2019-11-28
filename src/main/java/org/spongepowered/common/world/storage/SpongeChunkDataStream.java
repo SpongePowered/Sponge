@@ -26,7 +26,7 @@ package org.spongepowered.common.world.storage;
 
 import com.google.common.collect.Sets;
 import net.minecraft.world.chunk.storage.RegionFile;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.storage.ChunkDataStream;
 import org.spongepowered.common.bridge.world.chunk.storage.RegionFileAccessor;
 

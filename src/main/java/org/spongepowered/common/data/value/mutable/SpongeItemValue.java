@@ -27,9 +27,9 @@ package org.spongepowered.common.data.value.mutable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeItemValue;
 
@@ -37,11 +37,11 @@ import java.util.function.Function;
 
 public class SpongeItemValue extends SpongeValue<ItemStack> {
 
-    public SpongeItemValue(Key<? extends BaseValue<ItemStack>> key, ItemStack defaultValue) {
+    public SpongeItemValue(Key<? extends Value<ItemStack>> key, ItemStack defaultValue) {
         super(key, defaultValue.copy());
     }
 
-    public SpongeItemValue(Key<? extends BaseValue<ItemStack>> key, ItemStack defaultValue, ItemStack actualValue) {
+    public SpongeItemValue(Key<? extends Value<ItemStack>> key, ItemStack defaultValue, ItemStack actualValue) {
         super(key, defaultValue.copy(), actualValue.copy());
     }
 
@@ -51,23 +51,23 @@ public class SpongeItemValue extends SpongeValue<ItemStack> {
     }
 
     @Override
-    public Value<ItemStack> set(ItemStack value) {
+    public Mutable<ItemStack> set(ItemStack value) {
         return super.set(value.copy());
     }
 
     @Override
-    public Value<ItemStack> transform(Function<ItemStack, ItemStack> function) {
+    public Mutable<ItemStack> transform(Function<ItemStack, ItemStack> function) {
         this.actualValue = checkNotNull(checkNotNull(function).apply(this.actualValue)).copy();
         return this;
     }
 
     @Override
-    public ImmutableValue<ItemStack> asImmutable() {
+    public Immutable<ItemStack> asImmutable() {
         return new ImmutableSpongeItemValue(this.getKey(), getDefault(), get());
     }
 
     @Override
-    public Value<ItemStack> copy() {
+    public Mutable<ItemStack> copy() {
         return new SpongeItemValue(this.getKey(), getDefault(), get());
     }
 }

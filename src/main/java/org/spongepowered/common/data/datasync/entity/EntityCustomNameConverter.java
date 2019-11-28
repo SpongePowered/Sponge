@@ -27,7 +27,7 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -56,8 +56,8 @@ public class EntityCustomNameConverter extends DataParameterConverter<String> {
     }
 
     @Override
-    public String getValueFromEvent(String originalValue, List<ImmutableValue<?>> immutableValues) {
-        for (ImmutableValue<?> value : immutableValues) {
+    public String getValueFromEvent(String originalValue, List<Immutable<?>> immutableValues) {
+        for (Immutable<?> value : immutableValues) {
             if (value.getKey() == Keys.DISPLAY_NAME) {
                 try {
                     return SpongeTexts.toLegacy((Text) value.get());

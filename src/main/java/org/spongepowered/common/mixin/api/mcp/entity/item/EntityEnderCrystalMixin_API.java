@@ -25,13 +25,13 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.EnderCrystalEntity;
-import org.spongepowered.api.entity.EnderCrystal;
+import org.spongepowered.api.entity.explosive.EndCrystal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.entity.item.EntityEnderCrystalBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
 @Mixin(EnderCrystalEntity.class)
-public abstract class EntityEnderCrystalMixin_API extends EntityMixin_API implements EnderCrystal {
+public abstract class EntityEnderCrystalMixin_API extends EntityMixin_API implements EndCrystal {
 
     @Override
     public void detonate() {

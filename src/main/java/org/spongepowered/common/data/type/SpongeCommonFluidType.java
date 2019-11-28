@@ -25,9 +25,9 @@
 package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.property.PropertyStore;
-import org.spongepowered.api.extra.fluid.FluidType;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.property.provider.PropertyProvider;
+import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.SpongeImpl;
 
@@ -56,7 +56,7 @@ public final class SpongeCommonFluidType extends SpongeCatalogType implements Fl
 
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        final Optional<PropertyStore<T>> optional = SpongeImpl.getPropertyRegistry().getStore(propertyClass);
+        final Optional<PropertyProvider<T>> optional = SpongeImpl.getPropertyRegistry().getStore(propertyClass);
         if (optional.isPresent()) {
             return optional.get().getFor(this);
         }

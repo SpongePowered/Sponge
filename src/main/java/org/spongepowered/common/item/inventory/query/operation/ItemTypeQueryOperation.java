@@ -26,12 +26,12 @@ package org.spongepowered.common.item.inventory.query.operation;
 
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 
 public final class ItemTypeQueryOperation extends ItemStackQueryOperation<ItemType> {
 
     public ItemTypeQueryOperation(ItemType type) {
-        super(QueryOperationTypes.ITEM_TYPE, type);
+        super(QueryTypes.ITEM_TYPE, type);
     }
 
     @Override

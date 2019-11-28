@@ -35,16 +35,16 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Singleton;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandManager;
-import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
+import org.spongepowered.api.command.manager.CommandManager;
+import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.command.SendCommandEvent;
@@ -118,17 +118,17 @@ public class SpongeCommandManager implements CommandManager {
     }
 
     @Override
-    public Optional<CommandMapping> register(Object plugin, CommandCallable callable, String... alias) {
+    public Optional<CommandMapping> register(Object plugin, Command callable, String... alias) {
         return register(plugin, callable, Arrays.asList(alias));
     }
 
     @Override
-    public Optional<CommandMapping> register(Object plugin, CommandCallable callable, List<String> aliases) {
+    public Optional<CommandMapping> register(Object plugin, Command callable, List<String> aliases) {
         return register(plugin, callable, aliases, Function.identity());
     }
 
     @Override
-    public Optional<CommandMapping> register(Object plugin, CommandCallable callable, List<String> aliases,
+    public Optional<CommandMapping> register(Object plugin, Command callable, List<String> aliases,
             Function<List<String>, List<String>> callback) {
         checkNotNull(plugin, "plugin");
 

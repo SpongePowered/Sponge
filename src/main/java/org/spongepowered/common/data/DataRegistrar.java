@@ -27,10 +27,24 @@ package org.spongepowered.common.data;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.entity.Comparator;
+import org.spongepowered.api.block.entity.DaylightDetector;
+import org.spongepowered.api.block.entity.EnchantmentTable;
+import org.spongepowered.api.block.entity.EndPortal;
+import org.spongepowered.api.block.entity.EnderChest;
+import org.spongepowered.api.block.entity.MobSpawner;
+import org.spongepowered.api.block.entity.PlayerHead;
+import org.spongepowered.api.block.entity.carrier.Beacon;
+import org.spongepowered.api.block.entity.carrier.BrewingStand;
+import org.spongepowered.api.block.entity.carrier.Dispenser;
+import org.spongepowered.api.block.entity.carrier.Dropper;
+import org.spongepowered.api.block.entity.carrier.Hopper;
+import org.spongepowered.api.block.entity.carrier.chest.Chest;
+import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.block.tileentity.*;
 import org.spongepowered.api.block.tileentity.carrier.*;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.*;
 import org.spongepowered.api.data.manipulator.immutable.block.*;
 import org.spongepowered.api.data.manipulator.immutable.entity.*;
@@ -43,7 +57,6 @@ import org.spongepowered.api.data.manipulator.mutable.item.*;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.*;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.EntityArchetype;
-import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.property.PropertyRegistry;
@@ -54,6 +67,7 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidItemData;
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
+import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -148,12 +162,12 @@ public final class DataRegistrar {
         dataManager.registerBuilder(EnchantmentTable.class, new SpongeEnchantmentTableBuilder());
         dataManager.registerBuilder(EnderChest.class, new SpongeEnderChestBuilder());
         dataManager.registerBuilder(EndPortal.class, new SpongeEndPortalBuilder());
-        dataManager.registerBuilder(Furnace.class, new SpongeFurnaceBuilder());
+        dataManager.registerBuilder(FurnaceBlockEntity.class, new SpongeFurnaceBuilder());
         dataManager.registerBuilder(Hopper.class, new SpongeHopperBuilder());
         dataManager.registerBuilder(MobSpawner.class, new SpongeMobSpawnerBuilder());
         dataManager.registerBuilder(Note.class, new SpongeNoteBuilder());
         dataManager.registerBuilder(Sign.class, new SpongeSignBuilder());
-        dataManager.registerBuilder(Skull.class, new SpongeSkullBuilder());
+        dataManager.registerBuilder(PlayerHead.class, new SpongeSkullBuilder());
         dataManager.registerBuilder(Beacon.class, new SpongeBeaconBuilder());
         dataManager.registerBuilder(LocatableBlock.class, new SpongeLocatableBlockBuilder());
 
@@ -214,7 +228,7 @@ public final class DataRegistrar {
         dataManager.registerContentUpdater(ItemStackSnapshot.class, new ItemStackSnapshotDuplicateManipulatorUpdater());
 
         // Content Updaters for Custom Data
-        dataManager.registerContentUpdater(DataManipulator.class, new LegacyCustomDataClassContentUpdater());
+        dataManager.registerContentUpdater(Mutable.class, new LegacyCustomDataClassContentUpdater());
 
         // Data Manipulators
 

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.entity.ArmorEquipable;
+import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.living.human.EntityHuman;

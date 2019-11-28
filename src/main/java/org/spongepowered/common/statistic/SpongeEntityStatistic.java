@@ -28,9 +28,9 @@ import net.minecraft.stats.Stat;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.statistic.EntityStatistic;
-import org.spongepowered.api.statistic.StatisticType;
+import org.spongepowered.api.statistic.StatisticCategory;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -40,7 +40,7 @@ import java.util.Optional;
 public final class SpongeEntityStatistic extends Stat implements EntityStatistic, SpongeStatistic {
 
     private final String entityId;
-    private StatisticType statisticType;
+    private StatisticCategory statisticType;
 
     public SpongeEntityStatistic(final String statIdIn, final ITextComponent statNameIn, final String entityId) {
         super(statIdIn, statNameIn);
@@ -68,9 +68,9 @@ public final class SpongeEntityStatistic extends Stat implements EntityStatistic
     }
 
     @Override
-    public StatisticType getType() {
+    public StatisticCategory getType() {
         if (this.statisticType == null) {
-            this.statisticType = Sponge.getRegistry().getType(StatisticType.class, getId().substring(0, getId().indexOf("."))).get();
+            this.statisticType = Sponge.getRegistry().getType(StatisticCategory.class, getId().substring(0, getId().indexOf("."))).get();
         }
         return this.statisticType;
     }

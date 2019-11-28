@@ -27,16 +27,16 @@ package org.spongepowered.common.data.builder.manipulator.immutable.block;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.ImmutableDataHolder;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
+import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
@@ -51,7 +51,7 @@ public class ImmutableSpongeTreeDataBuilder extends AbstractDataBuilder<Immutabl
 
     @Override
     public ImmutableTreeData createImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, TreeTypes.OAK);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, WoodTypes.OAK);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class ImmutableSpongeTreeDataBuilder extends AbstractDataBuilder<Immutabl
     protected Optional<ImmutableTreeData> buildContent(DataView container) throws InvalidDataException {
         checkDataExists(container, Keys.TREE_TYPE.getQuery());
         final String treeTypeId = container.getString(Keys.TREE_TYPE.getQuery()).get();
-        final TreeType treeType = SpongeImpl.getRegistry().getType(TreeType.class, treeTypeId).get();
+        final WoodType treeType = SpongeImpl.getRegistry().getType(WoodType.class, treeTypeId).get();
         return Optional.of(ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType));
     }
 }

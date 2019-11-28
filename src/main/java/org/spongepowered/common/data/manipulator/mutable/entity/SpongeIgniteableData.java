@@ -26,11 +26,11 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeIgniteableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.util.Constants;
@@ -54,7 +54,7 @@ public class SpongeIgniteableData extends AbstractData<IgniteableData, Immutable
     }
 
     @Override
-    public MutableBoundedValue<Integer> fireTicks() {
+    public Mutable<Integer> fireTicks() {
         return SpongeValueFactory.boundedBuilder(Keys.FIRE_TICKS)
             .defaultValue(Constants.Entity.DEFAULT_FIRE_TICKS)
             .minimum(1)
@@ -64,7 +64,7 @@ public class SpongeIgniteableData extends AbstractData<IgniteableData, Immutable
     }
 
     @Override
-    public MutableBoundedValue<Integer> fireDelay() {
+    public Mutable<Integer> fireDelay() {
         return SpongeValueFactory.boundedBuilder(Keys.FIRE_DAMAGE_DELAY)
             .defaultValue(Constants.Entity.DEFAULT_FIRE_DAMAGE_DELAY)
             .minimum(0)

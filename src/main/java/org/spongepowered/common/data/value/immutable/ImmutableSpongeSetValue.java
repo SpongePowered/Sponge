@@ -30,63 +30,63 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
-import org.spongepowered.api.data.value.mutable.SetValue;
+import org.spongepowered.api.data.value.SetValue.Immutable;
+import org.spongepowered.api.data.value.SetValue.Mutable;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E, Set<E>, ImmutableSetValue<E>, SetValue<E>>
-    implements ImmutableSetValue<E> {
+public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E, Set<E>, Immutable<E>, Mutable<E>>
+    implements Immutable<E> {
 
-    public ImmutableSpongeSetValue(Key<? extends BaseValue<Set<E>>> key) {
+    public ImmutableSpongeSetValue(Key<? extends Value<Set<E>>> key) {
         super(key, ImmutableSet.<E>of());
     }
 
-    public ImmutableSpongeSetValue(Key<? extends BaseValue<Set<E>>> key, Set<E> actualValue) {
+    public ImmutableSpongeSetValue(Key<? extends Value<Set<E>>> key, Set<E> actualValue) {
         super(key, ImmutableSet.<E>of(), actualValue);
     }
 
     @Override
 
-    public ImmutableSetValue<E> with(Set<E> value) {
+    public Immutable<E> with(Set<E> value) {
         return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.copyOf(value));
     }
 
     @Override
-    public ImmutableSetValue<E> transform(Function<Set<E>, Set<E>> function) {
+    public Immutable<E> transform(Function<Set<E>, Set<E>> function) {
         return new ImmutableSpongeSetValue<>(getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
     }
 
     @Override
-    public ImmutableSetValue<E> withElement(E elements) {
+    public Immutable<E> withElement(E elements) {
         return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).add(elements).build());
     }
 
     @Override
-    public ImmutableSetValue<E> withAll(Iterable<E> elements) {
+    public Immutable<E> withAll(Iterable<E> elements) {
         return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).addAll(elements).build());
     }
 
     @Override
-    public ImmutableSetValue<E> without(E element) {
+    public Immutable<E> without(E element) {
         final ImmutableSet.Builder<E> builder = ImmutableSet.builder();
         this.actualValue.stream().filter(existing -> !existing.equals(element)).forEach(builder::add);
         return new ImmutableSpongeSetValue<>(getKey(), builder.build());
     }
 
     @Override
-    public ImmutableSetValue<E> withoutAll(Iterable<E> elements) {
+    public Immutable<E> withoutAll(Iterable<E> elements) {
         final ImmutableSet.Builder<E> builder = ImmutableSet.builder();
         this.actualValue.stream().filter(existingElement -> !Iterables.contains(elements, existingElement)).forEach(builder::add);
         return new ImmutableSpongeSetValue<>(getKey(), builder.build());
     }
 
     @Override
-    public ImmutableSetValue<E> withoutAll(Predicate<E> predicate) {
+    public Immutable<E> withoutAll(Predicate<E> predicate) {
         final ImmutableSet.Builder<E> builder = ImmutableSet.builder();
         this.actualValue.stream().filter(existingElement -> checkNotNull(predicate).test(existingElement)).forEach(builder::add);
         return new ImmutableSpongeSetValue<>(getKey(), builder.build());
@@ -100,7 +100,7 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
     }
 
     @Override
-    public SetValue<E> asMutable() {
+    public Mutable<E> asMutable() {
         final Set<E> set = Sets.newHashSet();
         set.addAll(this.actualValue);
         return new SpongeSetValue<>(getKey(), set);

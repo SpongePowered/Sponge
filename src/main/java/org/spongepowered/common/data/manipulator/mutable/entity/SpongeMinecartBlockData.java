@@ -27,11 +27,11 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import com.google.common.base.Preconditions;
 import net.minecraft.block.Blocks;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMinecartBlockData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MinecartBlockData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMinecartBlockData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -55,12 +55,12 @@ public class SpongeMinecartBlockData extends AbstractData<MinecartBlockData, Imm
     }
 
     @Override
-    public Value<BlockState> block() {
+    public Mutable<BlockState> block() {
         return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), this.block);
     }
 
     @Override
-    public Value<Integer> offset() {
+    public Mutable<Integer> offset() {
         return new SpongeValue<>(Keys.OFFSET, 6, this.offset);
     }
 

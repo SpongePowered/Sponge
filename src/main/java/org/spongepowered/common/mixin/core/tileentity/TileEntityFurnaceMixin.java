@@ -33,7 +33,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.MathHelper;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.tileentity.carrier.Furnace;
+import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.SmeltEvent;
@@ -111,7 +111,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
         final ItemStackSnapshot shrinkedFuel = ItemStackUtil.snapshotOf(ItemStackUtil.cloneDefensive(itemStack, itemStack.getCount() - 1));
 
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(fuel, shrinkedFuel);
-        final SmeltEvent.ConsumeFuel event = SpongeEventFactory.createSmeltEventConsumeFuel(cause, fuel, (Furnace) this, Collections.singletonList(transaction));
+        final SmeltEvent.ConsumeFuel event = SpongeEventFactory.createSmeltEventConsumeFuel(cause, fuel, (FurnaceBlockEntity) this, Collections.singletonList(transaction));
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             this.currentItemBurnTime = 0;
@@ -140,12 +140,12 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
 
         final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
         if (this.cookTime == 0) { // Start
-            final SmeltEvent.Start event = SpongeEventFactory.createSmeltEventStart(cause, fuel, (Furnace) this, Collections.emptyList());
+            final SmeltEvent.Start event = SpongeEventFactory.createSmeltEventStart(cause, fuel, (FurnaceBlockEntity) this, Collections.emptyList());
             SpongeImpl.postEvent(event);
             return !event.isCancelled();
 
         } else { // Tick up
-            final SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, (Furnace) this, Collections.emptyList());
+            final SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, (FurnaceBlockEntity) this, Collections.emptyList());
             SpongeImpl.postEvent(event);
             return !event.isCancelled();
         }
@@ -157,7 +157,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
         final int clampedCookTime = MathHelper.clamp(newCookTime, zero, totalCookTime);
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
         final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-        final SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, (Furnace) this, Collections.emptyList());
+        final SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, (FurnaceBlockEntity) this, Collections.emptyList());
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             return this.cookTime; // dont tick down
@@ -205,7 +205,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
         if (this.cookTime > 0) {
             final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
             final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-            final SmeltEvent.Interrupt event = SpongeEventFactory.createSmeltEventInterrupt(cause, fuel, Collections.emptyList(), (Furnace) this);
+            final SmeltEvent.Interrupt event = SpongeEventFactory.createSmeltEventInterrupt(cause, fuel, Collections.emptyList(), (FurnaceBlockEntity) this);
             SpongeImpl.postEvent(event);
         }
     }
@@ -239,7 +239,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
         final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(result);
-        final SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, Collections.singletonList(snapshot), (Furnace) this);
+        final SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, Collections.singletonList(snapshot), (FurnaceBlockEntity) this);
         SpongeImpl.postEvent(event);
     }
 

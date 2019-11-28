@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDisabledSlotsData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DisabledSlotsData;
-import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
+import org.spongepowered.api.data.value.SetValue.Immutable;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDisabledSlotsData;
@@ -40,8 +40,8 @@ public class ImmutableSpongeDisabledSlotsData extends AbstractImmutableData<Immu
 
     private Set<EquipmentType> takingDisabled;
     private Set<EquipmentType> placingDisabled;
-    private ImmutableSetValue<EquipmentType> takingDisabledValue;
-    private ImmutableSetValue<EquipmentType> placingDisabledValue;
+    private Immutable<EquipmentType> takingDisabledValue;
+    private Immutable<EquipmentType> placingDisabledValue;
 
     public ImmutableSpongeDisabledSlotsData() {
         this(Collections.emptySet(), Collections.emptySet());
@@ -74,12 +74,12 @@ public class ImmutableSpongeDisabledSlotsData extends AbstractImmutableData<Immu
         return new SpongeDisabledSlotsData(this.takingDisabled, this.placingDisabled);
     }
     @Override
-    public ImmutableSetValue<EquipmentType> takingDisabled() {
+    public Immutable<EquipmentType> takingDisabled() {
         return this.takingDisabledValue;
     }
 
     @Override
-    public ImmutableSetValue<EquipmentType> placingDisabled() {
+    public Immutable<EquipmentType> placingDisabled() {
         return this.placingDisabledValue;
     }
 }

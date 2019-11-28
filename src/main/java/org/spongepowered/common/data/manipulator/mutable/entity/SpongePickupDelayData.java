@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePickupDelayData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PickupDelayData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePickupDelayData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
@@ -74,7 +73,7 @@ public final class SpongePickupDelayData extends AbstractData<PickupDelayData, I
     }
 
     @Override
-    public Value<Boolean> infinite() {
+    public Mutable<Boolean> infinite() {
         return new SpongeValue<>(Keys.INFINITE_PICKUP_DELAY, false, isInifinitePickup());
     }
 
@@ -83,7 +82,7 @@ public final class SpongePickupDelayData extends AbstractData<PickupDelayData, I
     }
 
     @Override
-    public MutableBoundedValue<Integer> delay() {
+    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> delay() {
         return SpongeValueFactory.boundedBuilder(Keys.PICKUP_DELAY) // this.usedKey does not work here
                 .actualValue(this.value)
                 .minimum(Constants.Entity.Item.MIN_PICKUP_DELAY)

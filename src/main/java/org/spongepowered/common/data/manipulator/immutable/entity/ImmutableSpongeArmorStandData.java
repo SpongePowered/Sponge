@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArmorStandData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArmorStandData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArmorStandData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -39,10 +39,10 @@ public class ImmutableSpongeArmorStandData extends AbstractImmutableData<Immutab
     private final boolean small;
     private final boolean arms;
     private final boolean basePlate;
-    private final ImmutableValue<Boolean> markerValue;
-    private final ImmutableValue<Boolean> smallValue;
-    private final ImmutableValue<Boolean> armsValue;
-    private final ImmutableValue<Boolean> basePlateValue;
+    private final Immutable<Boolean> markerValue;
+    private final Immutable<Boolean> smallValue;
+    private final Immutable<Boolean> armsValue;
+    private final Immutable<Boolean> basePlateValue;
 
     public ImmutableSpongeArmorStandData() {
         this(false, false, false, true);
@@ -78,22 +78,22 @@ public class ImmutableSpongeArmorStandData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public ImmutableValue<Boolean> marker() {
+    public Immutable<Boolean> marker() {
         return this.markerValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> small() {
+    public Immutable<Boolean> small() {
         return this.smallValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> arms() {
+    public Immutable<Boolean> arms() {
         return this.armsValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> basePlate() {
+    public Immutable<Boolean> basePlate() {
         return this.basePlateValue;
     }
 

@@ -27,10 +27,10 @@ package org.spongepowered.common.data.builder.item;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
@@ -64,7 +64,7 @@ public class SpongeItemStackSnapshotBuilder extends AbstractDataBuilder<ItemStac
             }
             final int count = getData(container, Constants.ItemStack.COUNT, Integer.class);
             final int damage = container.getInt(Constants.ItemStack.DAMAGE_VALUE).orElse(0);
-            final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
+            final ImmutableList<Immutable<?, ?>> manipulators;
             if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
                 manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get());
             } else {

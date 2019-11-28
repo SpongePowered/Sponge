@@ -26,9 +26,9 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.block.entity.carrier.CarrierBlockEntity;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.util.Constants;
@@ -36,7 +36,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeLockableBuilder<T extends TileEntityCarrier> extends AbstractTileBuilder<T> {
+public class SpongeLockableBuilder<T extends CarrierBlockEntity> extends AbstractTileBuilder<T> {
 
     protected SpongeLockableBuilder(Class<T> clazz, int version) {
         super(clazz, version);

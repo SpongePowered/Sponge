@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.pattern.BlockStateMatcher;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -32,13 +31,12 @@ import net.minecraft.world.gen.feature.DesertWellsFeature;
 import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorObject;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.DesertWell;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 @Mixin(DesertWellsFeature.class)
@@ -60,7 +58,7 @@ public abstract class WorldGenDesertWellsMixin_API extends Feature implements De
     }
 
     @Override
-    public PopulatorType getType() {
+    public org.spongepowered.api.world.gen.feature.Feature getType() {
         return PopulatorTypes.DESERT_WELL;
     }
 

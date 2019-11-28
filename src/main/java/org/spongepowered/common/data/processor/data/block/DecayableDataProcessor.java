@@ -27,12 +27,12 @@ package org.spongepowered.common.data.processor.data.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDecayableData;
 import org.spongepowered.api.data.manipulator.mutable.block.DecayableData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDecayableData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class DecayableDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, DecayableData, ImmutableDecayableData> {
+public class DecayableDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Mutable<Boolean>, DecayableData, ImmutableDecayableData> {
 
     public DecayableDataProcessor() {
         super(Keys.DECAYABLE);
@@ -49,7 +49,7 @@ public class DecayableDataProcessor extends AbstractBlockOnlyDataProcessor<Boole
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Mutable<Boolean> constructValue(Boolean actualValue) {
         return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 

@@ -26,12 +26,11 @@ package org.spongepowered.common.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
-
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.value.Value;
 import java.util.Optional;
 
 /**
@@ -78,7 +77,7 @@ public class MemoryDataContainer extends MemoryDataView implements DataContainer
     }
 
     @Override
-    public <E> DataContainer set(Key<? extends BaseValue<E>> key, E value) {
+    public <E> DataContainer set(Key<? extends Value<E>> key, E value) {
         return set(checkNotNull(key).getQuery(), value);
     }
 

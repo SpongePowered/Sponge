@@ -29,9 +29,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -39,7 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class SneakingDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Boolean, Value<Boolean>, SneakingData, ImmutableSneakingData> {
+public class SneakingDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Boolean, Mutable<Boolean>, SneakingData, ImmutableSneakingData> {
 
     public SneakingDataProcessor() {
         super(Entity.class, Keys.IS_SNEAKING);
@@ -62,12 +62,12 @@ public class SneakingDataProcessor extends AbstractEntitySingleDataProcessor<Ent
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean sneaking) {
+    protected Mutable<Boolean> constructValue(Boolean sneaking) {
         return new SpongeValue<>(Keys.IS_SNEAKING, false, sneaking);
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, value);
     }
 

@@ -28,9 +28,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -43,7 +43,7 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
+public final class SpongeKey<V extends Value<?>> implements Key<V> {
 
     private final TypeToken<V> valueToken;
     private final String id;
@@ -58,7 +58,7 @@ public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
         this.name = name;
         this.valueToken = valueToken;
         this.query = query;
-        this.elementToken = this.valueToken.resolveType(BaseValue.class.getTypeParameters()[0]);
+        this.elementToken = this.valueToken.resolveType(Value.class.getTypeParameters()[0]);
         this.parent = plugin;
     }
 

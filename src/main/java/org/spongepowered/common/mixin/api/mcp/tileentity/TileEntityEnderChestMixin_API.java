@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.EnderChestTileEntity;
-import org.spongepowered.api.block.tileentity.EnderChest;
+import org.spongepowered.api.block.entity.EnderChest;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 

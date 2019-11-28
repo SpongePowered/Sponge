@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.world.storage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonParseException;
 import net.minecraft.nbt.CompoundNBT;
@@ -35,19 +33,19 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.gen.GeneratorType;
+import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -60,7 +58,8 @@ import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.Constants;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
@@ -481,12 +480,12 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
+    public Collection<TerrainGeneratorConfig> getGeneratorModifiers() {
         return WorldGeneratorModifierRegistryModule.getInstance().toModifiers( ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorldGenModifiers());
     }
 
     @Override
-    public void setGeneratorModifiers(final Collection<WorldGeneratorModifier> modifiers) {
+    public void setGeneratorModifiers(final Collection<TerrainGeneratorConfig> modifiers) {
         checkNotNull(modifiers, "modifiers");
 
         ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorldGenModifiers().clear();

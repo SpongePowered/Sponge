@@ -27,12 +27,12 @@ package org.spongepowered.common.data.builder.manipulator;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
+import org.spongepowered.api.data.DataManipulator.Mutable.Factory;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
@@ -42,8 +42,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.Optional;
 
-public final class SpongeDataManipulatorBuilder<T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>>
-    implements DataManipulatorBuilder<T, I> {
+public final class SpongeDataManipulatorBuilder<T extends Mutable<T, I>, I extends Immutable<I, T>>
+    implements Factory<T, I> {
 
     private final DataProcessorDelegate<T, I> delegate;
     private final Class<T> manipulatorClass;

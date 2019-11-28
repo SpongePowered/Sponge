@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableActiveItemData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ActiveItemData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeActiveItemData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
@@ -44,12 +44,12 @@ public class SpongeActiveItemData extends AbstractSingleData<ItemStackSnapshot, 
     }
 
     @Override
-    public Value<ItemStackSnapshot> activeItem() {
+    public Mutable<ItemStackSnapshot> activeItem() {
         return new SpongeValue<>(Keys.ACTIVE_ITEM, getValue());
     }
 
     @Override
-    protected Value<ItemStackSnapshot> getValueGetter() {
+    protected Mutable<ItemStackSnapshot> getValueGetter() {
         return activeItem();
     }
 

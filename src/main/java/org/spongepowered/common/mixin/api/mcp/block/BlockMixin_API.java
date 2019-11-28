@@ -34,9 +34,9 @@ import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
@@ -122,12 +122,12 @@ public abstract class BlockMixin_API implements BlockType {
 
 
     @Override
-    public Collection<BlockTrait<?>> getTraits() {
+    public Collection<StateProperty<?>> getTraits() {
         return getDefaultState().getTraits();
     }
 
     @Override
-    public Optional<BlockTrait<?>> getTrait(String blockTrait) {
+    public Optional<StateProperty<?>> getTrait(String blockTrait) {
         return getDefaultState().getTrait(blockTrait);
     }
 

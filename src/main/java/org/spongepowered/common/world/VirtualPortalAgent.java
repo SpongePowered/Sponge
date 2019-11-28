@@ -25,9 +25,9 @@
 package org.spongepowered.common.world;
 
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.PortalAgent;
-import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.teleport.PortalAgent;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 

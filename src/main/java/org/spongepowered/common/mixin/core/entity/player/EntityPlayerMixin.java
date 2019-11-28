@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -123,7 +122,7 @@ import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

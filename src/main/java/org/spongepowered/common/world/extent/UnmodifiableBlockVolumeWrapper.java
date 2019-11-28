@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.world.extent.ImmutableBlockVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
-import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
+import org.spongepowered.api.world.volume.StorageType;
+import org.spongepowered.api.world.volume.block.ImmutableBlockVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
+import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.volume.block.worker.BlockVolumeStream;
 import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
+import org.spongepowered.math.vector.Vector3i;
 
 public class UnmodifiableBlockVolumeWrapper implements UnmodifiableBlockVolume {
 
@@ -84,7 +84,7 @@ public class UnmodifiableBlockVolumeWrapper implements UnmodifiableBlockVolume {
     }
 
     @Override
-    public BlockVolumeWorker<? extends UnmodifiableBlockVolume> getBlockWorker() {
+    public BlockVolumeStream<? extends UnmodifiableBlockVolume> getBlockWorker() {
         return new SpongeBlockVolumeWorker<>(this);
     }
 

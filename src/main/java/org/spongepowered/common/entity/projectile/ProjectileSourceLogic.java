@@ -25,8 +25,7 @@
 package org.spongepowered.common.entity.projectile;
 
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-
+import org.spongepowered.api.projectile.source.ProjectileSource;
 import java.util.Optional;
 
 public interface ProjectileSourceLogic<T extends ProjectileSource> {

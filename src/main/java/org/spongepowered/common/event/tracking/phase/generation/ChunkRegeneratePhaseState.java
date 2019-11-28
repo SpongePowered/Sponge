@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.Chunk;
-
+import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.function.BiConsumer;
 
 public final class ChunkRegeneratePhaseState extends GeneralGenerationPhaseState<ChunkRegenerateContext> {

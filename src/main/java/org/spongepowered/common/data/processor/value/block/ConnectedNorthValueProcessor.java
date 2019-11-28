@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.block;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -36,14 +36,14 @@ import java.util.Optional;
 import net.minecraft.tileentity.ChestTileEntity;
 
 public class ConnectedNorthValueProcessor extends
-        AbstractSpongeValueProcessor<ChestTileEntity, Boolean, Value<Boolean>> {
+        AbstractSpongeValueProcessor<ChestTileEntity, Boolean, Mutable<Boolean>> {
 
     public ConnectedNorthValueProcessor() {
         super(ChestTileEntity.class, Keys.CONNECTED_NORTH);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean defaultValue) {
+    protected Mutable<Boolean> constructValue(Boolean defaultValue) {
         return new SpongeValue<>(Keys.CONNECTED_NORTH, false, defaultValue);
     }
 
@@ -59,7 +59,7 @@ public class ConnectedNorthValueProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(Boolean value) {
         return constructValue(value).asImmutable();
     }
 

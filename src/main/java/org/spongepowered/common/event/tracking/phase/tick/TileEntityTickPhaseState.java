@@ -33,7 +33,7 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -59,7 +59,7 @@ import java.util.function.BiConsumer;
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
     private final BiConsumer<CauseStackManager.StackFrame, TileEntityTickContext> TILE_ENTITY_MODIFIER =
         super.getFrameModifier().andThen((frame, context) ->
-            context.getSource(TileEntity.class)
+            context.getSource(BlockEntity.class)
                 .ifPresent(frame::pushCause)
         );
 
@@ -89,7 +89,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
 
     @Override
     LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
-        return context.getSource(TileEntity.class)
+        return context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over a TileEntity!", context))
                 .getLocatableBlock();
     }
@@ -97,7 +97,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(final TileEntityTickContext context) {
-        final TileEntity tickingTile = context.getSource(TileEntity.class)
+        final BlockEntity tickingTile = context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             TrackingUtil.processBlockCaptures(context);
@@ -154,14 +154,14 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final TileEntityTickContext context) {
         context.applyNotifierIfAvailable(explosionContext::notifier);
         context.applyOwnerIfAvailable(explosionContext::owner);
-        final TileEntity tickingTile = context.getSource(TileEntity.class)
+        final BlockEntity tickingTile = context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
         explosionContext.source(tickingTile);
     }
 
     @Override
     public boolean spawnEntityOrCapture(final TileEntityTickContext context, final Entity entity, final int chunkX, final int chunkZ) {
-        final TileEntity tickingTile = context.getSource(TileEntity.class)
+        final BlockEntity tickingTile = context.getSource(BlockEntity.class)
             .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
         final TileEntityBridge mixinTileEntity = (TileEntityBridge) tickingTile;
 

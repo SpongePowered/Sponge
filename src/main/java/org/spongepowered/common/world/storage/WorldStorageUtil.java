@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.storage;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -32,14 +31,14 @@ import net.minecraft.world.chunk.storage.ChunkLoader;
 import net.minecraft.world.chunk.storage.RegionFile;
 import net.minecraft.world.chunk.storage.RegionFileCache;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.chunk.storage.AnvilChunkLoaderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.mixin.core.world.chunk.storage.RegionFileCacheAccessor;
 import org.spongepowered.common.util.Constants;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;

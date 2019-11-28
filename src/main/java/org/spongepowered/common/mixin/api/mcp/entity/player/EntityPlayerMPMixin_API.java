@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -55,15 +53,14 @@ import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -132,7 +129,8 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -431,7 +429,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     }
 
     @Override
-    public void playRecord(final Vector3i position, final RecordType recordType) {
+    public void playRecord(final Vector3i position, final MusicDisc recordType) {
         playRecord0(position, checkNotNull(recordType, "recordType"));
     }
 
@@ -440,7 +438,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         playRecord0(position, null);
     }
 
-    private void playRecord0(final Vector3i position, @Nullable final RecordType recordType) {
+    private void playRecord0(final Vector3i position, @Nullable final MusicDisc recordType) {
         this.connection.sendPacket(SpongeRecordType.createPacket(position, recordType));
     }
 
@@ -490,12 +488,12 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     }
 
     @Override
-    public Value<Instant> firstPlayed() {
+    public Mutable<Instant> firstPlayed() {
         return new SpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, SpongePlayerDataHandler.getFirstJoined(this.getUniqueID()).get());
     }
 
     @Override
-    public Value<Instant> lastPlayed() {
+    public Mutable<Instant> lastPlayed() {
         return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, Instant.now());
     }
 
@@ -514,13 +512,13 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     }
 
     @Override
-    public Value<GameMode> gameMode() {
+    public Mutable<GameMode> gameMode() {
         return new SpongeValue<>(Keys.GAME_MODE, Constants.Catalog.DEFAULT_GAMEMODE,
                 (GameMode) (Object) this.interactionManager.getGameType());
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(final Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getJoinData());
         manipulators.add(getGameModeData());

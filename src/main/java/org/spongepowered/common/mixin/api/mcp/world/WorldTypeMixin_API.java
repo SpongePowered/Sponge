@@ -31,11 +31,11 @@ import com.google.gson.JsonParseException;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.gen.GeneratorType;
+import org.spongepowered.api.world.gen.TerrainGenerator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -85,7 +85,7 @@ public abstract class WorldTypeMixin_API implements GeneratorType {
     }
 
     @Override
-    public WorldGenerator createGenerator(World world) {
+    public TerrainGenerator createGenerator(World world) {
         checkNotNull(world);
         return ((WorldServerBridge) world).bridge$createWorldGenerator(getGeneratorSettings());
     }

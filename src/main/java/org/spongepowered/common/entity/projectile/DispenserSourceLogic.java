@@ -33,7 +33,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.DispenserTileEntity;
 import net.minecraft.util.Direction;
-import org.spongepowered.api.block.tileentity.carrier.Dispenser;
+import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.entity.projectile.Projectile;
 
 import java.util.List;

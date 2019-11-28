@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.village;
 
 import net.minecraft.village.MerchantRecipe;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;

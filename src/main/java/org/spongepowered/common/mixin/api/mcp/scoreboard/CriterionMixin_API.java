@@ -28,7 +28,7 @@ import com.google.common.base.CaseFormat;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreCriteriaColored;
 import net.minecraft.scoreboard.ScoreCriteria_Old;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;

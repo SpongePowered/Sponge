@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.server;
 
 import net.minecraft.server.dedicated.DedicatedServer;
-import org.spongepowered.api.Server;
+import org.spongepowered.api.server.Server;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 

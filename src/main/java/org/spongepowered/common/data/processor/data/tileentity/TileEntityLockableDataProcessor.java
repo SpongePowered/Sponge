@@ -30,9 +30,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableLockableData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeLockableData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -41,7 +41,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 
 public final class TileEntityLockableDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<LockableTileEntity, String, Value<String>, LockableData, ImmutableLockableData> {
+        extends AbstractTileEntitySingleDataProcessor<LockableTileEntity, String, Mutable<String>, LockableData, ImmutableLockableData> {
 
     public TileEntityLockableDataProcessor() {
         super(LockableTileEntity.class, Keys.LOCK_TOKEN);
@@ -76,12 +76,12 @@ public final class TileEntityLockableDataProcessor
     }
 
     @Override
-    protected Value<String> constructValue(String actualValue) {
+    protected Mutable<String> constructValue(String actualValue) {
         return new SpongeValue<String>(Keys.LOCK_TOKEN, "", actualValue);
     }
 
     @Override
-    protected ImmutableValue<String> constructImmutableValue(String value) {
+    protected Immutable<String> constructImmutableValue(String value) {
         return new ImmutableSpongeValue<String>(Keys.LOCK_TOKEN, "", value);
     }
 

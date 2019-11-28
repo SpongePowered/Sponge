@@ -25,10 +25,10 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.block.entity.carrier.BrewingStand;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.util.Constants;
 

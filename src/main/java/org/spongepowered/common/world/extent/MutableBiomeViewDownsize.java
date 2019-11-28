@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
-import org.spongepowered.api.world.extent.UnmodifiableBiomeVolume;
-import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.UnmodifiableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.workerMutableBiomeVolumeStream;
 import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
+import org.spongepowered.math.vector.Vector3i;
 
 public class MutableBiomeViewDownsize extends AbstractBiomeViewDownsize<MutableBiomeVolume> implements MutableBiomeVolume {
 
@@ -59,7 +59,7 @@ public class MutableBiomeViewDownsize extends AbstractBiomeViewDownsize<MutableB
     }
 
     @Override
-    public MutableBiomeVolumeWorker<? extends MutableBiomeVolume> getBiomeWorker() {
+    public workerMutableBiomeVolumeStream<? extends MutableBiomeVolume> getBiomeWorker() {
         return new SpongeMutableBiomeVolumeWorker<>(this);
     }
 

@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.world.gen;
 
-import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.feature.Feature;
 
 public class InternalPopulatorTypes {
 
-    public static PopulatorType ANIMAL;
-    public static PopulatorType BONUS_CHEST;
-    public static PopulatorType END_SPIKE;
-    public static PopulatorType ENDER_DRAGON;
-    public static PopulatorType PLAINS_GRASS;
-    public static PopulatorType SNOW;
-    public static PopulatorType STRUCTURE;
-    public static PopulatorType UNKNOWN;
+    public static Feature ANIMAL;
+    public static Feature BONUS_CHEST;
+    public static Feature END_SPIKE;
+    public static Feature ENDER_DRAGON;
+    public static Feature PLAINS_GRASS;
+    public static Feature SNOW;
+    public static Feature STRUCTURE;
+    public static Feature UNKNOWN;
 
     private InternalPopulatorTypes() {
     }

@@ -27,9 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.world.chunk;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector2d;
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import net.minecraft.server.management.PlayerChunkMapEntry;
@@ -48,7 +45,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -59,11 +56,11 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
-import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
+import org.spongepowered.api.world.volume.biome.workerMutableBiomeVolumeStream;
+import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeStream;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -77,7 +74,9 @@ import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
-
+import org.spongepowered.math.vector.Vector2d;
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -354,12 +353,12 @@ public abstract class ChunkMixin_API implements Chunk {
     }
 
     @Override
-    public MutableBiomeVolumeWorker<Chunk> getBiomeWorker() {
+    public workerMutableBiomeVolumeStream<Chunk> getBiomeWorker() {
         return new SpongeMutableBiomeVolumeWorker<>(this);
     }
 
     @Override
-    public MutableBlockVolumeWorker<Chunk> getBlockWorker() {
+    public MutableBlockVolumeStream<Chunk> getBlockWorker() {
         return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
@@ -414,24 +413,24 @@ public abstract class ChunkMixin_API implements Chunk {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public Collection<org.spongepowered.api.block.tileentity.TileEntity> getTileEntities() {
+    public Collection<org.spongepowered.api.block.entity.BlockEntity> getTileEntities() {
         return Sets.newHashSet((Collection) this.tileEntities.values());
     }
 
     @Override
-    public Collection<org.spongepowered.api.block.tileentity.TileEntity> getTileEntities(final java.util.function.Predicate<org.spongepowered.api.block.tileentity.TileEntity> filter) {
-        final Set<org.spongepowered.api.block.tileentity.TileEntity> tiles = Sets.newHashSet();
+    public Collection<org.spongepowered.api.block.entity.BlockEntity> getTileEntities(final java.util.function.Predicate<org.spongepowered.api.block.entity.BlockEntity> filter) {
+        final Set<org.spongepowered.api.block.entity.BlockEntity> tiles = Sets.newHashSet();
         for (final Map.Entry<BlockPos, TileEntity> entry : this.tileEntities.entrySet()) {
-            if (filter.test((org.spongepowered.api.block.tileentity.TileEntity) entry.getValue())) {
-                tiles.add((org.spongepowered.api.block.tileentity.TileEntity) entry.getValue());
+            if (filter.test((org.spongepowered.api.block.entity.BlockEntity) entry.getValue())) {
+                tiles.add((org.spongepowered.api.block.entity.BlockEntity) entry.getValue());
             }
         }
         return tiles;
     }
 
     @Override
-    public Optional<org.spongepowered.api.block.tileentity.TileEntity> getTileEntity(final int x, final int y, final int z) {
-        return Optional.ofNullable((org.spongepowered.api.block.tileentity.TileEntity) this.getTileEntity(
+    public Optional<org.spongepowered.api.block.entity.BlockEntity> getTileEntity(final int x, final int y, final int z) {
+        return Optional.ofNullable((org.spongepowered.api.block.entity.BlockEntity) this.getTileEntity(
                 new BlockPos((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15)), net.minecraft.world.chunk.Chunk.CreateEntityType.CHECK));
     }
 
@@ -524,7 +523,7 @@ public abstract class ChunkMixin_API implements Chunk {
     }
 
     @Override
-    public Set<EntityHit> getIntersectingEntities(final Vector3d start, final Vector3d end, final java.util.function.Predicate<EntityHit> filter) {
+    public Set<org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> getIntersectingEntities(final Vector3d start, final Vector3d end, final java.util.function.Predicate<org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> filter) {
         checkNotNull(start, "start");
         checkNotNull(end, "end");
         checkNotNull(filter, "filter");
@@ -533,8 +532,8 @@ public abstract class ChunkMixin_API implements Chunk {
     }
 
     @Override
-    public Set<EntityHit> getIntersectingEntities(final Vector3d start, Vector3d direction, final double distance,
-            final java.util.function.Predicate<EntityHit> filter) {
+    public Set<org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> getIntersectingEntities(final Vector3d start, Vector3d direction, final double distance,
+            final java.util.function.Predicate<org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> filter) {
         checkNotNull(start, "start");
         checkNotNull(direction, "direction");
         checkNotNull(filter, "filter");
@@ -542,14 +541,14 @@ public abstract class ChunkMixin_API implements Chunk {
         return api$getIntersectingEntities(start, start.add(direction.mul(distance)), direction, distance, filter);
     }
 
-    private Set<EntityHit> api$getIntersectingEntities(final Vector3d start, final Vector3d end, final Vector3d direction, final double distance,
-            final java.util.function.Predicate<? super EntityHit> filter) {
+    private Set<org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> api$getIntersectingEntities(final Vector3d start, final Vector3d end, final Vector3d direction, final double distance,
+            final java.util.function.Predicate<? super org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> filter) {
         final Vector2d entryAndExitY = getEntryAndExitY(start, end, direction, distance);
         if (entryAndExitY == null) {
             // Doesn't intersect the chunk, ignore it
             return Collections.emptySet();
         }
-        final Set<EntityHit> intersections = new HashSet<>();
+        final Set<org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> intersections = new HashSet<>();
         ((ChunkBridge) this).bridge$getIntersectingEntities(start, direction, distance, filter, entryAndExitY.getX(), entryAndExitY.getY(), intersections);
         return intersections;
     }

@@ -26,9 +26,8 @@ package org.spongepowered.common.mixin.api.common.entity.player;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -43,7 +42,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.world.WorldManager;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.inventory.EnderChestInventory;

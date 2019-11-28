@@ -26,14 +26,14 @@ package org.spongepowered.common.data.processor.multi.entity;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMinecartBlockData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MinecartBlockData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMinecartBlockData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -98,8 +98,8 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Abst
             AbstractMinecartEntity cart = (AbstractMinecartEntity) dataHolder;
             DataTransactionResult.Builder builder = DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS);
             if(cart.hasDisplayTile()) {
-                ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
-                ImmutableValue<Integer> offset = new ImmutableSpongeValue<>(Keys.OFFSET, cart.getDisplayTileOffset());
+                Immutable<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
+                Immutable<Integer> offset = new ImmutableSpongeValue<>(Keys.OFFSET, cart.getDisplayTileOffset());
                 cart.setHasDisplayTile(false);
                 builder.replace(block).replace(offset);
             }

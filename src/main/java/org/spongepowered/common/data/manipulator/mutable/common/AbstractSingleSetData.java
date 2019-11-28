@@ -27,24 +27,23 @@ package org.spongepowered.common.data.manipulator.mutable.common;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.Sets;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
 import java.util.Set;
 
-public abstract class AbstractSingleSetData<E, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+public abstract class AbstractSingleSetData<E, M extends Mutable<M, I>, I extends Immutable<I, M>>
     extends AbstractSingleData<Set<E>, M, I> {
 
     private final Class<? extends I> immutableClass;
 
     public AbstractSingleSetData(Class<M> manipulatorClass, Set<E> value,
-                                  Key<? extends BaseValue<Set<E>>> usedKey,
+                                  Key<? extends Value<Set<E>>> usedKey,
                                   Class<? extends I> immutableClass) {
         super(manipulatorClass, Sets.newHashSet(value), usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
@@ -63,7 +62,7 @@ public abstract class AbstractSingleSetData<E, M extends DataManipulator<M, I>, 
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected org.spongepowered.api.data.value.Value.Mutable<?> getValueGetter() {
         return new SpongeSetValue<>(this.usedKey, getValue());
     }
 

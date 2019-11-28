@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.bridge.world.chunk;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
@@ -36,12 +35,12 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.extent.EntityUniverse;
+import org.spongepowered.api.world.volume.entity.ReadableEntityVolume;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,8 +90,8 @@ public interface ChunkBridge {
 
     void bridge$setScheduledForUnload(long scheduled);
 
-    void bridge$getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<? super EntityUniverse.EntityHit> filter,
-            double entryY, double exitY, Set<? super EntityUniverse.EntityHit> intersections);
+    void bridge$getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<? super ReadableEntityVolume.EntityHit> filter,
+            double entryY, double exitY, Set<? super ReadableEntityVolume.EntityHit> intersections);
 
     boolean bridge$isPersistedChunk();
 

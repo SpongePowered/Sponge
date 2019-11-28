@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.world.extent.BlockVolume;
-import org.spongepowered.api.world.extent.ImmutableBlockVolume;
-import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
-import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
+import org.spongepowered.api.world.volume.block.ImmutableBlockVolume;
+import org.spongepowered.api.world.volume.block.ReadableBlockVolume;
+import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.volume.block.worker.BlockVolumeStream;
 import org.spongepowered.common.util.gen.ArrayImmutableBlockBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
+import org.spongepowered.math.vector.Vector3i;
 
-public class UnmodifiableBlockViewDownsize extends AbstractBlockViewDownsize<BlockVolume> implements UnmodifiableBlockVolume {
+public class UnmodifiableBlockViewDownsize extends AbstractBlockViewDownsize<ReadableBlockVolume> implements UnmodifiableBlockVolume {
 
-    public UnmodifiableBlockViewDownsize(BlockVolume volume, Vector3i min, Vector3i max) {
+    public UnmodifiableBlockViewDownsize(ReadableBlockVolume volume, Vector3i min, Vector3i max) {
         super(volume, min, max);
     }
 
@@ -59,7 +59,7 @@ public class UnmodifiableBlockViewDownsize extends AbstractBlockViewDownsize<Blo
     }
 
     @Override
-    public BlockVolumeWorker<? extends UnmodifiableBlockVolume> getBlockWorker() {
+    public BlockVolumeStream<? extends UnmodifiableBlockVolume> getBlockWorker() {
         return new SpongeBlockVolumeWorker<>(this);
     }
 

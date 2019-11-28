@@ -27,18 +27,18 @@ package org.spongepowered.common.registry.type.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.BooleanTrait;
-import org.spongepowered.api.block.trait.BooleanTraits;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.state.BooleanStateProperties;
+import org.spongepowered.api.state.BooleanStateProperty;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 import java.util.Locale;
 
-@RegisterCatalog(BooleanTraits.class)
+@RegisterCatalog(BooleanStateProperties.class)
 public final class BooleanTraitRegistryModule
-        extends AbstractPrefixAlternateCatalogTypeRegistryModule<BooleanTrait>
-        implements SpongeAdditionalCatalogRegistryModule<BooleanTrait>{
+        extends AbstractPrefixAlternateCatalogTypeRegistryModule<BooleanStateProperty>
+        implements SpongeAdditionalCatalogRegistryModule<BooleanStateProperty>{
 
     public static BooleanTraitRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -50,11 +50,11 @@ public final class BooleanTraitRegistryModule
     }
 
     @Override
-    public void registerAdditionalCatalog(BooleanTrait extraCatalog) {
+    public void registerAdditionalCatalog(BooleanStateProperty extraCatalog) {
         this.catalogTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
-    public void registerBlock(String id, BlockType block, BooleanTrait property) {
+    public void registerBlock(String id, BlockType block, BooleanStateProperty property) {
         checkNotNull(id, "Id was null!");
         checkNotNull(property, "Property was null!");
         this.catalogTypeMap.put(id.toLowerCase(Locale.ENGLISH), property);

@@ -27,13 +27,12 @@ package org.spongepowered.common.data.manipulator.mutable.common;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.BoundedValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.ReflectionUtil;
@@ -41,7 +40,7 @@ import org.spongepowered.common.util.ReflectionUtil;
 import java.lang.reflect.Modifier;
 import java.util.Comparator;
 
-public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M extends Mutable<M, I>, I extends Immutable<I, M>>
     extends AbstractSingleData<T, M, I> {
 
     private final Class<? extends I> immutableClass;
@@ -50,7 +49,7 @@ public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M e
     protected final T upperBound;
     protected final T defaultValue;
 
-    protected AbstractBoundedComparableData(Class<M> manipulatorClass, T value, Key<? extends BaseValue<T>> usedKey, Comparator<T> comparator,
+    protected AbstractBoundedComparableData(Class<M> manipulatorClass, T value, Key<? extends Value<T>> usedKey, Comparator<T> comparator,
                                          Class<? extends I> immutableClass, T lowerBound, T upperBound, T defaultValue) {
         super(manipulatorClass, value, usedKey);
         this.comparator = checkNotNull(comparator);
@@ -70,7 +69,7 @@ public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M e
 
     @SuppressWarnings("unchecked")
     @Override
-    protected MutableBoundedValue<T> getValueGetter() {
+    protected org.spongepowered.api.data.value.BoundedValue.Mutable<T> getValueGetter() {
         return SpongeValueFactory.boundedBuilder(((Key<? extends BoundedValue<T>>) this.usedKey))
             .minimum(this.lowerBound)
             .maximum(this.upperBound)

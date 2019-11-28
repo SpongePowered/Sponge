@@ -27,11 +27,11 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVehicleData;
@@ -63,14 +63,14 @@ public class SpongeVehicleData extends AbstractData<VehicleData, ImmutableVehicl
     }
 
     @Override
-    public Value<EntitySnapshot> vehicle() {
+    public Mutable<EntitySnapshot> vehicle() {
         checkState(this.vehicle != null, "Vehicle cannot be null!");
         checkState(this.baseVehicle != null, "Base Vehicle cannot be null!");
         return new SpongeValue<>(Keys.VEHICLE, this.vehicle);
     }
 
     @Override
-    public Value<EntitySnapshot> baseVehicle() {
+    public Mutable<EntitySnapshot> baseVehicle() {
         checkState(this.vehicle != null, "Vehicle cannot be null!");
         checkState(this.baseVehicle != null, "Base Vehicle cannot be null!");
         return new SpongeValue<>(Keys.BASE_VEHICLE, this.baseVehicle);

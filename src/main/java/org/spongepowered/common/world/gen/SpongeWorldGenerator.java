@@ -34,8 +34,8 @@ import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.gen.TerrainGenerator;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
 import org.spongepowered.common.mixin.core.world.WorldProviderAccessor;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
@@ -47,14 +47,14 @@ import java.util.stream.Collectors;
 /**
  * Implementation of {@link WorldGenerator}.
  */
-public final class SpongeWorldGenerator implements WorldGenerator {
+public final class SpongeWorldGenerator implements TerrainGenerator {
 
     private final World world;
     /**
      * Holds the populators. May be mutable or immutable, but must be changed to
      * be mutable before the first call to {@link #getPopulators()}.
      */
-    private List<Populator> populators;
+    private List<Feature> populators;
     /**
      * Holds the generator populators. May be mutable or immutable, but must be
      * changed to be mutable before the first call to
@@ -89,12 +89,12 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     }
 
     @Override
-    public List<Populator> getPopulators() {
+    public List<Feature> getPopulators() {
         return this.populators;
     }
 
     @Override
-    public List<Populator> getPopulators(final Class<? extends Populator> type) {
+    public List<Feature> getPopulators(final Class<? extends Feature> type) {
         return this.populators.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 

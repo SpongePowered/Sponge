@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
-import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.OptionalValue.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
@@ -44,7 +44,7 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
     private static final ImmutableSpongeTameableData EMPTY_DATA = new ImmutableSpongeTameableData(null);
 
     @Nullable private final UUID owner;
-    private final ImmutableOptionalValue<UUID> immutableValue;
+    private final Immutable<UUID> immutableValue;
 
     public ImmutableSpongeTameableData(@Nullable UUID owner) {
         super(ImmutableTameableData.class);
@@ -58,7 +58,7 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
     }
 
     @Override
-    public ImmutableOptionalValue<UUID> owner() {
+    public Immutable<UUID> owner() {
         return this.immutableValue;
     }
 

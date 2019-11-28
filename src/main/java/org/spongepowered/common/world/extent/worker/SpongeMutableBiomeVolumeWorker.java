@@ -25,14 +25,14 @@
 package org.spongepowered.common.world.extent.worker;
 
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
-import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.extent.worker.procedure.BiomeVolumeFiller;
+import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.workerMutableBiomeVolumeStream;
 
 /**
  *
  */
-public class SpongeMutableBiomeVolumeWorker<V extends MutableBiomeVolume> extends SpongeBiomeVolumeWorker<V> implements MutableBiomeVolumeWorker<V> {
+public class SpongeMutableBiomeVolumeWorker<V extends MutableBiomeVolume> extends SpongeBiomeVolumeWorker<V> implements workerMutableBiomeVolumeStream<V> {
 
     public SpongeMutableBiomeVolumeWorker(V volume) {
         super(volume);

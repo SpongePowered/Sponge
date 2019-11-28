@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.EntityAreaEffectCloudAccessor;
@@ -36,14 +36,14 @@ import org.spongepowered.common.mixin.core.entity.EntityAreaEffectCloudAccessor;
 import java.util.Optional;
 import net.minecraft.entity.AreaEffectCloudEntity;
 
-public class AreaEffectCloudWaitTimeProcessor extends AbstractSpongeValueProcessor<AreaEffectCloudEntity, Integer, MutableBoundedValue<Integer>> {
+public class AreaEffectCloudWaitTimeProcessor extends AbstractSpongeValueProcessor<AreaEffectCloudEntity, Integer, Mutable<Integer>> {
 
     public AreaEffectCloudWaitTimeProcessor() {
         super(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_WAIT_TIME);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Mutable<Integer> constructValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_WAIT_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -64,7 +64,7 @@ public class AreaEffectCloudWaitTimeProcessor extends AbstractSpongeValueProcess
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected Immutable<Integer> constructImmutableValue(Integer value) {
         return constructValue(value).asImmutable();
     }
 

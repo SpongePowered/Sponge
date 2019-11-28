@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.data.processor.multi.entity;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBodyPartRotationalData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BodyPartRotationalData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBodyPartRotationalData;
@@ -42,7 +41,7 @@ import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;

@@ -30,11 +30,11 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataAlreadyRegisteredException;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
+import org.spongepowered.api.data.DataManipulator.Mutable.Factory;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
@@ -45,12 +45,12 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+public final class SpongeDataRegistrationBuilder<M extends Mutable<M, I>, I extends Immutable<I, M>>
         extends SpongeCatalogBuilder<DataRegistration<M, I>, DataRegistration.Builder<M, I>> implements DataRegistration.Builder<M, I> {
 
     @Nullable Class<M> manipulatorClass;
     @Nullable Class<I> immutableClass;
-    @Nullable DataManipulatorBuilder<M, I> manipulatorBuilder;
+    @Nullable Factory<M, I> manipulatorBuilder;
     @Nullable PluginContainer container;
     @Nullable Class<? extends M> implementationData;
     @Nullable Class<? extends I> immutableImplementation;
@@ -61,7 +61,7 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
 
     @SuppressWarnings("unchecked")
     @Override
-    public  <D extends DataManipulator<D, C>, C extends ImmutableDataManipulator<C, D>> SpongeDataRegistrationBuilder<D, C> dataClass(Class<D> manipulatorClass) {
+    public  <D extends Mutable<D, C>, C extends Immutable<C, D>> SpongeDataRegistrationBuilder<D, C> dataClass(Class<D> manipulatorClass) {
         this.manipulatorClass = (Class<M>) checkNotNull(manipulatorClass, "DataManipulator class cannot be null!");
         return (SpongeDataRegistrationBuilder<D, C>) this;
     }
@@ -74,7 +74,7 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
     }
 
     @Override
-    public SpongeDataRegistrationBuilder<M, I> builder(DataManipulatorBuilder<M, I> builder) {
+    public SpongeDataRegistrationBuilder<M, I> builder(Factory<M, I> builder) {
         this.manipulatorBuilder = checkNotNull(builder, "ManipulatorBuilder cannot be null!");
         return this;
     }

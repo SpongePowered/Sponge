@@ -37,11 +37,8 @@ import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.block.trait.BooleanTrait;
-import org.spongepowered.api.block.trait.EnumTrait;
-import org.spongepowered.api.block.trait.IntegerTrait;
+import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
@@ -56,7 +53,7 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -66,7 +63,7 @@ import org.spongepowered.api.entity.ai.task.builtin.*;
 import org.spongepowered.api.entity.ai.task.builtin.creature.*;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
-import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseType;
+import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.event.cause.EventContextKey;
@@ -76,9 +73,9 @@ import org.spongepowered.api.event.cause.entity.damage.source.*;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
-import org.spongepowered.api.extra.fluid.FluidStack;
-import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
-import org.spongepowered.api.extra.fluid.FluidType;
+import org.spongepowered.api.fluid.FluidStack;
+import org.spongepowered.api.fluid.FluidStackSnapshot;
+import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
@@ -97,13 +94,16 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.*;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
+import org.spongepowered.api.state.BooleanStateProperty;
+import org.spongepowered.api.state.EnumStateProperty;
+import org.spongepowered.api.state.IntegerStateProperty;
 import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.api.statistic.StatisticType;
+import org.spongepowered.api.statistic.StatisticCategory;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
@@ -119,14 +119,16 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.gen.GeneratorType;
 import org.spongepowered.api.world.gen.PopulatorObject;
-import org.spongepowered.api.world.gen.PopulatorType;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.*;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeImpl;
@@ -298,7 +300,7 @@ public final class CommonModuleRegistry {
                 .registerBuilderSupplier(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
                 .registerBuilderSupplier(ServerBossBar.Builder.class, ServerBossBarBuilder::new)
                 .registerBuilderSupplier(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
-                .registerBuilderSupplier(TileEntityArchetype.Builder.class, SpongeTileEntityArchetypeBuilder::new)
+                .registerBuilderSupplier(BlockEntityArchetype.Builder.class, SpongeTileEntityArchetypeBuilder::new)
                 .registerBuilderSupplier(Schematic.Builder.class, SpongeSchematicBuilder::new)
                 .registerBuilderSupplier(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
                 .registerBuilderSupplier(BiomeGenerationSettings.Builder.class, SpongeBiomeGenerationSettingsBuilder::new)
@@ -335,11 +337,11 @@ public final class CommonModuleRegistry {
                 .registerModule(ChunkRegenerateFlagRegistryModule.getInstance())
                 .registerModule(AITaskType.class, AITaskTypeModule.getInstance())
                 .registerModule(ArmorType.class, new ArmorTypeRegistryModule())
-                .registerModule(Art.class, new ArtRegistryModule())
+                .registerModule(ArtType.class, new ArtRegistryModule())
                 .registerModule(BanType.class, new BanTypeRegistryModule())
                 .registerModule(BannerPatternShape.class, new BannerPatternShapeRegistryModule())
                 .registerModule(BodyPart.class, new BodyPartRegistryModule())
-                .registerModule(BooleanTrait.class, BooleanTraitRegistryModule.getInstance())
+                .registerModule(BooleanStateProperty.class, BooleanTraitRegistryModule.getInstance())
                 .registerModule(BigMushroomType.class, new BigMushroomRegistryModule())
                 .registerModule(BiomeTreeType.class, new BiomeTreeTypeRegistryModule())
                 .registerModule(BiomeType.class, new BiomeTypeRegistryModule())
@@ -365,8 +367,8 @@ public final class CommonModuleRegistry {
                 .registerModule(DoublePlantType.class, new DoublePlantTypeRegistryModule())
                 .registerModule(DyeColor.class, DyeColorRegistryModule.getInstance())
                 .registerModule(EnchantmentType.class, EnchantmentRegistryModule.getInstance())
-                .registerModule(EnderDragonPhaseType.class, EnderDragonPhaseTypeRegistryModule.getInstance())
-                .registerModule((Class<EnumTrait<?>>) (Class) EnumTrait.class, EnumTraitRegistryModule.getInstance())
+                .registerModule(DragonPhaseType.class, EnderDragonPhaseTypeRegistryModule.getInstance())
+                .registerModule((Class<EnumStateProperty<?>>) (Class) EnumStateProperty.class, EnumTraitRegistryModule.getInstance())
                 .registerModule(EntityType.class, EntityTypeRegistryModule.getInstance())
                 .registerModule(EquipmentType.class, new EquipmentTypeRegistryModule())
                 .registerModule(FireworkShape.class, new FireworkShapeRegistryModule())
@@ -377,21 +379,21 @@ public final class CommonModuleRegistry {
                 .registerModule(GoalType.class, GoalTypeModule.getInstance())
                 .registerModule(GoldenApple.class, new GoldenAppleRegistryModule())
                 .registerModule(Hinge.class, new HingeRegistryModule())
-                .registerModule(IntegerTrait.class, IntegerTraitRegistryModule.getInstance())
+                .registerModule(IntegerStateProperty.class, IntegerTraitRegistryModule.getInstance())
                 .registerModule(ItemType.class, ItemTypeRegistryModule.getInstance())
                 .registerModule(new LocaleRegistryModule())
                 .registerModule(LogAxis.class, new LogAxisRegistryModule())
                 .registerModule(MushroomType.class, new MushroomTypeRegistryModule())
                 .registerModule(NotePitch.class, new NotePitchRegistryModule())
                 .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
-                .registerModule(OcelotType.class, new OcelotTypeRegistryModule())
-                .registerModule(ParrotVariant.class, new ParrotVariantRegistryModule())
+                .registerModule(CatType.class, new OcelotTypeRegistryModule())
+                .registerModule(ParrotType.class, new ParrotVariantRegistryModule())
                 .registerModule(ParticleType.class, ParticleTypeRegistryModule.getInstance())
                 .registerModule((Class<ParticleOption<?>>) (Class<?>) ParticleOption.class, new ParticleOptionRegistryModule())
                 .registerModule(PistonType.class, new PistonTypeRegistryModule())
                 .registerModule(PlantType.class, new PlantTypeModuleRegistry())
                 .registerModule(PopulatorObject.class, new PopulatorObjectRegistryModule())
-                .registerModule(PopulatorType.class, PopulatorTypeRegistryModule.getInstance())
+                .registerModule(Feature.class, PopulatorTypeRegistryModule.getInstance())
                 .registerModule(PortionType.class, new PortionTypeRegistryModule())
                 .registerModule(PotionType.class, PotionTypeRegistryModule.getInstance())
                 .registerModule(PotionEffectType.class, PotionEffectTypeRegistryModule.getInstance())
@@ -419,16 +421,16 @@ public final class CommonModuleRegistry {
                 .registerModule(TextColor.class, new TextColorRegistryModule())
                 .registerModule(TextSerializer.class, new TextSerializerRegistryModule())
                 .registerModule(TextStyle.Base.class, new TextStyleRegistryModule())
-                .registerModule(TileEntityType.class, TileEntityTypeRegistryModule.getInstance())
+                .registerModule(BlockEntityType.class, TileEntityTypeRegistryModule.getInstance())
                 .registerModule(ToolType.class, new ToolTypeRegistryModule())
-                .registerModule(TreeType.class, TreeTypeRegistryModule.getInstance())
+                .registerModule(WoodType.class, TreeTypeRegistryModule.getInstance())
                 .registerModule(Visibility.class, new VisibilityRegistryModule())
                 .registerModule(Statistic.class, StatisticRegistryModule.getInstance())
-                .registerModule(StatisticType.class, new StatisticTypeRegistryModule())
+                .registerModule(StatisticCategory.class, new StatisticTypeRegistryModule())
                 .registerModule(WallType.class, new WallTypeRegistryModule())
                 .registerModule(Weather.class, new WeatherRegistryModule())
                 .registerModule(WireAttachmentType.class, new WireAttachmentRegistryModule())
-                .registerModule(WorldGeneratorModifier.class, WorldGeneratorModifierRegistryModule.getInstance())
+                .registerModule(TerrainGeneratorConfig.class, WorldGeneratorModifierRegistryModule.getInstance())
                 .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
                 .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
                 .registerModule(SkinPart.class, SkinPartRegistryModule.getInstance())
@@ -450,7 +452,7 @@ public final class CommonModuleRegistry {
                 .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
                 .registerModule(SmeltingRecipe.class, (CatalogRegistryModule<SmeltingRecipe>) FurnaceRecipes.instance())
                 .registerModule(EventContextKey.class, EventContextKeysModule.getInstance())
-                .registerModule(RecordType.class, RecordTypeRegistryModule.getInstance())
+                .registerModule(MusicDisc.class, RecordTypeRegistryModule.getInstance())
                 .registerModule(HorseStyle.class, HorseStyleRegistryModule.getInstance())
                 .registerModule(HorseColor.class, HorseColorRegistryModule.getInstance())
                 .registerModule(InstrumentType.class, InstrumentTypeRegistryModule.getInstance())

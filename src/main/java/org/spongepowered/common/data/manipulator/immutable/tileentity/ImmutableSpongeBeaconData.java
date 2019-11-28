@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.tileentity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBeaconData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
-import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.OptionalValue.Immutable;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBeaconData;
@@ -44,8 +44,8 @@ public class ImmutableSpongeBeaconData extends AbstractImmutableData<ImmutableBe
     private final PotionEffectType primaryEffect;
     @Nullable
     private final PotionEffectType secondaryEffect;
-    private final ImmutableOptionalValue<PotionEffectType> primaryEffectValue;
-    private final ImmutableOptionalValue<PotionEffectType> secondaryEffectValue;
+    private final Immutable<PotionEffectType> primaryEffectValue;
+    private final Immutable<PotionEffectType> secondaryEffectValue;
 
     public ImmutableSpongeBeaconData(@Nullable PotionEffectType primaryEffect, @Nullable PotionEffectType secondaryEffect) {
         super(ImmutableBeaconData.class);
@@ -70,7 +70,7 @@ public class ImmutableSpongeBeaconData extends AbstractImmutableData<ImmutableBe
     }
 
     @Override
-    public ImmutableOptionalValue<PotionEffectType> primaryEffect() {
+    public Immutable<PotionEffectType> primaryEffect() {
         return this.primaryEffectValue;
     }
 
@@ -79,7 +79,7 @@ public class ImmutableSpongeBeaconData extends AbstractImmutableData<ImmutableBe
     }
 
     @Override
-    public ImmutableOptionalValue<PotionEffectType> secondaryEffect() {
+    public Immutable<PotionEffectType> secondaryEffect() {
         return this.secondaryEffectValue;
     }
 

@@ -31,9 +31,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetedEntityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetedEntityData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
@@ -44,7 +44,7 @@ import org.spongepowered.common.mixin.core.entity.projectile.ShulkerBulletEntity
 import java.util.Optional;
 
 public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataSingleTargetProcessor<ShulkerBulletEntityAccessor, EntitySnapshot,
-        Value<EntitySnapshot>, TargetedEntityData, ImmutableTargetedEntityData> {
+        Mutable<EntitySnapshot>, TargetedEntityData, ImmutableTargetedEntityData> {
 
     public EntityTargetedEntityDataProcessor() {
         super(Keys.TARGETED_ENTITY, ShulkerBulletEntityAccessor.class);
@@ -74,7 +74,7 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
     }
 
     @Override
-    protected ImmutableValue<org.spongepowered.api.entity.EntitySnapshot> constructImmutableValue(org.spongepowered.api.entity.EntitySnapshot value) {
+    protected Immutable<org.spongepowered.api.entity.EntitySnapshot> constructImmutableValue(org.spongepowered.api.entity.EntitySnapshot value) {
         return new ImmutableSpongeValue<>(this.key, value);
     }
 
@@ -84,7 +84,7 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
     }
 
     @Override
-    protected Value<org.spongepowered.api.entity.EntitySnapshot> constructValue(org.spongepowered.api.entity.EntitySnapshot actualValue) {
+    protected Mutable<org.spongepowered.api.entity.EntitySnapshot> constructValue(org.spongepowered.api.entity.EntitySnapshot actualValue) {
         return new SpongeValue<>(this.key, actualValue);
     }
 

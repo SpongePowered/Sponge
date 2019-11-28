@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMovementSpeedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -38,8 +38,8 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
     private final double walkSpeed;
     private final double flySpeed;
 
-    private final ImmutableValue<Double> walkSpeedValue;
-    private final ImmutableValue<Double> flyingSpeedValue;
+    private final Immutable<Double> walkSpeedValue;
+    private final Immutable<Double> flyingSpeedValue;
 
 
     public ImmutableSpongeMovementSpeedData(double walkSpeed, double flySpeed) {
@@ -70,12 +70,12 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
     }
 
     @Override
-    public ImmutableValue<Double> walkSpeed() {
+    public Immutable<Double> walkSpeed() {
         return this.walkSpeedValue;
     }
 
     @Override
-    public ImmutableValue<Double> flySpeed() {
+    public Immutable<Double> flySpeed() {
         return this.flyingSpeedValue;
     }
 

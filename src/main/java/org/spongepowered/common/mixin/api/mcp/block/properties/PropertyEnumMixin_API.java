@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.block.properties;
 
 import net.minecraft.block.properties.PropertyEnum;
-import org.spongepowered.api.block.trait.EnumTrait;
+import org.spongepowered.api.state.EnumStateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(value = PropertyEnum.class)
-public abstract class PropertyEnumMixin_API<E extends Enum<E>> extends PropertyHelperMixin_API<E> implements EnumTrait<E> {
+public abstract class PropertyEnumMixin_API<E extends Enum<E>> extends PropertyHelperMixin_API<E> implements EnumStateProperty<E> {
 
 }

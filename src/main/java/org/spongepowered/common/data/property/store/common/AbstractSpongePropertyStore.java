@@ -26,9 +26,9 @@ package org.spongepowered.common.data.property.store.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.data.property.provider.PropertyProvider;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -36,7 +36,7 @@ import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
 import java.util.Optional;
 
-public abstract class AbstractSpongePropertyStore<T extends Property<?, ?>> implements PropertyStore<T> {
+public abstract class AbstractSpongePropertyStore<T extends Property<?, ?>> implements PropertyProvider<T> {
 
     @SuppressWarnings("unchecked")
     @Override

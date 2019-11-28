@@ -72,9 +72,9 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.item.ItemType;
@@ -531,8 +531,8 @@ public final class SpongeImplHooks {
         throw new UnsupportedOperationException("SpongeCommon does not have it's own ecosystem, this needs to be mixed into for implementations depending on SpongeCommon");
     }
 
-    public static TileEntityType getTileEntityType(final Class<? extends TileEntity> aClass) {
-        return SpongeImpl.getRegistry().getTranslated(aClass, TileEntityType.class);
+    public static BlockEntityType getTileEntityType(final Class<? extends TileEntity> aClass) {
+        return SpongeImpl.getRegistry().getTranslated(aClass, BlockEntityType.class);
     }
 
     /**

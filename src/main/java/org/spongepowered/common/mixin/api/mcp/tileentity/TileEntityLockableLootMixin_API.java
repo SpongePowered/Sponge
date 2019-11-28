@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
 import net.minecraft.tileentity.LockableLootTileEntity;
 
 @Mixin(LockableLootTileEntity.class)
-public abstract class TileEntityLockableLootMixin_API<T extends TileEntity & Carrier> extends TileEntityLockableMixin_API<T> {
+public abstract class TileEntityLockableLootMixin_API<T extends BlockEntity & Carrier> extends TileEntityLockableMixin_API<T> {
 
     @Nullable @Shadow protected String customName; // Not really nullable, but it should be...
 

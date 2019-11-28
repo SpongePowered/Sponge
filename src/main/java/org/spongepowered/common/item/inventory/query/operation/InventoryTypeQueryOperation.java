@@ -25,7 +25,7 @@
 package org.spongepowered.common.item.inventory.query.operation;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
@@ -35,7 +35,7 @@ public final class InventoryTypeQueryOperation extends SpongeQueryOperation<Clas
     private final Class<? extends Inventory> targetType;
 
     public InventoryTypeQueryOperation(Class<? extends Inventory> targetType) {
-        super(QueryOperationTypes.INVENTORY_TYPE);
+        super(QueryTypes.INVENTORY_TYPE);
         this.targetType = targetType;
     }
 

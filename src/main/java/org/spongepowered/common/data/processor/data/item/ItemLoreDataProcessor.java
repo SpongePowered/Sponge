@@ -28,14 +28,14 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.ListValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
@@ -48,7 +48,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<Text>, ListValue<Text>, LoreData, ImmutableLoreData> {
+public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<Text>, Mutable<Text>, LoreData, ImmutableLoreData> {
 
     public ItemLoreDataProcessor() {
         super(input -> true, Keys.ITEM_LORE);
@@ -103,12 +103,12 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
     }
 
     @Override
-    protected ListValue<Text> constructValue(List<Text> defaultValue) {
+    protected Mutable<Text> constructValue(List<Text> defaultValue) {
         return new SpongeListValue<>(Keys.ITEM_LORE, defaultValue);
     }
 
     @Override
-    protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
+    protected Immutable<List<Text>> constructImmutableValue(List<Text> value) {
         return new ImmutableSpongeListValue<>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
     }
 

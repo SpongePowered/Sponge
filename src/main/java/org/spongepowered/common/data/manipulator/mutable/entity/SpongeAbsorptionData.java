@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAbsorptionData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AbsorptionData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAbsorptionData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.util.Constants;
@@ -44,12 +44,12 @@ public final class SpongeAbsorptionData extends AbstractSingleData<Double, Absor
     }
 
     @Override
-    public Value<Double> absorption() {
+    public Mutable<Double> absorption() {
         return this.getValueGetter();
     }
 
     @Override
-    protected Value<Double> getValueGetter() {
+    protected Mutable<Double> getValueGetter() {
         return new SpongeValue<>(this.usedKey, Constants.Entity.DEFAULT_ABSORPTION, this.getValue());
     }
 

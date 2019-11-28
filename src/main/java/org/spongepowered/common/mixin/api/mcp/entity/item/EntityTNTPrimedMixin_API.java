@@ -30,7 +30,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.entity.explosive.PrimedTNT;
+import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.mixin.Mixin;

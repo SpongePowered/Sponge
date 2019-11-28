@@ -26,8 +26,7 @@ package org.spongepowered.common.bridge.world.gen;
 
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
 import java.util.List;
 import java.util.Random;
 

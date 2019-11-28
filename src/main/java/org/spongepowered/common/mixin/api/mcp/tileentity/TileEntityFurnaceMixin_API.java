@@ -26,12 +26,11 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.FurnaceTileEntity;
-import org.spongepowered.api.block.tileentity.carrier.Furnace;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,7 +42,7 @@ import java.util.List;
 
 @NonnullByDefault
 @Mixin(FurnaceTileEntity.class)
-public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin_API<Furnace> implements Furnace {
+public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin_API<FurnaceBlockEntity> implements FurnaceBlockEntity {
 
     @Shadow private String furnaceCustomName;
 
@@ -74,7 +73,7 @@ public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin
     }
 
     @Override
-    public MutableBoundedValue<Integer> passedBurnTime() {
+    public Mutable<Integer> passedBurnTime() {
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_BURN_TIME)
             .minimum(0)
             .maximum(Constants.TileEntity.Furnace.MAX_BURN_TIME)
@@ -83,7 +82,7 @@ public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin
     }
 
     @Override
-    public MutableBoundedValue<Integer> maxBurnTime() {
+    public Mutable<Integer> maxBurnTime() {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_BURN_TIME)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
@@ -92,7 +91,7 @@ public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin
     }
 
     @Override
-    public MutableBoundedValue<Integer> passedCookTime() {
+    public Mutable<Integer> passedCookTime() {
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_COOK_TIME)
             .minimum(0)
             .maximum(Integer.MAX_VALUE) //TODO
@@ -102,7 +101,7 @@ public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin
     }
 
     @Override
-    public MutableBoundedValue<Integer> maxCookTime() {
+    public Mutable<Integer> maxCookTime() {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_COOK_TIME)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
@@ -126,7 +125,7 @@ public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(List<org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getFurnaceData());
 

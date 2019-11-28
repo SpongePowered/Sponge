@@ -29,14 +29,14 @@ import net.minecraft.block.Block;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.data.DataManipulator.Mutable;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -59,7 +59,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntity.class)
-public abstract class TileEntityMixin_API implements TileEntity {
+public abstract class TileEntityMixin_API implements BlockEntity {
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World world;
@@ -70,7 +70,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
     @Shadow public abstract CompoundNBT writeToNBT(CompoundNBT compound);
     @Shadow public abstract void shadow$markDirty();
 
-    private final TileEntityType api$TileEntityType = SpongeImplHooks.getTileEntityType(((net.minecraft.tileentity.TileEntity) (Object) this).getClass());
+    private final BlockEntityType api$TileEntityType = SpongeImplHooks.getTileEntityType(((net.minecraft.tileentity.TileEntity) (Object) this).getClass());
     @Nullable private LocatableBlock api$LocatableBlock;
 
     @Override
@@ -96,7 +96,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
         this.writeToNBT(compound);
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
-        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
+        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
@@ -129,7 +129,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
     }
 
     @Override
-    public final TileEntityType getType() {
+    public final BlockEntityType getType() {
         return this.api$TileEntityType;
     }
 
@@ -138,13 +138,13 @@ public abstract class TileEntityMixin_API implements TileEntity {
         return (BlockState) this.world.getBlockState(this.getPos());
     }
 
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(List<Mutable<?, ?>> manipulators) {
 
     }
 
     @Override
-    public Collection<DataManipulator<?, ?>> getContainers() {
-        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
+    public Collection<Mutable<?, ?>> getContainers() {
+        final List<Mutable<?, ?>> list = Lists.newArrayList();
         this.supplyVanillaManipulators(list);
         if (this instanceof CustomDataHolderBridge) {
             list.addAll(((CustomDataHolderBridge) this).bridge$getCustomManipulators());
@@ -153,7 +153,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
     }
 
     @Override
-    public TileEntityArchetype createArchetype() {
+    public BlockEntityArchetype createArchetype() {
         return new SpongeTileEntityArchetypeBuilder().tile(this).build();
     }
 

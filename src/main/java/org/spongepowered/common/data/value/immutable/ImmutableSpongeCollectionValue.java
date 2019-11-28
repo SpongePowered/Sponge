@@ -26,21 +26,20 @@ package org.spongepowered.common.data.value.immutable;
 
 import com.google.common.collect.Iterables;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableCollectionValue;
-import org.spongepowered.api.data.value.mutable.CollectionValue;
-
+import org.spongepowered.api.data.value.CollectionValue.Immutable;
+import org.spongepowered.api.data.value.CollectionValue.Mutable;
+import org.spongepowered.api.data.value.Value;
 import java.util.Collection;
 import java.util.function.Function;
 
-public abstract class ImmutableSpongeCollectionValue<E, V extends Collection<E>, I extends ImmutableCollectionValue<E, V, I, L>,
-    L extends CollectionValue<E, V, L, I>> extends ImmutableSpongeValue<V> implements ImmutableCollectionValue<E, V, I, L> {
+public abstract class ImmutableSpongeCollectionValue<E, V extends Collection<E>, I extends Immutable<E, V, I, L>,
+    L extends Mutable<E, V, L, I>> extends ImmutableSpongeValue<V> implements Immutable<E, V, I, L> {
 
-    protected ImmutableSpongeCollectionValue(Key<? extends BaseValue<V>> key, V defaultValue) {
+    protected ImmutableSpongeCollectionValue(Key<? extends Value<V>> key, V defaultValue) {
         super(key, defaultValue);
     }
 
-    protected ImmutableSpongeCollectionValue(Key<? extends BaseValue<V>> key, V defaultValue, V actualValue) {
+    protected ImmutableSpongeCollectionValue(Key<? extends Value<V>> key, V defaultValue, V actualValue) {
         super(key, defaultValue, actualValue);
     }
 

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.world.teleport;
 
-import com.flowpowered.math.GenericMath;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
 import net.minecraft.world.border.WorldBorder;
@@ -38,7 +36,8 @@ import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
-
+import org.spongepowered.math.GenericMath;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;

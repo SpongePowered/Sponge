@@ -26,13 +26,13 @@ package org.spongepowered.common.data.processor.multi.tileentity;
 
 import com.google.common.collect.Maps;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableFurnaceData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;

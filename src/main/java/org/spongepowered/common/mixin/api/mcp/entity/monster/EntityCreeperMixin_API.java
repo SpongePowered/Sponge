@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.entity.monster.CreeperEntity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -48,7 +48,7 @@ public abstract class EntityCreeperMixin_API extends EntityMobMixin_API implemen
     @Shadow public abstract boolean getPowered();
 
     @Override
-    public Value<Boolean> charged() {
+    public Mutable<Boolean> charged() {
         return new SpongeValue<>(Keys.CREEPER_CHARGED, false, this.getPowered());
     }
 

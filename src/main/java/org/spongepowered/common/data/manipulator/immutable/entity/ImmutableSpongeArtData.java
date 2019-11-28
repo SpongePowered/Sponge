@@ -27,18 +27,18 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArtData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
-import org.spongepowered.api.data.type.Art;
+import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
 import org.spongepowered.common.util.Constants;
 
-public class ImmutableSpongeArtData extends AbstractImmutableSingleCatalogData<Art, ImmutableArtData, ArtData> implements ImmutableArtData {
+public class ImmutableSpongeArtData extends AbstractImmutableSingleCatalogData<ArtType, ImmutableArtData, ArtData> implements ImmutableArtData {
 
     public ImmutableSpongeArtData() {
         this(Constants.Catalog.DEFAULT_ART);
     }
 
-    public ImmutableSpongeArtData(Art value) {
+    public ImmutableSpongeArtData(ArtType value) {
         super(ImmutableArtData.class, value, Constants.Catalog.DEFAULT_ART, Keys.ART, SpongeArtData.class);
     }
 

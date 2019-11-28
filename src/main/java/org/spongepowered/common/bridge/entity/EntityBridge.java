@@ -24,15 +24,14 @@
  */
 package org.spongepowered.common.bridge.entity;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
-
+import org.spongepowered.math.vector.Vector3d;
 import javax.annotation.Nullable;
 
 public interface EntityBridge {

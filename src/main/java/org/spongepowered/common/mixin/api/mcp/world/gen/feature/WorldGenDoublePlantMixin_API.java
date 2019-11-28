@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.DoublePlantBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -35,13 +34,12 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.gen.feature.WorldGenDoublePlantBridge;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
@@ -59,7 +57,7 @@ public abstract class WorldGenDoublePlantMixin_API extends Feature implements Do
 
 
     @Override
-    public PopulatorType getType() {
+    public org.spongepowered.api.world.gen.feature.Feature getType() {
         return PopulatorTypes.DOUBLE_PLANT;
     }
 

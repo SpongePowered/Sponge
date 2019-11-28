@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
@@ -36,14 +36,14 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class FallingBlockCanHurtEntitiesValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, Boolean, Value<Boolean>> {
+public class FallingBlockCanHurtEntitiesValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, Boolean, Mutable<Boolean>> {
 
     public FallingBlockCanHurtEntitiesValueProcessor() {
         super(EntityFallingBlockAccessor.class, Keys.FALLING_BLOCK_CAN_HURT_ENTITIES);
     }
 
     @Override
-    protected Value<Boolean> constructValue(final Boolean value) {
+    protected Mutable<Boolean> constructValue(final Boolean value) {
         return new SpongeValue<>(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, Constants.Entity.FallingBlock.DEFAULT_CAN_HURT_ENTITIES, value);
     }
 
@@ -59,7 +59,7 @@ public class FallingBlockCanHurtEntitiesValueProcessor extends AbstractSpongeVal
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(final Boolean value) {
         return constructValue(value).asImmutable();
     }
 

@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableJohnnyData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JohnnyData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeJohnnyData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
@@ -42,7 +42,7 @@ public class SpongeJohnnyData extends AbstractBooleanData<JohnnyData, ImmutableJ
     }
 
     @Override
-    public Value<Boolean> johnny() {
+    public Mutable<Boolean> johnny() {
         return getValueGetter();
     }
 

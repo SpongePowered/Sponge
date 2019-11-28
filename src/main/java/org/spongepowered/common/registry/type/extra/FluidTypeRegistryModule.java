@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.extra.fluid.FluidType;
-import org.spongepowered.api.extra.fluid.FluidTypes;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.fluid.FluidTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.data.type.SpongeCommonFluidType;

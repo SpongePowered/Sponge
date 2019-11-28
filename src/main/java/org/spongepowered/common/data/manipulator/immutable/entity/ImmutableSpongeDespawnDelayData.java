@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDespawnDelayData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DespawnDelayData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDespawnDelayData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -64,7 +64,7 @@ public final class ImmutableSpongeDespawnDelayData extends AbstractImmutableData
     }
 
     @Override
-    public ImmutableValue<Boolean> infinite() {
+    public Immutable<Boolean> infinite() {
         return new ImmutableSpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false, isInfinite());
     }
 

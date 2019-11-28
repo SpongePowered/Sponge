@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.world.extent.BiomeVolume;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.extent.UnmodifiableBiomeVolume;
-import org.spongepowered.api.world.extent.worker.BiomeVolumeWorker;
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.ReadableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.UnmodifiableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.worker.BiomeVolumeStream;
 import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
+import org.spongepowered.math.vector.Vector3i;
 
-public class UnmodifiableBiomeViewDownsize extends AbstractBiomeViewDownsize<BiomeVolume> implements UnmodifiableBiomeVolume {
+public class UnmodifiableBiomeViewDownsize extends AbstractBiomeViewDownsize<ReadableBiomeVolume> implements UnmodifiableBiomeVolume {
 
-    public UnmodifiableBiomeViewDownsize(BiomeVolume volume, Vector3i min, Vector3i max) {
+    public UnmodifiableBiomeViewDownsize(ReadableBiomeVolume volume, Vector3i min, Vector3i max) {
         super(volume, min, max);
     }
 
@@ -58,7 +58,7 @@ public class UnmodifiableBiomeViewDownsize extends AbstractBiomeViewDownsize<Bio
     }
 
     @Override
-    public BiomeVolumeWorker<? extends UnmodifiableBiomeVolume> getBiomeWorker() {
+    public BiomeVolumeStream<? extends UnmodifiableBiomeVolume> getBiomeWorker() {
         return new SpongeBiomeVolumeWorker<>(this);
     }
 

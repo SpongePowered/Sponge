@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.item;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableStoredEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.StoredEnchantmentData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeStoredEnchantmentData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;

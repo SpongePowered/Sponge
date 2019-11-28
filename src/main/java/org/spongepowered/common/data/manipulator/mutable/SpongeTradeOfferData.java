@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.mutable;
 
 import com.google.common.collect.Lists;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTradeOfferData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TradeOfferData;

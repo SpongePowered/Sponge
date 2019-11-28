@@ -32,9 +32,9 @@ import com.google.common.collect.Iterables;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
+import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;

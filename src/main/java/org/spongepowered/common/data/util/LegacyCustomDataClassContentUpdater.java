@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.util;
 
 import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.util.Constants;
 

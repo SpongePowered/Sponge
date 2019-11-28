@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import com.flowpowered.math.vector.Vector2i;
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -36,6 +33,9 @@ import net.minecraft.util.math.Vec3i;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.bridge.world.LocationBridge;
+import org.spongepowered.math.vector.Vector2i;
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 
 public final class VecHelper {
 

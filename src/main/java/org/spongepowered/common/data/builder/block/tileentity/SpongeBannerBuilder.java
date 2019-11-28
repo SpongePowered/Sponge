@@ -28,13 +28,13 @@ import net.minecraft.tileentity.BannerTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Banner;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.value.mutable.ListValue;
+import org.spongepowered.api.data.value.ListValue.Mutable;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
 import org.spongepowered.common.util.Constants;
 
@@ -65,7 +65,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
 
             // Now we have to get the patterns list
             final List<PatternLayer> patternsList = container.getSerializableList(Constants.TileEntity.Banner.PATTERNS, PatternLayer.class).get();
-            final ListValue<PatternLayer> patternLayers = bannerData.patternsList();
+            final Mutable<PatternLayer> patternLayers = bannerData.patternsList();
             patternsList.forEach(patternLayers::add);
             bannerData.set(patternLayers);
             banner1.offer(bannerData);

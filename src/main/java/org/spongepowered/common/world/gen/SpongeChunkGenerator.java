@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -64,13 +63,12 @@ import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.GroundCoverLayer;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.PopulatorType;
-import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.gen.TerrainGenerator;
+import org.spongepowered.api.world.gen.feature.Feature;
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
@@ -90,7 +88,7 @@ import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.extent.SoftBufferExtentViewDownsize;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -104,14 +102,14 @@ import javax.annotation.Nullable;
  * Similar class to {@link ChunkGeneratorOverworld}, but instead gets its blocks
  * from a custom chunk generator.
  */
-public class SpongeChunkGenerator implements WorldGenerator, ChunkGenerator {
+public class SpongeChunkGenerator implements TerrainGenerator, ChunkGenerator {
 
     private static final Vector3i CHUNK_AREA = new Vector3i(16, 1, 16);
 
     protected BiomeGenerator biomeGenerator;
     protected GenerationPopulator baseGenerator;
     protected List<GenerationPopulator> genpop;
-    protected List<Populator> pop;
+    protected List<Feature> pop;
     protected Map<BiomeType, BiomeGenerationSettings> biomeSettings;
     protected final World world;
     protected final ObjectArrayMutableBiomeBuffer cachedBiomes;
@@ -179,11 +177,11 @@ public class SpongeChunkGenerator implements WorldGenerator, ChunkGenerator {
     }
 
     @Override
-    public List<Populator> getPopulators() {
+    public List<Feature> getPopulators() {
         return this.pop;
     }
 
-    public void setPopulators(List<Populator> populators) {
+    public void setPopulators(List<Feature> populators) {
         this.pop = Lists.newArrayList(populators);
     }
 
@@ -232,7 +230,7 @@ public class SpongeChunkGenerator implements WorldGenerator, ChunkGenerator {
     }
 
     @Override
-    public List<Populator> getPopulators(Class<? extends Populator> type) {
+    public List<Feature> getPopulators(Class<? extends Feature> type) {
         return this.pop.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 
@@ -311,16 +309,16 @@ public class SpongeChunkGenerator implements WorldGenerator, ChunkGenerator {
         BlockPos blockpos = new BlockPos(chunkX * 16, 0, chunkZ * 16);
         BiomeType biome = (BiomeType) this.world.getBiome(blockpos.add(16, 0, 16));
 
-        org.spongepowered.api.world.Chunk chunk = (org.spongepowered.api.world.Chunk) this.world.getChunk(chunkX, chunkZ);
+        org.spongepowered.api.world.chunk.Chunk chunk = (org.spongepowered.api.world.chunk.Chunk) this.world.getChunk(chunkX, chunkZ);
 
         BiomeGenerationSettings settings = getBiomeSettings(biome);
 
-        List<Populator> populators = new ArrayList<>(this.pop);
+        List<Feature> populators = new ArrayList<>(this.pop);
 
-        Populator snowPopulator = null;
-        Iterator<Populator> itr = populators.iterator();
+        Feature snowPopulator = null;
+        Iterator<Feature> itr = populators.iterator();
         while (itr.hasNext()) {
-            Populator populator = itr.next();
+            Feature populator = itr.next();
             if (populator instanceof SnowPopulator) {
                 itr.remove();
                 snowPopulator = populator;
@@ -339,8 +337,8 @@ public class SpongeChunkGenerator implements WorldGenerator, ChunkGenerator {
         final Vector3i min = currentState.getChunkPopulatorOffset(chunk, chunkX, chunkZ);
         org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) this.world;
         Extent volume = new SoftBufferExtentViewDownsize(chunk.getWorld(), min, min.add(15, 255, 15), min.sub(8, 0, 8), min.add(23, 255, 23));
-        for (Populator populator : populators) {
-            final PopulatorType type = populator.getType();
+        for (Feature populator : populators) {
+            final Feature type = populator.getType();
             if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(Sponge.getCauseStackManager().getCurrentCause(), populator, chunk))) {
                 continue;
             }
@@ -401,7 +399,7 @@ public class SpongeChunkGenerator implements WorldGenerator, ChunkGenerator {
     public boolean generateStructures(Chunk chunk, int chunkX, int chunkZ) {
         boolean flag = false;
         if (chunk.getInhabitedTime() < 3600L) {
-            for (Populator populator : this.pop) {
+            for (Feature populator : this.pop) {
                 if (populator instanceof OceanMonumentStructure) {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                          GenerationContext<PopulatorPhaseContext> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()

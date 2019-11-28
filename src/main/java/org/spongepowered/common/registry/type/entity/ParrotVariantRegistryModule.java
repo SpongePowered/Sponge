@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.type.ParrotVariant;
-import org.spongepowered.api.data.type.ParrotVariants;
+import org.spongepowered.api.data.type.ParrotType;
+import org.spongepowered.api.data.type.ParrotTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.entity.SpongeParrotVariant;
@@ -40,10 +40,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class ParrotVariantRegistryModule implements CatalogRegistryModule<ParrotVariant> {
+public class ParrotVariantRegistryModule implements CatalogRegistryModule<ParrotType> {
 
-    public static final Map<String, ParrotVariant> PARROT_VARIANTS = Maps.newHashMap();
-    public static final Map<Integer, ParrotVariant> PARROT_VARIANT_IDMAP = Maps.newHashMap();
+    public static final Map<String, ParrotType> PARROT_VARIANTS = Maps.newHashMap();
+    public static final Map<Integer, ParrotType> PARROT_VARIANT_IDMAP = Maps.newHashMap();
 
     public static final SpongeParrotVariant RED_PARROT = new SpongeParrotVariant(0, "RED");
     public static final SpongeParrotVariant BLUE_PARROT = new SpongeParrotVariant(1, "BLUE");
@@ -51,16 +51,16 @@ public class ParrotVariantRegistryModule implements CatalogRegistryModule<Parrot
     public static final SpongeParrotVariant CYAN_PARROT = new SpongeParrotVariant(3, "CYAN");
     public static final SpongeParrotVariant GRAY_PARROT = new SpongeParrotVariant(4, "GRAY");
 
-    @RegisterCatalog(ParrotVariants.class)
-    private final Map<String, ParrotVariant> parrotVariantMap = new HashMap<>();
+    @RegisterCatalog(ParrotTypes.class)
+    private final Map<String, ParrotType> parrotVariantMap = new HashMap<>();
 
     @Override
-    public Optional<ParrotVariant> getById(String id) {
+    public Optional<ParrotType> getById(String id) {
         return Optional.ofNullable(this.parrotVariantMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
-    public Collection<ParrotVariant> getAll() {
+    public Collection<ParrotType> getAll() {
         return ImmutableList.copyOf(this.parrotVariantMap.values());
     }
 

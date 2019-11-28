@@ -27,13 +27,12 @@ package org.spongepowered.common.data.manipulator.immutable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.value.SpongeValueFactory.boundedBuilder;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.immutable.ImmutableWeightedCollectionValue;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
@@ -64,8 +63,8 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
     private final ImmutableBoundedValue<Short> nearbyValue;
     private final ImmutableBoundedValue<Short> playerRangeValue;
     private final ImmutableBoundedValue<Short> spawnRangeValue;
-    private final ImmutableValue<WeightedSerializableObject<EntityArchetype>> nextValue;
-    private final ImmutableWeightedCollectionValue<EntityArchetype> toSpawnValue;
+    private final Immutable<WeightedSerializableObject<EntityArchetype>> nextValue;
+    private final org.spongepowered.api.data.value.WeightedcollectionValue.Immutable<EntityArchetype> toSpawnValue;
 
     public ImmutableSpongeMobSpawnerData() {
         this(Constants.TileEntity.Spawner.DEFAULT_REMAINING_DELAY, Constants.TileEntity.Spawner.DEFAULT_MINIMUM_SPAWN_DELAY,
@@ -180,12 +179,12 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public ImmutableValue<WeightedSerializableObject<EntityArchetype>> nextEntityToSpawn() {
+    public Immutable<WeightedSerializableObject<EntityArchetype>> nextEntityToSpawn() {
         return this.nextValue;
     }
 
     @Override
-    public ImmutableWeightedCollectionValue<EntityArchetype> possibleEntitiesToSpawn() {
+    public org.spongepowered.api.data.value.WeightedcollectionValue.Immutable<EntityArchetype> possibleEntitiesToSpawn() {
         return this.toSpawnValue;
     }
 

@@ -26,23 +26,23 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.OptionalValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
 
 import java.util.Optional;
 
-public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<EntityLivingBaseAccessor, Optional<Double>, OptionalValue<Double>> {
+public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<EntityLivingBaseAccessor, Optional<Double>, Mutable<Double>> {
 
     public LastDamageValueProcessor() {
         super(EntityLivingBaseAccessor.class, Keys.LAST_DAMAGE);
     }
 
     @Override
-    protected OptionalValue<Double> constructValue(final Optional<Double> actualValue) {
+    protected Mutable<Double> constructValue(final Optional<Double> actualValue) {
         return SpongeValueFactory.getInstance().createOptionalValue(Keys.LAST_DAMAGE, actualValue.orElse(null));
     }
 
@@ -62,7 +62,7 @@ public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<Entit
     }
 
     @Override
-    protected ImmutableValue<Optional<Double>> constructImmutableValue(final Optional<Double> value) {
+    protected Immutable<Optional<Double>> constructImmutableValue(final Optional<Double> value) {
         return constructValue(value).asImmutable();
     }
 

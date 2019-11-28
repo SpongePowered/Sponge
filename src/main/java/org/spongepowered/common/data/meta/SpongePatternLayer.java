@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.meta;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.util.Constants;

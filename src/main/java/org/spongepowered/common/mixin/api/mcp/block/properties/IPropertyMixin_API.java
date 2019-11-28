@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.block.properties;
 
 import net.minecraft.block.properties.IProperty;
-import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -50,7 +50,7 @@ import java.util.function.Predicate;
  * @param <T> The type of comparable.
  */
 @Mixin(value = IProperty.class)
-@Implements(@Interface(iface = BlockTrait.class, prefix = "trait$"))
+@Implements(@Interface(iface = StateProperty.class, prefix = "trait$"))
 public interface IPropertyMixin_API<T extends Comparable<T>> extends IProperty<T> {
 
     default String trait$getId() {

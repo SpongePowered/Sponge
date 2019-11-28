@@ -25,11 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.living.golem.Shulker;
 import org.spongepowered.api.entity.projectile.EntityTargetingProjectile;
 import org.spongepowered.api.util.Direction;
@@ -55,7 +54,7 @@ public abstract class EntityShulkerMixin_API extends EntityGolemMixin_API implem
     }
 
     @Override
-    public Value<DyeColor> color() {
+    public Mutable<DyeColor> color() {
         return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHULKER_COLOR, ((EntityShulkerBridge) this).bridge$getColor());
     }
 
@@ -65,7 +64,7 @@ public abstract class EntityShulkerMixin_API extends EntityGolemMixin_API implem
     }
 
     @Override
-    public Value<Direction> direction() {
+    public Mutable<Direction> direction() {
         return new SpongeValue<>(Keys.DIRECTION, ((EntityShulkerBridge) this).bridge$getDirection());
     }
 
@@ -76,7 +75,7 @@ public abstract class EntityShulkerMixin_API extends EntityGolemMixin_API implem
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(final Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getDyeData());
         manipulators.add(getDirectionalData());

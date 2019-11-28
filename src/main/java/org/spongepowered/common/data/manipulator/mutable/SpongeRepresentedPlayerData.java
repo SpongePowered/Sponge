@@ -25,12 +25,12 @@
 package org.spongepowered.common.data.manipulator.mutable;
 
 import com.google.common.collect.Multimap;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedPlayerData;
@@ -90,7 +90,7 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
     }
 
     @Override
-    public Value<GameProfile> owner() {
+    public Mutable<GameProfile> owner() {
         return new SpongeValue<>(this.usedKey, this.getValue());
     }
 
@@ -112,7 +112,7 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Mutable<?> getValueGetter() {
         return this.owner();
     }
 

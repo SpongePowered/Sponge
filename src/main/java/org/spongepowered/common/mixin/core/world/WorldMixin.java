@@ -54,7 +54,7 @@ import net.minecraft.world.storage.WorldInfo;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.property.item.RecordProperty;
-import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
@@ -397,7 +397,7 @@ public abstract class WorldMixin implements WorldBridge {
                             //Safeguard for https://github.com/SpongePowered/SpongeCommon/issues/2337
                             return;
                         }
-                        final RecordType recordType = recordProperty.get().getValue();
+                        final MusicDisc recordType = recordProperty.get().getValue();
                         final PlaySoundEvent.Record event = SpongeCommonEventFactory.callPlaySoundRecordEvent(frame.getCurrentCause(), jukebox, recordType, data);
                         if (event.isCancelled()) {
                             callbackInfo.cancel();
@@ -529,7 +529,7 @@ public abstract class WorldMixin implements WorldBridge {
 
     @SuppressWarnings("ConstantConditions")
     private boolean canTileUpdate(final TileEntity tile) {
-        final org.spongepowered.api.block.tileentity.TileEntity spongeTile = (org.spongepowered.api.block.tileentity.TileEntity) tile;
+        final org.spongepowered.api.block.entity.BlockEntity spongeTile = (org.spongepowered.api.block.entity.BlockEntity) tile;
         return spongeTile.getType() == null || ((SpongeTileEntityType) spongeTile.getType()).canTick();
     }
 

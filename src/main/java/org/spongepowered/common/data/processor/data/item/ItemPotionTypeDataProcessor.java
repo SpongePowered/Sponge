@@ -34,9 +34,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionTypeData;
 import org.spongepowered.api.data.manipulator.mutable.PotionTypeData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionTypeData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
@@ -45,7 +45,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor<PotionType, Value<PotionType>, PotionTypeData, ImmutablePotionTypeData> {
+public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor<PotionType, Mutable<PotionType>, PotionTypeData, ImmutablePotionTypeData> {
 
     public ItemPotionTypeDataProcessor() {
         super(itemStack -> itemStack.getItem() == Items.POTION || itemStack.getItem() == Items.SPLASH_POTION ||
@@ -69,12 +69,12 @@ public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor
     }
 
     @Override
-    protected ImmutableValue<PotionType> constructImmutableValue(PotionType value) {
+    protected Immutable<PotionType> constructImmutableValue(PotionType value) {
         return new ImmutableSpongeValue<>(Keys.POTION_TYPE, value);
     }
 
     @Override
-    protected Value<PotionType> constructValue(PotionType actualValue) {
+    protected Mutable<PotionType> constructValue(PotionType actualValue) {
         return new SpongeValue<>(Keys.POTION_TYPE, actualValue);
     }
 

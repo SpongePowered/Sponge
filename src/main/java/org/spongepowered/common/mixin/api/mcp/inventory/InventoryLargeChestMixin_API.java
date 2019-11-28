@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.inventory;
 
 import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.world.ILockableContainer;
-import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.MultiBlockCarrier;
@@ -58,11 +58,11 @@ public abstract class InventoryLargeChestMixin_API implements CarriedInventory<M
     @Override
     public List<Location<World>> getLocations() {
         final List<Location<World>> list = new ArrayList<>();
-        if (this.upperChest instanceof TileEntity) {
-            list.add(((TileEntity) this.upperChest).getLocation());
+        if (this.upperChest instanceof BlockEntity) {
+            list.add(((BlockEntity) this.upperChest).getLocation());
         }
-        if (this.lowerChest instanceof TileEntity) {
-            list.add(((TileEntity) this.lowerChest).getLocation());
+        if (this.lowerChest instanceof BlockEntity) {
+            list.add(((BlockEntity) this.lowerChest).getLocation());
         }
         return Collections.unmodifiableList(list);
     }

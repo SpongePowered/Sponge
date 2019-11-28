@@ -27,9 +27,9 @@ package org.spongepowered.common.data.processor.value.block;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.SetValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
@@ -39,14 +39,14 @@ import java.util.Set;
 import net.minecraft.tileentity.ChestTileEntity;
 
 public class ConnectedDirectionsValueProcessor extends
-        AbstractSpongeValueProcessor<ChestTileEntity, Set<Direction>, SetValue<Direction>> {
+        AbstractSpongeValueProcessor<ChestTileEntity, Set<Direction>, Mutable<Direction>> {
 
     public ConnectedDirectionsValueProcessor() {
         super(ChestTileEntity.class, Keys.CONNECTED_DIRECTIONS);
     }
 
     @Override
-    protected SetValue<Direction> constructValue(Set<Direction> defaultValue) {
+    protected Mutable<Direction> constructValue(Set<Direction> defaultValue) {
         return new SpongeSetValue<>(Keys.CONNECTED_DIRECTIONS, Sets.newHashSet(), defaultValue);
     }
 
@@ -77,7 +77,7 @@ public class ConnectedDirectionsValueProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Set<Direction>> constructImmutableValue(Set<Direction> value) {
+    protected Immutable<Set<Direction>> constructImmutableValue(Set<Direction> value) {
         return constructValue(value).asImmutable();
     }
 

@@ -27,11 +27,10 @@ package org.spongepowered.common.bridge.block;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
@@ -64,7 +63,7 @@ public interface BlockBridge {
      * @param blockState The block state being passed in
      * @return The list of immutable manipulators
      */
-    List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(net.minecraft.block.BlockState blockState);
+    List<Immutable<?, ?>> bridge$getManipulators(net.minecraft.block.BlockState blockState);
 
     /**
      * A simple check whether the class is supported by the block or not.
@@ -72,7 +71,7 @@ public interface BlockBridge {
      * @param immutable The immutable class
      * @return True if the data possibly represented by an instance of the class is supported
      */
-    boolean bridge$supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable);
+    boolean bridge$supports(Class<? extends Immutable<?, ?>> immutable);
 
     /**
      * Instead of delegating to a block processor, we can delegate to the block
@@ -89,7 +88,7 @@ public interface BlockBridge {
      * @param <E> The type of value, for type checking
      * @return The blockstate with the new value, if available and compatible
      */
-    <E> Optional<BlockState> bridge$getStateWithValue(net.minecraft.block.BlockState blockState, Key<? extends BaseValue<E>> key, E value);
+    <E> Optional<BlockState> bridge$getStateWithValue(net.minecraft.block.BlockState blockState, Key<? extends Value<E>> key, E value);
 
     /**
      * Again, another delegate method directly to the block, usually not all
@@ -106,7 +105,7 @@ public interface BlockBridge {
      * @param manipulator The manipulator being offered
      * @return The block state with the requested data, if available
      */
-    Optional<BlockState> bridge$getStateWithData(net.minecraft.block.BlockState blockState, ImmutableDataManipulator<?, ?> manipulator);
+    Optional<BlockState> bridge$getStateWithData(net.minecraft.block.BlockState blockState, Immutable<?, ?> manipulator);
 
     // Normal API methods
 

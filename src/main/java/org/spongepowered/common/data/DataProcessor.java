@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.data;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityType;
 
 import java.util.Optional;
 
-public interface DataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> {
+public interface DataProcessor<M extends Mutable<M, I>, I extends Immutable<I, M>> {
 
     /**
      * Gets the priority of this processor. A single {@link Key} can have
@@ -97,7 +97,7 @@ public interface DataProcessor<M extends DataManipulator<M, I>, I extends Immuta
      */
     DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function);
 
-    Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable);
+    Optional<I> with(Key<? extends Value<?>> key, Object value, I immutable);
 
     /**
      * Attempts to remove the {@link DataManipulator} type from the given {@link DataHolder}.

@@ -75,8 +75,8 @@ import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.biome.BiomeBridge;
 import org.spongepowered.common.registry.RegistryHelper;
@@ -89,19 +89,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegistryModule<PopulatorType> {
+public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegistryModule<Feature> {
 
     public static PopulatorTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    public final Map<Class<?>, PopulatorType> populatorClassToTypeMappings = Maps.newHashMap();
+    public final Map<Class<?>, Feature> populatorClassToTypeMappings = Maps.newHashMap();
 
     @RegisterCatalog(PopulatorTypes.class)
-    protected final Map<String, PopulatorType> populatorTypeMappings = Maps.newHashMap();
+    protected final Map<String, Feature> populatorTypeMappings = Maps.newHashMap();
 
-    private final Function<Biome, PopulatorType> customTypeFunction;
-    private final Function<Class<?>, PopulatorType> classPopulatorTypeFunction;
+    private final Function<Biome, Feature> customTypeFunction;
+    private final Function<Class<?>, Feature> classPopulatorTypeFunction;
 
 
     PopulatorTypeRegistryModule() {
@@ -115,12 +115,12 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
     }
 
     @Override
-    public Optional<PopulatorType> getById(String id) {
+    public Optional<Feature> getById(String id) {
         return Optional.ofNullable(this.populatorTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
-    public Collection<PopulatorType> getAll() {
+    public Collection<Feature> getAll() {
         return ImmutableList.copyOf(this.populatorTypeMappings.values());
     }
 
@@ -209,14 +209,14 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
     }
 
     @Override
-    public void registerAdditionalCatalog(PopulatorType extraCatalog) {
+    public void registerAdditionalCatalog(Feature extraCatalog) {
         checkNotNull(extraCatalog, "CatalogType cannot be null");
         checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
         checkArgument(!this.populatorTypeMappings.containsKey(extraCatalog.getId()), "Duplicate Id: " + extraCatalog.getId());
         this.populatorTypeMappings.put(extraCatalog.getId(), extraCatalog);
     }
 
-    public void registerClassMapping(Class<? extends net.minecraft.world.gen.feature.Feature> generator, PopulatorType type) {
+    public void registerClassMapping(Class<? extends net.minecraft.world.gen.feature.Feature> generator, Feature type) {
         this.populatorClassToTypeMappings.put(generator, type);
     }
 
@@ -231,13 +231,13 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         return this.populatorClassToTypeMappings.containsKey(cls);
     }
 
-    public PopulatorType getForClass(Class<?> cls) {
+    public Feature getForClass(Class<?> cls) {
         return this.populatorClassToTypeMappings.get(cls);
     }
 
-    public PopulatorType replaceFromForge(Biome biome) {
+    public Feature replaceFromForge(Biome biome) {
         if (hasRegistrationFor(biome.getClass())) {
-            PopulatorType removed = this.populatorClassToTypeMappings.remove(biome.getClass());
+            Feature removed = this.populatorClassToTypeMappings.remove(biome.getClass());
             this.populatorTypeMappings.remove(removed.getId());
             SpongePopulatorType replacement = new SpongePopulatorType(((BiomeType) biome).getName(), ((BiomeBridge) biome).bridge$getModId());
             this.populatorClassToTypeMappings.put(biome.getClass(), replacement);
@@ -247,11 +247,11 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         return getOrCreateForType(biome);
     }
 
-    public PopulatorType getOrCreateForType(Biome biome) {
+    public Feature getOrCreateForType(Biome biome) {
         if (hasRegistrationFor(biome.getClass())) {
             return getForClass(biome.getClass());
         }
-        PopulatorType type = this.customTypeFunction.apply(biome);
+        Feature type = this.customTypeFunction.apply(biome);
         if (type == null) {
             return InternalPopulatorTypes.UNKNOWN;
         }
@@ -261,11 +261,11 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
     }
 
 
-    public PopulatorType getOrCreateForType(Class<?> cls) {
+    public Feature getOrCreateForType(Class<?> cls) {
         if (hasRegistrationFor(cls)) {
             return getForClass(cls);
         }
-        PopulatorType type = this.classPopulatorTypeFunction.apply(cls);
+        Feature type = this.classPopulatorTypeFunction.apply(cls);
         if (type == null) {
             return InternalPopulatorTypes.UNKNOWN;
         }

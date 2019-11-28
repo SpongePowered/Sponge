@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EyeOfEnderEntity;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
+import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(EyeOfEnderEntity.class)
 public abstract class EntityEnderEyeMixin extends EntityMixin implements LocationTargetingBridge {

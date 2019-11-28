@@ -32,10 +32,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Singleton;
-import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.PropertyRegistry;
-import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.data.property.provider.PropertyProvider;
 import org.spongepowered.common.data.property.SpongePropertyRegistry.TempRegistry;
 import org.spongepowered.common.util.Constants;
 
@@ -57,7 +57,7 @@ public class SpongePropertyRegistry implements PropertyRegistry {
     private final Map<Class<? extends Property<?, ?>>, PropertyStoreDelegate<?>> delegateMap = Maps.newConcurrentMap();
 
     static final class TempRegistry {
-        final Map<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> propertyStoreMap = Maps.newConcurrentMap();
+        final Map<Class<? extends Property<?, ?>>, List<PropertyProvider<?>>> propertyStoreMap = Maps.newConcurrentMap();
         final Map<Class<? extends Property<?, ?>>, PropertyStoreDelegate<?>> delegateMap = Maps.newConcurrentMap();
     }
 
@@ -67,8 +67,8 @@ public class SpongePropertyRegistry implements PropertyRegistry {
         final TempRegistry temp = this.tempRegistry;
         this.tempRegistry = null;
         if (temp != null) {
-            for (final Map.Entry<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> entry : temp.propertyStoreMap.entrySet()) {
-                final ImmutableList.Builder<PropertyStore<?>> propertyStoreBuilder = ImmutableList.builder();
+            for (final Map.Entry<Class<? extends Property<?, ?>>, List<PropertyProvider<?>>> entry : temp.propertyStoreMap.entrySet()) {
+                final ImmutableList.Builder<PropertyProvider<?>> propertyStoreBuilder = ImmutableList.builder();
                 entry.getValue().sort(Constants.Functional.PROPERTY_STORE_COMPARATOR);
                 propertyStoreBuilder.addAll(entry.getValue());
                 final PropertyStoreDelegate<?> delegate = new PropertyStoreDelegate(propertyStoreBuilder.build());
@@ -80,25 +80,25 @@ public class SpongePropertyRegistry implements PropertyRegistry {
     }
 
     @Override
-    public <T extends Property<?, ?>> void register(final Class<T> propertyClass, final PropertyStore<T> propertyStore) {
+    public <T extends Property<?, ?>> void register(final Class<T> propertyClass, final PropertyProvider<T> propertyStore) {
         checkState(this.tempRegistry != null, "Registrations are no longer allowed!");
         checkArgument(propertyClass != null, "The property class can not be null!");
         if (!this.tempRegistry.propertyStoreMap.containsKey(propertyClass)) {
-            this.tempRegistry.propertyStoreMap.put(propertyClass, Collections.synchronizedList(Lists.<PropertyStore<?>>newArrayList()));
+            this.tempRegistry.propertyStoreMap.put(propertyClass, Collections.synchronizedList(Lists.<PropertyProvider<?>>newArrayList()));
         }
         this.tempRegistry.delegateMap.remove(propertyClass);
-        final List<PropertyStore<?>> propertyStores = this.tempRegistry.propertyStoreMap.get(propertyClass);
+        final List<PropertyProvider<?>> propertyStores = this.tempRegistry.propertyStoreMap.get(propertyClass);
         propertyStores.add(checkNotNull(propertyStore));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends Property<?, ?>> Optional<PropertyStore<T>> getStore(final Class<T> propertyClass) {
+    public <T extends Property<?, ?>> Optional<PropertyProvider<T>> getStore(final Class<T> propertyClass) {
         checkArgument(propertyClass != null, "The property class can not be null!");
         if (!this.delegateMap.containsKey(propertyClass)) {
             return Optional.empty();
         }
-        return Optional.of((PropertyStore<T>) this.delegateMap.get(propertyClass));
+        return Optional.of((PropertyProvider<T>) this.delegateMap.get(propertyClass));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -110,10 +110,10 @@ public class SpongePropertyRegistry implements PropertyRegistry {
                 used.add(entry.getKey());
                 entry.getValue().getFor(holder).ifPresent(builder::add);
             }
-            for (final Map.Entry<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> entry : this.tempRegistry.propertyStoreMap.entrySet()) {
+            for (final Map.Entry<Class<? extends Property<?, ?>>, List<PropertyProvider<?>>> entry : this.tempRegistry.propertyStoreMap.entrySet()) {
                 if (!used.contains(entry.getKey())) {
                     used.add(entry.getKey());
-                    final ImmutableList.Builder<PropertyStore<?>> propertyStoreBuilder = ImmutableList.builder();
+                    final ImmutableList.Builder<PropertyProvider<?>> propertyStoreBuilder = ImmutableList.builder();
                     entry.getValue().sort(Constants.Functional.PROPERTY_STORE_COMPARATOR);
                     propertyStoreBuilder.addAll(entry.getValue());
                     final PropertyStoreDelegate<?> delegate = new PropertyStoreDelegate(propertyStoreBuilder.build());

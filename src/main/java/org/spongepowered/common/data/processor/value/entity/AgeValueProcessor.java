@@ -28,23 +28,23 @@ import static org.spongepowered.common.util.Constants.Functional.intComparator;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 import net.minecraft.entity.AgeableEntity;
 
-public class AgeValueProcessor extends AbstractSpongeValueProcessor<AgeableEntity, Integer, MutableBoundedValue<Integer>> {
+public class AgeValueProcessor extends AbstractSpongeValueProcessor<AgeableEntity, Integer, Mutable<Integer>> {
 
     public AgeValueProcessor() {
         super(AgeableEntity.class, Keys.AGE);
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(Integer age) {
+    public Mutable<Integer> constructValue(Integer age) {
         return SpongeValueFactory.boundedBuilder(Keys.AGE)
                 .comparator(intComparator())
                 .minimum(Integer.MIN_VALUE)
@@ -71,7 +71,7 @@ public class AgeValueProcessor extends AbstractSpongeValueProcessor<AgeableEntit
     }
 
     @Override
-    public Optional<MutableBoundedValue<Integer>> getApiValueFromContainer(ValueContainer<?> container) {
+    public Optional<Mutable<Integer>> getApiValueFromContainer(ValueContainer<?> container) {
         if (this.supports(container)) {
             Optional<Integer> value = this.getVal((AgeableEntity) container);
             if (value.isPresent()) {

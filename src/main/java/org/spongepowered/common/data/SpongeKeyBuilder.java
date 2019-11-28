@@ -29,9 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
@@ -42,7 +42,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public final class SpongeKeyBuilder<E, V extends BaseValue<E>> extends SpongeCatalogBuilder<Key<V>, Key.Builder<E, V>> implements Key.Builder<E, V> {
+public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilder<Key<V>, Key.Builder<E, V>> implements Key.Builder<E, V> {
 
     private static final Set<String> loggedPlugins = new HashSet<>();
 
@@ -52,7 +52,7 @@ public final class SpongeKeyBuilder<E, V extends BaseValue<E>> extends SpongeCat
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T, B extends BaseValue<T>> Key.Builder<T, B> type(TypeToken<B> token) {
+    public <T, B extends Value<T>> Key.Builder<T, B> type(TypeToken<B> token) {
         this.valueToken = (TypeToken<V>) checkNotNull(token, "Value Token cannot be null!");
         return (Key.Builder<T, B>) this;
     }

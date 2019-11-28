@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionColorData;
 import org.spongepowered.api.data.manipulator.mutable.PotionColorData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionColorData;
@@ -35,19 +35,19 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongePotionColorData extends AbstractImmutableSingleData<Color, ImmutablePotionColorData, PotionColorData> implements ImmutablePotionColorData {
 
-    private final ImmutableValue<Color> immutableValue = new ImmutableSpongeValue<>(Keys.POTION_COLOR, Color.RED, this.value);
+    private final Immutable<Color> immutableValue = new ImmutableSpongeValue<>(Keys.POTION_COLOR, Color.RED, this.value);
 
     public ImmutableSpongePotionColorData(Color type) {
         super(ImmutablePotionColorData.class, type, Keys.POTION_COLOR);
     }
 
     @Override
-    public ImmutableValue<Color> color() {
+    public Immutable<Color> color() {
         return this.immutableValue;
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
+    protected Immutable<?> getValueGetter() {
         return this.color();
     }
 

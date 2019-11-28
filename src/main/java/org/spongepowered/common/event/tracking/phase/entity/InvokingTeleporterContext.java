@@ -25,9 +25,9 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.world.PortalAgent;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
 public final class InvokingTeleporterContext extends EntityContext<InvokingTeleporterContext> {

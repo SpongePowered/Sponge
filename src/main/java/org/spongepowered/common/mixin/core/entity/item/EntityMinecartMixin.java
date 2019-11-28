@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
@@ -46,7 +45,7 @@ import org.spongepowered.common.bridge.entity.item.EntityMinecartBridge;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VectorSerializer;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.ArrayList;
 
 @Mixin(AbstractMinecartEntity.class)

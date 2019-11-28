@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.WaterMobEntity;
-import org.spongepowered.api.entity.living.Aquatic;
+import org.spongepowered.api.entity.aquatic.living.Aquatic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingMixin_API;
 

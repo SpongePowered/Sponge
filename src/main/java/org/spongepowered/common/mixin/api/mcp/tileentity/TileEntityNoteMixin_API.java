@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.TileEntityNote;
 import org.spongepowered.api.block.tileentity.Note;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.DataManipulator.Mutable;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,7 +49,7 @@ public abstract class TileEntityNoteMixin_API extends TileEntityMixin_API implem
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(List<Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getNoteData());
     }

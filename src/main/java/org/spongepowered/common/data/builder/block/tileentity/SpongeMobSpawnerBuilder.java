@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import org.spongepowered.api.block.tileentity.MobSpawner;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.block.entity.MobSpawner;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 
 import java.util.Optional;

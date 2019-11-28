@@ -24,21 +24,20 @@
  */
 package org.spongepowered.common.util.gen;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
-import org.spongepowered.api.world.extent.BlockVolume;
 import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.volume.block.ReadableBlockVolume;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Objects;
 
 /**
  * Base class for block buffers.
  */
-public abstract class AbstractBlockBuffer implements BlockVolume {
+public abstract class AbstractBlockBuffer implements ReadableBlockVolume {
 
     protected final Vector3i start;
     protected final Vector3i size;

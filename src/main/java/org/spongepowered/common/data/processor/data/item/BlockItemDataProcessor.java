@@ -32,9 +32,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBlockItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.BlockItemData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBlockItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.util.Constants;
@@ -43,7 +43,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<BlockState, Value<BlockState>, BlockItemData, ImmutableBlockItemData> {
+public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<BlockState, Mutable<BlockState>, BlockItemData, ImmutableBlockItemData> {
 
     public BlockItemDataProcessor() {
         super(stack -> stack.getItem() instanceof BlockItem, Keys.ITEM_BLOCKSTATE);
@@ -75,12 +75,12 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
     }
 
     @Override
-    protected Value<BlockState> constructValue(BlockState actualValue) {
+    protected Mutable<BlockState> constructValue(BlockState actualValue) {
         return new SpongeValue<>(Keys.ITEM_BLOCKSTATE, Constants.Catalog.DEFAULT_BLOCK_STATE, actualValue);
     }
 
     @Override
-    protected ImmutableValue<BlockState> constructImmutableValue(BlockState value) {
+    protected Immutable<BlockState> constructImmutableValue(BlockState value) {
         return new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, Constants.Catalog.DEFAULT_BLOCK_STATE, value);
     }
 

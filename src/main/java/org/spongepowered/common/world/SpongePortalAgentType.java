@@ -27,8 +27,8 @@ package org.spongepowered.common.world;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.world.PortalAgent;
-import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.teleport.PortalAgent;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 
 public final class SpongePortalAgentType implements PortalAgentType {

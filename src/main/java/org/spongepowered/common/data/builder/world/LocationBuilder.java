@@ -25,13 +25,12 @@
 package org.spongepowered.common.data.builder.world;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-
+import org.spongepowered.api.data.persistence.DataView;
 import java.util.Optional;
 import java.util.UUID;
 

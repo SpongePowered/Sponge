@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableFurnaceData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -76,7 +76,7 @@ public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnac
     }
 
     @Override
-    public MutableBoundedValue<Integer> passedBurnTime() {
+    public Mutable<Integer> passedBurnTime() {
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_BURN_TIME)
                 .minimum(0)
                 .maximum(this.maxBurnTime)
@@ -94,7 +94,7 @@ public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnac
     }
 
     @Override
-    public MutableBoundedValue<Integer> maxBurnTime() {
+    public Mutable<Integer> maxBurnTime() {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_BURN_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -112,7 +112,7 @@ public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnac
     }
 
     @Override
-    public MutableBoundedValue<Integer> passedCookTime() {
+    public Mutable<Integer> passedCookTime() {
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_COOK_TIME)
                 .minimum(0)
                 .maximum(this.maxCookTime)
@@ -130,7 +130,7 @@ public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnac
     }
 
     @Override
-    public MutableBoundedValue<Integer> maxCookTime() {
+    public Mutable<Integer> maxCookTime() {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_COOK_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)

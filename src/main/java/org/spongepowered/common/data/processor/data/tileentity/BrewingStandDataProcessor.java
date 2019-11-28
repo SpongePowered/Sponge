@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -40,7 +40,7 @@ import java.util.Optional;
 import net.minecraft.tileentity.BrewingStandTileEntity;
 
 public class BrewingStandDataProcessor extends
-        AbstractTileEntitySingleDataProcessor<BrewingStandTileEntity, Integer, MutableBoundedValue<Integer>, BrewingStandData, ImmutableBrewingStandData> {
+        AbstractTileEntitySingleDataProcessor<BrewingStandTileEntity, Integer, Mutable<Integer>, BrewingStandData, ImmutableBrewingStandData> {
 
     public BrewingStandDataProcessor() {
         super(BrewingStandTileEntity.class, Keys.REMAINING_BREW_TIME);
@@ -62,7 +62,7 @@ public class BrewingStandDataProcessor extends
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(final Integer actualValue) {
+    protected Mutable<Integer> constructValue(final Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.REMAINING_BREW_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -72,7 +72,7 @@ public class BrewingStandDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
+    protected Immutable<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 

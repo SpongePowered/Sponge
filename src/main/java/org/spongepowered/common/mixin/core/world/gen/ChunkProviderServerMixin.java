@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.gen;
 
-import com.flowpowered.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -65,7 +64,7 @@ import org.spongepowered.common.util.CachedLong2ObjectMap;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeEmptyChunk;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Iterator;

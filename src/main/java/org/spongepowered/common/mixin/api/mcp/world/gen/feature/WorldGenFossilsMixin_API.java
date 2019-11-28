@@ -29,7 +29,6 @@ import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.FossilsFeature;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Fossil;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,7 +41,7 @@ public abstract class WorldGenFossilsMixin_API extends Feature implements Fossil
     private double api$chance = 1 / 64.0;
 
     @Override
-    public PopulatorType getType() {
+    public org.spongepowered.api.world.gen.feature.Feature getType() {
         return PopulatorTypes.FOSSIL;
     }
 

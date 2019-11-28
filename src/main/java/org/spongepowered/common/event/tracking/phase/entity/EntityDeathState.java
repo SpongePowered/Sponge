@@ -30,7 +30,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.world.gamerule.DefaultGameRules;
+import org.spongepowered.api.world.gamerule.GameRules;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -117,9 +117,9 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
 
             if (entityPlayer != null) {
                 if (((EntityPlayerBridge) entityPlayer).bridge$keepInventory()) {
-                    keepInventoryRule = entityPlayer.world.getGameRules().getBoolean(DefaultGameRules.KEEP_INVENTORY);
+                    keepInventoryRule = entityPlayer.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
                     // Set global keep-inventory gamerule so mods do not drop items
-                    entityPlayer.world.getGameRules().setOrCreateGameRule(DefaultGameRules.KEEP_INVENTORY, "true");
+                    entityPlayer.world.getGameRules().setOrCreateGameRule(GameRules.KEEP_INVENTORY, "true");
                 }
             }
             SpongeCommonEventFactory.callDropItemDestruct(entities, context);
@@ -127,7 +127,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
             if (entityPlayer != null) {
                 if (((EntityPlayerBridge) entityPlayer).bridge$keepInventory()) {
                     // Restore global keep-inventory gamerule
-                    entityPlayer.world.getGameRules().setOrCreateGameRule(DefaultGameRules.KEEP_INVENTORY, String.valueOf(keepInventoryRule));
+                    entityPlayer.world.getGameRules().setOrCreateGameRule(GameRules.KEEP_INVENTORY, String.valueOf(keepInventoryRule));
                 }
             }
         }

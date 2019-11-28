@@ -26,8 +26,6 @@ package org.spongepowered.common.entity;
 
 import static net.minecraft.util.EntityPredicates.NOT_SPECTATING;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -64,8 +62,7 @@ import net.minecraft.world.dimension.OverworldDimension;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.explosive.FusedExplosive;
+import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
@@ -75,11 +72,12 @@ import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gamerule.DefaultGameRules;
+import org.spongepowered.api.world.gamerule.GameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
@@ -104,7 +102,8 @@ import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.world.WorldManager;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -506,7 +505,7 @@ public final class EntityUtil {
         }
 
         player.connection.sendPacket(new SServerDifficultyPacket(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
-        player.connection.sendPacket(new SEntityStatusPacket(player, toWorld.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ?
+        player.connection.sendPacket(new SEntityStatusPacket(player, toWorld.getGameRules().getBoolean(GameRules.REDUCED_DEBUG_INFO) ?
             (byte) 22 : 23));
 
         if (!event.getKeepsVelocity()) {

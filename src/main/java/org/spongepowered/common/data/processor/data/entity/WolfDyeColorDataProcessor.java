@@ -30,9 +30,9 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
 import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -40,14 +40,14 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import java.util.Optional;
 import net.minecraft.entity.passive.WolfEntity;
 
-public class WolfDyeColorDataProcessor extends AbstractEntitySingleDataProcessor<WolfEntity, DyeColor, Value<DyeColor>, DyeableData, ImmutableDyeableData> {
+public class WolfDyeColorDataProcessor extends AbstractEntitySingleDataProcessor<WolfEntity, DyeColor, Mutable<DyeColor>, DyeableData, ImmutableDyeableData> {
 
     public WolfDyeColorDataProcessor() {
         super(WolfEntity.class, Keys.DYE_COLOR);
     }
 
     @Override
-    protected Value<DyeColor> constructValue(DyeColor actualValue) {
+    protected Mutable<DyeColor> constructValue(DyeColor actualValue) {
         return SpongeValueFactory.getInstance().createValue(Keys.DYE_COLOR, actualValue, DyeColors.BLACK);
     }
 
@@ -63,7 +63,7 @@ public class WolfDyeColorDataProcessor extends AbstractEntitySingleDataProcessor
     }
 
     @Override
-    protected ImmutableValue<DyeColor> constructImmutableValue(DyeColor value) {
+    protected Immutable<DyeColor> constructImmutableValue(DyeColor value) {
         return constructValue(value).asImmutable();
     }
 

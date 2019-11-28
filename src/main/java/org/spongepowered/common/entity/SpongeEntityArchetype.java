@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
@@ -33,7 +32,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -52,7 +51,7 @@ import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

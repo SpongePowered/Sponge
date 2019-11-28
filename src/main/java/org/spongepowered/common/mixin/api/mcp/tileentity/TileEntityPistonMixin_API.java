@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.PistonTileEntity;
-import org.spongepowered.api.block.tileentity.Piston;
+import org.spongepowered.api.block.entity.Piston;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(PistonTileEntity.class)

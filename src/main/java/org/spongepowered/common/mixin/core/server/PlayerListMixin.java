@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.Entity;
@@ -60,8 +59,7 @@ import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
@@ -70,11 +68,12 @@ import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gamerule.DefaultGameRules;
+import org.spongepowered.api.world.gamerule.GameRules;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -107,7 +106,7 @@ import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.io.File;
 import java.net.SocketAddress;
 import java.util.List;
@@ -367,7 +366,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((org.spongepowered.api.world.World) worldServer).spawnEntity(spongeEntity);
         this.playerEntityList.add(newPlayer);
         newPlayer.connection.sendPacket(new SPlayerListItemPacket(SPlayerListItemPacket.Action.UPDATE_GAME_MODE, newPlayer));
-        for (DataManipulator<?, ?> container : ((Player) playerIn).getContainers()) {
+        for (Mutable<?, ?> container : ((Player) playerIn).getContainers()) {
             ((Player) newPlayer).offer(container);
         }
         this.uuidToPlayerMap.put(newPlayer.getUniqueID(), newPlayer);
@@ -375,7 +374,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         // Update reducedDebugInfo game rule
         newPlayer.connection.sendPacket(new SEntityStatusPacket(newPlayer,
-                worldServer.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
+                worldServer.getGameRules().getBoolean(GameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
 
         for (final EffectInstance potioneffect : newPlayer.getActivePotionEffects()) {
             newPlayer.connection.sendPacket(new SPlayEntityEffectPacket(newPlayer.getEntityId(), potioneffect));

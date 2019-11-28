@@ -27,13 +27,13 @@ package org.spongepowered.common.data.processor.data.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureData;
 import org.spongepowered.api.data.manipulator.mutable.block.MoistureData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeMoistureData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class MoistureDataProcessor
-        extends AbstractBlockOnlyDataProcessor<Integer, MutableBoundedValue<Integer>, MoistureData, ImmutableMoistureData> {
+        extends AbstractBlockOnlyDataProcessor<Integer, Mutable<Integer>, MoistureData, ImmutableMoistureData> {
 
     public MoistureDataProcessor() {
         super(Keys.MOISTURE);
@@ -50,7 +50,7 @@ public class MoistureDataProcessor
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Mutable<Integer> constructValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(this.key)
                 .defaultValue(getDefaultValue())
                 .minimum(0)

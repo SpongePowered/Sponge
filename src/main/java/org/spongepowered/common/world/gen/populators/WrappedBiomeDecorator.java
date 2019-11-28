@@ -24,23 +24,21 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeDecorator;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
-public class WrappedBiomeDecorator implements Populator {
+public class WrappedBiomeDecorator implements Feature {
 
     private BiomeDecorator wrapped;
     private Biome biome;
-    private final PopulatorType type;
+    private final Feature type;
 
     public WrappedBiomeDecorator(Biome dec) {
         this.biome = dec;
@@ -53,7 +51,7 @@ public class WrappedBiomeDecorator implements Populator {
     }
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return this.type;
     }
 

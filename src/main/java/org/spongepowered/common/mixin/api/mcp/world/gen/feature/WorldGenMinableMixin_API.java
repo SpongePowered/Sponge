@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -33,14 +32,13 @@ import net.minecraft.world.gen.feature.OreFeature;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Ore;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 @Mixin(OreFeature.class)
@@ -55,7 +53,7 @@ public abstract class WorldGenMinableMixin_API extends Feature implements Ore {
     private VariableAmount api$height = VariableAmount.baseWithRandomAddition(0, 64);
 
     @Override
-    public PopulatorType getType() {
+    public org.spongepowered.api.world.gen.feature.Feature getType() {
         return PopulatorTypes.ORE;
     }
 

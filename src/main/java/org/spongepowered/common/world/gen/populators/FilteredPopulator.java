@@ -27,26 +27,25 @@ package org.spongepowered.common.world.gen.populators;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.feature.Feature;
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
 import org.spongepowered.common.bridge.world.gen.FlaggedPopulatorBridge;
 
 import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
 
-public class FilteredPopulator implements FlaggedPopulatorBridge, Populator {
+public class FilteredPopulator implements FlaggedPopulatorBridge, Feature {
 
-    private final Populator wrapped;
+    private final Feature wrapped;
     private final List<String> requiredFlags = Lists.newArrayList();
     private final Predicate<Extent> check;
 
-    public FilteredPopulator(Populator w) {
+    public FilteredPopulator(Feature w) {
         this(w, (c) -> true);
     }
 
-    public FilteredPopulator(Populator w, Predicate<Extent> c) {
+    public FilteredPopulator(Feature w, Predicate<Extent> c) {
         this.wrapped = w;
         this.check = c;
     }
@@ -59,7 +58,7 @@ public class FilteredPopulator implements FlaggedPopulatorBridge, Populator {
     }
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return this.wrapped.getType();
     }
 

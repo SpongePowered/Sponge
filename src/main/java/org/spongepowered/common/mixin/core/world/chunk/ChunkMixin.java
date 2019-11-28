@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.chunk;
 
-import com.flowpowered.math.GenericMath;
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
@@ -57,8 +54,8 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.Chunk;
-import org.spongepowered.api.world.extent.EntityUniverse;
+import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.api.world.volume.entity.ReadableEntityVolume;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -92,7 +89,9 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.gen.WorldGenConstants;
-
+import org.spongepowered.math.GenericMath;
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -770,8 +769,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Override
     public void bridge$getIntersectingEntities(final Vector3d start, final Vector3d direction, final double distance,
-        final java.util.function.Predicate<? super EntityUniverse.EntityHit> filter, final double entryY, final double exitY,
-        final Set<? super EntityUniverse.EntityHit> intersections) {
+        final java.util.function.Predicate<? super ReadableEntityVolume.EntityHit> filter, final double entryY, final double exitY,
+        final Set<? super ReadableEntityVolume.EntityHit> intersections) {
         // Order the entry and exit y coordinates by magnitude
         final double yMin = Math.min(entryY, exitY);
         final double yMax = Math.max(entryY, exitY);
@@ -785,8 +784,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
     private void impl$getIntersectingEntities(final Collection<? extends Entity> entities, final Vector3d start, final Vector3d direction,
-        final double distance, final java.util.function.Predicate<? super EntityUniverse.EntityHit> filter,
-        final Set<? super EntityUniverse.EntityHit> intersections) {
+        final double distance, final java.util.function.Predicate<? super ReadableEntityVolume.EntityHit> filter,
+        final Set<? super ReadableEntityVolume.EntityHit> intersections) {
         // Check each entity in the list
         for (final net.minecraft.entity.Entity entity : entities) {
             final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entity;
@@ -807,7 +806,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                 continue;
             }
             // Now test the filter on the entity and intersection
-            final EntityUniverse.EntityHit hit = new EntityUniverse.EntityHit(spongeEntity, intersection.getFirst(), intersection.getSecond(), Math.sqrt(distanceSquared));
+            final ReadableEntityVolume.EntityHit hit = new ReadableEntityVolume.EntityHit(spongeEntity, intersection.getFirst(), intersection.getSecond(), Math.sqrt(distanceSquared));
             if (!filter.test(hit)) {
                 continue;
             }

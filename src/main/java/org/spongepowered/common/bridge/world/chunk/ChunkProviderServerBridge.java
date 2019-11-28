@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.bridge.world.chunk;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
-import com.flowpowered.math.vector.Vector2i;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
@@ -38,7 +37,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
-
+import org.spongepowered.math.vector.Vector2i;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

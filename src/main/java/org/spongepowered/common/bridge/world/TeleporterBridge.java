@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 
 public interface TeleporterBridge extends ForgeITeleporterBridge {
 

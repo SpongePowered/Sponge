@@ -31,9 +31,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
@@ -44,7 +44,7 @@ import org.spongepowered.common.mixin.core.block.BlockFlowerPotAccessor;
 import java.util.Optional;
 
 public class FlowerPotDataProcessor extends
-        AbstractTileEntitySingleDataProcessor<TileEntityFlowerPot, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
+        AbstractTileEntitySingleDataProcessor<TileEntityFlowerPot, ItemStackSnapshot, Mutable<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
 
     public FlowerPotDataProcessor() {
         super(TileEntityFlowerPot.class, Keys.REPRESENTED_ITEM);
@@ -92,12 +92,12 @@ public class FlowerPotDataProcessor extends
     }
 
     @Override
-    protected Value<ItemStackSnapshot> constructValue(ItemStackSnapshot value) {
+    protected Mutable<ItemStackSnapshot> constructValue(ItemStackSnapshot value) {
         return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, value);
     }
 
     @Override
-    protected ImmutableValue<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
+    protected Immutable<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
         return new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, value);
     }
 

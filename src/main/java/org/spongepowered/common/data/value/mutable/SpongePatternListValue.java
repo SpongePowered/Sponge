@@ -30,7 +30,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.immutable.ImmutablePatternListValue;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
@@ -42,11 +42,11 @@ import java.util.function.Predicate;
 
 public class SpongePatternListValue extends SpongeListValue<PatternLayer> implements PatternListValue {
 
-    public SpongePatternListValue(Key<? extends BaseValue<List<PatternLayer>>> key) {
+    public SpongePatternListValue(Key<? extends Value<List<PatternLayer>>> key) {
         super(key);
     }
 
-    public SpongePatternListValue(Key<? extends BaseValue<List<PatternLayer>>> key, List<PatternLayer> actualValue) {
+    public SpongePatternListValue(Key<? extends Value<List<PatternLayer>>> key, List<PatternLayer> actualValue) {
         super(key, actualValue);
     }
 

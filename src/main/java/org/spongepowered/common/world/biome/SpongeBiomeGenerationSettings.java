@@ -28,7 +28,7 @@ import com.google.common.collect.Lists;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.GroundCoverLayer;
 import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class SpongeBiomeGenerationSettings implements BiomeGenerationSettings {
     private float minHeight;
     private float maxHeight;
 
-    private final List<Populator> populators = new NonNullArrayList<>();
+    private final List<Feature> populators = new NonNullArrayList<>();
     private final List<GenerationPopulator> genpopulator = Lists.newArrayList();
     private final List<GroundCoverLayer> groundcover = Lists.newArrayList();
 
@@ -85,13 +85,13 @@ public class SpongeBiomeGenerationSettings implements BiomeGenerationSettings {
     }
 
     @Override
-    public List<Populator> getPopulators() {
+    public List<Feature> getPopulators() {
         return this.populators;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Populator> List<T> getPopulators(Class<T> type) {
+    public <T extends Feature> List<T> getPopulators(Class<T> type) {
         return (List<T>) this.populators.stream().filter((p) -> {
             return type.isAssignableFrom(p.getClass());
         }).collect(Collectors.toList());

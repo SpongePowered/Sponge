@@ -33,7 +33,7 @@ import net.minecraft.command.EntitySelector;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
@@ -66,7 +66,7 @@ import javax.annotation.Nullable;
 /**
  * Wrapper around ICommands so they fit into the Sponge command system.
  */
-public class MinecraftCommandWrapper implements CommandCallable {
+public class MinecraftCommandWrapper implements Command {
 
     private static final String TRANSLATION_NO_PERMISSION = "commands.generic.permission";
     private final PluginContainer owner;

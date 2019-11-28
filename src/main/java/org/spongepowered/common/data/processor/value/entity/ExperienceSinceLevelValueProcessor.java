@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
@@ -37,7 +37,7 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import java.util.Optional;
 import net.minecraft.entity.player.PlayerEntity;
 
-public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Integer, MutableBoundedValue<Integer>> {
+public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Integer, Mutable<Integer>> {
 
     public ExperienceSinceLevelValueProcessor() {
         super(PlayerEntity.class, Keys.EXPERIENCE_SINCE_LEVEL);
@@ -49,7 +49,7 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    public Mutable<Integer> constructValue(Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.EXPERIENCE_SINCE_LEVEL)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
@@ -74,7 +74,7 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected Immutable<Integer> constructImmutableValue(Integer value) {
         return constructValue(value).asImmutable();
     }
 

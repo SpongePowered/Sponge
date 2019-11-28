@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
 import org.spongepowered.api.data.manipulator.mutable.WetData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeWetData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
@@ -42,7 +42,7 @@ public class SpongeWetData extends AbstractBooleanData<WetData, ImmutableWetData
     }
 
     @Override
-    public Value<Boolean> wet() {
+    public Mutable<Boolean> wet() {
         return getValueGetter();
     }
 }

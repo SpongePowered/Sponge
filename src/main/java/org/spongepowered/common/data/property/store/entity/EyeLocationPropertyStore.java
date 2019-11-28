@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.data.property.store.entity;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.property.entity.EyeLocationProperty;
 import org.spongepowered.common.data.property.store.common.AbstractEntityPropertyStore;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 
 public class EyeLocationPropertyStore extends AbstractEntityPropertyStore<EyeLocationProperty> {

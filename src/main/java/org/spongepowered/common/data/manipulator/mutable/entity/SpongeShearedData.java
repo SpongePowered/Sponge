@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableShearedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeShearedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
@@ -42,7 +42,7 @@ public class SpongeShearedData extends AbstractBooleanData<ShearedData, Immutabl
     }
 
     @Override
-    public Value<Boolean> sheared() {
+    public Mutable<Boolean> sheared() {
         return getValueGetter();
     }
 }

@@ -54,7 +54,7 @@ import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.GroundCoverLayer;
-import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.BigMushroom;
 import org.spongepowered.api.world.gen.populator.Cactus;
 import org.spongepowered.api.world.gen.populator.DeadBush;
@@ -672,8 +672,8 @@ public final class WorldGenConstants {
     }
 
     public static void buildJunglePopulators(final SpongeBiomeGenerationSettings gensettings, final BiomeDecorator decorator, final boolean isEdge) {
-        for (final Iterator<Populator> it = gensettings.getPopulators().iterator(); it.hasNext();) {
-            final Populator next = it.next();
+        for (final Iterator<Feature> it = gensettings.getPopulators().iterator(); it.hasNext();) {
+            final Feature next = it.next();
             if (next instanceof Shrub) {
                 final Shrub s = (Shrub) next;
                 if (s.getTypes().size() == 1) {

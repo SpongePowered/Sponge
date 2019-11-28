@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen.structure;
 
-import com.flowpowered.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -32,12 +31,11 @@ import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.feature.Structure;
 import net.minecraft.world.gen.feature.StructureStart;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 /**
@@ -46,7 +44,7 @@ import java.util.Random;
  * phase and the population phase of chunk creation.
  */
 @Mixin(Structure.class)
-public abstract class MapGenStructureMixin_API extends MapGenBase implements Populator {
+public abstract class MapGenStructureMixin_API extends MapGenBase implements Feature {
 
     @Shadow protected Long2ObjectMap<StructureStart> structureMap;
     @Shadow protected abstract void initializeStructureData(World worldIn);
@@ -54,7 +52,7 @@ public abstract class MapGenStructureMixin_API extends MapGenBase implements Pop
     @Shadow public abstract boolean generateStructure(World worldIn, Random randomIn, ChunkPos chunkCoord);
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return InternalPopulatorTypes.STRUCTURE;
     }
 

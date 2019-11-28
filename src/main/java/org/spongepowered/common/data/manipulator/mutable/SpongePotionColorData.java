@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionColorData;
 import org.spongepowered.api.data.manipulator.mutable.PotionColorData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongePotionColorData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
@@ -44,12 +44,12 @@ public class SpongePotionColorData extends AbstractSingleData<Color, PotionColor
     }
 
     @Override
-    public Value<Color> color() {
+    public Mutable<Color> color() {
         return new SpongeValue<>(Keys.POTION_COLOR, Color.RED, this.getValue());
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Mutable<?> getValueGetter() {
         return this.color();
     }
 

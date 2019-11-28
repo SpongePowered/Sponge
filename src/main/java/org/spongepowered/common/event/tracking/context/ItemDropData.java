@@ -26,13 +26,13 @@ package org.spongepowered.common.event.tracking.context;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Random;
 
 public class ItemDropData {

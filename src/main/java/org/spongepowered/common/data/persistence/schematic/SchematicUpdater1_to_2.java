@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.persistence.schematic;
 
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.common.util.Constants;
 
 // TODO - Migrate this to DataFixer DSL in 1.14.

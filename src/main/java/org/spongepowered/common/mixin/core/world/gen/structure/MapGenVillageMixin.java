@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.structure;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.VillageStructure;
@@ -32,7 +31,7 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.gen.FlaggedPopulatorBridge;
 import org.spongepowered.common.world.gen.WorldGenConstants;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.List;
 import java.util.Random;
 

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.CaveSpiderEntity;
-import org.spongepowered.api.entity.living.monster.CaveSpider;
+import org.spongepowered.api.entity.living.monster.spider.CaveSpider;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(CaveSpiderEntity.class)

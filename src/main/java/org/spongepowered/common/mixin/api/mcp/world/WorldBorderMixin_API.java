@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.ChunkPreGenerate;
 import org.spongepowered.api.world.World;
@@ -35,6 +34,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.pregen.SpongeChunkPreGenerateTask;
+import org.spongepowered.math.vector.Vector3d;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.border.WorldBorder.class)

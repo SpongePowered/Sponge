@@ -26,16 +26,16 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 
-public class EntitySuccessCountValueProcessor extends AbstractSpongeValueProcessor<MinecartCommandBlockEntity, Integer, MutableBoundedValue<Integer>> {
+public class EntitySuccessCountValueProcessor extends AbstractSpongeValueProcessor<MinecartCommandBlockEntity, Integer, Mutable<Integer>> {
 
     public EntitySuccessCountValueProcessor() {
         super(MinecartCommandBlockEntity.class, Keys.SUCCESS_COUNT);
@@ -47,7 +47,7 @@ public class EntitySuccessCountValueProcessor extends AbstractSpongeValueProcess
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(final Integer actualValue) {
+    protected Mutable<Integer> constructValue(final Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.SUCCESS_COUNT)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -68,7 +68,7 @@ public class EntitySuccessCountValueProcessor extends AbstractSpongeValueProcess
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
+    protected Immutable<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 

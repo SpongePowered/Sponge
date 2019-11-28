@@ -54,12 +54,12 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
@@ -73,7 +73,7 @@ import java.util.Optional;
  *
  * @param <T> The type of sponge tile entity
  */
-public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.tileentity.TileEntity> extends AbstractDataBuilder<T> implements DataBuilder<T> {
+public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.entity.BlockEntity> extends AbstractDataBuilder<T> implements DataBuilder<T> {
 
     private static final Map<Class<? extends TileEntity>, BlockType> classToTypeMap = Maps.newHashMap();
 
@@ -97,7 +97,7 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         final String tile = container.getString(Constants.TileEntity.TILE_TYPE)
             .orElseThrow(() -> new InvalidDataException("Could not find TileEntityType"));
         final Class<? extends TileEntity> clazz = (Class<? extends TileEntity>) TileEntityTypeRegistryModule.getInstance().getById(tile)
-            .map(TileEntityType::getTileEntityType)
+            .map(BlockEntityType::getTileEntityType)
             .orElse(null);
         if (clazz == null) {
             // TODO do we want to throw an InvalidDataException since the class is not registered?

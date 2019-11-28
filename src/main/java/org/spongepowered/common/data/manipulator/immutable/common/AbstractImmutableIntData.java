@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.common;
 
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.util.Constants;
 
-public abstract class AbstractImmutableIntData<I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
+public abstract class AbstractImmutableIntData<I extends Immutable<I, M>, M extends Mutable<M, I>>
     extends AbstractImmutableBoundedComparableData<Integer, I, M> {
 
     public AbstractImmutableIntData(Class<I> immutableClass, int value,
-        Key<? extends BaseValue<Integer>> usedKey,
+        Key<? extends Value<Integer>> usedKey,
         Class<? extends M> mutableClass, int lowerBound, int upperBound, int defaultValue) {
         super(immutableClass, value, usedKey, Constants.Functional.intComparator(), mutableClass, lowerBound, upperBound, defaultValue);
     }

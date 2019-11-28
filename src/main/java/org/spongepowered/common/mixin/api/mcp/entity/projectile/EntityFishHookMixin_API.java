@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.projectile.FishHook;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.entity.projectile.FishingBobber;
+import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
@@ -38,7 +38,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 
 @Mixin(FishingBobberEntity.class)
-public abstract class EntityFishHookMixin_API extends EntityMixin_API implements FishHook {
+public abstract class EntityFishHookMixin_API extends EntityMixin_API implements FishingBobber {
 
     @Shadow @Nullable private PlayerEntity angler;
     @Shadow @Nullable public net.minecraft.entity.Entity caughtEntity;

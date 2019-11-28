@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSeamlessData;
 import org.spongepowered.api.data.manipulator.mutable.block.SeamlessData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSeamlessData;
 
@@ -38,7 +38,7 @@ public class ImmutableSpongeSeamlessData extends AbstractImmutableBooleanData<Im
     }
 
     @Override
-    public ImmutableValue<Boolean> seamless() {
+    public Immutable<Boolean> seamless() {
         return getValueGetter();
     }
 

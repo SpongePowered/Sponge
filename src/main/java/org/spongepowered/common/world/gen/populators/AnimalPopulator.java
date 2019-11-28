@@ -24,21 +24,19 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.spawner.WorldEntitySpawner;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
-public class AnimalPopulator implements Populator {
+public class AnimalPopulator implements Feature {
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return InternalPopulatorTypes.ANIMAL;
     }
 

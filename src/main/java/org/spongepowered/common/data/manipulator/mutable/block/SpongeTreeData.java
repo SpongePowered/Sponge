@@ -29,18 +29,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
+import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 
-public class SpongeTreeData extends AbstractSingleCatalogData<TreeType, TreeData, ImmutableTreeData> implements TreeData {
+public class SpongeTreeData extends AbstractSingleCatalogData<WoodType, TreeData, ImmutableTreeData> implements TreeData {
 
-    public SpongeTreeData(TreeType variant) {
+    public SpongeTreeData(WoodType variant) {
         super(TreeData.class, checkNotNull(variant), Keys.TREE_TYPE, ImmutableSpongeTreeData.class);
     }
 
     public SpongeTreeData() {
-        this(TreeTypes.OAK);
+        this(WoodTypes.OAK);
     }
 }

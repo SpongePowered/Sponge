@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.type.OcelotType;
-import org.spongepowered.api.data.type.OcelotTypes;
+import org.spongepowered.api.data.type.CatType;
+import org.spongepowered.api.data.type.CatTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.entity.SpongeOcelotType;
@@ -40,25 +40,25 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class OcelotTypeRegistryModule implements CatalogRegistryModule<OcelotType> {
+public class OcelotTypeRegistryModule implements CatalogRegistryModule<CatType> {
 
-    public static final Map<String, OcelotType> OCELOT_TYPES = Maps.newHashMap();
-    public static final Map<Integer, OcelotType> OCELOT_IDMAP = Maps.newHashMap();
+    public static final Map<String, CatType> OCELOT_TYPES = Maps.newHashMap();
+    public static final Map<Integer, CatType> OCELOT_IDMAP = Maps.newHashMap();
     // ocelot types
     public static final SpongeOcelotType WILD_OCELOT = new SpongeOcelotType(0, "WILD_OCELOT");
     public static final SpongeOcelotType BLACK_CAT = new SpongeOcelotType(1, "BLACK_CAT");
     public static final SpongeOcelotType RED_CAT = new SpongeOcelotType(2, "RED_CAT");
     public static final SpongeOcelotType SIAMESE_CAT = new SpongeOcelotType(3, "SIAMESE_CAT");
-    @RegisterCatalog(OcelotTypes.class)
-    private final Map<String, OcelotType> ocelotTypeMap = new HashMap<>();
+    @RegisterCatalog(CatTypes.class)
+    private final Map<String, CatType> ocelotTypeMap = new HashMap<>();
 
     @Override
-    public Optional<OcelotType> getById(String id) {
+    public Optional<CatType> getById(String id) {
         return Optional.ofNullable(this.ocelotTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
-    public Collection<OcelotType> getAll() {
+    public Collection<CatType> getAll() {
         return ImmutableList.copyOf(this.ocelotTypeMap.values());
     }
 

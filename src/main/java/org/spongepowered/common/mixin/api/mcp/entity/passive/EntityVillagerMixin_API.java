@@ -25,12 +25,11 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.living.Humanoid;
-import org.spongepowered.api.entity.living.Villager;
+import org.spongepowered.api.entity.living.trader.Villager;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Implements;
@@ -85,12 +84,12 @@ public abstract class EntityVillagerMixin_API extends EntityAgeableMixin_API imp
     }
 
     @Override
-    public Value<Career> career() {
+    public Mutable<Career> career() {
         return new SpongeValue<>(Keys.CAREER, Constants.Catalog.CAREER_DEFAULT, ((EntityVillagerBridge) this).bridge$getCareer());
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getCareerData());
     }

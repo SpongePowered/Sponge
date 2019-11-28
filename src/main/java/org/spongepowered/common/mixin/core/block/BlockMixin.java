@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import co.aikar.timings.Timing;
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BeaconBlock;
@@ -46,15 +45,15 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
@@ -85,7 +84,7 @@ import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -125,22 +124,22 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     }
 
     @Override
-    public boolean bridge$supports(final Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
         return false;
     }
 
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
         return Optional.empty();
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
         return Optional.empty(); // By default, all blocks just have a single state unless otherwise dictated.
     }
 
     @Override
-    public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
+    public List<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.of();
     }
 

@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTradeOfferData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TradeOfferData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableListData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeTradeOfferData;

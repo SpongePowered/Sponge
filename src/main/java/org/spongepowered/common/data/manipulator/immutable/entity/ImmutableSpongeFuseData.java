@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFuseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFuseData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -63,12 +63,12 @@ public class ImmutableSpongeFuseData extends AbstractImmutableData<ImmutableFuse
     }
 
     @Override
-    public ImmutableValue<Integer> fuseDuration() {
+    public Immutable<Integer> fuseDuration() {
         return this.fuseDurationValue;
     }
 
     @Override
-    public ImmutableValue<Integer> ticksRemaining() {
+    public Immutable<Integer> ticksRemaining() {
         return this.ticksRemainingValue;
     }
 

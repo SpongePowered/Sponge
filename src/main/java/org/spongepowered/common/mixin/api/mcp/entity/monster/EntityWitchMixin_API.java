@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.WitchEntity;
-import org.spongepowered.api.entity.living.monster.Witch;
+import org.spongepowered.api.entity.living.monster.raider.Witch;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(WitchEntity.class)

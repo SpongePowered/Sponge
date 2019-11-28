@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
@@ -36,15 +35,15 @@ import net.minecraft.util.datafix.FixTypes;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataTranslators;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
@@ -62,7 +61,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -152,7 +151,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 }
             }
         }
-        Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
+        Map<Vector3i, BlockEntityArchetype> tiles = Maps.newHashMap();
         List<DataView> tiledata = view.getViewList(Constants.Sponge.Schematic.Legacy.TILE_ENTITIES).orElse(null);
         if (tiledata != null) {
             for (DataView tile : tiledata) {
@@ -161,7 +160,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 int z = tile.getInt(Constants.Sponge.Schematic.Legacy.Z_POS).get();
                 final String tileType = tile.getString(TILE_ID).get();
                 final ResourceLocation name = new ResourceLocation(tileType);
-                TileEntityType type = TileEntityTypeRegistryModule.getInstance()
+                BlockEntityType type = TileEntityTypeRegistryModule.getInstance()
                         .getForClass(TileEntityAccessor.accessor$getRegistry().getOrDefault(name));
                 final BlockState state = buffer.getBlock(x - offsetX, y - offsetY, z - offsetZ);
                 // Somehow we need to get some DataFixers in here, because some data may be legacy from older versions before data
@@ -173,7 +172,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 upgraded = NbtTranslator.getInstance().translate(tileNbt);
 
                 if (type!= null && SpongeImplHooks.hasBlockTileEntity(((Block) state.getType()), (net.minecraft.block.BlockState) state)) {
-                    TileEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
+                    BlockEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
                         .state(state)
                         .tileData(upgraded)
                         .tile(type)
@@ -252,7 +251,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
             data.set(Constants.Sponge.Schematic.Legacy.ADD_BLOCKS, extraids);
         }
         List<DataView> tileEntities = Lists.newArrayList();
-        for (Map.Entry<Vector3i, TileEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
+        for (Map.Entry<Vector3i, BlockEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
             Vector3i pos = entry.getKey();
             DataContainer tiledata = entry.getValue().getTileData();
             tiledata.set(Constants.DataSerializers.X_POS, pos.getX() - xMin);

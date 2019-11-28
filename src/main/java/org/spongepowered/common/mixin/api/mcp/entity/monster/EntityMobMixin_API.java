@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.MonsterEntity;
-import org.spongepowered.api.entity.living.monster.Monster;
+import org.spongepowered.api.entity.living.Monster;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityCreatureMixin_API;
 

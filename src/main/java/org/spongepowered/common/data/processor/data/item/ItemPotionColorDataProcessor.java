@@ -32,9 +32,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionColorData;
 import org.spongepowered.api.data.manipulator.mutable.PotionColorData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionColorData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
@@ -44,7 +44,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcessor<Color, Value<Color>, PotionColorData, ImmutablePotionColorData> {
+public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcessor<Color, Mutable<Color>, PotionColorData, ImmutablePotionColorData> {
 
     public ItemPotionColorDataProcessor() {
         super(itemStack -> itemStack.getItem() == Items.POTION || itemStack.getItem() == Items.SPLASH_POTION ||
@@ -68,12 +68,12 @@ public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcesso
     }
 
     @Override
-    protected ImmutableValue<Color> constructImmutableValue(Color value) {
+    protected Immutable<Color> constructImmutableValue(Color value) {
         return new ImmutableSpongeValue<>(Keys.POTION_COLOR, value);
     }
 
     @Override
-    protected Value<Color> constructValue(Color actualValue) {
+    protected Mutable<Color> constructValue(Color actualValue) {
         return new SpongeValue<>(Keys.POTION_COLOR, actualValue);
     }
 

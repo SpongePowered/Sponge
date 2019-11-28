@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.pagination;
 
-import com.flowpowered.math.GenericMath;
 import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -38,7 +37,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
 import org.spongepowered.common.text.SpongeTexts;
-
+import org.spongepowered.math.GenericMath;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;

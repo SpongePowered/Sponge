@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.world;
 
 import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 

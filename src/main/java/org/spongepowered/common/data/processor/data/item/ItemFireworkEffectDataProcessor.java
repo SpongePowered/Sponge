@@ -27,14 +27,14 @@ package org.spongepowered.common.data.processor.data.item;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkEffectData;
 import org.spongepowered.api.data.manipulator.mutable.FireworkEffectData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.ListValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.item.FireworkEffect;
@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ItemFireworkEffectDataProcessor
-        extends AbstractItemSingleDataProcessor<List<FireworkEffect>, ListValue<FireworkEffect>, FireworkEffectData, ImmutableFireworkEffectData> {
+        extends AbstractItemSingleDataProcessor<List<FireworkEffect>, Mutable<FireworkEffect>, FireworkEffectData, ImmutableFireworkEffectData> {
 
     public ItemFireworkEffectDataProcessor() {
         super(stack -> stack.getItem() == Items.FIREWORK_CHARGE || stack.getItem() == Items.FIREWORKS, Keys.FIREWORK_EFFECTS);
@@ -93,12 +93,12 @@ public class ItemFireworkEffectDataProcessor
     }
 
     @Override
-    protected ListValue<FireworkEffect> constructValue(List<FireworkEffect> value) {
+    protected Mutable<FireworkEffect> constructValue(List<FireworkEffect> value) {
         return new SpongeListValue<>(Keys.FIREWORK_EFFECTS, value);
     }
 
     @Override
-    protected ImmutableValue<List<FireworkEffect>> constructImmutableValue(List<FireworkEffect> value) {
+    protected Immutable<List<FireworkEffect>> constructImmutableValue(List<FireworkEffect> value) {
         return new ImmutableSpongeListValue<>(Keys.FIREWORK_EFFECTS, ImmutableList.copyOf(value));
     }
 

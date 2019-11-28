@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
+import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
+import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeArchetypeVolume;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Collections;
 
 public final class SpongeExtentBufferFactory implements ExtentBufferFactory {

@@ -31,15 +31,15 @@ import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.value.ListValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
@@ -52,7 +52,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<Text>, ListValue<Text>, SignData, ImmutableSignData> {
+public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<Text>, Mutable<Text>, SignData, ImmutableSignData> {
 
     public ItemSignDataProcessor() {
         super(stack -> stack.getItem().equals(Items.SIGN), Keys.SIGN_LINES);
@@ -145,12 +145,12 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
     }
 
     @Override
-    protected ListValue<Text> constructValue(final List<Text> defaultValue) {
+    protected Mutable<Text> constructValue(final List<Text> defaultValue) {
         return new SpongeListValue<>(Keys.SIGN_LINES, defaultValue);
     }
 
     @Override
-    protected ImmutableValue<List<Text>> constructImmutableValue(final List<Text> value) {
+    protected Immutable<List<Text>> constructImmutableValue(final List<Text> value) {
         return new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(value));
     }
 

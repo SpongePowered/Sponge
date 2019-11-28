@@ -30,9 +30,9 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.StringNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
@@ -43,14 +43,14 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Text, Value<Text>> {
+public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Text, Mutable<Text>> {
 
     public ItemDisplayNameValueProcessor() {
         super(ItemStack.class, Keys.DISPLAY_NAME);
     }
 
     @Override
-    protected Value<Text> constructValue(final Text defaultValue) {
+    protected Mutable<Text> constructValue(final Text defaultValue) {
         return new SpongeValue<>(Keys.DISPLAY_NAME, Text.of(), defaultValue);
     }
 
@@ -84,7 +84,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected ImmutableValue<Text> constructImmutableValue(final Text value) {
+    protected Immutable<Text> constructImmutableValue(final Text value) {
         return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.of(), value);
     }
 

@@ -25,11 +25,11 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FallingBlockData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFallingBlockData;
 import org.spongepowered.common.util.Constants;
@@ -111,7 +111,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
     }
 
     @Override
-    public ImmutableValue<Double> fallDamagePerBlock() {
+    public Immutable<Double> fallDamagePerBlock() {
         return this.fallDamagePerBlockValue;
     }
 
@@ -120,7 +120,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
     }
 
     @Override
-    public ImmutableValue<Double> maxFallDamage() {
+    public Immutable<Double> maxFallDamage() {
         return this.maxFallDamageValue;
     }
 
@@ -129,7 +129,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
     }
 
     @Override
-    public ImmutableValue<BlockState> blockState() {
+    public Immutable<BlockState> blockState() {
         return this.blockStateValue;
     }
 
@@ -138,7 +138,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
     }
 
     @Override
-    public ImmutableValue<Boolean> canPlaceAsBlock() {
+    public Immutable<Boolean> canPlaceAsBlock() {
         return this.canPlaceAsBlockValue;
     }
 
@@ -147,7 +147,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
     }
 
     @Override
-    public ImmutableValue<Boolean> canDropAsItem() {
+    public Immutable<Boolean> canDropAsItem() {
         return this.canDropAsItemValue;
     }
 
@@ -156,7 +156,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
     }
 
     @Override
-    public ImmutableValue<Integer> fallTime() {
+    public Immutable<Integer> fallTime() {
         return this.fallTimeValue;
     }
 
@@ -165,7 +165,7 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
     }
 
     @Override
-    public ImmutableValue<Boolean> canHurtEntities() {
+    public Immutable<Boolean> canHurtEntities() {
         return this.canHurtEntitiesValue;
     }
 

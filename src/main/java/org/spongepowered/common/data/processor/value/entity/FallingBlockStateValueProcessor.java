@@ -27,9 +27,9 @@ package org.spongepowered.common.data.processor.value.entity;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
@@ -37,14 +37,14 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class FallingBlockStateValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, BlockState, Value<BlockState>> {
+public class FallingBlockStateValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, BlockState, Mutable<BlockState>> {
 
     public FallingBlockStateValueProcessor() {
         super(EntityFallingBlockAccessor.class, Keys.FALLING_BLOCK_STATE);
     }
 
     @Override
-    protected Value<BlockState> constructValue(final BlockState value) {
+    protected Mutable<BlockState> constructValue(final BlockState value) {
         return new SpongeValue<>(Keys.FALLING_BLOCK_STATE, Constants.Catalog.DEFAULT_FALLING_BLOCK_BLOCKSTATE, value);
     }
 
@@ -60,7 +60,7 @@ public class FallingBlockStateValueProcessor extends AbstractSpongeValueProcesso
     }
 
     @Override
-    protected ImmutableValue<BlockState> constructImmutableValue(final BlockState value) {
+    protected Immutable<BlockState> constructImmutableValue(final BlockState value) {
         return constructValue(value).asImmutable();
     }
 

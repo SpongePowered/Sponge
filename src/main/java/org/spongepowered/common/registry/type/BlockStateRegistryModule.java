@@ -29,8 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.util.Tuple;
 
 import java.util.ArrayList;
@@ -64,10 +64,10 @@ public final class BlockStateRegistryModule implements CatalogRegistryModule<Blo
                 return Optional.empty();
             }
             final BlockType type = blockType.get();
-            final Collection<BlockTrait<?>> traits = type.getTraits();
+            final Collection<StateProperty<?>> traits = type.getTraits();
             final String properties = split[1].replace("[", "").replace("]", "");
             final String[] propertyValuePairs = properties.split(",");
-            List<Tuple<BlockTrait<?>, ? extends Comparable<?>>> foundPairs = new ArrayList<>(propertyValuePairs.length);
+            List<Tuple<StateProperty<?>, ? extends Comparable<?>>> foundPairs = new ArrayList<>(propertyValuePairs.length);
             for (String propertyValuePair : propertyValuePairs) {
                 final String name = propertyValuePair.split("=")[0];
                 final String value = propertyValuePair.split("=")[1];
@@ -79,9 +79,9 @@ public final class BlockStateRegistryModule implements CatalogRegistryModule<Blo
             }
 
             final BlockState.MatcherBuilder matcher = BlockState.matcher(type);
-            for (Tuple<BlockTrait<?>, ? extends Comparable<?>> foundPair : foundPairs) {
+            for (Tuple<StateProperty<?>, ? extends Comparable<?>> foundPair : foundPairs) {
                 //noinspection RedundantCast // Intellij will compile this, but the jdk won't.
-                matcher.trait((BlockTrait) foundPair.getFirst(), (Comparable) foundPair.getSecond());
+                matcher.trait((StateProperty) foundPair.getFirst(), (Comparable) foundPair.getSecond());
             }
             final BlockState.StateMatcher build = matcher.build();
             return type.getAllBlockStates().stream()

@@ -25,12 +25,12 @@
 package org.spongepowered.common.bridge.data;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 
@@ -42,27 +42,27 @@ import net.minecraft.nbt.ListNBT;
 
 public interface CustomDataHolderBridge {
 
-    DataTransactionResult bridge$offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function);
+    DataTransactionResult bridge$offerCustom(Mutable<?, ?> manipulator, MergeFunction function);
 
-    <T extends DataManipulator<?, ?>> Optional<T> bridge$getCustom(Class<T> customClass);
+    <T extends Mutable<?, ?>> Optional<T> bridge$getCustom(Class<T> customClass);
 
-    DataTransactionResult bridge$removeCustom(Class<? extends DataManipulator<?, ?>> customClass);
+    DataTransactionResult bridge$removeCustom(Class<? extends Mutable<?, ?>> customClass);
 
     boolean bridge$hasManipulators();
 
     boolean bridge$supportsCustom(Key<?> key);
 
-    <E> Optional<E> bridge$getCustom(Key<? extends BaseValue<E>> key);
+    <E> Optional<E> bridge$getCustom(Key<? extends Value<E>> key);
 
-    <E, V extends BaseValue<E>> Optional<V> bridge$getCustomValue(Key<V> key);
+    <E, V extends Value<E>> Optional<V> bridge$getCustomValue(Key<V> key);
 
-    Collection<DataManipulator<?, ?>> bridge$getCustomManipulators();
+    Collection<Mutable<?, ?>> bridge$getCustomManipulators();
 
-    <E> DataTransactionResult bridge$offerCustom(Key<? extends BaseValue<E>> key, E value);
+    <E> DataTransactionResult bridge$offerCustom(Key<? extends Value<E>> key, E value);
 
     DataTransactionResult bridge$removeCustom(Key<?> key);
 
-    default void bridge$removeCustomFromNbt(DataManipulator<?, ?> manipulator) {
+    default void bridge$removeCustomFromNbt(Mutable<?, ?> manipulator) {
         if (this instanceof DataCompoundHolder) {
             final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
             if (spongeData.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {

@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -37,7 +37,7 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import java.util.Optional;
 import net.minecraft.entity.player.PlayerEntity;
 
-public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Integer, MutableBoundedValue<Integer>> {
+public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Integer, Mutable<Integer>> {
 
     public TotalExperienceValueProcessor() {
         super(PlayerEntity.class, Keys.TOTAL_EXPERIENCE);
@@ -49,7 +49,7 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(final Integer defaultValue) {
+    public Mutable<Integer> constructValue(final Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.TOTAL_EXPERIENCE)
             .defaultValue(0)
             .minimum(0)
@@ -97,7 +97,7 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
+    protected Immutable<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 

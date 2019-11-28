@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -37,7 +37,7 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import java.util.Optional;
 import net.minecraft.entity.player.PlayerEntity;
 
-public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Integer, MutableBoundedValue<Integer>> {
+public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Integer, Mutable<Integer>> {
 
     public ExperienceLevelValueProcessor() {
         super(PlayerEntity.class, Keys.EXPERIENCE_LEVEL);
@@ -66,7 +66,7 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    public Mutable<Integer> constructValue(Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.EXPERIENCE_LEVEL)
             .defaultValue(0)
             .minimum(0)

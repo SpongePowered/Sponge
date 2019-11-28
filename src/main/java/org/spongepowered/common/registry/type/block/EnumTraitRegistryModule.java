@@ -27,10 +27,10 @@ package org.spongepowered.common.registry.type.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.EnumTrait;
-import org.spongepowered.api.block.trait.EnumTraits;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.state.EnumStateProperties;
+import org.spongepowered.api.state.EnumStateProperty;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
@@ -38,10 +38,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-@RegisterCatalog(EnumTraits.class)
+@RegisterCatalog(EnumStateProperties.class)
 public final class EnumTraitRegistryModule
-        extends AbstractPrefixCheckCatalogRegistryModule<EnumTrait<?>>
-        implements SpongeAdditionalCatalogRegistryModule<EnumTrait<?>>, AlternateCatalogRegistryModule<EnumTrait<?>> {
+        extends AbstractPrefixCheckCatalogRegistryModule<EnumStateProperty<?>>
+        implements SpongeAdditionalCatalogRegistryModule<EnumStateProperty<?>>, AlternateCatalogRegistryModule<EnumStateProperty<?>> {
 
     public static EnumTraitRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -53,11 +53,11 @@ public final class EnumTraitRegistryModule
     }
 
     @Override
-    public void registerAdditionalCatalog(EnumTrait<?> extraCatalog) {
+    public void registerAdditionalCatalog(EnumStateProperty<?> extraCatalog) {
         this.catalogTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
-    public void registerBlock(String id, BlockType block, EnumTrait<?> property) {
+    public void registerBlock(String id, BlockType block, EnumStateProperty<?> property) {
         checkNotNull(id, "Id was null!");
         checkNotNull(property, "Property was null!");
         this.catalogTypeMap.put(id.toLowerCase(Locale.ENGLISH), property);
@@ -70,9 +70,9 @@ public final class EnumTraitRegistryModule
     }
 
     @Override
-    public Map<String, EnumTrait<?>> provideCatalogMap() {
-        Map<String, EnumTrait<?>> map = new HashMap<>();
-        for (Map.Entry<String, EnumTrait<?>> enumTraitEntry : this.catalogTypeMap.entrySet()) {
+    public Map<String, EnumStateProperty<?>> provideCatalogMap() {
+        Map<String, EnumStateProperty<?>> map = new HashMap<>();
+        for (Map.Entry<String, EnumStateProperty<?>> enumTraitEntry : this.catalogTypeMap.entrySet()) {
             map.put(enumTraitEntry.getKey().replace("minecraft:", ""), enumTraitEntry.getValue());
         }
         return map;

@@ -27,27 +27,26 @@ package org.spongepowered.common.data.processor.data.entity;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAccelerationData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AccelerationData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAccelerationData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.entity.projectile.EntityFireballAccessor;
 import org.spongepowered.common.util.Constants;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 import net.minecraft.entity.projectile.DamagingProjectileEntity;
 
-public class AccelerationDataProcessor extends AbstractEntitySingleDataProcessor<DamagingProjectileEntity, Vector3d, Value<Vector3d>, AccelerationData, ImmutableAccelerationData> {
+public class AccelerationDataProcessor extends AbstractEntitySingleDataProcessor<DamagingProjectileEntity, Vector3d, Mutable<Vector3d>, AccelerationData, ImmutableAccelerationData> {
 
     public AccelerationDataProcessor() {
         super(DamagingProjectileEntity.class, Keys.ACCELERATION);
@@ -87,12 +86,12 @@ public class AccelerationDataProcessor extends AbstractEntitySingleDataProcessor
     }
 
     @Override
-    protected Value<Vector3d> constructValue(final Vector3d actualValue) {
+    protected Mutable<Vector3d> constructValue(final Vector3d actualValue) {
         return new SpongeValue<>(Keys.ACCELERATION, Vector3d.ZERO, actualValue);
     }
 
     @Override
-    protected ImmutableValue<Vector3d> constructImmutableValue(final Vector3d value) {
+    protected Immutable<Vector3d> constructImmutableValue(final Vector3d value) {
         return new ImmutableSpongeValue<>(Keys.ACCELERATION, Vector3d.ZERO, value);
     }
 

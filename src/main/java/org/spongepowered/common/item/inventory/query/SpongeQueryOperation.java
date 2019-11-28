@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
-import org.spongepowered.api.item.inventory.query.QueryOperation;
+import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 
-public abstract class SpongeQueryOperation<T> implements QueryOperation<T> {
+public abstract class SpongeQueryOperation<T> implements Query<T> {
 
     protected final QueryOperationType<T> type;
 

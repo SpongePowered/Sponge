@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.plugin.tileentityactivation;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
@@ -34,7 +33,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
@@ -50,7 +49,7 @@ import org.spongepowered.common.mixin.core.server.management.PlayerChunkMapAcces
 import org.spongepowered.common.mixin.core.server.management.PlayerchunkMapEntryAccessor;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Map;
 
 public class TileEntityActivation {
@@ -66,7 +65,7 @@ public class TileEntityActivation {
         }
 
         final TileEntityActivationCategory tileEntityActCat = ((WorldInfoBridge) tileEntity.getWorld().getWorldInfo()).bridge$getConfigAdapter().getConfig().getTileEntityActivationRange();
-        final TileEntityType type = ((org.spongepowered.api.block.tileentity.TileEntity) tileEntity).getType();
+        final BlockEntityType type = ((org.spongepowered.api.block.entity.BlockEntity) tileEntity).getType();
 
         final ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
         final SpongeTileEntityType spongeType = (SpongeTileEntityType) type;

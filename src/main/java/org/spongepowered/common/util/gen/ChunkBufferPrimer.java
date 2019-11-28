@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.util.gen;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Blocks;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
+import org.spongepowered.math.vector.Vector3i;
 
 /**
  * Wraps a {@link MutableBlockVolume} within a ChunkPrimer in order to be able

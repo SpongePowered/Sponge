@@ -27,7 +27,6 @@ package org.spongepowered.common.item.inventory.query;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -56,9 +55,9 @@ public class Query {
 
     private final Lens lens;
 
-    private final QueryOperation<?>[] queries;
+    private final org.spongepowered.api.item.inventory.query.Query<?>[] queries;
 
-    private Query(final InventoryAdapter adapter, final QueryOperation<?>[] queries) {
+    private Query(final InventoryAdapter adapter, final org.spongepowered.api.item.inventory.query.Query<?>[] queries) {
         this.adapter = adapter;
         this.inventory = adapter.bridge$getFabric();
         this.lens = adapter.bridge$getRootLens();
@@ -119,7 +118,7 @@ public class Query {
 
     @SuppressWarnings({"rawtypes"})
     private boolean matches(final Lens lens, final Lens parent, final Fabric inventory) {
-        for (final QueryOperation<?> operation : this.queries) {
+        for (final org.spongepowered.api.item.inventory.query.Query<?> operation : this.queries) {
             if (((SpongeQueryOperation) operation).matches(lens, parent, inventory)) {
                 return true;
             }
@@ -166,7 +165,7 @@ public class Query {
         return slots;
     }
 
-    public static Query compile(final InventoryAdapter adapter, final QueryOperation<?>... queries) {
+    public static Query compile(final InventoryAdapter adapter, final org.spongepowered.api.item.inventory.query.Query<?>... queries) {
         return new Query(adapter, queries);
     }
 

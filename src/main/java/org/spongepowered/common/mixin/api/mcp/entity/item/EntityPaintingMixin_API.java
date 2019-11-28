@@ -25,10 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
-import org.spongepowered.api.data.type.Art;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.type.ArtType;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.hanging.Painting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -47,16 +46,16 @@ public abstract class EntityPaintingMixin_API extends EntityHangingMixin_API imp
 
     @Override
     public ArtData getArtData() {
-        return new SpongeArtData((Art) (Object) this.art);
+        return new SpongeArtData((ArtType) (Object) this.art);
     }
 
     @Override
-    public Value<Art> art() {
-        return new SpongeValue<>(Keys.ART, Constants.Catalog.DEFAULT_ART, (Art) (Object) this.art);
+    public Mutable<ArtType> art() {
+        return new SpongeValue<>(Keys.ART, Constants.Catalog.DEFAULT_ART, (ArtType) (Object) this.art);
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getArtData());
     }

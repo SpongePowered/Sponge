@@ -27,16 +27,16 @@ package org.spongepowered.common.mixin.api.mcp.world;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.gen.GeneratorType;
+import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -153,7 +153,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
     }
 
     @Override
-    public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
+    public Collection<TerrainGeneratorConfig> getGeneratorModifiers() {
         return ((WorldSettingsBridge) this).bridge$getGeneratorModifiers();
     }
 

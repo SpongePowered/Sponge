@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.tileentity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.tileentity.TileEntityEndGatewayAccessor;
@@ -36,14 +36,14 @@ import org.spongepowered.common.mixin.core.tileentity.TileEntityEndGatewayAccess
 import java.util.Optional;
 import net.minecraft.tileentity.EndGatewayTileEntity;
 
-public class EndGatewayAgeValueProcessor extends AbstractSpongeValueProcessor<EndGatewayTileEntity, Long, Value<Long>> {
+public class EndGatewayAgeValueProcessor extends AbstractSpongeValueProcessor<EndGatewayTileEntity, Long, Mutable<Long>> {
 
     public EndGatewayAgeValueProcessor() {
         super(EndGatewayTileEntity.class, Keys.END_GATEWAY_AGE);
     }
 
     @Override
-    protected Value<Long> constructValue(Long actualValue) {
+    protected Mutable<Long> constructValue(Long actualValue) {
         return new SpongeValue<>(Keys.END_GATEWAY_AGE, actualValue);
     }
 
@@ -59,7 +59,7 @@ public class EndGatewayAgeValueProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    protected ImmutableValue<Long> constructImmutableValue(Long value) {
+    protected Immutable<Long> constructImmutableValue(Long value) {
         return constructValue(value).asImmutable();
     }
 

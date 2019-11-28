@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import org.spongepowered.api.block.tileentity.Banner;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -37,7 +37,7 @@ import net.minecraft.tileentity.BannerTileEntity;
 public abstract class TileEntityBannerMixin_API extends TileEntityMixin_API implements Banner {
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(List<Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getBannerData());
     }

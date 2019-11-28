@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.potion;
 
 import net.minecraft.potion.Effect;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.asm.mixin.Final;

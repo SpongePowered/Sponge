@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
-import com.flowpowered.math.vector.Vector3d;
 import io.netty.util.collection.LongObjectHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -81,8 +80,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.data.value.ListValue.Mutable;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
@@ -99,6 +97,7 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
@@ -134,7 +133,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.Set;
@@ -252,7 +251,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             throw new RuntimeException("Critical error! Sign data not present on sign!");
         }
         final SignData changedSignData = existingSignData.get().copy();
-        final ListValue<Text> lines = changedSignData.lines();
+        final Mutable<Text> lines = changedSignData.lines();
         for (int i = 0; i < packetIn.getLines().length; i++) {
             lines.set(i, SpongeTexts.toText(new StringTextComponent(packetIn.getLines()[i])));
         }

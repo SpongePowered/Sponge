@@ -28,22 +28,22 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<LivingEntity, Double, MutableBoundedValue<Double>> {
+public class MaxHealthValueProcessor extends AbstractSpongeValueProcessor<LivingEntity, Double, Mutable<Double>> {
 
     public MaxHealthValueProcessor() {
         super(LivingEntity.class, Keys.MAX_HEALTH);
     }
 
     @Override
-    public MutableBoundedValue<Double> constructValue(final Double defaultValue) {
+    public Mutable<Double> constructValue(final Double defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_HEALTH)
             .defaultValue(20D)
             .minimum(1D)

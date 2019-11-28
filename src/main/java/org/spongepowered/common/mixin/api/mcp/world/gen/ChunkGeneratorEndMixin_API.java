@@ -24,19 +24,18 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen;
 
-import com.flowpowered.math.GenericMath;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.EndChunkGenerator;
 import net.minecraft.world.gen.feature.EndCityStructure;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.gen.ChunkBufferPrimer;
-
+import org.spongepowered.math.GenericMath;
 import java.util.Random;
 
 @Mixin(EndChunkGenerator.class)

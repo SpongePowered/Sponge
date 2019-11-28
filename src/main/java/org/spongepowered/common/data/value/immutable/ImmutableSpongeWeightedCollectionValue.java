@@ -26,9 +26,9 @@ package org.spongepowered.common.data.value.immutable;
 
 import com.google.common.collect.Iterables;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableWeightedCollectionValue;
-import org.spongepowered.api.data.value.mutable.WeightedCollectionValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.WeightedCollectionValue.Mutable;
+import org.spongepowered.api.data.value.WeightedcollectionValue.Immutable;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.util.weighted.TableEntry;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
@@ -42,20 +42,20 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCollectionValue<TableEntry<E>,
-    WeightedTable<E>, ImmutableWeightedCollectionValue<E>, WeightedCollectionValue<E>> implements ImmutableWeightedCollectionValue<E> {
+    WeightedTable<E>, Immutable<E>, Mutable<E>> implements Immutable<E> {
 
 
-    public ImmutableSpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedTable<E>>> key, WeightedTable<E> actualValue) {
+    public ImmutableSpongeWeightedCollectionValue(Key<? extends Value<WeightedTable<E>>> key, WeightedTable<E> actualValue) {
         super(key, new WeightedTable<>(), actualValue.stream().collect(Collectors.toCollection(WeightedTable<E>::new)));
     }
 
     @Override
-    public ImmutableWeightedCollectionValue<E> with(WeightedTable<E> value) {
+    public Immutable<E> with(WeightedTable<E> value) {
         return new ImmutableSpongeWeightedCollectionValue<>(getKey(), value);
     }
 
     @Override
-    public ImmutableWeightedCollectionValue<E> withElement(TableEntry<E> elements) {
+    public Immutable<E> withElement(TableEntry<E> elements) {
         WeightedTable<E> table = new WeightedTable<>();
         table.addAll(this.actualValue);
         table.add(elements);
@@ -63,21 +63,21 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
     }
 
     @Override
-    public ImmutableWeightedCollectionValue<E> transform(Function<WeightedTable<E>, WeightedTable<E>> function) {
+    public Immutable<E> transform(Function<WeightedTable<E>, WeightedTable<E>> function) {
         final WeightedTable<E> table = getAll();
         final WeightedTable<E> functionTable = function.apply(table);
         return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), functionTable);
     }
 
     @Override
-    public ImmutableWeightedCollectionValue<E> withAll(Iterable<TableEntry<E>> elements) {
+    public Immutable<E> withAll(Iterable<TableEntry<E>> elements) {
         final WeightedTable<E> newTable = getAll();
         elements.forEach(newTable::add);
         return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), newTable);
     }
 
     @Override
-    public ImmutableWeightedCollectionValue<E> without(TableEntry<E> element) {
+    public Immutable<E> without(TableEntry<E> element) {
         final WeightedTable<E> newTable = this.actualValue.stream()
                 .filter(entry -> !entry.equals(element))
                 .map(entry -> element)
@@ -86,7 +86,7 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
     }
 
     @Override
-    public ImmutableWeightedCollectionValue<E> withoutAll(Iterable<TableEntry<E>> elements) {
+    public Immutable<E> withoutAll(Iterable<TableEntry<E>> elements) {
         final WeightedTable<E> newTable = new WeightedTable<>();
         this.actualValue.stream()
             .filter(entry -> !Iterables.contains(elements, entry))
@@ -95,7 +95,7 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
     }
 
     @Override
-    public ImmutableWeightedCollectionValue<E> withoutAll(Predicate<TableEntry<E>> predicate) {
+    public Immutable<E> withoutAll(Predicate<TableEntry<E>> predicate) {
         final WeightedTable<E> newTable = this.actualValue.stream()
             .filter(predicate)
             .collect(Collectors.toCollection(WeightedTable::new));
@@ -110,7 +110,7 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
     }
 
     @Override
-    public WeightedCollectionValue<E> asMutable() {
+    public Mutable<E> asMutable() {
         return new SpongeWeightedCollectionValue<>(this.getKey(), getAll());
     }
 

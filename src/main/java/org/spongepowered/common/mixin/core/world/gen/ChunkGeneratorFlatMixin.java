@@ -35,8 +35,8 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.gen.TerrainGenerator;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.Dungeon;
 import org.spongepowered.api.world.gen.populator.Lake;
 import org.spongepowered.asm.mixin.Final;
@@ -58,12 +58,12 @@ public class ChunkGeneratorFlatMixin implements  PopulatorProviderBridge {
     @Shadow @Final private FlatGeneratorInfo flatWorldGenInfo;
 
     @Override
-    public void bridge$addPopulators(final WorldGenerator generator) {
+    public void bridge$addPopulators(final TerrainGenerator generator) {
         for (final Object o : this.structureGenerators.values()) {
             if (o instanceof MapGenBase) {
                 generator.getGenerationPopulators().add((GenerationPopulator) o);
                 if (o instanceof Structure) {
-                    generator.getPopulators().add((Populator) o);
+                    generator.getPopulators().add((Feature) o);
                 }
             }
         }

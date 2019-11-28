@@ -32,7 +32,6 @@ import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
@@ -239,7 +238,7 @@ public interface DefaultImplementedAdapterInventory extends Inventory {
 
     @SuppressWarnings("unchecked")
     @Override
-    default <T extends Inventory> T query(QueryOperation<?>... queries) {
+    default <T extends Inventory> T query(org.spongepowered.api.item.inventory.query.Query<?>... queries) {
         return (T) Query.compile(((InventoryBridge) this).bridge$getAdapter(), queries).execute();
     }
 

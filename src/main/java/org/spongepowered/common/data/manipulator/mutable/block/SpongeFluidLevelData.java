@@ -29,7 +29,7 @@ import static org.spongepowered.common.util.Constants.Functional.intComparator;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableFluidLevelData;
 import org.spongepowered.api.data.manipulator.mutable.block.FluidLevelData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeFluidLevelData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 
@@ -48,7 +48,7 @@ public class SpongeFluidLevelData extends AbstractBoundedComparableData<Integer,
     }
 
     @Override
-    public MutableBoundedValue<Integer> level() {
+    public Mutable<Integer> level() {
         return getValueGetter();
     }
 }

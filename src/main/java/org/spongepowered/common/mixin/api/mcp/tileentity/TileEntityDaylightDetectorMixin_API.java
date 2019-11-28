@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.DaylightDetectorTileEntity;
-import org.spongepowered.api.block.tileentity.DaylightDetector;
+import org.spongepowered.api.block.entity.DaylightDetector;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(DaylightDetectorTileEntity.class)

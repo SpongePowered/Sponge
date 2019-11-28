@@ -31,7 +31,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
-import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.AdapterLogic;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -40,7 +39,7 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.Optional;
 
-public class OrderedInventoryAdapter extends AbstractInventoryAdapter implements OrderedInventory {
+public class OrderedInventoryAdapter extends AbstractInventoryAdapter implements org.spongepowered.api.item.inventory.type.Inventory {
 
     protected final OrderedInventoryLens orderedLens;
 

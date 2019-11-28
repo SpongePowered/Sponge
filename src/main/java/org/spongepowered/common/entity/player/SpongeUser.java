@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity.player;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -35,17 +34,17 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.Queries;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.DataManipulator.Mutable;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataSerializable;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
-import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.entity.Tamer;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -61,7 +60,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -142,8 +141,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         this.enderChest = null;
 
         ((CustomDataHolderBridge) this).bridge$getFailedData().clear();
-        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) this).bridge$getCustomManipulators()) {
-            ((CustomDataHolderBridge) this).bridge$removeCustom((Class<? extends DataManipulator<?, ?>>) manipulator.getClass());
+        for (Mutable<?, ?> manipulator : ((CustomDataHolderBridge) this).bridge$getCustomManipulators()) {
+            ((CustomDataHolderBridge) this).bridge$removeCustom((Class<? extends Mutable<?, ?>>) manipulator.getClass());
         }
     }
 

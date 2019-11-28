@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.PerlinNoiseGenerator;
 import org.spongepowered.api.data.type.DoublePlantType;
@@ -33,17 +32,16 @@ import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
 import org.spongepowered.api.world.gen.populator.Flower;
 import org.spongepowered.api.world.gen.populator.Shrub;
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
-public class PlainsGrassPopulator implements Populator {
+public class PlainsGrassPopulator implements Feature {
 
     private PerlinNoiseGenerator noise = new PerlinNoiseGenerator(new Random(2345L), 1);
     private final boolean sunflowers;
@@ -71,7 +69,7 @@ public class PlainsGrassPopulator implements Populator {
     }
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return InternalPopulatorTypes.PLAINS_GRASS;
     }
 

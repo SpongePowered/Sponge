@@ -35,10 +35,10 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArtData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
-import org.spongepowered.api.data.type.Art;
+import org.spongepowered.api.data.type.ArtType;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
@@ -54,7 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<PaintingEntity, Art, Value<Art>, ArtData, ImmutableArtData> {
+public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<PaintingEntity, ArtType, Mutable<ArtType>, ArtData, ImmutableArtData> {
 
     public ArtDataProcessor() {
         super(PaintingEntity.class, Keys.ART);
@@ -62,7 +62,7 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<Painting
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    protected boolean set(final PaintingEntity entity, final Art value) {
+    protected boolean set(final PaintingEntity entity, final ArtType value) {
         if (!entity.world.isRemote) {
             final PaintingEntity.EnumArt oldArt = entity.art;
             entity.art = (PaintingEntity.EnumArt) (Object) value;
@@ -96,12 +96,12 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<Painting
     }
 
     @Override
-    protected Optional<Art> getVal(final PaintingEntity entity) {
-        return Optional.of((Art) (Object) entity.art);
+    protected Optional<ArtType> getVal(final PaintingEntity entity) {
+        return Optional.of((ArtType) (Object) entity.art);
     }
 
     @Override
-    protected ImmutableValue<Art> constructImmutableValue(final Art value) {
+    protected Immutable<ArtType> constructImmutableValue(final ArtType value) {
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, this.key, value, Constants.Catalog.DEFAULT_ART);
     }
 
@@ -111,7 +111,7 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<Painting
     }
 
     @Override
-    protected Value<Art> constructValue(final Art actualValue) {
+    protected Mutable<ArtType> constructValue(final ArtType actualValue) {
         return new SpongeValue<>(Keys.ART, Constants.Catalog.DEFAULT_ART, actualValue);
     }
 

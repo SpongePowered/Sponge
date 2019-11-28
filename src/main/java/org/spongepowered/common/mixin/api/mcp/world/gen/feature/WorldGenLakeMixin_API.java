@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
@@ -38,14 +37,13 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Lake;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
 import java.util.Random;
 
@@ -58,7 +56,7 @@ public abstract class WorldGenLakeMixin_API extends Feature implements Lake {
     private VariableAmount api$height = VariableAmount.baseWithRandomAddition(0, 256);
 
     @Override
-    public PopulatorType getType() {
+    public org.spongepowered.api.world.gen.feature.Feature getType() {
         return PopulatorTypes.LAKE;
     }
 

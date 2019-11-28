@@ -56,9 +56,9 @@ import net.minecraft.world.server.ServerWorld;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandMapping;
+import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
@@ -67,7 +67,7 @@ import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -724,7 +724,7 @@ public class SpongeCommandFactory {
         }
     }
 
-    private static CommandCallable createSpongeTimingsCommand() {
+    private static Command createSpongeTimingsCommand() {
         return CommandSpec.builder()
             .permission("sponge.command.timings")
             .description(Text.of("Manages Sponge Timings data to see performance of the server."))
@@ -910,7 +910,7 @@ public class SpongeCommandFactory {
                 Optional<Integer> page = args.getOne(PAGE_KEY);
 
                 if (command.isPresent()) {
-                    CommandCallable callable = command.get().getCallable();
+                    Command callable = command.get().getCallable();
                     Optional<? extends Text> desc = callable.getHelp(src);
                     if (desc.isPresent()) {
                         src.sendMessage(desc.get());
@@ -935,7 +935,7 @@ public class SpongeCommandFactory {
             }).build();
     }
 
-    private static CommandCallable createSpongeMetricsCommand() {
+    private static Command createSpongeMetricsCommand() {
         return CommandSpec.builder()
           .arguments(
             optionalWeak(onlyOne(plugin(PLUGIN_KEY))),

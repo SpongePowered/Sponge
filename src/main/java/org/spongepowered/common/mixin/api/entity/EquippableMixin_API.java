@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.entity;
 
-import org.spongepowered.api.entity.Equipable;
+import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Mixin;

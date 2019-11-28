@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import com.flowpowered.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -37,16 +36,16 @@ import net.minecraft.world.Teleporter;
 import net.minecraft.world.Teleporter.PortalPosition;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.PortalAgent;
-import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.teleport.PortalAgent;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
 import java.util.Random;
 

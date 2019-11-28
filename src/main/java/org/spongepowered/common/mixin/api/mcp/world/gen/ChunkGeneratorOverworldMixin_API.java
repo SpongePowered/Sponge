@@ -24,22 +24,21 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen;
 
-import com.flowpowered.math.GenericMath;
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.OverworldChunkGenerator;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
 import org.spongepowered.common.util.gen.ChunkBufferPrimer;
-
+import org.spongepowered.math.GenericMath;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 import javax.annotation.Nullable;

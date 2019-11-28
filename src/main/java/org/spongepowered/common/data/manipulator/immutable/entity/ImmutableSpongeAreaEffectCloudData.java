@@ -25,13 +25,12 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAreaEffectCloudData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AreaEffectCloudData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -59,8 +58,8 @@ public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<Im
     private final int age;
 
     private final ImmutableBoundedValue<Integer> durationOnUseValue;
-    private final ImmutableValue<Color> colorImmutableValue;
-    private final ImmutableValue<ParticleType> particleTypeImmutableValue;
+    private final Immutable<Color> colorImmutableValue;
+    private final Immutable<ParticleType> particleTypeImmutableValue;
     private final ImmutableBoundedValue<Integer> immutableAge;
     private final ImmutableSpongeListValue<PotionEffect> immutablePotionEffectsValue;
     private final ImmutableBoundedValue<Integer> reapplicationDelayValue;
@@ -238,7 +237,7 @@ public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Color> color() {
+    public Immutable<Color> color() {
         return this.colorImmutableValue;
     }
 
@@ -248,7 +247,7 @@ public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<ParticleType> particleType() {
+    public Immutable<ParticleType> particleType() {
         return this.particleTypeImmutableValue;
     }
 
@@ -283,7 +282,7 @@ public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableListValue<PotionEffect> effects() {
+    public org.spongepowered.api.data.value.ListValue.Immutable<PotionEffect> effects() {
         return this.immutablePotionEffectsValue;
     }
 

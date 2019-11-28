@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.minecart.TNTMinecartEntity;
 import net.minecraft.util.DamageSource;
@@ -49,7 +48,7 @@ import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.ArrayList;
 import java.util.Optional;
 

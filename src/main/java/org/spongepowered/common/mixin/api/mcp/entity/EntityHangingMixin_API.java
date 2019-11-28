@@ -25,9 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,12 +51,12 @@ public abstract class EntityHangingMixin_API extends EntityMixin_API implements 
     }
 
     @Override
-    public Value<Direction> direction() {
+    public Mutable<Direction> direction() {
         return new SpongeValue<>(Keys.DIRECTION, this.facingDirection == null ? Direction.NONE : Constants.DirectionFunctions.getFor(this.facingDirection));
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getDirectionalData());
     }

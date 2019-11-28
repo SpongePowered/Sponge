@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableShearedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeShearedData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -39,7 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 import net.minecraft.entity.passive.SheepEntity;
 
-public class ShearedDataProcessor extends AbstractEntitySingleDataProcessor<SheepEntity, Boolean, Value<Boolean>, ShearedData, ImmutableShearedData> {
+public class ShearedDataProcessor extends AbstractEntitySingleDataProcessor<SheepEntity, Boolean, Mutable<Boolean>, ShearedData, ImmutableShearedData> {
 
     public ShearedDataProcessor() {
         super(SheepEntity.class, Keys.IS_SHEARED);
@@ -57,12 +57,12 @@ public class ShearedDataProcessor extends AbstractEntitySingleDataProcessor<Shee
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Mutable<Boolean> constructValue(Boolean actualValue) {
         return new SpongeValue<>(this.key, false, actualValue);
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.IS_SHEARED, false, value);
     }
 

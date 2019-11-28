@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockStaticLiquid;
 import net.minecraft.util.math.BlockPos;
@@ -44,7 +43,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Collections;
 import java.util.List;
 

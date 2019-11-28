@@ -32,12 +32,12 @@ import net.minecraft.block.StainedGlassBlock;
 import net.minecraft.block.StainedGlassPaneBlock;
 import net.minecraft.block.properties.PropertyEnum;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.block.DyeableBlockBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
@@ -57,21 +57,21 @@ public abstract class DyeableBlockMixin extends BlockMixin implements DyeableBlo
     }
 
     @Override
-    public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
+    public List<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
+        return ImmutableList.<Immutable<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
                 .add(this.impl$getDyeableData(blockState))
                 .build();
     }
 
     @Override
-    public boolean bridge$supports(final Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
         return ImmutableDyeableData.class.isAssignableFrom(immutable) || super.bridge$supports(immutable);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDyeableData) {
             final DyeColor color = ((ImmutableDyeableData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(this.bridge$ColorProperty, (net.minecraft.item.DyeColor) (Object) color));
@@ -81,7 +81,7 @@ public abstract class DyeableBlockMixin extends BlockMixin implements DyeableBlo
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
         if (key.equals(Keys.DYE_COLOR)) {
             final DyeColor color = (DyeColor) value;
             return Optional.of((BlockState) blockState.withProperty(this.bridge$ColorProperty, (net.minecraft.item.DyeColor) (Object) color));

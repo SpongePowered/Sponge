@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.type.Art;
-import org.spongepowered.api.data.type.Arts;
+import org.spongepowered.api.data.type.ArtType;
+import org.spongepowered.api.data.type.ArtTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
@@ -42,32 +42,32 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.entity.item.PaintingEntity;
 
-public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
+public final class ArtRegistryModule implements CatalogRegistryModule<ArtType> {
 
-    @RegisterCatalog(Arts.class)
-    private final Map<String, Art> artMappings = Maps.newHashMap();
+    @RegisterCatalog(ArtTypes.class)
+    private final Map<String, ArtType> artMappings = Maps.newHashMap();
 
     @Override
-    public Optional<Art> getById(String id) {
+    public Optional<ArtType> getById(String id) {
         return Optional.ofNullable(this.artMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
-    public Collection<Art> getAll() {
+    public Collection<ArtType> getAll() {
         return ImmutableList.copyOf(this.artMappings.values());
     }
 
     @Override
     public void registerDefaults() {
         for (PaintingEntity.EnumArt art : PaintingEntity.EnumArt.values()) {
-            this.artMappings.put(((Art) (Object) art).getId().toLowerCase(Locale.ENGLISH), (Art) (Object) art);
+            this.artMappings.put(((ArtType) (Object) art).getId().toLowerCase(Locale.ENGLISH), (ArtType) (Object) art);
         }
     }
 
     @CustomCatalogRegistration
     public void customRegistration() {
         registerDefaults();
-        RegistryHelper.mapFields(Arts.class, field -> {
+        RegistryHelper.mapFields(ArtTypes.class, field -> {
             String name = field.replace("_", "");
             return this.artMappings.get(name.toLowerCase(Locale.ENGLISH));
         });
@@ -77,7 +77,7 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
     public void registerAdditionals() {
         for (PaintingEntity.EnumArt art : PaintingEntity.EnumArt.values()) {
             if (!this.artMappings.containsValue(art)) {
-                this.artMappings.put(((Art) (Object) art).getId().toLowerCase(Locale.ENGLISH), (Art) (Object) art);
+                this.artMappings.put(((ArtType) (Object) art).getId().toLowerCase(Locale.ENGLISH), (ArtType) (Object) art);
             }
         }
     }

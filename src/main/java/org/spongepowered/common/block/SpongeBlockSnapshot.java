@@ -26,7 +26,6 @@ package org.spongepowered.common.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
@@ -41,17 +40,16 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -71,7 +69,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
@@ -89,12 +87,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private final BlockState extendedState;
     private final UUID worldUniqueId;
     private final Vector3i pos;
-    private final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
-    private ImmutableMap<Key<?>, ImmutableValue<?>> keyValueMap;
-    private ImmutableSet<ImmutableValue<?>> valueSet;
-    private ImmutableList<ImmutableDataManipulator<?, ?>> blockData;
-    private ImmutableMap<Key<?>, ImmutableValue<?>> blockKeyValueMap;
-    private ImmutableSet<ImmutableValue<?>> blockValueSet;
+    private final ImmutableList<Immutable<?, ?>> extraData;
+    private ImmutableMap<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> keyValueMap;
+    private ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> valueSet;
+    private ImmutableList<Immutable<?, ?>> blockData;
+    private ImmutableMap<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> blockKeyValueMap;
+    private ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> blockValueSet;
     @Nullable final CompoundNBT compound;
     @Nullable final UUID creatorUniqueId;
     @Nullable final UUID notifierUniqueId;
@@ -115,10 +113,10 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
         // This avoids cross contamination of block state based values versus tile entity values.
         // TODO - delegate this to NbtProcessors when schematics are merged.
-        final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> tileBuilder = ImmutableMap.builder();
-        this.extraData = builder.manipulators == null ? ImmutableList.<ImmutableDataManipulator<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
-        for (final ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
-            for (final ImmutableValue<?> value : manipulator.getValues()) {
+        final ImmutableMap.Builder<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> tileBuilder = ImmutableMap.builder();
+        this.extraData = builder.manipulators == null ? ImmutableList.<Immutable<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
+        for (final Immutable<?, ?> manipulator : this.extraData) {
+            for (final org.spongepowered.api.data.value.Value.Immutable<?> value : manipulator.getValues()) {
                 tileBuilder.put(value.getKey(), value);
             }
         }
@@ -272,8 +270,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public List<ImmutableDataManipulator<?, ?>> getManipulators() {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder().addAll(this.getBlockManipulators()).addAll(this.extraData).build();
+    public List<Immutable<?, ?>> getManipulators() {
+        return ImmutableList.<Immutable<?, ?>>builder().addAll(this.getBlockManipulators()).addAll(this.extraData).build();
     }
 
     @Override
@@ -307,12 +305,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> get(final Class<T> containerClass) {
+    public <T extends Immutable<?, ?>> Optional<T> get(final Class<T> containerClass) {
         final Optional<T> optional = this.blockState.get(containerClass);
         if (optional.isPresent()) {
             return optional;
         }
-        for (final ImmutableDataManipulator<?, ?> dataManipulator : this.extraData) {
+        for (final Immutable<?, ?> dataManipulator : this.extraData) {
             if (containerClass.isInstance(dataManipulator)) {
                 return Optional.of(((T) dataManipulator));
             }
@@ -321,22 +319,22 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
+    public <T extends Immutable<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
         return get(containerClass);
     }
 
     @Override
-    public boolean supports(final Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    public boolean supports(final Class<? extends Immutable<?, ?>> containerClass) {
         return this.blockState.supports(containerClass);
     }
 
     @Override
-    public <E> Optional<BlockSnapshot> transform(final Key<? extends BaseValue<E>> key, final Function<E, E> function) {
+    public <E> Optional<BlockSnapshot> transform(final Key<? extends Value<E>> key, final Function<E, E> function) {
         return Optional.empty();
     }
 
     @Override
-    public <E> Optional<BlockSnapshot> with(final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockSnapshot> with(final Key<? extends Value<E>> key, final E value) {
         final Optional<BlockState> optional = this.blockState.with(key, value);
         if (optional.isPresent()) {
             return Optional.of(withState(optional.get()));
@@ -346,16 +344,16 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public Optional<BlockSnapshot> with(final BaseValue<?> value) {
+    public Optional<BlockSnapshot> with(final Value<?> value) {
         return with((Key) value.getKey(), value.get());
     }
 
     @Override
-    public Optional<BlockSnapshot> with(final ImmutableDataManipulator<?, ?> valueContainer) {
-        if (((BlockBridge) this.blockState.getType()).bridge$supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
+    public Optional<BlockSnapshot> with(final Immutable<?, ?> valueContainer) {
+        if (((BlockBridge) this.blockState.getType()).bridge$supports((Class<Immutable<?, ?>>) valueContainer.getClass())) {
             final BlockState newState;
             boolean changeState = false;
-            if (this.blockState.supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
+            if (this.blockState.supports((Class<Immutable<?, ?>>) valueContainer.getClass())) {
                 newState = this.blockState.with(valueContainer).get();
                 changeState = true;
             } else {
@@ -372,9 +370,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public Optional<BlockSnapshot> with(final Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
+    public Optional<BlockSnapshot> with(final Iterable<Immutable<?, ?>> valueContainers) {
         BlockSnapshot snapshot = this;
-        for (final ImmutableDataManipulator<?, ?> manipulator : valueContainers) {
+        for (final Immutable<?, ?> manipulator : valueContainers) {
             final Optional<BlockSnapshot> optional = snapshot.with(manipulator);
             if (!optional.isPresent()) {
                 return Optional.empty();
@@ -385,7 +383,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public Optional<BlockSnapshot> without(final Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    public Optional<BlockSnapshot> without(final Class<? extends Immutable<?, ?>> containerClass) {
         return Optional.empty();
     }
 
@@ -398,7 +396,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public BlockSnapshot merge(final BlockSnapshot that, final MergeFunction function) {
         BlockSnapshot merged = this;
         merged = merged.withState(function.merge(this.blockState, that.getState()));
-        for (final ImmutableDataManipulator<?, ?> manipulator : that.getContainers()) {
+        for (final Immutable<?, ?> manipulator : that.getContainers()) {
             final Optional<BlockSnapshot> optional = merged.with(function.merge(this.get(manipulator.getClass()).orElse(null), manipulator));
             if (optional.isPresent()) {
                 merged = optional.get();
@@ -408,12 +406,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public List<ImmutableDataManipulator<?, ?>> getContainers() {
+    public List<Immutable<?, ?>> getContainers() {
         return getManipulators();
     }
 
     @Override
-    public <E> Optional<E> get(final Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> get(final Key<? extends Value<E>> key) {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((E) this.keyValueMap.get(key).get());
         } else if (getKeyValueMap().containsKey(key)) {
@@ -422,10 +420,10 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return Optional.empty();
     }
 
-    private ImmutableMap<Key<?>, ImmutableValue<?>> getKeyValueMap() {
+    private ImmutableMap<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> getKeyValueMap() {
         if (this.blockKeyValueMap == null) {
-            final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableMap.builder();
-            for (final ImmutableValue<?> value : this.blockState.getValues()) {
+            final ImmutableMap.Builder<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> mapBuilder = ImmutableMap.builder();
+            for (final org.spongepowered.api.data.value.Value.Immutable<?> value : this.blockState.getValues()) {
                 mapBuilder.put(value.getKey(), value);
             }
             this.blockKeyValueMap = mapBuilder.build();
@@ -433,25 +431,25 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return this.blockKeyValueMap;
     }
 
-    private ImmutableSet<ImmutableValue<?>> getValueSet() {
+    private ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> getValueSet() {
         if (this.blockValueSet == null) {
             this.blockValueSet = ImmutableSet.copyOf(getKeyValueMap().values());
         }
         return this.blockValueSet;
     }
 
-    private ImmutableSet<ImmutableValue<?>> getTileValueSet() {
+    private ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> getTileValueSet() {
         if (this.valueSet == null) {
             this.valueSet = ImmutableSet.copyOf(this.getTileMap().values());
         }
         return this.valueSet;
     }
 
-    private ImmutableMap<Key<?>, ImmutableValue<?>> getTileMap() {
+    private ImmutableMap<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> getTileMap() {
         if (this.keyValueMap == null) {
-            final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> tileBuilder = ImmutableMap.builder();
-            for (final ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
-                for (final ImmutableValue<?> value : manipulator.getValues()) {
+            final ImmutableMap.Builder<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> tileBuilder = ImmutableMap.builder();
+            for (final Immutable<?, ?> manipulator : this.extraData) {
+                for (final org.spongepowered.api.data.value.Value.Immutable<?> value : manipulator.getValues()) {
                     tileBuilder.put(value.getKey(), value);
                 }
             }
@@ -461,7 +459,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
 
-    private ImmutableList<ImmutableDataManipulator<?, ?>> getBlockManipulators() {
+    private ImmutableList<Immutable<?, ?>> getBlockManipulators() {
         if (this.blockData == null) {
             this.blockData = ImmutableList.copyOf(this.blockState.getContainers());
         }
@@ -469,7 +467,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(final Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((V) this.keyValueMap.get(key).asMutable());
         } else if (getKeyValueMap().containsKey(key)) {
@@ -497,12 +495,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
         return this.keys;
     }
-    private ImmutableSet<ImmutableValue<?>> values;
+    private ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> values;
 
     @Override
-    public Set<ImmutableValue<?>> getValues() {
+    public Set<org.spongepowered.api.data.value.Value.Immutable<?>> getValues() {
         if (this.values == null) {
-            this.values = ImmutableSet.<ImmutableValue<?>>builder().addAll(getTileValueSet()).addAll(getValueSet()).build();
+            this.values = ImmutableSet.<org.spongepowered.api.data.value.Value.Immutable<?>>builder().addAll(getTileValueSet()).addAll(getValueSet()).build();
         }
         return this.values;
     }
@@ -517,7 +515,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             .extendedState(this.extendedState)
             .position(this.pos)
             .worldId(this.worldUniqueId);
-        for (final ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
+        for (final Immutable<?, ?> manipulator : this.extraData) {
             builder.add(manipulator);
         }
         if (this.compound != null) {
@@ -557,7 +555,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public Optional<TileEntityArchetype> createArchetype() {
+    public Optional<BlockEntityArchetype> createArchetype() {
         final BlockType type = this.blockState.getType();
         if (!(type instanceof ITileEntityProvider)) {
             return Optional.empty();
@@ -567,14 +565,14 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
         final String tileId = this.compound.getString(Constants.Item.BLOCK_ENTITY_ID);
         final Class<? extends TileEntity> tileClass = (Class<? extends TileEntity>) TileEntityTypeRegistryModule.getInstance().getById(tileId)
-            .map(TileEntityType::getTileEntityType)
+            .map(BlockEntityType::getTileEntityType)
             .orElse(null);
         if (tileClass == null) {
             return Optional.empty();
         }
-        final TileEntityType tileType = TileEntityTypeRegistryModule.getInstance().getForClass(tileClass);
+        final BlockEntityType tileType = TileEntityTypeRegistryModule.getInstance().getForClass(tileClass);
 
-        final TileEntityArchetype archetype = TileEntityArchetype.builder()
+        final BlockEntityArchetype archetype = BlockEntityArchetype.builder()
                 .tile(tileType)
                 .state(this.blockState)
                 .tileData(NbtTranslator.getInstance().translate(this.compound))

@@ -24,22 +24,21 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 import net.minecraft.entity.item.ArmorStandEntity;
 
-public class RightArmRotationValueProcessor extends AbstractSpongeValueProcessor<ArmorStandEntity, Vector3d, Value<Vector3d>> {
+public class RightArmRotationValueProcessor extends AbstractSpongeValueProcessor<ArmorStandEntity, Vector3d, Mutable<Vector3d>> {
 
     public RightArmRotationValueProcessor() {
         super(ArmorStandEntity.class, Keys.RIGHT_ARM_ROTATION);
@@ -51,7 +50,7 @@ public class RightArmRotationValueProcessor extends AbstractSpongeValueProcessor
     }
 
     @Override
-    protected Value<Vector3d> constructValue(final Vector3d actualValue) {
+    protected Mutable<Vector3d> constructValue(final Vector3d actualValue) {
         return new SpongeValue<>(Keys.RIGHT_ARM_ROTATION, Constants.Entity.ArmorStand.DEFAULT_RIGHT_ARM_ROTATION, actualValue);
     }
 
@@ -67,7 +66,7 @@ public class RightArmRotationValueProcessor extends AbstractSpongeValueProcessor
     }
 
     @Override
-    protected ImmutableValue<Vector3d> constructImmutableValue(final Vector3d value) {
+    protected Immutable<Vector3d> constructImmutableValue(final Vector3d value) {
         return constructValue(value).asImmutable();
     }
 

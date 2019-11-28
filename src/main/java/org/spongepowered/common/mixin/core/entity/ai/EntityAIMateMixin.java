@@ -75,7 +75,7 @@ public abstract class EntityAIMateMixin {
         if (ShouldFire.BREED_ENTITY_EVENT_FIND_MATE) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this.animal);
-                final org.spongepowered.api.event.entity.BreedEntityEvent.FindMate event =
+                final org.spongepowered.api.event.entity.BreedingEvent.FindMate event =
                     SpongeEventFactory.createBreedEntityEventFindMate(Sponge.getCauseStackManager().getCurrentCause(), TristateResult.Result.DEFAULT,
                         TristateResult.Result.DEFAULT, Optional.empty(), (Animal) nearbyMate, (Ageable) this.animal, true);
                 if (SpongeImpl.postEvent(event) || event.getResult() == TristateResult.Result.DENY) {
@@ -111,7 +111,7 @@ public abstract class EntityAIMateMixin {
                 // TODO API 8 is removing this TargetXXXX nonsense so that is why I put the parents into the Cause
                 frame.pushCause(this.animal);
                 frame.pushCause(this.targetMate);
-                final org.spongepowered.api.event.entity.BreedEntityEvent.Breed event =
+                final org.spongepowered.api.event.entity.BreedingEvent.Breed event =
                     SpongeEventFactory.createBreedEntityEventBreed(Sponge.getCauseStackManager().getCurrentCause(),
                     Optional.empty(), (Ageable) baby, (Ageable) this.targetMate);
                 this.impl$spawnEntityResult = !SpongeImpl.postEvent(event) && world.addEntity0(baby);

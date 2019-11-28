@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.bridge.entity.EntityItemBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -37,14 +37,14 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 import net.minecraft.entity.item.ItemEntity;
 
-public class InfinitePickupDelayValueProcessor extends AbstractSpongeValueProcessor<ItemEntity, Boolean, Value<Boolean>> {
+public class InfinitePickupDelayValueProcessor extends AbstractSpongeValueProcessor<ItemEntity, Boolean, Mutable<Boolean>> {
 
     public InfinitePickupDelayValueProcessor() {
         super(ItemEntity.class, Keys.INFINITE_PICKUP_DELAY);
     }
 
     @Override
-    public Value<Boolean> constructValue(Boolean defaultValue) {
+    public Mutable<Boolean> constructValue(Boolean defaultValue) {
         return new SpongeValue<>(Keys.INFINITE_PICKUP_DELAY, false, defaultValue);
     }
 
@@ -60,7 +60,7 @@ public class InfinitePickupDelayValueProcessor extends AbstractSpongeValueProces
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(Boolean value) {
         return constructValue(value).asImmutable();
     }
 

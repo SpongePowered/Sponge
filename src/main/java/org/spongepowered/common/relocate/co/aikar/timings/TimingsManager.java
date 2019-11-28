@@ -27,7 +27,7 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
 import com.google.common.collect.EvictingQueue;
-import org.spongepowered.api.command.CommandMapping;
+import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;

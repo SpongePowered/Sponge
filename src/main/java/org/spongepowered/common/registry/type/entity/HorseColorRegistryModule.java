@@ -27,8 +27,8 @@ package org.spongepowered.common.registry.type.entity;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.registry.util.RegisterCatalog;

@@ -25,13 +25,13 @@
 package org.spongepowered.common.data.processor.multi;
 
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.gen;
 
-import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.gen.TerrainGenerator;
 
 public interface PopulatorProviderBridge {
 
-    void bridge$addPopulators(WorldGenerator generator);
+    void bridge$addPopulators(TerrainGenerator generator);
 }

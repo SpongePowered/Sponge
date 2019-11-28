@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.DungeonsFeature;
@@ -39,12 +38,11 @@ import org.spongepowered.api.util.weighted.UnmodifiableWeightedTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Dungeon;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.registry.type.world.gen.DungeonMobRegistryModule;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
 import java.util.Random;
 
@@ -61,7 +59,7 @@ public abstract class WorldGenDungeonsMixin_API extends Feature implements Dunge
     private final LootTable<ItemStackSnapshot> api$loot = new LootTable<>();
 
     @Override
-    public PopulatorType getType() {
+    public org.spongepowered.api.world.gen.feature.Feature getType() {
         return PopulatorTypes.DUNGEON;
     }
 

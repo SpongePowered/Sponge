@@ -31,23 +31,23 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.registry.CatalogTypeAlreadyRegisteredException;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.GeneratorTypes;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.gen.GeneratorType;
+import org.spongepowered.api.world.gen.GeneratorTypes;
+import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.api.world.teleport.PortalAgentTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
@@ -75,7 +75,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
     private boolean commandsAllowed;
     private boolean generateBonusChest;
     private DataContainer generatorSettings;
-    private ImmutableList<WorldGeneratorModifier> generatorModifiers;
+    private ImmutableList<TerrainGeneratorConfig> generatorModifiers;
     private PortalAgentType portalAgentType;
     private boolean seedRandomized;
 
@@ -170,8 +170,8 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
     }
 
     @Override
-    public SpongeWorldArchetypeBuilder generatorModifiers(WorldGeneratorModifier... modifiers) {
-        ImmutableList<WorldGeneratorModifier> defensiveCopy = ImmutableList.copyOf(modifiers);
+    public SpongeWorldArchetypeBuilder generatorModifiers(TerrainGeneratorConfig... modifiers) {
+        ImmutableList<TerrainGeneratorConfig> defensiveCopy = ImmutableList.copyOf(modifiers);
         WorldGeneratorModifierRegistryModule.getInstance().checkAllRegistered(defensiveCopy);
         this.generatorModifiers = defensiveCopy;
         return this;

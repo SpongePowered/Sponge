@@ -26,11 +26,11 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableJoinData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeJoinData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -72,12 +72,12 @@ public class SpongeJoinData extends AbstractData<JoinData, ImmutableJoinData> im
     }
 
     @Override
-    public Value<Instant> firstPlayed() {
+    public Mutable<Instant> firstPlayed() {
         return new SpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, this.firstJoined);
     }
 
     @Override
-    public Value<Instant> lastPlayed() {
+    public Mutable<Instant> lastPlayed() {
         return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, this.lastJoined);
     }
 

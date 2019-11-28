@@ -49,7 +49,7 @@ import org.spongepowered.api.event.GenericEvent;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.impl.AbstractEvent;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -456,16 +456,16 @@ public class SpongeEventManager implements EventManager {
     @Override
     public boolean post(Event event) {
         try {
-            if (event instanceof InteractInventoryEvent) { // Track usage of Containers
-                ((ContainerBridge) ((InteractInventoryEvent) event).getTargetInventory()).bridge$setInUse(true);
+            if (event instanceof InteractContainerEvent) { // Track usage of Containers
+                ((ContainerBridge) ((InteractContainerEvent) event).getTargetInventory()).bridge$setInUse(true);
             }
             // Allow the client thread by default so devs can actually
             // call their own events inside the init events. Only allowing
             // this as long that there is no server available
             return post(event, !Sponge.isServerAvailable());
         } finally {
-            if (event instanceof InteractInventoryEvent) { // Finished using Container
-                ((ContainerBridge) ((InteractInventoryEvent) event).getTargetInventory()).bridge$setInUse(false);
+            if (event instanceof InteractContainerEvent) { // Finished using Container
+                ((ContainerBridge) ((InteractContainerEvent) event).getTargetInventory()).bridge$setInUse(false);
             }
         }
     }

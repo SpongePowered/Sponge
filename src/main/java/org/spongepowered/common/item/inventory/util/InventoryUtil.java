@@ -154,8 +154,8 @@ public final class InventoryUtil {
 
         final Object base = inventory;
 
-        if (base instanceof org.spongepowered.api.block.tileentity.TileEntity) {
-            final String id = ((org.spongepowered.api.block.tileentity.TileEntity) base).getBlock().getType().getId();
+        if (base instanceof org.spongepowered.api.block.entity.BlockEntity) {
+            final String id = ((org.spongepowered.api.block.entity.BlockEntity) base).getBlock().getType().getId();
             final String pluginId = id.substring(0, id.indexOf(":"));
             container = Sponge.getPluginManager().getPlugin(pluginId)
                     .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + id));

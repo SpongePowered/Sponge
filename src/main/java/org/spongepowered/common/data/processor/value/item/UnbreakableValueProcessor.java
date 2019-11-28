@@ -28,16 +28,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Boolean, Value<Boolean>> {
+public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Boolean, Mutable<Boolean>> {
 
     public UnbreakableValueProcessor() {
         super(ItemStack.class, Keys.UNBREAKABLE);
@@ -49,7 +49,7 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
     }
 
     @Override
-    public Value<Boolean> constructValue(Boolean defaultValue) {
+    public Mutable<Boolean> constructValue(Boolean defaultValue) {
         return SpongeValueFactory.getInstance().createValue(Keys.UNBREAKABLE, defaultValue, false);
     }
 
@@ -74,7 +74,7 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
     }
 
     @Override
-    public ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    public Immutable<Boolean> constructImmutableValue(Boolean value) {
         return constructValue(value).asImmutable();
     }
 

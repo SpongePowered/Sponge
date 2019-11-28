@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.tileentity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableNoteData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.NoteData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeNoteData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeNoteData extends AbstractImmutableSingleData<NotePitch, ImmutableNoteData, NoteData> implements ImmutableNoteData {
 
-    private final ImmutableValue<NotePitch> cachedValue = ImmutableSpongeValue.cachedOf(Keys.NOTE_PITCH, NotePitches.F_SHARP0, this.value);
+    private final Immutable<NotePitch> cachedValue = ImmutableSpongeValue.cachedOf(Keys.NOTE_PITCH, NotePitches.F_SHARP0, this.value);
 
     public ImmutableSpongeNoteData() {
         this(NotePitches.F_SHARP0);
@@ -48,12 +48,12 @@ public class ImmutableSpongeNoteData extends AbstractImmutableSingleData<NotePit
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
+    protected Immutable<?> getValueGetter() {
         return note();
     }
 
     @Override
-    public ImmutableValue<NotePitch> note() {
+    public Immutable<NotePitch> note() {
         return this.cachedValue;
     }
 

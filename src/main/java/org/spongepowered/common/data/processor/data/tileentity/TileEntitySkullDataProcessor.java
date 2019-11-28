@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
 import org.spongepowered.api.data.manipulator.mutable.SkullData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
@@ -48,7 +48,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.SkullTileEntity;
 
 public class TileEntitySkullDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<SkullTileEntity, SkullType, Value<SkullType>, SkullData, ImmutableSkullData> {
+        extends AbstractTileEntitySingleDataProcessor<SkullTileEntity, SkullType, Mutable<SkullType>, SkullData, ImmutableSkullData> {
 
     public TileEntitySkullDataProcessor() {
         super(SkullTileEntity.class, Keys.SKULL_TYPE);
@@ -85,12 +85,12 @@ public class TileEntitySkullDataProcessor
     }
 
     @Override
-    protected Value<SkullType> constructValue(final SkullType value) {
+    protected Mutable<SkullType> constructValue(final SkullType value) {
         return new SpongeValue<>(Keys.SKULL_TYPE, SkullTypes.SKELETON, value);
     }
 
     @Override
-    protected ImmutableValue<SkullType> constructImmutableValue(final SkullType value) {
+    protected Immutable<SkullType> constructImmutableValue(final SkullType value) {
         return ImmutableSpongeValue.cachedOf(Keys.SKULL_TYPE, SkullTypes.SKELETON, value);
     }
 

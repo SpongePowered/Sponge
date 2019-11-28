@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableKnockbackData;
 import org.spongepowered.api.data.manipulator.mutable.entity.KnockbackData;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeKnockbackData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -41,7 +41,7 @@ import java.util.Optional;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 
 public class KnockbackDataProcessor
-        extends AbstractEntitySingleDataProcessor<AbstractArrowEntity, Integer, MutableBoundedValue<Integer>, KnockbackData, ImmutableKnockbackData> {
+        extends AbstractEntitySingleDataProcessor<AbstractArrowEntity, Integer, Mutable<Integer>, KnockbackData, ImmutableKnockbackData> {
 
     public KnockbackDataProcessor() {
         super(AbstractArrowEntity.class, Keys.KNOCKBACK_STRENGTH);
@@ -53,7 +53,7 @@ public class KnockbackDataProcessor
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(final Integer actualValue) {
+    protected Mutable<Integer> constructValue(final Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.KNOCKBACK_STRENGTH)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -74,7 +74,7 @@ public class KnockbackDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
+    protected Immutable<Integer> constructImmutableValue(final Integer value) {
         return new ImmutableSpongeValue<>(Keys.KNOCKBACK_STRENGTH, value);
     }
 

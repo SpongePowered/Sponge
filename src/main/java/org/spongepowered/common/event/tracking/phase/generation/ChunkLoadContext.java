@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 

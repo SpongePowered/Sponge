@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.gen;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Blocks;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
@@ -44,8 +43,8 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.gen.TerrainGenerator;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.Dungeon;
 import org.spongepowered.api.world.gen.populator.Lake;
 import org.spongepowered.asm.mixin.Final;
@@ -65,7 +64,7 @@ import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.AnimalPopulator;
 import org.spongepowered.common.world.gen.populators.FilteredPopulator;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -102,7 +101,7 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
     }
 
     @Override
-    public void bridge$addPopulators(final WorldGenerator generator) {
+    public void bridge$addPopulators(final TerrainGenerator generator) {
         if (this.settings.useCaves) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.caveGenerator);
         }
@@ -116,32 +115,32 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
 
         if (this.settings.useMineShafts && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.mineshaftGenerator);
-            generator.getPopulators().add((Populator) this.mineshaftGenerator);
+            generator.getPopulators().add((Feature) this.mineshaftGenerator);
         }
 
         if (this.settings.useVillages && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.villageGenerator);
-            generator.getPopulators().add((Populator) this.villageGenerator);
+            generator.getPopulators().add((Feature) this.villageGenerator);
         }
 
         if (this.settings.useStrongholds && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.strongholdGenerator);
-            generator.getPopulators().add((Populator) this.strongholdGenerator);
+            generator.getPopulators().add((Feature) this.strongholdGenerator);
         }
 
         if (this.settings.useTemples && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.scatteredFeatureGenerator);
-            generator.getPopulators().add((Populator) this.scatteredFeatureGenerator);
+            generator.getPopulators().add((Feature) this.scatteredFeatureGenerator);
         }
 
         if (this.settings.useMonuments && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.oceanMonumentGenerator);
-            generator.getPopulators().add((Populator) this.oceanMonumentGenerator);
+            generator.getPopulators().add((Feature) this.oceanMonumentGenerator);
         }
 
         if (this.settings.useMansions && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.woodlandMansionGenerator);
-            generator.getPopulators().add((Populator) this.woodlandMansionGenerator);
+            generator.getPopulators().add((Feature) this.woodlandMansionGenerator);
         }
 
         if (this.settings.useWaterLakes) {

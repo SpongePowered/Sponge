@@ -31,9 +31,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
@@ -45,7 +45,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Text, Value<Text>, AuthorData, ImmutableAuthorData> {
+public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Text, Mutable<Text>, AuthorData, ImmutableAuthorData> {
 
     public ItemAuthorDataProcessor() {
         super(input -> input.getItem() == Items.WRITABLE_BOOK || input.getItem() == Items.WRITTEN_BOOK, Keys.BOOK_AUTHOR);
@@ -78,12 +78,12 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
     }
 
     @Override
-    protected Value<Text> constructValue(final Text actualValue) {
+    protected Mutable<Text> constructValue(final Text actualValue) {
         return new SpongeValue<>(Keys.BOOK_AUTHOR, Text.of(), actualValue);
     }
 
     @Override
-    protected ImmutableValue<Text> constructImmutableValue(final Text value) {
+    protected Immutable<Text> constructImmutableValue(final Text value) {
         return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Text.of(), value);
     }
 

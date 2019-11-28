@@ -28,7 +28,7 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
@@ -69,7 +69,7 @@ public abstract class ItemMixin implements ItemBridge, SpongeGameDictionaryEntry
     }
 
     @Override
-    public void bridge$gatherManipulators(final ItemStack itemStack, final List<DataManipulator<?, ?>> list) {
+    public void bridge$gatherManipulators(final ItemStack itemStack, final List<Mutable<?, ?>> list) {
         if (!itemStack.hasTag()) {
             return;
         }

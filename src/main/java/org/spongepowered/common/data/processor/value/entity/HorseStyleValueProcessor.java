@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseStyles;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -42,14 +42,14 @@ import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 import java.util.Optional;
 import net.minecraft.entity.passive.horse.HorseEntity;
 
-public class HorseStyleValueProcessor extends AbstractSpongeValueProcessor<HorseEntity, HorseStyle, Value<HorseStyle>> {
+public class HorseStyleValueProcessor extends AbstractSpongeValueProcessor<HorseEntity, HorseStyle, Mutable<HorseStyle>> {
 
     public HorseStyleValueProcessor() {
         super(HorseEntity.class, Keys.HORSE_STYLE);
     }
 
     @Override
-    protected Value<HorseStyle> constructValue(HorseStyle defaultValue) {
+    protected Mutable<HorseStyle> constructValue(HorseStyle defaultValue) {
         return new SpongeValue<>(Keys.HORSE_STYLE, defaultValue);
     }
 
@@ -66,7 +66,7 @@ public class HorseStyleValueProcessor extends AbstractSpongeValueProcessor<Horse
     }
 
     @Override
-    protected ImmutableValue<HorseStyle> constructImmutableValue(HorseStyle value) {
+    protected Immutable<HorseStyle> constructImmutableValue(HorseStyle value) {
         return ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, value);
     }
 

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.ComparatorTileEntity;
-import org.spongepowered.api.block.tileentity.Comparator;
+import org.spongepowered.api.block.entity.Comparator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 

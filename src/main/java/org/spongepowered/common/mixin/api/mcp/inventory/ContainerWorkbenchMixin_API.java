@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.inventory;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.inventory.container.WorkbenchContainer;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -35,6 +34,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(WorkbenchContainer.class)
 public abstract class ContainerWorkbenchMixin_API implements SingleBlockCarrier {

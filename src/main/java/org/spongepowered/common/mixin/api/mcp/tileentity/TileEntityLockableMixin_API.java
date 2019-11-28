@@ -29,18 +29,18 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.world.LockCode;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.block.entity.carrier.CarrierBlockEntity;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.InventoryItemData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.type.TileEntityInventory;
+import org.spongepowered.api.item.inventory.type.BlockEntityInventory;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,8 +53,8 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(LockableTileEntity.class)
-public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier> extends TileEntityMixin_API
-    implements TileEntityCarrier, TileEntityInventory<T> {
+public abstract class TileEntityLockableMixin_API<T extends BlockEntity & Carrier> extends TileEntityMixin_API
+    implements CarrierBlockEntity, BlockEntityInventory<T> {
 
     @Shadow @Nullable private LockCode code;
 
@@ -81,7 +81,7 @@ public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier
     }
 
     @Override
-    public void supplyVanillaManipulators(final List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(final List<Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         final Optional<LockableData> lockData = get(LockableData.class);
         lockData.ifPresent(manipulators::add);
@@ -94,8 +94,8 @@ public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier
 
     @SuppressWarnings("unchecked")
     @Override
-    public TileEntityInventory<TileEntityCarrier> getInventory() {
-        return (TileEntityInventory<TileEntityCarrier>) this;
+    public BlockEntityInventory<CarrierBlockEntity> getInventory() {
+        return (BlockEntityInventory<CarrierBlockEntity>) this;
     }
 
     @Override

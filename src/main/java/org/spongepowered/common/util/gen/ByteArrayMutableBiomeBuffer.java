@@ -27,22 +27,21 @@ package org.spongepowered.common.util.gen;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
-import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.UnmodifiableBiomeVolume;
-import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.volume.StorageType;
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.UnmodifiableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.workerMutableBiomeVolumeStream;
 import org.spongepowered.common.world.extent.MutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.MutableBiomeViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBiomeVolumeWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -141,7 +140,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     }
 
     @Override
-    public MutableBiomeVolumeWorker<? extends MutableBiomeVolume> getBiomeWorker() {
+    public workerMutableBiomeVolumeStream<? extends MutableBiomeVolume> getBiomeWorker() {
         return new SpongeMutableBiomeVolumeWorker<>(this);
     }
 

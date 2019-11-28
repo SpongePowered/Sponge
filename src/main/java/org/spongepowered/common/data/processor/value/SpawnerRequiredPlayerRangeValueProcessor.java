@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
@@ -37,14 +37,14 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class SpawnerRequiredPlayerRangeValueProcessor extends AbstractSpongeValueProcessor<TileEntityMobSpawnerAccessor, Short, MutableBoundedValue<Short>> {
+public class SpawnerRequiredPlayerRangeValueProcessor extends AbstractSpongeValueProcessor<TileEntityMobSpawnerAccessor, Short, Mutable<Short>> {
 
     public SpawnerRequiredPlayerRangeValueProcessor() {
         super(TileEntityMobSpawnerAccessor.class, Keys.SPAWNER_REQUIRED_PLAYER_RANGE);
     }
 
     @Override
-    protected MutableBoundedValue<Short> constructValue(final Short actualValue) {
+    protected Mutable<Short> constructValue(final Short actualValue) {
         return SpongeValueFactory.boundedBuilder(this.key)
                 .minimum((short) 0)
                 .maximum(Short.MAX_VALUE)
@@ -65,7 +65,7 @@ public class SpawnerRequiredPlayerRangeValueProcessor extends AbstractSpongeValu
     }
 
     @Override
-    protected ImmutableValue<Short> constructImmutableValue(final Short value) {
+    protected Immutable<Short> constructImmutableValue(final Short value) {
         return constructValue(value).asImmutable();
     }
 

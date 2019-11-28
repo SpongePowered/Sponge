@@ -32,9 +32,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.type.SkullTypes;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
@@ -46,7 +46,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 
 public class ItemSkullRepresentedPlayerDataProcessor
-        extends AbstractItemSingleDataProcessor<GameProfile, Value<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
+        extends AbstractItemSingleDataProcessor<GameProfile, Mutable<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
 
     public ItemSkullRepresentedPlayerDataProcessor() {
         super(ItemSkullRepresentedPlayerDataProcessor::isSupportedItem, Keys.REPRESENTED_PLAYER);
@@ -88,12 +88,12 @@ public class ItemSkullRepresentedPlayerDataProcessor
     }
 
     @Override
-    protected Value<GameProfile> constructValue(GameProfile actualValue) {
+    protected Mutable<GameProfile> constructValue(GameProfile actualValue) {
         return new SpongeValue<>(this.key, SpongeRepresentedPlayerData.NULL_PROFILE, actualValue);
     }
 
     @Override
-    protected ImmutableValue<GameProfile> constructImmutableValue(GameProfile value) {
+    protected Immutable<GameProfile> constructImmutableValue(GameProfile value) {
         return new ImmutableSpongeValue<>(this.key, SpongeRepresentedPlayerData.NULL_PROFILE, value);
     }
 

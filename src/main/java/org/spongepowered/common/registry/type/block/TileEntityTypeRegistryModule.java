@@ -33,8 +33,8 @@ import net.minecraft.tileentity.EnderChestTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.block.tileentity.TileEntityTypes;
+import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.block.entity.BlockEntityTypes;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.SpongeImplHooks;
@@ -47,11 +47,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-@RegisterCatalog(TileEntityTypes.class)
+@RegisterCatalog(BlockEntityTypes.class)
 public final class TileEntityTypeRegistryModule
-        extends AbstractPrefixAlternateCatalogTypeRegistryModule<TileEntityType>
-        implements ExtraClassCatalogRegistryModule<TileEntityType, TileEntity>,
-        SpongeAdditionalCatalogRegistryModule<TileEntityType> {
+        extends AbstractPrefixAlternateCatalogTypeRegistryModule<BlockEntityType>
+        implements ExtraClassCatalogRegistryModule<BlockEntityType, TileEntity>,
+        SpongeAdditionalCatalogRegistryModule<BlockEntityType> {
 
 
     private static final Map<String, String> NAME_TO_ID_MAPPING = ImmutableMap.<String, String>builder()
@@ -64,7 +64,7 @@ public final class TileEntityTypeRegistryModule
         return Holder.INSTANCE;
     }
 
-    private final Map<Class<? extends TileEntity>, TileEntityType> tileClassToTypeMappings = Maps.newConcurrentMap();
+    private final Map<Class<? extends TileEntity>, BlockEntityType> tileClassToTypeMappings = Maps.newConcurrentMap();
 
     @Override
     public boolean allowsApiRegistration() {
@@ -73,7 +73,7 @@ public final class TileEntityTypeRegistryModule
 
     @SuppressWarnings("unchecked")
     @Override
-    public void registerAdditionalCatalog(TileEntityType extraCatalog) {
+    public void registerAdditionalCatalog(BlockEntityType extraCatalog) {
         this.tileClassToTypeMappings.put((Class<? extends TileEntity>) extraCatalog.getTileEntityType(), extraCatalog);
         this.catalogTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
@@ -84,7 +84,7 @@ public final class TileEntityTypeRegistryModule
     }
 
     @Override
-    public TileEntityType getForClass(Class<? extends TileEntity> clazz) {
+    public BlockEntityType getForClass(Class<? extends TileEntity> clazz) {
         return this.tileClassToTypeMappings.get(clazz);
     }
 
@@ -100,9 +100,9 @@ public final class TileEntityTypeRegistryModule
     }
 
     @Override
-    public Optional<TileEntityType> getById(String id) {
+    public Optional<BlockEntityType> getById(String id) {
         String key = checkNotNull(id).toLowerCase(Locale.ENGLISH);
-        final Optional<TileEntityType> type = super.getById(key);
+        final Optional<BlockEntityType> type = super.getById(key);
         if (type.isPresent()) {
             return type;
         }
@@ -124,7 +124,7 @@ public final class TileEntityTypeRegistryModule
         final ResourceLocation location = new ResourceLocation(id);
         final Class<? extends TileEntity> object = TileEntityAccessor.accessor$getRegistry().getOrDefault(location);
         if (object != null) {
-            final TileEntityType forClass = getForClass(object);
+            final BlockEntityType forClass = getForClass(object);
             if (forClass != null) {
                 this.catalogTypeMap.put(location.toString(), forClass);
                 return Optional.of(forClass);
@@ -139,7 +139,7 @@ public final class TileEntityTypeRegistryModule
     }
 
     @SuppressWarnings("unchecked")
-    public TileEntityType doTileEntityRegistration(Class<?> clazz, String name) {
+    public BlockEntityType doTileEntityRegistration(Class<?> clazz, String name) {
         final String id = TileEntityTypeRegistryModule.getInstance().getIdForName(name);
         boolean canTick = true;
         try {
@@ -155,8 +155,8 @@ public final class TileEntityTypeRegistryModule
         }
         final String modId = SpongeImplHooks.getModIdFromClass(clazz);
         final String tileId = !id.contains(":") ? modId + ":" + id : id;
-        final TileEntityType tileEntityType =
-                new SpongeTileEntityType((Class<? extends org.spongepowered.api.block.tileentity.TileEntity>) clazz, name, tileId, canTick, modId);
+        final BlockEntityType tileEntityType =
+                new SpongeTileEntityType((Class<? extends org.spongepowered.api.block.entity.BlockEntity>) clazz, name, tileId, canTick, modId);
 
         TileEntityTypeRegistryModule.getInstance().registerAdditionalCatalog(tileEntityType);
         return tileEntityType;

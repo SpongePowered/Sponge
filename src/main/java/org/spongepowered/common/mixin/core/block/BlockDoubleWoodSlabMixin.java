@@ -28,9 +28,9 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockDoubleWoodSlab;
 import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.BlockState;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.type.TreeType;
+import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
@@ -40,17 +40,17 @@ public abstract class BlockDoubleWoodSlabMixin extends BlockWoodSlabMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final BlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getTreeTypeFor(blockState));
+    public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final BlockState blockState) {
+        return ImmutableList.<Immutable<?, ?>>of(impl$getTreeTypeFor(blockState));
     }
 
     @Override
-    public boolean bridge$supports(final Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
         return ImmutableTreeData.class.isAssignableFrom(immutable);
     }
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableTreeData impl$getTreeTypeFor(final BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.get(BlockPlanks.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (WoodType) (Object) blockState.get(BlockPlanks.VARIANT));
     }
 }

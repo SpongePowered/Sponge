@@ -32,12 +32,12 @@ import net.minecraft.block.RailBlock;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRailDirectionData;
 import org.spongepowered.api.data.type.RailDirection;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeRailDirectionData;
@@ -51,7 +51,7 @@ import javax.annotation.Nullable;
 public abstract class BlockRailBaseMixin extends BlockMixin {
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
+    public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         final ImmutableRailDirectionData railDirection = impl$getRailDirectionFor(blockState);
         if (railDirection == null) { // Extra safety check
             return ImmutableList.of();
@@ -60,13 +60,13 @@ public abstract class BlockRailBaseMixin extends BlockMixin {
     }
 
     @Override
-    public boolean bridge$supports(final Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
         return ImmutableRailDirectionData.class.isAssignableFrom(immutable);
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     @Override
-    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
+    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
         if (manipulator instanceof ImmutableRailDirectionData) {
             final RailDirection apiDirection = ((ImmutableRailDirectionData) manipulator).type().get();
             final AbstractRailBlock.EnumRailDirection railDirection = (AbstractRailBlock.EnumRailDirection) (Object) apiDirection;
@@ -90,7 +90,7 @@ public abstract class BlockRailBaseMixin extends BlockMixin {
     }
 
     @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
+    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
         if (key.equals(Keys.RAIL_DIRECTION)) {
             final AbstractRailBlock.EnumRailDirection railDirection = (AbstractRailBlock.EnumRailDirection) value;
             final Optional<BlockState> x = impl$getStateForDirection(blockState, railDirection);

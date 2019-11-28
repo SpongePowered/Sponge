@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
@@ -35,7 +35,7 @@ import net.minecraft.world.gen.ChunkGenerator;
 
 public class GenerationCompatibileContext extends GenerationContext<GenerationCompatibileContext> {
 
-    @Nullable private PopulatorType type;
+    @Nullable private Feature type;
     @Nullable SpongeChunkGenerator spongeGen;
     @Nullable AbstractChunkProvider provider;
     @Nullable ChunkGenerator modGen;
@@ -54,7 +54,7 @@ public class GenerationCompatibileContext extends GenerationContext<GenerationCo
         this.modGen = null;
     }
 
-    public GenerationCompatibileContext populator(final PopulatorType type) {
+    public GenerationCompatibileContext populator(final Feature type) {
         this.type = type;
         return this;
     }

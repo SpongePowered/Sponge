@@ -26,13 +26,12 @@ package org.spongepowered.common.data.manipulator.immutable.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -51,8 +50,8 @@ import java.util.Comparator;
  * @param <I> The immutable data manipulator type
  * @param <M> The mutable data manipulator type
  */
-public abstract class AbstractImmutableBoundedComparableData<T extends Comparable<T>, I extends ImmutableDataManipulator<I, M>,
-    M extends DataManipulator<M, I>> extends AbstractImmutableSingleData<T, I, M> {
+public abstract class AbstractImmutableBoundedComparableData<T extends Comparable<T>, I extends Immutable<I, M>,
+    M extends Mutable<M, I>> extends AbstractImmutableSingleData<T, I, M> {
 
     private final Class<? extends M> mutableClass;
     protected final Comparator<T> comparator;
@@ -63,7 +62,7 @@ public abstract class AbstractImmutableBoundedComparableData<T extends Comparabl
 
     @SuppressWarnings("unchecked")
     protected AbstractImmutableBoundedComparableData(Class<I> immutableClass, T value,
-                                                     Key<? extends BaseValue<T>> usedKey,
+                                                     Key<? extends Value<T>> usedKey,
                                                      Comparator<T> comparator, Class<? extends M> mutableClass, T lowerBound, T upperBound, T defaultValue) {
         super(immutableClass, value, usedKey);
         this.comparator = comparator;

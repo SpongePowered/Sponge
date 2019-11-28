@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.SetValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
@@ -43,7 +43,7 @@ import java.util.Set;
 import net.minecraft.entity.item.ArmorStandEntity;
 
 public class TakingDisabledValueProcessor
-		extends AbstractSpongeValueProcessor<ArmorStandEntity, Set<EquipmentType>, SetValue<EquipmentType>> {
+		extends AbstractSpongeValueProcessor<ArmorStandEntity, Set<EquipmentType>, Mutable<EquipmentType>> {
 
 	public TakingDisabledValueProcessor() {
 		super(ArmorStandEntity.class, Keys.ARMOR_STAND_TAKING_DISABLED);
@@ -65,7 +65,7 @@ public class TakingDisabledValueProcessor
 	}
 
 	@Override
-	protected SetValue<EquipmentType> constructValue(final Set<EquipmentType> actualValue) {
+	protected Mutable<EquipmentType> constructValue(final Set<EquipmentType> actualValue) {
 		return new SpongeSetValue<EquipmentType>(this.key, actualValue);
 	}
 
@@ -108,7 +108,7 @@ public class TakingDisabledValueProcessor
 	}
 
 	@Override
-	protected ImmutableValue<Set<EquipmentType>> constructImmutableValue(final Set<EquipmentType> value) {
+	protected Immutable<Set<EquipmentType>> constructImmutableValue(final Set<EquipmentType> value) {
 		return ImmutableSpongeValue.cachedOf(this.key, Collections.emptySet(), value);
 	}
 

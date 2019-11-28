@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.chunk.storage;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
@@ -39,12 +38,12 @@ import net.minecraft.world.storage.ThreadedFileIOBase;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -63,7 +62,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.QueuedChunk;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;

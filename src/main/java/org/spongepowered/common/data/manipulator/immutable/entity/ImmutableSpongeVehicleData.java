@@ -26,11 +26,11 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
@@ -42,8 +42,8 @@ public class ImmutableSpongeVehicleData extends AbstractImmutableData<ImmutableV
     private final EntitySnapshot vehicle;
     private final EntitySnapshot baseVehicle;
 
-    private final ImmutableValue<EntitySnapshot> vehicleValue;
-    private final ImmutableValue<EntitySnapshot> baseVehicleValue;
+    private final Immutable<EntitySnapshot> vehicleValue;
+    private final Immutable<EntitySnapshot> baseVehicleValue;
 
     public ImmutableSpongeVehicleData(EntitySnapshot vehicle, EntitySnapshot baseVehicle) {
         super(ImmutableVehicleData.class);
@@ -60,12 +60,12 @@ public class ImmutableSpongeVehicleData extends AbstractImmutableData<ImmutableV
     }
 
     @Override
-    public ImmutableValue<EntitySnapshot> vehicle() {
+    public Immutable<EntitySnapshot> vehicle() {
         return this.vehicleValue;
     }
 
     @Override
-    public ImmutableValue<EntitySnapshot> baseVehicle() {
+    public Immutable<EntitySnapshot> baseVehicle() {
         return this.baseVehicleValue;
     }
 

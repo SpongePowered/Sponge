@@ -27,8 +27,8 @@ package org.spongepowered.common.data.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
@@ -36,11 +36,11 @@ import org.spongepowered.common.config.category.TileEntityTrackerCategory;
 import org.spongepowered.common.config.category.TileEntityTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
 
-public class SpongeTileEntityType extends SpongeCatalogType implements TileEntityType {
+public class SpongeTileEntityType extends SpongeCatalogType implements BlockEntityType {
 
     private final String name;
     private final String modId;
-    private final Class<? extends TileEntity> clazz;
+    private final Class<? extends BlockEntity> clazz;
     private final boolean canTick;
     // Used by tracker config
     public boolean allowsBlockBulkCapture = true;
@@ -48,7 +48,7 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     public boolean allowsBlockEventCreation = true;
     public boolean allowsEntityEventCreation = true;
 
-    public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id, boolean canTick, String modId) {
+    public SpongeTileEntityType(Class<? extends BlockEntity> clazz, String name, String id, boolean canTick, String modId) {
         super(id);
         this.name = checkNotNull(name, "name");
         this.clazz = checkNotNull(clazz, "clazz");
@@ -105,7 +105,7 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     }
 
     @Override
-    public Class<? extends TileEntity> getTileEntityType() {
+    public Class<? extends BlockEntity> getTileEntityType() {
         return this.clazz;
     }
 

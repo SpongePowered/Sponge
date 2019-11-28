@@ -24,25 +24,24 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
+import org.spongepowered.api.data.value.MapValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MapValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
 import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.entity.item.ArmorStandEntity;
 
-public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<ArmorStandEntity, Map<BodyPart, Vector3d>, MapValue<BodyPart, Vector3d>> {
+public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<ArmorStandEntity, Map<BodyPart, Vector3d>, Mutable<BodyPart, Vector3d>> {
 
     public BodyRotationsValueProcessor() {
         super(ArmorStandEntity.class, Keys.BODY_ROTATIONS);
@@ -54,7 +53,7 @@ public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<Ar
     }
 
     @Override
-    protected MapValue<BodyPart, Vector3d> constructValue(final Map<BodyPart, Vector3d> actualValue) {
+    protected Mutable<BodyPart, Vector3d> constructValue(final Map<BodyPart, Vector3d> actualValue) {
         return new SpongeMapValue<>(Keys.BODY_ROTATIONS, actualValue);
     }
 
@@ -83,7 +82,7 @@ public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<Ar
     }
 
     @Override
-    protected ImmutableValue<Map<BodyPart, Vector3d>> constructImmutableValue(final Map<BodyPart, Vector3d> value) {
+    protected Immutable<Map<BodyPart, Vector3d>> constructImmutableValue(final Map<BodyPart, Vector3d> value) {
         return constructValue(value).asImmutable();
     }
 

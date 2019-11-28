@@ -24,15 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.biome;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
+import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
+import org.spongepowered.math.vector.Vector3i;
 import javax.annotation.Nullable;
 
 @Mixin(BiomeProvider.class)

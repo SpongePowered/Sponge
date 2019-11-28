@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAccelerationData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AccelerationData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAccelerationData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.math.vector.Vector3d;
 
 public class SpongeAccelerationData extends AbstractSingleData<Vector3d, AccelerationData, ImmutableAccelerationData> implements AccelerationData {
 
@@ -50,7 +50,7 @@ public class SpongeAccelerationData extends AbstractSingleData<Vector3d, Acceler
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Mutable<?> getValueGetter() {
         return acceleration();
     }
 
@@ -75,7 +75,7 @@ public class SpongeAccelerationData extends AbstractSingleData<Vector3d, Acceler
     }
 
     @Override
-    public Value<Vector3d> acceleration() {
+    public Mutable<Vector3d> acceleration() {
         return new SpongeValue<>(Keys.ACCELERATION, Vector3d.ZERO, this.getValue());
     }
 }

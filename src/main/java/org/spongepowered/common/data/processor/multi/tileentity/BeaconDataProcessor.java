@@ -26,13 +26,13 @@ package org.spongepowered.common.data.processor.multi.tileentity;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBeaconData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;

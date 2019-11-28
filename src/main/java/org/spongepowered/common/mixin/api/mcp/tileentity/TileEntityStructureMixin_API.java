@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.StructureBlockTileEntity;
-import org.spongepowered.api.block.tileentity.Structure;
+import org.spongepowered.api.block.entity.StructureBlock;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(StructureBlockTileEntity.class)
-public abstract class TileEntityStructureMixin_API extends TileEntityMixin_API implements Structure {
+public abstract class TileEntityStructureMixin_API extends TileEntityMixin_API implements StructureBlock {
 
     // TODO - implement toContainer maybe?
 

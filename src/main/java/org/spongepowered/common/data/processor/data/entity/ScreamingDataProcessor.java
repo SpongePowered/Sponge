@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -41,7 +41,7 @@ import java.util.Optional;
 import net.minecraft.entity.monster.EndermanEntity;
 
 public class ScreamingDataProcessor
-        extends AbstractEntitySingleDataProcessor<EndermanEntity, Boolean, Value<Boolean>, ScreamingData, ImmutableScreamingData> {
+        extends AbstractEntitySingleDataProcessor<EndermanEntity, Boolean, Mutable<Boolean>, ScreamingData, ImmutableScreamingData> {
 
     public ScreamingDataProcessor() {
         super(EndermanEntity.class, Keys.IS_SCREAMING);
@@ -64,12 +64,12 @@ public class ScreamingDataProcessor
     }
 
     @Override
-    protected Value<Boolean> constructValue(final Boolean actualValue) {
+    protected Mutable<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<>(Keys.IS_SCREAMING, false, actualValue);
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.IS_SCREAMING, false, value);
     }
 

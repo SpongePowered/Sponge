@@ -26,24 +26,22 @@ package org.spongepowered.common.world.extent;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -59,7 +57,8 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
@@ -272,31 +271,31 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public <E> Optional<E> get(int x, int y, int z, Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> get(int x, int y, int z, Key<? extends Value<E>> key) {
         checkBlockRange(x, y, z);
         return this.extent.get(x, y, z, key);
     }
 
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> get(int x, int y, int z, Class<T> manipulatorClass) {
+    public <T extends Mutable<?, ?>> Optional<T> get(int x, int y, int z, Class<T> manipulatorClass) {
         checkBlockRange(x, y, z);
         return this.extent.get(x, y, z, manipulatorClass);
     }
 
     @Override
-    public Set<ImmutableValue<?>> getValues(int x, int y, int z) {
+    public Set<Immutable<?>> getValues(int x, int y, int z) {
         checkBlockRange(x, y, z);
         return this.extent.getValues(x, y, z);
     }
 
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
+    public <T extends Mutable<?, ?>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
         checkBlockRange(x, y, z);
         return this.extent.getOrCreate(x, y, z, manipulatorClass);
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(int x, int y, int z, Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> getValue(int x, int y, int z, Key<V> key) {
         checkBlockRange(x, y, z);
         return this.extent.getValue(x, y, z, key);
     }
@@ -308,7 +307,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public boolean supports(int x, int y, int z, Class<? extends DataManipulator<?, ?>> manipulatorClass) {
+    public boolean supports(int x, int y, int z, Class<? extends Mutable<?, ?>> manipulatorClass) {
         checkBlockRange(x, y, z);
         return this.extent.supports(x, y, z, manipulatorClass);
     }
@@ -320,13 +319,13 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value) {
+    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends Value<E>> key, E value) {
         checkBlockRange(x, y, z);
         return this.extent.offer(x, y, z, key, value);
     }
 
     @Override
-    public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function) {
+    public DataTransactionResult offer(int x, int y, int z, Mutable<?, ?> manipulator, MergeFunction function) {
         checkBlockRange(x, y, z);
         return this.extent.offer(x, y, z, manipulator, function);
     }
@@ -338,7 +337,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public DataTransactionResult remove(int x, int y, int z, Class<? extends DataManipulator<?, ?>> manipulatorClass) {
+    public DataTransactionResult remove(int x, int y, int z, Class<? extends Mutable<?, ?>> manipulatorClass) {
         checkBlockRange(x, y, z);
         return this.extent.remove(x, y, z, manipulatorClass);
     }
@@ -350,7 +349,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public Collection<DataManipulator<?, ?>> getManipulators(int x, int y, int z) {
+    public Collection<Mutable<?, ?>> getManipulators(int x, int y, int z) {
         checkBlockRange(x, y, z);
         return this.extent.getManipulators(x, y, z);
     }
@@ -387,10 +386,10 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public Collection<TileEntity> getTileEntities() {
-        final Collection<TileEntity> tileEntities = this.extent.getTileEntities();
-        for (Iterator<TileEntity> iterator = tileEntities.iterator(); iterator.hasNext(); ) {
-            final TileEntity tileEntity = iterator.next();
+    public Collection<BlockEntity> getTileEntities() {
+        final Collection<BlockEntity> tileEntities = this.extent.getTileEntities();
+        for (Iterator<BlockEntity> iterator = tileEntities.iterator(); iterator.hasNext(); ) {
+            final BlockEntity tileEntity = iterator.next();
             final Location<World> block = tileEntity.getLocation();
             if (!VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.blockMin, this.blockMax)) {
                 iterator.remove();
@@ -400,7 +399,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
+    public Collection<BlockEntity> getTileEntities(Predicate<BlockEntity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
         return this.extent.getTileEntities(Functional.predicateAnd(input -> {
             final Location<World> block = input.getLocation();
@@ -409,7 +408,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public Optional<TileEntity> getTileEntity(int x, int y, int z) {
+    public Optional<BlockEntity> getTileEntity(int x, int y, int z) {
         checkBlockRange(x, y, z);
         return this.extent.getTileEntity(x, y, z);
     }

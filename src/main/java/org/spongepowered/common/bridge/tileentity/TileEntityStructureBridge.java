@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.bridge.tileentity;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.data.type.StructureMode;
+import org.spongepowered.math.vector.Vector3i;
 
 public interface TileEntityStructureBridge {
 

@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRotationalData;
 import org.spongepowered.api.data.manipulator.mutable.RotationalData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.common.SpongeImpl;
@@ -43,7 +43,7 @@ import java.util.Optional;
 import net.minecraft.entity.item.ItemFrameEntity;
 
 public class RotationalDataProcessor
-        extends AbstractEntitySingleDataProcessor<ItemFrameEntity, Rotation, Value<Rotation>, RotationalData, ImmutableRotationalData> {
+        extends AbstractEntitySingleDataProcessor<ItemFrameEntity, Rotation, Mutable<Rotation>, RotationalData, ImmutableRotationalData> {
 
     public RotationalDataProcessor() {
         super(ItemFrameEntity.class, Keys.ROTATION);
@@ -61,7 +61,7 @@ public class RotationalDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Rotation> constructImmutableValue(Rotation value) {
+    protected Immutable<Rotation> constructImmutableValue(Rotation value) {
         return ImmutableSpongeValue.cachedOf(Keys.ROTATION, Rotations.BOTTOM, value);
     }
 
@@ -71,7 +71,7 @@ public class RotationalDataProcessor
     }
 
     @Override
-    protected Value<Rotation> constructValue(Rotation actualValue) {
+    protected Mutable<Rotation> constructValue(Rotation actualValue) {
         return new SpongeValue<>(Keys.ROTATION, Rotations.BOTTOM, actualValue);
     }
 

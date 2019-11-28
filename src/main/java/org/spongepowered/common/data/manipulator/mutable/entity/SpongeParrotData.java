@@ -29,18 +29,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableParrotData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ParrotData;
-import org.spongepowered.api.data.type.ParrotVariant;
-import org.spongepowered.api.data.type.ParrotVariants;
+import org.spongepowered.api.data.type.ParrotType;
+import org.spongepowered.api.data.type.ParrotTypes;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeParrotData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 
-public class SpongeParrotData extends AbstractSingleCatalogData<ParrotVariant, ParrotData, ImmutableParrotData> implements ParrotData {
+public class SpongeParrotData extends AbstractSingleCatalogData<ParrotType, ParrotData, ImmutableParrotData> implements ParrotData {
 
     public SpongeParrotData() {
-        this(ParrotVariants.RED);
+        this(ParrotTypes.RED);
     }
 
-    public SpongeParrotData(ParrotVariant variant) {
+    public SpongeParrotData(ParrotType variant) {
         super(ParrotData.class, checkNotNull(variant, "The parrot variant cannot be null!"),
                 Keys.PARROT_VARIANT, ImmutableSpongeParrotData.class);
     }

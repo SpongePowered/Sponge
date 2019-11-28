@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.world.border;
 
-import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.math.vector.Vector3d;
 
 public class SpongeWorldBorderBuilder implements WorldBorder.Builder {
 

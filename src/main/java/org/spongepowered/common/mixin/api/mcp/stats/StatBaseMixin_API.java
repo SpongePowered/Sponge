@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.stats;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.stats.Stat;
 import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;

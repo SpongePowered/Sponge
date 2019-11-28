@@ -30,9 +30,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAbsorptionData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AbsorptionData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAbsorptionData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.util.Constants;
@@ -42,7 +42,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 import net.minecraft.entity.LivingEntity;
 
-public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTargetProcessor<LivingEntity, Double, Value<Double>, AbsorptionData, ImmutableAbsorptionData> {
+public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTargetProcessor<LivingEntity, Double, Mutable<Double>, AbsorptionData, ImmutableAbsorptionData> {
 
     public AbsorptionDataProcessor() {
         super(Keys.ABSORPTION, LivingEntity.class);
@@ -66,12 +66,12 @@ public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTarge
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
+    protected Immutable<Double> constructImmutableValue(Double value) {
         return new ImmutableSpongeValue<>(this.key, Constants.Entity.DEFAULT_ABSORPTION, value);
     }
 
     @Override
-    protected Value<Double> constructValue(Double actualValue) {
+    protected Mutable<Double> constructValue(Double actualValue) {
         return new SpongeValue<>(this.key, Constants.Entity.DEFAULT_ABSORPTION, actualValue);
     }
 

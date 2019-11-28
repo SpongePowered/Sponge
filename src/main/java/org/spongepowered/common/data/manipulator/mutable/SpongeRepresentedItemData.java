@@ -25,11 +25,11 @@
 package org.spongepowered.common.data.manipulator.mutable;
 
 import net.minecraft.item.Items;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedItemData;
@@ -47,7 +47,7 @@ public class SpongeRepresentedItemData extends AbstractSingleData<ItemStackSnaps
     }
 
     @Override
-    public Value<ItemStackSnapshot> item() {
+    public Mutable<ItemStackSnapshot> item() {
         return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, this.getValue());
     }
 
@@ -68,7 +68,7 @@ public class SpongeRepresentedItemData extends AbstractSingleData<ItemStackSnaps
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Mutable<?> getValueGetter() {
         return item();
     }
 }

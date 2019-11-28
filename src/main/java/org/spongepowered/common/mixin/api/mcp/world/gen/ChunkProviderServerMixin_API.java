@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ChunkLoader;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.storage.ChunkDataStream;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
@@ -39,7 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.chunk.storage.AnvilChunkLoaderBridge;
 import org.spongepowered.common.world.storage.SpongeChunkDataStream;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 

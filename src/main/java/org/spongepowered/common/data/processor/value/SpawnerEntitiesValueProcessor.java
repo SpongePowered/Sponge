@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.WeightedCollectionValue;
+import org.spongepowered.api.data.value.WeightedCollectionValue.Mutable;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
@@ -40,14 +40,14 @@ import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccess
 import java.util.Optional;
 import net.minecraft.world.spawner.AbstractSpawner;
 
-public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<TileEntityMobSpawnerAccessor, WeightedTable<EntityArchetype>, WeightedCollectionValue<EntityArchetype>> {
+public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<TileEntityMobSpawnerAccessor, WeightedTable<EntityArchetype>, Mutable<EntityArchetype>> {
 
     public SpawnerEntitiesValueProcessor() {
         super(TileEntityMobSpawnerAccessor.class, Keys.SPAWNER_ENTITIES);
     }
 
     @Override
-    protected WeightedCollectionValue<EntityArchetype> constructValue(final WeightedTable<EntityArchetype> actualValue) {
+    protected Mutable<EntityArchetype> constructValue(final WeightedTable<EntityArchetype> actualValue) {
         return new SpongeWeightedCollectionValue<>(this.key, actualValue);
     }
 
@@ -65,7 +65,7 @@ public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected ImmutableValue<WeightedTable<EntityArchetype>> constructImmutableValue(final WeightedTable<EntityArchetype> value) {
+    protected Immutable<WeightedTable<EntityArchetype>> constructImmutableValue(final WeightedTable<EntityArchetype> value) {
         return constructValue(value).asImmutable();
     }
 

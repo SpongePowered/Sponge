@@ -26,21 +26,20 @@ package org.spongepowered.common.world.gen.populators;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.RandomBlock;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.world.server.ServerWorld;
@@ -67,7 +66,7 @@ public class RandomBlockPopulator implements RandomBlock {
     }
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return PopulatorTypes.GENERIC_BLOCK;
     }
 

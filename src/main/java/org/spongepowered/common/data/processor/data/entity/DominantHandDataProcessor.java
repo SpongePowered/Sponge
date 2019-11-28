@@ -32,9 +32,9 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDominant
 import org.spongepowered.api.data.manipulator.mutable.entity.DominantHandData;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandPreferences;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDominantHandData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -43,7 +43,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 import net.minecraft.entity.MobEntity;
 
-public class DominantHandDataProcessor extends AbstractEntitySingleDataProcessor<MobEntity, HandPreference, Value<HandPreference>, DominantHandData, ImmutableDominantHandData> {
+public class DominantHandDataProcessor extends AbstractEntitySingleDataProcessor<MobEntity, HandPreference, Mutable<HandPreference>, DominantHandData, ImmutableDominantHandData> {
 
     public DominantHandDataProcessor() {
         super(MobEntity.class, Keys.DOMINANT_HAND);
@@ -62,12 +62,12 @@ public class DominantHandDataProcessor extends AbstractEntitySingleDataProcessor
     }
 
     @Override
-    protected ImmutableValue<HandPreference> constructImmutableValue(HandPreference value) {
+    protected Immutable<HandPreference> constructImmutableValue(HandPreference value) {
         return ImmutableSpongeValue.cachedOf(Keys.DOMINANT_HAND, DEFAULT_HAND, value);
     }
 
     @Override
-    protected Value<HandPreference> constructValue(HandPreference actualValue) {
+    protected Mutable<HandPreference> constructValue(HandPreference actualValue) {
         return new SpongeValue<>(Keys.DOMINANT_HAND,DEFAULT_HAND, actualValue);
     }
 

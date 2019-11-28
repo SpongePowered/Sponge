@@ -33,9 +33,9 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGoldenAppl
 import org.spongepowered.api.data.manipulator.mutable.item.GoldenAppleData;
 import org.spongepowered.api.data.type.GoldenApple;
 import org.spongepowered.api.data.type.GoldenApples;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
@@ -46,7 +46,7 @@ import org.spongepowered.common.item.SpongeGoldenApple;
 import java.util.Optional;
 
 public class GoldenAppleDataProcessor
-        extends AbstractItemSingleDataProcessor<GoldenApple, Value<GoldenApple>, GoldenAppleData, ImmutableGoldenAppleData> {
+        extends AbstractItemSingleDataProcessor<GoldenApple, Mutable<GoldenApple>, GoldenAppleData, ImmutableGoldenAppleData> {
 
     public GoldenAppleDataProcessor() {
         super(input -> input.getItem().equals(Items.GOLDEN_APPLE), Keys.GOLDEN_APPLE_TYPE);
@@ -69,12 +69,12 @@ public class GoldenAppleDataProcessor
     }
 
     @Override
-    protected Value<GoldenApple> constructValue(GoldenApple actualValue) {
+    protected Mutable<GoldenApple> constructValue(GoldenApple actualValue) {
         return new SpongeValue<>(Keys.GOLDEN_APPLE_TYPE, GoldenApples.GOLDEN_APPLE, actualValue);
     }
 
     @Override
-    protected ImmutableValue<GoldenApple> constructImmutableValue(GoldenApple value) {
+    protected Immutable<GoldenApple> constructImmutableValue(GoldenApple value) {
         return ImmutableSpongeValue.cachedOf(Keys.GOLDEN_APPLE_TYPE, GoldenApples.GOLDEN_APPLE, value);
     }
 

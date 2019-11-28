@@ -26,7 +26,6 @@ package org.spongepowered.common.world.gen.populators;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChorusFlowerBlock;
 import net.minecraft.util.math.BlockPos;
@@ -34,10 +33,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.SimplexNoiseGenerator;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.ChorusFlower;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 public class ChorusFlowerPopulator implements ChorusFlower {
@@ -47,7 +46,7 @@ public class ChorusFlowerPopulator implements ChorusFlower {
     private int exclusion = 1024;
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return PopulatorTypes.CHORUS_FLOWER;
     }
 

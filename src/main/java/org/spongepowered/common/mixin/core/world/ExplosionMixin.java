@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;

@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.property.store.common;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;

@@ -29,15 +29,14 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.properties.IProperty;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.BlockTrait;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.util.Cycleable;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
@@ -70,14 +69,14 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     }
 
     @Override
-    default BlockState cycleValue(final Key<? extends BaseValue<? extends Cycleable<?>>> key) {
+    default BlockState cycleValue(final Key<? extends Value<? extends Cycleable<?>>> key) {
         return this;
     }
 
 
     @SuppressWarnings({"unchecked"})
     @Override
-    default <T extends Comparable<T>> Optional<T> getTraitValue(final BlockTrait<T> blockTrait) {
+    default <T extends Comparable<T>> Optional<T> getTraitValue(final StateProperty<T> blockTrait) {
         for (final Map.Entry<IProperty<?>, Comparable<?>> entry : getProperties().entrySet()) {
             //noinspection EqualsBetweenInconvertibleTypes
             if (entry.getKey() == blockTrait) {
@@ -89,10 +88,10 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
 
     @SuppressWarnings("rawtypes")
     @Override
-    default Optional<BlockTrait<?>> getTrait(final String blockTrait) {
+    default Optional<StateProperty<?>> getTrait(final String blockTrait) {
         for (final IProperty property : getProperties().keySet()) {
             if (property.getName().equalsIgnoreCase(blockTrait)) {
-                return Optional.of((BlockTrait<?>) property);
+                return Optional.of((StateProperty<?>) property);
             }
         }
         return Optional.empty();
@@ -100,7 +99,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
 
     @SuppressWarnings({"rawtypes", "unchecked", "RedundantCast"})
     @Override
-    default Optional<BlockState> withTrait(final BlockTrait<?> trait, final Object value) {
+    default Optional<BlockState> withTrait(final StateProperty<?> trait, final Object value) {
         if (value instanceof String) {
             Comparable foundValue = null;
             for (final Comparable comparable : trait.getPossibleValues()) {
@@ -122,7 +121,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     }
 
     @Override
-    default Collection<BlockTrait<?>> getTraits() {
+    default Collection<StateProperty<?>> getTraits() {
         return getTraitMap().keySet();
     }
 
@@ -133,7 +132,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    default Map<BlockTrait<?>, ?> getTraitMap() {
+    default Map<StateProperty<?>, ?> getTraitMap() {
         return (ImmutableMap) getProperties();
     }
 
@@ -166,7 +165,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     }
 
     @Override
-    default List<ImmutableDataManipulator<?, ?>> getManipulators() {
+    default List<Immutable<?, ?>> getManipulators() {
         return Collections.emptyList();
     }
 
@@ -183,47 +182,47 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     }
 
     @Override
-    default <T extends ImmutableDataManipulator<?, ?>> Optional<T> get(final Class<T> containerClass) {
+    default <T extends Immutable<?, ?>> Optional<T> get(final Class<T> containerClass) {
         return Optional.empty();
     }
 
     @Override
-    default <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
+    default <T extends Immutable<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
         return Optional.empty();
     }
 
     @Override
-    default boolean supports(final Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    default boolean supports(final Class<? extends Immutable<?, ?>> containerClass) {
         return false;
     }
 
     @Override
-    default <E> Optional<BlockState> transform(final Key<? extends BaseValue<E>> key, final Function<E, E> function) {
+    default <E> Optional<BlockState> transform(final Key<? extends Value<E>> key, final Function<E, E> function) {
         return Optional.empty();
     }
 
     @Override
-    default <E> Optional<BlockState> with(final Key<? extends BaseValue<E>> key, final E value) {
+    default <E> Optional<BlockState> with(final Key<? extends Value<E>> key, final E value) {
         return Optional.empty();
     }
 
     @Override
-    default Optional<BlockState> with(final BaseValue<?> value) {
+    default Optional<BlockState> with(final Value<?> value) {
         return Optional.empty();
     }
 
     @Override
-    default Optional<BlockState> with(final ImmutableDataManipulator<?, ?> valueContainer) {
+    default Optional<BlockState> with(final Immutable<?, ?> valueContainer) {
         return Optional.empty();
     }
 
     @Override
-    default Optional<BlockState> with(final Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
+    default Optional<BlockState> with(final Iterable<Immutable<?, ?>> valueContainers) {
         return Optional.empty();
     }
 
     @Override
-    default Optional<BlockState> without(final Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    default Optional<BlockState> without(final Class<? extends Immutable<?, ?>> containerClass) {
         return Optional.empty();
     }
 
@@ -238,7 +237,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     }
 
     @Override
-    default List<ImmutableDataManipulator<?, ?>> getContainers() {
+    default List<Immutable<?, ?>> getContainers() {
         return Collections.emptyList();
     }
 
@@ -253,12 +252,12 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     }
 
     @Override
-    default <E> Optional<E> get(final Key<? extends BaseValue<E>> key) {
+    default <E> Optional<E> get(final Key<? extends Value<E>> key) {
         return Optional.empty();
     }
 
     @Override
-    default <E, V extends BaseValue<E>> Optional<V> getValue(final Key<V> key) {
+    default <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
         return Optional.empty();
     }
 
@@ -278,7 +277,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     }
 
     @Override
-    default Set<ImmutableValue<?>> getValues() {
+    default Set<org.spongepowered.api.data.value.Value.Immutable<?>> getValues() {
         return Collections.emptySet();
     }
 }

@@ -26,18 +26,16 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.FireFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.NetherFire;
 import org.spongepowered.asm.mixin.Mixin;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 @Mixin(FireFeature.class)
@@ -47,7 +45,7 @@ public abstract class WorldGenFireMixin_API extends Feature implements NetherFir
     private VariableAmount api$cluster = VariableAmount.fixed(64);
 
     @Override
-    public PopulatorType getType() {
+    public org.spongepowered.api.world.gen.feature.Feature getType() {
         return PopulatorTypes.NETHER_FIRE;
     }
 

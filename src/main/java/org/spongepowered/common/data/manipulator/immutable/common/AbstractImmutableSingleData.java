@@ -27,30 +27,28 @@ package org.spongepowered.common.data.manipulator.immutable.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
+public abstract class AbstractImmutableSingleData<T, I extends Immutable<I, M>, M extends Mutable<M, I>>
         extends AbstractImmutableData<I, M> {
 
-    protected final Key<? extends BaseValue<T>> usedKey;
+    protected final Key<? extends Value<T>> usedKey;
     protected final T value;
 
-    protected AbstractImmutableSingleData(Class<I> immutableClass, T value, Key<? extends BaseValue<T>> usedKey) {
+    protected AbstractImmutableSingleData(Class<I> immutableClass, T value, Key<? extends Value<T>> usedKey) {
         super(immutableClass);
         this.value = checkNotNull(value);
         this.usedKey = checkNotNull(usedKey, "Hey, the key provided is null! Please make sure it is registered!");
         registerGetters();
     }
 
-    protected abstract ImmutableValue<?> getValueGetter();
+    protected abstract org.spongepowered.api.data.value.Value.Immutable<?> getValueGetter();
 
     public T getValue() {
         return this.value;
@@ -67,7 +65,7 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> get(Key<? extends Value<E>> key) {
         return checkNotNull(key).equals(this.usedKey) ? Optional.of((E) this.value) : Optional.<E>empty();
     }
 

@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.ICommandSender;
@@ -92,7 +91,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -144,7 +143,7 @@ import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
@@ -664,8 +663,8 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
         // Add SlotTransaction to PlayerContainer
         final org.spongepowered.api.item.inventory.Slot slot = ((Inventory) this.inventoryContainer)
-                .query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class))
-                .query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(this.inventory.currentItem)));
+                .query(QueryTypes.INVENTORY_TYPE.of(Hotbar.class))
+                .query(QueryTypes.INVENTORY_PROPERTY.of(SlotIndex.of(this.inventory.currentItem)));
         final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(currentItem);
         final int count = dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1;
         final ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, count);

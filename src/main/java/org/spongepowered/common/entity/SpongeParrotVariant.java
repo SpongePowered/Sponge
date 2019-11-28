@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.entity;
 
-import org.spongepowered.api.data.type.ParrotVariant;
+import org.spongepowered.api.data.type.ParrotType;
 
-public class SpongeParrotVariant extends SpongeEntityMeta implements ParrotVariant {
+public class SpongeParrotVariant extends SpongeEntityMeta implements ParrotType {
 
     public SpongeParrotVariant(int type, String name) {
         super(type, name);

@@ -26,27 +26,26 @@ package org.spongepowered.common.world.extent.worker;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.extent.BlockVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
-import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeMapper;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeMerger;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeReducer;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
+import org.spongepowered.api.world.volume.block.ReadableBlockVolume;
+import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.volume.block.worker.BlockVolumeStream;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.function.BiFunction;
 
 /**
  *
  */
-public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolumeWorker<V> {
+public class SpongeBlockVolumeWorker<V extends ReadableBlockVolume> implements BlockVolumeStream<V> {
 
     protected final V volume;
 
@@ -90,7 +89,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
     }
 
     @Override
-    public void merge(BlockVolume second, BlockVolumeMerger merger, MutableBlockVolume destination) {
+    public void merge(ReadableBlockVolume second, BlockVolumeMerger merger, MutableBlockVolume destination) {
         final Vector3i offsetSecond = align(second);
         final int xOffsetSecond = offsetSecond.getX();
         final int yOffsetSecond = offsetSecond.getY();
@@ -164,7 +163,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         return reduction;
     }
 
-    private Vector3i align(BlockVolume other) {
+    private Vector3i align(ReadableBlockVolume other) {
         final Vector3i thisSize = this.volume.getBlockSize();
         final Vector3i otherSize = other.getBlockSize();
         checkArgument(otherSize.getX() >= thisSize.getX() && otherSize.getY() >= thisSize.getY() && otherSize.getZ() >= thisSize.getZ(),

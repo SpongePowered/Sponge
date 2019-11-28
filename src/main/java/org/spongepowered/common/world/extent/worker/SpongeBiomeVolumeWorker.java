@@ -26,23 +26,22 @@ package org.spongepowered.common.world.extent.worker;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.BiomeVolume;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
-import org.spongepowered.api.world.extent.UnmodifiableBiomeVolume;
-import org.spongepowered.api.world.extent.worker.BiomeVolumeWorker;
 import org.spongepowered.api.world.extent.worker.procedure.BiomeVolumeMapper;
 import org.spongepowered.api.world.extent.worker.procedure.BiomeVolumeMerger;
 import org.spongepowered.api.world.extent.worker.procedure.BiomeVolumeReducer;
 import org.spongepowered.api.world.extent.worker.procedure.BiomeVolumeVisitor;
-
+import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.ReadableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.UnmodifiableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.worker.BiomeVolumeStream;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.function.BiFunction;
 
 /**
  *
  */
-public class SpongeBiomeVolumeWorker<V extends BiomeVolume> implements BiomeVolumeWorker<V> {
+public class SpongeBiomeVolumeWorker<V extends ReadableBiomeVolume> implements BiomeVolumeStream<V> {
 
     protected final V volume;
 
@@ -79,7 +78,7 @@ public class SpongeBiomeVolumeWorker<V extends BiomeVolume> implements BiomeVolu
     }
 
     @Override
-    public void merge(BiomeVolume second, BiomeVolumeMerger merger, MutableBiomeVolume destination) {
+    public void merge(ReadableBiomeVolume second, BiomeVolumeMerger merger, MutableBiomeVolume destination) {
         final Vector3i offsetSecond = align(second);
         final int xOffsetSecond = offsetSecond.getX();
         final int yOffsetSecond = offsetSecond.getY();
@@ -144,7 +143,7 @@ public class SpongeBiomeVolumeWorker<V extends BiomeVolume> implements BiomeVolu
         return reduction;
     }
 
-    private Vector3i align(BiomeVolume other) {
+    private Vector3i align(ReadableBiomeVolume other) {
         final Vector3i thisSize = this.volume.getBiomeSize();
         final Vector3i otherSize = other.getBiomeSize();
         checkArgument(otherSize.getX() >= thisSize.getX() && otherSize.getY() >= thisSize.getY() && otherSize.getZ() >= thisSize.getZ(),

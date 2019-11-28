@@ -27,7 +27,7 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.mixin.core.entity.EntityAgeableAccessor;
@@ -51,8 +51,8 @@ public final class EntityBabyConverter extends DataParameterConverter<Boolean> {
     }
 
     @Override
-    public Boolean getValueFromEvent(final Boolean originalValue, final List<ImmutableValue<?>> immutableValues) {
-        for (final ImmutableValue<?> value : immutableValues) {
+    public Boolean getValueFromEvent(final Boolean originalValue, final List<Immutable<?>> immutableValues) {
+        for (final Immutable<?> value : immutableValues) {
             if (value.getKey() == Keys.IS_ADULT) {
                 return !(Boolean) value.get();
             }

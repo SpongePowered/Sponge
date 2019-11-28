@@ -28,10 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
@@ -40,7 +40,7 @@ import java.util.function.Function;
 
 public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> implements ImmutableBoundedValue<E> {
 
-    public static <T> ImmutableBoundedValue<T> cachedOf(Key<? extends BaseValue<T>> key, T defaultValue, T actualValue, Comparator<T>
+    public static <T> ImmutableBoundedValue<T> cachedOf(Key<? extends Value<T>> key, T defaultValue, T actualValue, Comparator<T>
             comparator, T minimum, T maximum) {
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, key, defaultValue, actualValue, comparator, minimum, maximum);
     }
@@ -49,7 +49,7 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
     private final E minimum;
     private final E maximum;
 
-    public ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, Comparator<E> comparator, E minimum, E maximum) {
+    public ImmutableSpongeBoundedValue(Key<? extends Value<E>> key, E defaultValue, Comparator<E> comparator, E minimum, E maximum) {
         super(key, defaultValue);
         this.comparator = checkNotNull(comparator);
         this.minimum = checkNotNull(minimum);
@@ -57,7 +57,7 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
         checkState(comparator.compare(maximum, minimum) >= 0);
     }
 
-    public ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, Comparator<E> comparator, E minimum, E maximum) {
+    public ImmutableSpongeBoundedValue(Key<? extends Value<E>> key, E defaultValue, E actualValue, Comparator<E> comparator, E minimum, E maximum) {
         super(key, defaultValue, actualValue);
         this.comparator = checkNotNull(comparator);
         this.minimum = checkNotNull(minimum);
@@ -80,7 +80,7 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
 
     @SuppressWarnings("unchecked")
     @Override
-    public MutableBoundedValue<E> asMutable() {
+    public Mutable<E> asMutable() {
         return SpongeValueFactory.boundedBuilder((Key<? extends BoundedValue<E>>) getKey())
             .defaultValue(getDefault())
             .minimum(getMinValue())

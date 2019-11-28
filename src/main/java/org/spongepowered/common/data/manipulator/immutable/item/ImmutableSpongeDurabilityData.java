@@ -26,12 +26,12 @@ package org.spongepowered.common.data.manipulator.immutable.item;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableDurabilityData;
 import org.spongepowered.api.data.manipulator.mutable.item.DurabilityData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeDurabilityData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -43,7 +43,7 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
     private final Boolean unbreakable;
 
     private final ImmutableBoundedValue<Integer> durabilityValue;
-    private final ImmutableValue<Boolean> unbreakableValue;
+    private final Immutable<Boolean> unbreakableValue;
 
     public ImmutableSpongeDurabilityData(int defaultDurability, int durability, boolean unbreakable) {
         super(ImmutableDurabilityData.class);
@@ -79,7 +79,7 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public ImmutableValue<Boolean> unbreakable() {
+    public Immutable<Boolean> unbreakable() {
         return this.unbreakableValue;
     }
 

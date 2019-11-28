@@ -27,8 +27,8 @@ package org.spongepowered.common.data.processor.value.tileentity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongePatternListValue;
@@ -65,7 +65,7 @@ public class TileBannerPatternLayersValueProcessor extends AbstractSpongeValuePr
     }
 
     @Override
-    protected ImmutableValue<List<PatternLayer>> constructImmutableValue(List<PatternLayer> value) {
+    protected Immutable<List<PatternLayer>> constructImmutableValue(List<PatternLayer> value) {
         return new ImmutableSpongePatternListValue(Keys.BANNER_PATTERNS, value);
     }
 

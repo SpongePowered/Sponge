@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
@@ -36,14 +36,14 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 import net.minecraft.entity.LivingEntity;
 
-public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<LivingEntity, Integer, MutableBoundedValue<Integer>> {
+public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<LivingEntity, Integer, Mutable<Integer>> {
 
     public RemainingAirValueProcessor() {
         super(LivingEntity.class, Keys.REMAINING_AIR);
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(final Integer defaultValue) {
+    public Mutable<Integer> constructValue(final Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.REMAINING_AIR)
             .defaultValue(Constants.Sponge.Entity.DEFAULT_MAX_AIR)
             .minimum(-20)

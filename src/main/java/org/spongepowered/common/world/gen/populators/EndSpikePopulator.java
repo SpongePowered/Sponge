@@ -24,25 +24,23 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeEndDecorator;
 import net.minecraft.world.gen.feature.EndSpikeFeature;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
-public class EndSpikePopulator implements Populator {
+public class EndSpikePopulator implements Feature {
 
     private final EndSpikeFeature spikeGen = new EndSpikeFeature();
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return InternalPopulatorTypes.END_SPIKE;
     }
 

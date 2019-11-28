@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -42,20 +41,18 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -64,6 +61,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.RelativePositions;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Implements;
@@ -91,7 +89,7 @@ import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -572,7 +570,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             .getContainer()
             .set(Constants.Entity.TYPE, this.entityType.getId())
             .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
-        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
+        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
@@ -580,8 +578,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public Collection<DataManipulator<?, ?>> getContainers() {
-        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
+    public Collection<Mutable<?, ?>> getContainers() {
+        final List<Mutable<?, ?>> list = Lists.newArrayList();
         this.spongeApi$supplyVanillaManipulators(list);
         if (this instanceof CustomDataHolderBridge && ((CustomDataHolderBridge) this).bridge$hasManipulators()) {
             list.addAll(((CustomDataHolderBridge) this).bridge$getCustomManipulators());
@@ -647,11 +645,11 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public Value<Boolean> gravity() {
+    public org.spongepowered.api.data.value.Value.Mutable<Boolean> gravity() {
         return this.getValue(Keys.HAS_GRAVITY).get();
     }
 
-    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super Mutable<?, ?>> manipulators) {
         this.get(VehicleData.class).ifPresent(manipulators::add);
         if (this.fire > 0) {
             manipulators.add(this.get(IgniteableData.class).get());

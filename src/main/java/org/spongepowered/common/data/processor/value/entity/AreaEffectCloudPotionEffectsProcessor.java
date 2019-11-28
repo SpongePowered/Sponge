@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.ListValue.Immutable;
+import org.spongepowered.api.data.value.ListValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
@@ -39,14 +39,14 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.entity.AreaEffectCloudEntity;
 
-public class AreaEffectCloudPotionEffectsProcessor extends AbstractSpongeValueProcessor<AreaEffectCloudEntity, List<PotionEffect>, ListValue<PotionEffect>> {
+public class AreaEffectCloudPotionEffectsProcessor extends AbstractSpongeValueProcessor<AreaEffectCloudEntity, List<PotionEffect>, Mutable<PotionEffect>> {
 
     public AreaEffectCloudPotionEffectsProcessor() {
         super(AreaEffectCloudEntity.class, Keys.POTION_EFFECTS);
     }
 
     @Override
-    protected ListValue<PotionEffect> constructValue(List<PotionEffect> actualValue) {
+    protected Mutable<PotionEffect> constructValue(List<PotionEffect> actualValue) {
         return new SpongeListValue<>(Keys.POTION_EFFECTS, actualValue);
     }
 
@@ -67,7 +67,7 @@ public class AreaEffectCloudPotionEffectsProcessor extends AbstractSpongeValuePr
     }
 
     @Override
-    protected ImmutableListValue<PotionEffect> constructImmutableValue(List<PotionEffect> value) {
+    protected Immutable<PotionEffect> constructImmutableValue(List<PotionEffect> value) {
         return constructValue(value).asImmutable();
     }
 

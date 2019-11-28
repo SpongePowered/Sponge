@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.statistic;
 
-import org.spongepowered.api.statistic.StatisticType;
+import org.spongepowered.api.statistic.StatisticCategory;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
 
-public final class SpongeStatisticType implements StatisticType {
+public final class SpongeStatisticType implements StatisticCategory {
 
     private final String id;
     @Nullable private Translation translation;

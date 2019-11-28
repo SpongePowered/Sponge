@@ -27,7 +27,7 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
@@ -63,8 +63,8 @@ public class EntityLivingBaseArrowCountConverter extends DataParameterConverter<
     }
 
     @Override
-    public Integer getValueFromEvent(final Integer originalValue, final List<ImmutableValue<?>> immutableValues) {
-        for (final ImmutableValue<?> immutableValue : immutableValues) {
+    public Integer getValueFromEvent(final Integer originalValue, final List<Immutable<?>> immutableValues) {
+        for (final Immutable<?> immutableValue : immutableValues) {
             if (immutableValue.getKey() == Keys.STUCK_ARROWS) {
                 return (Integer) immutableValue.get();
             }

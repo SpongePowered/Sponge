@@ -30,9 +30,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.AreaEffectCloudData;
-import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -86,12 +84,12 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
     }
 
     @Override
-    public Value<Color> color() {
+    public Mutable<Color> color() {
         return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, Color.WHITE, Color.ofRgb(getColor()));
     }
 
     @Override
-    public MutableBoundedValue<Double> radius() {
+    public org.spongepowered.api.data.value.BoundedValue.Mutable<Double> radius() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS)
                 .minimum(0D)
                 .maximum((double) Float.MAX_VALUE)
@@ -101,12 +99,12 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
     }
 
     @Override
-    public Value<ParticleType> particleType() {
+    public Mutable<ParticleType> particleType() {
         return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, ParticleTypes.MOB_SPELL, ParticleTypes.MOB_SPELL);
     }
 
     @Override
-    public MutableBoundedValue<Integer> duration() {
+    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> duration() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_DURATION)
                 .minimum(Integer.MIN_VALUE)
                 .maximum(Integer.MAX_VALUE)
@@ -116,7 +114,7 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
     }
 
     @Override
-    public MutableBoundedValue<Integer> waitTime() {
+    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> waitTime() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_WAIT_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -126,7 +124,7 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
     }
 
     @Override
-    public MutableBoundedValue<Double> radiusOnUse() {
+    public org.spongepowered.api.data.value.BoundedValue.Mutable<Double> radiusOnUse() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE)
                 .minimum(0.0D)
                 .maximum((double) Float.MAX_VALUE)
@@ -136,7 +134,7 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
     }
 
     @Override
-    public MutableBoundedValue<Double> radiusPerTick() {
+    public org.spongepowered.api.data.value.BoundedValue.Mutable<Double> radiusPerTick() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS_PER_TICK)
                 .minimum(0.0D)
                 .maximum((double) Float.MAX_VALUE)
@@ -146,7 +144,7 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
     }
 
     @Override
-    public MutableBoundedValue<Integer> durationOnUse() {
+    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> durationOnUse() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -156,7 +154,7 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
     }
 
     @Override
-    public MutableBoundedValue<Integer> applicationDelay() {
+    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> applicationDelay() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -166,12 +164,12 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
     }
 
     @Override
-    public ListValue<PotionEffect> effects() {
+    public org.spongepowered.api.data.value.ListValue.Mutable<PotionEffect> effects() {
         return new SpongeListValue<>(Keys.POTION_EFFECTS, (List<PotionEffect>) (List<?>) this.effects);
     }
 
     @Override
-    public MutableBoundedValue<Integer> age() {
+    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> age() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_AGE)
                 .defaultValue(0)
                 .minimum(0)

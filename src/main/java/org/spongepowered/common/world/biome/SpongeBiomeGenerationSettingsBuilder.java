@@ -31,8 +31,7 @@ import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings.Builder;
 import org.spongepowered.api.world.biome.GroundCoverLayer;
 import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.gen.Populator;
-
+import org.spongepowered.api.world.gen.feature.Feature;
 import java.util.List;
 
 public class SpongeBiomeGenerationSettingsBuilder implements BiomeGenerationSettings.Builder {
@@ -40,7 +39,7 @@ public class SpongeBiomeGenerationSettingsBuilder implements BiomeGenerationSett
     private float min = 0;
     private float max = 0;
     private final List<GroundCoverLayer> groundCover = Lists.newArrayList();
-    private final List<Populator> populators = Lists.newArrayList();
+    private final List<Feature> populators = Lists.newArrayList();
     private final List<GenerationPopulator> genpop = Lists.newArrayList();
 
     @Override
@@ -119,20 +118,20 @@ public class SpongeBiomeGenerationSettingsBuilder implements BiomeGenerationSett
     }
 
     @Override
-    public Builder populators(Populator... populators) {
+    public Builder populators(Feature... populators) {
         checkNotNull(populators, "populators");
         this.populators.clear();
-        for (Populator pop : populators) {
+        for (Feature pop : populators) {
             this.populators.add(checkNotNull(pop, "pop"));
         }
         return this;
     }
 
     @Override
-    public Builder populators(Iterable<Populator> populators) {
+    public Builder populators(Iterable<Feature> populators) {
         checkNotNull(populators, "populators");
         this.populators.clear();
-        for (Populator pop : populators) {
+        for (Feature pop : populators) {
             this.populators.add(checkNotNull(pop, "pop"));
         }
         return this;

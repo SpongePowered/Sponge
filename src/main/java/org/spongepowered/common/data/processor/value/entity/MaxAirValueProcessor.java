@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.bridge.entity.LivingEntityBaseBridge;
@@ -36,14 +36,14 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<LivingEntityBaseBridge, Integer, MutableBoundedValue<Integer>> {
+public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<LivingEntityBaseBridge, Integer, Mutable<Integer>> {
 
     public MaxAirValueProcessor() {
         super(LivingEntityBaseBridge.class, Keys.MAX_AIR);
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(final Integer defaultValue) {
+    public Mutable<Integer> constructValue(final Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_AIR)
             .defaultValue(Constants.Sponge.Entity.DEFAULT_MAX_AIR)
             .minimum(0)
@@ -67,7 +67,7 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<LivingEnt
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
+    protected Immutable<Integer> constructImmutableValue(final Integer value) {
         return constructValue(value).asImmutable();
     }
 

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.ZombieEntity;
-import org.spongepowered.api.entity.living.monster.Zombie;
+import org.spongepowered.api.entity.living.monster.zombie.Zombie;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ZombieEntity.class)

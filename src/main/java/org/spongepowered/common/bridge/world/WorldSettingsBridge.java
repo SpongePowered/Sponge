@@ -25,13 +25,12 @@
 package org.spongepowered.common.bridge.world;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
-
+import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 import java.util.Collection;
 
 import javax.annotation.Nullable;
@@ -66,7 +65,7 @@ public interface WorldSettingsBridge {
 
     boolean bridge$isPVPEnabled();
 
-    Collection<WorldGeneratorModifier> bridge$getGeneratorModifiers();
+    Collection<TerrainGeneratorConfig> bridge$getGeneratorModifiers();
 
     void bridge$setId(String id);
 
@@ -80,7 +79,7 @@ public interface WorldSettingsBridge {
 
     void bridge$setGeneratorSettings(DataContainer generatorSettings);
 
-    void bridge$setGeneratorModifiers(ImmutableList<WorldGeneratorModifier> generatorModifiers);
+    void bridge$setGeneratorModifiers(ImmutableList<TerrainGeneratorConfig> generatorModifiers);
 
     void bridge$setEnabled(boolean state);
 

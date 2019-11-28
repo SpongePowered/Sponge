@@ -26,9 +26,9 @@ package org.spongepowered.common.data.persistence;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormat;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataFormatException;
 import org.spongepowered.common.SpongeCatalogType;
 

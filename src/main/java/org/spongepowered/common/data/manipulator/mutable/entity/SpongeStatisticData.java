@@ -25,12 +25,12 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableStatisticData;
 import org.spongepowered.api.data.manipulator.mutable.entity.StatisticData;
-import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeStatisticData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractMappedData;

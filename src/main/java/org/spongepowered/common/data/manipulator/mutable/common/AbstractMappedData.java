@@ -31,12 +31,10 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMappedData;
 import org.spongepowered.api.data.manipulator.mutable.MappedData;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.MapValue;
+import org.spongepowered.api.data.value.MapValue.Mutable;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.CollectionUtils;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
 import org.spongepowered.common.util.ReflectionUtil;
@@ -61,7 +59,7 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M, I>,
     private final Class<? extends I> immutableClass;
 
     public AbstractMappedData(Class<M> manipulatorClass, Map<K, V> value,
-        Key<? extends BaseValue<Map<K, V>>> usedKey,
+        Key<? extends Value<Map<K, V>>> usedKey,
         Class<? extends I> immutableClass) {
         super(manipulatorClass, CollectionUtils.copyMap(value), usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
@@ -80,7 +78,7 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M, I>,
     }
 
     @Override
-    protected MapValue<K, V> getValueGetter() {
+    protected Mutable<K, V> getValueGetter() {
         return new SpongeMapValue<>(this.usedKey, this.getValue());
     }
 
@@ -126,7 +124,7 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M, I>,
     }
 
     @Override
-    public MapValue<K, V> getMapValue() {
+    public Mutable<K, V> getMapValue() {
         return getValueGetter();
     }
 

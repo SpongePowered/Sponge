@@ -37,13 +37,13 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Multimap;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataRegistrationNotFoundException;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.SpongeImpl;
@@ -86,12 +86,12 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         return INSTANCE;
     }
 
-    private final Map<Class<? extends DataManipulator<?, ?>>, Class<? extends DataManipulator<?, ?>>> interfaceToImplDataManipulatorClasses = new IdentityHashMap<>();
-    private final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> dataProcessorDelegates =  new IdentityHashMap<>();
-    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates =  new IdentityHashMap<>();
-    private ImmutableTable<Class<? extends DataManipulator<?, ?>>, NbtDataType, NbtDataProcessor<?, ?>> nbtProcessorTable = ImmutableTable.of();
+    private final Map<Class<? extends Mutable<?, ?>>, Class<? extends Mutable<?, ?>>> interfaceToImplDataManipulatorClasses = new IdentityHashMap<>();
+    private final Map<Class<? extends Mutable<?, ?>>, DataProcessorDelegate<?, ?>> dataProcessorDelegates =  new IdentityHashMap<>();
+    private final Map<Class<? extends Immutable<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates =  new IdentityHashMap<>();
+    private ImmutableTable<Class<? extends Mutable<?, ?>>, NbtDataType, NbtDataProcessor<?, ?>> nbtProcessorTable = ImmutableTable.of();
     private ImmutableTable<Key<?>, NbtDataType, NbtValueProcessor<?, ?>> nbtValueTable = ImmutableTable.of();
-    private final Map<Key<? extends BaseValue<?>>, ValueProcessorDelegate<?, ?>> valueDelegates = new IdentityHashMap<>();
+    private final Map<Key<? extends Value<?>>, ValueProcessorDelegate<?, ?>> valueDelegates = new IdentityHashMap<>();
 
     // This will be replaced with an immutable variant on #bake()
     private Multimap<PluginContainer, DataRegistration<?, ?>> pluginBasedRegistrations = ImmutableMultimap.of();
@@ -99,8 +99,8 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     // This will be replaced with an immutable variant on #bake()
     private Collection<DataRegistration<?, ?>> registrations = Collections.emptyList();
 
-    private Map<Class<? extends DataManipulator<?, ?>>, DataRegistration<?, ?>> manipulatorRegistrationMap = ImmutableMap.of();
-    private Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataRegistration<?, ?>> immutableRegistrationMap = ImmutableMap.of();
+    private Map<Class<? extends Mutable<?, ?>>, DataRegistration<?, ?>> manipulatorRegistrationMap = ImmutableMap.of();
+    private Map<Class<? extends Immutable<?, ?>>, DataRegistration<?, ?>> immutableRegistrationMap = ImmutableMap.of();
     private Map<String, DataRegistration<?, ?>> registrationMap = ImmutableMap.of();
     private final Map<String, DataRegistration<?, ?>> legacyRegistrationIds = new MapMaker().concurrencyLevel(4).makeMap();
 
@@ -142,20 +142,20 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
 
     private static final class TemporaryRegistry {
 
-        private final Map<Class<? extends DataManipulator<?, ?>>, List<DataProcessor<?, ?>>> processorMap = new MapMaker()
+        private final Map<Class<? extends Mutable<?, ?>>, List<DataProcessor<?, ?>>> processorMap = new MapMaker()
             .concurrencyLevel(4)
             .makeMap();
 
 
-        private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, List<DataProcessor<?, ?>>> immutableProcessorMap = new MapMaker()
+        private final Map<Class<? extends Immutable<?, ?>>, List<DataProcessor<?, ?>>> immutableProcessorMap = new MapMaker()
             .concurrencyLevel(4)
             .makeMap();
 
-        private final Map<Class<? extends DataManipulator<?, ?>>, List<NbtDataProcessor<?, ?>>> nbtProcessorMap = new MapMaker()
+        private final Map<Class<? extends Mutable<?, ?>>, List<NbtDataProcessor<?, ?>>> nbtProcessorMap = new MapMaker()
             .concurrencyLevel(4)
             .makeMap();
 
-        private final Map<Key<? extends BaseValue<?>>, List<ValueProcessor<?, ?>>> valueProcessorMap = new MapMaker()
+        private final Map<Key<? extends Value<?>>, List<ValueProcessor<?, ?>>> valueProcessorMap = new MapMaker()
             .concurrencyLevel(4)
             .makeMap();
 
@@ -167,7 +167,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     private SpongeManipulatorRegistry() {
     }
 
-    public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> DataRegistration<M, I> getRegistrationFor(
+    public <M extends Mutable<M, I>, I extends Immutable<I, M>> DataRegistration<M, I> getRegistrationFor(
         Class<? extends M> manipulator) {
         final DataRegistration<?, ?> dataRegistration = this.manipulatorRegistrationMap.get(manipulator.getClass());
         if (dataRegistration == null) {
@@ -176,7 +176,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         return (DataRegistration<M, I>) dataRegistration;
     }
 
-    public DataRegistration<?, ?> getRegistrationFor(DataManipulator<?, ?> manipulator) {
+    public DataRegistration<?, ?> getRegistrationFor(Mutable<?, ?> manipulator) {
         final DataRegistration<?, ?> dataRegistration = this.manipulatorRegistrationMap.get(manipulator.getClass());
         if (dataRegistration == null) {
             if (this.tempRegistry != null) {
@@ -191,7 +191,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         return dataRegistration;
     }
 
-    public DataRegistration<?, ?> getRegistrationFor(ImmutableDataManipulator<?, ?> immutable) {
+    public DataRegistration<?, ?> getRegistrationFor(Immutable<?, ?> immutable) {
         final DataRegistration<?, ?> dataRegistration = this.immutableRegistrationMap.get(immutable.getClass());
         if (dataRegistration == null) {
             if (this.tempRegistry != null) {
@@ -206,7 +206,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         return dataRegistration;
     }
 
-    public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> DataRegistration<M, I> getRegistrationForImmutable(
+    public <M extends Mutable<M, I>, I extends Immutable<I, M>> DataRegistration<M, I> getRegistrationForImmutable(
         Class<? extends I> manipulator) {
         final DataRegistration<?, ?> dataRegistration = this.immutableRegistrationMap.get(manipulator);
         if (dataRegistration == null) {
@@ -215,13 +215,13 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         return (DataRegistration<M, I>) dataRegistration;
     }
 
-    public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> Optional<DataRegistration<M, I>> getRegistrationFor(
+    public <M extends Mutable<M, I>, I extends Immutable<I, M>> Optional<DataRegistration<M, I>> getRegistrationFor(
         String id) {
         final DataRegistration<?, ?> dataRegistration = this.registrationMap.get(id);
         return Optional.ofNullable((DataRegistration<M, I>) dataRegistration);
     }
 
-    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistrationId(String id) {
+    <M extends Mutable<M, I>, I extends Immutable<I, M>> void validateRegistrationId(String id) {
         checkState(this.tempRegistry != null);
         this.tempRegistry.registrations.stream()
             .filter(registration -> registration.getId().equalsIgnoreCase(id))
@@ -231,7 +231,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
             });
     }
 
-    Collection<Class<? extends DataManipulator<?, ?>>> getRegistrations(PluginContainer container) {
+    Collection<Class<? extends Mutable<?, ?>>> getRegistrations(PluginContainer container) {
         return this.pluginBasedRegistrations.get(container).stream()
             .map(DataRegistration::getManipulatorClass)
             .collect(Collectors.toList());
@@ -242,7 +242,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     }
 
 
-    public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> DataRegistration<M, I> register(
+    public <M extends Mutable<M, I>, I extends Immutable<I, M>> DataRegistration<M, I> register(
         SpongeDataRegistration<M, I> registration) {
         checkState(this.tempRegistry != null);
         if (this.tempRegistry.registrations.contains(registration)) {
@@ -252,7 +252,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         return registration;
     }
 
-    public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> SpongeManipulatorRegistry register(
+    public <M extends Mutable<M, I>, I extends Immutable<I, M>> SpongeManipulatorRegistry register(
         Class<M> manipulatorClass,
         Class<? extends M> implClass,
         Class<I> immutableDataManipulator,
@@ -286,7 +286,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         return this;
     }
 
-    public <E, V extends BaseValue<E>> void registerValueProcessor(Key<V> key, ValueProcessor<E, V> valueProcessor) {
+    public <E, V extends Value<E>> void registerValueProcessor(Key<V> key, ValueProcessor<E, V> valueProcessor) {
         checkState(this.tempRegistry != null);
         checkNotNull(valueProcessor);
         checkArgument(!(valueProcessor instanceof ValueProcessorDelegate), "Cannot register ValueProcessorDelegates! READ THE DOCS!");
@@ -303,7 +303,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     public DataProcessor<?, ?> getDelegate(Class<?> mClass) {
         if (this.tempRegistry != null) {
             // During soft registrations
-            if (DataManipulator.class.isAssignableFrom(mClass)) {
+            if (Mutable.class.isAssignableFrom(mClass)) {
                 List<DataProcessor<?, ?>> dataProcessors = this.tempRegistry.processorMap.get(mClass);
                 if (dataProcessors == null) {
                     return null;
@@ -317,7 +317,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
                 return new DataProcessorDelegate(ImmutableList.copyOf(dataProcessors));
             }
         }
-        return DataManipulator.class.isAssignableFrom(mClass)
+        return Mutable.class.isAssignableFrom(mClass)
                ? this.dataProcessorDelegates.get(mClass)
                : this.immutableDataProcessorDelegates.get(mClass);
     }
@@ -378,14 +378,14 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         // DataManipulatorBuilders part 2 (Have to register them back for serialization stuff
         this.dataProcessorDelegates.forEach((key, value) -> {
             if (!Modifier.isInterface(key.getModifiers()) && !Modifier.isAbstract(key.getModifiers())) {
-                DataFunction<DataContainer, DataManipulator, Optional<? extends DataManipulator<?, ?>>> function =
+                DataFunction<DataContainer, Mutable, Optional<? extends Mutable<?, ?>>> function =
                     ((DataProcessor) value)::fill;
                 SpongeDataManipulatorBuilder builder = new SpongeDataManipulatorBuilder(value, key, function);
                 manager.builderMap.put(key, checkNotNull(builder));
                 manager.registerBuilder(key, builder);
             } else {
-                final Class<? extends DataManipulator<?, ?>> clazz = this.interfaceToImplDataManipulatorClasses.get(key);
-                DataFunction<DataContainer, DataManipulator, Optional<? extends DataManipulator<?, ?>>> function =
+                final Class<? extends Mutable<?, ?>> clazz = this.interfaceToImplDataManipulatorClasses.get(key);
+                DataFunction<DataContainer, Mutable, Optional<? extends Mutable<?, ?>>> function =
                     ((DataProcessor) value)::fill;
                 SpongeDataManipulatorBuilder builder = new SpongeDataManipulatorBuilder(value, clazz, function);
                 manager.builderMap.put(key, checkNotNull(builder));
@@ -402,7 +402,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
             this.immutableDataProcessorDelegates.put(key, delegate);
         });
         // NBT processors
-        ImmutableTable.Builder<Class<? extends DataManipulator<?, ?>>, NbtDataType, NbtDataProcessor<?, ?>> builder = ImmutableTable.builder();
+        ImmutableTable.Builder<Class<? extends Mutable<?, ?>>, NbtDataType, NbtDataProcessor<?, ?>> builder = ImmutableTable.builder();
         this.tempRegistry.nbtProcessorMap.forEach((key, value) -> {
             final HashMultimap<NbtDataType, NbtDataProcessor<?, ?>> processorMultimap = HashMultimap.create();
             for (NbtDataProcessor<?, ?> nbtDataProcessor : value) {
@@ -418,8 +418,8 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         this.nbtProcessorTable = builder.build();
 
         ImmutableSet.Builder<DataRegistration<?, ?>> registrationBuilder = ImmutableSet.builder();
-        ImmutableMap.Builder<Class<? extends DataManipulator<?, ?>>, DataRegistration<?, ?>> manipulatorBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Class<? extends ImmutableDataManipulator<?, ?>>, DataRegistration<?, ?>> immutableBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Class<? extends Mutable<?, ?>>, DataRegistration<?, ?>> manipulatorBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Class<? extends Immutable<?, ?>>, DataRegistration<?, ?>> immutableBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<String, DataRegistration<?, ?>> idBuilder = ImmutableMap.builder();
         ImmutableMultimap.Builder<PluginContainer, DataRegistration<?, ?>> pluginBuilder = ImmutableMultimap.builder();
         this.tempRegistry.registrations.forEach(registration -> {

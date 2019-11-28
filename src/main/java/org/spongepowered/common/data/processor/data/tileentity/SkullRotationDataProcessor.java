@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
@@ -44,7 +44,7 @@ import net.minecraft.block.SkullBlock;
 import net.minecraft.tileentity.SkullTileEntity;
 
 public class SkullRotationDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<SkullTileEntity, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
+        extends AbstractTileEntitySingleDataProcessor<SkullTileEntity, Direction, Mutable<Direction>, DirectionalData, ImmutableDirectionalData> {
 
     public SkullRotationDataProcessor() {
         super(SkullTileEntity.class, Keys.DIRECTION);
@@ -57,7 +57,7 @@ public class SkullRotationDataProcessor
     }
 
     @Override
-    protected Value<Direction> constructValue(final Direction actualValue) {
+    protected Mutable<Direction> constructValue(final Direction actualValue) {
         return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, actualValue);
     }
 
@@ -80,7 +80,7 @@ public class SkullRotationDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Direction> constructImmutableValue(final Direction value) {
+    protected Immutable<Direction> constructImmutableValue(final Direction value) {
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.DIRECTION, Direction.NORTH, value);
     }
 

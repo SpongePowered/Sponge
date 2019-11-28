@@ -26,13 +26,12 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.block.tileentity.carrier.Dispenser;
+import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 import net.minecraft.tileentity.DispenserTileEntity;
 

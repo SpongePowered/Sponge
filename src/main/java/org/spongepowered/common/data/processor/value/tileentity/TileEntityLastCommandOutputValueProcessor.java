@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.tileentity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.OptionalValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
@@ -37,7 +37,7 @@ import org.spongepowered.common.text.SpongeTexts;
 import java.util.Optional;
 import net.minecraft.tileentity.CommandBlockTileEntity;
 
-public class TileEntityLastCommandOutputValueProcessor extends AbstractSpongeValueProcessor<CommandBlockTileEntity, Optional<Text>, OptionalValue<Text>> {
+public class TileEntityLastCommandOutputValueProcessor extends AbstractSpongeValueProcessor<CommandBlockTileEntity, Optional<Text>, Mutable<Text>> {
 
     public TileEntityLastCommandOutputValueProcessor() {
         super(CommandBlockTileEntity.class, Keys.LAST_COMMAND_OUTPUT);
@@ -49,7 +49,7 @@ public class TileEntityLastCommandOutputValueProcessor extends AbstractSpongeVal
     }
 
     @Override
-    protected OptionalValue<Text> constructValue(Optional<Text> actualValue) {
+    protected Mutable<Text> constructValue(Optional<Text> actualValue) {
         return new SpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, actualValue);
     }
 
@@ -66,7 +66,7 @@ public class TileEntityLastCommandOutputValueProcessor extends AbstractSpongeVal
     }
 
     @Override
-    protected ImmutableValue<Optional<Text>> constructImmutableValue(Optional<Text> value) {
+    protected Immutable<Optional<Text>> constructImmutableValue(Optional<Text> value) {
         return constructValue(value).asImmutable();
     }
 

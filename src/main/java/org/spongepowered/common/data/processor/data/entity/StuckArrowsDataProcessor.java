@@ -30,9 +30,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableStuckArrowsData;
 import org.spongepowered.api.data.manipulator.mutable.entity.StuckArrowsData;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeStuckArrowsData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -43,14 +43,14 @@ import java.util.Optional;
 import net.minecraft.entity.LivingEntity;
 
 public class StuckArrowsDataProcessor extends
-        AbstractEntitySingleDataProcessor<LivingEntity, Integer, MutableBoundedValue<Integer>, StuckArrowsData, ImmutableStuckArrowsData> {
+        AbstractEntitySingleDataProcessor<LivingEntity, Integer, Mutable<Integer>, StuckArrowsData, ImmutableStuckArrowsData> {
 
     public StuckArrowsDataProcessor() {
         super(LivingEntity.class, Keys.STUCK_ARROWS);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Mutable<Integer> constructValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(this.key)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
@@ -72,7 +72,7 @@ public class StuckArrowsDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected Immutable<Integer> constructImmutableValue(Integer value) {
         return new ImmutableSpongeBoundedValue<>(this.key, 0, value, Constants.Functional.intComparator(), 0, Integer.MAX_VALUE);
     }
 

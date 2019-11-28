@@ -28,19 +28,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.data.Archetype;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.LocatableSnapshot;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.world.Archetype;
+import org.spongepowered.api.world.LocatableSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
@@ -94,20 +93,20 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> get(final Class<T> containerClass) {
+    public <T extends Mutable<?, ?>> Optional<T> get(final Class<T> containerClass) {
         return DataUtil.getRawNbtProcessor(this.getDataType(), containerClass)
                 .flatMap(processor -> processor.readFrom(this.data));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
+    public <T extends Mutable<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
         return DataUtil.getRawNbtProcessor(this.getDataType(), containerClass)
                 .flatMap(processor -> processor.readFrom(this.data));
     }
 
     @Override
-    public boolean supports(final Class<? extends DataManipulator<?, ?>> holderClass) {
+    public boolean supports(final Class<? extends Mutable<?, ?>> holderClass) {
         // By default, if there is a processor, we can check compatibilty with that
         // Otherwise, it's true because of custom data.
         return DataUtil.getRawNbtProcessor(this.getDataType(), holderClass)
@@ -116,7 +115,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     }
 
     @Override
-    public <R> DataTransactionResult offer(final Key<? extends BaseValue<R>> key, final R value) {
+    public <R> DataTransactionResult offer(final Key<? extends Value<R>> key, final R value) {
         return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .map(processor -> processor.offer(this.data, value))
                 .orElseGet(DataTransactionResult::failNoData);
@@ -124,13 +123,13 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public DataTransactionResult offer(final DataManipulator<?, ?> valueContainer, final MergeFunction function) {
+    public DataTransactionResult offer(final Mutable<?, ?> valueContainer, final MergeFunction function) {
         return DataUtil.getRawNbtProcessor(this.getDataType(), valueContainer.getClass())
                 .map(processor -> {
-                    Optional<DataManipulator<?, ?>> optionalManipulator = processor.readFrom(this.data);
+                    Optional<Mutable<?, ?>> optionalManipulator = processor.readFrom(this.data);
 
-                    final DataManipulator<?, ?> newManipulator = optionalManipulator
-                            .map(manipulator -> (DataManipulator) function.merge(manipulator, valueContainer))
+                    final Mutable<?, ?> newManipulator = optionalManipulator
+                            .map(manipulator -> (Mutable) function.merge(manipulator, valueContainer))
                             .orElse(valueContainer);
 
                     final Optional<CompoundNBT> optional = processor.storeToCompound(this.data, newManipulator);
@@ -144,7 +143,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     }
 
     @Override
-    public DataTransactionResult remove(final Class<? extends DataManipulator<?, ?>> containerClass) {
+    public DataTransactionResult remove(final Class<? extends Mutable<?, ?>> containerClass) {
         return DataUtil.getRawNbtProcessor(this.getDataType(), containerClass)
                 .map(processor -> processor.remove(this.data))
                 .orElseGet(() -> DataUtil.remove(this.data, containerClass));
@@ -163,10 +162,10 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
             return DataTransactionResult.successNoData();
         }
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        for (final ImmutableValue<?> replaced : result.getReplacedData()) {
+        for (final Immutable<?> replaced : result.getReplacedData()) {
             builder.absorbResult(offer(replaced));
         }
-        for (final ImmutableValue<?> successful : result.getSuccessfulData()) {
+        for (final Immutable<?> successful : result.getSuccessfulData()) {
             builder.absorbResult(remove(successful));
         }
         return builder.build();
@@ -178,7 +177,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     }
 
     @Override
-    public Collection<DataManipulator<?, ?>> getContainers() {
+    public Collection<Mutable<?, ?>> getContainers() {
         return DataUtil.getNbtProcessors(this.getDataType()).stream()
                 .map(processor -> processor.readFrom(this.data))
                 .filter(Optional::isPresent)
@@ -187,13 +186,13 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     }
 
     @Override
-    public <R> Optional<R> get(final Key<? extends BaseValue<R>> key) {
+    public <R> Optional<R> get(final Key<? extends Value<R>> key) {
         return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .flatMap(processor -> processor.readValue(this.data));
     }
 
     @Override
-    public <R, V extends BaseValue<R>> Optional<V> getValue(final Key<V> key) {
+    public <R, V extends Value<R>> Optional<V> getValue(final Key<V> key) {
         return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .flatMap(processor -> processor.readFrom(this.data));
     }
@@ -211,19 +210,19 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
                 .map(processor -> processor.readFrom(this.data))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(BaseValue::getKey)
+                .map(Value::getKey)
                 .collect(Collectors.toSet());
     }
 
     @Override
-    public Set<ImmutableValue<?>> getValues() {
+    public Set<Immutable<?>> getValues() {
         return DataUtil.getNbtValueProcessors(this.getDataType()).stream()
                 .map(processor -> processor.readFrom(this.data))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .filter(value -> value instanceof Value<?>)
-                .map(value -> (Value<?>) value)
-                .map(Value::asImmutable)
+                .filter(value -> value instanceof org.spongepowered.api.data.value.Value.Mutable<?>)
+                .map(value -> (org.spongepowered.api.data.value.Value.Mutable<?>) value)
+                .map(org.spongepowered.api.data.value.Value.Mutable::asImmutable)
                 .collect(Collectors.toSet());
     }
 

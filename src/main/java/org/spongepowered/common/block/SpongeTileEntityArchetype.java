@@ -31,9 +31,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -49,7 +49,7 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.Objects;
 import java.util.Optional;
 
-public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType, BlockSnapshot, org.spongepowered.api.block.tileentity.TileEntity> implements TileEntityArchetype {
+public class SpongeTileEntityArchetype extends AbstractArchetype<BlockEntityType, BlockSnapshot, org.spongepowered.api.block.entity.BlockEntity> implements BlockEntityArchetype {
 
     final BlockState blockState;
 
@@ -64,7 +64,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     }
 
     @Override
-    public TileEntityType getTileEntityType() {
+    public BlockEntityType getTileEntityType() {
         return this.type;
     }
 
@@ -74,7 +74,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     }
 
     @Override
-    public Optional<org.spongepowered.api.block.tileentity.TileEntity> apply(Location<World> location) {
+    public Optional<org.spongepowered.api.block.entity.BlockEntity> apply(Location<World> location) {
         final BlockState currentState = location.getBlock();
         final Block currentBlock = ((net.minecraft.block.BlockState) currentState).getBlock();
         final Block newBlock = ((net.minecraft.block.BlockState) this.blockState).getBlock();
@@ -95,7 +95,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
         compound.putInt("z", blockpos.getZ());
         tileEntity.read(compound);
         tileEntity.markDirty();
-        return Optional.of((org.spongepowered.api.block.tileentity.TileEntity) tileEntity);
+        return Optional.of((org.spongepowered.api.block.entity.BlockEntity) tileEntity);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     }
 
     @Override
-    public TileEntityArchetype copy() {
+    public BlockEntityArchetype copy() {
         final SpongeTileEntityArchetypeBuilder builder = new SpongeTileEntityArchetypeBuilder();
         builder.tileEntityType = this.type;
         builder.tileData = NbtTranslator.getInstance().translate(this.data);

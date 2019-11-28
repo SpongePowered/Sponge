@@ -27,14 +27,14 @@ package org.spongepowered.common.data.util;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timing;
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeImpl;
@@ -43,7 +43,7 @@ import org.spongepowered.common.data.DataProcessor;
 
 import java.util.Optional;
 
-public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataProcessor<M, I> {
+public final class DataProcessorDelegate<M extends Mutable<M, I>, I extends Immutable<I, M>> implements DataProcessor<M, I> {
 
     private final ImmutableList<Tuple<DataProcessor<M, I>, Timing>> processors;
 
@@ -192,7 +192,7 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     }
 
     @Override
-    public Optional<I> with(final Key<? extends BaseValue<?>> key, final Object value, final I immutable) {
+    public Optional<I> with(final Key<? extends Value<?>> key, final Object value, final I immutable) {
         final boolean callingFromMinecraftThread = SpongeImplHooks.isMainThread();
 
         for (final Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {

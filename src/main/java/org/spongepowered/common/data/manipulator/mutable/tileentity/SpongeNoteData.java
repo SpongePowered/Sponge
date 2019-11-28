@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableNoteData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.NoteData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeNoteData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -46,7 +46,7 @@ public class SpongeNoteData extends AbstractSingleData<NotePitch, NoteData, Immu
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Mutable<?> getValueGetter() {
         return note();
     }
 
@@ -56,7 +56,7 @@ public class SpongeNoteData extends AbstractSingleData<NotePitch, NoteData, Immu
     }
 
     @Override
-    public Value<NotePitch> note() {
+    public Mutable<NotePitch> note() {
         return new SpongeValue<>(Keys.NOTE_PITCH, NotePitches.F_SHARP0, getValue());
     }
 

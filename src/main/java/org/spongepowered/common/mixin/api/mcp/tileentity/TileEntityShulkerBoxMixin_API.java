@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import org.spongepowered.api.block.tileentity.carrier.ShulkerBox;
+import org.spongepowered.api.block.entity.carrier.ShulkerBox;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -55,12 +54,12 @@ public abstract class TileEntityShulkerBoxMixin_API extends TileEntityLockableLo
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Value<DyeColor> color() {
+    public Mutable<DyeColor> color() {
         return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHULKER_COLOR, (DyeColor) (Object) this.color);
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(List<org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getDyeData());
     }

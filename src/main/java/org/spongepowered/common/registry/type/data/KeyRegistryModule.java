@@ -27,7 +27,7 @@ package org.spongepowered.common.registry.type.data;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spongepowered.api.data.DataQuery.of;
+import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

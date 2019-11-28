@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
-
+import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 import net.minecraft.world.gen.PerlinNoiseGenerator;
 

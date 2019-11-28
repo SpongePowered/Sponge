@@ -28,12 +28,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableVariantData;
 import org.spongepowered.api.data.manipulator.mutable.VariantData;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
@@ -44,9 +44,9 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
 
     private final Class<? extends M> mutableClass;
     private final E defaultValue;
-    private final ImmutableValue<E> immutableValue;
+    private final Immutable<E> immutableValue;
 
-    public AbstractImmutableSingleCatalogData(Class<I> immutableClass, E value, E defaultValue, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
+    public AbstractImmutableSingleCatalogData(Class<I> immutableClass, E value, E defaultValue, Key<? extends Value<E>> usedKey, Class<? extends M> mutableClass) {
         super(immutableClass, value, usedKey);
         checkArgument(!Modifier.isAbstract(mutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(mutableClass.getModifiers()), "The immutable class cannot be an interface!");
@@ -56,7 +56,7 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
     }
 
     @Override
-    protected ImmutableValue<E> getValueGetter() {
+    protected Immutable<E> getValueGetter() {
         return this.immutableValue;
     }
 
@@ -71,7 +71,7 @@ public abstract class AbstractImmutableSingleCatalogData<E extends CatalogType, 
     }
 
     @Override
-    public ImmutableValue<E> type() {
+    public Immutable<E> type() {
         return this.immutableValue;
     }
 }

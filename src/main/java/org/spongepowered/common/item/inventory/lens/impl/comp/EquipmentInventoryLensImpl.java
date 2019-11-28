@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import org.spongepowered.api.entity.ArmorEquipable;
+import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.property.EquipmentSlotType;

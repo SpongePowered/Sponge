@@ -26,7 +26,6 @@ package org.spongepowered.common.registry.type.effect;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.NotePitch;
@@ -39,7 +38,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.effect.particle.SpongeParticleOption;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;

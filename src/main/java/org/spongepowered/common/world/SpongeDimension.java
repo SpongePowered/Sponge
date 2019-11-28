@@ -27,7 +27,7 @@ package org.spongepowered.common.world;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.gen.GeneratorType;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.mixin.core.world.WorldProviderAccessor;
 

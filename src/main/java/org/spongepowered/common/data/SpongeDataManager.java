@@ -36,20 +36,20 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
+import org.spongepowered.api.data.DataManipulator.Mutable.Factory;
 import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.ImmutableDataBuilder;
 import org.spongepowered.api.data.ImmutableDataHolder;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslator;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
@@ -85,11 +85,11 @@ public final class SpongeDataManager implements DataManager {
     private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
 
 
-    final Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> builderMap = new MapMaker()
+    final Map<Class<? extends Mutable<?, ?>>, Factory<?, ?>> builderMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
 
-    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> immutableBuilderMap = new MapMaker()
+    private final Map<Class<? extends Immutable<?, ?>>, Factory<?, ?>> immutableBuilderMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
 
@@ -225,16 +225,16 @@ public final class SpongeDataManager implements DataManager {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
+    public <T extends Mutable<T, I>, I extends Immutable<I, T>> Optional<Factory<T, I>>
     getManipulatorBuilder(Class<T> manipulatorClass) {
-        return Optional.ofNullable((DataManipulatorBuilder<T, I>) this.builderMap.get(checkNotNull(manipulatorClass)));
+        return Optional.ofNullable((Factory<T, I>) this.builderMap.get(checkNotNull(manipulatorClass)));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
+    public <T extends Mutable<T, I>, I extends Immutable<I, T>> Optional<Factory<T, I>>
     getImmutableManipulatorBuilder(Class<I> immutableManipulatorClass) {
-        return Optional.ofNullable((DataManipulatorBuilder<T, I>) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
+        return Optional.ofNullable((Factory<T, I>) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
     }
 
     @Deprecated
@@ -253,7 +253,7 @@ public final class SpongeDataManager implements DataManager {
     }
 
     @Override
-    public Collection<Class<? extends DataManipulator<?, ?>>> getAllRegistrationsFor(PluginContainer container) {
+    public Collection<Class<? extends Mutable<?, ?>>> getAllRegistrationsFor(PluginContainer container) {
         return SpongeManipulatorRegistry.getInstance().getRegistrations(container);
     }
 
@@ -267,22 +267,22 @@ public final class SpongeDataManager implements DataManager {
         return new MemoryDataContainer(safety);
     }
 
-    public Optional<DataManipulatorBuilder<?, ?>> getWildManipulatorBuilder(Class<? extends DataManipulator<?, ?>> manipulatorClass) {
+    public Optional<Factory<?, ?>> getWildManipulatorBuilder(Class<? extends Mutable<?, ?>> manipulatorClass) {
         return Optional.ofNullable(this.builderMap.get(checkNotNull(manipulatorClass)));
     }
 
-    public Optional<DataManipulatorBuilder<?, ?>> getWildBuilderForImmutable(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+    public Optional<Factory<?, ?>> getWildBuilderForImmutable(Class<? extends Immutable<?, ?>> immutable) {
         return Optional.ofNullable(this.immutableBuilderMap.get(checkNotNull(immutable)));
     }
 
-    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistration(
+    <M extends Mutable<M, I>, I extends Immutable<I, M>> void validateRegistration(
       SpongeDataRegistrationBuilder<M, I> builder) {
         checkState(allowRegistrations);
         final Class<M> manipulatorClass = builder.manipulatorClass;
         final Class<? extends M> implementationClass = builder.implementationData;
         final Class<I> immutableClass = builder.immutableClass;
         final Class<? extends I> immutableImplementation = builder.immutableImplementation;
-        final DataManipulatorBuilder<M, I> manipulatorBuilder = builder.manipulatorBuilder;
+        final Factory<M, I> manipulatorBuilder = builder.manipulatorBuilder;
         checkState(!this.builders.containsKey(manipulatorClass), "DataManipulator already registered!");
         checkState(!this.builderMap.containsKey(manipulatorClass), "DataManipulator already registered!");
         checkState(!this.builderMap.containsValue(manipulatorBuilder), "DataManipulatorBuilder already registered!");
@@ -304,7 +304,7 @@ public final class SpongeDataManager implements DataManager {
         return !allowRegistrations;
     }
 
-    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void registerInternally(
+    <M extends Mutable<M, I>, I extends Immutable<I, M>> void registerInternally(
       SpongeDataRegistration<M, I> registration) {
         this.builders.put(registration.getManipulatorClass(), registration.getDataManipulatorBuilder());
         this.builderMap.put(registration.getManipulatorClass(), registration.getDataManipulatorBuilder());

@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.tileentity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
@@ -40,14 +40,14 @@ import org.spongepowered.common.text.SpongeTexts;
 import java.util.Optional;
 import net.minecraft.util.INameable;
 
-public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProcessor<INameable, Text, Value<Text>> {
+public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProcessor<INameable, Text, Mutable<Text>> {
 
     public TileEntityDisplayNameValueProcessor() {
         super(INameable.class, Keys.DISPLAY_NAME);
     }
 
     @Override
-    protected Value<Text> constructValue(Text defaultValue) {
+    protected Mutable<Text> constructValue(Text defaultValue) {
         return new SpongeValue<>(Keys.DISPLAY_NAME, Text.of(), defaultValue);
     }
 
@@ -73,7 +73,7 @@ public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProc
     }
 
     @Override
-    protected ImmutableValue<Text> constructImmutableValue(Text value) {
+    protected Immutable<Text> constructImmutableValue(Text value) {
         return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.of(), value);
     }
 

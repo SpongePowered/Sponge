@@ -25,10 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.RabbitData;
 import org.spongepowered.api.data.type.RabbitType;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.living.animal.Rabbit;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,12 +50,12 @@ public abstract class EntityRabbitMixin_API extends EntityAnimalMixin_API implem
     }
 
     @Override
-    public Value<RabbitType> variant() {
+    public Mutable<RabbitType> variant() {
         return new SpongeValue<>(Keys.RABBIT_TYPE, Constants.Entity.Rabbit.DEFAULT_TYPE, RabbitTypeRegistryModule.RABBIT_IDMAP.get(this.getRabbitType()));
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getRabbitData());
     }

@@ -26,7 +26,6 @@ package org.spongepowered.common.registry.type.effect;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -53,7 +52,7 @@ import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.NotePitchRegistryModule;
 import org.spongepowered.common.registry.type.item.FireworkShapeRegistryModule;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;

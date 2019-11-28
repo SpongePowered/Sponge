@@ -39,12 +39,12 @@ import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.api.world.teleport.PortalAgentTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -142,7 +142,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         }
         worldCat.setGenerateSpawnOnLoad(archetype.doesGenerateSpawnOnLoad());
         this.bridge$forceSetDifficulty((Difficulty) (Object) archetype.getDifficulty());
-        final Collection<WorldGeneratorModifier> modifiers = WorldGeneratorModifierRegistryModule.getInstance().toModifiers(config.getWorldGenModifiers());
+        final Collection<TerrainGeneratorConfig> modifiers = WorldGeneratorModifierRegistryModule.getInstance().toModifiers(config.getWorldGenModifiers());
         if (modifiers.isEmpty()) {
             config.getWorldGenModifiers().clear();
             config.getWorldGenModifiers().addAll(WorldGeneratorModifierRegistryModule.getInstance().toIds(archetype.getGeneratorModifiers()));

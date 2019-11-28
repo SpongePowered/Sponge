@@ -28,9 +28,9 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.data.property.provider.PropertyProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 
@@ -42,7 +42,7 @@ public abstract class PropertyHolderMixin_API implements PropertyHolder {
 
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        final Optional<PropertyStore<T>> optional = SpongeImpl.getPropertyRegistry().getStore(propertyClass);
+        final Optional<PropertyProvider<T>> optional = SpongeImpl.getPropertyRegistry().getStore(propertyClass);
         if (optional.isPresent()) {
             return optional.get().getFor(this);
         }

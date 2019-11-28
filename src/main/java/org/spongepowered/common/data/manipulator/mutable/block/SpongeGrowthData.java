@@ -29,7 +29,7 @@ import static org.spongepowered.common.util.Constants.Functional.intComparator;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
 import org.spongepowered.api.data.manipulator.mutable.block.GrowthData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 
@@ -48,7 +48,7 @@ public class SpongeGrowthData extends AbstractBoundedComparableData<Integer, Gro
     }
 
     @Override
-    public MutableBoundedValue<Integer> growthStage() {
+    public Mutable<Integer> growthStage() {
         return getValueGetter();
     }
 }

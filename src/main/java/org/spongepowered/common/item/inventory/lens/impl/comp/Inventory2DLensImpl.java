@@ -26,7 +26,7 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.spongepowered.api.data.Property.Operator;
+import org.spongepowered.api.data.property.Property.Operator;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.property.SlotPos;

@@ -38,15 +38,15 @@ import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -72,7 +72,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> implements ItemStack.Builder {
-    @Nullable private Set<DataManipulator<?, ?>> itemDataSet;
+    @Nullable private Set<Mutable<?, ?>> itemDataSet;
     private ItemType type;
     private int quantity;
     private int damageValue = 0;
@@ -104,12 +104,12 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     }
 
     @Override
-    public ItemStack.Builder itemData(ImmutableDataManipulator<?, ?> itemData) throws IllegalArgumentException {
+    public ItemStack.Builder itemData(Immutable<?, ?> itemData) throws IllegalArgumentException {
         return itemData(itemData.asMutable());
     }
 
     @Override
-    public <V> ItemStack.Builder add(Key<? extends BaseValue<V>> key, V value) throws IllegalArgumentException {
+    public <V> ItemStack.Builder add(Key<? extends Value<V>> key, V value) throws IllegalArgumentException {
         if (this.keyValues == null) {
             this.keyValues = new LinkedHashMap<>();
         }
@@ -118,7 +118,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     }
 
     @Override
-    public ItemStack.Builder itemData(final DataManipulator<?, ?> itemData) throws IllegalArgumentException {
+    public ItemStack.Builder itemData(final Mutable<?, ?> itemData) throws IllegalArgumentException {
         checkNotNull(itemData, "Must have a non-null item data!");
         checkNotNull(this.type, "Cannot set item data without having set a type first!");
         if (this.itemDataSet == null) {
@@ -176,7 +176,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
             final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
-            final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
+            final List<Mutable<?, ?>> manipulators = transaction.deserializedManipulators;
             this.itemDataSet = new HashSet<>();
             manipulators.forEach(this.itemDataSet::add);
         }
@@ -188,7 +188,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         checkNotNull(snapshot, "The snapshot was null!");
         itemType(snapshot.getType());
         quantity(snapshot.getQuantity());
-        for (ImmutableDataManipulator<?, ?> manipulator : snapshot.getContainers()) {
+        for (Immutable<?, ?> manipulator : snapshot.getContainers()) {
             itemData(manipulator);
         }
         if (snapshot instanceof SpongeItemStackSnapshot) {
@@ -246,10 +246,10 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     }
 
     @Override
-    public ItemStack.Builder remove(Class<? extends DataManipulator<?, ?>> manipulatorClass) {
+    public ItemStack.Builder remove(Class<? extends Mutable<?, ?>> manipulatorClass) {
         if (this.itemDataSet != null) {
-            for (final Iterator<DataManipulator<?, ?>> iterator = this.itemDataSet.iterator(); iterator.hasNext(); ) {
-                final DataManipulator<?, ?> next = iterator.next();
+            for (final Iterator<Mutable<?, ?>> iterator = this.itemDataSet.iterator(); iterator.hasNext(); ) {
+                final Mutable<?, ?> next = iterator.next();
                 if (manipulatorClass.isInstance(next)) {
                     iterator.remove();
                     break;
@@ -284,8 +284,8 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
             final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
-            final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
-            for (DataManipulator<?, ?> manipulator : manipulators) {
+            final List<Mutable<?, ?>> manipulators = transaction.deserializedManipulators;
+            for (Mutable<?, ?> manipulator : manipulators) {
                 ((CustomDataHolderBridge) itemStack).bridge$offerCustom(manipulator, MergeFunction.IGNORE_ALL);
             }
             if (!transaction.failedData.isEmpty()) {

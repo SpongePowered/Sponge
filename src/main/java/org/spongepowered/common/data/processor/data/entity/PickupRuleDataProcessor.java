@@ -29,9 +29,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePickupRuleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PickupRuleData;
 import org.spongepowered.api.data.type.PickupRule;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePickupRuleData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
@@ -42,7 +42,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 
-public final class PickupRuleDataProcessor extends AbstractEntitySingleDataProcessor<AbstractArrowEntity, PickupRule, Value<PickupRule>,
+public final class PickupRuleDataProcessor extends AbstractEntitySingleDataProcessor<AbstractArrowEntity, PickupRule, Mutable<PickupRule>,
         PickupRuleData, ImmutablePickupRuleData> {
 
     public PickupRuleDataProcessor() {
@@ -61,12 +61,12 @@ public final class PickupRuleDataProcessor extends AbstractEntitySingleDataProce
     }
 
     @Override
-    protected ImmutableValue<PickupRule> constructImmutableValue(PickupRule value) {
+    protected Immutable<PickupRule> constructImmutableValue(PickupRule value) {
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, this.key, value, Constants.Catalog.DEFAULT_PICKUP_RULE);
     }
 
     @Override
-    protected Value<PickupRule> constructValue(PickupRule actualValue) {
+    protected Mutable<PickupRule> constructValue(PickupRule actualValue) {
         return new SpongeValue<>(this.key, Constants.Catalog.DEFAULT_PICKUP_RULE, actualValue);
     }
 

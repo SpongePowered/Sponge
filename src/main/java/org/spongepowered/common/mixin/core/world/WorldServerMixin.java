@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.world;
 
 import co.aikar.timings.Timing;
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
@@ -86,12 +84,10 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
@@ -106,16 +102,17 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.gen.BiomeGenerator;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.gen.GeneratorType;
+import org.spongepowered.api.world.gen.GeneratorTypes;
+import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.api.world.teleport.PortalAgentTypes;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
@@ -182,7 +179,8 @@ import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -412,7 +410,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             ((PopulatorProviderBridge) newGenerator.getBaseGenerationPopulator()).bridge$addPopulators(newGenerator);
         }
 
-        for (final WorldGeneratorModifier modifier : ((org.spongepowered.api.world.World) this).getProperties().getGeneratorModifiers()) {
+        for (final TerrainGeneratorConfig modifier : ((org.spongepowered.api.world.World) this).getProperties().getGeneratorModifiers()) {
             modifier.modifyWorldGenerator(((org.spongepowered.api.world.World) this).getProperties(), generatorSettings, newGenerator);
         }
 
@@ -890,7 +888,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if (((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
             blockEvent.bridge$setSourceUser(currentContext.getActiveUser());
             if (SpongeImplHooks.hasBlockTileEntity(blockIn, getBlockState(pos))) {
-                blockEvent.bridge$setTileEntity((org.spongepowered.api.block.tileentity.TileEntity) getTileEntity(pos));
+                blockEvent.bridge$setTileEntity((org.spongepowered.api.block.entity.BlockEntity) getTileEntity(pos));
             }
             if (blockEvent.bridge$getTileEntity() == null) {
                 final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
@@ -1853,7 +1851,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if (hasTileEntity || tileEntity != null) {
             // We MUST only check to see if a TE exists to avoid creating a new one.
             if (tileEntity != null) {
-                for (final DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators()) {
+                for (final org.spongepowered.api.data.DataManipulator.Mutable<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators()) {
                     builder.add(manipulator);
                 }
                 final CompoundNBT nbt = new CompoundNBT();

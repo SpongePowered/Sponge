@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.BrewingStandTileEntity;
-import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
+import org.spongepowered.api.block.entity.carrier.BrewingStand;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(BrewingStandTileEntity.class)

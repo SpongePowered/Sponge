@@ -32,10 +32,10 @@ import net.minecraft.entity.boss.dragon.phase.PhaseManager;
 import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.world.end.DragonFightManager;
 import org.spongepowered.api.boss.ServerBossBar;
-import org.spongepowered.api.entity.EnderCrystal;
-import org.spongepowered.api.entity.living.complex.EnderDragon;
-import org.spongepowered.api.entity.living.complex.EnderDragonPart;
-import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseManager;
+import org.spongepowered.api.entity.explosive.EndCrystal;
+import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragon;
+import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragonPart;
+import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -65,8 +65,8 @@ public abstract class EntityDragonMixin_API extends EntityLivingMixin_API implem
     }
 
     @Override
-    public Optional<EnderCrystal> getHealingCrystal() {
-        return Optional.ofNullable((EnderCrystal) this.healingEnderCrystal);
+    public Optional<EndCrystal> getHealingCrystal() {
+        return Optional.ofNullable((EndCrystal) this.healingEnderCrystal);
     }
 
 
@@ -76,7 +76,7 @@ public abstract class EntityDragonMixin_API extends EntityLivingMixin_API implem
     }
 
     @Override
-    public EnderDragonPhaseManager getPhaseManager() {
-        return (EnderDragonPhaseManager) this.phaseManager;
+    public DragonPhaseManager getPhaseManager() {
+        return (DragonPhaseManager) this.phaseManager;
     }
 }

@@ -30,13 +30,13 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableBrickData
 import org.spongepowered.api.data.manipulator.mutable.block.BrickData;
 import org.spongepowered.api.data.type.BrickType;
 import org.spongepowered.api.data.type.BrickTypes;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeBrickData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class BrickDataProcessor extends AbstractCatalogDataProcessor<BrickType, Value<BrickType>, BrickData, ImmutableBrickData> {
+public class BrickDataProcessor extends AbstractCatalogDataProcessor<BrickType, Mutable<BrickType>, BrickData, ImmutableBrickData> {
 
     public BrickDataProcessor() {
         super(Keys.BRICK_TYPE, input -> input.getItem() == ItemTypes.STONEBRICK || input.getItem() == ItemTypes.STONE_BRICK_STAIRS);
@@ -63,7 +63,7 @@ public class BrickDataProcessor extends AbstractCatalogDataProcessor<BrickType, 
     }
 
     @Override
-    protected Value<BrickType> constructValue(BrickType actualValue) {
+    protected Mutable<BrickType> constructValue(BrickType actualValue) {
         return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 

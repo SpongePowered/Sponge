@@ -27,25 +27,24 @@ package org.spongepowered.common.data.manipulator.mutable.common;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
 
-public abstract class AbstractBooleanData<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends
+public abstract class AbstractBooleanData<M extends Mutable<M, I>, I extends Immutable<I, M>> extends
         AbstractSingleData<Boolean, M, I> {
 
     private final Class<? extends I> immutableClass;
     private final Boolean defaultValue;
 
-    protected AbstractBooleanData(Class<M> manipulatorClass, Boolean value, Key<? extends BaseValue<Boolean>> usedKey, Class<? extends I> immutableClass, Boolean defaultValue) {
+    protected AbstractBooleanData(Class<M> manipulatorClass, Boolean value, Key<? extends Value<Boolean>> usedKey, Class<? extends I> immutableClass, Boolean defaultValue) {
         super(manipulatorClass, value, usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
@@ -54,7 +53,7 @@ public abstract class AbstractBooleanData<M extends DataManipulator<M, I>, I ext
     }
 
     @Override
-    protected Value<Boolean> getValueGetter() {
+    protected org.spongepowered.api.data.value.Value.Mutable<Boolean> getValueGetter() {
         return new SpongeValue<>(this.usedKey, this.defaultValue, this.getValue());
     }
 

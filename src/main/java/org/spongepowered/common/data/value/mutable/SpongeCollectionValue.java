@@ -27,10 +27,9 @@ package org.spongepowered.common.data.value.mutable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableCollectionValue;
-import org.spongepowered.api.data.value.mutable.CollectionValue;
-
+import org.spongepowered.api.data.value.CollectionValue.Immutable;
+import org.spongepowered.api.data.value.CollectionValue.Mutable;
+import org.spongepowered.api.data.value.Value;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
@@ -40,16 +39,16 @@ import java.util.function.Predicate;
 @SuppressWarnings("unchecked")
 public abstract class SpongeCollectionValue<Element,
     CollectionType extends Collection<Element>,
-    CollectionValueType extends CollectionValue<Element, CollectionType, CollectionValueType, ImmutableType>,
-    ImmutableType extends ImmutableCollectionValue<Element, CollectionType, ImmutableType, CollectionValueType>>
-    extends SpongeValue<CollectionType> implements CollectionValue<Element, CollectionType, CollectionValueType, ImmutableType> {
+    CollectionValueType extends Mutable<Element, CollectionType, CollectionValueType, ImmutableType>,
+    ImmutableType extends Immutable<Element, CollectionType, ImmutableType, CollectionValueType>>
+    extends SpongeValue<CollectionType> implements Mutable<Element, CollectionType, CollectionValueType, ImmutableType> {
 
 
-    public SpongeCollectionValue(Key<? extends BaseValue<CollectionType>> key, CollectionType defaultValue) {
+    public SpongeCollectionValue(Key<? extends Value<CollectionType>> key, CollectionType defaultValue) {
         super(key, defaultValue);
     }
 
-    public SpongeCollectionValue(Key<? extends BaseValue<CollectionType>> key, CollectionType defaultValue, CollectionType actualValue) {
+    public SpongeCollectionValue(Key<? extends Value<CollectionType>> key, CollectionType defaultValue, CollectionType actualValue) {
         super(key, defaultValue, actualValue);
     }
 

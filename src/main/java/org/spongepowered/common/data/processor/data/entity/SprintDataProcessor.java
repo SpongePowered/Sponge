@@ -29,9 +29,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSprintData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SprintData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSprintData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -39,14 +39,14 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class SprintDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Boolean, Value<Boolean>, SprintData, ImmutableSprintData> {
+public class SprintDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Boolean, Mutable<Boolean>, SprintData, ImmutableSprintData> {
 
     public SprintDataProcessor() {
         super(Entity.class, Keys.IS_SPRINTING);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Mutable<Boolean> constructValue(Boolean actualValue) {
         return new SpongeValue<>(this.key, actualValue);
     }
 
@@ -62,7 +62,7 @@ public class SprintDataProcessor extends AbstractEntitySingleDataProcessor<Entit
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(Boolean value) {
         return new ImmutableSpongeValue<>(this.key, false, value);
     }
 

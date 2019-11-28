@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
-import org.spongepowered.api.world.extent.BiomeVolume;
-import org.spongepowered.api.world.extent.BlockVolume;
+import org.spongepowered.api.world.volume.biome.ReadableBiomeVolume;
+import org.spongepowered.api.world.volume.block.ReadableBlockVolume;
+import org.spongepowered.math.vector.Vector3i;
 
 public class ExtentBufferUtil {
 
-    public static byte[] copyToArray(BiomeVolume volume, Vector3i min, Vector3i max, Vector3i size) {
+    public static byte[] copyToArray(ReadableBiomeVolume volume, Vector3i min, Vector3i max, Vector3i size) {
         // Check if the volume has more biomes than can be stored in an array
         final long memory = (long) size.getX() * (long) size.getZ();
         // Leave 8 bytes for a header used in some JVMs
@@ -56,7 +56,7 @@ public class ExtentBufferUtil {
         return copy;
     }
 
-    public static char[] copyToArray(BlockVolume volume, Vector3i min, Vector3i max, Vector3i size) {
+    public static char[] copyToArray(ReadableBlockVolume volume, Vector3i min, Vector3i max, Vector3i size) {
         // Check if the volume has more blocks than can be stored in an array
         final long memory = (long) size.getX() * (long) size.getY() * (long) size.getZ();
         // Leave 8 bytes for a header used in some JVMs

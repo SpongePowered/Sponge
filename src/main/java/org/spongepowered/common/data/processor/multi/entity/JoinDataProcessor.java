@@ -25,13 +25,13 @@
 package org.spongepowered.common.data.processor.multi.entity;
 
 import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableJoinData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;

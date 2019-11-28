@@ -26,23 +26,21 @@ package org.spongepowered.common.world;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.util.Constants;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
@@ -108,17 +106,17 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public List<ImmutableDataManipulator<?, ?>> getManipulators() {
+    public List<Immutable<?, ?>> getManipulators() {
         return this.blockState.getManipulators();
     }
 
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> get(Key<? extends Value<E>> key) {
         return this.blockState.get(key);
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
         return this.blockState.getValue(key);
     }
 
@@ -138,27 +136,27 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public Set<ImmutableValue<?>> getValues() {
+    public Set<org.spongepowered.api.data.value.Value.Immutable<?>> getValues() {
         return this.blockState.getValues();
     }
 
     @Override
-    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
+    public <T extends Immutable<?, ?>> Optional<T> get(Class<T> containerClass) {
         return this.blockState.get(containerClass);
     }
 
     @Override
-    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
+    public <T extends Immutable<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
         return this.blockState.getOrCreate(containerClass);
     }
 
     @Override
-    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    public boolean supports(Class<? extends Immutable<?, ?>> containerClass) {
         return this.blockState.supports(containerClass);
     }
 
     @Override
-    public <E> Optional<LocatableBlock> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
+    public <E> Optional<LocatableBlock> transform(Key<? extends Value<E>> key, Function<E, E> function) {
         return this.blockState.transform(key, function)
                 .map(state -> LocatableBlock.builder()
                         .from(this)
@@ -167,7 +165,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public <E> Optional<LocatableBlock> with(Key<? extends BaseValue<E>> key, E value) {
+    public <E> Optional<LocatableBlock> with(Key<? extends Value<E>> key, E value) {
         return this.blockState.with(key, value)
                 .map(state -> LocatableBlock.builder()
                         .from(this)
@@ -176,7 +174,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public Optional<LocatableBlock> with(BaseValue<?> value) {
+    public Optional<LocatableBlock> with(Value<?> value) {
         return this.blockState.with(value)
                 .map(state -> LocatableBlock.builder()
                         .from(this)
@@ -185,7 +183,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public Optional<LocatableBlock> with(ImmutableDataManipulator<?, ?> valueContainer) {
+    public Optional<LocatableBlock> with(Immutable<?, ?> valueContainer) {
         return this.blockState.with(valueContainer)
                 .map(state -> LocatableBlock.builder()
                         .from(this)
@@ -194,7 +192,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public Optional<LocatableBlock> with(Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
+    public Optional<LocatableBlock> with(Iterable<Immutable<?, ?>> valueContainers) {
         return this.blockState.with(valueContainers)
                 .map(state -> LocatableBlock.builder()
                         .from(this)
@@ -203,7 +201,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public Optional<LocatableBlock> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    public Optional<LocatableBlock> without(Class<? extends Immutable<?, ?>> containerClass) {
         return Optional.empty();
     }
 
@@ -218,7 +216,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public List<ImmutableDataManipulator<?, ?>> getContainers() {
+    public List<Immutable<?, ?>> getContainers() {
         return this.blockState.getContainers();
     }
 

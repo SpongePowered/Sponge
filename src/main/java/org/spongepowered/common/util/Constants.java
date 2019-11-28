@@ -25,10 +25,8 @@
 package org.spongepowered.common.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.DataQuery.of;
+import static org.spongepowered.api.data.persistence.DataQuery.of;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import net.minecraft.block.LeverBlock;
@@ -42,17 +40,19 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.api.data.property.PropertyStore;
-import org.spongepowered.api.data.type.Art;
-import org.spongepowered.api.data.type.Arts;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.property.provider.PropertyProvider;
+import org.spongepowered.api.data.type.ArtType;
+import org.spongepowered.api.data.type.ArtTypes;
 import org.spongepowered.api.data.type.BigMushroomType;
 import org.spongepowered.api.data.type.BigMushroomTypes;
 import org.spongepowered.api.data.type.BrickType;
 import org.spongepowered.api.data.type.BrickTypes;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Careers;
+import org.spongepowered.api.data.type.CatType;
+import org.spongepowered.api.data.type.CatTypes;
 import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.type.ComparatorTypes;
 import org.spongepowered.api.data.type.DirtType;
@@ -69,12 +69,10 @@ import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseStyles;
-import org.spongepowered.api.data.type.LlamaVariant;
-import org.spongepowered.api.data.type.LlamaVariants;
-import org.spongepowered.api.data.type.OcelotType;
-import org.spongepowered.api.data.type.OcelotTypes;
-import org.spongepowered.api.data.type.ParrotVariant;
-import org.spongepowered.api.data.type.ParrotVariants;
+import org.spongepowered.api.data.type.LlamaType;
+import org.spongepowered.api.data.type.LlamaTypes;
+import org.spongepowered.api.data.type.ParrotType;
+import org.spongepowered.api.data.type.ParrotTypes;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.data.type.PickupRules;
 import org.spongepowered.api.data.type.RabbitType;
@@ -100,7 +98,8 @@ import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Comparator;
@@ -691,12 +690,12 @@ public final class Constants {
         public static final DisguisedBlockType DEFAULT_DISGUISED_BLOCK = DisguisedBlockTypes.STONE;
         public static final DoublePlantType DEFAULT_DOUBLE_PLANT = DoublePlantTypes.GRASS;
         public static final DyeColor DEFAULT_BANNER_BASE = DyeColors.BLACK;
-        public static final OcelotType DEFAULT_OCELOT = OcelotTypes.WILD_OCELOT;
+        public static final CatType DEFAULT_OCELOT = CatTypes.WILD_OCELOT;
         public static final Career CAREER_DEFAULT = Careers.FARMER;
         public static final GameMode DEFAULT_GAMEMODE = GameModes.NOT_SET;
         public static final BlockState DEFAULT_FALLING_BLOCK_BLOCKSTATE = BlockTypes.SAND.getDefaultState();
         public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
-        public static final Art DEFAULT_ART = Arts.KEBAB;
+        public static final ArtType DEFAULT_ART = ArtTypes.KEBAB;
         public static final PickupRule DEFAULT_PICKUP_RULE = PickupRules.ALLOWED;
         public static final HandPreference DEFAULT_HAND = HandPreferences.RIGHT;
     }
@@ -817,7 +816,7 @@ public final class Constants {
         }
 
         public static final class Llama {
-            public static final LlamaVariant DEFAULT_VARIANT = LlamaVariants.WHITE;
+            public static final LlamaType DEFAULT_VARIANT = LlamaTypes.WHITE;
             public static final int DEFAULT_STRENGTH = 1;
             public static final int MINIMUM_STRENGTH = 1;
             public static final int MAXIMUM_STRENGTH = 5;
@@ -839,13 +838,13 @@ public final class Constants {
 
         public static final class Ocelot {
 
-            public static final OcelotType DEFAULT_TYPE = OcelotTypes.WILD_OCELOT;
+            public static final CatType DEFAULT_TYPE = CatTypes.WILD_OCELOT;
 
 
         }
         public static final class Parrot {
 
-            public static final ParrotVariant DEFAULT_VARIANT = ParrotVariants.RED;
+            public static final ParrotType DEFAULT_VARIANT = ParrotTypes.RED;
 
 
         }
@@ -1161,7 +1160,7 @@ public final class Constants {
             (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
         public static final Comparator<DataProcessor<?, ?>> DATA_PROCESSOR_COMPARATOR =
             (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
-        public static final Comparator<PropertyStore<?>> PROPERTY_STORE_COMPARATOR =
+        public static final Comparator<PropertyProvider<?>> PROPERTY_STORE_COMPARATOR =
             (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
         public static final Comparator<DataContentUpdater> DATA_CONTENT_UPDATER_COMPARATOR =
             (o1, o2) -> ComparisonChain.start()

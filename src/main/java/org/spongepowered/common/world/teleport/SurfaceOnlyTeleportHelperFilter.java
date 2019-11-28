@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.world.teleport;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.World;
+import org.spongepowered.math.vector.Vector3i;
 
 public class SurfaceOnlyTeleportHelperFilter extends DefaultTeleportHelperFilter {
 

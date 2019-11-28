@@ -28,17 +28,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.extra.fluid.FluidStack;
-import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
-import org.spongepowered.api.extra.fluid.FluidType;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.fluid.FluidStack;
+import org.spongepowered.api.fluid.FluidStackSnapshot;
+import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -80,17 +80,17 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
     }
 
     @Override
-    public FluidStackSnapshot.Builder add(DataManipulator<?, ?> manipulator) {
+    public FluidStackSnapshot.Builder add(Mutable<?, ?> manipulator) {
         return this;
     }
 
     @Override
-    public FluidStackSnapshot.Builder add(ImmutableDataManipulator<?, ?> manipulator) {
+    public FluidStackSnapshot.Builder add(Immutable<?, ?> manipulator) {
         return this;
     }
 
     @Override
-    public <V> FluidStackSnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
+    public <V> FluidStackSnapshot.Builder add(Key<? extends Value<V>> key, V value) {
         return this;
     }
 

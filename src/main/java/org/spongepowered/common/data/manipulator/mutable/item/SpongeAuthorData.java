@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.item;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeAuthorData;
@@ -51,12 +50,12 @@ public class SpongeAuthorData extends AbstractSingleData<Text, AuthorData, Immut
     }
 
     @Override
-    public Value<Text> author() {
+    public Mutable<Text> author() {
         return new SpongeValue<>(Keys.BOOK_AUTHOR, Text.of(), this.getValue());
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Mutable<?> getValueGetter() {
         return author();
     }
 

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.boss.dragon.phase;
 
 import com.google.common.base.CaseFormat;
-import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseType;
+import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,7 +34,7 @@ import java.util.Locale;
 import net.minecraft.entity.boss.dragon.phase.PhaseType;
 
 @Mixin(PhaseType.class)
-public class PhaseListMixin_API implements EnderDragonPhaseType {
+public class PhaseListMixin_API implements DragonPhaseType {
 
     private String spongeId;
     @Shadow @Final private String name;

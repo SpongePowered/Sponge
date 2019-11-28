@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ITileEntityProvider;
@@ -36,14 +35,14 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
@@ -54,7 +53,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
@@ -87,7 +86,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     @Nullable UUID creatorUuid;
     @Nullable UUID notifierUuid;
     Vector3i coords;
-    @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
+    @Nullable List<Immutable<?, ?>> manipulators;
     @Nullable CompoundNBT compound;
     SpongeBlockChangeFlag flag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
     private final boolean pooled;
@@ -150,10 +149,10 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         if (this.blockState.getType() instanceof ITileEntityProvider) {
             if (location.hasTileEntity()) {
                 this.compound = new CompoundNBT();
-                final org.spongepowered.api.block.tileentity.TileEntity te = location.getTileEntity().get();
+                final org.spongepowered.api.block.entity.BlockEntity te = location.getTileEntity().get();
                 ((TileEntity) te).write(this.compound);
                 this.manipulators = ((CustomDataHolderBridge) te).bridge$getCustomManipulators().stream()
-                        .map(DataManipulator::asImmutable)
+                        .map(Mutable::asImmutable)
                         .collect(Collectors.toList());
             }
         }
@@ -178,18 +177,18 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public SpongeBlockSnapshotBuilder add(final DataManipulator<?, ?> manipulator) {
+    public SpongeBlockSnapshotBuilder add(final Mutable<?, ?> manipulator) {
         return add(checkNotNull(manipulator, "manipulator").asImmutable());
     }
 
     @Override
-    public SpongeBlockSnapshotBuilder add(final ImmutableDataManipulator<?, ?> manipulator) {
+    public SpongeBlockSnapshotBuilder add(final Immutable<?, ?> manipulator) {
         checkNotNull(manipulator, "manipulator");
         if (this.manipulators == null) {
             this.manipulators = Lists.newArrayList();
         }
-        for (final Iterator<ImmutableDataManipulator<?, ?>> iterator = this.manipulators.iterator(); iterator.hasNext();) {
-            final ImmutableDataManipulator<?, ?> existing = iterator.next();
+        for (final Iterator<Immutable<?, ?>> iterator = this.manipulators.iterator(); iterator.hasNext();) {
+            final Immutable<?, ?> existing = iterator.next();
             if (manipulator.getClass().isInstance(existing)) {
                 iterator.remove();
             }
@@ -199,7 +198,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public <V> SpongeBlockSnapshotBuilder add(final Key<? extends BaseValue<V>> key, final V value) {
+    public <V> SpongeBlockSnapshotBuilder add(final Key<? extends Value<V>> key, final V value) {
         checkNotNull(key, "key");
         checkState(this.blockState != null);
         this.blockState = this.blockState.with(key, value).orElse(this.blockState);

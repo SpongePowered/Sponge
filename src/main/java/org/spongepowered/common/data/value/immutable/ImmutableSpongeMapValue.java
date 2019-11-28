@@ -32,37 +32,37 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
-import org.spongepowered.api.data.value.mutable.MapValue;
+import org.spongepowered.api.data.value.MapValue.Immutable;
+import org.spongepowered.api.data.value.MapValue.Mutable;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
 
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V>> implements ImmutableMapValue<K, V> {
+public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V>> implements Immutable<K, V> {
 
-    public ImmutableSpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key) {
+    public ImmutableSpongeMapValue(Key<? extends Value<Map<K, V>>> key) {
         this(key, ImmutableMap.<K, V>of());
     }
 
-    public ImmutableSpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> actualValue) {
+    public ImmutableSpongeMapValue(Key<? extends Value<Map<K, V>>> key, Map<K, V> actualValue) {
         super(key, ImmutableMap.<K, V>of(), ImmutableMap.copyOf(actualValue));
     }
 
     @Override
-    public ImmutableMapValue<K, V> with(Map<K, V> value) {
+    public Immutable<K, V> with(Map<K, V> value) {
         return new ImmutableSpongeMapValue<>(getKey(), checkNotNull(value));
     }
 
     @Override
-    public ImmutableMapValue<K, V> transform(Function<Map<K, V>, Map<K, V>> function) {
+    public Immutable<K, V> transform(Function<Map<K, V>, Map<K, V>> function) {
         return new ImmutableSpongeMapValue<>(getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
     }
 
     @Override
-    public MapValue<K, V> asMutable() {
+    public Mutable<K, V> asMutable() {
         final Map<K, V> map = Maps.newHashMap();
         map.putAll(this.actualValue);
         return new SpongeMapValue<>(getKey(), map);
@@ -74,18 +74,18 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
     }
 
     @Override
-    public ImmutableMapValue<K, V> with(K key, V value) {
+    public Immutable<K, V> with(K key, V value) {
         return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue).put(checkNotNull(key),
                                                                                                                  checkNotNull(value)).build());
     }
 
     @Override
-    public ImmutableMapValue<K, V> withAll(Map<K, V> map) {
+    public Immutable<K, V> withAll(Map<K, V> map) {
         return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue).putAll(map).build());
     }
 
     @Override
-    public ImmutableMapValue<K, V> without(K key) {
+    public Immutable<K, V> without(K key) {
         final ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
         this.actualValue.entrySet().stream()
             .filter(entry -> !entry.getKey().equals(key))
@@ -94,7 +94,7 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
     }
 
     @Override
-    public ImmutableMapValue<K, V> withoutAll(Iterable<K> keys) {
+    public Immutable<K, V> withoutAll(Iterable<K> keys) {
         final ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
         this.actualValue.entrySet().stream()
             .filter(entry -> !Iterables.contains(keys, entry.getKey()))
@@ -103,7 +103,7 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
     }
 
     @Override
-    public ImmutableMapValue<K, V> withoutAll(Predicate<Map.Entry<K, V>> predicate) {
+    public Immutable<K, V> withoutAll(Predicate<Map.Entry<K, V>> predicate) {
         final ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
         this.actualValue.entrySet().stream()
             .filter(entry -> checkNotNull(predicate).test(entry))

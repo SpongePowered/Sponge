@@ -28,8 +28,8 @@ import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.NetherChunkGenerator;
 import net.minecraft.world.gen.feature.FortressStructure;
 import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.gen.TerrainGenerator;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,12 +43,12 @@ public abstract class ChunkGeneratorHellMixin_API implements PopulatorProviderBr
     @Shadow @Final private MapGenBase genNetherCaves;
 
     @Override
-    public void bridge$addPopulators(final WorldGenerator generator) {
+    public void bridge$addPopulators(final TerrainGenerator generator) {
         generator.getGenerationPopulators().add((GenerationPopulator) this.genNetherCaves);
 
         if (this.generateStructures) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.genNetherBridge);
-            generator.getPopulators().add((Populator) this.genNetherBridge);
+            generator.getPopulators().add((Feature) this.genNetherBridge);
         }
     }
 

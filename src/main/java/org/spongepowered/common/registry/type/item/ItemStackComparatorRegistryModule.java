@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
 import org.spongepowered.api.data.manipulator.mutable.item.DurabilityData;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.registry.RegistrationPhase;
@@ -87,16 +87,16 @@ public final class ItemStackComparatorRegistryModule implements RegistryModule {
 
     private static final class ItemDataComparator implements Comparator<ItemStack> {
 
-        private final Class<? extends DataManipulator<?, ?>>[] ignored;
+        private final Class<? extends Mutable<?, ?>>[] ignored;
 
-        ItemDataComparator(Class<? extends DataManipulator<?, ?>>... ignored) {
+        ItemDataComparator(Class<? extends Mutable<?, ?>>... ignored) {
             this.ignored = ignored;
         }
 
         @Override
         public int compare(ItemStack o1, ItemStack o2) {
-            Set<DataManipulator<?, ?>> manipulators = new LinkedHashSet<>(o2.getContainers());
-            for (final DataManipulator<?, ?> manipulator : o1.getContainers()) {
+            Set<Mutable<?, ?>> manipulators = new LinkedHashSet<>(o2.getContainers());
+            for (final Mutable<?, ?> manipulator : o1.getContainers()) {
                 if (manipulators.contains(manipulator)) {
                     manipulators.remove(manipulator);
                 } else if (!this.isIgnored(manipulators, manipulator)) {
@@ -106,8 +106,8 @@ public final class ItemStackComparatorRegistryModule implements RegistryModule {
             return manipulators.size();
         }
 
-        private boolean isIgnored(Set<DataManipulator<?, ?>> list, DataManipulator<?, ?> toCheck) {
-            for (Class<? extends DataManipulator<?, ?>> ignore : this.ignored) {
+        private boolean isIgnored(Set<Mutable<?, ?>> list, Mutable<?, ?> toCheck) {
+            for (Class<? extends Mutable<?, ?>> ignore : this.ignored) {
                 if (ignore.isAssignableFrom(toCheck.getClass())) {
                     list.removeIf(manip -> ignore.isAssignableFrom(manip.getClass()));
                     return true;

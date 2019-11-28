@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +40,7 @@ import javax.annotation.Nullable;
 public abstract class BlockEventDataMixin implements BlockEventDataBridge {
 
     @Nullable private LocatableBlock bridge$TickingBlock = null;
-    @Nullable private TileEntity bridge$TileEntity = null;
+    @Nullable private BlockEntity bridge$TileEntity = null;
     @Nullable private User bridge$sourceUser = null;
 
     @Shadow public abstract BlockPos getPosition();
@@ -59,12 +59,12 @@ public abstract class BlockEventDataMixin implements BlockEventDataBridge {
 
     @Nullable
     @Override
-    public TileEntity bridge$getTileEntity() {
+    public BlockEntity bridge$getTileEntity() {
         return this.bridge$TileEntity;
     }
 
     @Override
-    public void bridge$setTileEntity(@Nullable final TileEntity bridge$TileEntity) {
+    public void bridge$setTileEntity(@Nullable final BlockEntity bridge$TileEntity) {
         this.bridge$TileEntity = bridge$TileEntity;
     }
 

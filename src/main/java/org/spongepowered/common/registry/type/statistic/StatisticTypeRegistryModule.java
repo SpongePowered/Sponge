@@ -28,8 +28,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.statistic.StatisticType;
-import org.spongepowered.api.statistic.StatisticTypes;
+import org.spongepowered.api.statistic.StatisticCategories;
+import org.spongepowered.api.statistic.StatisticCategory;
 import org.spongepowered.common.statistic.SpongeStatisticType;
 
 import java.util.Collection;
@@ -37,18 +37,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class StatisticTypeRegistryModule implements CatalogRegistryModule<StatisticType> {
+public final class StatisticTypeRegistryModule implements CatalogRegistryModule<StatisticCategory> {
 
-    @RegisterCatalog(StatisticTypes.class)
-    private final Map<String, StatisticType> statisticTypeMappings = Maps.newHashMap();
+    @RegisterCatalog(StatisticCategories.class)
+    private final Map<String, StatisticCategory> statisticTypeMappings = Maps.newHashMap();
 
     @Override
-    public Optional<StatisticType> getById(String id) {
+    public Optional<StatisticCategory> getById(String id) {
         return Optional.ofNullable(this.statisticTypeMappings.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
-    public Collection<StatisticType> getAll() {
+    public Collection<StatisticCategory> getAll() {
         return ImmutableSet.copyOf(this.statisticTypeMappings.values());
     }
 

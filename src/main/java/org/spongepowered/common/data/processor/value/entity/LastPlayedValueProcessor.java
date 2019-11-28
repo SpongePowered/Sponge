@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -41,7 +41,7 @@ import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.entity.player.PlayerEntity;
 
-public class LastPlayedValueProcessor extends AbstractSpongeValueProcessor<Identifiable, Instant, Value<Instant>> {
+public class LastPlayedValueProcessor extends AbstractSpongeValueProcessor<Identifiable, Instant, Mutable<Instant>> {
 
     public LastPlayedValueProcessor() {
         super(Identifiable.class, Keys.LAST_DATE_PLAYED);
@@ -53,7 +53,7 @@ public class LastPlayedValueProcessor extends AbstractSpongeValueProcessor<Ident
     }
 
     @Override
-    protected Value<Instant> constructValue(Instant actualValue) {
+    protected Mutable<Instant> constructValue(Instant actualValue) {
         return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.now(), actualValue);
     }
 
@@ -71,7 +71,7 @@ public class LastPlayedValueProcessor extends AbstractSpongeValueProcessor<Ident
     }
 
     @Override
-    protected ImmutableValue<Instant> constructImmutableValue(Instant value) {
+    protected Immutable<Instant> constructImmutableValue(Instant value) {
         return new ImmutableSpongeValue<Instant>(Keys.LAST_DATE_PLAYED, Instant.now(), value);
     }
 

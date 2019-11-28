@@ -28,13 +28,12 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
-
 import java.util.Optional;
 
-public abstract class AbstractCatalogDataValueProcessor<T extends CatalogType, V extends Value<T>> extends
+public abstract class AbstractCatalogDataValueProcessor<T extends CatalogType, V extends Mutable<T>> extends
         AbstractSpongeValueProcessor<ItemStack, T, V> {
 
     protected AbstractCatalogDataValueProcessor(Key<V> key) {
@@ -62,7 +61,7 @@ public abstract class AbstractCatalogDataValueProcessor<T extends CatalogType, V
     }
 
     @Override
-    protected ImmutableValue<T> constructImmutableValue(T value) {
+    protected Immutable<T> constructImmutableValue(T value) {
         return this.constructValue(value).asImmutable();
     }
 

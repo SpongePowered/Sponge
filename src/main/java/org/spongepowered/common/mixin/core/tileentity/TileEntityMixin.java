@@ -29,8 +29,8 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -132,7 +132,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      * @param compound The SpongeData compound to read from
      */
     protected void bridge$readFromSpongeCompound(final CompoundNBT compound) {
-        DataUtil.readCustomData(compound, (TileEntity) this);
+        DataUtil.readCustomData(compound, (BlockEntity) this);
     }
 
     /**
@@ -141,14 +141,14 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      * @param compound The SpongeData compound to write to
      */
     protected void bridge$writeToSpongeCompound(final CompoundNBT compound) {
-        DataUtil.writeCustomData(compound, (TileEntity) this);
+        DataUtil.writeCustomData(compound, (BlockEntity) this);
     }
 
 
     @Override
     public Timing bridge$getTimingsHandler() {
         if (this.impl$timing == null) {
-            this.impl$timing = SpongeTimings.getTileEntityTiming((TileEntity) this);
+            this.impl$timing = SpongeTimings.getTileEntityTiming((BlockEntity) this);
         }
         return this.impl$timing;
     }
@@ -201,18 +201,18 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
 
     @Override
     public void bridge$refreshTrackerStates() {
-        if (((TileEntity) this).getType() != null) {
-            this.impl$allowsBlockBulkCapture = ((SpongeTileEntityType) ((TileEntity) this).getType()).allowsBlockBulkCapture;
-            this.impl$allowsEntityBulkCapture = ((SpongeTileEntityType) ((TileEntity) this).getType()).allowsEntityBulkCapture;
-            this.impl$allowsBlockEventCreation = ((SpongeTileEntityType) ((TileEntity) this).getType()).allowsBlockEventCreation;
-            this.impl$allowsEntityEventCreation = ((SpongeTileEntityType) ((TileEntity) this).getType()).allowsEntityEventCreation;
+        if (((BlockEntity) this).getType() != null) {
+            this.impl$allowsBlockBulkCapture = ((SpongeTileEntityType) ((BlockEntity) this).getType()).allowsBlockBulkCapture;
+            this.impl$allowsEntityBulkCapture = ((SpongeTileEntityType) ((BlockEntity) this).getType()).allowsEntityBulkCapture;
+            this.impl$allowsBlockEventCreation = ((SpongeTileEntityType) ((BlockEntity) this).getType()).allowsBlockEventCreation;
+            this.impl$allowsEntityEventCreation = ((SpongeTileEntityType) ((BlockEntity) this).getType()).allowsEntityEventCreation;
         }
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public String toString() {
-        final TileEntityType type = ((TileEntity) this).getType();
+        final BlockEntityType type = ((BlockEntity) this).getType();
         return MoreObjects.toStringHelper(this)
                 // Double check some mods are registering their tile entities and doing some "interesting"
                 // things with doing a to string on a tile entity not actually functionally valid in the game "yet".
@@ -225,7 +225,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
 
     protected MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
         return MoreObjects.toStringHelper(this)
-            .add("type", ((TileEntity) this).getType().getId())
+            .add("type", ((BlockEntity) this).getType().getId())
             .add("world", this.world.getWorldInfo().getWorldName())
             .add("pos", this.pos);
     }

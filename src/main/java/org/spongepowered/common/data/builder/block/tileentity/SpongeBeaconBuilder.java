@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import org.spongepowered.api.block.tileentity.carrier.Beacon;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.block.entity.carrier.Beacon;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBeaconData;

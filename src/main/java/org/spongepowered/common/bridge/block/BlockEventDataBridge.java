@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.block;
 
-import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.LocatableBlock;
 
@@ -34,13 +34,13 @@ public interface BlockEventDataBridge {
 
     @Nullable LocatableBlock bridge$getTickingLocatable();
 
-    @Nullable TileEntity bridge$getTileEntity();
+    @Nullable BlockEntity bridge$getTileEntity();
 
     @Nullable User bridge$getSourceUser();
 
     void bridge$setTickingLocatable(@Nullable LocatableBlock tickBlock);
 
-    void bridge$setTileEntity(@Nullable TileEntity bridge$TileEntity);
+    void bridge$setTileEntity(@Nullable BlockEntity bridge$TileEntity);
 
     void bridge$setSourceUser(@Nullable User user);
 }

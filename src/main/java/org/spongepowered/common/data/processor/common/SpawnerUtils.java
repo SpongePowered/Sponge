@@ -33,7 +33,7 @@ import net.minecraft.world.spawner.AbstractSpawner;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -138,8 +138,8 @@ public class SpawnerUtils {
 
     public static void applyData(final AbstractSpawner logic, final MobSpawnerData data) {
         final Map<Key<?>, Object> map = new IdentityHashMap<>();
-        final Set<ImmutableValue<?>> newValues = data.getValues();
-        for (final ImmutableValue<?> value : newValues) {
+        final Set<Immutable<?>> newValues = data.getValues();
+        for (final Immutable<?> value : newValues) {
             map.put(value.getKey(), value.get());
         }
         applyData(((MobSpawnerBaseLogicAccessor) logic), map);

@@ -29,9 +29,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionEffectData;
 import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
+import org.spongepowered.api.data.value.ListValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionEffectData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.entity.LivingEntity;
 
-public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetProcessor<LivingEntity, List<PotionEffect>, ListValue<PotionEffect>,
+public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetProcessor<LivingEntity, List<PotionEffect>, Mutable<PotionEffect>,
         PotionEffectData, ImmutablePotionEffectData> {
 
     public EntityPotionDataProcessor() {
@@ -80,12 +80,12 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
     }
 
     @Override
-    protected ImmutableValue<List<PotionEffect>> constructImmutableValue(List<PotionEffect> value) {
+    protected Immutable<List<PotionEffect>> constructImmutableValue(List<PotionEffect> value) {
         return new ImmutableSpongeListValue<>(Keys.POTION_EFFECTS, ImmutableList.copyOf(value));
     }
 
     @Override
-    protected ListValue<PotionEffect> constructValue(List<PotionEffect> actualValue) {
+    protected Mutable<PotionEffect> constructValue(List<PotionEffect> actualValue) {
         return new SpongeListValue<>(Keys.POTION_EFFECTS, actualValue);
     }
 

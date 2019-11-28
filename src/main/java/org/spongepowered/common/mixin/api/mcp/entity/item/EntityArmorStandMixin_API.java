@@ -24,18 +24,16 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.util.math.Rotations;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArmorStandData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BodyPartRotationalData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DisabledSlotsData;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -47,7 +45,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDisabledSl
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Collection;
 import java.util.Map;
 
@@ -68,22 +66,22 @@ public abstract class EntityArmorStandMixin_API extends EntityLivingBaseMixin_AP
     @Shadow public abstract Rotations getBodyRotation();
 
     @Override
-    public Value<Boolean> marker() {
+    public Mutable<Boolean> marker() {
         return new SpongeValue<>(Keys.ARMOR_STAND_MARKER, false, this.hasMarker());
     }
 
     @Override
-    public Value<Boolean> small() {
+    public Mutable<Boolean> small() {
         return new SpongeValue<>(Keys.ARMOR_STAND_IS_SMALL, false, this.shadow$isSmall());
     }
 
     @Override
-    public Value<Boolean> basePlate() {
+    public Mutable<Boolean> basePlate() {
         return new SpongeValue<>(Keys.ARMOR_STAND_HAS_BASE_PLATE, true, !this.hasNoBasePlate());
     }
 
     @Override
-    public Value<Boolean> arms() {
+    public Mutable<Boolean> arms() {
         return new SpongeValue<>(Keys.ARMOR_STAND_HAS_ARMS, false, this.getShowArms());
     }
 
@@ -110,7 +108,7 @@ public abstract class EntityArmorStandMixin_API extends EntityLivingBaseMixin_AP
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getBodyPartRotationalData());
         manipulators.add(getArmorStandData());

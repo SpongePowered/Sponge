@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.item;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableHideData;
 import org.spongepowered.api.data.manipulator.mutable.item.HideData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeHideData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
@@ -62,32 +62,32 @@ public class SpongeHideData extends AbstractData<HideData, ImmutableHideData> im
     }
 
     @Override
-    public Value<Boolean> hideEnchantments() {
+    public Mutable<Boolean> hideEnchantments() {
         return SpongeValueFactory.getInstance().createValue(Keys.HIDE_ENCHANTMENTS, this.enchantments, false);
     }
 
     @Override
-    public Value<Boolean> hideAttributes() {
+    public Mutable<Boolean> hideAttributes() {
         return SpongeValueFactory.getInstance().createValue(Keys.HIDE_ATTRIBUTES, this.attributes, false);
     }
 
     @Override
-    public Value<Boolean> hideUnbreakable() {
+    public Mutable<Boolean> hideUnbreakable() {
         return SpongeValueFactory.getInstance().createValue(Keys.HIDE_UNBREAKABLE, this.unbreakable, false);
     }
 
     @Override
-    public Value<Boolean> hideCanDestroy() {
+    public Mutable<Boolean> hideCanDestroy() {
         return SpongeValueFactory.getInstance().createValue(Keys.HIDE_CAN_DESTROY, this.canDestroy, false);
     }
 
     @Override
-    public Value<Boolean> hideCanPlace() {
+    public Mutable<Boolean> hideCanPlace() {
         return SpongeValueFactory.getInstance().createValue(Keys.HIDE_CAN_PLACE, this.canPlace, false);
     }
 
     @Override
-    public Value<Boolean> hideMiscellaneous() {
+    public Mutable<Boolean> hideMiscellaneous() {
         return SpongeValueFactory.getInstance().createValue(Keys.HIDE_MISCELLANEOUS, this.miscellaneous, false);
     }
 

@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet.drag;
 
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.World;
@@ -62,7 +62,7 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
         final ServerPlayerEntity player = context.getPacketPlayer();
         ((ContainerBridge) player.openContainer).bridge$setFirePreview(true);
 
-        Inventory craftInv = ((Inventory) player.openContainer).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+        Inventory craftInv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
         if (craftInv instanceof CraftingInventory) {
             List<SlotTransaction> previewTransactions = ((ContainerBridge) player.openContainer).bridge$getPreviewTransactions();
             if (!previewTransactions.isEmpty()) {

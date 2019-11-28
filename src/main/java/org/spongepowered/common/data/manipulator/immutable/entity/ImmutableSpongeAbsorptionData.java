@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAbsorptionData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AbsorptionData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAbsorptionData;
 import org.spongepowered.common.util.Constants;
@@ -35,7 +35,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public final class ImmutableSpongeAbsorptionData extends AbstractImmutableSingleData<Double, ImmutableAbsorptionData, AbsorptionData> implements ImmutableAbsorptionData {
 
-    private final ImmutableValue<Double> value;
+    private final Immutable<Double> value;
 
     public ImmutableSpongeAbsorptionData(double value) {
         super(ImmutableAbsorptionData.class, value, Keys.ABSORPTION);
@@ -43,12 +43,12 @@ public final class ImmutableSpongeAbsorptionData extends AbstractImmutableSingle
     }
 
     @Override
-    public ImmutableValue<Double> absorption() {
+    public Immutable<Double> absorption() {
         return this.getValueGetter();
     }
 
     @Override
-    protected ImmutableValue<Double> getValueGetter() {
+    protected Immutable<Double> getValueGetter() {
         return this.value;
     }
 

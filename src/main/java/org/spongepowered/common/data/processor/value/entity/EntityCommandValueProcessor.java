@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.tileentity.CommandBlockBaseLogicAccessor;
@@ -36,7 +36,7 @@ import org.spongepowered.common.mixin.core.tileentity.CommandBlockBaseLogicAcces
 import java.util.Optional;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 
-public class EntityCommandValueProcessor extends AbstractSpongeValueProcessor<MinecartCommandBlockEntity, String, Value<String>> {
+public class EntityCommandValueProcessor extends AbstractSpongeValueProcessor<MinecartCommandBlockEntity, String, Mutable<String>> {
 
     public EntityCommandValueProcessor() {
         super(MinecartCommandBlockEntity.class, Keys.COMMAND);
@@ -48,7 +48,7 @@ public class EntityCommandValueProcessor extends AbstractSpongeValueProcessor<Mi
     }
 
     @Override
-    protected Value<String> constructValue(final String actualValue) {
+    protected Mutable<String> constructValue(final String actualValue) {
         return new SpongeValue<>(Keys.COMMAND, actualValue);
     }
 
@@ -64,7 +64,7 @@ public class EntityCommandValueProcessor extends AbstractSpongeValueProcessor<Mi
     }
 
     @Override
-    protected ImmutableValue<String> constructImmutableValue(final String value) {
+    protected Immutable<String> constructImmutableValue(final String value) {
         return constructValue(value).asImmutable();
     }
 

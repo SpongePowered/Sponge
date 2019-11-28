@@ -29,15 +29,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import net.minecraft.block.BlockPlanks;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
+import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 import java.util.Map;
 
-@RegisterCatalog(TreeTypes.class)
-public final class TreeTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockPlanks.EnumType, TreeType> {
+@RegisterCatalog(WoodTypes.class)
+public final class TreeTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockPlanks.EnumType, WoodType> {
 
     private static final class Holder {
         private static final TreeTypeRegistryModule INSTANCE = new TreeTypeRegistryModule();
@@ -48,13 +48,13 @@ public final class TreeTypeRegistryModule extends MinecraftEnumBasedCatalogTypeM
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static BlockPlanks.EnumType getFor(final TreeType treeType) {
+    public static BlockPlanks.EnumType getFor(final WoodType treeType) {
         return (BlockPlanks.EnumType) (Object) treeType;
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static TreeType getFor(final BlockPlanks.EnumType planks) {
-        return (TreeType) (Object) planks;
+    public static WoodType getFor(final BlockPlanks.EnumType planks) {
+        return (WoodType) (Object) planks;
     }
 
     TreeTypeRegistryModule() {

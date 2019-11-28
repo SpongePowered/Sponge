@@ -26,7 +26,6 @@ package org.spongepowered.common.item.inventory.lens.impl;
 
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.GridInventory;
-import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
 
 /**

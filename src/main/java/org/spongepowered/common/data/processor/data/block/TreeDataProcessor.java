@@ -30,9 +30,9 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.data.type.WoodTypes;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
@@ -42,15 +42,15 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Map;
 import java.util.Optional;
 
-public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Value<TreeType>, TreeData, ImmutableTreeData> {
+public class TreeDataProcessor extends AbstractCatalogDataProcessor<WoodType, Mutable<WoodType>, TreeData, ImmutableTreeData> {
 
-    private static final Map<ItemType, TreeType> boatMapping = ImmutableMap.<ItemType, TreeType>builder()
-            .put(ItemTypes.BOAT, TreeTypes.OAK)
-            .put(ItemTypes.ACACIA_BOAT, TreeTypes.ACACIA)
-            .put(ItemTypes.BIRCH_BOAT, TreeTypes.BIRCH)
-            .put(ItemTypes.DARK_OAK_BOAT, TreeTypes.DARK_OAK)
-            .put(ItemTypes.JUNGLE_BOAT, TreeTypes.JUNGLE)
-            .put(ItemTypes.SPRUCE_BOAT, TreeTypes.SPRUCE)
+    private static final Map<ItemType, WoodType> boatMapping = ImmutableMap.<ItemType, WoodType>builder()
+            .put(ItemTypes.BOAT, WoodTypes.OAK)
+            .put(ItemTypes.ACACIA_BOAT, WoodTypes.ACACIA)
+            .put(ItemTypes.BIRCH_BOAT, WoodTypes.BIRCH)
+            .put(ItemTypes.DARK_OAK_BOAT, WoodTypes.DARK_OAK)
+            .put(ItemTypes.JUNGLE_BOAT, WoodTypes.JUNGLE)
+            .put(ItemTypes.SPRUCE_BOAT, WoodTypes.SPRUCE)
             .build();
 
     public TreeDataProcessor() {
@@ -61,17 +61,17 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
     }
 
     @Override
-    protected int setToMeta(TreeType value) {
+    protected int setToMeta(WoodType value) {
         return ((BlockPlanks.EnumType) (Object) value).getMetadata();
     }
 
     @Override
-    protected TreeType getFromMeta(int meta) {
-        return (TreeType) (Object) BlockPlanks.EnumType.byMetadata(meta);
+    protected WoodType getFromMeta(int meta) {
+        return (WoodType) (Object) BlockPlanks.EnumType.byMetadata(meta);
     }
 
     @Override
-    protected Optional<TreeType> getVal(ItemStack stack) {
+    protected Optional<WoodType> getVal(ItemStack stack) {
         if (stack.getItem() == ItemTypes.LEAVES2 || stack.getItem() == ItemTypes.LOG2) {
             return Optional.of(getFromMeta(stack.getDamage() + 4));
         } else if (boatMapping.containsKey((ItemType) stack.getItem())) {
@@ -87,18 +87,18 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
     }
 
     @Override
-    protected boolean set(ItemStack stack, TreeType value) {
+    protected boolean set(ItemStack stack, WoodType value) {
         // TODO - the API needs to be changed, as its no longer possible to change an ItemStack's type
 
         if (stack.getItem() == ItemTypes.LOG || stack.getItem() == ItemTypes.LEAVES) {
-            if (value == TreeTypes.ACACIA || value == TreeTypes.DARK_OAK) {
+            if (value == WoodTypes.ACACIA || value == WoodTypes.DARK_OAK) {
                 return false; // TODO
             }
             stack.setItemDamage(this.setToMeta(value));
             return true;
         }
         else if (stack.getItem() == ItemTypes.LOG2 || stack.getItem() == ItemTypes.LEAVES2) {
-            if (value == TreeTypes.OAK || value == TreeTypes.SPRUCE || value == TreeTypes.BIRCH || value == TreeTypes.JUNGLE) {
+            if (value == WoodTypes.OAK || value == WoodTypes.SPRUCE || value == WoodTypes.BIRCH || value == WoodTypes.JUNGLE) {
                 return false; // TODO
             }
             stack.setItemDamage(this.setToMeta(value) - 4);
@@ -111,12 +111,12 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
     }
 
     @Override
-    protected TreeType getDefaultValue() {
-        return TreeTypes.OAK;
+    protected WoodType getDefaultValue() {
+        return WoodTypes.OAK;
     }
 
     @Override
-    protected Value<TreeType> constructValue(TreeType actualValue) {
+    protected Mutable<WoodType> constructValue(WoodType actualValue) {
         return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 

@@ -30,7 +30,7 @@ import net.minecraft.block.BlockDoubleStoneSlabNew;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockStoneSlab;
 import net.minecraft.block.BlockStoneSlabNew;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSeamlessData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSlabData;
 import org.spongepowered.api.data.type.SlabType;
@@ -45,12 +45,12 @@ public abstract class BlockDoubleStoneSlabMixin extends BlockStoneSlabMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final BlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getSlabTypeFor(blockState), impl$getIsSeamlessFor(blockState));
+    public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final BlockState blockState) {
+        return ImmutableList.<Immutable<?, ?>>of(impl$getSlabTypeFor(blockState), impl$getIsSeamlessFor(blockState));
     }
 
     @Override
-    public boolean bridge$supports(final Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
+    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
         return ImmutableSlabData.class.isAssignableFrom(immutable) || ImmutableSeamlessData.class.isAssignableFrom(immutable);
     }
 

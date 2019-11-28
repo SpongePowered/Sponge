@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3f;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -60,7 +58,8 @@ import org.spongepowered.common.mixin.core.entity.item.EntityFireworkRocketAcces
 import org.spongepowered.common.mixin.core.network.play.server.SPacketEntityMetadataAccessor;
 import org.spongepowered.common.mixin.core.network.play.server.SPacketEntityStatusAccessor;
 import org.spongepowered.common.mixin.core.network.play.server.SPacketSpawnObjectAccessor;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3f;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

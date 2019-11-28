@@ -33,7 +33,7 @@ import com.google.common.collect.Lists;
 import org.spongepowered.api.extra.modifier.empty.VoidWorldGeneratorModifier;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
 import org.spongepowered.api.world.gen.WorldGeneratorModifiers;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
@@ -45,32 +45,32 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class WorldGeneratorModifierRegistryModule implements AlternateCatalogRegistryModule<WorldGeneratorModifier>,
-        SpongeAdditionalCatalogRegistryModule<WorldGeneratorModifier> {
+public class WorldGeneratorModifierRegistryModule implements AlternateCatalogRegistryModule<TerrainGeneratorConfig>,
+        SpongeAdditionalCatalogRegistryModule<TerrainGeneratorConfig> {
 
     public static WorldGeneratorModifierRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
     @RegisterCatalog(WorldGeneratorModifiers.class)
-    private final Map<String, WorldGeneratorModifier> modifierMappings = new HashMap<>();
+    private final Map<String, TerrainGeneratorConfig> modifierMappings = new HashMap<>();
 
     @Override
-    public Map<String, WorldGeneratorModifier> provideCatalogMap() {
-        final Map<String, WorldGeneratorModifier> modifierMap = new HashMap<>();
-        for (Map.Entry<String, WorldGeneratorModifier> entry : this.modifierMappings.entrySet()) {
+    public Map<String, TerrainGeneratorConfig> provideCatalogMap() {
+        final Map<String, TerrainGeneratorConfig> modifierMap = new HashMap<>();
+        for (Map.Entry<String, TerrainGeneratorConfig> entry : this.modifierMappings.entrySet()) {
             modifierMap.put(entry.getKey().replace("sponge:", ""), entry.getValue());
         }
         return modifierMap;
     }
 
     @Override
-    public Optional<WorldGeneratorModifier> getById(String id) {
+    public Optional<TerrainGeneratorConfig> getById(String id) {
         return Optional.ofNullable(this.modifierMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
-    public Collection<WorldGeneratorModifier> getAll() {
+    public Collection<TerrainGeneratorConfig> getAll() {
         return ImmutableList.copyOf(this.modifierMappings.values());
     }
 
@@ -87,7 +87,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
     }
 
     @Override
-    public void registerAdditionalCatalog(WorldGeneratorModifier modifier) {
+    public void registerAdditionalCatalog(TerrainGeneratorConfig modifier) {
         checkNotNull(modifier, "modifier");
         final String id = modifier.getId();
         checkId(id, "World generator ID");
@@ -105,7 +105,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
      * @param modifiers The modifiers
      * @throws IllegalArgumentException If a modifier is not registered
      */
-    public void checkAllRegistered(Collection<WorldGeneratorModifier> modifiers) {
+    public void checkAllRegistered(Collection<TerrainGeneratorConfig> modifiers) {
         // We simply call toIds, that checks all world generators
         toIds(modifiers);
     }
@@ -118,9 +118,9 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
      * @throws IllegalArgumentException If any of the modifiers is not
      *         registered
      */
-    public ImmutableCollection<String> toIds(Collection<WorldGeneratorModifier> modifiers) {
+    public ImmutableCollection<String> toIds(Collection<TerrainGeneratorConfig> modifiers) {
         final ImmutableList.Builder<String> ids = ImmutableList.builder();
-        for (WorldGeneratorModifier modifier : modifiers) {
+        for (TerrainGeneratorConfig modifier : modifiers) {
             checkNotNull(modifier, "modifier (in collection)");
             final String id = modifier.getId();
             checkArgument(this.modifierMappings.containsKey(id.toLowerCase(Locale.ENGLISH)), "unregistered modifier in collection");
@@ -137,10 +137,10 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
      * @param ids The ids
      * @return The modifiers
      */
-    public Collection<WorldGeneratorModifier> toModifiers(Collection<String> ids) {
-        final List<WorldGeneratorModifier> modifiers = Lists.newArrayList();
+    public Collection<TerrainGeneratorConfig> toModifiers(Collection<String> ids) {
+        final List<TerrainGeneratorConfig> modifiers = Lists.newArrayList();
         for (String id : ids) {
-            final WorldGeneratorModifier modifier = this.modifierMappings.get(id.toLowerCase(Locale.ENGLISH));
+            final TerrainGeneratorConfig modifier = this.modifierMappings.get(id.toLowerCase(Locale.ENGLISH));
             if (modifier != null) {
                 modifiers.add(modifier);
             } else {

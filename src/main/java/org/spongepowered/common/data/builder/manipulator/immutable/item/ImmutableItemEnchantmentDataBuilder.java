@@ -29,7 +29,6 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.ImmutableDataHolder;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulatorBuilder;
@@ -37,6 +36,7 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmen
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
 import org.spongepowered.common.util.Constants;

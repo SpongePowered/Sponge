@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
@@ -50,7 +50,7 @@ public class ChunkRegenerateContext extends GenerationContext<ChunkRegenerateCon
         return this;
     }
 
-    public final org.spongepowered.api.world.Chunk getChunk() {
+    public final org.spongepowered.api.world.chunk.Chunk getChunk() {
         return this.chunk;
     }
 

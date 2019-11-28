@@ -27,9 +27,9 @@ package org.spongepowered.common.data.processor.value.entity;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -38,14 +38,14 @@ import java.util.Optional;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 
-public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor<AbstractMinecartEntity, BlockState, Value<BlockState>> {
+public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor<AbstractMinecartEntity, BlockState, Mutable<BlockState>> {
 
     public RepresentedBlockValueProcessor() {
         super(AbstractMinecartEntity.class, Keys.REPRESENTED_BLOCK);
     }
 
     @Override
-    protected Value<BlockState> constructValue(final BlockState value) {
+    protected Mutable<BlockState> constructValue(final BlockState value) {
         return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), value);
     }
 
@@ -62,7 +62,7 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
     }
 
     @Override
-    protected ImmutableValue<BlockState> constructImmutableValue(final BlockState value) {
+    protected Immutable<BlockState> constructImmutableValue(final BlockState value) {
         return new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), value);
     }
 
@@ -70,7 +70,7 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if(container instanceof AbstractMinecartEntity) {
             final AbstractMinecartEntity cart = (AbstractMinecartEntity) container;
-            final ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
+            final Immutable<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
             cart.setHasDisplayTile(false);
             return DataTransactionResult.builder().replace(block).build();
         }

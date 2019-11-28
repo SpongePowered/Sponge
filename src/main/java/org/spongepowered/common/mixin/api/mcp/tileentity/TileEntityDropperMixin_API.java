@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.DropperTileEntity;
-import org.spongepowered.api.block.tileentity.carrier.Dropper;
+import org.spongepowered.api.block.entity.carrier.Dropper;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 

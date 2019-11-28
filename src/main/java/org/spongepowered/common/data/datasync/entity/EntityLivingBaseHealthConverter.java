@@ -28,7 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -70,8 +70,8 @@ public class EntityLivingBaseHealthConverter extends DataParameterConverter<Floa
     }
 
     @Override
-    public Float getValueFromEvent(final Float originalValue, final List<ImmutableValue<?>> immutableValues) {
-        for (final ImmutableValue<?> immutableValue : immutableValues) {
+    public Float getValueFromEvent(final Float originalValue, final List<Immutable<?>> immutableValues) {
+        for (final Immutable<?> immutableValue : immutableValues) {
             if (immutableValue.getKey() == Keys.HEALTH) {
                 return (Float) immutableValue.get();
             }

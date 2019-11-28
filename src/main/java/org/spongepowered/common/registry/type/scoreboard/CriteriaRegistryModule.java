@@ -26,8 +26,8 @@ package org.spongepowered.common.registry.type.scoreboard;
 
 import net.minecraft.scoreboard.ScoreCriteria;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.scoreboard.critieria.Criteria;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.criteria.Criteria;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 @RegisterCatalog(Criteria.class)

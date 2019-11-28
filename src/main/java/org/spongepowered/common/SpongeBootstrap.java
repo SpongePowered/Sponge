@@ -28,7 +28,7 @@ import com.google.inject.Inject;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.pagination.PaginationService;

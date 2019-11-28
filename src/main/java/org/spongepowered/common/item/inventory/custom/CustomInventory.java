@@ -32,7 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
@@ -65,7 +65,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     public static final String INVENTORY_CAPACITY = InventoryCapacity.class.getSimpleName().toLowerCase(Locale.ENGLISH);
     public static final String INVENTORY_DIMENSION = InventoryDimension.class.getSimpleName().toLowerCase(Locale.ENGLISH);
     public static final String TITLE = InventoryTitle.class.getSimpleName().toLowerCase(Locale.ENGLISH);
-    private final Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners;
+    private final Map<Class<? extends InteractContainerEvent>, List<Consumer<? extends InteractContainerEvent>>> listeners;
     private final PluginContainer plugin;
 
     private net.minecraft.inventory.Inventory inv;
@@ -78,7 +78,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     @SuppressWarnings("deprecation")
     public CustomInventory(final InventoryArchetype archetype, final Map<String, InventoryProperty<?, ?>> properties, final Carrier carrier,
-            final Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, final PluginContainer plugin) {
+            final Map<Class<? extends InteractContainerEvent>, List<Consumer<? extends InteractContainerEvent>>> listeners, final PluginContainer plugin) {
         this.archetype = archetype;
         this.properties = properties;
         this.carrier = carrier;
@@ -110,7 +110,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     private void doRegistration() {
-        for (final Map.Entry<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> entry: this.listeners.entrySet()) {
+        for (final Map.Entry<Class<? extends InteractContainerEvent>, List<Consumer<? extends InteractContainerEvent>>> entry: this.listeners.entrySet()) {
             Sponge.getEventManager().registerListener(this.plugin, entry.getKey(), new CustomInventoryListener((Inventory) this, entry.getValue()));
         }
         this.registered = true;

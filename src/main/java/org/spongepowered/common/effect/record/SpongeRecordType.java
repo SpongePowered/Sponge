@@ -26,19 +26,18 @@ package org.spongepowered.common.effect.record;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.item.Item;
 import net.minecraft.network.play.server.SPlaySoundEventPacket;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-
+import org.spongepowered.math.vector.Vector3i;
 import javax.annotation.Nullable;
 
-public class SpongeRecordType extends SpongeCatalogType.Translatable implements RecordType {
+public class SpongeRecordType extends SpongeCatalogType.Translatable implements MusicDisc {
 
     /**
      * This is the effect ID that is used by the Effect packet to play a record effect.
@@ -64,7 +63,7 @@ public class SpongeRecordType extends SpongeCatalogType.Translatable implements 
         return this.soundType;
     }
 
-    public static SPlaySoundEventPacket createPacket(Vector3i position, @Nullable RecordType recordType) {
+    public static SPlaySoundEventPacket createPacket(Vector3i position, @Nullable MusicDisc recordType) {
         checkNotNull(position, "position");
         final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
         return new SPlaySoundEventPacket(EFFECT_ID, pos, recordType == null ? 0 :

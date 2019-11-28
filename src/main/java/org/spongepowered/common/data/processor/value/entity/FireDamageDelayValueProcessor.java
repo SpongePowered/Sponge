@@ -29,16 +29,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 
 import java.util.Optional;
 
-public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<Entity, Integer, MutableBoundedValue<Integer>> {
+public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<Entity, Integer, Mutable<Integer>> {
 
     public FireDamageDelayValueProcessor() {
         super(Entity.class, Keys.FIRE_DAMAGE_DELAY);
@@ -51,7 +51,7 @@ public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    protected Mutable<Integer> constructValue(Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.FIRE_DAMAGE_DELAY)
             .defaultValue(20)
             .minimum(0)
@@ -74,7 +74,7 @@ public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected Immutable<Integer> constructImmutableValue(Integer value) {
         return constructValue(value).asImmutable();
     }
 }

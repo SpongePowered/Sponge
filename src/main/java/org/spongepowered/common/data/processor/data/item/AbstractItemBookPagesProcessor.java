@@ -29,14 +29,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
@@ -49,11 +47,11 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends
-    AbstractItemSingleDataProcessor<List<T>, ListValue<T>, M, I> {
+abstract class AbstractItemBookPagesProcessor<T, M extends Mutable<M, I>, I extends Immutable<I, M>> extends
+    AbstractItemSingleDataProcessor<List<T>, org.spongepowered.api.data.value.ListValue.Mutable<T>, M, I> {
 
 
-    AbstractItemBookPagesProcessor(final Predicate<ItemStack> predicate, final Key<ListValue<T>> key) {
+    AbstractItemBookPagesProcessor(final Predicate<ItemStack> predicate, final Key<org.spongepowered.api.data.value.ListValue.Mutable<T>> key) {
         super(predicate, key);
     }
 
@@ -122,12 +120,12 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
     }
 
     @Override
-    protected ListValue<T> constructValue(final List<T> actualValue) {
+    protected org.spongepowered.api.data.value.ListValue.Mutable<T> constructValue(final List<T> actualValue) {
         return new SpongeListValue<>(this.key, actualValue);
     }
 
     @Override
-    protected ImmutableValue<List<T>> constructImmutableValue(final List<T> value) {
+    protected org.spongepowered.api.data.value.Value.Immutable<List<T>> constructImmutableValue(final List<T> value) {
         return new ImmutableSpongeListValue<>(this.key, ImmutableList.copyOf(value));
     }
 }

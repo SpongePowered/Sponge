@@ -34,7 +34,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.projectile.FishHook;
+import org.spongepowered.api.entity.projectile.FishingBobber;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -70,7 +70,7 @@ public abstract class ItemFishingRodMixin extends Item {
 
         FishingBobberEntity fishHook = new FishingBobberEntity(world, player);
         Sponge.getCauseStackManager().pushCause(player);
-        if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getCauseStackManager().getCurrentCause(), (FishHook) fishHook))) {
+        if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getCauseStackManager().getCurrentCause(), (FishingBobber) fishHook))) {
             fishHook.remove(); // Bye
             cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand)));
         } else {

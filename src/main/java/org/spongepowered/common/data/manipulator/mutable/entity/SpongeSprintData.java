@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSprintData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SprintData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSprintData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
@@ -42,7 +42,7 @@ public class SpongeSprintData extends AbstractBooleanData<SprintData, ImmutableS
     }
 
     @Override
-    public Value<Boolean> sprinting() {
+    public Mutable<Boolean> sprinting() {
         return this.getValueGetter();
     }
 

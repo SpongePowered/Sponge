@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -36,14 +36,14 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class VanishValueProcessor extends AbstractSpongeValueProcessor<VanishableBridge, Boolean, Value<Boolean>> {
+public class VanishValueProcessor extends AbstractSpongeValueProcessor<VanishableBridge, Boolean, Mutable<Boolean>> {
 
     public VanishValueProcessor() {
         super(VanishableBridge.class, Keys.VANISH);
     }
 
     @Override
-    protected Value<Boolean> constructValue(final Boolean actualValue) {
+    protected Mutable<Boolean> constructValue(final Boolean actualValue) {
         return new SpongeValue<>(Keys.VANISH, false, actualValue);
     }
 
@@ -62,7 +62,7 @@ public class VanishValueProcessor extends AbstractSpongeValueProcessor<Vanishabl
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(final Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(final Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.VANISH, false, value);
     }
 

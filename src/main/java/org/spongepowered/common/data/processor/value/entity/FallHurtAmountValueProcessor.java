@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
@@ -36,14 +36,14 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, Double, MutableBoundedValue<Double>> {
+public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, Double, Mutable<Double>> {
 
     public FallHurtAmountValueProcessor() {
         super(EntityFallingBlockAccessor.class, Keys.FALL_DAMAGE_PER_BLOCK);
     }
 
     @Override
-    protected MutableBoundedValue<Double> constructValue(final Double value) {
+    protected Mutable<Double> constructValue(final Double value) {
         return SpongeValueFactory.boundedBuilder(Keys.FALL_DAMAGE_PER_BLOCK)
                 .actualValue(value)
                 .defaultValue(Constants.Entity.FallingBlock.DEFAULT_FALL_DAMAGE_PER_BLOCK)
@@ -64,7 +64,7 @@ public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<E
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(final Double value) {
+    protected Immutable<Double> constructImmutableValue(final Double value) {
         return constructValue(value).asImmutable();
     }
 

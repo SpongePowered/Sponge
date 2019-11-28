@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.advancements;
 
-import com.flowpowered.math.vector.Vector2d;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.item.ItemStack;
@@ -43,6 +42,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.math.vector.Vector2d;
 
 @Mixin(DisplayInfo.class)
 @Implements(@Interface(iface = org.spongepowered.api.advancement.DisplayInfo.class, prefix = "info$"))

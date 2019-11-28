@@ -31,15 +31,15 @@ import com.google.common.collect.Lists;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.value.ListValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class TileEntitySignDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<SignTileEntity, List<Text>, ListValue<Text>, SignData, ImmutableSignData> {
+        extends AbstractTileEntitySingleDataProcessor<SignTileEntity, List<Text>, Mutable<Text>, SignData, ImmutableSignData> {
 
     public TileEntitySignDataProcessor() {
         super(SignTileEntity.class, Keys.SIGN_LINES);
@@ -107,12 +107,12 @@ public class TileEntitySignDataProcessor
     }
 
     @Override
-    public ListValue<Text> constructValue(List<Text> defaultValue) {
+    public Mutable<Text> constructValue(List<Text> defaultValue) {
         return new SpongeListValue<>(Keys.SIGN_LINES, defaultValue);
     }
 
     @Override
-    protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
+    protected Immutable<List<Text>> constructImmutableValue(List<Text> value) {
         return new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.copyOf(value));
     }
 

@@ -31,13 +31,12 @@ import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -69,25 +68,25 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     @Shadow public abstract void setTagCompound(@Nullable CompoundNBT compound);
 
     @Shadow private CompoundNBT stackTagCompound;
-    private List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
+    private List<Mutable<?, ?>> manipulators = Lists.newArrayList();
     private List<DataView> failedData = new ArrayList<>();
 
     @SuppressWarnings({"rawtypes", "Duplicates"})
     @Override
-    public DataTransactionResult bridge$offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function) {
+    public DataTransactionResult bridge$offerCustom(Mutable<?, ?> manipulator, MergeFunction function) {
         if (this.shadow$isEmpty()) {
             return DataTransactionResult.failResult(manipulator.getValues());
         }
 
-        @Nullable DataManipulator<?, ?> existingManipulator = null;
-        for (DataManipulator<?, ?> existing : this.manipulators) {
+        @Nullable Mutable<?, ?> existingManipulator = null;
+        for (Mutable<?, ?> existing : this.manipulators) {
             if (manipulator.getClass().isInstance(existing)) {
                 existingManipulator = existing;
                 break;
             }
         }
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        final DataManipulator<?, ?> newManipulator = checkNotNull(function.merge(existingManipulator, (DataManipulator) manipulator.copy()));
+        final Mutable<?, ?> newManipulator = checkNotNull(function.merge(existingManipulator, (Mutable) manipulator.copy()));
         if (existingManipulator != null) {
             builder.replace(existingManipulator.getValues());
             this.manipulators.remove(existingManipulator);
@@ -112,11 +111,11 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> bridge$getCustom(Class<T> customClass) {
+    public <T extends Mutable<?, ?>> Optional<T> bridge$getCustom(Class<T> customClass) {
         if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
-        for (DataManipulator<?, ?> existing : this.manipulators) {
+        for (Mutable<?, ?> existing : this.manipulators) {
             if (customClass.isInstance(existing)) {
                 return Optional.of((T) existing.copy());
             }
@@ -151,12 +150,12 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public DataTransactionResult bridge$removeCustom(Class<? extends DataManipulator<?, ?>> customClass) {
+    public DataTransactionResult bridge$removeCustom(Class<? extends Mutable<?, ?>> customClass) {
         if (this.shadow$isEmpty()) {
             return DataTransactionResult.failNoData();
         }
-        @Nullable DataManipulator<?, ?> manipulator = null;
-        for (DataManipulator<?, ?> existing : this.manipulators) {
+        @Nullable Mutable<?, ?> manipulator = null;
+        for (Mutable<?, ?> existing : this.manipulators) {
             if (customClass.isInstance(existing)) {
                 manipulator = existing;
             }
@@ -175,24 +174,24 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public Collection<DataManipulator<?, ?>> bridge$getCustomManipulators() {
+    public Collection<Mutable<?, ?>> bridge$getCustomManipulators() {
         return this.manipulators.stream()
-            .map(DataManipulator::copy)
+            .map(Mutable::copy)
             .collect(Collectors.toList());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public <E> DataTransactionResult bridge$offerCustom(Key<? extends BaseValue<E>> key, E value) {
+    public <E> DataTransactionResult bridge$offerCustom(Key<? extends Value<E>> key, E value) {
         if (this.shadow$isEmpty()) {
             return DataTransactionResult.failNoData();
         }
-        for (DataManipulator<?, ?> manipulator : this.manipulators) {
+        for (Mutable<?, ?> manipulator : this.manipulators) {
             if (manipulator.supports(key)) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-                builder.replace(((Value) manipulator.getValue((Key) key).get()).asImmutable());
+                builder.replace(((org.spongepowered.api.data.value.Value.Mutable) manipulator.getValue((Key) key).get()).asImmutable());
                 manipulator.set(key, value);
-                builder.success(((Value) manipulator.getValue((Key) key).get()).asImmutable());
+                builder.success(((org.spongepowered.api.data.value.Value.Mutable) manipulator.getValue((Key) key).get()).asImmutable());
                 resyncCustomToTag();
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
@@ -202,9 +201,9 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     @Override
     public DataTransactionResult bridge$removeCustom(Key<?> key) {
-        final Iterator<DataManipulator<?, ?>> iterator = this.manipulators.iterator();
+        final Iterator<Mutable<?, ?>> iterator = this.manipulators.iterator();
         while (iterator.hasNext()) {
-            final DataManipulator<?, ?> manipulator = iterator.next();
+            final Mutable<?, ?> manipulator = iterator.next();
             if (manipulator.getKeys().size() == 1 && manipulator.supports(key)) {
                 iterator.remove();
                 resyncCustomToTag();
@@ -227,7 +226,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public <E> Optional<E> bridge$getCustom(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> bridge$getCustom(Key<? extends Value<E>> key) {
         if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
@@ -238,7 +237,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> bridge$getCustomValue(Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> bridge$getCustomValue(Key<V> key) {
         if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
@@ -253,7 +252,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     private void onCopy(CallbackInfoReturnable<ItemStack> info) {
         final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
         if (this.bridge$hasManipulators()) { // no manipulators? no problem.
-            for (DataManipulator<?, ?> manipulator : this.manipulators) {
+            for (Mutable<?, ?> manipulator : this.manipulators) {
                 ((CustomDataHolderBridge) itemStack).bridge$offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
             }
         }
@@ -263,7 +262,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     private void onSplit(int amount, CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
         final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
         if (this.bridge$hasManipulators()) {
-            for (DataManipulator<?, ?> manipulator : this.manipulators) {
+            for (Mutable<?, ?> manipulator : this.manipulators) {
                 ((CustomDataHolderBridge) itemStack).bridge$offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
             }
         }

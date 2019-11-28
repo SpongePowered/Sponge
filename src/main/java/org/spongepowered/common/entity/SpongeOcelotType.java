@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.entity;
 
-import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.type.CatType;
 
-public class SpongeOcelotType extends SpongeEntityMeta implements OcelotType {
+public class SpongeOcelotType extends SpongeEntityMeta implements CatType {
 
     public SpongeOcelotType(int type, String name) {
         super(type, name);

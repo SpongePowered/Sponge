@@ -32,17 +32,17 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.INameable;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
@@ -61,7 +61,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 // TODO Improve this processor
-public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, Value<Text>, DisplayNameData, ImmutableDisplayNameData> {
+public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, Mutable<Text>, DisplayNameData, ImmutableDisplayNameData> {
 
     public DisplayNameDataProcessor() {
         super(Keys.DISPLAY_NAME);
@@ -135,7 +135,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
         final Optional<DisplayNameData> old = from(holder);
         final DisplayNameData merged = checkNotNull(function).merge(old.orElse(null), manipulator);
         final Text newValue = merged.displayName().get();
-        final ImmutableValue<Text> immutableValue = merged.displayName().asImmutable();
+        final Immutable<Text> immutableValue = merged.displayName().asImmutable();
 
         try {
             if (holder instanceof EntityBridge) {
@@ -158,7 +158,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
     }
 
     @Override
-    public Optional<ImmutableDisplayNameData> with(final Key<? extends BaseValue<?>> key, final Object value, final ImmutableDisplayNameData immutable) {
+    public Optional<ImmutableDisplayNameData> with(final Key<? extends Value<?>> key, final Object value, final ImmutableDisplayNameData immutable) {
         if (key == this.key) {
             return Optional.of(new ImmutableSpongeDisplayNameData((Text) value));
         }

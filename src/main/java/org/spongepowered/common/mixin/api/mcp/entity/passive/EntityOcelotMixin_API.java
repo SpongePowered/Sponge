@@ -25,10 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
-import org.spongepowered.api.data.type.OcelotType;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.type.CatType;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -54,12 +53,12 @@ public abstract class EntityOcelotMixin_API extends EntityTameableMixin_API impl
     }
 
     @Override
-    public Value<OcelotType> variant() {
+    public Mutable<CatType> variant() {
         return new SpongeValue<>(Keys.OCELOT_TYPE, Constants.Entity.Ocelot.DEFAULT_TYPE, OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
         manipulators.add(getOcelotData());

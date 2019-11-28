@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableActiveItemData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ActiveItemData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeActiveItemData;
@@ -36,7 +36,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 public class ImmutableSpongeActiveItemData extends AbstractImmutableSingleData<ItemStackSnapshot, ImmutableActiveItemData, ActiveItemData>
         implements ImmutableActiveItemData {
 
-    private final ImmutableValue<ItemStackSnapshot> snapshotValue;
+    private final Immutable<ItemStackSnapshot> snapshotValue;
 
     public ImmutableSpongeActiveItemData() {
         this(ItemStackSnapshot.NONE);
@@ -48,12 +48,12 @@ public class ImmutableSpongeActiveItemData extends AbstractImmutableSingleData<I
     }
 
     @Override
-    public ImmutableValue<ItemStackSnapshot> activeItem() {
+    public Immutable<ItemStackSnapshot> activeItem() {
         return this.snapshotValue;
     }
 
     @Override
-    protected ImmutableValue<ItemStackSnapshot> getValueGetter() {
+    protected Immutable<ItemStackSnapshot> getValueGetter() {
         return activeItem();
     }
 

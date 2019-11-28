@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.boss;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.WitherEntity;
 import org.objectweb.asm.Opcodes;
@@ -44,7 +43,7 @@ import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.monster.EntityMobMixin;
 import org.spongepowered.common.util.Constants;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 
 import javax.annotation.Nullable;

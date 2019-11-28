@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.block;
 
 import net.minecraft.block.BlockPlanks;
-import org.spongepowered.api.data.type.TreeType;
+import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -38,8 +38,8 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import javax.annotation.Nullable;
 
 @Mixin(BlockPlanks.EnumType.class)
-@Implements(@Interface(iface = TreeType.class, prefix = "tree$"))
-public abstract class BlockPlanks_EnumTypeMixin_API implements TreeType {
+@Implements(@Interface(iface = WoodType.class, prefix = "tree$"))
+public abstract class BlockPlanks_EnumTypeMixin_API implements WoodType {
 
     @Shadow @Final private String name;
     @Shadow @Final private String translationKey;

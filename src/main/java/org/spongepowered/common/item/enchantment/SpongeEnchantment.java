@@ -25,8 +25,8 @@
 package org.spongepowered.common.item.enchantment;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 

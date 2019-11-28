@@ -24,23 +24,22 @@
  */
 package org.spongepowered.common.util.gen;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.world.extent.ImmutableBlockVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
-import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
 import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.volume.StorageType;
+import org.spongepowered.api.world.volume.block.ImmutableBlockVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
+import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.volume.block.worker.BlockVolumeStream;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.BackingData;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.CharBackingData;
 import org.spongepowered.common.world.extent.ImmutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBlockViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Objects;
 
 public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements ImmutableBlockVolume {
@@ -99,7 +98,7 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
     }
 
     @Override
-    public BlockVolumeWorker<? extends ImmutableBlockVolume> getBlockWorker() {
+    public BlockVolumeStream<? extends ImmutableBlockVolume> getBlockWorker() {
         return new SpongeBlockVolumeWorker<>(this);
     }
 

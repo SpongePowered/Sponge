@@ -29,7 +29,7 @@ import static org.spongepowered.common.util.Constants.Functional.intComparator;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureData;
 import org.spongepowered.api.data.manipulator.mutable.block.MoistureData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeMoistureData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 
@@ -52,7 +52,7 @@ public class SpongeMoistureData extends AbstractBoundedComparableData<Integer, M
     }
 
     @Override
-    public MutableBoundedValue<Integer> moisture() {
+    public Mutable<Integer> moisture() {
         return getValueGetter();
     }
 }

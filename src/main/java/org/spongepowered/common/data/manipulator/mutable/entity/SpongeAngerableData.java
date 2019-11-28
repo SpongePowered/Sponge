@@ -27,8 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAngerableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAngerableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -49,7 +48,7 @@ public class SpongeAngerableData extends AbstractIntData<AngerableData, Immutabl
     }
 
     @Override
-    public MutableBoundedValue<Integer> angerLevel() {
+    public Mutable<Integer> angerLevel() {
         return SpongeValueFactory.boundedBuilder(Keys.ANGER)
                 .actualValue(getValue())
                 .defaultValue(0)
@@ -59,7 +58,7 @@ public class SpongeAngerableData extends AbstractIntData<AngerableData, Immutabl
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected org.spongepowered.api.data.value.Value.Mutable<?> getValueGetter() {
         return angerLevel();
     }
 

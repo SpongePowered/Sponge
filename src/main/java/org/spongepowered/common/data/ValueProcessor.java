@@ -26,14 +26,11 @@ package org.spongepowered.common.data;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.CommandData;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.mutable.CollectionValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 
 import java.util.Optional;
@@ -46,7 +43,7 @@ import java.util.Optional;
  * @param <E> The type of element within the value
  * @param <V> The type of Value
  */
-public interface ValueProcessor<E, V extends BaseValue<E>> {
+public interface ValueProcessor<E, V extends Value<E>> {
 
     /**
      * Gets the associated {@link Key} that this {@link ValueProcessor}
@@ -54,7 +51,7 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      *
      * @return The associated key for this processor
      */
-    Key<? extends BaseValue<E>> getKey();
+    Key<? extends Value<E>> getKey();
 
     /**
      * Gets the priority of this processor. A single {@link Key} can have

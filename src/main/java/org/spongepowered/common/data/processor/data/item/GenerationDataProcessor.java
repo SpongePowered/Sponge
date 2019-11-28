@@ -31,9 +31,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGenerationData;
 import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGenerationData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.util.Constants;
@@ -43,7 +43,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import java.util.Optional;
 
 public final class GenerationDataProcessor
-        extends AbstractItemSingleDataProcessor<Integer, MutableBoundedValue<Integer>, GenerationData, ImmutableGenerationData> {
+        extends AbstractItemSingleDataProcessor<Integer, Mutable<Integer>, GenerationData, ImmutableGenerationData> {
 
     public GenerationDataProcessor() {
         super(stack -> stack.getItem().equals(Items.WRITTEN_BOOK), Keys.GENERATION);
@@ -55,7 +55,7 @@ public final class GenerationDataProcessor
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(final Integer actualValue) {
+    protected Mutable<Integer> constructValue(final Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.GENERATION)
                 .actualValue(actualValue)
                 .defaultValue(0)
@@ -79,7 +79,7 @@ public final class GenerationDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(final Integer value) {
+    protected Immutable<Integer> constructImmutableValue(final Integer value) {
         return ImmutableSpongeValue.cachedOf(Keys.GENERATION, 0, value);
     }
 

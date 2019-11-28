@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.OptionalValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
@@ -38,7 +38,7 @@ import java.util.Optional;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 
 public class EntityLastCommandOutputValueProcessor extends
-        AbstractSpongeValueProcessor<MinecartCommandBlockEntity, Optional<Text>, OptionalValue<Text>> {
+        AbstractSpongeValueProcessor<MinecartCommandBlockEntity, Optional<Text>, Mutable<Text>> {
 
     public EntityLastCommandOutputValueProcessor() {
         super(MinecartCommandBlockEntity.class, Keys.LAST_COMMAND_OUTPUT);
@@ -50,7 +50,7 @@ public class EntityLastCommandOutputValueProcessor extends
     }
 
     @Override
-    protected OptionalValue<Text> constructValue(Optional<Text> actualValue) {
+    protected Mutable<Text> constructValue(Optional<Text> actualValue) {
         return new SpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, actualValue);
     }
 
@@ -67,7 +67,7 @@ public class EntityLastCommandOutputValueProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Optional<Text>> constructImmutableValue(Optional<Text> value) {
+    protected Immutable<Optional<Text>> constructImmutableValue(Optional<Text> value) {
         return constructValue(value).asImmutable();
     }
 

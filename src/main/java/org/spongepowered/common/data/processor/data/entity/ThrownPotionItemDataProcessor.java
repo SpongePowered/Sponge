@@ -31,9 +31,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
@@ -44,7 +44,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import java.util.Optional;
 
 public class ThrownPotionItemDataProcessor extends
-        AbstractEntitySingleDataProcessor<PotionEntity, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
+        AbstractEntitySingleDataProcessor<PotionEntity, ItemStackSnapshot, Mutable<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
 
     public ThrownPotionItemDataProcessor() {
         super(PotionEntity.class, Keys.REPRESENTED_ITEM);
@@ -68,12 +68,12 @@ public class ThrownPotionItemDataProcessor extends
     }
 
     @Override
-    protected Value<ItemStackSnapshot> constructValue(ItemStackSnapshot defaultValue) {
+    protected Mutable<ItemStackSnapshot> constructValue(ItemStackSnapshot defaultValue) {
         return new SpongeValue<>(this.key, defaultValue);
     }
 
     @Override
-    protected ImmutableValue<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
+    protected Immutable<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
         return new ImmutableSpongeValue<>(this.key, value);
     }
 

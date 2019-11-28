@@ -30,16 +30,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.util.DataUtil;
@@ -79,7 +77,7 @@ import java.util.function.Supplier;
  * @param <I> The type of the ImmutableDatAManipulator from the API
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractData<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataManipulator<M, I> {
+public abstract class AbstractData<M extends Mutable<M, I>, I extends Immutable<I, M>> implements Mutable<M, I> {
 
     // We need this field for referencing to retrieve the processors as needed. This can never be null
     private final Class<M> manipulatorClass;
@@ -97,7 +95,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     // The largest issue was implementation. Since most fields are simple to get and
     // set, other values, such as ItemStacks require a bit of finer tuning.
     //
-    private final Map<Key<?>, Supplier<Value<?>>> keyValueMap = Maps.newHashMap();
+    private final Map<Key<?>, Supplier<org.spongepowered.api.data.value.Value.Mutable<?>>> keyValueMap = Maps.newHashMap();
     private final Map<Key<?>, Supplier<?>> keyFieldGetterMap = Maps.newHashMap();
     private final Map<Key<?>, Consumer<Object>> keyFieldSetterMap = Maps.newHashMap();
 
@@ -117,7 +115,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * @param key The key for the value return type
      * @param function The function for getting the value
      */
-    protected final void registerKeyValue(Key<?> key, Supplier<Value<?>> function) {
+    protected final void registerKeyValue(Key<?> key, Supplier<org.spongepowered.api.data.value.Value.Mutable<?>> function) {
         this.keyValueMap.put(checkNotNull(key), checkNotNull(function));
     }
 
@@ -150,7 +148,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * @param function The function for setting the field
      */
     @SuppressWarnings("rawtypes")
-    protected final <E> void registerFieldSetter(Key<? extends BaseValue<E>> key, Consumer<E> function) {
+    protected final <E> void registerFieldSetter(Key<? extends Value<E>> key, Consumer<E> function) {
         this.keyFieldSetterMap.put(checkNotNull(key), checkNotNull((Consumer) function));
     }
 
@@ -182,21 +180,21 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     // Beyond this point is all implementation with the getter/setter functions!
 
     @Override
-    public <E> M set(Key<? extends BaseValue<E>> key, E value) {
+    public <E> M set(Key<? extends Value<E>> key, E value) {
         checkArgument(supports(key), "This data manipulator doesn't support the following key: " + key.toString());
         this.keyFieldSetterMap.get(key).accept(value);
         return (M) this;
     }
 
     @Override
-    public <E> M transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
+    public <E> M transform(Key<? extends Value<E>> key, Function<E, E> function) {
         checkArgument(supports(key));
         this.keyFieldSetterMap.get(key).accept(checkNotNull(function.apply((E) this.keyFieldGetterMap.get(key).get())));
         return (M) this;
     }
 
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> get(Key<? extends Value<E>> key) {
         if (!supports(key)) {
             return Optional.empty();
         }
@@ -204,7 +202,7 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
         if (!this.keyValueMap.containsKey(key)) {
             return Optional.empty();
         }
@@ -222,9 +220,9 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     }
 
     @Override
-    public Set<ImmutableValue<?>> getValues() {
-        ImmutableSet.Builder<ImmutableValue<?>> builder = ImmutableSet.builder();
-        for (Supplier<Value<?>> function : this.keyValueMap.values()) {
+    public Set<org.spongepowered.api.data.value.Value.Immutable<?>> getValues() {
+        ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> builder = ImmutableSet.builder();
+        for (Supplier<org.spongepowered.api.data.value.Value.Mutable<?>> function : this.keyValueMap.values()) {
             builder.add(checkNotNull(function.get()).asImmutable());
         }
         return builder.build();

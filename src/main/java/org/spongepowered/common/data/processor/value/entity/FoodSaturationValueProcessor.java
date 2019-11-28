@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
+import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.util.FoodStatsAccessor;
@@ -37,14 +37,14 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 import net.minecraft.entity.player.PlayerEntity;
 
-public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Double, MutableBoundedValue<Double>> {
+public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<PlayerEntity, Double, Mutable<Double>> {
 
     public FoodSaturationValueProcessor() {
         super(PlayerEntity.class, Keys.SATURATION);
     }
 
     @Override
-    public MutableBoundedValue<Double> constructValue(final Double defaultValue) {
+    public Mutable<Double> constructValue(final Double defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.SATURATION)
             .defaultValue(Constants.Entity.Player.DEFAULT_SATURATION)
             .minimum(0D)
@@ -65,7 +65,7 @@ public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<P
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(final Double value) {
+    protected Immutable<Double> constructImmutableValue(final Double value) {
         return constructValue(value).asImmutable();
     }
 

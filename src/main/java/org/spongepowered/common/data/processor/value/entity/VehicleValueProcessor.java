@@ -26,9 +26,9 @@ package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
@@ -37,7 +37,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.minecraft.entity.Entity, EntitySnapshot, Value<EntitySnapshot>> {
+public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.minecraft.entity.Entity, EntitySnapshot, Mutable<EntitySnapshot>> {
 
     public VehicleValueProcessor() {
         super(net.minecraft.entity.Entity.class, Keys.VEHICLE);
@@ -63,7 +63,7 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
     }
 
     @Override
-    protected Value<EntitySnapshot> constructValue(final EntitySnapshot defaultValue) {
+    protected Mutable<EntitySnapshot> constructValue(final EntitySnapshot defaultValue) {
         return new SpongeValue<>(this.getKey(), defaultValue);
     }
 
@@ -82,7 +82,7 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
     }
 
     @Override
-    protected ImmutableValue<EntitySnapshot> constructImmutableValue(final EntitySnapshot value) {
+    protected Immutable<EntitySnapshot> constructImmutableValue(final EntitySnapshot value) {
         return new ImmutableSpongeValue<>(this.getKey(), value);
     }
 

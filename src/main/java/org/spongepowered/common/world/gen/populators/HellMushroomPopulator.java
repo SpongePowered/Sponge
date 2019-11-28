@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -33,14 +32,14 @@ import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.Mushroom;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
 import org.spongepowered.common.mixin.core.world.gen.feature.WorldGenBushAccessor;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -63,7 +62,7 @@ public class HellMushroomPopulator implements Mushroom {
     }
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return PopulatorTypes.MUSHROOM;
     }
 

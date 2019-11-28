@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -32,11 +31,11 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorObject;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.Forest;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -56,7 +55,7 @@ public class ForestPopulator implements Forest {
     }
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return PopulatorTypes.FOREST;
     }
 

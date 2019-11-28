@@ -27,22 +27,20 @@ package org.spongepowered.common.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
@@ -52,7 +50,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.util.Constants;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Optional;
@@ -70,9 +68,9 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     EntityType entityType;
 
     @Nullable UUID entityId;
-    @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
+    @Nullable List<Immutable<?, ?>> manipulators;
     @Nullable CompoundNBT compound;
-    @Nullable List<ImmutableValue<?>> values;
+    @Nullable List<org.spongepowered.api.data.value.Value.Immutable<?>> values;
     @Nullable WeakReference<Entity> entityReference;
 
     public SpongeEntitySnapshotBuilder() {
@@ -131,7 +129,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.entityType = entity.getType();
         this.entityId = entity.getUniqueId();
         this.manipulators = Lists.newArrayList();
-        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) entity).bridge$getCustomManipulators()) {
+        for (Mutable<?, ?> manipulator : ((CustomDataHolderBridge) entity).bridge$getCustomManipulators()) {
             addManipulator(manipulator.asImmutable());
         }
         this.compound = new CompoundNBT();
@@ -140,14 +138,14 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder add(DataManipulator<?, ?> manipulator) {
+    public SpongeEntitySnapshotBuilder add(Mutable<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
         return add(manipulator.asImmutable());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public SpongeEntitySnapshotBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
+    public SpongeEntitySnapshotBuilder add(Immutable<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getImmutableProcessor((Class) manipulator.getClass());
         if (optional.isPresent()) {
@@ -161,7 +159,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     }
 
     @Override
-    public <V> EntitySnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
+    public <V> EntitySnapshot.Builder add(Key<? extends Value<V>> key, V value) {
         checkNotNull(key, "key");
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
         if (this.values == null) {
@@ -171,12 +169,12 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         return this;
     }
 
-    private void addManipulator(ImmutableDataManipulator<?, ?> manipulator) {
+    private void addManipulator(Immutable<?, ?> manipulator) {
         if (this.manipulators == null) {
             this.manipulators = Lists.newArrayList();
         }
         int replaceIndex = -1;
-        for (ImmutableDataManipulator<?, ?> existing : this.manipulators) {
+        for (Immutable<?, ?> existing : this.manipulators) {
             replaceIndex++;
             if (existing.getClass().equals(manipulator.getClass())) {
                 break;
@@ -203,7 +201,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
             this.scale = optional.get().getScale();
         }
         this.manipulators = Lists.newArrayList();
-        for (ImmutableDataManipulator<?, ?> manipulator : holder.getContainers()) {
+        for (Immutable<?, ?> manipulator : holder.getContainers()) {
             add(manipulator);
         }
         if (holder instanceof SpongeEntitySnapshot) {
@@ -221,7 +219,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.rotation = transform.getRotation();
         this.scale = transform.getScale();
         this.manipulators = Lists.newArrayList();
-        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) minecraftEntity).bridge$getCustomManipulators()) {
+        for (Mutable<?, ?> manipulator : ((CustomDataHolderBridge) minecraftEntity).bridge$getCustomManipulators()) {
             addManipulator(manipulator.asImmutable());
         }
         this.compound = new CompoundNBT();
@@ -258,7 +256,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         checkNotNull(this.entityType);
         EntitySnapshot snapshot = new SpongeEntitySnapshot(this);
         if(this.values != null) {
-            for (ImmutableValue<?> value : this.values) {
+            for (org.spongepowered.api.data.value.Value.Immutable<?> value : this.values) {
                 snapshot = snapshot.with(value).orElse(snapshot);
             }
         }

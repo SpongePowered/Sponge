@@ -28,11 +28,11 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableParrotData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ParrotData;
-import org.spongepowered.api.data.type.ParrotVariant;
-import org.spongepowered.api.data.type.ParrotVariants;
+import org.spongepowered.api.data.type.ParrotType;
+import org.spongepowered.api.data.type.ParrotTypes;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeParrotData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -44,31 +44,31 @@ import java.util.Optional;
 import net.minecraft.entity.passive.ParrotEntity;
 
 public class ParrotDataProcessor extends
-        AbstractEntitySingleDataProcessor<ParrotEntity, ParrotVariant, Value<ParrotVariant>, ParrotData, ImmutableParrotData> {
+        AbstractEntitySingleDataProcessor<ParrotEntity, ParrotType, Mutable<ParrotType>, ParrotData, ImmutableParrotData> {
 
     public ParrotDataProcessor() {
         super(ParrotEntity.class, Keys.PARROT_VARIANT);
     }
 
     @Override
-    protected boolean set(ParrotEntity dataHolder, ParrotVariant value) {
+    protected boolean set(ParrotEntity dataHolder, ParrotType value) {
         dataHolder.setVariant(((SpongeParrotVariant)value).type);
         return true;
     }
 
     @Override
-    protected Optional<ParrotVariant> getVal(ParrotEntity dataHolder) {
+    protected Optional<ParrotType> getVal(ParrotEntity dataHolder) {
         return Optional.of(ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(dataHolder.getVariant()));
     }
 
     @Override
-    protected ImmutableValue<ParrotVariant> constructImmutableValue(ParrotVariant value) {
-        return ImmutableSpongeValue.cachedOf(this.key, ParrotVariants.RED, value);
+    protected Immutable<ParrotType> constructImmutableValue(ParrotType value) {
+        return ImmutableSpongeValue.cachedOf(this.key, ParrotTypes.RED, value);
     }
 
     @Override
-    protected Value<ParrotVariant> constructValue(ParrotVariant actualValue) {
-        return new SpongeValue<>(this.key, ParrotVariants.RED, actualValue);
+    protected Mutable<ParrotType> constructValue(ParrotType actualValue) {
+        return new SpongeValue<>(this.key, ParrotTypes.RED, actualValue);
     }
 
     @Override

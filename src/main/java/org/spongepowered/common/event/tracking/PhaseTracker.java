@@ -47,7 +47,7 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -470,7 +470,7 @@ public final class PhaseTracker {
 
 
     public static void printNullSourceBlockWithTile(
-        final BlockPos pos, final Block blockIn, final BlockPos otherPos, final TileEntityType type, final boolean useTile,
+        final BlockPos pos, final Block blockIn, final BlockPos otherPos, final BlockEntityType type, final boolean useTile,
         final NullPointerException e) {
         final PhaseTracker instance = PhaseTracker.getInstance();
         final PrettyPrinter printer = new PrettyPrinter(60).add("Null Source Block on TileEntity!").centre().hr()
@@ -657,9 +657,9 @@ public final class PhaseTracker {
 
             if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
                 // Try to save ourselves
-                final TileEntityType type = currentContext
-                    .getSource(org.spongepowered.api.block.tileentity.TileEntity.class)
-                    .map(org.spongepowered.api.block.tileentity.TileEntity::getType)
+                final BlockEntityType type = currentContext
+                    .getSource(org.spongepowered.api.block.entity.BlockEntity.class)
+                    .map(org.spongepowered.api.block.entity.BlockEntity::getType)
                     .orElse(null);
                 if (type != null) {
                     final Map<String, Boolean> autoFixedTiles = trackerConfig.getAutoFixedTiles();

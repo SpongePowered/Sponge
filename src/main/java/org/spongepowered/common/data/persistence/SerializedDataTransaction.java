@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.persistence;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.DataManipulator.Mutable;
+import org.spongepowered.api.data.persistence.DataView;
 
 public class SerializedDataTransaction {
 
@@ -35,7 +35,7 @@ public class SerializedDataTransaction {
     }
 
     public final ImmutableList<DataView> failedData;
-    public final ImmutableList<DataManipulator<?, ?>> deserializedManipulators;
+    public final ImmutableList<Mutable<?, ?>> deserializedManipulators;
 
     private SerializedDataTransaction(Builder builder) {
         this.failedData = builder.serializedData.build();
@@ -46,7 +46,7 @@ public class SerializedDataTransaction {
     public static final class Builder {
 
         private final ImmutableList.Builder<DataView> serializedData = ImmutableList.builder();
-        private final ImmutableList.Builder<DataManipulator<?, ?>> deserializedManipulators = ImmutableList.builder();
+        private final ImmutableList.Builder<Mutable<?, ?>> deserializedManipulators = ImmutableList.builder();
 
         Builder() {
         }
@@ -55,7 +55,7 @@ public class SerializedDataTransaction {
             this.serializedData.add(serializedData);
         }
 
-        public void successfulData(DataManipulator<?, ?> success) {
+        public void successfulData(Mutable<?, ?> success) {
             this.deserializedManipulators.add(success);
         }
 

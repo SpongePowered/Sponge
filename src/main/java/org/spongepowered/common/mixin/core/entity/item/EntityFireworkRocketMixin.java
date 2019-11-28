@@ -32,10 +32,10 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.projectile.Firework;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -70,7 +70,7 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
     @Override
     public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, (Firework) this);
+        ProjectileSourceSerializer.readSourceFromNbt(compound, (FireworkRocket) this);
     }
 
     @Override
@@ -119,11 +119,11 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
             // post an event regardless and if the radius is zero the explosion
             // won't be triggered (the default behavior).
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.THROWER, ((Firework) this).getShooter()); // TODO - Remove in 1.13/API 8
-            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((Firework) this).getShooter());
+            frame.addContext(EventContextKeys.THROWER, ((FireworkRocket) this).getShooter()); // TODO - Remove in 1.13/API 8
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((FireworkRocket) this).getShooter());
             SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .sourceExplosive(((Firework) this))
-                .location(((Firework) this).getLocation())
+                .sourceExplosive(((FireworkRocket) this))
+                .location(((FireworkRocket) this).getLocation())
                 .radius(this.impl$explosionRadius))
                 .ifPresent(explosion -> world.setEntityState(self, state));
         }
@@ -135,8 +135,8 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
         if (this.fireworkAge == 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
-                frame.addContext(EventContextKeys.THROWER, ((Firework) this).getShooter()); // TODO - Remove in 1.13/API 8
-                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((Firework) this).getShooter());
+                frame.addContext(EventContextKeys.THROWER, ((FireworkRocket) this).getShooter()); // TODO - Remove in 1.13/API 8
+                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((FireworkRocket) this).getShooter());
                 bridge$postPrime();
             }
         }

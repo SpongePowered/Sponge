@@ -25,9 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
@@ -89,12 +88,12 @@ public abstract class EntityLivingMixin_API extends EntityLivingBaseMixin_API im
     }
 
     @Override
-    public Value<Boolean> aiEnabled() {
+    public Mutable<Boolean> aiEnabled() {
         return new SpongeValue<>(Keys.AI_ENABLED, true, !this.isAIDisabled());
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getAgentData());
     }

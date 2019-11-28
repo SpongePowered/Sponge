@@ -25,17 +25,17 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWireAttachmentData;
 import org.spongepowered.api.data.manipulator.mutable.block.WireAttachmentData;
-import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WireAttachmentTypes;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeWireAttachmentData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeWireAttachmentData;
@@ -71,7 +71,7 @@ public class WireAttachmentDataProcessor extends AbstractMultiDataProcessor<Wire
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<ImmutableWireAttachmentData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableWireAttachmentData immutable) {
+    public Optional<ImmutableWireAttachmentData> with(Key<? extends Value<?>> key, Object value, ImmutableWireAttachmentData immutable) {
         Map<Direction, WireAttachmentType> map = Maps.newHashMap(((ImmutableSpongeWireAttachmentData) immutable).getWireAttachmentMap());
         if (key == Keys.WIRE_ATTACHMENTS) {
             for (Direction dir : map.keySet()) {

@@ -64,7 +64,7 @@ public class ChunkMixin_TileEntityActivation {
                 spongeTile.activation$setDefaultActivationState(true);
                 return;
             }
-            final SpongeTileEntityType tileType = (SpongeTileEntityType) ((org.spongepowered.api.block.tileentity.TileEntity) tileEntityIn).getType();
+            final SpongeTileEntityType tileType = (SpongeTileEntityType) ((org.spongepowered.api.block.entity.BlockEntity) tileEntityIn).getType();
             if (tileType == null) {
                 return;
             }

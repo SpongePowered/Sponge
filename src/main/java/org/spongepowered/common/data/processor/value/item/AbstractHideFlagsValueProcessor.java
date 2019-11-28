@@ -28,9 +28,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -38,17 +38,17 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Boolean, Value<Boolean>> {
+public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Boolean, Mutable<Boolean>> {
 
     private final int flag;
 
-    protected AbstractHideFlagsValueProcessor(Key<Value<Boolean>> key, int flag) {
+    protected AbstractHideFlagsValueProcessor(Key<Mutable<Boolean>> key, int flag) {
         super(ItemStack.class, key);
         this.flag = flag;
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Mutable<Boolean> constructValue(Boolean actualValue) {
         return SpongeValueFactory.getInstance().createValue(this.key, actualValue, false);
     }
 
@@ -87,7 +87,7 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected Immutable<Boolean> constructImmutableValue(Boolean value) {
         return constructValue(value).asImmutable();
     }
 

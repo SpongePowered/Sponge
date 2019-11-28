@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
@@ -40,8 +39,7 @@ import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.projectile.Projectile;
@@ -54,7 +52,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
-
+import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 import java.util.Random;
 
@@ -103,7 +101,7 @@ public abstract class EntityLivingBaseMixin_API extends EntityMixin_API implemen
     }
 
     @Override
-    public MutableBoundedValue<Double> health() {
+    public Mutable<Double> health() {
         return SpongeValueFactory.boundedBuilder(Keys.HEALTH)
                 .minimum(0D)
                 .maximum((double) this.getMaxHealth())
@@ -113,7 +111,7 @@ public abstract class EntityLivingBaseMixin_API extends EntityMixin_API implemen
     }
 
     @Override
-    public MutableBoundedValue<Double> maxHealth() {
+    public Mutable<Double> maxHealth() {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_HEALTH)
                 .minimum(1D)
                 .maximum((double) Float.MAX_VALUE)
@@ -128,13 +126,13 @@ public abstract class EntityLivingBaseMixin_API extends EntityMixin_API implemen
     }
 
     @Override
-    public OptionalValue<EntitySnapshot> lastAttacker() {
+    public org.spongepowered.api.data.value.OptionalValue.Mutable<EntitySnapshot> lastAttacker() {
         return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.empty(), Optional.ofNullable(this.revengeTarget == null ?
                 null : ((Living) this.revengeTarget).createSnapshot()));
     }
 
     @Override
-    public OptionalValue<Double> lastDamage() {
+    public org.spongepowered.api.data.value.OptionalValue.Mutable<Double> lastDamage() {
         return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.empty(), Optional.ofNullable(this.revengeTarget == null ?
                 null : (double) (this.lastDamage)));
     }

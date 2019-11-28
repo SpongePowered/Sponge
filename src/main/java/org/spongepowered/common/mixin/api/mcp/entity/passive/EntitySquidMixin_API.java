@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.SquidEntity;
-import org.spongepowered.api.entity.living.Squid;
+import org.spongepowered.api.entity.living.aquatic.Squid;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(SquidEntity.class)

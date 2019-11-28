@@ -28,14 +28,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator.Mutable;
+import org.spongepowered.api.data.DataManipulator.Mutable.Factory;
 import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 
-public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+public final class SpongeDataRegistration<M extends Mutable<M, I>, I extends Immutable<I, M>>
     implements DataRegistration<M, I>, Comparable<SpongeDataRegistration<?, ?>> {
 
 
@@ -43,7 +43,7 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
     private final Class<? extends M> implementationClass;
     private final Class<I> immutableClass;
     private final Class<? extends I> immutableImplementationClass;
-    private final DataManipulatorBuilder<M, I> manipulatorBuilder;
+    private final Factory<M, I> manipulatorBuilder;
     private final PluginContainer container;
     private final String id;
     private final Translation name;
@@ -80,7 +80,7 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
     }
 
     @Override
-    public DataManipulatorBuilder<M, I> getDataManipulatorBuilder() {
+    public Factory<M, I> getDataManipulatorBuilder() {
         return this.manipulatorBuilder;
     }
 

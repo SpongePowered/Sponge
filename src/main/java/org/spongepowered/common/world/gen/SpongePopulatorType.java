@@ -26,11 +26,10 @@ package org.spongepowered.common.world.gen;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.world.gen.PopulatorType;
-
+import org.spongepowered.api.world.gen.feature.Feature;
 import java.util.Locale;
 
-public class SpongePopulatorType implements PopulatorType {
+public class SpongePopulatorType implements Feature {
 
     public final String populatorName;
     public final String modId;

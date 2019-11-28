@@ -26,18 +26,16 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.VinesFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Vine;
 import org.spongepowered.asm.mixin.Mixin;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 
 @Mixin(VinesFeature.class)
@@ -46,7 +44,7 @@ public abstract class WorldGenVinesMixin_API extends Feature implements Vine {
     private VariableAmount api$count = VariableAmount.fixed(50);
 
     @Override
-    public PopulatorType getType() {
+    public org.spongepowered.api.world.gen.feature.Feature getType() {
         return PopulatorTypes.VINE;
     }
 

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import org.spongepowered.api.block.tileentity.DaylightDetector;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.block.entity.DaylightDetector;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 
 import java.util.Optional;

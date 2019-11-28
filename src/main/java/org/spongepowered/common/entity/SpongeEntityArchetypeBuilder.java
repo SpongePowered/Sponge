@@ -29,13 +29,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.entity.EntityTypes.UNKNOWN;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
@@ -129,7 +129,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
 
     @SuppressWarnings("unchecked")
     @Override
-    public EntityArchetype.Builder setData(DataManipulator<?, ?> manipulator) {
+    public EntityArchetype.Builder setData(Mutable<?, ?> manipulator) {
         if (this.entityData == null) {
             this.entityData = DataContainer.createNew();
             this.compound = null;
@@ -141,7 +141,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E, V extends BaseValue<E>> EntityArchetype.Builder set(V value) {
+    public <E, V extends Value<E>> EntityArchetype.Builder set(V value) {
         if (this.entityData == null) {
             this.entityData = DataContainer.createNew();
             this.compound = null;
@@ -154,7 +154,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E, V extends BaseValue<E>> EntityArchetype.Builder set(Key<V> key, E value) {
+    public <E, V extends Value<E>> EntityArchetype.Builder set(Key<V> key, E value) {
         if (this.entityData == null) {
             this.entityData = DataContainer.createNew();
         }

@@ -27,8 +27,8 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExplosionRadiusData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExplosionRadiusData;
+import org.spongepowered.api.data.value.OptionalValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExplosionRadiusData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
@@ -47,7 +47,7 @@ public class SpongeExplosionRadiusData extends AbstractSingleData<Optional<Integ
     }
 
     @Override
-    protected OptionalValue<Integer> getValueGetter() {
+    protected Mutable<Integer> getValueGetter() {
         return explosionRadius();
     }
 
@@ -62,14 +62,14 @@ public class SpongeExplosionRadiusData extends AbstractSingleData<Optional<Integ
     }
 
     @Override
-    public OptionalValue<Integer> explosionRadius() {
+    public Mutable<Integer> explosionRadius() {
         return new SpongeOptionalValue<>(Keys.EXPLOSION_RADIUS, getValue());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static int compare(ValueContainer dis, ValueContainer dat) {
-        Optional<Integer> value = ((OptionalValue<Integer>) dis.get(Keys.EXPLOSION_RADIUS).get()).get();
-        Optional<Integer> other = ((OptionalValue<Integer>) dat.get(Keys.EXPLOSION_RADIUS).get()).get();
+        Optional<Integer> value = ((Mutable<Integer>) dis.get(Keys.EXPLOSION_RADIUS).get()).get();
+        Optional<Integer> other = ((Mutable<Integer>) dat.get(Keys.EXPLOSION_RADIUS).get()).get();
         if (value.isPresent()) {
             if (other.isPresent()) {
                 return value.get() - other.get();

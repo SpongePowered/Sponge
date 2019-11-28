@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.nbt.validation;
 
 import net.minecraft.nbt.CompoundNBT;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataView;
 
 public interface RawDataValidator {
 

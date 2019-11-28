@@ -26,19 +26,18 @@ package org.spongepowered.common.util.gen;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
-import org.spongepowered.api.world.extent.BiomeVolume;
+import org.spongepowered.api.world.volume.biome.ReadableBiomeVolume;
 import org.spongepowered.common.util.VecHelper;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Objects;
 
 /**
  * Base class for biome areas. This class provides methods for retrieving the
  * size and for range checking.
  */
-public abstract class AbstractBiomeBuffer implements BiomeVolume {
+public abstract class AbstractBiomeBuffer implements ReadableBiomeVolume {
 
     protected Vector3i start;
     protected Vector3i size;

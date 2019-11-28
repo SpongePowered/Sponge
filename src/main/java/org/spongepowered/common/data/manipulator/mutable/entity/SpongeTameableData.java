@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.OptionalValue.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTameableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
@@ -53,7 +53,7 @@ public class SpongeTameableData extends AbstractData<TameableData, ImmutableTame
     }
 
     @Override
-    public OptionalValue<UUID> owner() {
+    public Mutable<UUID> owner() {
         return new SpongeOptionalValue<>(Keys.TAMED_OWNER, Optional.ofNullable(this.owner));
     }
 

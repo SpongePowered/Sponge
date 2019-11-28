@@ -26,7 +26,6 @@ package org.spongepowered.common.world.gen.populators;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.math.BlockPos;
@@ -34,10 +33,10 @@ import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
+import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.SeaFloor;
-
+import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 import java.util.function.Predicate;
 
@@ -58,7 +57,7 @@ public class SeaFloorPopulator implements SeaFloor {
     }
 
     @Override
-    public PopulatorType getType() {
+    public Feature getType() {
         return PopulatorTypes.SEA_FLOOR;
     }
 

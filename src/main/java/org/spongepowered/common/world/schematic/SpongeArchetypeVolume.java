@@ -24,15 +24,13 @@
  */
 package org.spongepowered.common.world.schematic;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.tileentity.TileEntityArchetype;
+import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -41,17 +39,18 @@ import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.ArchetypeVolume;
-import org.spongepowered.api.world.extent.ImmutableBlockVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
-import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.volume.StorageType;
+import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
+import org.spongepowered.api.world.volume.block.ImmutableBlockVolume;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
+import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeStream;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.util.gen.AbstractBlockBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
-
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -61,10 +60,10 @@ import java.util.Optional;
 public class SpongeArchetypeVolume extends AbstractBlockBuffer implements ArchetypeVolume {
 
     private final MutableBlockVolume backing;
-    private final Map<Vector3i, TileEntityArchetype> tiles;
+    private final Map<Vector3i, BlockEntityArchetype> tiles;
     private final Collection<EntityArchetype> entities;
 
-    public SpongeArchetypeVolume(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles, Collection<EntityArchetype> entities) {
+    public SpongeArchetypeVolume(MutableBlockVolume backing, Map<Vector3i, BlockEntityArchetype> tiles, Collection<EntityArchetype> entities) {
         super(backing.getBlockMin(), backing.getBlockSize());
         this.backing = backing instanceof SpongeArchetypeVolume ? ((SpongeArchetypeVolume) backing).backing : backing;
         this.tiles = Maps.newHashMap(tiles);
@@ -77,12 +76,12 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
     }
 
     @Override
-    public Optional<TileEntityArchetype> getTileEntityArchetype(int x, int y, int z) {
+    public Optional<BlockEntityArchetype> getTileEntityArchetype(int x, int y, int z) {
         return Optional.ofNullable(this.tiles.get(getBlockMin().add(x, y, z)));
     }
 
     @Override
-    public Map<Vector3i, TileEntityArchetype> getTileEntityArchetypes() {
+    public Map<Vector3i, BlockEntityArchetype> getTileEntityArchetypes() {
         return this.tiles;
     }
 
@@ -121,7 +120,7 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends ArchetypeVolume> getBlockWorker() {
+    public MutableBlockVolumeStream<? extends ArchetypeVolume> getBlockWorker() {
         return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
@@ -131,7 +130,7 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
             location.getExtent().setBlock(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBlock(x, y, z), changeFlag);
         });
         for (Vector3i pos : this.tiles.keySet()) {
-            TileEntityArchetype archetype = this.tiles.get(pos);
+            BlockEntityArchetype archetype = this.tiles.get(pos);
             archetype.apply(location.add(pos));
         }
         if (!this.entities.isEmpty()) {

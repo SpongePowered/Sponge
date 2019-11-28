@@ -36,9 +36,8 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandMessageFormatting;
 import org.spongepowered.api.command.CommandNotFoundException;
 import org.spongepowered.api.command.CommandResult;
@@ -46,6 +45,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.ImmutableCommandMapping;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.Dispatcher;
+import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -127,7 +127,7 @@ final class SpongeCommandDispatcher implements Dispatcher {
      * @return The registered command mapping, unless no aliases could be
      *     registered
      */
-    public Optional<CommandMapping> register(CommandCallable callable, String... alias) {
+    public Optional<CommandMapping> register(Command callable, String... alias) {
         checkNotNull(alias, "alias");
         return register(callable, Arrays.asList(alias));
     }
@@ -148,7 +148,7 @@ final class SpongeCommandDispatcher implements Dispatcher {
      * @return The registered command mapping, unless no aliases could be
      *     registered
      */
-    public Optional<CommandMapping> register(CommandCallable callable, List<String> aliases) {
+    public Optional<CommandMapping> register(Command callable, List<String> aliases) {
         return register(callable, aliases, Function.identity());
     }
 
@@ -172,7 +172,7 @@ final class SpongeCommandDispatcher implements Dispatcher {
      * @return The registered command mapping, unless no aliases could
      *     be registered
      */
-    public synchronized Optional<CommandMapping> register(CommandCallable callable, List<String> aliases,
+    public synchronized Optional<CommandMapping> register(Command callable, List<String> aliases,
             Function<List<String>, List<String>> callback) {
         checkNotNull(aliases, "aliases");
         checkNotNull(callable, "callable");
@@ -349,7 +349,7 @@ final class SpongeCommandDispatcher implements Dispatcher {
         CommandMapping mapping = cmdOptional.get();
         Optional<PluginContainer> pluginOwner = Sponge.getCommandManager().getOwner(mapping);
         pluginOwner.ifPresent(pluginContainer -> Sponge.getCauseStackManager().pushCause(pluginContainer));
-        final CommandCallable spec = mapping.getCallable();
+        final Command spec = mapping.getCallable();
         Sponge.getCauseStackManager().pushCause(spec);
         try {
             return spec.process(source, arguments);

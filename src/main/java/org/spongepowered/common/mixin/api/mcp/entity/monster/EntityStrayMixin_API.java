@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.StrayEntity;
-import org.spongepowered.api.entity.living.monster.Stray;
+import org.spongepowered.api.entity.living.monster.skeleton.Stray;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(StrayEntity.class)

@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSittingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSittingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
@@ -42,7 +42,7 @@ public class SpongeSittingData extends AbstractBooleanData<SittingData, Immutabl
     }
 
     @Override
-    public Value<Boolean> sitting() {
+    public Mutable<Boolean> sitting() {
         return getValueGetter();
     }
 

@@ -33,8 +33,8 @@ import net.minecraft.item.MusicDiscItem;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.record.RecordType;
-import org.spongepowered.api.effect.sound.record.RecordTypes;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
+import org.spongepowered.api.effect.sound.music.MusicDiscs;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
@@ -52,19 +52,19 @@ import java.util.Map;
 import java.util.Optional;
 
 @RegistrationDependency({SoundRegistryModule.class, ItemTypeRegistryModule.class})
-public final class RecordTypeRegistryModule implements CatalogRegistryModule<RecordType> {
+public final class RecordTypeRegistryModule implements CatalogRegistryModule<MusicDisc> {
 
     public static RecordTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(RecordTypes.class)
-    private final Map<String, RecordType> mappings = new HashMap<>();
+    @RegisterCatalog(MusicDiscs.class)
+    private final Map<String, MusicDisc> mappings = new HashMap<>();
 
     private RecordTypeRegistryModule() {
     }
 
-    public Optional<RecordType> getByItem(Item itemType) {
+    public Optional<MusicDisc> getByItem(Item itemType) {
         final ResourceLocation resourceLocation = Item.REGISTRY.getKey(itemType);
         if (resourceLocation == null) {
             return Optional.empty();
@@ -73,7 +73,7 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Rec
     }
 
     @Override
-    public Optional<RecordType> getById(String id) {
+    public Optional<MusicDisc> getById(String id) {
         checkNotNull(id);
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
@@ -82,7 +82,7 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Rec
     }
 
     @Override
-    public Collection<RecordType> getAll() {
+    public Collection<MusicDisc> getAll() {
         return ImmutableList.copyOf(this.mappings.values());
     }
 
@@ -105,14 +105,14 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Rec
             }
         }
 
-        RegistryHelper.mapFields(RecordTypes.class, fieldName -> {
+        RegistryHelper.mapFields(MusicDiscs.class, fieldName -> {
             final String name = fieldName.toLowerCase(Locale.ENGLISH);
             if (name.equals("thirteen")) {
                 return this.mappings.get("minecraft:record_13");
             } else if (name.equals("eleven")) {
                 return this.mappings.get("minecraft:record_11");
             }
-            final RecordType recordType = this.mappings.get("minecraft:record_" + name);
+            final MusicDisc recordType = this.mappings.get("minecraft:record_" + name);
             return recordType;
         });
     }

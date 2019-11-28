@@ -27,12 +27,12 @@ package org.spongepowered.common.data.processor.data.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSeamlessData;
 import org.spongepowered.api.data.manipulator.mutable.block.SeamlessData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSeamlessData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SeamlessDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, SeamlessData, ImmutableSeamlessData> {
+public class SeamlessDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Mutable<Boolean>, SeamlessData, ImmutableSeamlessData> {
 
     public SeamlessDataProcessor() {
         super(Keys.SEAMLESS);
@@ -49,7 +49,7 @@ public class SeamlessDataProcessor extends AbstractBlockOnlyDataProcessor<Boolea
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
+    protected Mutable<Boolean> constructValue(Boolean actualValue) {
         return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 

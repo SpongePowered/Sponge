@@ -30,9 +30,9 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
 import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
+import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
@@ -42,7 +42,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 import net.minecraft.tileentity.BedTileEntity;
 
-public class BedDyeColorDataProcessor extends AbstractTileEntitySingleDataProcessor<BedTileEntity, DyeColor, Value<DyeColor>, DyeableData,
+public class BedDyeColorDataProcessor extends AbstractTileEntitySingleDataProcessor<BedTileEntity, DyeColor, Mutable<DyeColor>, DyeableData,
         ImmutableDyeableData> {
 
     public BedDyeColorDataProcessor() {
@@ -61,12 +61,12 @@ public class BedDyeColorDataProcessor extends AbstractTileEntitySingleDataProces
     }
 
     @Override
-    protected ImmutableValue<DyeColor> constructImmutableValue(DyeColor value) {
+    protected Immutable<DyeColor> constructImmutableValue(DyeColor value) {
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.DYE_COLOR, DyeColors.RED, value);
     }
 
     @Override
-    protected Value<DyeColor> constructValue(DyeColor actualValue) {
+    protected Mutable<DyeColor> constructValue(DyeColor actualValue) {
         // Beds are red by default, not white.
         return new SpongeValue<>(Keys.DYE_COLOR, DyeColors.RED, actualValue);
     }
