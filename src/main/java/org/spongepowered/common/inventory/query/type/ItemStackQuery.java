@@ -42,10 +42,10 @@ public abstract class ItemStackQuery<T> extends SpongeQuery<T> {
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+    public boolean matches(Lens lens, Lens parent, Fabric fabric) {
         if (lens instanceof SlotLens) {
             @SuppressWarnings("unchecked")
-            ItemStack stack = ItemStackUtil.fromNative(((SlotLens) lens).getStack(inventory));
+            ItemStack stack = ItemStackUtil.fromNative(((SlotLens) lens).getStack(fabric));
             if (this.matches(stack, this.arg)) {
                 return true;
             }

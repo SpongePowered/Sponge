@@ -36,8 +36,8 @@ public class EquipmentSlotAdapter extends FilteringSlotAdapter implements Equipm
     
     protected final EquipmentSlotLens equipmentSlot;
 
-    public EquipmentSlotAdapter(Fabric inventory, EquipmentSlotLens lens, Inventory parent) {
-        super(inventory, lens, parent);
+    public EquipmentSlotAdapter(Fabric fabric, EquipmentSlotLens lens, Inventory parent) {
+        super(fabric, lens, parent);
         this.equipmentSlot = lens;
     }
 

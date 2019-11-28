@@ -65,12 +65,12 @@ public interface Lens extends LensCollection {
      * 
      * @return adapter for this lens
      */
-    InventoryAdapter getAdapter(Fabric inv, Inventory parent);
+    InventoryAdapter getAdapter(Fabric fabric, Inventory parent);
     
     /**
      * Returns the display name of this lens 
      */
-    Translation getName(Fabric inv);
+    Translation getName(Fabric fabric);
     
     /**
      * Get the number of slots referenced by this lens
@@ -99,30 +99,30 @@ public interface Lens extends LensCollection {
      * than 0 or greater than or equal to the value returned by
      * {@link #slotCount()}.
      *
-     * @param inv inventory
+     * @param fabric fabric
      * @param ordinal
      * @return the "real" slot index (ordinal), or -1 for invalid indices
      */
-    int getRealIndex(Fabric inv, int ordinal);
+    int getRealIndex(Fabric fabric, int ordinal);
 
     /**
      * Gets the itemstack for the specified slot ordinal. Returns null if the
      * slot is empty, or if the specified ordinal is outside the range of this
      * lens.
      *
-     * @param inv inventory
+     * @param fabric inventory
      * @param ordinal slot ordinal
      * @return the item stack in the specified slot
      */
-    ItemStack getStack(Fabric inv, int ordinal);
+    ItemStack getStack(Fabric fabric, int ordinal);
 
     /**
      * Get the maximum stack size from the target inventory
      * 
-     * @param inv
+     * @param fabric
      * @return
      */
-    int getMaxStackSize(Fabric inv);
+    int getMaxStackSize(Fabric fabric);
 
     /**
      * Get child lenses of this lens
@@ -141,12 +141,12 @@ public interface Lens extends LensCollection {
     /**
      * Set the stack at the specified offset 
      * 
-     * @param inv
+     * @param fabric
      * @param ordinal
      * @param stack
      * @return
      */
-    boolean setStack(Fabric inv, int ordinal, ItemStack stack);
+    boolean setStack(Fabric fabric, int ordinal, ItemStack stack);
 
     SlotLens getSlotLens(int ordinal);
 

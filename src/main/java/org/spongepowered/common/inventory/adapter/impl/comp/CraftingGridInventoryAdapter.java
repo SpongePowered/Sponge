@@ -40,12 +40,12 @@ public class CraftingGridInventoryAdapter extends GridInventoryAdapter implement
 
     protected final CraftingGridInventoryLens craftingLens;
 
-    public CraftingGridInventoryAdapter(Fabric inventory, CraftingGridInventoryLens root) {
-        this(inventory, root, null);
+    public CraftingGridInventoryAdapter(Fabric fabric, CraftingGridInventoryLens root) {
+        this(fabric, root, null);
     }
 
-    public CraftingGridInventoryAdapter(Fabric inventory, CraftingGridInventoryLens root, Inventory parent) {
-        super(inventory, root, parent);
+    public CraftingGridInventoryAdapter(Fabric fabric, CraftingGridInventoryLens root, Inventory parent) {
+        super(fabric, root, parent);
         this.craftingLens = root;
     }
 

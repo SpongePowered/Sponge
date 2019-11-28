@@ -42,7 +42,7 @@ public class Inventory2DAdapter extends OrderedInventoryAdapter implements Inven
 
     protected Inventory2DLens lens2d;
 
-    public Inventory2DAdapter(Fabric inventory, Inventory2DLens root, Inventory parent) {
+    public Inventory2DAdapter(import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;entory, Inventory2DLens root, Inventory parent) {
         super(inventory, root, parent);
         this.lens2d = root;
     }

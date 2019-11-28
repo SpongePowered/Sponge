@@ -33,8 +33,8 @@ import org.spongepowered.api.item.inventory.slot.InputSlot;
 
 public class InputSlotAdapter extends FilteringSlotAdapter implements InputSlot {
 
-    public InputSlotAdapter(Fabric inventory, InputSlotLens lens, Inventory parent) {
-        super(inventory, lens, parent);
+    public InputSlotAdapter(Fabric fabric, InputSlotLens lens, Inventory parent) {
+        super(fabric, lens, parent);
     }
 
 }

@@ -40,7 +40,7 @@ public final class InventoryPropertyMatcherQuery extends SpongeQuery<InventoryPr
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+    public boolean matches(Lens lens, Lens parent, Fabric fabric) {
         if (parent == null) {
             return false;
         }

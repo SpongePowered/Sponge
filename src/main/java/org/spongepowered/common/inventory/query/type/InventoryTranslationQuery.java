@@ -41,8 +41,8 @@ public final class InventoryTranslationQuery extends SpongeQuery<Translation> {
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        return Objects.equals(lens.getName(inventory), translation);
+    public boolean matches(Lens lens, Lens parent, Fabric fabric) {
+        return Objects.equals(lens.getName(fabric), translation);
     }
 
 }

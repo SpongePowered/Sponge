@@ -39,7 +39,7 @@ public final class TypeQuery extends SpongeQuery<Class<?>> {
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+    public boolean matches(Lens lens, Lens parent, Fabric fabric) {
         return this.targetType.isAssignableFrom(lens.getAdapterType());
     }
 

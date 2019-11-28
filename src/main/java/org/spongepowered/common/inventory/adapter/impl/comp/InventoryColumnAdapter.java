@@ -33,8 +33,8 @@ public class InventoryColumnAdapter extends Inventory2DAdapter implements Invent
 
     protected InventoryColumnLens columnLens;
     
-    public InventoryColumnAdapter(Fabric inventory, InventoryColumnLens root, Inventory parent) {
-        super(inventory, root, parent);
+    public InventoryColumnAdapter(Fabric fabric, InventoryColumnLens root, Inventory parent) {
+        super(fabric, root, parent);
         this.columnLens = root;
     }
 

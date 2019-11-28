@@ -108,9 +108,9 @@ public class GridInventoryLens extends Inventory2DLens implements GridInventoryL
     }
 
     @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
+    public int getRealIndex(Fabric fabric, int ordinal) {
         LensHandle child = this.getLensForOrdinal(ordinal);
-        return child.lens.getRealIndex(inv, ordinal - child.ordinal);
+        return child.lens.getRealIndex(fabric, ordinal - child.ordinal);
     }
 
     @SuppressWarnings("unchecked")

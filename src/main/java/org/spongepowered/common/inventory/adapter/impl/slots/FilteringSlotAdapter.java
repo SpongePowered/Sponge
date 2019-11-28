@@ -38,8 +38,8 @@ public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
     
     protected final FilteringSlotLens filteringSlot;
 
-    public FilteringSlotAdapter(Fabric inventory, FilteringSlotLens lens, Inventory parent) {
-        super(inventory, lens, parent);
+    public FilteringSlotAdapter(Fabric fabric, FilteringSlotLens lens, Inventory parent) {
+        super(fabric, lens, parent);
         this.filteringSlot = lens;
     }
 

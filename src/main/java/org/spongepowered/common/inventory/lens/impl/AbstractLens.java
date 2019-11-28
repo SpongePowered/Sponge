@@ -103,8 +103,8 @@ public abstract class AbstractLens implements Lens {
     }
 
     @Override
-    public Translation getName(final Fabric inv) {
-        return inv.fabric$getDisplayName();
+    public Translation getName(final Fabric fabric) {
+        return fabric.fabric$getDisplayName();
     }
 
     @Override
@@ -128,18 +128,18 @@ public abstract class AbstractLens implements Lens {
     }
 
     @Override
-    public ItemStack getStack(final Fabric inv, final int ordinal) {
+    public ItemStack getStack(final Fabric fabric, final int ordinal) {
         final LensHandle lens = this.getLensForOrdinal(ordinal);
         if (lens == null) {
             return ItemStack.EMPTY;
         }
-        return lens.lens.getStack(inv, ordinal - lens.ordinal);
+        return lens.lens.getStack(fabric, ordinal - lens.ordinal);
     }
 
     @Override
-    public boolean setStack(final Fabric inv, final int ordinal, final ItemStack stack) {
+    public boolean setStack(final Fabric fabric, final int ordinal, final ItemStack stack) {
         final LensHandle lens = this.getLensForOrdinal(ordinal);
-        return lens != null && lens.lens.setStack(inv, ordinal - lens.ordinal, stack);
+        return lens != null && lens.lens.setStack(fabric, ordinal - lens.ordinal, stack);
     }
 
     protected LensHandle getLensForOrdinal(final int ordinal) {
@@ -219,14 +219,14 @@ public abstract class AbstractLens implements Lens {
     }
 
     @Override
-    public int getRealIndex(final Fabric inv, final int ordinal) {
+    public int getRealIndex(final Fabric fabric, final int ordinal) {
         final LensHandle child = this.getLensForOrdinal(ordinal);
-        return child.lens.getRealIndex(inv, ordinal - child.ordinal);
+        return child.lens.getRealIndex(fabric, ordinal - child.ordinal);
     }
 
     @Override
-    public int getMaxStackSize(final Fabric inv) {
-        return inv.fabric$getMaxStackSize();
+    public int getMaxStackSize(final Fabric fabric) {
+        return fabric.fabric$getMaxStackSize();
     }
 
     protected boolean checkOrdinal(final int ordinal) {

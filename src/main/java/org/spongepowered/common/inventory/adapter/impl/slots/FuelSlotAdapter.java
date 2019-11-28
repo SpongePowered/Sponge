@@ -31,8 +31,8 @@ import org.spongepowered.common.inventory.lens.slots.InputSlotLens;
 
 public class FuelSlotAdapter extends InputSlotAdapter implements FuelSlot {
 
-    public FuelSlotAdapter(Fabric inventory, InputSlotLens lens, Inventory parent) {
-        super(inventory, lens, parent);
+    public FuelSlotAdapter(Fabric fabric, InputSlotLens lens, Inventory parent) {
+        super(fabric, lens, parent);
     }
 
 }

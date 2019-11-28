@@ -42,34 +42,34 @@ public class SlotCollection implements Iterable<Slot> {
     
     private Inventory parent;
 
-    private final Fabric inv;
+    private final Fabric fabric;
     
     private final List<Slot> slots;
 
-    public SlotCollection(Inventory parent, Fabric inv, Lens lens, SlotLensProvider slots) {
+    public SlotCollection(Inventory parent, Fabric fabric, Lens lens, SlotLensProvider slots) {
         this.parent = parent;
-        this.inv = inv;
-        this.slots = this.traverseSpanningTree(inv, lens, slots, ImmutableList.<Slot>builder()).build();
+        this.fabric = fabric;
+        this.slots = this.traverseSpanningTree(fabric, lens, slots, ImmutableList.<Slot>builder()).build();
     }
     
     @SuppressWarnings("rawtypes")
-    private Builder<Slot> traverseSpanningTree(Fabric inv, Lens lens, SlotLensProvider slots, Builder<Slot> list) {
+    private Builder<Slot> traverseSpanningTree(Fabric fabric, Lens lens, SlotLensProvider slots, Builder<Slot> list) {
         if (lens instanceof SlotLens) {
-            list.add(((SlotAdapter) lens.getAdapter(inv, this.parent)));
+            list.add(((SlotAdapter) lens.getAdapter(fabric, this.parent)));
             return list;
         }
         for (Lens child : lens.getSpanningChildren()) {
             if (child instanceof SlotLens) {
-                list.add((SlotAdapter) child.getAdapter(inv, this.parent));
+                list.add((SlotAdapter) child.getAdapter(fabric, this.parent));
             } else if (child.getSpanningChildren().size() > 0) {
-                this.traverseSpanningTree(inv, child, slots, list);
+                this.traverseSpanningTree(fabric, child, slots, list);
             }
         }
         return list;
     }
 
     public Fabric getFabric() {
-        return this.inv;
+        return this.fabric;
     }
 
     @Override
