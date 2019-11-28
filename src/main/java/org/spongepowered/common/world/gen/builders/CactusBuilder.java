@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenCactus;
+import net.minecraft.world.gen.feature.CactusFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Cactus;
 import org.spongepowered.api.world.gen.populator.Cactus.Builder;
@@ -68,7 +68,7 @@ public class CactusBuilder implements Cactus.Builder {
 
     @Override
     public Cactus build() throws IllegalStateException {
-        Cactus populator = (Cactus) new WorldGenCactus();
+        Cactus populator = (Cactus) new CactusFeature();
         populator.setCactiPerChunk(this.count);
         populator.setHeight(this.height);
         return populator;

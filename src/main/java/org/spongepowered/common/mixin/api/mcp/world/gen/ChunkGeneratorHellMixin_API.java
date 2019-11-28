@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen;
 
-import net.minecraft.world.gen.ChunkGeneratorHell;
+import net.minecraft.world.gen.ChunkGeneratorNether;
 import net.minecraft.world.gen.MapGenBase;
-import net.minecraft.world.gen.structure.MapGenNetherBridge;
+import net.minecraft.world.gen.feature.FortressStructure;
 import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
@@ -35,11 +35,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.gen.PopulatorProviderBridge;
 
-@Mixin(ChunkGeneratorHell.class)
+@Mixin(ChunkGeneratorNether.class)
 public abstract class ChunkGeneratorHellMixin_API implements PopulatorProviderBridge {
 
     @Shadow @Final private boolean generateStructures;
-    @Shadow @Final private MapGenNetherBridge genNetherBridge;
+    @Shadow @Final private FortressStructure genNetherBridge;
     @Shadow @Final private MapGenBase genNetherCaves;
 
     @Override

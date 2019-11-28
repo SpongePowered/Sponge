@@ -28,14 +28,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenEndIsland;
+import net.minecraft.world.gen.feature.EndIslandFeature;
 import org.spongepowered.api.world.gen.populator.EndIsland;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 import java.util.Random;
 
-@Mixin(WorldGenEndIsland.class)
+@Mixin(EndIslandFeature.class)
 public abstract class WorldGenEndIslandMixin extends WorldGeneratorMixin {
 
     /**

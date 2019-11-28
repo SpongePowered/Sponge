@@ -25,14 +25,14 @@
 package org.spongepowered.common.mixin.core.stats;
 
 import net.minecraft.stats.IStatType;
-import net.minecraft.stats.StatBase;
+import net.minecraft.stats.Stat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-@Mixin(StatBase.class)
+@Mixin(Stat.class)
 public interface StatBaseAccessor {
 
     @Accessor("numberFormat") NumberFormat accessor$getNumberFormat();

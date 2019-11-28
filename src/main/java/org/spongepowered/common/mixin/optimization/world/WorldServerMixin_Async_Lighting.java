@@ -29,7 +29,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
@@ -56,13 +56,13 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
                 Executors.newFixedThreadPool(SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().getAsyncLightingCategory().getNumThreads(), new ThreadFactoryBuilder().setNameFormat("Sponge - Async Light Thread").build());
 
     @Override
-    public boolean checkLightFor(final EnumSkyBlock lightType, final BlockPos pos) {
+    public boolean checkLightFor(final EnumLightType lightType, final BlockPos pos) {
         return this.asyncLightingBridge$updateLightAsync(lightType, pos, null);
     }
 
     @Override
     public boolean asyncLightingBridge$checkLightAsync(
-        final EnumSkyBlock lightType, final BlockPos pos, final net.minecraft.world.chunk.Chunk currentChunk, final List<Chunk> neighbors) {
+        final EnumLightType lightType, final BlockPos pos, final net.minecraft.world.chunk.Chunk currentChunk, final List<Chunk> neighbors) {
         // Sponge - This check is not needed as neighbors are checked in bridge$updateLightAsync
         if (false && !this.isAreaLoaded(pos, 17, false)) {
             return false;
@@ -197,7 +197,7 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
     }
 
     @Override
-    public boolean asyncLightingBridge$updateLightAsync(final EnumSkyBlock lightType, final BlockPos pos, @Nullable Chunk currentChunk) {
+    public boolean asyncLightingBridge$updateLightAsync(final EnumLightType lightType, final BlockPos pos, @Nullable Chunk currentChunk) {
         if (this.getMinecraftServer().func_71241_aa() || this.asyncLightingImpl$lightExecutorService.isShutdown()) {
             return false;
         }
@@ -291,7 +291,7 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
         return null;
     }
 
-    private int asyncLightingImpl$getLightForAsync(final EnumSkyBlock lightType, BlockPos pos, final Chunk currentChunk, final List<Chunk> neighbors) {
+    private int asyncLightingImpl$getLightForAsync(final EnumLightType lightType, BlockPos pos, final Chunk currentChunk, final List<Chunk> neighbors) {
         if (pos.func_177956_o() < 0) {
             pos = new BlockPos(pos.func_177958_n(), 0, pos.func_177952_p());
         }
@@ -307,17 +307,17 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
         return chunk.func_177413_a(lightType, pos);
     }
 
-    private int asyncLightingImpl$getRawBlockLightAsync(final EnumSkyBlock lightType, final BlockPos pos, final Chunk currentChunk, final List<Chunk> neighbors) {
+    private int asyncLightingImpl$getRawBlockLightAsync(final EnumLightType lightType, final BlockPos pos, final Chunk currentChunk, final List<Chunk> neighbors) {
         final Chunk chunk = asyncLightingImpl$getLightChunk(pos, currentChunk, neighbors);
         if (chunk == null || chunk.field_189550_d) {
             return lightType.field_77198_c;
         }
-        if (lightType == EnumSkyBlock.SKY && chunk.func_177444_d(pos)) {
+        if (lightType == EnumLightType.SKY && chunk.func_177444_d(pos)) {
             return 15;
         } else {
             final IBlockState blockState = chunk.func_177435_g(pos);
             final int blockLight = SpongeImplHooks.getChunkPosLight(blockState, (net.minecraft.world.World) (Object) this, pos);
-            int i = lightType == EnumSkyBlock.SKY ? 0 : blockLight;
+            int i = lightType == EnumLightType.SKY ? 0 : blockLight;
             int j = SpongeImplHooks.getBlockLightOpacity(blockState, (net.minecraft.world.World) (Object) this, pos);
 
             if (j >= 15 && blockLight > 0) {
@@ -357,7 +357,7 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
         }
     }
 
-    private void asyncLightingImpl$setLightForAsync(final EnumSkyBlock type, final BlockPos pos, final int lightValue, final Chunk currentChunk, final List<Chunk> neighbors) {
+    private void asyncLightingImpl$setLightForAsync(final EnumLightType type, final BlockPos pos, final int lightValue, final Chunk currentChunk, final List<Chunk> neighbors) {
         if (((BlockPosBridge) pos).bridge$isValidPosition()) {
             final Chunk chunk = this.asyncLightingImpl$getLightChunk(pos, currentChunk, neighbors);
             if (chunk != null && !chunk.field_189550_d) {

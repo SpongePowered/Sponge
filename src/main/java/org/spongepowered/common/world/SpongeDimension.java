@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world;
 
-import net.minecraft.world.WorldProvider;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
@@ -34,9 +33,9 @@ import org.spongepowered.common.mixin.core.world.WorldProviderAccessor;
 
 public class SpongeDimension implements Dimension {
 
-    private final WorldProvider worldProvider;
+    private final net.minecraft.world.dimension.Dimension worldProvider;
 
-    public SpongeDimension(WorldProvider worldProvider) {
+    public SpongeDimension(net.minecraft.world.dimension.Dimension worldProvider) {
         this.worldProvider = worldProvider;
     }
 

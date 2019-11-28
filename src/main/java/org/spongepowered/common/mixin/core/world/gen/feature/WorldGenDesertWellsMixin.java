@@ -25,13 +25,13 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.world.gen.feature.WorldGenDesertWells;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.DesertWellsFeature;
+import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.DesertWell;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(WorldGenDesertWells.class)
-public abstract class WorldGenDesertWellsMixin extends WorldGenerator {
+@Mixin(DesertWellsFeature.class)
+public abstract class WorldGenDesertWellsMixin extends Feature {
 
     @Override
     public String toString() {

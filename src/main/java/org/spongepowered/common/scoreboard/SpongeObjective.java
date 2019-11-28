@@ -25,7 +25,7 @@
 package org.spongepowered.common.scoreboard;
 
 import com.google.common.collect.Maps;
-import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -107,7 +107,7 @@ public class SpongeObjective implements Objective {
     @SuppressWarnings("ConstantConditions")
     private void updateDisplayMode() {
         for (final ScoreObjective objective: this.objectives.values()) {
-            ((ScoreObjectiveAccessor) objective).accessor$setRenderType((IScoreCriteria.EnumRenderType) (Object) this.displayMode);
+            ((ScoreObjectiveAccessor) objective).accessor$setRenderType((ScoreCriteria.RenderType) (Object) this.displayMode);
             ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().func_96532_b(objective);
         }
     }
@@ -220,14 +220,14 @@ public class SpongeObjective implements Objective {
         if (this.objectives.containsKey(scoreboard)) {
             return this.objectives.get(scoreboard);
         }
-        final ScoreObjective objective = new ScoreObjective(scoreboard, this.name, (IScoreCriteria) this.criterion);
+        final ScoreObjective objective = new ScoreObjective(scoreboard, this.name, (ScoreCriteria) this.criterion);
 
         // We deliberately set the fields here instead of using the methods.
         // Since a new objective is being created here, we want to avoid
         // sending packets until everything is in the proper state.
 
         ((ScoreObjectiveAccessor) objective).accessor$setDisplayName(SpongeTexts.toLegacy(this.displayName));
-        ((ScoreObjectiveAccessor) objective).accessor$setRenderType((IScoreCriteria.EnumRenderType) (Object) this.displayMode);
+        ((ScoreObjectiveAccessor) objective).accessor$setRenderType((ScoreCriteria.RenderType) (Object) this.displayMode);
         ((ScoreObjectiveBridge) objective).bridge$setSpongeObjective(this);
         this.objectives.put(scoreboard, objective);
 

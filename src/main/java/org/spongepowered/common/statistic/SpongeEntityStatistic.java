@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.statistic;
 
-import net.minecraft.stats.StatBase;
+import net.minecraft.stats.Stat;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
@@ -37,7 +37,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
-public final class SpongeEntityStatistic extends StatBase implements EntityStatistic, SpongeStatistic {
+public final class SpongeEntityStatistic extends Stat implements EntityStatistic, SpongeStatistic {
 
     private final String entityId;
     private StatisticType statisticType;

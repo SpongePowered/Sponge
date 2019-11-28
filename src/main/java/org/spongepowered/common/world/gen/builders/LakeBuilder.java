@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.block.Block;
-import net.minecraft.world.gen.feature.WorldGenLakes;
+import net.minecraft.world.gen.feature.LakesFeature;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.property.block.MatterProperty;
@@ -88,7 +88,7 @@ public class LakeBuilder implements Lake.Builder {
 
     @Override
     public Lake build() throws IllegalStateException {
-        Lake pop = (Lake) new WorldGenLakes((Block) this.liquid.getType());
+        Lake pop = (Lake) new LakesFeature((Block) this.liquid.getType());
         pop.setLiquidType(this.liquid);
         pop.setLakeProbability(this.chance);
         pop.setHeight(this.height);

@@ -29,8 +29,8 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.MapGenBase;
-import net.minecraft.world.gen.structure.MapGenStructure;
-import net.minecraft.world.gen.structure.StructureStart;
+import net.minecraft.world.gen.feature.Structure;
+import net.minecraft.world.gen.feature.StructureStart;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -45,7 +45,7 @@ import java.util.Random;
  * generationpopulator as the structures are called both from the generation
  * phase and the population phase of chunk creation.
  */
-@Mixin(MapGenStructure.class)
+@Mixin(Structure.class)
 public abstract class MapGenStructureMixin_API extends MapGenBase implements Populator {
 
     @Shadow protected Long2ObjectMap<StructureStart> structureMap;

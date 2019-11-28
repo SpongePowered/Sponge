@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.type.scoreboard;
 
-import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.ScoreCriteria;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
@@ -39,12 +39,12 @@ public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalog
 
     @Override
     public void registerDefaults() {
-        register((Criterion) IScoreCriteria.field_96641_b);
-        register((Criterion) IScoreCriteria.field_178791_c);
-        register((Criterion) IScoreCriteria.field_96638_f);
-        register((Criterion) IScoreCriteria.field_96639_d);
-        register((Criterion) IScoreCriteria.field_96640_e);
-        register((Criterion) IScoreCriteria.field_96642_c);
+        register((Criterion) ScoreCriteria.field_96641_b);
+        register((Criterion) ScoreCriteria.field_178791_c);
+        register((Criterion) ScoreCriteria.field_96638_f);
+        register((Criterion) ScoreCriteria.field_96639_d);
+        register((Criterion) ScoreCriteria.field_96640_e);
+        register((Criterion) ScoreCriteria.field_96642_c);
     }
 
 }

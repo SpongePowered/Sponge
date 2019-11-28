@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
+import net.minecraft.network.NetHandlerHandshakeTCP;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.handshake.client.C00Handshake;
-import net.minecraft.server.network.NetHandlerHandshakeTCP;
+import net.minecraft.network.handshake.client.CPacketHandshake;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,7 +42,7 @@ public abstract class NetHandlerHandshakeTCPMixin {
     @Shadow @Final private NetworkManager networkManager;
 
     @Inject(method = "processHandshake", at = @At("HEAD"))
-    private void impl$updateVersionAndHost(final C00Handshake packetIn, final CallbackInfo ci) {
+    private void impl$updateVersionAndHost(final CPacketHandshake packetIn, final CallbackInfo ci) {
         final NetworkManagerBridge info = (NetworkManagerBridge) this.networkManager;
         info.bridge$setVersion(packetIn.func_149595_d());
         info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(packetIn.field_149598_b), packetIn.field_149599_c);

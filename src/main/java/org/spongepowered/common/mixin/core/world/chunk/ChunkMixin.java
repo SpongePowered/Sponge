@@ -39,10 +39,10 @@ import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -123,7 +123,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType p_177424_2_);
     @Shadow public abstract void generateSkylightMap();
-    @Shadow public abstract int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos);
+    @Shadow public abstract int getLightFor(EnumLightType p_177413_1_, BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(int x, int y, int z);
     @Shadow public abstract Biome getBiome(BlockPos pos, BiomeProvider chunkManager);
@@ -503,7 +503,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                 this.relightBlock(xPos, yPos, zPos);
             }
 
-            if (newBlockLightOpacity != postNewBlockLightOpacity && (newBlockLightOpacity < postNewBlockLightOpacity || this.getLightFor(EnumSkyBlock.SKY, pos) > 0 || this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
+            if (newBlockLightOpacity != postNewBlockLightOpacity && (newBlockLightOpacity < postNewBlockLightOpacity || this.getLightFor(EnumLightType.SKY, pos) > 0 || this.getLightFor(EnumLightType.BLOCK, pos) > 0)) {
                 this.propagateSkylightOcclusion(xPos, zPos);
             }
         }

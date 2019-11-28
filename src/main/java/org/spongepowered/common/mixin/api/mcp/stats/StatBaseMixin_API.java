@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.stats;
 
-import net.minecraft.scoreboard.IScoreCriteria;
-import net.minecraft.stats.StatBase;
+import net.minecraft.scoreboard.ScoreCriteria;
+import net.minecraft.stats.Stat;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.statistic.Statistic;
@@ -40,12 +40,12 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.text.NumberFormat;
 import java.util.Optional;
 
-@Mixin(value = StatBase.class)
+@Mixin(value = Stat.class)
 public abstract class StatBaseMixin_API implements Statistic {
 
     @Shadow @Final public String statId;
     @Shadow @Final private ITextComponent statName;
-    @Shadow @Final private IScoreCriteria objectiveCriteria;
+    @Shadow @Final private ScoreCriteria objectiveCriteria;
 
     @Override
     public Translation getTranslation() {

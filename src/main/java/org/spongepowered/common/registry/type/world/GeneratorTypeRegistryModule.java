@@ -27,10 +27,10 @@ package org.spongepowered.common.registry.type.world;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.biome.BiomeProviderSingle;
+import net.minecraft.world.biome.provider.BiomeProvider;
+import net.minecraft.world.biome.provider.SingleBiomeProvider;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
-import net.minecraft.world.gen.ChunkGeneratorHell;
+import net.minecraft.world.gen.ChunkGeneratorNether;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.RegistrationPhase;
@@ -67,7 +67,7 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
             final WorldType the_end = new WorldType(getNextID(), "the_end");
             ((WorldTypeBridge) the_end).bridge$setChunkGenerator((world, options)
                 -> new ChunkGeneratorEnd(world, true, world.func_72905_C(), new BlockPos(100, 50, 0)));
-            ((WorldTypeBridge) the_end).bridge$setBiomeProvider(world -> new BiomeProviderSingle(Biomes.field_76779_k));
+            ((WorldTypeBridge) the_end).bridge$setBiomeProvider(world -> new SingleBiomeProvider(Biomes.field_76779_k));
             ((WorldTypeAccessor) the_end).accessor$setHasInfoNotice(true);
 
             this.registerAdditionalCatalog((GeneratorType) the_end);
@@ -75,8 +75,8 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
         {
             final WorldType nether = new WorldType(getNextID(), "nether");
             ((WorldTypeAccessor) nether).accessor$setHasInfoNotice(true);
-            ((WorldTypeBridge) nether).bridge$setBiomeProvider(world -> new BiomeProviderSingle(Biomes.field_76778_j));
-            ((WorldTypeBridge) nether).bridge$setChunkGenerator((world, s) -> new ChunkGeneratorHell(world, world.func_72912_H().func_76089_r(), world.func_72905_C()));
+            ((WorldTypeBridge) nether).bridge$setBiomeProvider(world -> new SingleBiomeProvider(Biomes.field_76778_j));
+            ((WorldTypeBridge) nether).bridge$setChunkGenerator((world, s) -> new ChunkGeneratorNether(world, world.func_72912_H().func_76089_r(), world.func_72905_C()));
             this.registerAdditionalCatalog((GeneratorType) nether);
         }
         {

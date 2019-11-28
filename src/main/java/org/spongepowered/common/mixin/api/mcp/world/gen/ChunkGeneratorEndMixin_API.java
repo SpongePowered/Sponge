@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.world.gen;
 import com.flowpowered.math.GenericMath;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
-import net.minecraft.world.gen.structure.MapGenEndCity;
+import net.minecraft.world.gen.feature.EndCityStructure;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -43,7 +43,7 @@ import java.util.Random;
 public abstract class ChunkGeneratorEndMixin_API implements GenerationPopulator {
 
     @Shadow @Final private Random rand;
-    @Shadow @Final private MapGenEndCity endCityGen;
+    @Shadow @Final private EndCityStructure endCityGen;
     @Shadow @Final private boolean mapFeaturesEnabled;
 
 

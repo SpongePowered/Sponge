@@ -42,14 +42,14 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.storage.WorldInfo;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
@@ -111,7 +111,7 @@ public abstract class WorldMixin implements WorldBridge {
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
-    @Shadow @Final public WorldProvider provider;
+    @Shadow @Final public Dimension provider;
     @Shadow @Final public Random rand;
     @Shadow @Final public Profiler profiler;
     @Shadow @Final public List<EntityPlayer> playerEntities;
@@ -139,11 +139,11 @@ public abstract class WorldMixin implements WorldBridge {
     // To be overridden in MixinWorldServer_Lighting
     @Shadow public abstract int getLight(BlockPos pos);
     @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
-    @Shadow protected abstract int getRawLight(BlockPos pos, EnumSkyBlock lightType);
+    @Shadow protected abstract int getRawLight(BlockPos pos, EnumLightType lightType);
     @Shadow public abstract int getSkylightSubtracted();
     @Shadow @Nullable public abstract Chunk getChunk(BlockPos pos);
     @Shadow public abstract WorldInfo getWorldInfo();
-    @Shadow public abstract boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos);
+    @Shadow public abstract boolean checkLightFor(EnumLightType lightType, BlockPos pos);
     @Shadow public abstract boolean addTileEntity(TileEntity tile);
     @Shadow protected abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
@@ -202,7 +202,7 @@ public abstract class WorldMixin implements WorldBridge {
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
                                                                      + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
-    private net.minecraft.world.border.WorldBorder onCreateWorldBorder(final WorldProvider provider) {
+    private net.minecraft.world.border.WorldBorder onCreateWorldBorder(final Dimension provider) {
         if (this.bridge$isFake()) {
             return provider.func_177501_r();
         }
@@ -552,7 +552,7 @@ public abstract class WorldMixin implements WorldBridge {
      */
     @Inject(method = "getRawLight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState" +
             "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"), cancellable = true)
-    protected void impl$getRawLightWithoutMarkingChunkActive(final BlockPos pos, final EnumSkyBlock enumSkyBlock, final CallbackInfoReturnable<Integer> cir) {
+    protected void impl$getRawLightWithoutMarkingChunkActive(final BlockPos pos, final EnumLightType enumSkyBlock, final CallbackInfoReturnable<Integer> cir) {
         final Chunk chunk;
         chunk = this.getChunk(pos);
         if (chunk == null || chunk.field_189550_d) {
@@ -658,7 +658,7 @@ public abstract class WorldMixin implements WorldBridge {
      */
     @Redirect(method = "checkLightFor", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;IZ)Z"))
     protected boolean spongeIsAreaLoadedForCheckingLight(
-        final net.minecraft.world.World thisWorld, final BlockPos pos, final int radius, final boolean allowEmtpy, final EnumSkyBlock lightType, final BlockPos samePosition) {
+        final net.minecraft.world.World thisWorld, final BlockPos pos, final int radius, final boolean allowEmtpy, final EnumLightType lightType, final BlockPos samePosition) {
         return isAreaLoaded(pos, radius, allowEmtpy);
     }
 
@@ -695,7 +695,7 @@ public abstract class WorldMixin implements WorldBridge {
      * @return The light for the defined sky type and block position
      */
     @Overwrite
-    public int getLightFor(final EnumSkyBlock type, BlockPos pos) {
+    public int getLightFor(final EnumLightType type, BlockPos pos) {
         if (pos.func_177956_o() < 0) {
             pos = new BlockPos(pos.func_177958_n(), 0, pos.func_177952_p());
         }
@@ -720,7 +720,7 @@ public abstract class WorldMixin implements WorldBridge {
      * @param lightValue The light value to set to
      */
     @Overwrite
-    public void setLightFor(final EnumSkyBlock type, final BlockPos pos, final int lightValue) {
+    public void setLightFor(final EnumLightType type, final BlockPos pos, final int lightValue) {
         // Sponge Start - Replace with inlined Valid position check
         // if (this.isValid(pos)) // Vanilla
         if (((BlockPosBridge) pos).bridge$isValidPosition()) { // Sponge - Replace with inlined method to check

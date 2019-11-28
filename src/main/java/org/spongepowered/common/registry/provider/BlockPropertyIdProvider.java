@@ -164,7 +164,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockCarpet.field_176330_a, "minecraft:carpet_color");
         register(BlockStone.field_176247_a, "minecraft:stone_variant");
         register(BlockHugeMushroom.field_176380_a, "minecraft:huge_mushroom_variant");
-        register(BlockSnow.field_176315_a, "minecraft:snow_layer");
+        register(BlockSnowLayer.field_176315_a, "minecraft:snow_layer");
         register(BlockWall.field_176256_a, "minecraft:wall_up");
         register(BlockWall.field_176254_b, "minecraft:wall_north");
         register(BlockWall.field_176257_M, "minecraft:wall_east");

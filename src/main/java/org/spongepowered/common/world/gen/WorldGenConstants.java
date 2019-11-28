@@ -31,12 +31,12 @@ import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeForest;
-import net.minecraft.world.biome.BiomeHills;
-import net.minecraft.world.biome.BiomeTaiga;
+import net.minecraft.world.biome.ExtremeHillsBiome;
+import net.minecraft.world.biome.ForestBiome;
+import net.minecraft.world.biome.TaigaBiome;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.ChunkGeneratorFlat;
-import net.minecraft.world.gen.ChunkGeneratorHell;
+import net.minecraft.world.gen.ChunkGeneratorNether;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.IChunkGenerator;
@@ -92,7 +92,7 @@ public final class WorldGenConstants {
     public static final String VILLAGE_FLAG = "VILLAGE";
 
     private static final Class<?>[] MIXINED_CHUNK_PROVIDERS =
-            new Class<?>[] {ChunkGeneratorOverworld.class, ChunkGeneratorFlat.class, ChunkGeneratorHell.class, ChunkGeneratorEnd.class};
+            new Class<?>[] {ChunkGeneratorOverworld.class, ChunkGeneratorFlat.class, ChunkGeneratorNether.class, ChunkGeneratorEnd.class};
 
     public static boolean isValid(final IChunkGenerator cp, final Class<?> api_type) {
         if (api_type.isInstance(cp)) {
@@ -599,16 +599,16 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(lava2);
     }
 
-    public static void buildForestPopulators(final SpongeBiomeGenerationSettings gensettings, final BiomeDecorator decorator, final BiomeForest.Type type) {
+    public static void buildForestPopulators(final SpongeBiomeGenerationSettings gensettings, final BiomeDecorator decorator, final ForestBiome.Type type) {
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         final BiomeDecoratorAccessor accessor = (BiomeDecoratorAccessor) decorator;
-        if (type == BiomeForest.Type.ROOFED) {
+        if (type == ForestBiome.Type.ROOFED) {
             final RoofedForestPopulator forest = new RoofedForestPopulator();
             gensettings.getPopulators().add(0, forest);
         } else {
             final Forest.Builder forest = Forest.builder();
             forest.perChunk(VariableAmount.baseWithOptionalAddition(accessor.accessor$getTreesPerChunk(), 1, 0.1));
-            if (type == BiomeForest.Type.BIRCH) {
+            if (type == ForestBiome.Type.BIRCH) {
                 forest.type(BiomeTreeTypes.BIRCH.getPopulatorObject(), 1);
             } else {
                 forest.type(BiomeTreeTypes.OAK.getPopulatorObject(), 4);
@@ -616,7 +616,7 @@ public final class WorldGenConstants {
             }
             gensettings.getPopulators().add(0, forest.build());
         }
-        if (type == BiomeForest.Type.FLOWER) {
+        if (type == ForestBiome.Type.FLOWER) {
             gensettings.getPopulators().removeAll(gensettings.getPopulators(Flower.class));
             final Flower flower = Flower.builder()
                     .perChunk(accessor.accessor$getFlowersPerChunk() * 64)
@@ -626,22 +626,22 @@ public final class WorldGenConstants {
         }
     }
 
-    public static void buildHillsPopulator(final SpongeBiomeGenerationSettings gensettings, final BiomeHills.Type type, final BiomeDecorator decorator) {
+    public static void buildHillsPopulator(final SpongeBiomeGenerationSettings gensettings, final ExtremeHillsBiome.Type type, final BiomeDecorator decorator) {
         gensettings.getGroundCoverLayers().clear();
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((stoneNoise) -> {
             IBlockState result = Blocks.field_150349_c.func_176223_P();
-            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && type == BiomeHills.Type.MUTATED) {
+            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && type == ExtremeHillsBiome.Type.MUTATED) {
                 result = Blocks.field_150351_n.func_176223_P();
-            } else if (stoneNoise > 1.0D && type != BiomeHills.Type.EXTRA_TREES) {
+            } else if (stoneNoise > 1.0D && type != ExtremeHillsBiome.Type.EXTRA_TREES) {
                 result = Blocks.field_150348_b.func_176223_P();
             }
             return (BlockState) result;
         } , SeededVariableAmount.fixed(1)));
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((stoneNoise) -> {
             IBlockState result = Blocks.field_150346_d.func_176223_P();
-            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && type == BiomeHills.Type.MUTATED) {
+            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && type == ExtremeHillsBiome.Type.MUTATED) {
                 result = Blocks.field_150351_n.func_176223_P();
-            } else if (stoneNoise > 1.0D && type != BiomeHills.Type.EXTRA_TREES) {
+            } else if (stoneNoise > 1.0D && type != ExtremeHillsBiome.Type.EXTRA_TREES) {
                 result = Blocks.field_150348_b.func_176223_P();
             }
             return (BlockState) result;
@@ -775,9 +775,9 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(Fossil.builder().probability(1 / 64.0).build());
     }
 
-    public static void buildTaigaPopulators(final SpongeBiomeGenerationSettings gensettings, final BiomeTaiga.Type type, final IBlockState fillerBlock,
+    public static void buildTaigaPopulators(final SpongeBiomeGenerationSettings gensettings, final TaigaBiome.Type type, final IBlockState fillerBlock,
         final BiomeDecorator decorator) {
-        if (type == BiomeTaiga.Type.MEGA || type == BiomeTaiga.Type.MEGA_SPRUCE) {
+        if (type == TaigaBiome.Type.MEGA || type == TaigaBiome.Type.MEGA_SPRUCE) {
             gensettings.getGroundCoverLayers().clear();
             gensettings.getGroundCoverLayers().add(new GroundCoverLayer((Double seed) -> {
                 if (seed > 1.75D) {
@@ -810,8 +810,8 @@ public final class WorldGenConstants {
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         final Forest.Builder forest = Forest.builder();
         forest.perChunk(VariableAmount.baseWithOptionalAddition(accessor.accessor$getTreesPerChunk(), 1, 0.1));
-        if (type == BiomeTaiga.Type.MEGA || type == BiomeTaiga.Type.MEGA_SPRUCE) {
-            if (type == BiomeTaiga.Type.MEGA) {
+        if (type == TaigaBiome.Type.MEGA || type == TaigaBiome.Type.MEGA_SPRUCE) {
+            if (type == TaigaBiome.Type.MEGA) {
                 forest.type(BiomeTreeTypes.POINTY_TAIGA.getLargePopulatorObject().get(), 1);
                 forest.type(BiomeTreeTypes.TALL_TAIGA.getLargePopulatorObject().get(), 12);
             } else {

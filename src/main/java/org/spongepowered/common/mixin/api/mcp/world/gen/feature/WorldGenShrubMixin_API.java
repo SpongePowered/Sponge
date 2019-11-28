@@ -25,16 +25,16 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenShrub;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.ShrubFeature;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Random;
 
-@Mixin(WorldGenShrub.class)
-public abstract class WorldGenShrubMixin_API extends WorldGenerator implements PopulatorObject {
+@Mixin(ShrubFeature.class)
+public abstract class WorldGenShrubMixin_API extends Feature implements PopulatorObject {
 
     @Override
     public String getId() {

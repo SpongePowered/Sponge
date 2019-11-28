@@ -28,7 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenMelon;
+import net.minecraft.world.gen.feature.MelonFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -39,7 +39,7 @@ import org.spongepowered.common.mixin.core.world.gen.feature.WorldGeneratorMixin
 
 import java.util.Random;
 
-@Mixin(WorldGenMelon.class)
+@Mixin(MelonFeature.class)
 public abstract class WorldGenMelonMixin_API extends WorldGeneratorMixin implements Melon {
 
     private VariableAmount api$count = VariableAmount.fixed(10);

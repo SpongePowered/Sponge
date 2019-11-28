@@ -32,14 +32,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenIceSpike;
+import net.minecraft.world.gen.feature.IceSpikeFeature;
 import org.spongepowered.api.world.gen.populator.IceSpike;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 import java.util.Random;
 
-@Mixin(WorldGenIceSpike.class)
+@Mixin(IceSpikeFeature.class)
 public abstract class WorldGenIceSpikeMixin extends WorldGeneratorMixin {
 
     /**

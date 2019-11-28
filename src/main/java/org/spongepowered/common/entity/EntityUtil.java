@@ -57,11 +57,11 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.dimension.EndDimension;
+import net.minecraft.world.dimension.OverworldDimension;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
@@ -532,7 +532,7 @@ public final class EntityUtil {
         int toDimensionId = ((WorldServerBridge) toWorld).bridge$getDimensionId();
 
         // Entering End Portal in End goes to Overworld in Vanilla
-        if (toDimensionId == 1 && fromWorld.field_73011_w instanceof WorldProviderEnd) {
+        if (toDimensionId == 1 && fromWorld.field_73011_w instanceof EndDimension) {
             toDimensionId = 0;
         }
 
@@ -577,14 +577,14 @@ public final class EntityUtil {
             .setExitTransform(toTransform)
             .buildAndSwitch();
 
-        if (!(fromWorld.field_73011_w instanceof WorldProviderEnd)) {
+        if (!(fromWorld.field_73011_w instanceof EndDimension)) {
 
             // Only place entity in portal if one of the following are true :
             // 1. The teleporter is custom. (not vanilla)
             // 2. The last known portal vec is known. (Usually set after block collision)
             // 3. The entity is traveling to end from a non-end world.
             // Note: We must always use placeInPortal to support mods.
-            if (!teleporter.bridge$isVanilla() || entity.func_181014_aG() != null || toWorld.field_73011_w instanceof WorldProviderEnd) {
+            if (!teleporter.bridge$isVanilla() || entity.func_181014_aG() != null || toWorld.field_73011_w instanceof EndDimension) {
                 // In Forge, the entity dimension is already set by this point.
                 // To maintain compatibility with Forge mods, we temporarily
                 // set the entity's dimension to the current target dimension
@@ -595,7 +595,7 @@ public final class EntityUtil {
                     (float) toTransform.getPitch());
 
                 fromWorld.field_72984_F.func_76320_a("placing");
-                if (!teleporter.bridge$isVanilla() || toWorld.field_73011_w instanceof WorldProviderEnd) {
+                if (!teleporter.bridge$isVanilla() || toWorld.field_73011_w instanceof EndDimension) {
                     // Have to assume mod teleporters or end -> overworld always port. We set this state for nether ports in
                     // TeleporterMixin#bridge$placeEntity
                     context.setDidPort(true);
@@ -620,8 +620,8 @@ public final class EntityUtil {
     }
 
     private static Transform<World> getPortalExitTransform(final Entity entity, final WorldServer fromWorld, final WorldServer toWorld) {
-        final WorldProvider fromWorldProvider = fromWorld.field_73011_w;
-        final WorldProvider toWorldProvider = toWorld.field_73011_w;
+        final Dimension fromWorldProvider = fromWorld.field_73011_w;
+        final Dimension toWorldProvider = toWorld.field_73011_w;
 
         double x;
         final double y;
@@ -629,12 +629,12 @@ public final class EntityUtil {
 
         final Transform<World> transform;
 
-        if (toWorldProvider instanceof WorldProviderEnd) {
+        if (toWorldProvider instanceof EndDimension) {
             final BlockPos coordinate = toWorld.func_180504_m();
             x = coordinate.func_177958_n();
             y = coordinate.func_177956_o();
             z = coordinate.func_177952_p();
-        } else if (fromWorldProvider instanceof WorldProviderEnd && toWorldProvider instanceof WorldProviderSurface) {
+        } else if (fromWorldProvider instanceof EndDimension && toWorldProvider instanceof OverworldDimension) {
             final BlockPos coordinate = toWorld.func_175694_M();
             x = coordinate.func_177958_n();
             y = coordinate.func_177956_o();

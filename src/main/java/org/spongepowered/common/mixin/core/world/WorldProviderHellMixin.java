@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.dimension.NetherDimension;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(WorldProviderHell.class)
+@Mixin(NetherDimension.class)
 public abstract class WorldProviderHellMixin extends WorldProviderMixin {
 
     @Override

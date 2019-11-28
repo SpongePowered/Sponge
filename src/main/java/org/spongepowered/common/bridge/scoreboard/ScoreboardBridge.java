@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.bridge.scoreboard;
 
-import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 
@@ -38,7 +38,7 @@ public interface ScoreboardBridge {
 
     // TODO Mixin 0.8
     @Deprecated
-    Map<IScoreCriteria, List<ScoreObjective>> accessor$getScoreObjectiveCriterias();
+    Map<ScoreCriteria, List<ScoreObjective>> accessor$getScoreObjectiveCriterias();
 
     // TODO Mixin 0.8
     @Deprecated

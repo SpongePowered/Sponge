@@ -26,7 +26,7 @@ package org.spongepowered.common.registry.type.world.gen;
 
 import com.google.common.collect.Lists;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.WorldGenDungeons;
+import net.minecraft.world.gen.feature.DungeonsFeature;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.registry.RegistryModule;
@@ -59,7 +59,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void registerDefaults() {
-        final WorldGenDungeons worldGenDungeons = new WorldGenDungeons();
+        final DungeonsFeature worldGenDungeons = new DungeonsFeature();
         final Map<String, Long> types = Arrays.stream(((WorldGenDungeonsAccessor) worldGenDungeons).accessor$getSpawnerTypes())
                 .collect(Collectors.groupingBy(ResourceLocation::toString, Collectors.counting()));
 

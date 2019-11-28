@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen.feature;
 import com.google.common.base.MoreObjects;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.WorldGenDungeons;
+import net.minecraft.world.gen.feature.DungeonsFeature;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 
-@Mixin(WorldGenDungeons.class)
+@Mixin(DungeonsFeature.class)
 public abstract class WorldGenDungeonsMixin extends WorldGeneratorMixin {
 
     @Redirect(method = "generate", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/MobSpawnerBaseLogic;setEntityId(Lnet/minecraft/util/ResourceLocation;)V"))

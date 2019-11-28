@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.world.ChunkCache;
+import net.minecraft.world.Region;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 
-@Mixin(ChunkCache.class)
+@Mixin(Region.class)
 public class ChunkCacheMixin {
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getChunk(II)Lnet/minecraft/world/chunk/Chunk;"))

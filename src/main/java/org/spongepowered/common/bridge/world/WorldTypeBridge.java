@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.world;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.gen.IChunkGenerator;
 
 import java.util.Optional;

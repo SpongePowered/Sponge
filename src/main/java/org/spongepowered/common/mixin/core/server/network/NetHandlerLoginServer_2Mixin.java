@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
-import net.minecraft.server.network.NetHandlerLoginServer;
+import net.minecraft.network.NetHandlerLoginServer;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

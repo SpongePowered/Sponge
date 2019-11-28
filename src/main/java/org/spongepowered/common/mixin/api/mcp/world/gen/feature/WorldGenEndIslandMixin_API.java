@@ -32,8 +32,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.NoiseGeneratorSimplex;
-import net.minecraft.world.gen.feature.WorldGenEndIsland;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.EndIslandFeature;
+import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -47,8 +47,8 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@Mixin(WorldGenEndIsland.class)
-public abstract class WorldGenEndIslandMixin_API extends WorldGenerator implements EndIsland {
+@Mixin(EndIslandFeature.class)
+public abstract class WorldGenEndIslandMixin_API extends Feature implements EndIsland {
 
     @Nullable private NoiseGeneratorSimplex api$noise;
     private VariableAmount api$initial = VariableAmount.baseWithRandomAddition(4, 3);

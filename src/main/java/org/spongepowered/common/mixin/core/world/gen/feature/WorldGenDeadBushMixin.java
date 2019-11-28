@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.world.gen.feature.WorldGenDeadBush;
+import net.minecraft.world.gen.feature.DeadBushFeature;
 import org.spongepowered.api.world.gen.populator.DeadBush;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(WorldGenDeadBush.class)
+@Mixin(DeadBushFeature.class)
 public abstract class WorldGenDeadBushMixin extends WorldGeneratorMixin {
 
     @Override

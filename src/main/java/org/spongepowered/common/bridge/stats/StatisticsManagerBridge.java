@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.bridge.stats;
 
-import net.minecraft.stats.StatBase;
+import net.minecraft.stats.Stat;
 import net.minecraft.util.TupleIntJsonSerializable;
 
 import java.util.Map;
 
 public interface StatisticsManagerBridge {
 
-    Map<StatBase, TupleIntJsonSerializable> bridge$getStatsData();
+    Map<Stat, TupleIntJsonSerializable> bridge$getStatsData();
 }

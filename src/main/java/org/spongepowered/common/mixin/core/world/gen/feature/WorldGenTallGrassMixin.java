@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen.feature;
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.world.gen.feature.WorldGenTallGrass;
+import net.minecraft.world.gen.feature.TallGrassFeature;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.world.gen.populator.Shrub;
@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(WorldGenTallGrass.class)
+@Mixin(TallGrassFeature.class)
 public abstract class WorldGenTallGrassMixin extends WorldGeneratorMixin{
 
     @Shadow @Final @Mutable private IBlockState tallGrassState;

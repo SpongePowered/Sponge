@@ -25,13 +25,13 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.world.gen.feature.WorldGenMelon;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.MelonFeature;
 import org.spongepowered.api.world.gen.populator.Melon;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(WorldGenMelon.class)
-public abstract class WorldGenMelonMixin extends WorldGenerator {
+@Mixin(MelonFeature.class)
+public abstract class WorldGenMelonMixin extends Feature {
 
     @Override
     public String toString() {

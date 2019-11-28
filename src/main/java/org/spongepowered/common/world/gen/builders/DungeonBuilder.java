@@ -26,7 +26,6 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenDungeons;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -37,6 +36,7 @@ import org.spongepowered.api.world.gen.populator.Dungeon;
 import org.spongepowered.api.world.gen.populator.Dungeon.Builder;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.gen.feature.DungeonsFeature;
 
 public class DungeonBuilder implements Dungeon.Builder {
 
@@ -96,7 +96,7 @@ public class DungeonBuilder implements Dungeon.Builder {
 
     @Override
     public Dungeon build() throws IllegalStateException {
-        Dungeon populator = (Dungeon) new WorldGenDungeons();
+        Dungeon populator = (Dungeon) new DungeonsFeature();
         populator.setAttemptsPerChunk(this.attempts);
         if (this.data != null) {
             populator.setMobSpawnerData(this.data);

@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.WorldProvider;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -39,7 +38,7 @@ import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 @Implements(value = @Interface(iface = org.spongepowered.api.world.DimensionType.class, prefix = "dimensionType$"))
 public abstract class DimensionTypeMixin_API implements org.spongepowered.api.world.DimensionType {
 
-    @Shadow @Final private Class <? extends WorldProvider> clazz;
+    @Shadow @Final private Class <? extends net.minecraft.world.dimension.Dimension> clazz;
     @Shadow public abstract String getName();
 
     @Intrinsic

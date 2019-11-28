@@ -48,15 +48,15 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
-import net.minecraft.world.gen.structure.MapGenEndCity;
-import net.minecraft.world.gen.structure.MapGenMineshaft;
-import net.minecraft.world.gen.structure.MapGenNetherBridge;
-import net.minecraft.world.gen.structure.MapGenScatteredFeature;
-import net.minecraft.world.gen.structure.MapGenStronghold;
-import net.minecraft.world.gen.structure.MapGenStructure;
-import net.minecraft.world.gen.structure.MapGenVillage;
-import net.minecraft.world.gen.structure.StructureOceanMonument;
-import net.minecraft.world.gen.structure.WoodlandMansion;
+import net.minecraft.world.gen.feature.EndCityStructure;
+import net.minecraft.world.gen.feature.FortressStructure;
+import net.minecraft.world.gen.feature.MineshaftStructure;
+import net.minecraft.world.gen.feature.OceanMonumentStructure;
+import net.minecraft.world.gen.feature.ScatteredStructure;
+import net.minecraft.world.gen.feature.StrongholdStructure;
+import net.minecraft.world.gen.feature.Structure;
+import net.minecraft.world.gen.feature.VillageStructure;
+import net.minecraft.world.gen.feature.WoodlandMansionStructure;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -403,13 +403,13 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         boolean flag = false;
         if (chunk.func_177416_w() < 3600L) {
             for (Populator populator : this.pop) {
-                if (populator instanceof StructureOceanMonument) {
+                if (populator instanceof OceanMonumentStructure) {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                          GenerationContext<PopulatorPhaseContext> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
                              .world(this.world)
                              .populator(populator.getType())
                             .buildAndSwitch()) {
-                        flag |= ((StructureOceanMonument) populator).func_175794_a(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
+                        flag |= ((OceanMonumentStructure) populator).func_175794_a(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
                     }
                 }
             }
@@ -434,37 +434,37 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Nullable
     @Override
     public BlockPos func_180513_a(World worldIn, String structureName, BlockPos position, boolean p_180513_4_) {
-        Class<? extends MapGenStructure> target = null;
+        Class<? extends Structure> target = null;
         switch (structureName) {
             case "Stronghold":
-                target = MapGenStronghold.class;
+                target = StrongholdStructure.class;
                 break;
             case "Mansion":
-                target = WoodlandMansion.class;
+                target = WoodlandMansionStructure.class;
                 break;
             case "Monument":
-                target = StructureOceanMonument.class;
+                target = OceanMonumentStructure.class;
                 break;
             case "Village":
-                target = MapGenVillage.class;
+                target = VillageStructure.class;
                 break;
             case "Mineshaft":
-                target = MapGenMineshaft.class;
+                target = MineshaftStructure.class;
                 break;
             case "Temple":
-                target = MapGenScatteredFeature.class;
+                target = ScatteredStructure.class;
                 break;
             case "Fortress":
-                target = MapGenNetherBridge.class;
+                target = FortressStructure.class;
                 break;
             case "EndCity":
-                target = MapGenEndCity.class;
+                target = EndCityStructure.class;
                 break;
         }
         if (target != null) {
             for (GenerationPopulator gen : this.genpop) {
                 if (target.isInstance(gen)) {
-                    return ((MapGenStructure) gen).func_180706_b(worldIn, position, p_180513_4_);
+                    return ((Structure) gen).func_180706_b(worldIn, position, p_180513_4_);
                 }
             }
         }
@@ -478,37 +478,37 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public boolean func_193414_a(World worldIn, String structureName, BlockPos position) {
-        Class<? extends MapGenStructure> target = null;
+        Class<? extends Structure> target = null;
         switch (structureName) {
             case "Stronghold":
-                target = MapGenStronghold.class;
+                target = StrongholdStructure.class;
                 break;
             case "Mansion":
-                target = WoodlandMansion.class;
+                target = WoodlandMansionStructure.class;
                 break;
             case "Monument":
-                target = StructureOceanMonument.class;
+                target = OceanMonumentStructure.class;
                 break;
             case "Village":
-                target = MapGenVillage.class;
+                target = VillageStructure.class;
                 break;
             case "Mineshaft":
-                target = MapGenMineshaft.class;
+                target = MineshaftStructure.class;
                 break;
             case "Temple":
-                target = MapGenScatteredFeature.class;
+                target = ScatteredStructure.class;
                 break;
             case "Fortress":
-                target = MapGenNetherBridge.class;
+                target = FortressStructure.class;
                 break;
             case "EndCity":
-                target = MapGenEndCity.class;
+                target = EndCityStructure.class;
                 break;
         }
         if (target != null) {
             for (GenerationPopulator gen : this.genpop) {
                 if (target.isInstance(gen)) {
-                    return ((MapGenStructure) gen).func_175795_b(position);
+                    return ((Structure) gen).func_175795_b(position);
                 }
             }
         }
@@ -535,8 +535,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         }
 
         for (GenerationPopulator populator : this.genpop) {
-            if (populator instanceof MapGenStructure) {
-                ((MapGenStructure) populator).func_186125_a(chunkIn.func_177412_p(), x, z, null);
+            if (populator instanceof Structure) {
+                ((Structure) populator).func_186125_a(chunkIn.func_177412_p(), x, z, null);
             }
         }
     }

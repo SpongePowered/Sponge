@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockDispenser;
-import net.minecraft.block.BlockSourceImpl;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.dispenser.BlockSourceImpl;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityDispenser;

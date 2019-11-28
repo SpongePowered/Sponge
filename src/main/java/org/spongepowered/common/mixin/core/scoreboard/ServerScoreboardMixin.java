@@ -30,8 +30,8 @@ import net.minecraft.network.play.server.SPacketDisplayObjective;
 import net.minecraft.network.play.server.SPacketScoreboardObjective;
 import net.minecraft.network.play.server.SPacketTeams;
 import net.minecraft.network.play.server.SPacketUpdateScore;
-import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
@@ -77,7 +77,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public ScoreObjective func_96535_a(final String name, final IScoreCriteria criteria) {
+    public ScoreObjective func_96535_a(final String name, final ScoreCriteria criteria) {
         final SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
         objective.setDisplayMode((ObjectiveDisplayMode) (Object) criteria.func_178790_c());
         ((org.spongepowered.api.scoreboard.Scoreboard) this).addObjective(objective);

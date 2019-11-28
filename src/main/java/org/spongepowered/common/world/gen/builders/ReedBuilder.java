@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenReed;
+import net.minecraft.world.gen.feature.ReedFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Reed;
 import org.spongepowered.api.world.gen.populator.Reed.Builder;
@@ -67,7 +67,7 @@ public class ReedBuilder implements Reed.Builder {
 
     @Override
     public Reed build() throws IllegalStateException {
-        Reed pop = (Reed) new WorldGenReed();
+        Reed pop = (Reed) new ReedFeature();
         pop.setReedHeight(this.height);
         pop.setReedsPerChunk(this.count);
         return pop;

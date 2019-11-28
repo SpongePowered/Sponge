@@ -27,7 +27,7 @@ package org.spongepowered.common.world.gen.builders;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.block.BlockDoublePlant.EnumPlantType;
-import net.minecraft.world.gen.feature.WorldGenDoublePlant;
+import net.minecraft.world.gen.feature.DoublePlantFeature;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedObject;
@@ -101,7 +101,7 @@ public class DoublePlantBuilder implements DoublePlant.Builder {
         if (this.types.isEmpty()) {
             throw new IllegalStateException("Builder is missing required weighted plant types.");
         }
-        WorldGenDoublePlant wgen = new WorldGenDoublePlant();
+        DoublePlantFeature wgen = new DoublePlantFeature();
         // Set a default just in case the weighted table is ever empty
         wgen.func_180710_a(EnumPlantType.GRASS);
         DoublePlant populator = (DoublePlant) wgen;

@@ -450,7 +450,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         } else if (((WorldInfoBridge) this).bridge$getIsMod() && !keepSpawnLoaded) { // If disabled and a mod dimension, validate
             final Integer dimensionId = ((WorldInfoBridge) this).bridge$getDimensionId();
 
-            if (dimensionId != null && dimensionId == ((net.minecraft.world.DimensionType)(Object) ((WorldInfoBridge) this).bridge$getDimensionType()).func_186068_a()) {
+            if (dimensionId != null && dimensionId == ((net.minecraft.world.dimension.DimensionType)(Object) ((WorldInfoBridge) this).bridge$getDimensionType()).func_186068_a()) {
                 if (((DimensionTypeBridge)((WorldInfoBridge) this).bridge$getDimensionType()).bridge$shouldKeepSpawnLoaded()) {
                     this.setKeepSpawnLoaded(true);
                     keepSpawnLoaded = true;

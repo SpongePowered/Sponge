@@ -25,14 +25,14 @@
 package org.spongepowered.common.mixin.bungee.network.packet;
 
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.handshake.client.C00Handshake;
+import net.minecraft.network.handshake.client.CPacketHandshake;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
 
-@Mixin(C00Handshake.class)
+@Mixin(CPacketHandshake.class)
 public abstract class C00HandshakeMixin_Bungee {
 
     @Shadow public String ip;

@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import net.minecraft.block.BlockBush;
-import net.minecraft.world.gen.feature.WorldGenBush;
+import net.minecraft.world.gen.feature.BushFeature;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(WorldGenBush.class)
+@Mixin(BushFeature.class)
 public interface WorldGenBushAccessor {
 
     @Accessor("block") BlockBush accessor$getBushBlock();

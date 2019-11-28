@@ -30,7 +30,7 @@ import net.minecraft.block.BlockCauldron;
 import net.minecraft.block.BlockChorusPlant;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockSlab;
-import net.minecraft.block.BlockSnow;
+import net.minecraft.block.BlockSnowLayer;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
@@ -80,7 +80,7 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
                  state.func_177230_c() instanceof BlockAnvil ||
                  state.func_177230_c() instanceof BlockFence ||
                  state.func_177230_c() instanceof BlockChorusPlant ||
-                 state.func_177230_c() instanceof BlockSnow ||
+                 state.func_177230_c() instanceof BlockSnowLayer ||
                  material == Material.field_151592_s ||
                  material == Material.field_151584_j);
     }

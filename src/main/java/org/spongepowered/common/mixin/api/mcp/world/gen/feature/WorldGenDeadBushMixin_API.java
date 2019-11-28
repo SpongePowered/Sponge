@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenDeadBush;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.DeadBushFeature;
+import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -38,8 +38,8 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Random;
 
-@Mixin(WorldGenDeadBush.class)
-public abstract class WorldGenDeadBushMixin_API extends WorldGenerator implements DeadBush {
+@Mixin(DeadBushFeature.class)
+public abstract class WorldGenDeadBushMixin_API extends Feature implements DeadBush {
 
     private VariableAmount api$count = VariableAmount.fixed(128);
 

@@ -28,8 +28,8 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenIcePath;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.IcePathFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -41,8 +41,8 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Random;
 
-@Mixin(WorldGenIcePath.class)
-public abstract class WorldGenIcePathMixin_API extends WorldGenerator implements IcePath {
+@Mixin(IcePathFeature.class)
+public abstract class WorldGenIcePathMixin_API extends Feature implements IcePath {
 
     private VariableAmount radius = VariableAmount.baseWithRandomAddition(2, 1); // defaulting, but overridden in WorldGenIcePathMixin
     private VariableAmount sections = VariableAmount.fixed(2);

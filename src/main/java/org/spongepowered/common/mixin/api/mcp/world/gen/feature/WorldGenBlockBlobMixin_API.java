@@ -28,8 +28,8 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenBlockBlob;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.BlockBlobFeature;
+import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
@@ -44,8 +44,8 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@Mixin(WorldGenBlockBlob.class)
-public abstract class WorldGenBlockBlobMixin_API extends WorldGenerator implements BlockBlob {
+@Mixin(BlockBlobFeature.class)
+public abstract class WorldGenBlockBlobMixin_API extends Feature implements BlockBlob {
 
     @Shadow @Final private Block block;
     @Shadow @Final private int startRadius;

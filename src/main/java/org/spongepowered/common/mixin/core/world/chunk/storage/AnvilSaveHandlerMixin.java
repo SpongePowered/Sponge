@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.core.world.chunk.storage;
 
 import net.minecraft.util.datafix.DataFixer;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.chunk.storage.IChunkLoader;
+import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -54,7 +54,7 @@ public abstract class AnvilSaveHandlerMixin extends SaveHandler {
      */
     @Override
     @Overwrite
-    public IChunkLoader func_75763_a(final WorldProvider provider) {
+    public IChunkLoader func_75763_a(final Dimension provider) {
         // To workaround the issue of every world having a separate save handler
         // we won't be generating a DIMXX folder for chunk loaders since this name is already generated
         // for the world container with provider.getSaveFolder().

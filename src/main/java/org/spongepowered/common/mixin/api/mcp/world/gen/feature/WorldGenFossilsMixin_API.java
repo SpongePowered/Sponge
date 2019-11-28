@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenFossils;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.FossilsFeature;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -36,8 +36,8 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Random;
 
-@Mixin(WorldGenFossils.class)
-public abstract class WorldGenFossilsMixin_API extends WorldGenerator implements Fossil {
+@Mixin(FossilsFeature.class)
+public abstract class WorldGenFossilsMixin_API extends Feature implements Fossil {
 
     private double api$chance = 1 / 64.0;
 

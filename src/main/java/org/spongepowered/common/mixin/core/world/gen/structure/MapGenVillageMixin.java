@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen.structure;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.MapGenVillage;
+import net.minecraft.world.gen.feature.VillageStructure;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.gen.FlaggedPopulatorBridge;
@@ -42,7 +42,7 @@ import java.util.Random;
  * allow better access and control over the function of these populators while
  * preserving vanilla functionality.
  */
-@Mixin(MapGenVillage.class)
+@Mixin(VillageStructure.class)
 public abstract class MapGenVillageMixin extends MapGenStructureMixin implements FlaggedPopulatorBridge {
 
     @Override

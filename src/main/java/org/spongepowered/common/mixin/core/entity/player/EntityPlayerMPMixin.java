@@ -58,8 +58,8 @@ import net.minecraft.network.play.server.SPacketEntityProperties;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.network.play.server.SPacketUpdateHealth;
-import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
@@ -269,7 +269,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
                 this.inventory.func_70436_m();
             }
 
-            for (final ScoreObjective scoreobjective : this.getWorldScoreboard().func_96520_a(IScoreCriteria.field_96642_c)) {
+            for (final ScoreObjective scoreobjective : this.getWorldScoreboard().func_96520_a(ScoreCriteria.field_96642_c)) {
                 final Score score = this.getWorldScoreboard().func_96529_a(this.shadow$getName(), scoreobjective);
                 score.func_96648_a();
             }

@@ -41,19 +41,19 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.FixTypes;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
-import net.minecraft.world.MinecraftException;
 import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
+import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveHandler;
+import net.minecraft.world.storage.SessionLockException;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
@@ -256,7 +256,7 @@ public final class WorldManager {
         return Optional.ofNullable(dimensionTypeByTypeId.get(dimensionTypeId));
     }
 
-    public static Optional<DimensionType> getDimensionType(final Class<? extends WorldProvider> providerClass) {
+    public static Optional<DimensionType> getDimensionType(final Class<? extends Dimension> providerClass) {
         checkNotNull(providerClass);
         for (final Object rawDimensionType : dimensionTypeByTypeId.values()) {
             final DimensionType dimensionType = (DimensionType) rawDimensionType;
@@ -547,7 +547,7 @@ public final class WorldManager {
                 }
 
                 ((WorldInfoBridge) worldServer.func_72912_H()).bridge$getConfigAdapter().save();
-            } catch (MinecraftException e) {
+            } catch (SessionLockException e) {
                 e.printStackTrace();
             } finally {
                 SpongeImpl.getLogger().info("Unloading world [{}] ({}/{})", worldServer.func_72912_H().func_76065_j(),
@@ -567,7 +567,7 @@ public final class WorldManager {
         return true;
     }
 
-    public static void saveWorld(final WorldServer worldServer, final boolean flush) throws MinecraftException {
+    public static void saveWorld(final WorldServer worldServer, final boolean flush) throws SessionLockException {
         if (((WorldProperties) worldServer.func_72912_H()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             return;
         } else {
@@ -1080,7 +1080,7 @@ public final class WorldManager {
         if (worldServer != null) {
             try {
                 saveWorld(worldServer, true);
-            } catch (MinecraftException e) {
+            } catch (SessionLockException e) {
                 throw new RuntimeException(e);
             }
 
@@ -1252,7 +1252,7 @@ public final class WorldManager {
 
     }
 
-    public static void sendDimensionRegistration(final EntityPlayerMP playerMP, final WorldProvider provider) {
+    public static void sendDimensionRegistration(final EntityPlayerMP playerMP, final Dimension provider) {
         // Do nothing in Common
     }
 

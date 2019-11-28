@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.biome.provider.BiomeProvider;
+import net.minecraft.world.dimension.Dimension;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(WorldProvider.class)
+@Mixin(Dimension.class)
 public interface WorldProviderAccessor {
 
     @Accessor("terrainType") WorldType accessor$getTerrainType();

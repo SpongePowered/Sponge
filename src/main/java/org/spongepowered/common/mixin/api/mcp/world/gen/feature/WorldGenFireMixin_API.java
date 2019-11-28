@@ -29,8 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenFire;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.FireFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -40,8 +40,8 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Random;
 
-@Mixin(WorldGenFire.class)
-public abstract class WorldGenFireMixin_API extends WorldGenerator implements NetherFire {
+@Mixin(FireFeature.class)
+public abstract class WorldGenFireMixin_API extends Feature implements NetherFire {
 
     private VariableAmount api$count = VariableAmount.fixed(10);
     private VariableAmount api$cluster = VariableAmount.fixed(64);

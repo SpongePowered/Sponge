@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.world.gen.feature.WorldGenVines;
+import net.minecraft.world.gen.feature.VinesFeature;
 import org.spongepowered.api.world.gen.populator.Vine;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(WorldGenVines.class)
+@Mixin(VinesFeature.class)
 public abstract class WorldGenVinesMixin extends WorldGeneratorMixin {
 
     @Override

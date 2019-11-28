@@ -27,7 +27,7 @@ package org.spongepowered.common.world.gen.builders;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.block.Block;
-import net.minecraft.world.gen.feature.WorldGenBlockBlob;
+import net.minecraft.world.gen.feature.BlockBlobFeature;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.BlockBlob;
@@ -86,7 +86,7 @@ public class BlockBlobBuilder implements BlockBlob.Builder {
         if (this.block == null) {
             throw new IllegalStateException("Builder is missing required BlockState argument.");
         }
-        BlockBlob populator = (BlockBlob) new WorldGenBlockBlob((Block) this.block.getType(), 2);
+        BlockBlob populator = (BlockBlob) new BlockBlobFeature((Block) this.block.getType(), 2);
         populator.setBlock(this.block);
         populator.setRadius(this.radius);
         populator.setCount(this.count);

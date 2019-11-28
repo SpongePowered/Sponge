@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.stats;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.stats.StatBase;
+import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatisticsManager;
 import net.minecraft.util.TupleIntJsonSerializable;
 import org.spongepowered.api.Sponge;
@@ -48,16 +48,16 @@ import java.util.Map;
 @Mixin(StatisticsManager.class)
 public abstract class StatisticsManagerMixin implements StatisticsManagerBridge {
 
-    @Shadow public abstract int readStat(StatBase stat);
-    @Shadow public abstract void increaseStat(EntityPlayer player, StatBase stat, int amount);
+    @Shadow public abstract int readStat(Stat stat);
+    @Shadow public abstract void increaseStat(EntityPlayer player, Stat stat, int amount);
 
-    @Shadow @Final protected Map<StatBase, TupleIntJsonSerializable> statsData;
+    @Shadow @Final protected Map<Stat, TupleIntJsonSerializable> statsData;
 
     private boolean statCaptured = false;
 
     @Inject(method = "increaseStat(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/stats/StatBase;I)V",
             at = @At("HEAD"), cancellable = true)
-    private void impl$throwEvent(final EntityPlayer player, final StatBase stat, final int amount, final CallbackInfo ci) {
+    private void impl$throwEvent(final EntityPlayer player, final Stat stat, final int amount, final CallbackInfo ci) {
         if (this.statCaptured) {
             return;
         }
@@ -81,7 +81,7 @@ public abstract class StatisticsManagerMixin implements StatisticsManagerBridge 
     }
 
     @Override
-    public Map<StatBase, TupleIntJsonSerializable> bridge$getStatsData() {
+    public Map<Stat, TupleIntJsonSerializable> bridge$getStatsData() {
         return ImmutableMap.copyOf(this.statsData);
     }
 

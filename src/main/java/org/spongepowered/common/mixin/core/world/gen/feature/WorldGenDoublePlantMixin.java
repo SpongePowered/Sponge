@@ -30,7 +30,7 @@ import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenDoublePlant;
+import net.minecraft.world.gen.feature.DoublePlantFeature;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.util.weighted.WeightedObject;
@@ -50,7 +50,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-@Mixin(WorldGenDoublePlant.class)
+@Mixin(DoublePlantFeature.class)
 public abstract class WorldGenDoublePlantMixin extends WorldGeneratorMixin implements WorldGenDoublePlantBridge {
 
     @Shadow private BlockDoublePlant.EnumPlantType plantType;

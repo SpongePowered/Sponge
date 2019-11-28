@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenCactus;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.CactusFeature;
+import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -38,8 +38,8 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Random;
 
-@Mixin(WorldGenCactus.class)
-public abstract class WorldGenCactusMixin_API extends WorldGenerator implements Cactus {
+@Mixin(CactusFeature.class)
+public abstract class WorldGenCactusMixin_API extends Feature implements Cactus {
 
     private VariableAmount api$cactiPerChunk = VariableAmount.fixed(10);
     private VariableAmount api$height = VariableAmount.baseWithRandomAddition(1, VariableAmount.baseWithRandomAddition(1, 3));

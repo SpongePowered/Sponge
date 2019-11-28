@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.item.crafting;
 
-import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.item.crafting.ShapelessRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ShapelessRecipes.class)
+@Mixin(ShapelessRecipe.class)
 public interface ShapelessRecipesAccessor {
 
     @Accessor("group") String accessor$getGroup();

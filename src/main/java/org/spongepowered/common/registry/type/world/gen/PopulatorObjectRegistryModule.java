@@ -33,20 +33,20 @@ import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.world.gen.feature.BigTreeFeature;
+import net.minecraft.world.gen.feature.BirchTreeFeature;
+import net.minecraft.world.gen.feature.CanopyTreeFeature;
+import net.minecraft.world.gen.feature.DesertWellsFeature;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.MegaJungleFeature;
+import net.minecraft.world.gen.feature.MegaPineTree;
+import net.minecraft.world.gen.feature.PointyTaigaTreeFeature;
+import net.minecraft.world.gen.feature.SavannaTreeFeature;
+import net.minecraft.world.gen.feature.ShrubFeature;
+import net.minecraft.world.gen.feature.SwampTreeFeature;
+import net.minecraft.world.gen.feature.TallTaigaTreeFeature;
+import net.minecraft.world.gen.feature.TreeFeature;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
-import net.minecraft.world.gen.feature.WorldGenBigTree;
-import net.minecraft.world.gen.feature.WorldGenBirchTree;
-import net.minecraft.world.gen.feature.WorldGenCanopyTree;
-import net.minecraft.world.gen.feature.WorldGenDesertWells;
-import net.minecraft.world.gen.feature.WorldGenMegaJungle;
-import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
-import net.minecraft.world.gen.feature.WorldGenSavannaTree;
-import net.minecraft.world.gen.feature.WorldGenShrub;
-import net.minecraft.world.gen.feature.WorldGenSwamp;
-import net.minecraft.world.gen.feature.WorldGenTaiga1;
-import net.minecraft.world.gen.feature.WorldGenTaiga2;
-import net.minecraft.world.gen.feature.WorldGenTrees;
-import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -76,38 +76,38 @@ public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalo
     @Override
     public void registerDefaults() {
         // Populators
-        register(new WorldGenDesertWells());
+        register(new DesertWellsFeature());
 
         // Trees
-        register(new WorldGenTrees(false));
-        register(new WorldGenBigTree(false));
-        register(new WorldGenBirchTree(false, false));
-        register(new WorldGenBirchTree(false, true));
-        register(new WorldGenTaiga2(false));
-        register(new WorldGenTaiga1());
-        register(new WorldGenMegaPineTree(false, true));
-        register(new WorldGenMegaPineTree(false, false));
+        register(new TreeFeature(false));
+        register(new BigTreeFeature(false));
+        register(new BirchTreeFeature(false, false));
+        register(new BirchTreeFeature(false, true));
+        register(new TallTaigaTreeFeature(false));
+        register(new PointyTaigaTreeFeature());
+        register(new MegaPineTree(false, true));
+        register(new MegaPineTree(false, false));
         IBlockState jlog = Blocks.field_150364_r.func_176223_P().func_177226_a(BlockOldLog.field_176301_b, BlockPlanks.EnumType.JUNGLE);
         IBlockState jleaf = Blocks.field_150362_t.func_176223_P().func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE).func_177226_a(BlockLeaves.field_176236_b, Boolean.valueOf(false));
         IBlockState leaf = Blocks.field_150362_t.func_176223_P().func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE).func_177226_a(BlockLeaves.field_176236_b, Boolean.valueOf(false));
-        WorldGenTreesBridge trees = (WorldGenTreesBridge) new WorldGenTrees(false, 4, jlog, jleaf, true);
+        WorldGenTreesBridge trees = (WorldGenTreesBridge) new TreeFeature(false, 4, jlog, jleaf, true);
         trees.bridge$setId("minecraft:jungle");
         trees.bridge$setName("Jungle tree");
         trees.bridge$setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
-        register((WorldGenTrees) trees);
-        register(new WorldGenMegaJungle(false, 10, 20, jlog, jleaf));
-        WorldGenShrub bush = new WorldGenShrub(jlog, leaf);
+        register((TreeFeature) trees);
+        register(new MegaJungleFeature(false, 10, 20, jlog, jleaf));
+        ShrubFeature bush = new ShrubFeature(jlog, leaf);
         register(bush);
-        register( new WorldGenSavannaTree(false));
-        register(new WorldGenCanopyTree(false));
-        register(new WorldGenSwamp());
+        register( new SavannaTreeFeature(false));
+        register(new CanopyTreeFeature(false));
+        register(new SwampTreeFeature());
 
         // Mushrooms
         register(new WorldGenBigMushroom(Blocks.field_150420_aW));
         register(new WorldGenBigMushroom(Blocks.field_150419_aX));
     }
 
-    private void register(WorldGenerator worldGenerator) {
+    private void register(Feature worldGenerator) {
         register((PopulatorObject) worldGenerator);
     }
 

@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.world.biome;
 
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;

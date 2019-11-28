@@ -27,16 +27,16 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
-import net.minecraft.world.gen.feature.WorldGenCanopyTree;
+import net.minecraft.world.gen.feature.AbstractTreeFeature;
+import net.minecraft.world.gen.feature.CanopyTreeFeature;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Random;
 
-@Mixin(WorldGenCanopyTree.class)
-public abstract class WorldGenCanopyTreeMixin extends WorldGenAbstractTree implements PopulatorObject {
+@Mixin(CanopyTreeFeature.class)
+public abstract class WorldGenCanopyTreeMixin extends AbstractTreeFeature implements PopulatorObject {
 
     public WorldGenCanopyTreeMixin(boolean notify) { // Shadow mixin requirement
         super(notify);

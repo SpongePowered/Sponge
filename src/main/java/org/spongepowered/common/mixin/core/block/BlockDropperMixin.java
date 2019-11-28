@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockDropper;
-import net.minecraft.block.BlockSourceImpl;
+import net.minecraft.dispenser.BlockSourceImpl;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityDispenser;

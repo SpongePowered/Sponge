@@ -36,6 +36,7 @@ import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.crash.ReportedException;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntitySkeletonHorse;
@@ -53,33 +54,32 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
-import net.minecraft.world.MinecraftException;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
+import net.minecraft.world.storage.SessionLockException;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.world.storage.WorldSavedData;
 import org.apache.logging.log4j.Level;
@@ -223,7 +223,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @Shadow @Final @Mutable private Teleporter worldTeleporter;
     @Shadow private int updateEntityTick;
 
-    @Shadow protected void saveLevel() throws MinecraftException { }
+    @Shadow protected void saveLevel() throws SessionLockException { }
     @Shadow private boolean fireBlockEvent(final BlockEventData event) { return false; }// shadowed
     @Shadow protected abstract void createBonusChest();
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
@@ -235,7 +235,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;setWorld(Lnet/minecraft/world/World;)V"))
-    private void onSetWorld(final WorldProvider worldProvider, final World worldIn) {
+    private void onSetWorld(final Dimension worldProvider, final World worldIn) {
         // Guarantees no mod has changed our worldInfo.
         // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
         // This change is not needed as all worlds in Sponge use separate save handlers.
@@ -469,7 +469,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             .orElseGet(() -> {
                 final IChunkGenerator current = ((ChunkProviderServerBridge) this.getChunkProvider()).accessor$getChunkGenerator();
                 if (current == null) {
-                    final WorldProvider worldProvider = worldServer.field_73011_w;
+                    final Dimension worldProvider = worldServer.field_73011_w;
                     ((WorldProviderBridge) worldProvider).accessor$setGeneratorSettings(settings);
                     return worldProvider.func_186060_c();
                 }
@@ -505,7 +505,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     }
 
     @Override
-    protected void impl$getRawLightWithoutMarkingChunkActive(final BlockPos pos, final EnumSkyBlock enumSkyBlock, final CallbackInfoReturnable<Integer> cir) {
+    protected void impl$getRawLightWithoutMarkingChunkActive(final BlockPos pos, final EnumLightType enumSkyBlock, final CallbackInfoReturnable<Integer> cir) {
         if (this.bridge$isFake()) {
             super.impl$getRawLightWithoutMarkingChunkActive(pos, enumSkyBlock, cir);
             return;
@@ -1166,7 +1166,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
      */
     @SuppressWarnings("UnnecessaryParentheses")
     @Overwrite
-    public void saveAllChunks(final boolean all, @Nullable final IProgressUpdate progressCallback) throws MinecraftException
+    public void saveAllChunks(final boolean all, @Nullable final IProgressUpdate progressCallback) throws SessionLockException
     {
         final ChunkProviderServer chunkproviderserver = this.getChunkProvider();
 
@@ -1994,7 +1994,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
      */
     @Override
     public boolean spongeIsAreaLoadedForCheckingLight(
-        final World thisWorld, final BlockPos pos, final int radius, final boolean allowEmtpy, final EnumSkyBlock lightType,
+        final World thisWorld, final BlockPos pos, final int radius, final boolean allowEmtpy, final EnumLightType lightType,
             final BlockPos samePosition) {
         final Chunk chunk = ((ChunkProviderBridge) this.getChunkProvider())
             .bridge$getLoadedChunkWithoutMarkingActive(pos.func_177958_n() >> 4, pos.func_177952_p() >> 4);
@@ -2095,7 +2095,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
      * @return The light for the defined sky type and block position
      */
     @Override
-    public int getLightFor(final EnumSkyBlock type, BlockPos pos) {
+    public int getLightFor(final EnumLightType type, BlockPos pos) {
         if (pos.func_177956_o() < 0) {
             pos = new BlockPos(pos.func_177958_n(), 0, pos.func_177952_p());
         }

@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenHugeTrees;
-import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
+import net.minecraft.world.gen.feature.HugeTreesFeature;
+import net.minecraft.world.gen.feature.MegaPineTree;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Final;
@@ -38,8 +38,8 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@Mixin(WorldGenMegaPineTree.class)
-public abstract class WorldGenMegaPineTreeMixin_API extends WorldGenHugeTrees implements PopulatorObject {
+@Mixin(MegaPineTree.class)
+public abstract class WorldGenMegaPineTreeMixin_API extends HugeTreesFeature implements PopulatorObject {
 
     @Shadow @Final private boolean useBaseHeight;
 

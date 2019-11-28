@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world.gen.builders;
 
-import net.minecraft.world.gen.feature.WorldGenVines;
+import net.minecraft.world.gen.feature.VinesFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Vine;
 import org.spongepowered.api.world.gen.populator.Vine.Builder;
@@ -55,7 +55,7 @@ public class VineBuilder implements Vine.Builder {
 
     @Override
     public Vine build() throws IllegalStateException {
-        Vine vine = (Vine) new WorldGenVines();
+        Vine vine = (Vine) new VinesFeature();
         vine.setVinesPerChunk(this.count);
         return vine;
     }

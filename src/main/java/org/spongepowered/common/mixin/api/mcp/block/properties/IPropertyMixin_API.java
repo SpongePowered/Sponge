@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.block.properties;
 
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyHelper;
 import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Implements;

@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenIcePath;
+import net.minecraft.world.gen.feature.IcePathFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.IcePath;
 import org.spongepowered.api.world.gen.populator.IcePath.Builder;
@@ -68,7 +68,7 @@ public class IcePathBuilder implements IcePath.Builder {
 
     @Override
     public IcePath build() throws IllegalStateException {
-        IcePath pop = (IcePath) new WorldGenIcePath(4);
+        IcePath pop = (IcePath) new IcePathFeature(4);
         pop.setRadius(this.radius);
         pop.setSectionsPerChunk(this.count);
         return pop;

@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.structure;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.MapGenStructure;
-import net.minecraft.world.gen.structure.MapGenVillage;
+import net.minecraft.world.gen.feature.Structure;
+import net.minecraft.world.gen.feature.VillageStructure;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,8 +41,8 @@ import java.util.Random;
  * allow better access and control over the function of these populators while
  * preserving vanilla functionality.
  */
-@Mixin(MapGenVillage.class)
-public abstract class MapGenVillageMixin_API extends MapGenStructure implements Populator {
+@Mixin(VillageStructure.class)
+public abstract class MapGenVillageMixin_API extends Structure implements Populator {
 
     @Override
     public void populate(final org.spongepowered.api.world.World worldIn, final Extent extent, final Random random) {

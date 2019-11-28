@@ -46,12 +46,12 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.MinecraftException;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -187,7 +187,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         // TODO: Expose flush parameter in SpongeAPI?
         try {
             WorldManager.saveWorld((WorldServer) (Object) this, true);
-        } catch (MinecraftException e) {
+        } catch (SessionLockException e) {
             throw new RuntimeException(e);
         }
         return true;

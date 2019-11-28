@@ -29,7 +29,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -173,7 +173,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
     }
 
     @Redirect(method = "updateSkylightNeighborHeight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;checkLightFor(Lnet/minecraft/world/EnumSkyBlock;Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean asyncLighting$onCheckLightForSkylightNeighbor(final World world, final EnumSkyBlock enumSkyBlock, final BlockPos pos) {
+    private boolean asyncLighting$onCheckLightForSkylightNeighbor(final World world, final EnumLightType enumSkyBlock, final BlockPos pos) {
         if (!this.asyncLighting$isServerChunk) {
             return world.func_180500_c(enumSkyBlock, pos);
         }
@@ -651,7 +651,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
                 if (chunk == null) {
                     continue;
                 }
-                ((WorldServerBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumSkyBlock.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
+                ((WorldServerBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumLightType.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
             }
         }
 
@@ -665,7 +665,7 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
      * @param pos The block position
      * @return True if light update was successful, false if not
      */
-    private boolean asyncLighting$checkWorldLightFor(final EnumSkyBlock lightType, final BlockPos pos) {
+    private boolean asyncLighting$checkWorldLightFor(final EnumLightType lightType, final BlockPos pos) {
         final Chunk chunk = this.asyncLighting$getLightChunk(pos.func_177958_n() >> 4, pos.func_177952_p() >> 4, null);
         if (chunk == null) {
             return false;
@@ -694,10 +694,10 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
 
         if (this.world.field_73011_w.func_191066_m())
         {
-            flag = ((WorldServerBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumSkyBlock.SKY, pos, (Chunk) (Object) chunk);
+            flag = ((WorldServerBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumLightType.SKY, pos, (Chunk) (Object) chunk);
         }
 
-        flag = flag | ((WorldServerBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumSkyBlock.BLOCK, pos, (Chunk)(Object) chunk);
+        flag = flag | ((WorldServerBridge_AsyncLighting) this.world).asyncLightingBridge$updateLightAsync(EnumLightType.BLOCK, pos, (Chunk)(Object) chunk);
         return flag;
     }
 
@@ -708,8 +708,8 @@ public abstract class ChunkMixin_Async_Lighting implements ChunkBridge_AsyncLigh
      * @return The list of queued block positions, empty if none
      */
     @Override
-    public Set<Short> asyncLightingBridge$getQueuedLightingUpdates(final EnumSkyBlock type) {
-        if (type == EnumSkyBlock.SKY) {
+    public Set<Short> asyncLightingBridge$getQueuedLightingUpdates(final EnumLightType type) {
+        if (type == EnumLightType.SKY) {
             return this.asyncLighting$queuedSkyLightingUpdates;
         }
         return this.asyncLighting$queuedBlockLightingUpdates;

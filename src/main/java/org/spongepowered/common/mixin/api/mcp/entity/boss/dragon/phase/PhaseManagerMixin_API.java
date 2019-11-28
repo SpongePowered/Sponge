@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.entity.boss.dragon.phase;
 
 import net.minecraft.entity.boss.dragon.phase.IPhase;
-import net.minecraft.entity.boss.dragon.phase.PhaseList;
 import net.minecraft.entity.boss.dragon.phase.PhaseManager;
+import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhase;
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseManager;
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseType;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(PhaseManager.class)
 public abstract class PhaseManagerMixin_API implements EnderDragonPhaseManager {
 
-    @Shadow public abstract void setPhase(PhaseList<?> phaseIn);
+    @Shadow public abstract void setPhase(PhaseType<?> phaseIn);
     @Shadow private IPhase phase;
 
     @Override
@@ -46,7 +46,7 @@ public abstract class PhaseManagerMixin_API implements EnderDragonPhaseManager {
 
     @Override
     public EnderDragonPhase setPhase(EnderDragonPhaseType phase) {
-        this.setPhase((PhaseList<?>) phase);
+        this.setPhase((PhaseType<?>) phase);
         return (EnderDragonPhase) this.phase;
     }
 }

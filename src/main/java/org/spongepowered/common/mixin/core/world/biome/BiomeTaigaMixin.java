@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeTaiga;
+import net.minecraft.world.biome.TaigaBiome;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -38,14 +38,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
-@Mixin(BiomeTaiga.class)
+@Mixin(TaigaBiome.class)
 public abstract class BiomeTaigaMixin extends BiomeMixin {
 
-    @Shadow @Final private BiomeTaiga.Type type;
+    @Shadow @Final private TaigaBiome.Type type;
 
     @Override
     public void bridge$buildPopulators(final World world, final SpongeBiomeGenerationSettings gensettings) {
-        if (this.type == BiomeTaiga.Type.MEGA || this.type == BiomeTaiga.Type.MEGA_SPRUCE) {
+        if (this.type == TaigaBiome.Type.MEGA || this.type == TaigaBiome.Type.MEGA_SPRUCE) {
             final BlockBlob blob = BlockBlob.builder()
                     .blobCount(VariableAmount.baseWithRandomAddition(0, 3))
                     .block((BlockState) Blocks.field_150341_Y.func_176223_P())

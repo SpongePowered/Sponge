@@ -28,8 +28,8 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
-import net.minecraft.world.gen.feature.WorldGenSavannaTree;
+import net.minecraft.world.gen.feature.AbstractTreeFeature;
+import net.minecraft.world.gen.feature.SavannaTreeFeature;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,8 +37,8 @@ import org.spongepowered.common.bridge.world.gen.feature.WorldGeneratorBridge;
 
 import java.util.Random;
 
-@Mixin(WorldGenSavannaTree.class)
-public abstract class WorldGenSavannaTreeMixin extends WorldGenAbstractTree implements PopulatorObject {
+@Mixin(SavannaTreeFeature.class)
+public abstract class WorldGenSavannaTreeMixin extends AbstractTreeFeature implements PopulatorObject {
 
     public WorldGenSavannaTreeMixin(final boolean notify) {
         super(notify);

@@ -29,8 +29,8 @@ import net.minecraft.block.BlockFlower;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenFlowers;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.AbstractFlowersFeature;
+import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -51,8 +51,8 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-@Mixin(WorldGenFlowers.class)
-public abstract class WorldGenFlowersMixin_API extends WorldGenerator implements Flower {
+@Mixin(AbstractFlowersFeature.class)
+public abstract class WorldGenFlowersMixin_API extends Feature implements Flower {
 
     private final WeightedTable<PlantType> api$flowers = new WeightedTable<PlantType>();
     @Nullable private Function<Location<Extent>, PlantType> api$override = null;

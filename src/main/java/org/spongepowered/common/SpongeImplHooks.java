@@ -32,6 +32,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.ReportedException;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -55,7 +56,6 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -66,9 +66,9 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -237,15 +237,15 @@ public final class SpongeImplHooks {
 
     // World provider
 
-    public static boolean canDoLightning(final WorldProvider provider, final net.minecraft.world.chunk.Chunk chunk) {
+    public static boolean canDoLightning(final Dimension provider, final net.minecraft.world.chunk.Chunk chunk) {
         return true;
     }
 
-    public static boolean canDoRainSnowIce(final WorldProvider provider, final net.minecraft.world.chunk.Chunk chunk) {
+    public static boolean canDoRainSnowIce(final Dimension provider, final net.minecraft.world.chunk.Chunk chunk) {
         return true;
     }
 
-    public static int getRespawnDimension(final WorldProvider targetDimension, final EntityPlayerMP player) {
+    public static int getRespawnDimension(final Dimension targetDimension, final EntityPlayerMP player) {
         return 0;
     }
 
@@ -421,13 +421,13 @@ public final class SpongeImplHooks {
         return entity.field_70170_p.func_72933_a(startPos, endPos);
     }
 
-    public static boolean shouldKeepSpawnLoaded(final net.minecraft.world.DimensionType dimensionType, final int dimensionId) {
+    public static boolean shouldKeepSpawnLoaded(final net.minecraft.world.dimension.DimensionType dimensionType, final int dimensionId) {
         final WorldServer worldServer = WorldManager.getWorldByDimensionId(dimensionId).orElse(null);
         return worldServer != null && ((WorldProperties) worldServer.func_72912_H()).doesKeepSpawnLoaded();
 
     }
 
-    public static void setShouldLoadSpawn(final net.minecraft.world.DimensionType dimensionType, final boolean keepSpawnLoaded) {
+    public static void setShouldLoadSpawn(final net.minecraft.world.dimension.DimensionType dimensionType, final boolean keepSpawnLoaded) {
         // This is only used in SpongeForge
     }
 

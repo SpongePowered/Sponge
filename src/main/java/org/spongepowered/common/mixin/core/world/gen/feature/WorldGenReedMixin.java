@@ -29,14 +29,14 @@ import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenReed;
+import net.minecraft.world.gen.feature.ReedFeature;
 import org.spongepowered.api.world.gen.populator.Reed;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 import java.util.Random;
 
-@Mixin(WorldGenReed.class)
+@Mixin(ReedFeature.class)
 public abstract class WorldGenReedMixin extends WorldGeneratorMixin {
 
     /**

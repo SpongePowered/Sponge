@@ -59,7 +59,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.IWorldEventListener;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
@@ -153,7 +152,7 @@ public abstract class WorldMixin_API implements World {
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
-    @Shadow @Final public WorldProvider provider;
+    @Shadow @Final public net.minecraft.world.dimension.Dimension provider;
     @Shadow @Final public Random rand;
     @Shadow @Final public Profiler profiler;
     @Shadow @Final public List<EntityPlayer> playerEntities;

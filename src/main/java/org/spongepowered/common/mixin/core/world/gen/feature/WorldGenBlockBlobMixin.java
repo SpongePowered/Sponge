@@ -30,14 +30,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenBlockBlob;
+import net.minecraft.world.gen.feature.BlockBlobFeature;
 import org.spongepowered.api.world.gen.populator.BlockBlob;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 import java.util.Random;
 
-@Mixin(WorldGenBlockBlob.class)
+@Mixin(BlockBlobFeature.class)
 public abstract class WorldGenBlockBlobMixin extends WorldGeneratorMixin {
 
     /**

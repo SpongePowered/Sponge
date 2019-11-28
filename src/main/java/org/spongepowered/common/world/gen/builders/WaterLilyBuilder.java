@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenWaterlily;
+import net.minecraft.world.gen.feature.WaterlilyFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.WaterLily;
 import org.spongepowered.api.world.gen.populator.WaterLily.Builder;
@@ -59,7 +59,7 @@ public class WaterLilyBuilder implements WaterLily.Builder {
 
     @Override
     public WaterLily build() throws IllegalStateException {
-        WaterLily pop = (WaterLily) new WorldGenWaterlily();
+        WaterLily pop = (WaterLily) new WaterlilyFeature();
         pop.setWaterLilyPerChunk(this.count);
         return pop;
     }

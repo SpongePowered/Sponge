@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import com.google.common.base.MoreObjects;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.gen.IChunkGenerator;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.asm.mixin.Final;

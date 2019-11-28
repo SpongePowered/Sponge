@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world.gen.builders;
 
-import net.minecraft.world.gen.feature.WorldGenFossils;
+import net.minecraft.world.gen.feature.FossilsFeature;
 import org.spongepowered.api.world.gen.populator.Fossil;
 import org.spongepowered.api.world.gen.populator.Fossil.Builder;
 
@@ -56,7 +56,7 @@ public class FossilBuilder implements Fossil.Builder {
 
     @Override
     public Fossil build() throws IllegalStateException {
-        Fossil pop = (Fossil) new WorldGenFossils();
+        Fossil pop = (Fossil) new FossilsFeature();
         pop.setSpawnProbability(this.probability);
         return pop;
     }

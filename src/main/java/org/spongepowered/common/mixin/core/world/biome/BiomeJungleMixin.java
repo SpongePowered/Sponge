@@ -25,14 +25,14 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeJungle;
+import net.minecraft.world.biome.JungleBiome;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
-@Mixin(BiomeJungle.class)
+@Mixin(JungleBiome.class)
 public abstract class BiomeJungleMixin extends BiomeMixin {
 
     @Shadow @Final private boolean isEdge;

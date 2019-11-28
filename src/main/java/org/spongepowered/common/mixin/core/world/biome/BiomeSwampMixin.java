@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeSwamp;
+import net.minecraft.world.biome.SwamplandBiome;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
-@Mixin(BiomeSwamp.class)
+@Mixin(SwamplandBiome.class)
 public abstract class BiomeSwampMixin extends BiomeMixin {
 
     @Override

@@ -25,17 +25,17 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeHills;
+import net.minecraft.world.biome.ExtremeHillsBiome;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
-@Mixin(BiomeHills.class)
+@Mixin(ExtremeHillsBiome.class)
 public abstract class BiomeHillsMixin extends BiomeMixin {
 
-    @Shadow @Final private BiomeHills.Type type;
+    @Shadow @Final private ExtremeHillsBiome.Type type;
 
     @Override
     public void bridge$buildPopulators(final World world, final SpongeBiomeGenerationSettings gensettings) {

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeForest;
+import net.minecraft.world.biome.ForestBiome;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
@@ -35,15 +35,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
-@Mixin(BiomeForest.class)
+@Mixin(ForestBiome.class)
 public abstract class BiomeForestMixin extends BiomeMixin {
 
-    @Shadow @Final private BiomeForest.Type type;
+    @Shadow @Final private ForestBiome.Type type;
 
     @Override
     public void bridge$buildPopulators(final World world, final SpongeBiomeGenerationSettings gensettings) {
         int base = -3;
-        if (this.type == BiomeForest.Type.FLOWER) {
+        if (this.type == ForestBiome.Type.FLOWER) {
             base = -1;
         }
         final DoublePlant plant = DoublePlant.builder()

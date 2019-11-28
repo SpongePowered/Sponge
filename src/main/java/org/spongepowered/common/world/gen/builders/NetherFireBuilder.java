@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenFire;
+import net.minecraft.world.gen.feature.FireFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.NetherFire;
 
@@ -67,7 +67,7 @@ public class NetherFireBuilder implements NetherFire.Builder {
 
     @Override
     public NetherFire build() throws IllegalStateException {
-        NetherFire pop = (NetherFire) new WorldGenFire();
+        NetherFire pop = (NetherFire) new FireFeature();
         pop.setFirePerCluster(this.cluster);
         pop.setClustersPerChunk(this.count);
         return pop;

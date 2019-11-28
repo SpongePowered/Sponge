@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeHell;
+import net.minecraft.world.biome.HellBiome;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
-@Mixin(BiomeHell.class)
+@Mixin(HellBiome.class)
 public abstract class BiomeHellMixin extends BiomeMixin {
 
     @Override

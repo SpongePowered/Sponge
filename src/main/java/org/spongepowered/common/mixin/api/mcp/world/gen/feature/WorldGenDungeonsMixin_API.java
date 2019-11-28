@@ -29,8 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenDungeons;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.DungeonsFeature;
+import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -50,8 +50,8 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@Mixin(WorldGenDungeons.class)
-public abstract class WorldGenDungeonsMixin_API extends WorldGenerator implements Dungeon {
+@Mixin(DungeonsFeature.class)
+public abstract class WorldGenDungeonsMixin_API extends Feature implements Dungeon {
 
     // We force this one to be immutable to avoid any wacky changes to it from plugins
     private final WeightedTable<EntityArchetype> api$defaultEntities = new UnmodifiableWeightedTable<>(DungeonMobRegistryModule.getInstance().getRaw());

@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenMelon;
+import net.minecraft.world.gen.feature.MelonFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Melon;
 import org.spongepowered.api.world.gen.populator.Melon.Builder;
@@ -59,7 +59,7 @@ public class MelonBuilder implements Melon.Builder {
 
     @Override
     public Melon build() throws IllegalStateException {
-        Melon pop = (Melon) new WorldGenMelon();
+        Melon pop = (Melon) new MelonFeature();
         pop.setMelonsPerChunk(this.count);
         return pop;
     }

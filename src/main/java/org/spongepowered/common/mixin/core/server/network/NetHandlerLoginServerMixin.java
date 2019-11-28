@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
+import net.minecraft.network.NetHandlerLoginServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.login.server.SPacketDisconnect;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.network.NetHandlerLoginServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.logging.log4j.Logger;

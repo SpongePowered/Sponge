@@ -27,7 +27,7 @@ package org.spongepowered.common.world.gen.builders;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenPumpkin;
+import net.minecraft.world.gen.feature.PumpkinFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Pumpkin;
 import org.spongepowered.api.world.gen.populator.Pumpkin.Builder;
@@ -71,7 +71,7 @@ public class PumpkinBuilder implements Pumpkin.Builder {
 
     @Override
     public Pumpkin build() throws IllegalStateException {
-        Pumpkin pop = (Pumpkin) new WorldGenPumpkin();
+        Pumpkin pop = (Pumpkin) new PumpkinFeature();
         pop.setPumpkinChance(this.chance);
         pop.setPumpkinsPerChunk(this.count);
         return pop;

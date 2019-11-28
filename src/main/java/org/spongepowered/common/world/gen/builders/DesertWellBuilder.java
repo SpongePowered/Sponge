@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.world.gen.feature.WorldGenDesertWells;
+import net.minecraft.world.gen.feature.DesertWellsFeature;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.populator.DesertWell;
 import org.spongepowered.api.world.gen.populator.DesertWell.Builder;
@@ -72,7 +72,7 @@ public class DesertWellBuilder implements DesertWell.Builder {
     @Override
     public DesertWell build() throws IllegalStateException {
         checkState(this.obj != null);
-        DesertWell populator = (DesertWell) new WorldGenDesertWells();
+        DesertWell populator = (DesertWell) new DesertWellsFeature();
         populator.setSpawnProbability(this.p);
         populator.setWellObject(this.obj);
         return populator;

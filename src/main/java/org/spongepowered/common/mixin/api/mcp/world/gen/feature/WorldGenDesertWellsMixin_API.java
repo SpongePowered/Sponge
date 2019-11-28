@@ -28,8 +28,8 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.state.pattern.BlockStateMatcher;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenDesertWells;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.DesertWellsFeature;
+import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -41,8 +41,8 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Random;
 
-@Mixin(WorldGenDesertWells.class)
-public abstract class WorldGenDesertWellsMixin_API extends WorldGenerator implements DesertWell, PopulatorObject {
+@Mixin(DesertWellsFeature.class)
+public abstract class WorldGenDesertWellsMixin_API extends Feature implements DesertWell, PopulatorObject {
 
     @Shadow @Final private static BlockStateMatcher IS_SAND;
 

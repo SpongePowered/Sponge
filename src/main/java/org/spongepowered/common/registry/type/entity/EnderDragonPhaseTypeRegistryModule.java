@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.registry.type.entity;
 
-import net.minecraft.entity.boss.dragon.phase.PhaseList;
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseType;
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -36,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.boss.dragon.phase.PhaseType;
 
 public class EnderDragonPhaseTypeRegistryModule implements CatalogRegistryModule<EnderDragonPhaseType> {
 
@@ -54,7 +54,7 @@ public class EnderDragonPhaseTypeRegistryModule implements CatalogRegistryModule
 
     @Override
     public void registerDefaults() {
-        for (final PhaseList<?> phaseType : PhaseListAccessor.accessor$getPhaseList()) {
+        for (final PhaseType<?> phaseType : PhaseListAccessor.accessor$getPhaseList()) {
             this.phaseTypeMap.put(((EnderDragonPhaseType) phaseType).getId(), (EnderDragonPhaseType) phaseType);
         }
     }

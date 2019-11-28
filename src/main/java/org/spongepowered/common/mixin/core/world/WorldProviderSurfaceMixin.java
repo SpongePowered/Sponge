@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.world.WorldProviderSurface;
+import net.minecraft.world.dimension.OverworldDimension;
 import org.spongepowered.asm.mixin.Mixin;
 
 
-@Mixin(WorldProviderSurface.class)
+@Mixin(OverworldDimension.class)
 public abstract class WorldProviderSurfaceMixin extends WorldProviderMixin {
 
     /**

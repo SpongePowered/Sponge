@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockSnow;
+import net.minecraft.block.BlockSnowLayer;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
@@ -39,7 +39,7 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 
 import java.util.Optional;
 
-@Mixin(BlockSnow.class)
+@Mixin(BlockSnowLayer.class)
 public abstract class BlockSnowMixin extends BlockMixin {
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
@@ -60,7 +60,7 @@ public abstract class BlockSnowMixin extends BlockMixin {
             if (layers < 1) {
                 layers = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSnow.field_176315_a, layers));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockSnowLayer.field_176315_a, layers));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -72,13 +72,13 @@ public abstract class BlockSnowMixin extends BlockMixin {
             if (layers < 1) {
                 layers = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(BlockSnow.field_176315_a, layers));
+            return Optional.of((BlockState) blockState.func_177226_a(BlockSnowLayer.field_176315_a, layers));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableLayeredData impl$getLayerData(final IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.func_177229_b(BlockSnow.field_176315_a), 1, 8);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.func_177229_b(BlockSnowLayer.field_176315_a), 1, 8);
     }
 
 }

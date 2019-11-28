@@ -28,7 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenBush;
+import net.minecraft.world.gen.feature.BushFeature;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Location;
@@ -53,12 +53,12 @@ import java.util.function.Function;
  */
 public class HellMushroomPopulator implements Mushroom {
 
-    private final WorldGenBush feature;
+    private final BushFeature feature;
     private final Mushroom featureM;
 
     @SuppressWarnings("ConstantConditions")
     public HellMushroomPopulator() {
-        this.feature = new WorldGenBush(null);
+        this.feature = new BushFeature(null);
         this.featureM = (Mushroom) this.feature;
     }
 

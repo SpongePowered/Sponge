@@ -28,8 +28,8 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
-import net.minecraft.world.gen.feature.WorldGenTrees;
+import net.minecraft.world.gen.feature.AbstractTreeFeature;
+import net.minecraft.world.gen.feature.TreeFeature;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Final;
@@ -41,8 +41,8 @@ import org.spongepowered.common.bridge.world.gen.feature.WorldGeneratorBridge;
 
 import java.util.Random;
 
-@Mixin(WorldGenTrees.class)
-public abstract class WorldGenTreesMixin_API extends WorldGenAbstractTree implements PopulatorObject {
+@Mixin(TreeFeature.class)
+public abstract class WorldGenTreesMixin_API extends AbstractTreeFeature implements PopulatorObject {
 
     @Shadow @Final @Mutable private int minTreeHeight;
 

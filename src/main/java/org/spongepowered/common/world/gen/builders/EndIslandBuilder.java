@@ -27,7 +27,7 @@ package org.spongepowered.common.world.gen.builders;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenEndIsland;
+import net.minecraft.world.gen.feature.EndIslandFeature;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -89,7 +89,7 @@ public class EndIslandBuilder implements EndIsland.Builder {
 
     @Override
     public EndIsland build() throws IllegalStateException {
-        EndIsland island = (EndIsland) new WorldGenEndIsland();
+        EndIsland island = (EndIsland) new EndIslandFeature();
         island.setIslandBlock(this.state);
         island.setStartingRadius(this.initial);
         island.setRadiusDecrement(this.decrement);

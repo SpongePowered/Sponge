@@ -26,16 +26,16 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenHugeTrees;
-import net.minecraft.world.gen.feature.WorldGenMegaJungle;
+import net.minecraft.world.gen.feature.HugeTreesFeature;
+import net.minecraft.world.gen.feature.MegaJungleFeature;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Random;
 
-@Mixin(WorldGenMegaJungle.class)
-public abstract class WorldGenMegaJungleMixin_API extends WorldGenHugeTrees implements PopulatorObject {
+@Mixin(MegaJungleFeature.class)
+public abstract class WorldGenMegaJungleMixin_API extends HugeTreesFeature implements PopulatorObject {
 
     public WorldGenMegaJungleMixin_API(final boolean notify, final int baseHeightIn, final int extraRandomHeightIn, final IBlockState woodMetadataIn,
         final IBlockState leavesMetadataIn) {

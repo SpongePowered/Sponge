@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.Dimension;
@@ -35,12 +34,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 
-@Mixin(WorldProvider.class)
+@Mixin(net.minecraft.world.dimension.Dimension.class)
 public abstract class WorldProviderMixin_API implements Dimension {
 
     @Shadow private WorldType terrainType;
     @Shadow protected World world;
-    @Shadow public abstract net.minecraft.world.DimensionType getDimensionType();
+    @Shadow public abstract net.minecraft.world.dimension.DimensionType getDimensionType();
     @Shadow public abstract boolean canRespawnHere();
     @Shadow public abstract int getAverageGroundLevel();
     @Shadow public abstract boolean doesWaterVaporize();

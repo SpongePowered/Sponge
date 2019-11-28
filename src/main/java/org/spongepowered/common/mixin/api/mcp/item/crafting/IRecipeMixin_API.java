@@ -29,8 +29,8 @@ import static org.spongepowered.common.item.inventory.util.InventoryUtil.toNativ
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
-import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.item.crafting.ShapedRecipe;
+import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -92,12 +92,12 @@ public interface IRecipeMixin_API extends CraftingRecipe {
     @Override
     default Optional<String> getGroup() {
         String group = "";
-        if (this instanceof ShapedRecipes) {
+        if (this instanceof ShapedRecipe) {
 
-            group = ((ShapedRecipes) this).field_194137_e;
+            group = ((ShapedRecipe) this).field_194137_e;
         }
-        if (this instanceof ShapelessRecipes) {
-            group = ((ShapelessRecipes) this).field_194138_c;
+        if (this instanceof ShapelessRecipe) {
+            group = ((ShapelessRecipe) this).field_194138_c;
         }
         if (group.isEmpty()) {
             return Optional.empty();

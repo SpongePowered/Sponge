@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen.feature;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.world.gen.feature.WorldGenMinable;
+import net.minecraft.world.gen.feature.MinableFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Ore;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(WorldGenMinable.class)
+@Mixin(MinableFeature.class)
 public abstract class WorldGenMinableMixin extends WorldGeneratorMixin {
 
     @SuppressWarnings("Guava") // IntelliJ wants to migrate to Java 8's functionals, but this is an injection.

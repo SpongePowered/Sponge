@@ -41,10 +41,10 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
-import net.minecraft.world.MinecraftException;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
@@ -358,7 +358,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
             value = "FIELD",
             target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;",
             opcode = Opcodes.GETFIELD))
-    private WorldProvider impl$getWorldProviderAndMaybeSetDimensionId(final WorldServer world) {
+    private Dimension impl$getWorldProviderAndMaybeSetDimensionId(final WorldServer world) {
         //noinspection ConstantConditions
         if (((WorldBridge) world).bridge$isFake() || world.func_72912_H() == null) {
             // Return overworld provider
@@ -442,7 +442,7 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
                 // Sponge end
                 try {
                     WorldManager.saveWorld(world, false);
-                } catch (MinecraftException ex) {
+                } catch (SessionLockException ex) {
                     ex.printStackTrace();
                 }
             }

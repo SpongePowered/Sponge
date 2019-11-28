@@ -51,7 +51,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.stats.StatBase;
+import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
@@ -153,11 +153,11 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     @Shadow public abstract void onCriticalHit(net.minecraft.entity.Entity entityHit);
     @Shadow public abstract void onEnchantmentCritical(net.minecraft.entity.Entity entityHit); // onEnchantmentCritical
     @Shadow public abstract void addExhaustion(float p_71020_1_);
-    @Shadow public abstract void addStat(@Nullable StatBase stat, int amount);
-    @Shadow public abstract void addStat(StatBase stat);
+    @Shadow public abstract void addStat(@Nullable Stat stat, int amount);
+    @Shadow public abstract void addStat(Stat stat);
     @Shadow public abstract void resetCooldown();
     @Shadow public abstract void spawnSweepParticles(); //spawnSweepParticles()
-    @Shadow public abstract void takeStat(StatBase stat);
+    @Shadow public abstract void takeStat(Stat stat);
     @Shadow protected abstract void destroyVanishingCursedItems(); // Filter vanishing curse enchanted items
     @Shadow public void wakeUpPlayer(final boolean immediately, final boolean updateWorldFlag, final boolean setSpawn) {};
     @Shadow @Nullable public abstract EntityItem dropItem(boolean dropAll); // Overridden in EntityPlayerMPMixin for tracking

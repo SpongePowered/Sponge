@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.world.gen.feature.WorldGenMinable;
+import net.minecraft.world.gen.feature.MinableFeature;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Ore;
@@ -100,7 +100,7 @@ public class OreBuilder implements Ore.Builder {
 
     @Override
     public Ore build() throws IllegalStateException {
-        Ore pop = (Ore) new WorldGenMinable((IBlockState) this.block, 10);
+        Ore pop = (Ore) new MinableFeature((IBlockState) this.block, 10);
         pop.setDepositSize(this.size);
         pop.setDepositsPerChunk(this.count);
         pop.setHeight(this.height);

@@ -26,14 +26,14 @@ package org.spongepowered.common.mixin.core.world.gen.structure;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.MapGenStronghold;
+import net.minecraft.world.gen.feature.StrongholdStructure;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
-@Mixin(MapGenStronghold.class)
+@Mixin(StrongholdStructure.class)
 public abstract class MapGenStrongholdMixin extends MapGenStructureMixin {
 
     @Inject(method = "getNearestStructurePos", at = @At("HEAD"))

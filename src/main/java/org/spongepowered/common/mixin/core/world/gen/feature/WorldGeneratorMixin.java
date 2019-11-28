@@ -31,14 +31,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.gen.feature.WorldGeneratorBridge;
 
 import java.util.Random;
 
-@Mixin(WorldGenerator.class)
+@Mixin(Feature.class)
 public abstract class WorldGeneratorMixin implements WorldGeneratorBridge {
 
     @Shadow public abstract void setDecorationDefaults();

@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.world.gen.feature.WorldGenBush;
+import net.minecraft.world.gen.feature.BushFeature;
 import org.spongepowered.api.world.gen.populator.Mushroom;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(WorldGenBush.class)
+@Mixin(BushFeature.class)
 public abstract class WorldGenBushMixin extends WorldGeneratorMixin {
 
     @Override

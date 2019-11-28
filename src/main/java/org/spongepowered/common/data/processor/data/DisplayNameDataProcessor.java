@@ -31,7 +31,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.world.IWorldNameable;
+import net.minecraft.util.INameable;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -74,7 +74,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
 
     @Override
     public boolean supports(final DataHolder holder) {
-        return holder instanceof Entity || holder instanceof ItemStack || holder instanceof IWorldNameable;
+        return holder instanceof Entity || holder instanceof ItemStack || holder instanceof INameable;
     }
 
     @Override
@@ -105,9 +105,9 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
                 return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.func_74779_i(Constants.Item.ITEM_DISPLAY_NAME))));
             }
             return Optional.empty();
-        } else if (holder instanceof IWorldNameable) {
-            if (((IWorldNameable) holder).func_145818_k_()) {
-                final String customName = ((IWorldNameable) holder).func_70005_c_();
+        } else if (holder instanceof INameable) {
+            if (((INameable) holder).func_145818_k_()) {
+                final String customName = ((INameable) holder).func_70005_c_();
                 final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(customName));
                 return Optional.of(data);
             }

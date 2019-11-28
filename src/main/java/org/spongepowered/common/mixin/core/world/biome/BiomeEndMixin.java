@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeEnd;
+import net.minecraft.world.biome.SkyBiome;
 import org.spongepowered.api.world.gen.populator.ChorusFlower;
 import org.spongepowered.api.world.gen.populator.EndIsland;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,7 +33,7 @@ import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.populators.EndBiomeGenerationPopulator;
 import org.spongepowered.common.world.gen.populators.EndSpikePopulator;
 
-@Mixin(BiomeEnd.class)
+@Mixin(SkyBiome.class)
 public abstract class BiomeEndMixin extends BiomeMixin {
 
     /*

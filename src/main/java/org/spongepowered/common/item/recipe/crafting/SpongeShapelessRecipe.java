@@ -26,11 +26,11 @@ package org.spongepowered.common.item.recipe.crafting;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.CatalogType;
 
-public class SpongeShapelessRecipe extends ShapelessRecipes implements CatalogType {
+public class SpongeShapelessRecipe extends ShapelessRecipe implements CatalogType {
 
     private final String id;
 

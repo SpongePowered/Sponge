@@ -30,8 +30,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenTallGrass;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.TallGrassFeature;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -54,8 +54,8 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-@Mixin(WorldGenTallGrass.class)
-public abstract class WorldGenTallGrassMixin_API extends WorldGenerator implements Shrub {
+@Mixin(TallGrassFeature.class)
+public abstract class WorldGenTallGrassMixin_API extends Feature implements Shrub {
 
     @Shadow @Final @Mutable private IBlockState tallGrassState;
 

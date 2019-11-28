@@ -28,7 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeEndDecorator;
-import net.minecraft.world.gen.feature.WorldGenSpikes;
+import net.minecraft.world.gen.feature.EndCrystalTowerFeature;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -39,7 +39,7 @@ import java.util.Random;
 
 public class EndSpikePopulator implements Populator {
 
-    private final WorldGenSpikes spikeGen = new WorldGenSpikes();
+    private final EndCrystalTowerFeature spikeGen = new EndCrystalTowerFeature();
 
     @Override
     public PopulatorType getType() {
@@ -50,9 +50,9 @@ public class EndSpikePopulator implements Populator {
     public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand) {
         Vector3i min = extent.getBlockMin().sub(8,0,8);
         World worldIn = (World) world;
-        WorldGenSpikes.EndSpike[] aworldgenspikes$endspike = BiomeEndDecorator.func_185426_a(worldIn);
+        EndCrystalTowerFeature.EndSpike[] aworldgenspikes$endspike = BiomeEndDecorator.func_185426_a(worldIn);
         BlockPos pos = VecHelper.toBlockPos(min);
-        for (WorldGenSpikes.EndSpike worldgenspikes$endspike : aworldgenspikes$endspike) {
+        for (EndCrystalTowerFeature.EndSpike worldgenspikes$endspike : aworldgenspikes$endspike) {
             if (worldgenspikes$endspike.func_186154_a(pos)) {
                 this.spikeGen.func_186143_a(worldgenspikes$endspike);
                 this.spikeGen.func_180709_b(worldIn, rand,

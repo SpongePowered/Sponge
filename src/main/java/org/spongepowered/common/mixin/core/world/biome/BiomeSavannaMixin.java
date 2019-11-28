@@ -25,14 +25,14 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeSavanna;
+import net.minecraft.world.biome.SavannaBiome;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
-@Mixin(BiomeSavanna.class)
+@Mixin(SavannaBiome.class)
 public abstract class BiomeSavannaMixin extends BiomeMixin {
 
     @Override

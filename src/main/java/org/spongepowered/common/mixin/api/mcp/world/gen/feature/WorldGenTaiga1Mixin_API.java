@@ -28,8 +28,8 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
-import net.minecraft.world.gen.feature.WorldGenTaiga1;
+import net.minecraft.world.gen.feature.AbstractTreeFeature;
+import net.minecraft.world.gen.feature.PointyTaigaTreeFeature;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,8 +38,8 @@ import org.spongepowered.common.bridge.world.gen.feature.WorldGeneratorBridge;
 import java.util.Random;
 
 //tall_taiga
-@Mixin(WorldGenTaiga1.class)
-public abstract class WorldGenTaiga1Mixin_API extends WorldGenAbstractTree implements PopulatorObject {
+@Mixin(PointyTaigaTreeFeature.class)
+public abstract class WorldGenTaiga1Mixin_API extends AbstractTreeFeature implements PopulatorObject {
 
     public WorldGenTaiga1Mixin_API(final boolean notify) {
         super(notify);

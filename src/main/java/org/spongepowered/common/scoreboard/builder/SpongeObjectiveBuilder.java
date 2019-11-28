@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.scoreboard.IScoreCriteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
@@ -36,6 +35,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
 import javax.annotation.Nullable;
+import net.minecraft.scoreboard.ScoreCriteria;
 
 public class SpongeObjectiveBuilder implements Objective.Builder {
 
@@ -106,8 +106,8 @@ public class SpongeObjectiveBuilder implements Objective.Builder {
 
         if (this.objectiveDisplayMode != null) {
             objective.setDisplayMode(this.objectiveDisplayMode);
-        } else if (this.criterion instanceof IScoreCriteria) {
-            objective.setDisplayMode((ObjectiveDisplayMode) (Object) ((IScoreCriteria) this.criterion).func_178790_c());
+        } else if (this.criterion instanceof ScoreCriteria) {
+            objective.setDisplayMode((ObjectiveDisplayMode) (Object) ((ScoreCriteria) this.criterion).func_178790_c());
         }
 
         return objective;

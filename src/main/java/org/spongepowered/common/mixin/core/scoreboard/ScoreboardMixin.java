@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
@@ -44,7 +44,7 @@ import java.util.Map;
 @Mixin(Scoreboard.class)
 public abstract class ScoreboardMixin implements ScoreboardBridge {
 
-    @Shadow @Final private Map<IScoreCriteria, List<ScoreObjective>> scoreObjectiveCriterias;
+    @Shadow @Final private Map<ScoreCriteria, List<ScoreObjective>> scoreObjectiveCriterias;
     @Shadow @Final private Map<String, ScoreObjective> scoreObjectives;
     @Shadow @Final private Map<String, Map<ScoreObjective, Score>> entitiesScoreObjectives;
     @Shadow @Final private Map<String, ScorePlayerTeam> teams;
@@ -66,7 +66,7 @@ public abstract class ScoreboardMixin implements ScoreboardBridge {
 
     // TODO - Remove all of these once Mixin 0.8 is released to fix AccessorMixins in Mixins
     @Override
-    public Map<IScoreCriteria, List<ScoreObjective>> accessor$getScoreObjectiveCriterias() {
+    public Map<ScoreCriteria, List<ScoreObjective>> accessor$getScoreObjectiveCriterias() {
         return this.scoreObjectiveCriterias;
     }
 

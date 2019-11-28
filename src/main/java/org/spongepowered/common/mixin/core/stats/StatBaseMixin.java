@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.stats;
 
 import com.google.common.base.CaseFormat;
 import net.minecraft.stats.IStatType;
-import net.minecraft.stats.StatBase;
+import net.minecraft.stats.Stat;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +40,7 @@ import org.spongepowered.common.registry.type.statistic.StatisticRegistryModule;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-@Mixin(value = StatBase.class)
+@Mixin(value = Stat.class)
 public abstract class StatBaseMixin implements StatBaseBridge {
 
     @Shadow @Final private static NumberFormat numberFormat;
@@ -51,7 +51,7 @@ public abstract class StatBaseMixin implements StatBaseBridge {
     private String impl$generatedId;
 
     @Inject(method = "registerStat()Lnet/minecraft/stats/StatBase;", at = @At("RETURN"))
-    private void impl$registerStatWithSponge(CallbackInfoReturnable<StatBase> ci) {
+    private void impl$registerStatWithSponge(CallbackInfoReturnable<Stat> ci) {
         StatisticRegistryModule.getInstance().registerAdditionalCatalog((Statistic) this);
     }
 
@@ -70,7 +70,7 @@ public abstract class StatBaseMixin implements StatBaseBridge {
 
     @Override
     public NumberFormat bridge$getFormat() {
-        if (this.formatter.equals(StatBase.field_75980_h)) {
+        if (this.formatter.equals(Stat.field_75980_h)) {
             return numberFormat;
         }
         return decimalFormat;

@@ -25,14 +25,14 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDesert;
+import net.minecraft.world.biome.DesertBiome;
 import org.spongepowered.api.world.gen.PopulatorObjects;
 import org.spongepowered.api.world.gen.populator.DesertWell;
 import org.spongepowered.api.world.gen.populator.Fossil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
-@Mixin(BiomeDesert.class)
+@Mixin(DesertBiome.class)
 public abstract class BiomeDesertMixin extends BiomeMixin {
 
     @Override

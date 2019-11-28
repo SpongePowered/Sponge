@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.statistic;
 
-import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatCrafting;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.common.bridge.stats.StatBaseBridge;

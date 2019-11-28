@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
-import net.minecraft.world.gen.feature.WorldGenBigTree;
+import net.minecraft.world.gen.feature.AbstractTreeFeature;
+import net.minecraft.world.gen.feature.BigTreeFeature;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,8 +34,8 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Random;
 
-@Mixin(WorldGenBigTree.class)
-public abstract class WorldGenBigTreeMixin_API extends WorldGenAbstractTree implements PopulatorObject {
+@Mixin(BigTreeFeature.class)
+public abstract class WorldGenBigTreeMixin_API extends AbstractTreeFeature implements PopulatorObject {
 
     @Shadow private net.minecraft.world.World world;
     @Shadow private BlockPos basePos;

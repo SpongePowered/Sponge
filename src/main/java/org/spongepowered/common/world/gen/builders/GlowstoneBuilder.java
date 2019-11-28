@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenGlowStone1;
+import net.minecraft.world.gen.feature.GlowStoneFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Glowstone;
 import org.spongepowered.api.world.gen.populator.Glowstone.Builder;
@@ -86,7 +86,7 @@ public class GlowstoneBuilder implements Glowstone.Builder {
 
     @Override
     public Glowstone build() throws IllegalStateException {
-        Glowstone pop = (Glowstone) new WorldGenGlowStone1();
+        Glowstone pop = (Glowstone) new GlowStoneFeature();
         pop.setAttemptsPerCluster(this.attempts);
         pop.setClustersPerChunk(this.count);
         pop.setClusterHeight(this.clusterheight);

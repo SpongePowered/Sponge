@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.block.properties;
 
+import net.minecraft.block.properties.AbstractProperty;
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -40,7 +40,7 @@ import javax.annotation.Nullable;
  *
  * @param <T> The type of comparable
  */
-@Mixin(value = PropertyHelper.class)
+@Mixin(value = AbstractProperty.class)
 public abstract class PropertyHelperMixin<T extends Comparable<T>> {
 
     @Shadow @Final private Class<T> valueClass;

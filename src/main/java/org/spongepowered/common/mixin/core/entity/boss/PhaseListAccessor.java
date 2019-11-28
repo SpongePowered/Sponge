@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.entity.boss;
 
-import net.minecraft.entity.boss.dragon.phase.PhaseList;
+import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(PhaseList.class)
+@Mixin(PhaseType.class)
 public interface PhaseListAccessor {
 
     @Accessor("phases")
-    static PhaseList<?>[] accessor$getPhaseList() {
+    static PhaseType<?>[] accessor$getPhaseList() {
         throw new IllegalStateException("PhaseListAccessor Untransformed!");
     }
 

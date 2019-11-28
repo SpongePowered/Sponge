@@ -35,7 +35,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.block.BlockRedstoneLight;
+import net.minecraft.block.BlockRedstoneLamp;
 import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
@@ -43,9 +43,9 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.dimension.Dimension;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -315,7 +315,7 @@ public final class TrackingUtil {
 
 
     public static void tickWorldProvider(final WorldServerBridge worldServer) {
-        final WorldProvider worldProvider = ((WorldServer) worldServer).field_73011_w;
+        final Dimension worldProvider = ((WorldServer) worldServer).field_73011_w;
         try (final DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext().source(worldProvider)) {
             context.buildAndSwitch();
             worldProvider.func_186059_r();
@@ -353,7 +353,7 @@ public final class TrackingUtil {
         } else if (originalBlock instanceof BlockRedstoneTorch && newBlock instanceof BlockRedstoneTorch) {
             return true;
         } else
-            return originalBlock instanceof BlockRedstoneLight && newBlock instanceof BlockRedstoneLight;
+            return originalBlock instanceof BlockRedstoneLamp && newBlock instanceof BlockRedstoneLamp;
     }
 
     private TrackingUtil() {

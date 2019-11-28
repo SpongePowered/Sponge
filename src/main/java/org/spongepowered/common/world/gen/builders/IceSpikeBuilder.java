@@ -27,7 +27,7 @@ package org.spongepowered.common.world.gen.builders;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenIceSpike;
+import net.minecraft.world.gen.feature.IceSpikeFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.IceSpike;
 import org.spongepowered.api.world.gen.populator.IceSpike.Builder;
@@ -87,7 +87,7 @@ public class IceSpikeBuilder implements IceSpike.Builder {
 
     @Override
     public IceSpike build() throws IllegalStateException {
-        IceSpike pop = (IceSpike) new WorldGenIceSpike();
+        IceSpike pop = (IceSpike) new IceSpikeFeature();
         pop.setHeight(this.height);
         pop.setExtremeSpikeProbability(this.extremeChance);
         pop.setExtremeSpikeIncrease(this.extremeIncrease);

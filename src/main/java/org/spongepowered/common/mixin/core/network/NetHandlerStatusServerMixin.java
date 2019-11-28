@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
+import net.minecraft.network.NetHandlerStatusServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.network.status.client.CPacketServerQuery;
 import net.minecraft.network.status.server.SPacketServerInfo;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.NetHandlerStatusServer;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

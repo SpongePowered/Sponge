@@ -30,8 +30,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
-import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.Location;
@@ -55,7 +55,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 @Mixin(WorldGenBigMushroom.class)
-public abstract class WorldGenBigMushroomMixin_API extends WorldGenerator implements BigMushroom, PopulatorObject {
+public abstract class WorldGenBigMushroomMixin_API extends Feature implements BigMushroom, PopulatorObject {
 
     @Shadow @Final private Block mushroomType;
 

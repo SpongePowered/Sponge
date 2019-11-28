@@ -26,12 +26,12 @@ package org.spongepowered.common.mixin.core.world.gen.structure;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.MapGenBase;
-import net.minecraft.world.gen.structure.MapGenStructure;
-import net.minecraft.world.gen.structure.StructureBoundingBox;
-import net.minecraft.world.gen.structure.StructureStart;
+import net.minecraft.world.gen.feature.Structure;
+import net.minecraft.world.gen.feature.StructureStart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,7 +39,7 @@ import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 
 import java.util.Random;
 
-@Mixin(MapGenStructure.class)
+@Mixin(Structure.class)
 public abstract class MapGenStructureMixin extends MapGenBase {
 
     private static boolean impl$isGeneratingStructures = false;
@@ -78,7 +78,7 @@ public abstract class MapGenStructureMixin extends MapGenBase {
         {
             if (structurestart.func_75069_d() && structurestart.func_175788_a(chunkCoord) && structurestart.func_75071_a().func_78885_a(i, j, i + 15, j + 15))
             {
-                structurestart.func_75068_a(worldIn, randomIn, new StructureBoundingBox(i, j, i + 15, j + 15));
+                structurestart.func_75068_a(worldIn, randomIn, new MutableBoundingBox(i, j, i + 15, j + 15));
                 structurestart.func_175787_b(chunkCoord);
                 flag = true;
                 this.setStructureStart(structurestart.func_143019_e(), structurestart.func_143018_f(), structurestart);

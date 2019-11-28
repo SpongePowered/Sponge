@@ -29,8 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenGlowStone1;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.GlowStoneFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -40,8 +40,8 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Random;
 
-@Mixin(WorldGenGlowStone1.class)
-public abstract class WorldGenGlowstoneMixin_API extends WorldGenerator implements Glowstone {
+@Mixin(GlowStoneFeature.class)
+public abstract class WorldGenGlowstoneMixin_API extends Feature implements Glowstone {
 
     private VariableAmount api$clusterheight = VariableAmount.baseWithRandomAddition(0, 12);
     private VariableAmount api$height = VariableAmount.baseWithRandomAddition(4, 120);

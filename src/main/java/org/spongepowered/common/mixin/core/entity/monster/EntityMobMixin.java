@@ -36,7 +36,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -152,7 +152,7 @@ public abstract class EntityMobMixin extends EntityLivingMixin {
             return false;
         }
 
-        if (this.world.func_175642_b(EnumSkyBlock.SKY, blockpos) > this.rand.nextInt(32))
+        if (this.world.func_175642_b(EnumLightType.SKY, blockpos) > this.rand.nextInt(32))
         {
             return false;
         } 

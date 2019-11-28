@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.api.mcp.scoreboard;
 
 import net.minecraft.network.play.server.SPacketDisplayObjective;
 import net.minecraft.network.play.server.SPacketScoreboardObjective;
-import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
@@ -87,7 +87,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
         List<ScoreObjective> objectives = ((ScoreboardBridge) this).accessor$getScoreObjectiveCriterias().get(objective.getCriterion());
         if (objectives == null) {
             objectives = new ArrayList<>();
-            ((ScoreboardBridge) this).accessor$getScoreObjectiveCriterias().put((IScoreCriteria) objective.getCriterion(), objectives);
+            ((ScoreboardBridge) this).accessor$getScoreObjectiveCriterias().put((ScoreCriteria) objective.getCriterion(), objectives);
         }
 
         objectives.add(scoreObjective);

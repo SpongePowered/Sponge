@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.gen.feature.WorldGenDeadBush;
+import net.minecraft.world.gen.feature.DeadBushFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.DeadBush;
 import org.spongepowered.api.world.gen.populator.DeadBush.Builder;
@@ -59,7 +59,7 @@ public class DeadBushBuilder implements DeadBush.Builder {
 
     @Override
     public DeadBush build() throws IllegalStateException {
-        DeadBush pop = (DeadBush) new WorldGenDeadBush();
+        DeadBush pop = (DeadBush) new DeadBushFeature();
         pop.setShrubsPerChunk(this.count);
         return pop;
     }

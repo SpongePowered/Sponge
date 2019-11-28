@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
@@ -78,7 +78,7 @@ public abstract class ScoreObjectiveMixin implements ScoreObjectiveBridge {
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "setRenderType", at = @At("HEAD"), cancellable = true)
-    private void onSetRenderType(final IScoreCriteria.EnumRenderType type, final CallbackInfo ci) {
+    private void onSetRenderType(final ScoreCriteria.RenderType type, final CallbackInfo ci) {
         if (this.scoreboard != null && ((ScoreboardBridge) this.scoreboard).bridge$isClient()) {
             return; // Let the normal logic take over.
         }

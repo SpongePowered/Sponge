@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
-import net.minecraft.world.gen.feature.WorldGenTrees;
+import net.minecraft.world.gen.feature.AbstractTreeFeature;
+import net.minecraft.world.gen.feature.TreeFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.gen.WorldGenTreesBridge;
 
-@Mixin(WorldGenTrees.class)
-public abstract class WorldGenTreesMixin extends WorldGenAbstractTree implements WorldGenTreesBridge {
+@Mixin(TreeFeature.class)
+public abstract class WorldGenTreesMixin extends AbstractTreeFeature implements WorldGenTreesBridge {
 
     @Shadow @Final @Mutable private int minTreeHeight;
 

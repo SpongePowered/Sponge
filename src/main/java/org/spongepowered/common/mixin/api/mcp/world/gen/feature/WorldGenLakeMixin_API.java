@@ -32,8 +32,8 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenLakes;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.LakesFeature;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -49,8 +49,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Optional;
 import java.util.Random;
 
-@Mixin(WorldGenLakes.class)
-public abstract class WorldGenLakeMixin_API extends WorldGenerator implements Lake {
+@Mixin(LakesFeature.class)
+public abstract class WorldGenLakeMixin_API extends Feature implements Lake {
 
     @Shadow @Final @Mutable private Block block;
 

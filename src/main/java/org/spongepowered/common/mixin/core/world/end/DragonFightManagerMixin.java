@@ -32,7 +32,7 @@ import net.minecraft.world.BossInfo;
 import net.minecraft.world.BossInfoServer;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.end.DragonFightManager;
-import net.minecraft.world.end.DragonSpawnManager;
+import net.minecraft.world.end.DragonSpawnState;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -59,7 +59,7 @@ public abstract class DragonFightManagerMixin implements DragonFightManagerBridg
     @Shadow private UUID dragonUniqueId;
     @Shadow private boolean scanForLegacyFight;
     @Shadow private BlockPos exitPortalLocation;
-    @Shadow private DragonSpawnManager respawnState;
+    @Shadow private DragonSpawnState respawnState;
     @Shadow private int respawnStateTicks;
     @Shadow private List<EntityEnderCrystal> crystals;
 

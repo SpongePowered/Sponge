@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.world.gen.feature;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.world.gen.feature.WorldGenWaterlily;
+import net.minecraft.world.gen.feature.WaterlilyFeature;
 import org.spongepowered.api.world.gen.populator.WaterLily;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(WorldGenWaterlily.class)
+@Mixin(WaterlilyFeature.class)
 public abstract class WorldGenWaterLilyMixin extends WorldGeneratorMixin {
 
     @Override

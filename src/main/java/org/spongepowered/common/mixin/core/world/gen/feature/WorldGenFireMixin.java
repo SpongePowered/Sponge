@@ -28,14 +28,14 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenFire;
+import net.minecraft.world.gen.feature.FireFeature;
 import org.spongepowered.api.world.gen.populator.NetherFire;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 import java.util.Random;
 
-@Mixin(WorldGenFire.class)
+@Mixin(FireFeature.class)
 public abstract class WorldGenFireMixin extends WorldGeneratorMixin {
 
     /**

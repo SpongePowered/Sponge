@@ -30,8 +30,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
-import net.minecraft.world.gen.feature.WorldGenSwamp;
+import net.minecraft.world.gen.feature.AbstractTreeFeature;
+import net.minecraft.world.gen.feature.SwampTreeFeature;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,8 +39,8 @@ import org.spongepowered.common.bridge.world.gen.feature.WorldGeneratorBridge;
 
 import java.util.Random;
 
-@Mixin(WorldGenSwamp.class)
-public abstract class WorldGenSwampMixin_API extends WorldGenAbstractTree implements PopulatorObject {
+@Mixin(SwampTreeFeature.class)
+public abstract class WorldGenSwampMixin_API extends AbstractTreeFeature implements PopulatorObject {
 
     public WorldGenSwampMixin_API(boolean notify) {
         super(notify);

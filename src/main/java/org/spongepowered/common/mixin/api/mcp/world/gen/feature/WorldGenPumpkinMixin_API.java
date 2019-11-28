@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.feature;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenPumpkin;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.PumpkinFeature;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -38,8 +38,8 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Random;
 
-@Mixin(WorldGenPumpkin.class)
-public abstract class WorldGenPumpkinMixin_API extends WorldGenerator implements Pumpkin {
+@Mixin(PumpkinFeature.class)
+public abstract class WorldGenPumpkinMixin_API extends Feature implements Pumpkin {
 
     private VariableAmount api$count = VariableAmount.fixed(10);
     private double api$chance = 0.1;

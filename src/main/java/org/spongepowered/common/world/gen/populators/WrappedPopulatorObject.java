@@ -25,7 +25,7 @@
 package org.spongepowered.common.world.gen.populators;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 
@@ -36,9 +36,9 @@ public class WrappedPopulatorObject implements PopulatorObject {
     
     private final String id;
     private final String name;
-    private WorldGenerator gen;
+    private Feature gen;
     
-    public WrappedPopulatorObject(String id, String name, WorldGenerator gen) {
+    public WrappedPopulatorObject(String id, String name, Feature gen) {
         this.gen = gen;
         this.id = id;
         this.name = name;

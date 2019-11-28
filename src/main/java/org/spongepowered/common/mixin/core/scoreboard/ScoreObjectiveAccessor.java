@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,5 +37,5 @@ public interface ScoreObjectiveAccessor {
 
     @Accessor("displayName") void accessor$setDisplayName(String toLegacy);
 
-    @Accessor("renderType") void accessor$setRenderType(IScoreCriteria.EnumRenderType displayMode);
+    @Accessor("renderType") void accessor$setRenderType(ScoreCriteria.RenderType displayMode);
 }

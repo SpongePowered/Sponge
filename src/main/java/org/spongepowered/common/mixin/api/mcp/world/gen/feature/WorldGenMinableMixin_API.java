@@ -29,8 +29,8 @@ import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenMinable;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.MinableFeature;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
@@ -44,8 +44,8 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Random;
 
-@Mixin(WorldGenMinable.class)
-public abstract class WorldGenMinableMixin_API extends WorldGenerator implements Ore {
+@Mixin(MinableFeature.class)
+public abstract class WorldGenMinableMixin_API extends Feature implements Ore {
 
     @Shadow @Final @Mutable private IBlockState oreBlock;
     @Shadow @Final @Mutable private int numberOfBlocks;
